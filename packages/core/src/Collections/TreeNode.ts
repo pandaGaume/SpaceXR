@@ -1,4 +1,4 @@
-import { IEventEmitter, NodeEventEmitter } from "../events";
+import { IEventEmitter, EventEmitter } from "../events";
 
 export interface ITreeNode extends IEventEmitter {
     parent?: ITreeNode;
@@ -16,7 +16,7 @@ export interface ITreeNode extends IEventEmitter {
     remove(...items: Array<ITreeNode>): Array<ITreeNode>;
 }
 
-export class TreeNode extends NodeEventEmitter implements ITreeNode {
+export class TreeNode extends EventEmitter implements ITreeNode {
     _parent?: ITreeNode;
     _childrens?: Array<ITreeNode>;
 

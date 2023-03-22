@@ -1,30 +1,30 @@
 ﻿export interface IEventEmitter {
-    on(eventName: string, listener: EventListener): NodeEventEmitter;
-    once(eventName: string, listener: EventListener): NodeEventEmitter;
+    on(eventName: string, listener: EventListener): EventEmitter;
+    once(eventName: string, listener: EventListener): EventEmitter;
     emit(eventName: string, ...args: unknown[]): boolean;
-    removeListener(eventName: string, listener?: EventListener): NodeEventEmitter;
+    removeListener(eventName: string, listener?: EventListener): EventEmitter;
 }
 
 export type EventListener = (...arg: unknown[]) => void;
 
 export type Listeners = Array<EventListener>;
 
-export class NodeEventEmitter implements IEventEmitter {
+export class EventEmitter implements IEventEmitter {
     public static defaultMaxListeners = 100;
 
     private _events = new Map<string, EventListener[]>();
-    private _maxListeners: number = NodeEventEmitter.defaultMaxListeners;
+    private _maxListeners: number = EventEmitter.defaultMaxListeners;
 
-    public addListener(eventName: string, listener: EventListener): NodeEventEmitter {
+    public addListener(eventName: string, listener: EventListener): EventEmitter {
         return this.on(eventName, listener);
     }
 
-    public on(eventName: string, listener: EventListener): NodeEventEmitter {
+    public on(eventName: string, listener: EventListener): EventEmitter {
         this._registerEvent(eventName, listener, false);
         return this;
     }
 
-    public once(eventName: string, listener: EventListener): NodeEventEmitter {
+    public once(eventName: string, listener: EventListener): EventEmitter {
         this._registerEvent(eventName, listener, true);
         return this;
     }
@@ -43,10 +43,10 @@ export class NodeEventEmitter implements IEventEmitter {
     }
 
     public getMaxListeners(): number {
-        return this._maxListeners === null ? NodeEventEmitter.defaultMaxListeners : this._maxListeners;
+        return this._maxListeners === null ? EventEmitter.defaultMaxListeners : this._maxListeners;
     }
 
-    public setMaxListeners(limit: number): NodeEventEmitter {
+    public setMaxListeners(limit: number): EventEmitter {
         this._maxListeners = limit;
         return this;
     }
@@ -60,7 +60,7 @@ export class NodeEventEmitter implements IEventEmitter {
         return event === undefined ? 0 : event.length;
     }
 
-    public removeAllListeners(eventNames?: Array<string>): NodeEventEmitter {
+    public removeAllListeners(eventNames?: Array<string>): EventEmitter {
         if (!eventNames) {
             eventNames = Array.from(this._events.keys());
         }
@@ -68,7 +68,7 @@ export class NodeEventEmitter implements IEventEmitter {
         return this;
     }
 
-    public removeListener(eventName: string, listener?: EventListener): NodeEventEmitter {
+    public removeListener(eventName: string, listener?: EventListener): EventEmitter {
         if (this.listeners) {
             const l = this.listeners(eventName);
             if (l) {

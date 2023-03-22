@@ -383,3 +383,15 @@ export class Distance extends Quantity {
         return Distance.Units[str] || undefined;
     }
 }
+
+export class Speed extends Quantity {
+    public static ForParameter(value: Distance | number, defaultValue: number, defaultUnit: Unit): Distance {
+        return value ? new Distance(value, defaultUnit) : new Distance(defaultValue, defaultUnit);
+    }
+
+    public static Units: { [key: string]: Unit } = {};
+
+    public unitForSymbol(str: string): Unit | undefined {
+        return Speed.Units[str] || undefined;
+    }
+}

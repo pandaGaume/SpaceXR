@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { Temperature, Distance, Angle, Timespan } from "../Math/math.units";
+import { Temperature, Distance, Angle, Timespan, Speed } from "../Math/math.units";
 import { RGBAColor } from "../Math/math.color";
 import { AxialTilt } from "./space.axialTilt";
 import { SpectralClass } from "./space.spectralClass";
@@ -47,14 +47,13 @@ export interface ISingleOrbit extends ICelestialObjectMotion {
 
 export interface IKeplerOrbit extends ISingleOrbit {
     semiMinorAxis: Distance;
-    eccentricity: Distance;
-    periapsisDistance: Distance;
+    periapsis: Distance;
     periapsisTime: number;
     periapsisAngle: Angle;
     inclination: Angle;
     period: Timespan;
     apoapsis: Distance;
-    meanAngularSpeed: Distance;
+    meanAngularSpeed: Speed;
 }
 
 export interface ICelestialObject {

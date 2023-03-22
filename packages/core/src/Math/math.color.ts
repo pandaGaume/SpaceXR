@@ -8,8 +8,8 @@ export class RGBAColor {
         const g = this.g / 255;
         const b = this.b / 255;
 
-        const max = Math.max(r, g, b),
-            min = Math.min(r, g, b);
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
         let h: number, s: number;
         const l: number = (max + min) / 2;
 

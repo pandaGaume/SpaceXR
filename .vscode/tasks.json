@@ -1,0 +1,31 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+            "label": "Build (Dev)",
+			"type": "shell",
+			"command": "npm run build:dev",
+            "isBackground": false,
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "presentation": {
+                "group": "build"
+            },
+            "problemMatcher": ["$tsc"]
+		},
+        {
+            "label": "Build (LTS)",
+            "type": "shell",
+            "command": "npm run build:lts",
+            "isBackground": false,
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "presentation": {
+                "group": "build"
+            },
+            "problemMatcher": ["$tsc"]
+        },
+	]
+}

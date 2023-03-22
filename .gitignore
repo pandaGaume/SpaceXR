@@ -1,0 +1,13 @@
+# Compiled binary
+build
+
+# Dependency directory
+node_modules
+
+# Optional npm cache directory
+.npm
+
+dist
+typings
+lib/*.js
+*.map

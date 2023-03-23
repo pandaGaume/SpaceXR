@@ -5,5 +5,3 @@ export * from "./Geography/index";
 export * from "./Meshes/index";
 export * from "./Math/index";
 export * from "./space/index";
-export * from "./topology/index";
-export * from "./Collections/index";

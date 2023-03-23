@@ -1,6 +1,5 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { Nullable } from "../types";
-import { FAL, FALErrorCode } from "../FAL/frameworkAbstractionLayer";
 
 export class TerrainGridOptions {
     public static DefaultGridSize = 64;
@@ -34,15 +33,12 @@ export class TerrainGridBuilder implements IVerticesDataBuilder {
         return this;
     }
 
-    public build(): IVerticesData {
+    public build(data: IVerticesData): IVerticesData {
+        data = data || <IVerticesData>{};
         const w = this._o?.width || TerrainGridOptions.DefaultGridSize;
         const h = this._o?.height || w;
         const sx = 1;
         const sy = 1;
-        const vertexData: IVerticesData = FAL.Factories.createVerticesData();
-        if (!vertexData) {
-            throw FAL.CreateException(FALErrorCode.unableToCreateObject, "IVerticesData");
-        }
         const positions = [];
         const indices = [];
         const uvs = [];
@@ -85,12 +81,12 @@ export class TerrainGridBuilder implements IVerticesDataBuilder {
         }
 
         // populate the data
-        vertexData.indices = indices;
-        vertexData.positions = positions;
+        data.indices = indices;
+        data.positions = positions;
         if (generateUvs) {
-            vertexData.uvs = uvs;
+            data.uvs = uvs;
         }
 
-        return vertexData;
+        return data;
     }
 }

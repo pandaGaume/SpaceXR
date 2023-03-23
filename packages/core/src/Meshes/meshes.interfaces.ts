@@ -23,5 +23,5 @@ export interface IVerticesData {
 }
 
 export interface IVerticesDataBuilder {
-    build(): IVerticesData;
+    build(data:IVerticesData): IVerticesData;
 }

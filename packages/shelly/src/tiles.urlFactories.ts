@@ -32,12 +32,12 @@ export class WebTileUrlFactory implements ITileUrlFactory {
         this._o = options;
         const scheme = this._o.isSecure ? "http" : "https";
         const host = this._o.port ? "${this._o.host}:${this._o.port}" : "${this._o.host}";
-        const query = this._o.query ? "?${query}" : "";
+        const query = this._o.query ? "?${this._o.query}" : "";
         this._template = scheme + "://" + host + "/" + this._o.path + query;
         this._i = this._o.roundRobin ? this._o.roundRobin.from : 0;
     }
 
-    protected buildUrl(request: ITileAddress, ...params: string[]): string {
+    public buildUrl(request: ITileAddress, ...params: string[]): string {
         const keys = [this.nextRRIndex().toString(), request.x.toString(), request.y.toString(), request.levelOfDetail.toString()];
         if (this._o.extension) keys.push(this._o.extension);
         if (params) keys.push(...params);
@@ -63,10 +63,9 @@ class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
     public constructor(type: string, extension = "png") {
         super();
         this._type = type;
-        this.host = "s{0}.amazonaws.com";
+        this.host = "s3.amazonaws.com";
         this.path = "elevation-tiles-prod/" + type + "/{3}/{1}/{2}.{4}";
         this.isSecure = true;
-        this.roundRobin = { from: 3, to: 3 };
         this.extension = extension;
     }
 }

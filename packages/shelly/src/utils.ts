@@ -1,8 +1,3 @@
-const ERROR = {
-    OK: { code: 0, text: "OK." },
-    INVALID_TYPE: { code: 12, text: "Invalid type {0} for {1}." },
-};
-
 export class Utils {
     public static DEBUG = true;
 

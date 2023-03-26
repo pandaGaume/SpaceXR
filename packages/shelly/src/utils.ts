@@ -13,7 +13,7 @@ export class Utils {
         }
     }
 
-    public static Format(text: string, ...substitutions: any[]): string {
+    public static Format(text: string, ...substitutions: string[]): string {
         if (substitutions) {
             let field: string, start: number;
             for (let i = 0; i < substitutions.length; i++) {

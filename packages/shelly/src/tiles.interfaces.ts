@@ -67,7 +67,7 @@ export interface ITileUrlFactory {
     buildUrl(request: ITileAddress, ...params: unknown[]): string;
 }
 
-export type ITileCodec<T> = (r: void | Response) => Promise<Awaited<T> | null>;
+export type ITileCodec<T> = (r: void | Response) => Promise<Nullable<Awaited<T>>>;
 
 export interface ITileClientOptions<T> {
     urlFactory: ITileUrlFactory;
@@ -76,5 +76,5 @@ export interface ITileClientOptions<T> {
 
 export interface ITileClient<T, R extends ITileAddress> {
     options: ITileClientOptions<T>;
-    fetchAsync(request: R): Promise<Awaited<T> | null>;
+    fetchAsync(request: R): Promise<Nullable<Awaited<T>>>;
 }

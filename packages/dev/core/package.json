@@ -1,0 +1,20 @@
+{
+    "name": "@dev/core",
+    "version": "1.0.0",
+    "main": "dist/index",
+    "module": "dist/index",
+    "esnext": "dist/index",
+    "types": "dist/index",
+    "private": true,
+    "files": [
+        "dist",
+        "src"
+    ],
+    "scripts": {
+        "build:core": "npm run compile:core",
+        "compile:core": "npm run compile:core:source",
+        "compile:core:source": "tsc -b tsconfig.json"
+    },
+    "sideEffects": false,
+    "devDependencies": {}
+}

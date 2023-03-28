@@ -1,0 +1,20 @@
+{
+    "name": "@dev/shelly",
+    "version": "1.0.0",
+    "main": "dist/index",
+    "module": "dist/index",
+    "esnext": "dist/index",
+    "types": "dist/index",
+    "private": true,
+    "files": [
+        "dist",
+        "src"
+    ],
+    "scripts": {
+        "build:shelly": "npm run compile:shelly",
+        "compile:shelly": "npm run compile:shelly:source",
+        "compile:shelly:source": "tsc -b tsconfig.json"
+    },
+    "sideEffects": false,
+    "devDependencies": {}
+}

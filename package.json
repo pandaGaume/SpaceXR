@@ -1,23 +1,19 @@
 {
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.56.0",
-    "@typescript-eslint/parser": "^5.56.0",
-    "eslint": "8.36.0",
-    "eslint-plugin-react": "^7.32.2",
-    "prettier": "2.8.6",
-    "typescript": "^5.0.2"
-  },
-  "engines": {
-    "node": ">=12.0.0 <17.0.0",
-    "npm": ">=7.0.0"
-  },
-  "scripts": {
-    "format": "npm run format:check && npm run format:fix",
-    "format:check": "prettier --check ./packages/**/src/**/*.{ts,tsx,js,json,scss,css}",
-    "format:fix": "prettier --write ./packages/**/src/**/*.{ts,tsx,js,json,scss,css}",
-    "lint": "npm run lint:check && npm run lint:fix",
-    "lint:check": "eslint ./packages/**/src/**/*.{ts,tsx,js,json}",
-    "lint:fix": "eslint ./packages/**/src/**/*.{ts,tsx,js,json} --fix",
-    "update-all-dependencies": "npm update -ws"
-  }
+    "devDependencies": {
+        "@babylonjs/core": "^5.52.0",
+        "@typescript-eslint/eslint-plugin": "^5.56.0",
+        "@typescript-eslint/parser": "^5.56.0",
+        "eslint": "8.36.0",
+        "eslint-plugin-react": "^7.32.2",
+        "prettier": "2.8.6",
+        "typescript": "^5.0.2"
+    },
+    "engines": {
+        "node": ">=12.0.0 <17.0.0",
+        "npm": ">=7.0.0"
+    },
+    "scripts": {
+        "build:dev": "npm run build:source",
+        "build:source": "tsc -b ./tsconfig.devpackages.json"
+    }
 }

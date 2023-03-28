@@ -1,10 +1,10 @@
 {
-    "types": ["babylonjs"],
     "compilerOptions": {
+        "baseUrl": "packages",
         "moduleResolution": "node",
         "module": "ES2020",
         "target": "es2021",
-        "declaration": false,
+        "declaration": true,
         "sourceMap": true,
         "inlineSources": true,
         "experimentalDecorators": true,
@@ -18,9 +18,9 @@
         "removeComments": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
-        "outDir": "./build"
-    },
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-    "exclude": ["**/node_modules", "**/dist"],
-    "files": ["./packages/core/src/index.ts", "./packages/shelly/src/index.ts", "./packages/babylon/src/index.ts"]
+        "paths": {
+            "core/*": ["dev/core/src/*"],
+            "shelly/*": ["dev/shelly/src/*"]
+        }
+    }
 }

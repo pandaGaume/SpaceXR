@@ -17,10 +17,8 @@
         "skipLibCheck": true,
         "removeComments": true,
         "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "paths": {
-            "core/*": ["dev/core/src/*"],
-            "shelly/*": ["dev/shelly/src/*"]
-        }
-    }
+        "strict": true
+    },
+    "include": ["./src/**/*.ts"],
+    "exclude": ["**/node_modules", "**/dist"]
 }

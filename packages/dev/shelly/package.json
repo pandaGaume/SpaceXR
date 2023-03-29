@@ -1,5 +1,5 @@
 {
-    "name": "@dev/shelly",
+    "name": "@gaume/shelly",
     "version": "1.0.0",
     "main": "dist/index",
     "module": "dist/index",
@@ -13,7 +13,7 @@
     "scripts": {
         "build:shelly": "npm run compile:shelly",
         "compile:shelly": "npm run compile:shelly:source",
-        "compile:shelly:source": "tsc -b tsconfig.json"
+        "compile:shelly:source": "tsc --project tsconfig.json"
     },
     "sideEffects": false,
     "devDependencies": {}

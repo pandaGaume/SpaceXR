@@ -1,7 +1,7 @@
 import { InstancedMesh, Mesh, Nullable, Scene, TransformNode, Vector2, VertexData } from "@babylonjs/core";
-import { IVerticesData } from "core/meshes/meshes.interfaces";
-import { TerrainGridOptions, TerrainGridBuilder } from "core/meshes/terrain.grid";
-import { Angle } from "core/math/math.units";
+import { IVerticesData } from "spacegx/meshes/meshes.interfaces";
+import { TerrainGridOptions, TerrainGridBuilder } from "spacegx/meshes/terrain.grid";
+import { Angle } from "spacegx/math/math.units";
 
 declare module "@babylonjs/core/meshes/mesh.vertexData" {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface

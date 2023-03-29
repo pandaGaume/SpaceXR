@@ -5,12 +5,13 @@
         "composite": true,
         "outDir": "./dist",
         "rootDir": "./src",
+        "declarationDir": "./types",
         "skipLibCheck": true,
         "paths": {
             "core/*": ["dev/core/src/*"]
         }
     },
 
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-    "exclude": ["**/node_modules", "**/dist"]
+    "include": ["./src/**/*.ts"],
+    "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

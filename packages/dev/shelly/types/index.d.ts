@@ -1,3 +1,3 @@
 export * from "./types";
-export * from "./core/tiles/index";
-export * from "./core/dem/index";
+export * from "./tiles/index";
+export * from "./dem/index";

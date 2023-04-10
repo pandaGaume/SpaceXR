@@ -1,20 +1,14 @@
 {
-    "name": "@gaume/shelly",
+    "name": "shelly",
     "version": "1.0.0",
-    "main": "dist/index",
-    "module": "dist/index",
-    "esnext": "dist/index",
-    "types": "dist/index",
-    "private": true,
-    "files": [
-        "dist",
-        "src"
-    ],
+    "main": "./dist/index",
+    "author": "Guillaume Pelletier",
+    "license": "MIT",
     "scripts": {
         "build:shelly": "npm run compile:shelly",
         "compile:shelly": "npm run compile:shelly:source",
-        "compile:shelly:source": "tsc --project tsconfig.json"
+        "compile:shelly:source": "tsc --project tsconfig.json",
+        "clean:shelly": "rimraf dist && rimraf tsconfig.build.tsbuildinfo"
     },
-    "sideEffects": false,
     "devDependencies": {}
 }

@@ -1,10 +1,16 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { Nullable } from "../types";
 
+export enum TerrainTopology {
+    normal,
+    star,
+}
+
 export class TerrainGridOptions {
     public static DefaultGridSize = 64;
     public static DefaultInvertIndices = false;
     public static DefaultGenerateUvs = false;
+    public static DefaultTerrainTopology = TerrainTopology.star;
     public static Shared = new TerrainGridOptions();
 
     public static Default() {
@@ -14,6 +20,7 @@ export class TerrainGridOptions {
     public width: number;
     public height?: number;
     public invertIndices: boolean;
+    public topology: TerrainTopology;
     public generateUvs: boolean;
 
     public constructor(size: number = TerrainGridOptions.DefaultGridSize, height?: number) {
@@ -21,6 +28,7 @@ export class TerrainGridOptions {
         this.height = height || size;
         this.invertIndices = TerrainGridOptions.DefaultInvertIndices;
         this.generateUvs = TerrainGridOptions.DefaultGenerateUvs;
+        this.topology = TerrainGridOptions.DefaultTerrainTopology;
     }
 
     public clone(): TerrainGridOptions {
@@ -77,16 +85,25 @@ export class TerrainGridBuilder implements IVerticesDataBuilder {
 
         // indices
         const showInterior = this._o?.invertIndices || TerrainGridOptions.DefaultInvertIndices;
+        const star = this._o?.topology || TerrainGridOptions.DefaultTerrainTopology;
         for (let row = 0; row < h - 1; row++) {
             for (let col = 0; col < w - 1; col++) {
                 const idx1 = col + row * w;
                 const idx2 = idx1 + w;
                 const idx3 = idx2 + 1;
                 const idx4 = idx1 + 1;
-                if (showInterior) {
-                    indices.push(idx1, idx3, idx2, idx4, idx3, idx1);
+                if (star && idx1 % 2 != 0) {
+                    if (showInterior) {
+                        indices.push(idx1, idx4, idx2, idx2, idx4, idx3);
+                    } else {
+                        indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
+                    }
                 } else {
-                    indices.push(idx1, idx2, idx3, idx4, idx1, idx3);
+                    if (showInterior) {
+                        indices.push(idx1, idx3, idx2, idx3, idx1, idx4);
+                    } else {
+                        indices.push(idx1, idx2, idx3, idx3, idx4, idx1);
+                    }
                 }
             }
         }

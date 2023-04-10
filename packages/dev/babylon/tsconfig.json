@@ -12,7 +12,7 @@
             "shelly/*": ["dev/shelly/types/*"]
         }
     },
-
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "references": [{ "path": "../core" }],
+    "include": ["./src/**/*.ts", "../core/src/materials/glsl.d.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

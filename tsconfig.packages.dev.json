@@ -1,0 +1,21 @@
+{
+    "extends": "./tsconfig.json",
+
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "./.temp/"
+    },
+
+    "references": [
+        {
+            "path": "packages/dev/shelly/tsconfig.json"
+        },
+        {
+            "path": "packages/dev/core/tsconfig.json"
+        },
+        {
+            "path": "packages/dev/babylon/tsconfig.json"
+        }
+    ],
+    "include": []
+}

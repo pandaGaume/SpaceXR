@@ -31,4 +31,11 @@ export class Utils {
         }
         return text;
     }
+
+    public static CreateCanvas(width: number, height: number): HTMLCanvasElement | undefined {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
 }

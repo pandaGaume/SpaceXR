@@ -1,5 +1,5 @@
 {
-    "name": "@gaume/spacegx.babylonjs",
+    "name": "spacegx.babylonjs",
     "version": "1.0.0",
     "main": "dist/index",
     "module": "dist/index",

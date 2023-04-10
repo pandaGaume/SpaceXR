@@ -13,7 +13,11 @@ export class EventEmitter implements IEventEmitter {
     public static defaultMaxListeners = 100;
 
     private _events = new Map<string, EventListener[]>();
-    private _maxListeners: number = EventEmitter.defaultMaxListeners;
+    private _maxListeners: number;
+
+    public constructor(maxListeners: number = EventEmitter.defaultMaxListeners) {
+        this._maxListeners = maxListeners;
+    }
 
     public addListener(eventName: string, listener: EventListener): EventEmitter {
         return this.on(eventName, listener);

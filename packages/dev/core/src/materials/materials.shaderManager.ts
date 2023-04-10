@@ -58,11 +58,11 @@ export class ShaderManager extends EventEmitter {
     }
 
     public async getAsync(path: string): Promise<IShaderContent | undefined> {
-        const result = await this.load(path, this._loader, this._cache);
+        const result = await this.load(path, this._loader, this._cache, false, true);
         return result ? result.shader : undefined;
     }
 
-    private async load(path: string, loader: IShaderLoader, cache: Map<string, IShaderContent>, optimize = false): Promise<ShaderLoadResult | undefined> {
+    private async load(path: string, loader: IShaderLoader, cache: Map<string, IShaderContent>, isInclude: boolean, optimize = false): Promise<ShaderLoadResult | undefined> {
         let content = cache.get(path);
         if (content) {
             return new ShaderLoadResult(ShaderSource.cache, path, content);
@@ -88,9 +88,19 @@ export class ShaderManager extends EventEmitter {
             }
             content = <IShaderContent>{ includes: undefined, body: body };
             content.includes = ShaderManager.ParseIncludePaths(body);
+            if (content.includes) {
+                for (const p of content.includes) {
+                    const result = await this.load(p, loader, cache, true, optimize);
+                    if (result) {
+                        if (result.source == ShaderSource.loader) {
+                            this.emit("onShader", result.key, result.shader, true);
+                        }
+                    }
+                }
+            }
             const result = new ShaderLoadResult(ShaderSource.loader, path, content);
             if (result) {
-                this.emit("onShader", result);
+                this.emit("onShader", result.key, result.shader, isInclude);
             }
             return result;
         }

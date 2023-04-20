@@ -38,4 +38,14 @@ export class Utils {
         canvas.height = height;
         return canvas;
     }
+
+    public static Clamp(value: number, min?: number, max?: number): number {
+        if (min) {
+            value = Math.max(min, value);
+        }
+        if (max) {
+            value = Math.min(max, value);
+        }
+        return value;
+    }
 }

@@ -8,17 +8,23 @@ export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     async decode(r: void | Response): Promise<Nullable<Awaited<ITile<HTMLImageElement>>>> {
         const blob = r instanceof Response ? await r.blob() : null;
         if (blob) {
-            const img: HTMLImageElement = new Image();
-            const blobURL: string = URL.createObjectURL(blob);
-            // this frees up memory, which is usually handled automatically when you close the
-            // page or navigate away from it
-            img.onload = function (ev: Event) {
-                const e: HTMLImageElement = ev.target as HTMLImageElement;
-                URL.revokeObjectURL(e.src);
-                e.onload = null;
-            };
-            img.src = blobURL;
-            return <ITile<HTMLImageElement>>{ data: img };
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const blobURL = URL.createObjectURL(blob);
+                // this frees up memory, which is usually handled automatically when you close the
+                // page or navigate away from it
+                img.onload = function (ev) {
+                    const e = ev.target;
+                    if (e && e instanceof HTMLImageElement) {
+                        URL.revokeObjectURL(e.src);
+                        e.onload = null;
+                    }
+                    // then call the resolve part of the promise.
+                    resolve(<ITile<HTMLImageElement>>{ data: img });
+                };
+                img.onerror = reject;
+                img.src = blobURL;
+            });
         } else {
             return null;
         }
@@ -85,10 +91,10 @@ export class FloatTileMetrics implements IFloatTileMetrics {
     constructor(public min: number, public max: number, public mean?: number) {}
 }
 
-export class ImageDecoderTileCodec implements ITileCodec<FloatArray> {
+export class ImageDecoderTileCodec implements ITileCodec<Float32Array> {
     private _canvas?: HTMLCanvasElement;
 
-    public constructor(public pixelDecoder: IRgbValueDecoder, canvas?: HTMLCanvasElement) {
+    public constructor(public pixelDecoder: IRgbValueDecoder<number>, canvas?: HTMLCanvasElement) {
         this._canvas = canvas;
     }
 
@@ -106,16 +112,17 @@ export class ImageDecoderTileCodec implements ITileCodec<FloatArray> {
             let max = Number.MIN_SAFE_INTEGER;
 
             // initialize mean value
-            let z = this.pixelDecoder.decode(pixels, 0, n);
+            let z: number = this.pixelDecoder.decode(pixels, 0, n);
             values[0] = z;
             let mean = -z / size;
             // loop the rows
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
+                const zoffset = imgData.width * row;
                 // then columns
                 for (let column = 0; column != imgData.width; column++) {
                     z = this.pixelDecoder.decode(pixels, offset + column * n, n);
-                    values[offset + column] = z;
+                    values[zoffset + column] = z;
                     min = Math.min(z, min);
                     max = Math.max(z, max);
                     mean += z / size;

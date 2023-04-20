@@ -10,6 +10,7 @@ export declare class EventEmitter implements IEventEmitter {
     static defaultMaxListeners: number;
     private _events;
     private _maxListeners;
+    constructor(maxListeners?: number);
     addListener(eventName: string, listener: EventListener): EventEmitter;
     on(eventName: string, listener: EventListener): EventEmitter;
     once(eventName: string, listener: EventListener): EventEmitter;

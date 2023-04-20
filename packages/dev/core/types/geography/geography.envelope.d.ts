@@ -1,0 +1,32 @@
+import { IEnvelope, ILocation, ISize } from "./geography.interfaces";
+export declare class Envelope implements IEnvelope {
+    private static Clamp;
+    static MaxLongitude: number;
+    static MaxLatitude: number;
+    static MinLongitude: number;
+    static MinLatitude: number;
+    static FromSize(position: ILocation, size: ISize): Envelope;
+    private _lowerCorner;
+    private _upperCorner;
+    private constructor();
+    get north(): number;
+    get south(): number;
+    get east(): number;
+    get west(): number;
+    get bottom(): number | undefined;
+    get top(): number | undefined;
+    get nw(): ILocation;
+    get sw(): ILocation;
+    get ne(): ILocation;
+    get se(): ILocation;
+    equals(other: IEnvelope): boolean;
+    clone(): IEnvelope;
+    get hasAltitude(): boolean;
+    get center(): ILocation;
+    get size(): ISize;
+    add(lat: number | ILocation, lon?: number, alt?: number): IEnvelope;
+    addInPlace(lat: number | ILocation, lon?: number, alt?: number): IEnvelope;
+    intersectWith(bounds: IEnvelope): boolean;
+    contains(loc: ILocation): boolean;
+    containsFloat(lat: number, lon?: number, alt?: number): boolean;
+}

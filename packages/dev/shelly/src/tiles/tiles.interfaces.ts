@@ -1,4 +1,4 @@
-import { FloatArray, Nullable } from "../types";
+import { Nullable } from "../types";
 
 export interface IVector2 {
     x: number;
@@ -31,40 +31,14 @@ export interface ITileMetricsOptions {
 }
 
 export interface ITileMetrics {
-    options: ITileMetricsOptions;
-
-    /**
-     * determines the map width and height (in pixels) at a specified level of detail.
-     * @param levelOfDetail - Level of detail, from lodRange.min (lowest detail) to lodRange.max (highest detail).
-     * @return - The map width and height in pixels
-     */
-    getMapSize(levelOfDetail: number): number;
-
-    /**
-     * determines the ground resolution (in meters per pixel) at a specified latitude and level of detail.
-     * @param latitude - Latitude (in degrees) at which to measure the ground resolution.
-     * @param levelOfDetail - Level of detail, from lodRange.min (lowest detail) to lodRange.max (highest detail).
-     * @param semiMajor - semi major axis radius of the ellipsoid.
-     * @return - The ground resolution, in meters per pixel.
-     */
-    getGroundResolution(latitude: number, levelOfDetail: number, semiMajor: number): number;
-
-    /**
-     * determines the map scale at a specified latitude, level of detail, and screen resolution.
-     * @param latitude -  Latitude (in degrees) at which to measure the map scale
-     * @param levelOfDetail - Level of detail, from lodRange.min (lowest detail) to lodRange.max (highest detail).
-     * @param  screenDpi - resolution of the screen, in dots per inch
-     * @return - the map scale, expressed as the denominator N of the ratio 1 : N.
-     */
-    getMapScale(latitude: number, levelOfDetail: number, screenDpi: number, semiMajor: number): number;
-
-    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: IVector2): IVector2;
+    tileSize: number;
+    minLOD: number;
+    maxLOD: number;
+    minLatitude: number;
+    maxLatitude: number;
+    minLongitude: number;
+    maxLongitude: number;
     getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: IVector2): IVector2;
-
-    getPixelXYToTileXY(x: number, y: number, tileXY?: IVector2): IVector2;
-    getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: ILocation): ILocation;
-
-    getTileXYToPixelXY(x: number, y: number, pixelXY?: IVector2): IVector2;
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: ILocation): ILocation;
 }
 
@@ -86,17 +60,16 @@ export interface ITileClient<T, R extends ITileAddress> {
     fetchAsync(request: R): Promise<Nullable<Awaited<ITile<T>>>>;
 }
 
-
 export interface IFloatTileMetrics {
     min: number;
     max: number;
     mean?: number;
 }
 
-export interface IFloatTile extends ITile<FloatArray> {
+export interface IFloatTile extends ITile<Float32Array> {
     metrics: IFloatTileMetrics;
 }
 
-export interface IRgbValueDecoder {
-    decode(pixels: Uint8ClampedArray, offset: number, size: number): number;
+export interface IRgbValueDecoder<T> {
+    decode(pixels: Uint8ClampedArray, offset: number, size: number): T;
 }

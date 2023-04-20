@@ -1,12 +1,17 @@
 import { ILocation, ITileMetrics, ITileMetricsOptions, IVector2 } from "./tiles.interfaces";
+export declare enum TileOverlapMode {
+    ON = 0,
+    OFF = 1
+}
 export declare class TileMetricsOptions implements ITileMetricsOptions {
-    static DefaultTileSize: 256;
-    static DefaultMinLOD: 0;
-    static DefaultMaxLOD: 23;
-    static DefaultMinLatitude: -85.05112878;
-    static DefaultMaxLatitude: 85.05112878;
-    static DefaultMinLongitude: -180;
-    static DefaultMaxLongitude: 180;
+    static DefaultTileSize: number;
+    static DefaultMinLOD: number;
+    static DefaultMaxLOD: number;
+    static DefaultMinLatitude: number;
+    static DefaultMaxLatitude: number;
+    static DefaultMinLongitude: number;
+    static DefaultMaxLongitude: number;
+    static DefaultOverlapMode: TileOverlapMode;
     static Shared: TileMetricsOptions;
     tileSize?: number;
     minLOD?: number;
@@ -15,6 +20,7 @@ export declare class TileMetricsOptions implements ITileMetricsOptions {
     maxLatitude?: number;
     minLongitude?: number;
     maxLongitude?: number;
+    overlapMode?: TileOverlapMode;
 }
 export declare class TileMetricsOptionsBuilder {
     _tileSize?: number;
@@ -24,6 +30,7 @@ export declare class TileMetricsOptionsBuilder {
     _maxLatitude?: number;
     _minLongitude?: number;
     _maxLongitude?: number;
+    _overlapMode?: TileOverlapMode;
     withTileSize(v?: number): TileMetricsOptionsBuilder;
     withMinLOD(v?: number): TileMetricsOptionsBuilder;
     withMaxLOD(v?: number): TileMetricsOptionsBuilder;
@@ -31,9 +38,11 @@ export declare class TileMetricsOptionsBuilder {
     withMaxLatitude(v?: number): TileMetricsOptionsBuilder;
     withMinLongitude(v?: number): TileMetricsOptionsBuilder;
     withMaxLongitude(v?: number): TileMetricsOptionsBuilder;
+    withTileOverlapMode(v?: TileOverlapMode): TileMetricsOptionsBuilder;
     build(): ITileMetricsOptions;
 }
 export declare class TileMetricsBase implements ITileMetrics {
+    static Shared: TileMetricsBase;
     private static Clamp;
     _o: TileMetricsOptions;
     constructor(options?: Partial<TileMetricsOptions>);

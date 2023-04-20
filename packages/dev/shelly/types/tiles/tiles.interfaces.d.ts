@@ -1,4 +1,4 @@
-import { FloatArray, Nullable } from "../types";
+import { Nullable } from "../types";
 export interface IVector2 {
     x: number;
     y: number;
@@ -55,9 +55,9 @@ export interface IFloatTileMetrics {
     max: number;
     mean?: number;
 }
-export interface IFloatTile extends ITile<FloatArray> {
+export interface IFloatTile extends ITile<Float32Array> {
     metrics: IFloatTileMetrics;
 }
-export interface IRgbValueDecoder {
-    decode(pixels: Uint8ClampedArray, offset: number, size: number): number;
+export interface IRgbValueDecoder<T> {
+    decode(pixels: Uint8ClampedArray, offset: number, size: number): T;
 }

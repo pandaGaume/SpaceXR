@@ -1,54 +1,56 @@
-    precision highp float;
+precision highp float;
 
-    const float oneOver2PI = 0.15915494309189533576888;
-    const float oneOverPI  = 0.31830988618379067153777;
-
-#ifdef WIREFRAME || WIREFRAME_SQUARE
-    #include<barycentric.glsl>
-    varying vec2 vBarys;
-    varying float vEdgeWeight;
+#if defined(WIREFRAME) || defined(WIREFRAME_SQUARE) 
+    #include<wireframe_vertex_decl>
 #endif
 
-#include <geodesy.glsl>
+    #include<geodesy>
 
-#ifdef BABYLON
-    #include<instancesDeclaration>
-#endif
-
-   // Attributes
+    // Attributes
     attribute vec3 position;
-    attribute vec2 center;
-    attribute vec2 size;
+    attribute vec3 normal;
 
-    // uniforms
-    uniform mat4 viewProjection;
-    uniform Ellipsoid ellipsoid;
+    // Uniforms
+    uniform mat4 worldViewProjection;
  
     // Varying
-    varying vec2 vUV;
-void main(void){
+    varying vec4 vPosition;
+    varying vec3 vNormal;
 
-#ifdef BABYLON
-    #include<instancesVertex>
+    void main(void) {
+
+        // convert normalized position to geodetic
+        // ---------------------------------------
+        vec2 uv = vec2(position.x + .5, position.y + .5);
+        float alt = float(texture2D(altitudes, uv )) ;
+
+        ivec2 altitudesSize  = textureSize(altitudes, 0);
+        float vertexIndex = float(gl_VertexID);
+        float w = float(altitudesSize.x);
+
+        float line = floor(vertexIndex / w) ; // x is width, y is height
+        float col = mod(vertexIndex, w);
+        
+        // get the sin,cos of lat and lon from lookup tables.
+        // --------------------------------------------------
+        vec4 latTrigo = texture2D(latLT, vec2(1.-uv.y,0.));
+        vec4 lonTrigo = texture2D(lonLT, vec2(uv.x,0.));
+        vec4 p = enuTransform * toECEF(ellipsoid,vec4(latTrigo.xy,lonTrigo.xy),alt);
+ 
+        // finally assign position 
+        // --------------------
+        vPosition = p.xzyw;
+        vec4 outPosition = worldViewProjection * vPosition ;
+        gl_Position = outPosition;
+    
+        vNormal = normal; 
+
+#if defined(WIREFRAME) || defined(WIREFRAME_SQUARE)
+        vec3 tmp = barycentricWeight(gl_VertexID, altitudesSize);
+        vBarys = tmp.xy ;
 #endif
 
-    // compute the location of the instance
-    float lat = center.y + position.y * size.y;
-    float lon = center.x + position.x * size.x;
-    // the altitude is typically retreived from float texture
-    float alt = 0.0;
-
-    // get the position from ECEF
-    gl_Position = viewProjection * finalWorld * toECEF(ellipsoid,vec3(lon,lat,alt));
-
-    // generate UVs on the fly
-    float u = .5  + lon * oneOver2PI ;
-    float v = .5  + lat * oneOverPI ;
-
-    vUV = vec2(u, v);
-
-#ifdef WIREFRAME || WIREFRAME_SQUARE
-    vBarys = barycentricWeight(gl_VertexID);
-    vEdgeWeight = AlternateWeight(gl_VertexID);
+#if defined(WIREFRAME_SQUARE) && defined(WIREFRAME_EDGE_WEIGHT)
+        vEdgeWeight = tmp.z;
 #endif
-}
+    }

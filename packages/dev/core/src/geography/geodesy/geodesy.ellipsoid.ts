@@ -107,62 +107,68 @@ export class Ellipsoid {
         this._ll4 = this._ll * 4;
     }
 
-    public get Name(): string {
+    public get name(): string {
         return this._name;
     }
 
     /**
      * Get semi major axis (meters).
      */
-    public get SemiMajorAxis(): number {
+    public get semiMajorAxis(): number {
         return this._a;
     }
     /**
      * Get semi minor axis (meters).
      */
-    public get SemiMinorAxis(): number {
+    public get semiMinorAxis(): number {
         return this._b;
     }
 
     /**
      * Get flattening.
      */
-    public get Flattening(): number {
+    public get flattening(): number {
         return this._f;
     }
 
     /**
      * Get inverse flattening.
      */
-    public get InverseFlattening(): number {
+    public get inverseFlattening(): number {
         return this._invf;
     }
 
     /**
      * Get linear eccentricity.
      */
-    public get LinearEccentricity(): number {
+    public get linearEccentricity(): number {
         return this._c;
     }
 
     /**
      * Get eccentricity.
      */
-    public get Eccentricity(): number {
+    public get eccentricity(): number {
         return this._e;
     }
 
     /**
      * Get square of eccentricity.
      */
-    public get SqrEccentricity(): number {
+    public get sqrEccentricity(): number {
         return this._ee;
     }
 
     /**
+     * Get the inverse of square of eccentricity.
+     */
+    public get oneMinusSqrEccentricity(): number {
+        return this._p1mee;
+    }
+    /**
      * Get Semi-latus rectum.
      */
-    public get SemiLatusRectum(): number {
+    public get semiLatusRectum(): number {
         return this._p1mee * this._a;
     }
 
@@ -171,7 +177,7 @@ export class Ellipsoid {
      * @param other test the equality with another ellipsoid
      * @returns true if the semiMajorAxis and semiMinorAxis are equals. false otherwise.
      */
-    public IsEquals(other: Ellipsoid) {
+    public isEquals(other: Ellipsoid) {
         return other && other._a == this._a && other._b == this._b;
     }
 

@@ -17,9 +17,9 @@ export declare class FloatTileMetrics implements IFloatTileMetrics {
     static From(data: FloatArray): IFloatTileMetrics;
     constructor(min: number, max: number, mean?: number | undefined);
 }
-export declare class ImageDecoderTileCodec implements ITileCodec<FloatArray> {
-    pixelDecoder: IRgbValueDecoder;
+export declare class ImageDecoderTileCodec implements ITileCodec<Float32Array> {
+    pixelDecoder: IRgbValueDecoder<number>;
     private _canvas?;
-    constructor(pixelDecoder: IRgbValueDecoder, canvas?: HTMLCanvasElement);
+    constructor(pixelDecoder: IRgbValueDecoder<number>, canvas?: HTMLCanvasElement);
     decode(r: void | Response): Promise<Nullable<Awaited<IFloatTile>>>;
 }

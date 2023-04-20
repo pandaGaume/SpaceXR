@@ -20,7 +20,6 @@ export declare class TileMetricsOptions implements ITileMetricsOptions {
     maxLatitude?: number;
     minLongitude?: number;
     maxLongitude?: number;
-    overlapMode?: TileOverlapMode;
 }
 export declare class TileMetricsOptionsBuilder {
     _tileSize?: number;
@@ -30,7 +29,6 @@ export declare class TileMetricsOptionsBuilder {
     _maxLatitude?: number;
     _minLongitude?: number;
     _maxLongitude?: number;
-    _overlapMode?: TileOverlapMode;
     withTileSize(v?: number): TileMetricsOptionsBuilder;
     withMinLOD(v?: number): TileMetricsOptionsBuilder;
     withMaxLOD(v?: number): TileMetricsOptionsBuilder;
@@ -38,25 +36,19 @@ export declare class TileMetricsOptionsBuilder {
     withMaxLatitude(v?: number): TileMetricsOptionsBuilder;
     withMinLongitude(v?: number): TileMetricsOptionsBuilder;
     withMaxLongitude(v?: number): TileMetricsOptionsBuilder;
-    withTileOverlapMode(v?: TileOverlapMode): TileMetricsOptionsBuilder;
     build(): ITileMetricsOptions;
 }
-export declare class TileMetricsBase implements ITileMetrics {
-    static Shared: TileMetricsBase;
-    private static Clamp;
+export declare abstract class AbstractTileMetrics implements ITileMetrics {
     _o: TileMetricsOptions;
     constructor(options?: Partial<TileMetricsOptions>);
     get options(): TileMetricsOptions;
-    set options(value: Partial<TileMetricsOptions>);
     get tileSize(): number;
-    set tileSize(s: number);
-    getMapSize(levelOfDetail: number): number;
-    getGroundResolution(latitude: number, levelOfDetail: number, radius: number): number;
-    getMapScale(latitude: number, levelOfDetail: number, screenDpi: number, radius: number): number;
-    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixel?: IVector2): IVector2;
-    getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: IVector2): IVector2;
-    getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, pos?: ILocation): ILocation;
-    getPixelXYToTileXY(x: number, y: number, tile?: IVector2): IVector2;
-    getTileXYToPixelXY(x: number, y: number, pixel?: IVector2): IVector2;
-    getTileXYToLatLon(x: number, y: number, levelOfDetail: number, pos?: ILocation): ILocation;
+    get minLOD(): number;
+    get maxLOD(): number;
+    get minLatitude(): number;
+    get maxLatitude(): number;
+    get minLongitude(): number;
+    get maxLongitude(): number;
+    abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: IVector2 | undefined): IVector2;
+    abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: ILocation | undefined): ILocation;
 }

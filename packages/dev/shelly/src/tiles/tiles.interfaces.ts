@@ -47,7 +47,13 @@ export interface ITileUrlFactory {
 }
 
 export interface ITileCodec<T> {
-    decode(r: void | Response): Promise<Nullable<Awaited<ITile<T>>>>;
+    decode(r: void | Response): Promise<Nullable<Awaited<T>>>;
+}
+
+export interface ITileBuilder<T> {
+    withData(data:T) : ITileBuilder<T> ;
+    withAddress(address:ITileAddress) : ITileBuilder<T> ;
+    build(): ITile<T>;
 }
 
 export interface ITileClientOptions<T> {
@@ -57,19 +63,9 @@ export interface ITileClientOptions<T> {
 
 export interface ITileClient<T, R extends ITileAddress> {
     options: ITileClientOptions<T>;
-    fetchAsync(request: R): Promise<Nullable<Awaited<ITile<T>>>>;
+    fetchAsync(request: R): Promise<Nullable<Awaited<T>>>;
 }
 
-export interface IFloatTileMetrics {
-    min: number;
-    max: number;
-    mean?: number;
-}
-
-export interface IFloatTile extends ITile<Float32Array> {
-    metrics: IFloatTileMetrics;
-}
-
-export interface IRgbValueDecoder<T> {
-    decode(pixels: Uint8ClampedArray, offset: number, size: number): T;
+export interface IPixelDecoder {
+    decode(pixels: Uint8ClampedArray, offset: number, target:Float32Array, targetOffset:number):number;
 }

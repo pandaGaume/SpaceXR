@@ -1,16 +1,37 @@
-import { IRgbValueDecoder, ITileAddress } from "shelly/src/tiles/tiles.interfaces";
-import { Tile } from "shelly/src/tiles/tiles.tile";
+import { ITileAddress, ITileMetrics } from "shelly/src/tiles/tiles.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
+import { GeographicTile } from "../geography.tile";
 
-export class DEMTile extends Tile<Float32Array> {
+export class DEMTileMetrics {
+    public static From(data: Float32Array): DEMTileMetrics {
+        let min = Number.MAX_VALUE;
+        let max = Number.MIN_VALUE;
+        let v = data[0];
+        if (v < min) min = v;
+        else if (v > max) max = v;
+
+        let mean = v / data.length;
+        for (let i = 1; i < data.length; i++) {
+            v = data[i];
+            if (v < min) min = v;
+            else if (v > max) max = v;
+            mean += v / data.length;
+        }
+        return new DEMTileMetrics(min, max, mean);
+    }
+
+    constructor(public min: number, public max: number, public mean?: number) {}
+}
+
+export class DEMTile extends GeographicTile<Float32Array> {
     /**
      * Internal function to prepare lookup table. The step will be (toDeg - fromDeg) / (count - 1)
      * @param fromDeg where to start the table
      * @param toDeg where to stop the table
      * @param count the number of item.
      * @param ellipsoid optional ellipsoid. If provided, then a third parameter is added which is
-     *              N = ellipsoid._a / Math.sqrt(1.0 - ellipsoid._ee * sin * sin)
-     * which is an intermediate value into ECEF tranformation.
+     * N = ellipsoid._a / Math.sqrt(1.0 - ellipsoid._ee * sin * sin)
+     * which is an intermediate value into ECEF tranformation and concerning the latitude ONLY.
      * @returns an array of 2xfloat32 or 3xfloat32
      */
     public static _PrepareLookupTable(fromDeg: number, toDeg: number, count: number, ellipsoid?: Ellipsoid) {
@@ -31,12 +52,18 @@ export class DEMTile extends Tile<Float32Array> {
         return tbl;
     }
 
+    _dataMetrics: DEMTileMetrics;
     _normals?: Float32Array;
     _latLookupTable?: Float32Array;
     _lonLookupTable?: Float32Array;
 
-    public constructor(data: Float32Array, address?: ITileAddress) {
-        super(data, address);
+    public constructor(data: Float32Array, address: ITileAddress, metrics?: ITileMetrics) {
+        super(data, address, metrics);
+        this._dataMetrics = DEMTileMetrics.From(data);
+    }
+
+    public get dataMetrics(): DEMTileMetrics {
+        return this._dataMetrics;
     }
 
     public get normals(): Float32Array | undefined {
@@ -51,26 +78,20 @@ export class DEMTile extends Tile<Float32Array> {
         return this._latLookupTable;
     }
 
-    public set latitudeLookupTable(n: Float32Array | undefined) {
-        this._latLookupTable = n;
-    }
-
     public get longitudeLookupTable(): Float32Array | undefined {
         return this._lonLookupTable;
     }
 
-    public set longitudeLookupTable(n: Float32Array | undefined) {
-        this._lonLookupTable = n;
-    }
-}
-
-export class CommonRgbValueDecoder implements IRgbValueDecoder<number> {
-    public static Shared = new CommonRgbValueDecoder();
-
-    public decode(pixels: Uint8ClampedArray, offset: number, size: number): number {
-        if (size < 3) {
-            return 0;
+    public prepareLookupTable(ellipsoid?: Ellipsoid) {
+        if (this._tileMetrics) {
+            const env = this.bounds;
+            this._latLookupTable = DEMTile._PrepareLookupTable(env.north, env.south, this._tileMetrics.tileSize, ellipsoid);
+            this._lonLookupTable = DEMTile._PrepareLookupTable(env.west, env.east, this._tileMetrics.tileSize);
         }
-        return -10000.0 + (pixels[offset] * 65536 + pixels[offset + 1] * 256 + pixels[offset + 2]) * 0.1;
+    }
+
+    public clearLookupTable() {
+        this._latLookupTable = undefined;
+        this._lonLookupTable = undefined;
     }
 }

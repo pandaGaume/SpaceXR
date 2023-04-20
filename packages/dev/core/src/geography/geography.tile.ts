@@ -4,21 +4,22 @@ import { IEnvelope, IGeoBounded } from "./geography.interfaces";
 import { Size } from "./geography.size";
 import { Location } from "./geography.location";
 import { Envelope } from "./geography.envelope";
+import { WebMercatorTileMetrics } from "shelly/src/tiles/tiles.metrics.webMercator";
 
 export class GeographicTile<T> extends Tile<T> implements IGeoBounded {
-    _metrics: ITileMetrics;
+    _tileMetrics: ITileMetrics;
     _env?: IEnvelope;
 
-    public constructor(data: T, address: ITileAddress, metrics: ITileMetrics) {
+    public constructor(data: T, address: ITileAddress, metrics?: ITileMetrics) {
         super(data, address);
-        this._metrics = metrics;
+        this._tileMetrics = metrics || WebMercatorTileMetrics.Shared;
     }
 
-    public get metrics(): ITileMetrics {
-        return this._metrics;
+    public get tileMetrics(): ITileMetrics {
+        return this._tileMetrics;
     }
 
-    public get bounds(): IEnvelope | undefined {
+    public get bounds(): IEnvelope {
         if (!this._env) {
             this._env = this.buildEnvelope();
         }
@@ -33,8 +34,8 @@ export class GeographicTile<T> extends Tile<T> implements IGeoBounded {
         const x = this.address?.x || 0;
         const y = this.address?.x || 0;
         const lod = this.address?.levelOfDetail || 0;
-        const nw = this._metrics.getTileXYToLatLon(x, y, lod);
-        const se = this._metrics.getTileXYToLatLon(x + 1, y + 1, lod);
+        const nw = this._tileMetrics.getTileXYToLatLon(x, y, lod);
+        const se = this._tileMetrics.getTileXYToLatLon(x + 1, y + 1, lod);
         const size = new Size(nw.lat - se.lat, se.lon - nw.lon);
         const pos = new Location(se.lat, nw.lon);
         return Envelope.FromSize(pos, size);

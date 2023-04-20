@@ -1,10 +1,16 @@
+import { Utils } from "../utils";
 import { ILocation, IVector2 } from "./tiles.interfaces";
 import { AbstractTileMetrics } from "./tiles.metrics";
 
 export class WebMercatorTileMetrics extends AbstractTileMetrics {
     private static D2R = Math.PI / 180;
 
+    public static Shared = new WebMercatorTileMetrics();
+
     public getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: IVector2 | undefined): IVector2 {
+        latitude = Utils.Clamp(latitude, this.minLatitude, this.maxLatitude);
+        longitude = Utils.Clamp(longitude, this.minLongitude, this.maxLongitude);
+
         const n = Math.pow(2, levelOfDetail);
         const x = Math.floor(((longitude + 180) / 360) * n);
         const lat_rad = latitude * WebMercatorTileMetrics.D2R;
@@ -28,7 +34,6 @@ export class WebMercatorTileMetrics extends AbstractTileMetrics {
             loc.lon = lon;
             return loc;
         }
-
         return <ILocation>{ lat: lat, lon: lon };
     }
 }

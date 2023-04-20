@@ -1,11 +1,11 @@
-import { FloatArray, Nullable } from "../types";
+import { Nullable } from "../types";
 import { Utils } from "../utils";
-import { IFloatTile, IFloatTileMetrics, IRgbValueDecoder, ITile, ITileCodec } from "./tiles.interfaces";
+import { IPixelDecoder, ITileCodec } from "./tiles.interfaces";
 
 export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     public static Shared = new ImageTileCodec();
 
-    async decode(r: void | Response): Promise<Nullable<Awaited<ITile<HTMLImageElement>>>> {
+    async decode(r: void | Response): Promise<Nullable<Awaited<HTMLImageElement>>> {
         const blob = r instanceof Response ? await r.blob() : null;
         if (blob) {
             return new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@ export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
                         e.onload = null;
                     }
                     // then call the resolve part of the promise.
-                    resolve(<ITile<HTMLImageElement>>{ data: img });
+                    resolve(img);
                 };
                 img.onerror = reject;
                 img.src = blobURL;
@@ -40,10 +40,9 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
         this._canvas = canvas;
     }
 
-    public async decode(r: void | Response): Promise<Nullable<Awaited<ITile<ImageData>>>> {
-        const tileImg = await ImageTileCodec.Shared.decode(r);
-        if (tileImg?.data) {
-            const image = tileImg.data;
+    public async decode(r: void | Response): Promise<Nullable<Awaited<ImageData>>> {
+        const image = await ImageTileCodec.Shared.decode(r);
+        if (image) {
             const w = image.width;
             const h = image.height;
 
@@ -58,78 +57,41 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
 
             workingContext.clearRect(0, 0, w, h);
             workingContext.drawImage(image, 0, 0);
-            return <ITile<ImageData>>{ data: workingContext.getImageData(0, 0, w, h) };
+            return workingContext.getImageData(0, 0, w, h);
         }
         return null;
     }
 }
 
-export class FloatTileMetrics implements IFloatTileMetrics {
-    public static From(data: FloatArray): IFloatTileMetrics {
-        let min = Number.MAX_VALUE;
-        let max = Number.MIN_VALUE;
-        let v = data[0];
-        if (v < min) min = v;
-        else if (v > max) max = v;
-
-        let mean = v / data.length;
-        for (let i = 1; i < data.length; i++) {
-            v = data[i];
-            if (v < min) min = v;
-            else if (v > max) max = v;
-            mean += v / data.length;
-        }
-        return new FloatTileMetrics(min, max, mean);
-    }
-
-    /**
-     *
-     * @param min
-     * @param max
-     * @param mean
-     */
-    constructor(public min: number, public max: number, public mean?: number) {}
-}
-
-export class ImageDecoderTileCodec implements ITileCodec<Float32Array> {
+export class Float32TileCodec implements ITileCodec<Float32Array> {
     private _canvas?: HTMLCanvasElement;
 
-    public constructor(public pixelDecoder: IRgbValueDecoder<number>, canvas?: HTMLCanvasElement) {
+    public constructor(public pixelDecoder: IPixelDecoder, canvas?: HTMLCanvasElement) {
         this._canvas = canvas;
     }
 
-    public async decode(r: void | Response): Promise<Nullable<Awaited<IFloatTile>>> {
-        const tile = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decode(r);
-        if (tile?.data) {
-            const imgData = tile.data;
+    public async decode(r: void | Response): Promise<Nullable<Awaited<Float32Array>>> {
+        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decode(r);
+        if (imgData) {
             const pixels = imgData.data;
             const size = imgData.width * imgData.height;
             const n = pixels.length / size;
             const stride = imgData.width * n;
 
             const values = new Float32Array(size);
-            let min = Number.MAX_SAFE_INTEGER;
-            let max = Number.MIN_SAFE_INTEGER;
-
+ 
             // initialize mean value
-            let z: number = this.pixelDecoder.decode(pixels, 0, n);
-            values[0] = z;
-            let mean = -z / size;
-            // loop the rows
+            let i = this.pixelDecoder.decode(pixels, 0, values, 0);
+             // loop the rows
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
-                const zoffset = imgData.width * row;
                 // then columns
                 for (let column = 0; column != imgData.width; column++) {
-                    z = this.pixelDecoder.decode(pixels, offset + column * n, n);
-                    values[zoffset + column] = z;
-                    min = Math.min(z, min);
-                    max = Math.max(z, max);
-                    mean += z / size;
+                    i = this.pixelDecoder.decode(pixels, offset + column * n, values, i);
                 }
             }
 
-            return <IFloatTile>{ metrics: new FloatTileMetrics(min, max, mean), data: values };
+            return values;
         }
         return null;
     }

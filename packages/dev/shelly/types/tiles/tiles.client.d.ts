@@ -1,4 +1,4 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileClientOptions, ITileUrlFactory, ITile } from "./tiles.interfaces";
+import { ITileAddress, ITileCodec, ITileClient, ITileClientOptions, ITileUrlFactory } from "./tiles.interfaces";
 import { Nullable } from "../types";
 export declare class TileClientOptions<T> implements ITileClientOptions<T> {
     urlFactory: ITileUrlFactory;
@@ -17,5 +17,5 @@ export declare class TileClient<T, R extends ITileAddress> implements ITileClien
     constructor(options: TileClientOptions<T>);
     get options(): TileClientOptions<T>;
     set options(value: TileClientOptions<T>);
-    fetchAsync(request: ITileAddress): Promise<Nullable<Awaited<ITile<T>>>>;
+    fetchAsync(request: ITileAddress): Promise<Nullable<Awaited<T>>>;
 }

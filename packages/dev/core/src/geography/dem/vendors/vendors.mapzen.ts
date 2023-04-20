@@ -1,7 +1,7 @@
 import { TileClientOptions } from "shelly/src/tiles/tiles.client";
-import { IRgbValueDecoder, ITileUrlFactory } from "dev/shelly/src/tiles/tiles.interfaces";
+import { IPixelDecoder } from "shelly/src/tiles/tiles.interfaces";
 import { WebTileUrlFactory, WebTileUrlFactoryOptions } from "shelly/src/tiles/tiles.urlFactories";
-import { ImageDecoderTileCodec } from "shelly/src/tiles/tiles.codecs.image";
+import { Float32TileCodec } from "shelly/src/tiles/tiles.codecs.image";
 
 export class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
     _type: string;
@@ -16,51 +16,34 @@ export class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
     }
 }
 
-export class MapzenRgbValueDecoder implements IRgbValueDecoder<number> {
-    public static Shared = new MapzenRgbValueDecoder();
+export class MapzenAltitudeDecoder implements IPixelDecoder {
+    public static Shared = new MapzenAltitudeDecoder();
 
-    public decode(pixels: Uint8ClampedArray, offset: number, size: number): number {
-        if (size < 3) {
-            return 0;
-        }
+    public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {
         const r = pixels[offset++];
         const g = pixels[offset++];
         const b = pixels[offset];
 
-        const z = r * 256 + g + b / 256 - 32768;
-        return z;
+        target[targetOffset++] = r * 256 + g + b / 256 - 32768;
+        return targetOffset;
     }
 }
 
-export class MapzenNormalValueDecoder implements IRgbValueDecoder<Array<number>> {
-    public static Shared = new MapzenRgbValueDecoder();
+export class MapzenNormalValueDecoder implements IPixelDecoder {
+    public static Shared = new MapzenNormalValueDecoder();
 
-    public decode(pixels: Uint8ClampedArray, offset: number, size: number): Array<number> {
-        if (size < 3) {
-            return [];
-        }
+    public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {
         const r = pixels[offset++];
         const g = pixels[offset++];
         const b = pixels[offset];
-        const x = (2 * r) / 255 - 1;
-        const y = (2 * g) / 255 - 1;
-        const z = (b - 128) / 127;
-        return [x, z, y];
+        target[targetOffset++] = (2 * r) / 255 - 1;
+        target[targetOffset++] = (2 * g) / 255 - 1;
+        target[targetOffset++] = (b - 128) / 127;
+        return targetOffset;
     }
 }
 
-export class MapZenTileClientOptions extends TileClientOptions<Float32Array> {
-    public static Terrarium = new MapZenTileClientOptions(
-        new WebTileUrlFactory(new MapZenTerrainUrlFactoryOptions("terrarium")),
-        new ImageDecoderTileCodec(MapzenRgbValueDecoder.Shared)
-    );
-
-    public static Normal = new MapZenTileClientOptions(
-        new WebTileUrlFactory(new MapZenTerrainUrlFactoryOptions("normal")),
-        new ImageDecoderTileCodec(MapzenRgbValueDecoder.Shared)
-    );
-
-    public constructor(urlFactory: ITileUrlFactory, codec: ImageDecoderTileCodec) {
-        super(urlFactory, codec);
-    }
+export class MapZenTileClientOptions {
+    public static Terrarium = new TileClientOptions(new WebTileUrlFactory(new MapZenTerrainUrlFactoryOptions("terrarium")), new Float32TileCodec(MapzenAltitudeDecoder.Shared));
+    public static Normal = new TileClientOptions(new WebTileUrlFactory(new MapZenTerrainUrlFactoryOptions("normal")), new Float32TileCodec(MapzenNormalValueDecoder.Shared));
 }

@@ -270,7 +270,7 @@ export class StarColor {
                 const { min, delta } = sc.effectiveTemperature;
                 const { r, g, b } = p.value;
 
-                yield { mk: c, sclass: sc, kelvin: min.value + delta * t, color: new RGBAColor(r, g, b) };
+                yield { mk: c, sclass: sc, kelvin: min.value + delta.value * t, color: new RGBAColor(r, g, b) };
             }
         }
     }

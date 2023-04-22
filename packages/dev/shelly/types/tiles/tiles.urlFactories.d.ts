@@ -1,7 +1,8 @@
 import { ITileAddress, ITileUrlFactory } from "./tiles.interfaces";
-export declare class RoundRobinOptions {
+declare class RoundRobinOptions {
     from: number;
     to: number;
+    constructor(f?: number, t?: number);
 }
 export declare class WebTileUrlFactoryOptions {
     host?: string;
@@ -12,27 +13,40 @@ export declare class WebTileUrlFactoryOptions {
     extension?: string;
     roundRobin?: RoundRobinOptions;
 }
-export declare class WebTileUrlFactory implements ITileUrlFactory {
-    _o: WebTileUrlFactoryOptions;
+export declare class WebTileUrlFactoryOptionsBuilder {
+    _host?: string;
+    _port?: number;
+    _isSecure?: boolean;
+    _path?: string;
+    _query?: string;
+    _extension?: string;
+    _roundRobin?: RoundRobinOptions;
+    withSecure(v: boolean): WebTileUrlFactoryOptionsBuilder;
+    withHost(v: string): WebTileUrlFactoryOptionsBuilder;
+    withPort(v: number): WebTileUrlFactoryOptionsBuilder;
+    withPath(v: string): WebTileUrlFactoryOptionsBuilder;
+    withQuery(v: string): WebTileUrlFactoryOptionsBuilder;
+    withExtension(v: string): WebTileUrlFactoryOptionsBuilder;
+    withRoundRobin(from: number, to: number): WebTileUrlFactoryOptionsBuilder;
+    build(): WebTileUrlFactoryOptions;
+}
+export declare class WebTileUrlFactory<T extends WebTileUrlFactoryOptions> implements ITileUrlFactory {
+    _o: T;
     _template: string;
     _i: number;
-    constructor(options: WebTileUrlFactoryOptions);
-    buildUrl(request: ITileAddress, ...params: string[]): string;
+    constructor(options: T);
+    buildUrl(request: ITileAddress): string;
     private nextRRIndex;
 }
-declare class GoogleMapUrlFactoryOptions extends WebTileUrlFactoryOptions {
+export declare class GoogleMapUrlFactoryOptions extends WebTileUrlFactoryOptions {
+    static RoadOnly: GoogleMapUrlFactoryOptions;
+    static StandardRoadmap: GoogleMapUrlFactoryOptions;
+    static Terrain: GoogleMapUrlFactoryOptions;
+    static SomehowAlteredRoadmap: GoogleMapUrlFactoryOptions;
+    static SatelliteOnly: GoogleMapUrlFactoryOptions;
+    static TerrainOnly: GoogleMapUrlFactoryOptions;
+    static Hybrid: GoogleMapUrlFactoryOptions;
     _type: string;
     constructor(type: string);
-}
-export declare class KnownUrlFactoryOptions {
-    static Google: {
-        RoadOnly: GoogleMapUrlFactoryOptions;
-        StandardRoadmap: GoogleMapUrlFactoryOptions;
-        Terrain: GoogleMapUrlFactoryOptions;
-        SomehowAlteredRoadmap: GoogleMapUrlFactoryOptions;
-        SatelliteOnly: GoogleMapUrlFactoryOptions;
-        TerrainOnly: GoogleMapUrlFactoryOptions;
-        Hybrid: GoogleMapUrlFactoryOptions;
-    };
 }
 export {};

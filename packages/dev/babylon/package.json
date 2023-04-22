@@ -1,5 +1,5 @@
 {
-    "name": "spacegx.babylonjs",
+    "name": "spacegx.babylon",
     "version": "1.0.0",
     "main": "dist/index",
     "module": "dist/index",
@@ -11,13 +11,9 @@
         "src"
     ],
     "scripts": {
-        "build": "npm run compile",
-        "compile": "npm run compile:source",
-        "compile:source": "tsc -b tsconfig.json"
+        "build:spacegx.babylon": "npm run compile:spacegx.babylon:source",
+        "compile:spacegx.babylon:source": "tsc --project tsconfig.json"
     },
     "sideEffects": false,
-    "devDependencies": {
-        "@gaume/spacegx": "^1.0.0",
-        "@gaume/shelly": "^1.0.0"
-    }
+    "devDependencies": {}
 }

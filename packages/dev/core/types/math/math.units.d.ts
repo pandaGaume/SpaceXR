@@ -23,13 +23,13 @@ export declare abstract class Quantity {
     clone(unit?: Unit): Quantity;
     getValue(unit?: Unit): number;
     equals(v: Quantity): boolean;
-    subtract(v: Quantity): number;
-    add(v: Quantity): number;
+    subtract(v: Quantity): Quantity;
+    add(v: Quantity): Quantity;
     tryParse(str: string): boolean;
     abstract unitForSymbol(symbol: string): Unit | undefined;
 }
 export declare class QuantityRange<T extends Quantity> extends AbstractRange<T> {
-    protected computeDelta(a: T, b: T): number;
+    protected computeDelta(a: T, b: T): T;
 }
 export declare class Timespan extends Quantity {
     static ForParameter(value: Timespan | number, defaultValue: number, defaultUnit: Unit): Timespan;

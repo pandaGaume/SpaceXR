@@ -24,9 +24,9 @@ export class Scalar {
 }
 
 export abstract class AbstractRange<T> {
-    private _min: T;
-    private _max?: T;
-    private _d?: number;
+    protected _min: T;
+    protected _max?: T;
+    protected _d?: T;
 
     public constructor(min: T, max?: T) {
         this._min = min;
@@ -50,18 +50,18 @@ export abstract class AbstractRange<T> {
         this._d = undefined;
     }
 
-    public get delta(): number {
+    public get delta(): T {
         if (this._d === undefined) {
             this._d = this.computeDelta(this._min, this._max);
         }
         return this._d;
     }
 
-    protected abstract computeDelta(a: T, b?: T): number;
+    protected abstract computeDelta(a: T, b?: T): T;
 }
 
 export class Range extends AbstractRange<number> {
     protected computeDelta(a: number, b?: number): number {
-        return a && b ? b - a : 0;
+        return a && b ? b - a : Number.POSITIVE_INFINITY;
     }
 }

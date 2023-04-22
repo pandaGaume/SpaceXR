@@ -1,52 +1,37 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { Nullable } from "../types";
 
-export enum TerrainTopology {
-    normal,
-    star,
-}
-
 export class TerrainGridOptions {
-    public static DefaultGridSize = 64;
-    public static DefaultInvertIndices = false;
-    public static DefaultGenerateUvs = false;
-    public static DefaultTerrainTopology = TerrainTopology.star;
     public static Shared = new TerrainGridOptions();
 
-    public static Default() {
-        return new TerrainGridOptions();
-    }
+    public static DefaultGridSize = 256;
+    public static DefaultInvertIndices = false;
 
     public width: number;
     public height?: number;
     public invertIndices: boolean;
-    public topology: TerrainTopology;
-    public generateUvs: boolean;
 
     public constructor(size: number = TerrainGridOptions.DefaultGridSize, height?: number) {
         this.width = size;
         this.height = height || size;
         this.invertIndices = TerrainGridOptions.DefaultInvertIndices;
-        this.generateUvs = TerrainGridOptions.DefaultGenerateUvs;
-        this.topology = TerrainGridOptions.DefaultTerrainTopology;
     }
 
     public clone(): TerrainGridOptions {
         const other = new TerrainGridOptions(this.width, this.height);
         other.invertIndices = this.invertIndices;
-        other.generateUvs = this.generateUvs;
         return other;
     }
 }
 
-export class TerrainGridBuilder implements IVerticesDataBuilder {
+export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
     private _o?: TerrainGridOptions;
 
     constructor(options: Nullable<TerrainGridOptions> = null) {
         this.withOptions(options);
     }
 
-    public withOptions(options: Nullable<TerrainGridOptions>): TerrainGridBuilder {
+    public withOptions(options: Nullable<TerrainGridOptions>): TerrainNormalizedGridBuilder {
         // merge options and default.
         this._o = <TerrainGridOptions>{ ...TerrainGridOptions.Shared, ...options };
         return this;
@@ -60,7 +45,6 @@ export class TerrainGridBuilder implements IVerticesDataBuilder {
         const sy = 1;
         const positions = [];
         const indices = [];
-        const uvs = [];
 
         // we decided to center the grid.
         const x0 = -0.5;
@@ -69,37 +53,35 @@ export class TerrainGridBuilder implements IVerticesDataBuilder {
         const dy = 1 / (h - 1);
 
         // positions and uvs. Note the uvs origin upper left.
-        const generateUvs = this._o?.generateUvs || TerrainGridOptions.DefaultGenerateUvs;
         for (let row = 0; row < h; row++) {
             const v = row * dy;
             const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
-                positions.push(x, y, 0);
-                if (generateUvs) {
-                    uvs.push(u, 1 - v);
-                }
+                const z = 0;
+                positions.push(x, y, z);
             }
         }
 
         // indices
-        const showInterior = this._o?.invertIndices || TerrainGridOptions.DefaultInvertIndices;
-        const star = this._o?.topology || TerrainGridOptions.DefaultTerrainTopology;
+        const isWEven = w % 2 == 0;
         for (let row = 0; row < h - 1; row++) {
+            const indice = isWEven ? row % 2 : 0;
+            const offset = row * w;
             for (let col = 0; col < w - 1; col++) {
-                const idx1 = col + row * w;
+                const idx1 = offset + col;
                 const idx2 = idx1 + w;
                 const idx3 = idx2 + 1;
                 const idx4 = idx1 + 1;
-                if (star && idx1 % 2 != 0) {
-                    if (showInterior) {
+                if (idx1 % 2 != indice) {
+                    if (this._o?.invertIndices) {
                         indices.push(idx1, idx4, idx2, idx2, idx4, idx3);
                     } else {
                         indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
                     }
                 } else {
-                    if (showInterior) {
+                    if (this._o?.invertIndices) {
                         indices.push(idx1, idx3, idx2, idx3, idx1, idx4);
                     } else {
                         indices.push(idx1, idx2, idx3, idx3, idx4, idx1);
@@ -111,9 +93,6 @@ export class TerrainGridBuilder implements IVerticesDataBuilder {
         // populate the data
         data.indices = indices;
         data.positions = positions;
-        if (generateUvs) {
-            data.uvs = uvs;
-        }
 
         return data;
     }

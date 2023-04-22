@@ -101,12 +101,14 @@ export abstract class Quantity {
         return this.value === v.getValue(this._unit);
     }
 
-    public subtract(v: Quantity): number {
-        return this.value - (v._unit === this._unit ? v.value : v.getValue(this._unit));
+    public subtract(v: Quantity): Quantity {
+        const result = this.value - (v._unit === this._unit ? v.value : v.getValue(this._unit)) ;
+        return this.constructor(result, this._unit);
     }
 
-    public add(v: Quantity): number {
-        return this.value + (v._unit === this._unit ? v.value : v.getValue(this._unit));
+    public add(v: Quantity): Quantity {
+        const result = this.value + (v._unit === this._unit ? v.value : v.getValue(this._unit));
+        return this.constructor(result, this._unit);
     }
 
     public tryParse(str: string): boolean {
@@ -131,10 +133,10 @@ export abstract class Quantity {
 }
 
 export class QuantityRange<T extends Quantity> extends AbstractRange<T> {
-    protected computeDelta(a: T, b: T): number {
-        return b && a ? b.subtract(a) : 0;
+    protected computeDelta(a: T, b: T): T {
+        return b && a ? b.subtract(a) : a.constructor(0,a.unit);
     }
-}
+} 
 
 export class Timespan extends Quantity {
     public static ForParameter(value: Timespan | number, defaultValue: number, defaultUnit: Unit): Timespan {

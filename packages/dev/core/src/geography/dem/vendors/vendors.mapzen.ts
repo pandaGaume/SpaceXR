@@ -3,20 +3,17 @@ import { IPixelDecoder } from "shelly/src/tiles/tiles.interfaces";
 import { WebTileUrlFactory, WebTileUrlFactoryOptions } from "shelly/src/tiles/tiles.urlFactories";
 import { Float32TileCodec } from "shelly/src/tiles/tiles.codecs.image";
 
-export class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
-    _type: string;
-
-    public constructor(type: string, extension = "png") {
+class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
+    public constructor(format: string, extension = "png") {
         super();
-        this._type = type;
         this.host = "s3.amazonaws.com";
-        this.path = "elevation-tiles-prod/" + type + "/{3}/{1}/{2}.{4}";
+        this.path = "elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}";
         this.isSecure = true;
         this.extension = extension;
     }
 }
 
-export class MapzenAltitudeDecoder implements IPixelDecoder {
+class MapzenAltitudeDecoder implements IPixelDecoder {
     public static Shared = new MapzenAltitudeDecoder();
 
     public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {
@@ -29,7 +26,7 @@ export class MapzenAltitudeDecoder implements IPixelDecoder {
     }
 }
 
-export class MapzenNormalValueDecoder implements IPixelDecoder {
+class MapzenNormalValueDecoder implements IPixelDecoder {
     public static Shared = new MapzenNormalValueDecoder();
 
     public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {

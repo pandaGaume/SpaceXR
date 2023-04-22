@@ -160,7 +160,7 @@ export class Ellipsoid {
     }
 
     /**
-     * Get the inverse of square of eccentricity.
+     * Get precalulated value of 1 - sqrEccentricity.
      */
     public get oneMinusSqrEccentricity(): number {
         return this._p1mee;

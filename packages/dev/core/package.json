@@ -11,11 +11,8 @@
         "./dist"
     ],
     "scripts": {
-        "build:spacegx": "npm run compile:spacegx",
-        "compile:spacegx": "npm run compile:spacegx:source",
-        "compile:spacegx:source": "tsc --project tsconfig.json",
-        "clean:shaders": "rimraf dist/shaders/",
-        "copy:shaders": "copyfiles -u 1 ./src/shaders/**/*.glsl dist/"
+        "build:spacegx": "npm run compile:spacegx:source",
+        "compile:spacegx:source": "tsc --project tsconfig.json"
     },
     "sideEffects": false,
     "devDependencies": {}

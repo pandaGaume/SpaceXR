@@ -1,13 +1,12 @@
-import { IEnvelope, ILocation, ISize } from "./geography.interfaces";
+import { IEnvelope, IGeo3, ISize } from "./geography.interfaces";
 export declare class Envelope implements IEnvelope {
-    private static Clamp;
     static MaxLongitude: number;
     static MaxLatitude: number;
     static MinLongitude: number;
     static MinLatitude: number;
-    static FromSize(position: ILocation, size: ISize): Envelope;
-    private _lowerCorner;
-    private _upperCorner;
+    static FromSize(position: IGeo3, size: ISize): Envelope;
+    _min: IGeo3;
+    _max: IGeo3;
     private constructor();
     get north(): number;
     get south(): number;
@@ -15,18 +14,18 @@ export declare class Envelope implements IEnvelope {
     get west(): number;
     get bottom(): number | undefined;
     get top(): number | undefined;
-    get nw(): ILocation;
-    get sw(): ILocation;
-    get ne(): ILocation;
-    get se(): ILocation;
+    get nw(): IGeo3;
+    get sw(): IGeo3;
+    get ne(): IGeo3;
+    get se(): IGeo3;
     equals(other: IEnvelope): boolean;
     clone(): IEnvelope;
     get hasAltitude(): boolean;
-    get center(): ILocation;
+    get center(): IGeo3;
     get size(): ISize;
-    add(lat: number | ILocation, lon?: number, alt?: number): IEnvelope;
-    addInPlace(lat: number | ILocation, lon?: number, alt?: number): IEnvelope;
+    add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
+    addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;
-    contains(loc: ILocation): boolean;
+    contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
 }

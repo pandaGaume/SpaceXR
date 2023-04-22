@@ -2,7 +2,7 @@ import { Tile } from "shelly/src/tiles/tiles.tile";
 import { ITileAddress, ITileMetrics } from "shelly/src/tiles/tiles.interfaces";
 import { IEnvelope, IGeoBounded } from "./geography.interfaces";
 import { Size } from "./geography.size";
-import { Location } from "./geography.location";
+import { Geo3 } from "./geography.geo3";
 import { Envelope } from "./geography.envelope";
 import { WebMercatorTileMetrics } from "shelly/src/tiles/tiles.metrics.webMercator";
 
@@ -37,7 +37,7 @@ export class GeographicTile<T> extends Tile<T> implements IGeoBounded {
         const nw = this._tileMetrics.getTileXYToLatLon(x, y, lod);
         const se = this._tileMetrics.getTileXYToLatLon(x + 1, y + 1, lod);
         const size = new Size(nw.lat - se.lat, se.lon - nw.lon);
-        const pos = new Location(se.lat, nw.lon);
+        const pos = new Geo3(se.lat, nw.lon);
         return Envelope.FromSize(pos, size);
     }
 }

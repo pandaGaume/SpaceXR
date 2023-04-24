@@ -1,0 +1,2 @@
+declare const wireframe_vertex_declVertexShader: String;
+export default wireframe_vertex_declVertexShader;

@@ -1,4 +1,8 @@
 {
+    "name": "spacexr/root",
+    "version": "1.0.0",
+    "private": true,
+
     "compilerOptions": {
         "baseUrl": "packages",
         "moduleResolution": "node",
@@ -19,6 +23,5 @@
         "forceConsistentCasingInFileNames": true,
         "strict": true
     },
-    "include": ["./src/**/*.ts"],
-    "exclude": ["**/node_modules", "**/dist"]
+    "workspaces": ["packages/**/*"]
 }

@@ -2,16 +2,13 @@
     "extends": "../../../tsconfig.json",
 
     "compilerOptions": {
+        "module": "CommonJS",
         "composite": true,
         "outDir": "./dist",
         "rootDir": "./src",
         "declarationDir": "./types",
-        "skipLibCheck": true,
-        "paths": {
-            "core/*": ["dev/core/src/*"]
-        }
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true
     },
-
-    "include": ["./src/**/*.ts"],
-    "exclude": ["**/node_modules", "**/dist", "**/types"]
+    "include": ["./src/**/*"]
 }

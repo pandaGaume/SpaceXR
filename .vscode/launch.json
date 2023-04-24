@@ -10,22 +10,15 @@
             "name": "Launch ms edge against localhost",
             "url": "http://localhost:1338/www/index.html",
             "webRoot": "${workspaceFolder}",
-            "runtimeArgs": [
-                "--disable-web-security",
-                "--user-data-dir=C:/Users/guill/edgeTmp"
-            ]
-        },        
+            "runtimeArgs": ["--disable-web-security", "--user-data-dir=C:/Users/guill/edgeTmp"]
+        },
         {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:1338/www/index.html",
             "webRoot": "${workspaceFolder}",
-            "runtimeArgs": [
-                "--disable-web-security",
-                "--user-data-dir=C:/Users/guill/chromeTmp"
-            ]
+            "runtimeArgs": ["--disable-web-security", "--user-data-dir=C:/Users/guill/chromeTmp"]
         }
-
     ]
 }

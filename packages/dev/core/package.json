@@ -1,5 +1,5 @@
 {
-    "name": "spacegx",
+    "name": "@dev/core",
     "version": "1.0.0",
     "main": "dist/index",
     "module": "dist/index",
@@ -7,13 +7,16 @@
     "types": "dist/index",
     "private": true,
     "files": [
-        "./src",
-        "./dist"
+        "./src"
     ],
     "scripts": {
-        "build:spacegx": "npm run compile:spacegx:source",
-        "compile:spacegx:source": "tsc --project tsconfig.json"
+        "build:core": "npm run clean:core && npm run compile:core",
+        "clean:core": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+        "compile:core": "npm run compile:core:source",
+        "compile:core:source": "tsc --project tsconfig.json"
     },
     "sideEffects": false,
-    "devDependencies": {}
+    "devDependencies": {
+        "rimraf": "^4.4.1"
+    }
 }

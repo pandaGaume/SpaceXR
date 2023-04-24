@@ -85,9 +85,9 @@ export class WebTileUrlFactory<T extends WebTileUrlFactoryOptions> implements IT
     public constructor(options: T) {
         this._o = options;
         const scheme = this._o.isSecure ? "http" : "https";
-        const host = this._o.port ? "${this._o.host}:${this._o.port}" : "${this._o.host}";
-        const query = this._o.query ? "?${this._o.query}" : "";
-        this._template = scheme + "://" + host + "/" + this._o.path + query;
+        const host = this._o.port ? `${this._o.host}:${this._o.port}` : `${this._o.host}`;
+        const query = this._o.query ? `?${this._o.query}` : "";
+        this._template = `${scheme}://${host}/${this._o.path}${query}`;
         if (this._o.extension) {
             this._template = this._template.replaceAll("{extension}", this._o.extension);
         }

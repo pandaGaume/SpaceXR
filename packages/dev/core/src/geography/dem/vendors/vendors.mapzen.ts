@@ -7,7 +7,7 @@ class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
     public constructor(format: string, extension = "png") {
         super();
         this.host = "s3.amazonaws.com";
-        this.path = "elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}";
+        this.path = `elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}`;
         this.isSecure = true;
         this.extension = extension;
     }

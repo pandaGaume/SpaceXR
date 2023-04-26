@@ -2,6 +2,7 @@ export type ParametricValue = number;
 
 export class Scalar {
     public static EPSILON = 1.401298e-45;
+    public static DEG2RAD = Math.PI / 180;
 
     public static WithinEpsilon(a: number, b: number, epsilon: number = Scalar.EPSILON) {
         const num = a - b;

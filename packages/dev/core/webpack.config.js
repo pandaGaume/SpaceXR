@@ -10,7 +10,7 @@ module.exports = [
         mode: "development",
         devtool: "source-map",
         output: {
-            library: "SPACEGX",
+            library: "spacexr.core",
             libraryTarget: "var",
             filename: "[name]." + config.version + ".js",
             path: path.resolve(__dirname, "bundles"),

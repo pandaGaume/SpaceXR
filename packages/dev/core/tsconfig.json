@@ -12,6 +12,6 @@
         }
     },
 
-    "include": ["./src/**/*.ts"],
+    "include": ["./src/**/*.ts", "../shelly/src/events/events.emitter.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

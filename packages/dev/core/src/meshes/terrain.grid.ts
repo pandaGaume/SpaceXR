@@ -37,7 +37,7 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         return this;
     }
 
-    public build(data: IVerticesData): IVerticesData {
+    public build(data?: IVerticesData): IVerticesData {
         data = data || <IVerticesData>{};
         const w = this._o?.width || TerrainGridOptions.DefaultGridSize;
         const h = this._o?.height || w;

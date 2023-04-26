@@ -16,8 +16,5 @@
     "scripts": {
         "build:dev": "npm run compile:dev",
         "compile:dev": "tsc -b ./tsconfig.packages.dev.json"
-    },
-    "dependencies": {
-        "@dev/build-tools": "^1.0.0"
     }
 }

@@ -1,6 +1,13 @@
-import { Tile } from "shelly/src/tiles/tiles.tile";
-import { ITileAddress, ITileMetrics } from "shelly/src/tiles/tiles.interfaces";
-import { IEnvelope, IGeoBounded } from "./geography.interfaces";
+import { Tile } from "../tiles/tiles.tile";
+import { ITileAddress, ITileMetrics } from "../tiles/tiles.interfaces";
+import { AbstractTileMetrics } from "../tiles/tiles.metrics";
+import { ICartesian2, IEnvelope, IGeo3, IGeoBounded } from "./geography.interfaces";
+export declare class WebMercatorTileMetrics extends AbstractTileMetrics {
+    private static D2R;
+    static Shared: WebMercatorTileMetrics;
+    getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
+    getTileXYToLatLon(x: number, y: number, levelOfDetail: number, loc?: IGeo3 | undefined): IGeo3;
+}
 export declare class GeographicTile<T> extends Tile<T> implements IGeoBounded {
     _tileMetrics: ITileMetrics;
     _env?: IEnvelope;

@@ -1,32 +1,36 @@
 export interface ICloneable<T> {
     clone(): T;
 }
-export interface IGeographicValue<T> extends ICloneable<T> {
-    equals(other: T): boolean;
+export interface IComparable<T> {
+    equals(other: T | undefined): boolean;
 }
-export interface ICartesian {
+export interface ICartesian2 {
+    x: number;
+    y: number;
+}
+export interface ICartesian3 {
     x: number;
     y: number;
     z: number;
 }
-export interface IGeo2 extends IGeographicValue<IGeo2> {
+export interface IGeo2 extends IComparable<IGeo2>, ICloneable<IGeo2> {
     lat: number;
     lon: number;
 }
-export interface IGeo3 extends IGeographicValue<IGeo3> {
+export interface IGeo3 extends IComparable<IGeo3>, ICloneable<IGeo3> {
     lat: number;
     lon: number;
     alt?: number;
     hasAltitude: boolean;
 }
 export declare function isLocation(b: unknown): b is IGeo3;
-export interface ISize extends IGeographicValue<ISize> {
+export interface ISize extends IComparable<ISize> {
     height: number;
     width: number;
     thickness?: number;
     hasThickness: boolean;
 }
-export interface IEnvelope extends IGeographicValue<IEnvelope> {
+export interface IEnvelope extends IComparable<IEnvelope> {
     north: number;
     south: number;
     east: number;

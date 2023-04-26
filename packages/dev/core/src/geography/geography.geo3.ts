@@ -1,5 +1,4 @@
 import { IGeo3 } from "./geography.interfaces";
-import { AbstractRange } from "../math/math";
 
 export class Geo3 implements IGeo3 {
     public static Zero() {
@@ -38,19 +37,5 @@ export class Geo3 implements IGeo3 {
 
     public equals(other: IGeo3): boolean {
         return this._lat === other.lat && this._lon === other.lon && this._alt === other.alt;
-    }
-}
-
-export class GeodeticRange extends AbstractRange<IGeo3> {
-    protected computeDelta(a: IGeo3, b?: IGeo3): IGeo3 {
-        if (a && b) {
-            const w = a.lon - b.lon;
-            const h = a.lat - b.lat;
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const t = a.hasAltitude && b.hasAltitude ? b.alt! - a.alt! : undefined;
-
-            return new Geo3(h, w, t);
-        }
-        return new Geo3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     }
 }

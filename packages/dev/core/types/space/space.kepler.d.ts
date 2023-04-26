@@ -1,7 +1,6 @@
-import { EventEmitter } from "../events";
 import { Distance, Angle, Timespan, Speed } from "../math/math.units";
 import { IKeplerOrbit, ICelestialBody } from "./space.interfaces";
-export declare class KeplerOrbitBase extends EventEmitter implements IKeplerOrbit {
+export declare class KeplerOrbitBase implements IKeplerOrbit {
     static DefaultDecimalPrecision: number;
     static DefaultIterationLimit: number;
     protected _body: ICelestialBody;

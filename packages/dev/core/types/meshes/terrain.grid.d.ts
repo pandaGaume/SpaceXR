@@ -14,5 +14,5 @@ export declare class TerrainNormalizedGridBuilder implements IVerticesDataBuilde
     private _o?;
     constructor(options?: Nullable<TerrainGridOptions>);
     withOptions(options: Nullable<TerrainGridOptions>): TerrainNormalizedGridBuilder;
-    build(data: IVerticesData): IVerticesData;
+    build(data?: IVerticesData): IVerticesData;
 }

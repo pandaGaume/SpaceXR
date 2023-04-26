@@ -1,8 +1,7 @@
-import { EventEmitter } from "../events";
 import { Distance, Angle, Timespan, Speed } from "../math/math.units";
 import { IKeplerOrbit, ICelestialBody } from "./space.interfaces";
 
-export class KeplerOrbitBase extends EventEmitter implements IKeplerOrbit {
+export class KeplerOrbitBase implements IKeplerOrbit {
     public static DefaultDecimalPrecision = 5;
     public static DefaultIterationLimit = 30; // be conservative...
 
@@ -28,7 +27,6 @@ export class KeplerOrbitBase extends EventEmitter implements IKeplerOrbit {
         periapsisAngle: Angle | number,
         period: Timespan | number
     ) {
-        super();
         this._body = body;
         this._focus = focus;
         this._semiMajorAxis = new Distance(semiMajorAxis, Distance.Units.Ly);

@@ -44,10 +44,8 @@ export interface ITileCodec<T> {
     decode(r: void | Response): Promise<Nullable<Awaited<T>>>;
 }
 
-export interface ITileBuilder<T> {
-    withData(data: T): ITileBuilder<T>;
-    withAddress(address: ITileAddress): ITileBuilder<T>;
-    build(): ITile<T>;
+export interface ITileBuilder<V, T extends ITile<V>> {
+    build(data: Array<Nullable<V>>, address: ITileAddress): T | undefined;
 }
 
 export interface ITileClientOptions<T> {
@@ -57,9 +55,15 @@ export interface ITileClientOptions<T> {
 
 export interface ITileClient<T, R extends ITileAddress> {
     options: ITileClientOptions<T>;
-    fetchAsync(request: R): Promise<Nullable<Awaited<T>>>;
+    fetchAsync(request: R): Promise<Nullable<T>>;
 }
 
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
+}
+
+export interface ITileSystem<V, T extends ITile<V>, R extends ITileAddress> {
+    metrics: ITileMetrics;
+    client: Array<ITileClient<V, R>>;
+    builder: ITileBuilder<V, T>;
 }

@@ -48,12 +48,12 @@ export class TileClient<T, R extends ITileAddress> implements ITileClient<T, R> 
         this._o = value;
     }
 
-    public async fetchAsync(request: ITileAddress): Promise<Nullable<Awaited<T>>> {
+    public async fetchAsync(request: ITileAddress): Promise<Awaited<T> | undefined> {
         const url = this._o.urlFactory.buildUrl(request.x, request.y, request.levelOfDetail);
         const response = await fetch(url);
         if (response && response.ok) {
-            return await this._o.codec.decode.call(this, response);
+            return await this._o.codec.decodeAsync.call(this, response);
         }
-        return null;
+        return undefined;
     }
 }

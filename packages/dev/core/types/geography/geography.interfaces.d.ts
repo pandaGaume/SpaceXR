@@ -52,5 +52,5 @@ export interface IEnvelope extends IComparable<IEnvelope> {
 }
 export declare function isEnvelope(b: unknown): b is IEnvelope;
 export interface IGeoBounded {
-    bounds: IEnvelope;
+    bounds?: IEnvelope;
 }

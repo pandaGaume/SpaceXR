@@ -1,10 +1,9 @@
-import { Nullable } from "../types";
 import { IPixelDecoder, ITileCodec } from "./tiles.interfaces";
 
 export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     public static Shared = new ImageTileCodec();
 
-    async decode(r: void | Response): Promise<Nullable<HTMLImageElement>> {
+    async decodeAsync(r: void | Response): Promise<HTMLImageElement | undefined> {
         const blob = r instanceof Response ? await r.blob() : null;
         if (blob) {
             return new Promise((resolve, reject) => {
@@ -29,7 +28,7 @@ export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
                 }
             });
         } else {
-            return null;
+            return undefined;
         }
     }
 }
@@ -50,8 +49,8 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
         this._canvas = canvas;
     }
 
-    public async decode(r: void | Response): Promise<Nullable<Awaited<ImageData>>> {
-        const image = await ImageTileCodec.Shared.decode(r);
+    public async decodeAsync(r: void | Response): Promise<Awaited<ImageData> | undefined> {
+        const image = await ImageTileCodec.Shared.decodeAsync(r);
         if (image) {
             const w = image.width;
             const h = image.height;
@@ -69,7 +68,7 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
             workingContext.drawImage(image, 0, 0);
             return workingContext.getImageData(0, 0, w, h);
         }
-        return null;
+        return undefined;
     }
 }
 
@@ -80,8 +79,8 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
         this._canvas = canvas;
     }
 
-    public async decode(r: void | Response): Promise<Nullable<Awaited<Float32Array>>> {
-        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decode(r);
+    public async decodeAsync(r: void | Response): Promise<Awaited<Float32Array> | undefined> {
+        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decodeAsync(r);
         if (imgData) {
             const pixels = imgData.data;
             const size = imgData.width * imgData.height;
@@ -103,6 +102,6 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
 
             return values;
         }
-        return null;
+        return undefined;
     }
 }

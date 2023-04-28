@@ -1,29 +1,32 @@
-import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
+import { ITileMetrics } from "./tiles.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
-import { GeographicTile } from "./tiles.geography";
+import { Tile } from "./tiles";
 
 export class DEMMetaData {
-    public static From(data: Float32Array): DEMMetaData {
-        let min = Number.MAX_VALUE;
-        let max = Number.MIN_VALUE;
-        let v = data[0];
-        if (v < min) min = v;
-        else if (v > max) max = v;
-
-        let mean = v / data.length;
-        for (let i = 1; i < data.length; i++) {
-            v = data[i];
+    public static From(data?: Float32Array): DEMMetaData | undefined {
+        if (data) {
+            let min = Number.MAX_VALUE;
+            let max = Number.MIN_VALUE;
+            let v = data[0];
             if (v < min) min = v;
             else if (v > max) max = v;
-            mean += v / data.length;
+
+            let mean = v / data.length;
+            for (let i = 1; i < data.length; i++) {
+                v = data[i];
+                if (v < min) min = v;
+                else if (v > max) max = v;
+                mean += v / data.length;
+            }
+            return new DEMMetaData(min, max, mean);
         }
-        return new DEMMetaData(min, max, mean);
+        return undefined;
     }
 
     constructor(public min: number, public max: number, public mean?: number) {}
 }
 
-export class DEMTile extends GeographicTile<Float32Array> {
+export class DEMTile extends Tile<Float32Array> {
     /**
      * Internal function to prepare lookup table. The step will be (toDeg - fromDeg) / (count - 1)
      * @param fromDeg where to start the table
@@ -52,17 +55,17 @@ export class DEMTile extends GeographicTile<Float32Array> {
         return tbl;
     }
 
-    _dataMetrics: DEMMetaData;
+    _dataMetrics?: DEMMetaData;
     _normals?: Float32Array;
     _latLookupTable?: Float32Array;
     _lonLookupTable?: Float32Array;
 
-    public constructor(data: Float32Array, address: ITileAddress, metrics?: ITileMetrics) {
-        super(data, address, metrics);
+    public constructor(x: number, y: number, levelOfDetail: number, data?: Float32Array, metrics?: ITileMetrics) {
+        super(x, y, levelOfDetail, data, metrics);
         this._dataMetrics = DEMMetaData.From(data);
     }
 
-    public get dataMetrics(): DEMMetaData {
+    public get dataMetrics(): DEMMetaData | undefined {
         return this._dataMetrics;
     }
 
@@ -82,11 +85,11 @@ export class DEMTile extends GeographicTile<Float32Array> {
         return this._lonLookupTable;
     }
 
-    public prepareLookupTable(ellipsoid?: Ellipsoid) {
-        if (this._tileMetrics) {
-            const env = this.bounds;
-            this._latLookupTable = DEMTile._PrepareLookupTable(env.north, env.south, this._tileMetrics.tileSize, ellipsoid);
-            this._lonLookupTable = DEMTile._PrepareLookupTable(env.west, env.east, this._tileMetrics.tileSize);
+    public prepareLookupTable(tileSize: number, ellipsoid?: Ellipsoid) {
+        const env = this.bounds;
+        if (env) {
+            this._latLookupTable = DEMTile._PrepareLookupTable(env.north, env.south, tileSize, ellipsoid);
+            this._lonLookupTable = DEMTile._PrepareLookupTable(env.west, env.east, tileSize);
         }
     }
 

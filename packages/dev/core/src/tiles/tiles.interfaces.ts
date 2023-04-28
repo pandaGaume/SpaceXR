@@ -1,4 +1,4 @@
-import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
+import { ICartesian2, IGeo3, IGeoBounded } from "../geography/geography.interfaces";
 import { Nullable } from "../types";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
@@ -9,7 +9,7 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
 }
 
-export interface ITile<T> {
+export interface ITile<T> extends IGeoBounded {
     address?: ITileAddress;
     data?: T;
 }
@@ -37,16 +37,20 @@ export interface ITileMetrics {
     assertValidAddress(x: number, y: number, levelOfDetail: number): void;
 }
 
+export interface ITileMetricsProvider {
+    metrics: ITileMetrics;
+}
+
 export interface ITileUrlBuilder {
     buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string;
 }
 
 export interface ITileCodec<T> {
-    decode(r: void | Response): Promise<Nullable<Awaited<T>>>;
+    decodeAsync(r: void | Response): Promise<Awaited<T> | undefined>;
 }
 
 export interface ITileDatasource<T, R extends ITileAddress> {
-    fetchAsync(request: R): Promise<Nullable<T>>;
+    fetchAsync(request: R): Promise<T | undefined>;
 }
 
 export interface ITileClientOptions<T> {

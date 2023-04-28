@@ -9,13 +9,13 @@ import { MapZenDemUrlBuilder } from "../../../src/tiles/tiles.mapzen";
 import { BlobTileCodec } from "../../../src/tiles/tiles.codecs";
 
 class DummyDataSource<T> implements ITileDatasource<T, ITileAddress> {
-    _data: T;
+    _data?: T;
 
-    public constructor(data: T) {
+    public constructor(data?: T) {
         this._data = data;
     }
 
-    public fetchAsync(request: ITileAddress): Promise<Nullable<T>> {
+    public fetchAsync(request: ITileAddress): Promise<T | undefined> {
         return Promise.resolve(this._data);
     }
 }
@@ -60,11 +60,11 @@ describe("Tiles", () => {
 
             const options = new TileClientOptions(MapZenDemUrlBuilder.Terrarium, BlobTileCodec.Shared);
             const client = new TileClient<Blob, ITileAddress>(options);
-            const index = new TilePyramid(new WebMercatorTileMetrics(), client);
+            const index = new TilePyramid<Blob>(new WebMercatorTileMetrics(), client);
 
             const result = await index.lookupAsync(x, y, lod);
             expect(result).not.toBeUndefined();
-            let image: Nullable<Blob> = null;
+            let image: Nullable<Blob> | undefined ;
             if (result) {
                 if (result instanceof Array && result.length) {
                     image = result[0];
@@ -72,6 +72,7 @@ describe("Tiles", () => {
                     image = <Blob>result;
                 }
             }
+            expect(image).not.toBeUndefined();
             expect(image).not.toBeNull();
         });
     });

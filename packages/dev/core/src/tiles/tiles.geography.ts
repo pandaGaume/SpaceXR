@@ -1,10 +1,5 @@
-import { Tile } from "./tiles";
-import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
 import { AbstractTileMetrics } from "./tiles.metrics";
-import { ICartesian2, IEnvelope, IGeo3, IGeoBounded } from "../geography/geography.interfaces";
-import { Size } from "../geography/geography.size";
-import { Geo3 } from "../geography/geography.geo3";
-import { Envelope } from "../geography/geography.envelope";
+import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
 import { Scalar } from "../math/math";
 
 export class WebMercatorTileMetrics extends AbstractTileMetrics {
@@ -40,41 +35,5 @@ export class WebMercatorTileMetrics extends AbstractTileMetrics {
             return loc;
         }
         return <IGeo3>{ lat: lat, lon: lon };
-    }
-}
-
-export class GeographicTile<T> extends Tile<T> implements IGeoBounded {
-    _tileMetrics: ITileMetrics;
-    _env?: IEnvelope;
-
-    public constructor(data: T, address: ITileAddress, metrics?: ITileMetrics) {
-        super(data, address);
-        this._tileMetrics = metrics || WebMercatorTileMetrics.Shared;
-    }
-
-    public get tileMetrics(): ITileMetrics {
-        return this._tileMetrics;
-    }
-
-    public get bounds(): IEnvelope {
-        if (!this._env) {
-            this._env = this.buildEnvelope();
-        }
-        return this._env;
-    }
-
-    public set bounds(e: IEnvelope | undefined) {
-        this._env = e;
-    }
-
-    private buildEnvelope(): IEnvelope {
-        const x = this.address?.x || 0;
-        const y = this.address?.x || 0;
-        const lod = this.address?.levelOfDetail || 0;
-        const nw = this._tileMetrics.getTileXYToLatLon(x, y, lod);
-        const se = this._tileMetrics.getTileXYToLatLon(x + 1, y + 1, lod);
-        const size = new Size(nw.lat - se.lat, se.lon - nw.lon);
-        const pos = new Geo3(se.lat, nw.lon);
-        return Envelope.FromSize(pos, size);
     }
 }

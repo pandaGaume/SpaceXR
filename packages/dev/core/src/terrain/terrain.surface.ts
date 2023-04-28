@@ -7,7 +7,7 @@ import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
 /**
  * This is the model, which is also itself a view of the data access through geodetic system and specific grid topology..
  */
-export class PlanetSurface {
+export class PlanetSurfaceModel {
     // data access
     _directory: ITileDirectory<Float32Array, ITileAddress>;
 

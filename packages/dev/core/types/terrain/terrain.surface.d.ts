@@ -2,7 +2,7 @@ import { ITileAddress, ITileDirectory, ITileMetrics } from "../tiles/tiles.inter
 import { IVerticesData } from "../meshes/meshes.interfaces";
 import { GeodeticSystem } from "core/geodesy/geodesy.system";
 import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
-export declare class PlanetSurface {
+export declare class PlanetSurfaceModel {
     directory: ITileDirectory<Float32Array, ITileAddress>;
     _directory: ITileDirectory<Float32Array, ITileAddress>;
     _topology: IVerticesData;

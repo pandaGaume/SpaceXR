@@ -1,31 +1,26 @@
-import { Observable } from "core/events/events.observable";
-import { ITile, ITileAddress, ITileClient, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
-import { Nullable } from "core/types";
-export type DATA_CONTAINER<V> = Array<Nullable<V>>;
-declare class TilePyramidNode<V> implements ITile<DATA_CONTAINER<V>>, ITileAddress {
-    _owner: TilePyramid<V>;
+import { ITileAddress, ITileDatasource, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
+import { Nullable } from "../types";
+import { Tile } from "./tiles";
+export type LOOKUP_RESULT<V> = V | Array<Nullable<V>> | undefined;
+declare class TilePyramidNode<V extends object> extends Tile<WeakRef<V | Array<Nullable<V>>>> {
     _parent?: TilePyramidNode<V>;
     _childrens?: Array<TilePyramidNode<V>>;
-    _x: number;
-    _y: number;
-    _z: number;
-    _value?: WeakRef<DATA_CONTAINER<V>>;
     constructor(x: number, y: number, z: number, owner: TilePyramid<V>, parent?: TilePyramidNode<V>);
-    get address(): ITileAddress | undefined;
-    get data(): DATA_CONTAINER<V> | undefined;
-    get x(): number;
-    get y(): number;
-    get levelOfDetail(): number;
 }
-export declare class TilePyramid<V> implements ITileDirectory<V, ITileAddress> {
+declare class TilePyramidInfos {
+    depth: number;
+    tileCount: number;
+    constructor(depth?: number, tileCount?: number);
+}
+export declare class TilePyramid<V extends object> implements ITileDirectory<V, ITileAddress> {
     metrics: ITileMetrics;
-    client: Array<ITileClient<V, ITileAddress>>;
+    datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>;
     _root: TilePyramidNode<V>;
-    _tilesObservable?: Observable<ITile<DATA_CONTAINER<V>>>;
-    constructor(metrics: ITileMetrics, client: Array<ITileClient<V, ITileAddress>>);
-    get tilesObservable(): Observable<ITile<DATA_CONTAINER<V>>>;
-    get maxDepth(): number;
-    lookupAsync(key: ITileAddress): Promise<DATA_CONTAINER<V> | undefined>;
+    _infos: TilePyramidInfos;
+    constructor(metrics: ITileMetrics, datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>);
+    get depth(): number;
+    get tileCount(): number;
+    lookupAsync(x: number, y: number, levelOfDetail: number): Promise<LOOKUP_RESULT<V>>;
     private lookup;
 }
 export {};

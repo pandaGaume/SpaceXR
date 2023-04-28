@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Scalar } from "core/math";
+import { Scalar } from "../math/math";
 import { IEnvelope, IGeo3, ISize, isLocation } from "./geography.interfaces";
 import { Geo3 } from "./geography.geo3";
 import { Size } from "./geography.size";

@@ -11,7 +11,7 @@ export interface ITileAddress extends ICartesian2 {
 
 export interface ITile<T> {
     address?: ITileAddress;
-    data: T;
+    data?: T;
 }
 
 export interface ITileMetricsOptions {
@@ -34,36 +34,35 @@ export interface ITileMetrics {
     maxLongitude: number;
     getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3): IGeo3;
+    assertValidAddress(x: number, y: number, levelOfDetail: number): void;
 }
 
-export interface ITileUrlFactory {
-    buildUrl(request: ITileAddress, ...params: unknown[]): string;
+export interface ITileUrlBuilder {
+    buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string;
 }
 
 export interface ITileCodec<T> {
     decode(r: void | Response): Promise<Nullable<Awaited<T>>>;
 }
 
-export interface ITileBuilder<V, T extends ITile<V>> {
-    build(data: Array<Nullable<V>>, address: ITileAddress): T | undefined;
+export interface ITileDatasource<T, R extends ITileAddress> {
+    fetchAsync(request: R): Promise<Nullable<T>>;
 }
 
 export interface ITileClientOptions<T> {
-    urlFactory: ITileUrlFactory;
+    urlFactory: ITileUrlBuilder;
     codec: ITileCodec<T>;
 }
 
-export interface ITileClient<T, R extends ITileAddress> {
+export interface ITileClient<T, R extends ITileAddress> extends ITileDatasource<T, R> {
     options: ITileClientOptions<T>;
-    fetchAsync(request: R): Promise<Nullable<T>>;
 }
 
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 
-export interface ITileSystem<V, T extends ITile<V>, R extends ITileAddress> {
+export interface ITileDirectory<V, R extends ITileAddress> {
     metrics: ITileMetrics;
-    client: Array<ITileClient<V, R>>;
-    builder: ITileBuilder<V, T>;
+    lookupAsync(x: number, y: number, levelOfDetail: number): Promise<Nullable<V> | Array<Nullable<V>> | undefined>;
 }

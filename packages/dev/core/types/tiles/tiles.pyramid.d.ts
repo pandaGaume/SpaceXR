@@ -1,35 +1,31 @@
 import { Observable } from "core/events/events.observable";
-import { ITile, ITileAddress } from "./tiles.interfaces";
-declare class TilePyramidNode<V, T extends ITile<V>> {
-    owner: TilePyramid<V, T>;
-    parent: TilePyramidNode<V, T>;
-    v?: T;
-    childrens?: TilePyramidNode<V, T>[];
-    constructor(owner: TilePyramid<V, T>, parent: TilePyramidNode<V, T>);
-    fold(id: ITileAddress, keys: Array<number>, level: number): void;
-    unfold(id: ITileAddress, keys: Array<number>, level: number): void;
-    lookup(id: ITileAddress, keys: Array<number>, level: number): TilePyramidNode<V, T> | undefined;
+import { ITile, ITileAddress, ITileClient, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
+import { Nullable } from "core/types";
+export type DATA_CONTAINER<V> = Array<Nullable<V>>;
+declare class TilePyramidNode<V> implements ITile<DATA_CONTAINER<V>>, ITileAddress {
+    _owner: TilePyramid<V>;
+    _parent?: TilePyramidNode<V>;
+    _childrens?: Array<TilePyramidNode<V>>;
+    _x: number;
+    _y: number;
+    _z: number;
+    _value?: WeakRef<DATA_CONTAINER<V>>;
+    constructor(x: number, y: number, z: number, owner: TilePyramid<V>, parent?: TilePyramidNode<V>);
+    get address(): ITileAddress | undefined;
+    get data(): DATA_CONTAINER<V> | undefined;
+    get x(): number;
+    get y(): number;
+    get levelOfDetail(): number;
 }
-export declare class TilePyramidOptions {
-    static Shared: TilePyramidOptions;
-    maxDepth?: number;
-}
-export declare class TilePyramidOptionsBuilder {
-    _maxDepth?: number;
-    withMaxDepth(depth: number): TilePyramidOptionsBuilder;
-    build(): TilePyramidOptions;
-}
-export declare class TilePyramid<V, T extends ITile<V>> {
-    static TileXYToQuadKey(tileX: number, tileY: number, levelOfDetail: number): number[];
-    _o: TilePyramidOptions;
-    _root?: TilePyramidNode<V, T>;
-    _tilesObservable?: Observable<T>;
-    constructor(options: TilePyramidOptions);
-    get tilesObservable(): Observable<T>;
+export declare class TilePyramid<V> implements ITileDirectory<V, ITileAddress> {
+    metrics: ITileMetrics;
+    client: Array<ITileClient<V, ITileAddress>>;
+    _root: TilePyramidNode<V>;
+    _tilesObservable?: Observable<ITile<DATA_CONTAINER<V>>>;
+    constructor(metrics: ITileMetrics, client: Array<ITileClient<V, ITileAddress>>);
+    get tilesObservable(): Observable<ITile<DATA_CONTAINER<V>>>;
     get maxDepth(): number;
-    lookup(id: ITileAddress): T | undefined;
-    unfold(id: ITileAddress): void;
-    fold(id: ITileAddress): void;
-    private lookup0;
+    lookupAsync(key: ITileAddress): Promise<DATA_CONTAINER<V> | undefined>;
+    private lookup;
 }
 export {};

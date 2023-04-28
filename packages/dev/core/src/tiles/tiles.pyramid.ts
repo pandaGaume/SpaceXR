@@ -1,89 +1,119 @@
-import { Observable } from "core/events/events.observable";
-import { ITile, ITileAddress, ITileSystem } from "./tiles.interfaces";
-import { Nullable } from "core/types";
+import { ITile, ITileAddress, ITileDatasource, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
+import { Nullable } from "../types";
+import { TileMetrics } from "./tiles.metrics";
 
-class TilePyramidNode<V, T extends ITile<V>> {
-    _owner: TilePyramid<V, T>;
-    _parent: TilePyramidNode<V, T>;
-    _value?: WeakRef<T>;
-    _childrens?: Array<TilePyramidNode<V, T>>;
 
-    constructor(owner: TilePyramid<V, T>, parent: TilePyramidNode<V, T>) {
+export type LOOKUP_RESULT<V> = V | Array<Nullable<V>> | undefined ;
+
+class TilePyramidNode<V extends object> implements ITile<LOOKUP_RESULT<V>>, ITileAddress {
+    _owner: TilePyramid<V>;
+    _parent?: TilePyramidNode<V>;
+    _childrens?: Array<TilePyramidNode<V>>;
+
+    _x: number;
+    _y: number;
+    _z: number;
+    _value?: WeakRef<V | Array<Nullable<V>>>;
+
+    constructor(x: number, y: number, z: number, owner: TilePyramid<V>, parent?: TilePyramidNode<V>) {
+        this._x = x;
+        this._y = y;
+        this._z = z;
         this._owner = owner;
         this._parent = parent;
     }
+
+    public get address(): ITileAddress | undefined {
+        return this;
+    }
+
+    public get data(): LOOKUP_RESULT<V> {
+        return this._value?.deref();
+    }
+
+    public get x(): number {
+        return this._x;
+    }
+    public get y(): number {
+        return this._y;
+    }
+    public get levelOfDetail(): number {
+        return this._z;
+    }
 }
 
-export class TilePyramid<V, T extends ITile<V>> {
-    public static TileXYToQuadKey(tileX: number, tileY: number, levelOfDetail: number): Uint8Array {
-        const quadKey = new Uint8Array(levelOfDetail);
-        let j = 0;
-        for (let i = levelOfDetail; i > 0; i--) {
-            let digit = 0;
-            let mask = 1 << (i - 1);
-            if ((tileX & mask) != 0) {
-                digit++;
-            }
-            if ((tileY & mask) != 0) {
-                digit++;
-                digit++;
-            }
-            quadKey[j++] = digit;
+class TilePyramidInfos {
+    constructor(public depth: number = 0, public tileCount: number = 0) {}
+}
+
+export class TilePyramid<V extends object> implements ITileDirectory<V, ITileAddress> {
+    _root: TilePyramidNode<V>;
+    _infos: TilePyramidInfos;
+
+    public constructor(public metrics: ITileMetrics, public datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>) {
+        this._infos = new TilePyramidInfos(0, 1);
+        this._root = new TilePyramidNode<V>(0, 0, 0, this);
+    }
+
+    public get depth(): number {
+        return this._infos.depth;
+    }
+
+    public get tileCount(): number {
+        return this._infos.tileCount;
+    }
+
+    public async lookupAsync(x: number, y: number, levelOfDetail: number): Promise<LOOKUP_RESULT<V>> {
+        this.metrics.assertValidAddress(x, y, levelOfDetail);
+
+        const n = this.lookup(x, y, levelOfDetail);
+        let data: Nullable<V> | Nullable<V>[] | undefined = n._value?.deref();
+        if (data) {
+            return data;
         }
-        return quadKey;
-    }
-
-    _system: ITileSystem<V, T, ITileAddress>;
-    _root?: TilePyramidNode<V, T>;
-    _tilesObservable?: Observable<T>;
-
-    public constructor(system: ITileSystem<V, T, ITileAddress>) {
-        this._system = system;
-    }
-
-    public get tilesObservable(): Observable<T> {
-        this._tilesObservable = this._tilesObservable || new Observable<T>();
-        return this._tilesObservable;
-    }
-
-    public get maxDepth(): number {
-        return this._system.metrics.maxLOD;
-    }
-
-    public async lookupAsync(id: ITileAddress): Promise<T | undefined> {
-        const n = this.lookup(id);
-        if (n) {
-            if (n._value) {
-                return n._value.deref();
-            }
-            let data;
+        // data not present. Could be because it at not beeing initialized or garbage collected.
+        if (this.datasources) {
             try {
-                data = await Promise.all(this._system.client.map(async (c, i) => c.fetchAsync(id)));
+                if (this.datasources instanceof Array) {
+                    if( this.datasources.length ){
+                        data = await Promise.all(this.datasources.map(async (c, i) => c.fetchAsync(n)));
+                    }
+                } else {
+                    data = await this.datasources.fetchAsync(n);
+                }
             } catch (e) {
             } finally {
                 if (data) {
-                    const tile = <T>this._system.builder.build(data, id);
-                    n._value = new WeakRef(tile);
-                    return tile;
+                    n._value = new WeakRef(data);
+                } else {
+                    n._value = undefined;
                 }
+                return n.data;
             }
         }
         return undefined;
     }
 
-    private lookup(id: ITileAddress): TilePyramidNode<V, T> | undefined {
-        if (id && id.levelOfDetail <= this.maxDepth) {
-            const key = TilePyramid.TileXYToQuadKey(id.x, id.y, id.levelOfDetail);
-            let i = 0;
-            if (i < key.length && this._root) {
-                let n = this._root;
-                do {
-                    n._childrens = n._childrens || Array.from({ length: 4 }, (v, i) => new TilePyramidNode<V, T>(this, n));
-                    n = n._childrens[key[i++]];
-                } while (i < key.length);
-                return n;
+    private lookup(tileX: number, tileY: number, levelOfDetail: number): TilePyramidNode<V> {
+        const key = TileMetrics.TileXYToQuadKey(tileX, tileY, levelOfDetail);
+        let lod = 0;
+        let n = this._root;
+        do {
+            if (n._childrens === undefined) {
+                const x = n.x << 1;
+                const y = n.y << 1;
+                const z = lod + 1;
+                n._childrens = [
+                    new TilePyramidNode<V>(x, y, z, this, n),
+                    new TilePyramidNode<V>(x + 1, y, z, this, n),
+                    new TilePyramidNode<V>(x, y + 1, z, this, n),
+                    new TilePyramidNode<V>(x + 1, y + 1, z, this, n),
+                ];
+                this._infos.tileCount += 4;
+                this._infos.depth = Math.max(this._infos.depth, z);
             }
-        }
-        return undefined;
+            n = n._childrens[key[lod++]];
+        } while (lod < key.length);
+        return n;
     }
 }

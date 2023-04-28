@@ -1,4 +1,4 @@
-import { Tile } from "./tiles.tile";
+import { Tile } from "./tiles";
 import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
 import { AbstractTileMetrics } from "./tiles.metrics";
 import { ICartesian2, IEnvelope, IGeo3, IGeoBounded } from "../geography/geography.interfaces";

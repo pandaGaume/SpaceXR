@@ -1,5 +1,5 @@
 import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
 export declare enum TileOverlapMode {
     ON = 0,
     OFF = 1
@@ -40,6 +40,8 @@ export declare class TileMetricsOptionsBuilder {
     build(): ITileMetricsOptions;
 }
 export declare abstract class AbstractTileMetrics implements ITileMetrics {
+    static TileXYToQuadKey(tileX: number, tileY: number, levelOfDetail: number): Uint8Array;
+    static QuadKeyToTileXY(quadKey: Uint8Array, from?: number): ITileAddress;
     _o: TileMetricsOptions;
     constructor(options?: Partial<TileMetricsOptions>);
     get options(): TileMetricsOptions;

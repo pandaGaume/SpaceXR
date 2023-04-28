@@ -6,7 +6,7 @@ export interface ITileAddress extends ICartesian2 {
 }
 export interface ITile<T> {
     address?: ITileAddress;
-    data: T;
+    data?: T;
 }
 export interface ITileMetricsOptions {
     tileSize?: number;
@@ -34,19 +34,18 @@ export interface ITileUrlFactory {
 export interface ITileCodec<T> {
     decode(r: void | Response): Promise<Nullable<Awaited<T>>>;
 }
-export interface ITileBuilder<T> {
-    withData(data: T): ITileBuilder<T>;
-    withAddress(address: ITileAddress): ITileBuilder<T>;
-    build(): ITile<T>;
-}
 export interface ITileClientOptions<T> {
     urlFactory: ITileUrlFactory;
     codec: ITileCodec<T>;
 }
 export interface ITileClient<T, R extends ITileAddress> {
     options: ITileClientOptions<T>;
-    fetchAsync(request: R): Promise<Nullable<Awaited<T>>>;
+    fetchAsync(request: R): Promise<Nullable<T>>;
 }
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
+}
+export interface ITileDirectory<V, R extends ITileAddress> {
+    metrics: ITileMetrics;
+    lookupAsync(key: R): Promise<Array<Nullable<V>> | undefined>;
 }

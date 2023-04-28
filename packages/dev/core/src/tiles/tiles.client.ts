@@ -1,21 +1,21 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileClientOptions, ITileUrlFactory } from "./tiles.interfaces";
+import { ITileAddress, ITileCodec, ITileClient, ITileClientOptions, ITileUrlBuilder } from "./tiles.interfaces";
 import { Nullable } from "../types";
 
 export class TileClientOptions<T> implements ITileClientOptions<T> {
-    urlFactory: ITileUrlFactory;
+    urlFactory: ITileUrlBuilder;
     codec: ITileCodec<T>;
 
-    public constructor(urlFactory: ITileUrlFactory, codec: ITileCodec<T>) {
+    public constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>) {
         this.urlFactory = urlFactory;
         this.codec = codec;
     }
 }
 
 export class TileClientOptionsBuilder<T> {
-    _urlFactory?: ITileUrlFactory;
+    _urlFactory?: ITileUrlBuilder;
     _codec?: ITileCodec<T>;
 
-    public withUrlFactory(v: ITileUrlFactory): TileClientOptionsBuilder<T> {
+    public withUrlFactory(v: ITileUrlBuilder): TileClientOptionsBuilder<T> {
         this._urlFactory = v;
         return this;
     }
@@ -49,7 +49,7 @@ export class TileClient<T, R extends ITileAddress> implements ITileClient<T, R> 
     }
 
     public async fetchAsync(request: ITileAddress): Promise<Nullable<Awaited<T>>> {
-        const url = this._o.urlFactory.buildUrl(request);
+        const url = this._o.urlFactory.buildUrl(request.x, request.y, request.levelOfDetail);
         const response = await fetch(url);
         if (response && response.ok) {
             return await this._o.codec.decode.call(this, response);

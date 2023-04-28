@@ -4,25 +4,29 @@ import { IPixelDecoder, ITileCodec } from "./tiles.interfaces";
 export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     public static Shared = new ImageTileCodec();
 
-    async decode(r: void | Response): Promise<Nullable<Awaited<HTMLImageElement>>> {
+    async decode(r: void | Response): Promise<Nullable<HTMLImageElement>> {
         const blob = r instanceof Response ? await r.blob() : null;
         if (blob) {
             return new Promise((resolve, reject) => {
-                const img = new Image();
-                const blobURL = URL.createObjectURL(blob);
-                // this frees up memory, which is usually handled automatically when you close the
-                // page or navigate away from it
-                img.onload = function (ev) {
-                    const e = ev.target;
-                    if (e && e instanceof HTMLImageElement) {
-                        URL.revokeObjectURL(e.src);
-                        e.onload = null;
-                    }
-                    // then call the resolve part of the promise.
-                    resolve(img);
-                };
-                img.onerror = reject;
-                img.src = blobURL;
+                try {
+                    const img = new Image();
+                    const blobURL = URL.createObjectURL(blob);
+                    // this frees up memory, which is usually handled automatically when you close the
+                    // page or navigate away from it
+                    img.onload = function (ev) {
+                        const e = ev.target;
+                        if (e && e instanceof HTMLImageElement) {
+                            URL.revokeObjectURL(e.src);
+                            e.onload = null;
+                        }
+                        // then call the resolve part of the promise.
+                        resolve(img);
+                    };
+                    img.onerror = reject;
+                    img.src = blobURL;
+                } catch (e) {
+                    reject(e);
+                }
             });
         } else {
             return null;

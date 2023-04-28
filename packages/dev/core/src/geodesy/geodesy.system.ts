@@ -66,6 +66,10 @@ export class GeodeticSystem {
         this._bounds = bounds;
     }
 
+    public get ellipsoid(): Ellipsoid {
+        return this._ellipsoid;
+    }
+
     public get ENUReference(): IGeo3 | undefined {
         return this._enuReference;
     }

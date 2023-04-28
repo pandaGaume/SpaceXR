@@ -1,19 +1,19 @@
 import { TileClientOptions } from "./tiles.client";
 import { IPixelDecoder } from "./tiles.interfaces";
-import { WebTileUrlFactory, WebTileUrlFactoryOptions } from "./tiles.urlFactories";
+import { WebTileUrlBuilder } from "./tiles.urlBuilder";
 import { Float32TileCodec } from "./tiles.codecs.image";
 
-class MapZenTerrainUrlFactoryOptions extends WebTileUrlFactoryOptions {
+export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
+    public static Terrarium = new MapZenDemUrlBuilder("terrarium");
+    public static Normal = new MapZenDemUrlBuilder("normal");
+
     public constructor(format: string, extension = "png") {
         super();
-        this.host = "s3.amazonaws.com";
-        this.path = `elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}`;
-        this.isSecure = true;
-        this.extension = extension;
+        this.withHost("s3.amazonaws.com").withPath(`elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}`).withSecure(true).withExtension(extension);
     }
 }
 
-class MapzenAltitudeDecoder implements IPixelDecoder {
+export class MapzenAltitudeDecoder implements IPixelDecoder {
     public static Shared = new MapzenAltitudeDecoder();
 
     public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {
@@ -26,7 +26,7 @@ class MapzenAltitudeDecoder implements IPixelDecoder {
     }
 }
 
-class MapzenNormalValueDecoder implements IPixelDecoder {
+export class MapzenNormalValueDecoder implements IPixelDecoder {
     public static Shared = new MapzenNormalValueDecoder();
 
     public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {
@@ -41,6 +41,6 @@ class MapzenNormalValueDecoder implements IPixelDecoder {
 }
 
 export class MapZenTileClientOptions {
-    public static Terrarium = new TileClientOptions(new WebTileUrlFactory(new MapZenTerrainUrlFactoryOptions("terrarium")), new Float32TileCodec(MapzenAltitudeDecoder.Shared));
-    public static Normal = new TileClientOptions(new WebTileUrlFactory(new MapZenTerrainUrlFactoryOptions("normal")), new Float32TileCodec(MapzenNormalValueDecoder.Shared));
+    public static Terrarium = new TileClientOptions(MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared));
+    public static Normal = new TileClientOptions(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared));
 }

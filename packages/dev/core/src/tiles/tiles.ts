@@ -1,6 +1,6 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { Size } from "../geography/geography.size";
-import { Geo3 } from "../geography/geography.geo3";
+import { Size3 } from "../geography/geography.size";
+import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileMetrics } from "./tiles.interfaces";
 
@@ -9,7 +9,7 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         if (metrics) {
             const nw = metrics.getTileXYToLatLon(x, y, lod);
             const se = metrics.getTileXYToLatLon(x + 1, y + 1, lod);
-            const size = new Size(nw.lat - se.lat, se.lon - nw.lon);
+            const size = new Size3(nw.lat - se.lat, se.lon - nw.lon);
             const pos = new Geo3(se.lat, nw.lon);
             return Envelope.FromSize(pos, size);
         }
@@ -26,7 +26,7 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         this._y = y;
         this._levelOfDetail = levelOfDetail;
         this._value = data;
-        this._env = Tile.BuildEnvelope(x,y,levelOfDetail, metrics);
+        this._env = Tile.BuildEnvelope(x, y, levelOfDetail, metrics);
     }
 
     public get address(): ITileAddress | undefined {

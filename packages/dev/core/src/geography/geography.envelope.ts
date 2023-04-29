@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Scalar } from "../math/math";
-import { IEnvelope, IGeo3, ISize, isLocation } from "./geography.interfaces";
-import { Geo3 } from "./geography.geo3";
-import { Size } from "./geography.size";
+import { IEnvelope, IGeo3, ISize3, isLocation } from "./geography.interfaces";
+import { Geo3 } from "./geography.position";
+import { Size3 } from "./geography.size";
 
 export class Envelope implements IEnvelope {
     public static MaxLongitude = 540;
@@ -10,7 +10,7 @@ export class Envelope implements IEnvelope {
     public static MinLongitude = -Envelope.MaxLongitude;
     public static MinLatitude = -Envelope.MaxLatitude;
 
-    public static FromSize(position: IGeo3, size: ISize) {
+    public static FromSize(position: IGeo3, size: ISize3) {
         const hasAlt = position.alt !== undefined && size.thickness !== undefined;
 
         const lat0 = Scalar.Clamp(position.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
@@ -20,8 +20,25 @@ export class Envelope implements IEnvelope {
         const h = size.width % 180;
         const lat1 = Scalar.Clamp(position.lat + h, Envelope.MinLatitude, Envelope.MaxLatitude);
         const w = size.width % 360;
-        const lon1 = Scalar.Clamp(position.lat + w, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const lon1 = Scalar.Clamp(position.lon + w, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt1 = hasAlt ? position.alt! + size.thickness! : undefined;
+
+        const lower = new Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0!, alt1!) : undefined);
+        const upper = new Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0!, alt1!) : undefined);
+
+        return new Envelope(lower, upper);
+    }
+
+    public static FromPoints(a: IGeo3, b: IGeo3) {
+        const hasAlt = a.alt !== undefined && b.alt !== undefined;
+
+        const lat0 = Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lon0 = Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const alt0 = hasAlt ? a.alt : undefined;
+
+        const lat1 = Scalar.Clamp(b.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lon1 = Scalar.Clamp(b.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const alt1 = hasAlt ? b.alt : undefined;
 
         const lower = new Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0!, alt1!) : undefined);
         const upper = new Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0!, alt1!) : undefined);
@@ -104,12 +121,12 @@ export class Envelope implements IEnvelope {
         return new Geo3(lat, lon, alt);
     }
 
-    public get size(): ISize {
+    public get size(): ISize3 {
         const w = this._max.lon - this._min.lon;
         const h = this._max.lat - this._min.lat;
         const t = this.hasAltitude ? this._max.alt! - this._min.alt! : undefined;
 
-        return new Size(h, w, t);
+        return new Size3(h, w, t);
     }
 
     public add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope {

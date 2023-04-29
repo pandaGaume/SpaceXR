@@ -1,5 +1,5 @@
 export * from "./geography.interfaces";
-export * from "./geography.geo3";
+export * from "./geography.position";
 export * from "./geography.size";
 export * from "./geography.envelope";
 export * from "../tiles/tiles.geography";

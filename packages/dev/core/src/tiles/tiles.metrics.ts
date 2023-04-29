@@ -1,5 +1,5 @@
 import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, ITileMapMetrics } from "./tiles.interfaces";
 
 export enum TileOverlapMode {
     ON = 0,
@@ -8,6 +8,7 @@ export enum TileOverlapMode {
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
+    public static DefaultLOD = 0;
     public static DefaultMinLOD = 0;
     public static DefaultMaxLOD = 23;
     public static DefaultMinLatitude = -85.05112878;
@@ -26,13 +27,15 @@ export class TileMetricsOptions implements ITileMetricsOptions {
         maxLongitude: TileMetricsOptions.DefaultMaxLongitude,
     };
 
-    public tileSize?: number;
-    public minLOD?: number;
-    public maxLOD?: number;
-    public minLatitude?: number;
-    public maxLatitude?: number;
-    public minLongitude?: number;
-    public maxLongitude?: number;
+    public constructor(
+        public tileSize: number,
+        public minLOD: number,
+        public maxLOD: number,
+        public minLatitude: number,
+        public maxLatitude: number,
+        public minLongitude: number,
+        public maxLongitude: number
+    ) {}
 }
 
 export class TileMetricsOptionsBuilder {
@@ -73,16 +76,15 @@ export class TileMetricsOptionsBuilder {
         return this;
     }
     public build(): ITileMetricsOptions {
-        const o: TileMetricsOptions = {
-            tileSize: this._tileSize,
-            minLOD: this._minLOD,
-            maxLOD: this._maxLOD,
-            minLatitude: this._minLatitude,
-            maxLatitude: this._maxLatitude,
-            minLongitude: this._minLongitude,
-            maxLongitude: this._maxLongitude,
-        };
-        return o;
+        return new TileMetricsOptions(
+            this._tileSize || TileMetricsOptions.DefaultTileSize,
+            this._minLOD || TileMetricsOptions.DefaultMinLOD,
+            this._maxLOD || TileMetricsOptions.DefaultMaxLOD,
+            this._minLatitude || TileMetricsOptions.DefaultMinLatitude,
+            this._maxLatitude || TileMetricsOptions.DefaultMaxLatitude,
+            this._minLongitude || TileMetricsOptions.DefaultMinLongitude,
+            this._maxLongitude || TileMetricsOptions.DefaultMaxLongitude
+        );
     }
 }
 
@@ -183,4 +185,11 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
     }
     public abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
     public abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3 | undefined): IGeo3;
+}
+
+export abstract class AbstractTileMapMetrics extends AbstractTileMetrics implements ITileMapMetrics {
+    public abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
+    public abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3): IGeo3;
+    public abstract getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
+    public abstract getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): IGeo3;
 }

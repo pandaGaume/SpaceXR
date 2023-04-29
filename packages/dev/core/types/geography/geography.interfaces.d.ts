@@ -24,7 +24,11 @@ export interface IGeo3 extends IComparable<IGeo3>, ICloneable<IGeo3> {
     hasAltitude: boolean;
 }
 export declare function isLocation(b: unknown): b is IGeo3;
-export interface ISize extends IComparable<ISize> {
+export interface ISize2 extends IComparable<ISize2> {
+    height: number;
+    width: number;
+}
+export interface ISize3 extends IComparable<ISize3> {
     height: number;
     width: number;
     thickness?: number;
@@ -43,7 +47,7 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     se: IGeo3;
     hasAltitude: boolean;
     center: IGeo3;
-    size: ISize;
+    size: ISize3;
     add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
     addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;

@@ -1,8 +1,8 @@
-import { AbstractTileMetrics } from "./tiles.metrics";
+import { AbstractTileMapMetrics } from "./tiles.metrics";
 import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
 import { Scalar } from "../math/math";
 
-export class WebMercatorTileMetrics extends AbstractTileMetrics {
+export class WebMercatorTileMetrics extends AbstractTileMapMetrics {
     private static D2R = Math.PI / 180;
 
     public static Shared = new WebMercatorTileMetrics();
@@ -35,5 +35,18 @@ export class WebMercatorTileMetrics extends AbstractTileMetrics {
             return loc;
         }
         return <IGeo3>{ lat: lat, lon: lon };
+    }
+
+    public getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2 | undefined): ICartesian2 {
+        throw new Error("Method not implemented.");
+    }
+    public getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3 | undefined): IGeo3 {
+        throw new Error("Method not implemented.");
+    }
+    public getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2 | undefined): ICartesian2 {
+        throw new Error("Method not implemented.");
+    }
+    public getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): IGeo3 {
+        throw new Error("Method not implemented.");
     }
 }

@@ -1,11 +1,19 @@
 import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, ITileMapMetrics } from "./tiles.interfaces";
 export declare enum TileOverlapMode {
     ON = 0,
     OFF = 1
 }
 export declare class TileMetricsOptions implements ITileMetricsOptions {
+    tileSize: number;
+    minLOD: number;
+    maxLOD: number;
+    minLatitude: number;
+    maxLatitude: number;
+    minLongitude: number;
+    maxLongitude: number;
     static DefaultTileSize: number;
+    static DefaultLOD: number;
     static DefaultMinLOD: number;
     static DefaultMaxLOD: number;
     static DefaultMinLatitude: number;
@@ -14,13 +22,7 @@ export declare class TileMetricsOptions implements ITileMetricsOptions {
     static DefaultMaxLongitude: number;
     static DefaultOverlapMode: TileOverlapMode;
     static Shared: TileMetricsOptions;
-    tileSize?: number;
-    minLOD?: number;
-    maxLOD?: number;
-    minLatitude?: number;
-    maxLatitude?: number;
-    minLongitude?: number;
-    maxLongitude?: number;
+    constructor(tileSize: number, minLOD: number, maxLOD: number, minLatitude: number, maxLatitude: number, minLongitude: number, maxLongitude: number);
 }
 export declare class TileMetricsOptionsBuilder {
     _tileSize?: number;
@@ -57,4 +59,10 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     assertValidAddress(x: number, y: number, levelOfDetail: number): void;
     abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
     abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3 | undefined): IGeo3;
+}
+export declare abstract class AbstractTileMapMetrics extends AbstractTileMetrics implements ITileMapMetrics {
+    abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
+    abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3): IGeo3;
+    abstract getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
+    abstract getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): IGeo3;
 }

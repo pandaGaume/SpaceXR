@@ -1,10 +1,11 @@
-import { IEnvelope, IGeo3, ISize } from "./geography.interfaces";
+import { IEnvelope, IGeo3, ISize3 } from "./geography.interfaces";
 export declare class Envelope implements IEnvelope {
     static MaxLongitude: number;
     static MaxLatitude: number;
     static MinLongitude: number;
     static MinLatitude: number;
-    static FromSize(position: IGeo3, size: ISize): Envelope;
+    static FromSize(position: IGeo3, size: ISize3): Envelope;
+    static FromPoints(a: IGeo3, b: IGeo3): Envelope;
     _min: IGeo3;
     _max: IGeo3;
     private constructor();
@@ -22,7 +23,7 @@ export declare class Envelope implements IEnvelope {
     clone(): IEnvelope;
     get hasAltitude(): boolean;
     get center(): IGeo3;
-    get size(): ISize;
+    get size(): ISize3;
     add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
     addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;

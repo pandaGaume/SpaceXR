@@ -19,7 +19,7 @@ class TilePyramidInfos {
     constructor(public depth: number = 0, public tileCount: number = 0) {}
 }
 
-export class TilePyramid<V extends object> implements ITileDirectory<V, ITileAddress> {
+export class TilePyramid<V extends object> implements ITileDirectory<V, ITileAddress, ITileMetrics> {
     _root: TilePyramidNode<V>;
     _infos: TilePyramidInfos;
 

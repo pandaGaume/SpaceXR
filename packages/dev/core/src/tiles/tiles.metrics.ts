@@ -1,10 +1,6 @@
-import { ICartesian2, IGeo3 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions, ITileMapMetrics } from "./tiles.interfaces";
+import { ICartesian2, IGeo2 } from "../geography/geography.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions} from "./tiles.interfaces";
 
-export enum TileOverlapMode {
-    ON = 0,
-    OFF = 1,
-}
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
@@ -15,7 +11,6 @@ export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultMaxLatitude = 85.05112878;
     public static DefaultMinLongitude = -180;
     public static DefaultMaxLongitude = 180;
-    public static DefaultOverlapMode = TileOverlapMode.OFF;
 
     public static Shared: TileMetricsOptions = {
         tileSize: TileMetricsOptions.DefaultTileSize,
@@ -24,7 +19,7 @@ export class TileMetricsOptions implements ITileMetricsOptions {
         minLatitude: TileMetricsOptions.DefaultMinLatitude,
         maxLatitude: TileMetricsOptions.DefaultMaxLatitude,
         minLongitude: TileMetricsOptions.DefaultMinLongitude,
-        maxLongitude: TileMetricsOptions.DefaultMaxLongitude,
+        maxLongitude: TileMetricsOptions.DefaultMaxLongitude
     };
 
     public constructor(
@@ -75,6 +70,7 @@ export class TileMetricsOptionsBuilder {
         this._maxLongitude = v;
         return this;
     }
+
     public build(): ITileMetricsOptions {
         return new TileMetricsOptions(
             this._tileSize || TileMetricsOptions.DefaultTileSize,
@@ -149,6 +145,10 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
         return this._o;
     }
 
+    public mapSize(levelOfDetail: number): number {
+        return this.tileSize << levelOfDetail;
+    }
+
     public get tileSize(): number {
         return this._o.tileSize || TileMetricsOptions.DefaultTileSize;
     }
@@ -183,13 +183,14 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
             throw new Error(`Invalid y ${y}, must be in [0,${s}] range.`);
         }
     }
-    public abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
-    public abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3 | undefined): IGeo3;
-}
 
-export abstract class AbstractTileMapMetrics extends AbstractTileMetrics implements ITileMapMetrics {
+    public abstract mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
+    public abstract groundResolution(latitude: number, levelOfDetail: number): number;
+
+    public abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
+    public abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): IGeo2;
     public abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    public abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo3): IGeo3;
+    public abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
     public abstract getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    public abstract getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): IGeo3;
+    public abstract getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
 }

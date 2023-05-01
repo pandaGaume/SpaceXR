@@ -3,19 +3,19 @@ import { IVerticesData } from "../meshes/meshes.interfaces";
 import { GeodeticSystem } from "core/geodesy/geodesy.system";
 import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
 export declare class Terrain {
-    directory: ITileDirectory<Float32Array, ITileAddress>;
-    _directory: ITileDirectory<Float32Array, ITileAddress>;
+    directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>;
+    _directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>;
     _topology: IVerticesData;
-    constructor(directory: ITileDirectory<Float32Array, ITileAddress>, topology?: IVerticesData);
+    constructor(directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>, topology?: IVerticesData);
     get tileMetrics(): ITileMetrics;
     get tileSize(): number;
     get referenceGrid(): IVerticesData;
     protected buildRefGrid(width: number, height?: number): IVerticesData;
 }
 export declare class PlanetSurface extends Terrain {
-    directory: ITileDirectory<Float32Array, ITileAddress>;
+    directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>;
     _system: GeodeticSystem;
-    constructor(directory: ITileDirectory<Float32Array, ITileAddress>, topology?: IVerticesData, ellipsoid?: Ellipsoid);
+    constructor(directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>, topology?: IVerticesData, ellipsoid?: Ellipsoid);
     get geodeticSystem(): GeodeticSystem;
     get ellipsoid(): Ellipsoid;
 }

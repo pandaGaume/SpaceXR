@@ -6,11 +6,11 @@ import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
 
 export class Terrain {
     // data access
-    _directory: ITileDirectory<Float32Array, ITileAddress>;
+    _directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>;
     // geometry
     _topology: IVerticesData;
 
-    public constructor(public directory: ITileDirectory<Float32Array, ITileAddress>, topology?: IVerticesData) {
+    public constructor(public directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>, topology?: IVerticesData) {
         this._directory = directory;
         this._topology = topology || this.buildRefGrid(this.tileSize);
     }
@@ -37,7 +37,7 @@ export class PlanetSurface extends Terrain {
     // geodesy
     _system: GeodeticSystem;
 
-    public constructor(public directory: ITileDirectory<Float32Array, ITileAddress>, topology?: IVerticesData, ellipsoid?: Ellipsoid) {
+    public constructor(public directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>, topology?: IVerticesData, ellipsoid?: Ellipsoid) {
         super(directory, topology);
         this._system = new GeodeticSystem(ellipsoid || Ellipsoid.WGS84);
     }

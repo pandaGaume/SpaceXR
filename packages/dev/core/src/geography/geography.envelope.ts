@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Scalar } from "../math/math";
-import { IEnvelope, IGeo3, ISize3, isLocation } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3, ISize3, ISize2, isLocation } from "./geography.interfaces";
 import { Geo3 } from "./geography.position";
 import { Size3 } from "./geography.size";
 
@@ -10,18 +10,18 @@ export class Envelope implements IEnvelope {
     public static MinLongitude = -Envelope.MaxLongitude;
     public static MinLatitude = -Envelope.MaxLatitude;
 
-    public static FromSize(position: IGeo3, size: ISize3) {
-        const hasAlt = position.alt !== undefined && size.thickness !== undefined;
+    public static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2) {
+        const hasAlt = (<IGeo3>position).alt !== undefined && (<ISize3>size).thickness !== undefined;
 
         const lat0 = Scalar.Clamp(position.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
         const lon0 = Scalar.Clamp(position.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
-        const alt0 = hasAlt ? position.alt : undefined;
+        const alt0 = hasAlt ? (<IGeo3>position).alt : undefined;
 
         const h = size.width % 180;
         const lat1 = Scalar.Clamp(position.lat + h, Envelope.MinLatitude, Envelope.MaxLatitude);
         const w = size.width % 360;
         const lon1 = Scalar.Clamp(position.lon + w, Envelope.MinLongitude, Envelope.MaxLongitude);
-        const alt1 = hasAlt ? position.alt! + size.thickness! : undefined;
+        const alt1 = hasAlt ? (<IGeo3>position).alt! + (<ISize3>size).thickness! : undefined;
 
         const lower = new Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0!, alt1!) : undefined);
         const upper = new Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0!, alt1!) : undefined);
@@ -29,16 +29,16 @@ export class Envelope implements IEnvelope {
         return new Envelope(lower, upper);
     }
 
-    public static FromPoints(a: IGeo3, b: IGeo3) {
-        const hasAlt = a.alt !== undefined && b.alt !== undefined;
+    public static FromPoints(a: IGeo3 | IGeo2, b: IGeo3 | IGeo2) {
+        const hasAlt = (<IGeo3>a).alt !== undefined && (<IGeo3>a).alt !== undefined;
 
         const lat0 = Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
         const lon0 = Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
-        const alt0 = hasAlt ? a.alt : undefined;
+        const alt0 = hasAlt ? (<IGeo3>a).alt : undefined;
 
         const lat1 = Scalar.Clamp(b.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
         const lon1 = Scalar.Clamp(b.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
-        const alt1 = hasAlt ? b.alt : undefined;
+        const alt1 = hasAlt ? (<IGeo3>a).alt : undefined;
 
         const lower = new Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0!, alt1!) : undefined);
         const upper = new Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0!, alt1!) : undefined);

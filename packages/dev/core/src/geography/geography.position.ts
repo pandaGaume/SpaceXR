@@ -1,8 +1,7 @@
 import { IGeo2, IGeo3 } from "./geography.interfaces";
 
 export class Geo2 implements IGeo2 {
-
-    public static Default = new Geo2(46.382581,-0.308024);
+    public static Default = new Geo2(46.382581, -0.308024);
 
     public static Zero() {
         return new Geo2(0, 0);
@@ -22,6 +21,13 @@ export class Geo2 implements IGeo2 {
 
     public get lon(): number {
         return this._lon;
+    }
+    public set lat(v: number) {
+        this._lat = v;
+    }
+
+    public set lon(v: number) {
+        this._lon = v;
     }
 
     public clone(): IGeo2 {
@@ -47,6 +53,9 @@ export class Geo3 extends Geo2 implements IGeo3 {
 
     public get alt(): number | undefined {
         return this._alt;
+    }
+    public set alt(v: number | undefined) {
+        this._alt = v;
     }
 
     public get hasAltitude(): boolean {

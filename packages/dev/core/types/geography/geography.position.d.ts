@@ -7,6 +7,8 @@ export declare class Geo2 implements IGeo2 {
     constructor(lat: number, lon: number);
     get lat(): number;
     get lon(): number;
+    set lat(v: number);
+    set lon(v: number);
     clone(): IGeo2;
     equals(other: IGeo2): boolean;
 }
@@ -15,6 +17,7 @@ export declare class Geo3 extends Geo2 implements IGeo3 {
     protected _alt?: number;
     constructor(lat: number, lon: number, alt?: number);
     get alt(): number | undefined;
+    set alt(v: number | undefined);
     get hasAltitude(): boolean;
     clone(): IGeo3;
     equals(other: IGeo3): boolean;

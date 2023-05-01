@@ -21,6 +21,21 @@ class DummyDataSource<T> implements ITileDatasource<T, ITileAddress> {
 }
 
 describe("Tiles", () => {
+    test("Web Mercator metrics", () => {
+        const x = 875;
+        const y = 589;
+        const lod = 13;
+        const metrics = new WebMercatorTileMetrics();
+        const upperLeftLatLonA = metrics.getTileXYToLatLon(x, y, lod);
+        const upperLeftPixelA = metrics.getTileXYToPixelXY(x, y, lod);
+        const upperLeftLatLonB = metrics.getPixelXYToLatLon(upperLeftPixelA.x, upperLeftPixelA.y, lod);
+        expect(upperLeftLatLonA).toEqual(upperLeftLatLonB);
+
+        const upperLeftPixelC = metrics.getTileXYToPixelXY(x+1, y+1, lod);
+        expect(upperLeftPixelC.x-upperLeftPixelA.x).toEqual(metrics.tileSize);
+      
+    });
+
     test("QuadKey", () => {
         const x = 875;
         const y = 589;
@@ -64,7 +79,7 @@ describe("Tiles", () => {
 
             const result = await index.lookupAsync(x, y, lod);
             expect(result).not.toBeUndefined();
-            let image: Nullable<Blob> | undefined ;
+            let image: Nullable<Blob> | undefined;
             if (result) {
                 if (result instanceof Array && result.length) {
                     image = result[0];

@@ -12,7 +12,7 @@ declare class TilePyramidInfos {
     tileCount: number;
     constructor(depth?: number, tileCount?: number);
 }
-export declare class TilePyramid<V extends object> implements ITileDirectory<V, ITileAddress> {
+export declare class TilePyramid<V extends object> implements ITileDirectory<V, ITileAddress, ITileMetrics> {
     metrics: ITileMetrics;
     datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>;
     _root: TilePyramidNode<V>;

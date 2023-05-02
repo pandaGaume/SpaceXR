@@ -1,11 +1,35 @@
-import { ITileAddress, ITileDirectory } from "../tiles/tiles.interfaces";
-import { IEnvelope, IGeo2, ISize2 } from "../geography/geography.interfaces";
+import { ITile, ITileAddress, ITileDirectory } from "../tiles/tiles.interfaces";
+import { IGeo2, ISize2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Size2 } from "../geography/geography.size";
 import { Scalar } from "../math/math";
-import { Envelope, WebMercatorTileMetrics } from "..";
+import { WebMercatorTileMetrics } from "..";
+import { Observable } from "../events/events.observable";
 
 export class MapLayer<T> {
+    public static ValidateTileKeys(lat: number, lon: number, lod: number, width: number, height: number, metrics: WebMercatorTileMetrics): number[] {
+        const cache = [];
+
+        const pixelCenterXY = metrics.getLatLonToPixelXY(lat, lon, lod);
+        const halfWitdh = width / 2;
+        const halfHeight = height / 2;
+        const x0 = Math.round(pixelCenterXY.x - halfWitdh);
+        const y0 = Math.round(pixelCenterXY.y - halfHeight);
+        const x1 = Math.round(pixelCenterXY.x + halfWitdh);
+        const y1 = Math.round(pixelCenterXY.y + halfHeight);
+
+        const tileXY0 = metrics.getPixelXYToTileXY(x0, y0, lod);
+        const tileXY1 = metrics.getPixelXYToTileXY(x1, y1, lod);
+
+        for (let y = tileXY0.y; y <= tileXY1.y; y++) {
+            for (let x = tileXY0.x; x <= tileXY1.x; x++) {
+                const p = metrics.getTileXYToPixelXY(x, y, lod);
+                cache.push(x, y, lod, p.x - x0, p.y - y0);
+            }
+        }
+        return cache;
+    }
+
     _enabled: boolean;
     _cache?: Array<number>;
 
@@ -13,55 +37,40 @@ export class MapLayer<T> {
         this._enabled = true;
     }
 
-    public get enabled(): boolean {
-        return this._enabled;
+    get metrics(): WebMercatorTileMetrics {
+        return this.directory.metrics;
     }
+}
 
-    public set enabled(v: boolean) {
-        if (v != this._enabled) {
-            this._enabled = false;
-            if (!this._enabled) {
-                this._cache = undefined;
-            }
-        }
-    }
+export enum TileMapEventType {
+    added,
+    removed,
+}
 
-    // tile keys are cached as tilex, tiley, lod, pixelx, pixely
-    public validateTileKeys(bounds: Envelope, lod: number) {
-        if (bounds) {
-            const cache = [];
-            const nw = bounds.nw;
-            const se = bounds.se;
-            const nwTileXY = this.directory.metrics.getLatLonToTileXY(nw.lat, nw.lon, lod);
-            const seTileXY = this.directory.metrics.getLatLonToTileXY(se.lat, se.lon, lod);
-            for (let y = nwTileXY.y; y <= seTileXY.y; y++) {
-                for (let x = nwTileXY.x; x <= seTileXY.x; x++) {
-                    const p = this.directory.metrics.getTileXYToPixelXY(x, y, lod);
-                    cache.push(x, y, lod, p.x, p.y);
-                }
-            }
-            this._cache = cache;
-        }
-    }
+export interface ITileMapEvent<T> extends ITileAddress {
+    type: TileMapEventType;
+    directory: ITileDirectory<T, ITileAddress, WebMercatorTileMetrics>;
+    x: number;
+    y: number;
 }
 
 export class WebMercatorMap2<T> {
     // map metrics
-    _metrics:WebMercatorTileMetrics;
+    _metrics: WebMercatorTileMetrics;
     _center: IGeo2 = Geo2.Default;
     _size: ISize2 = Size2.Zero();
     _levelOfDetail: number = 0;
 
     // layers of data
-    _layers?: Map<string, MapLayer<T>>;
-    _defaultLayer?: string;
+    _layers: Map<string, MapLayer<T>>;
+    _valid: boolean;
+    _tileObservable?: Observable<ITileMapEvent<T>>;
 
-    // bounds
-    _env?: IEnvelope;
-
-    public constructor(width: number, height: number, lat?: number, lon?: number, levelOfDetail?: number, metrics?:WebMercatorTileMetrics) {
+    public constructor(width: number, height: number, lat?: number, lon?: number, levelOfDetail?: number, metrics?: WebMercatorTileMetrics) {
         this._metrics = metrics || WebMercatorTileMetrics.Shared;
         this.zoom(levelOfDetail).resize(width, height).center(lat, lon);
+        this._valid = false;
+        this._layers = new Map<string, MapLayer<T>>();
     }
 
     public get levelOfDetail(): number {
@@ -101,57 +110,62 @@ export class WebMercatorMap2<T> {
         return this.invalidate();
     }
 
+    public setEnabledLayer(v: boolean, ...names: string[]): WebMercatorMap2<T> {
+        for (const n of names) {
+            const l = this._layers.get(n);
+            if (l && l._enabled !== v) {
+                this._setEnabledLayer(v, l);
+            }
+        }
+        return this;
+    }
+
     public *layers(predicate: (l: MapLayer<T>) => boolean): IterableIterator<MapLayer<T>> {
-        if (this._layers) {
-            for (const l of this._layers.values()) {
-                if (!predicate || predicate(l)) {
-                    yield l;
-                }
+        for (const l of this._layers.values()) {
+            if (!predicate || predicate(l)) {
+                yield l;
             }
         }
     }
 
-    public addLayer(name: string, directory: ITileDirectory<T, ITileAddress, WebMercatorTileMetrics>): WebMercatorMap2<T> {
-        if (!this._layers?.has(name)) {
-            this._layers?.set(name, new MapLayer(name, directory));
+    public addLayer(name: string, directory: ITileDirectory<T, ITileAddress, WebMercatorTileMetrics>, enabled: boolean = false): WebMercatorMap2<T> {
+        if (!this._layers.has(name)) {
+            const l = new MapLayer(name, directory);
+            this._layers.set(name, l);
+            this._setEnabledLayer(enabled, l);
         }
         return this;
     }
 
-    public removeLayer(name: string) {
+    public removeLayer(name: string): WebMercatorMap2<T> {
         this._layers?.delete(name);
+        return this;
     }
 
     public invalidate(): WebMercatorMap2<T> {
-        this._env = undefined;
+        this._valid = false;
         return this;
     }
 
     public validate(): WebMercatorMap2<T> {
-        if (this._env === undefined) {
-            this._env = this.buildEnvelope();
+        if (!this._valid) {
+            if (this._layers) {
+                for (const l of this._layers.values()) {
+                    this._setEnabledLayer(true, l);
+                }
+            }
+            this._valid = true;
         }
         return this;
     }
 
-    /**
-     * building this envelope is based on lat,lon of the center, assuming lat/lon reference is in the middle of the pixel,
-     * an tile map origin is upper left.
-     */
-    private buildEnvelope(): IEnvelope {
-        const xy = this._metrics.getLatLonToPixelXY(this.lat, this.lon, this.levelOfDetail);
-        const w2 = this.width / 2;
-        const h2 = this.height / 2;
-        // pixel can NOT be divide by 2 when size is even (which is mostly the case in tile metrics).
-        // so we need to offset the lower pixel corner, according the fact that the origin is up/left
-        const woffset = 1 - (this.width % 2);
-        const hoffset = 1 - (this.height % 2);
-        const x0 = xy.x - w2;
-        const x1 = xy.x + w2 - woffset;
-        const y0 = xy.y - h2;
-        const y1 = xy.y + h2 - hoffset;
-        const nw = this._metrics.getPixelXYToLatLon(x0, y0, this.levelOfDetail);
-        const se = this._metrics.getPixelXYToLatLon(x1, y1, this.levelOfDetail);
-        return Envelope.FromPoints(nw, se);
+    private _setEnabledLayer(v: boolean, l: MapLayer<T>) {
+        if (v) {
+            const keys = MapLayer.ValidateTileKeys(this.lat, this.lon, this.levelOfDetail, this.width, this.height, l.metrics);
+            l._cache = keys;
+        } else {
+            l._cache = undefined;
+        }
+        l._enabled = v;
     }
 }

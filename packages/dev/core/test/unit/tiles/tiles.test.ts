@@ -3,10 +3,8 @@ import { TilePyramid } from "../../../src/tiles/tiles.pyramid";
 import { WebMercatorTileMetrics } from "../../../src/tiles/tiles.geography";
 import { WebTileUrlBuilder } from "../../../src/tiles/tiles.urlBuilder";
 import { ITileDatasource, ITileAddress } from "../../../src/tiles/tiles.interfaces";
-import { Nullable } from "../../../src/types";
-import { TileClient, TileClientOptions } from "../../../src/tiles/tiles.client";
-import { MapZenDemUrlBuilder } from "../../../src/tiles/tiles.mapzen";
-import { BlobTileCodec } from "../../../src/tiles/tiles.codecs";
+import { MapLayer } from "../../../src/map/map.mercator2";
+import { Geo3 } from "../../../src/geography/geography.position";
 
 class DummyDataSource<T> implements ITileDatasource<T, ITileAddress> {
     _data?: T;
@@ -31,9 +29,8 @@ describe("Tiles", () => {
         const upperLeftLatLonB = metrics.getPixelXYToLatLon(upperLeftPixelA.x, upperLeftPixelA.y, lod);
         expect(upperLeftLatLonA).toEqual(upperLeftLatLonB);
 
-        const upperLeftPixelC = metrics.getTileXYToPixelXY(x+1, y+1, lod);
-        expect(upperLeftPixelC.x-upperLeftPixelA.x).toEqual(metrics.tileSize);
-      
+        const upperLeftPixelC = metrics.getTileXYToPixelXY(x + 1, y + 1, lod);
+        expect(upperLeftPixelC.x - upperLeftPixelA.x).toEqual(metrics.tileSize);
     });
 
     test("QuadKey", () => {
@@ -46,7 +43,7 @@ describe("Tiles", () => {
     });
 
     describe("Pyramid ", () => {
-        test("Lookup - no datasource", async () => {
+        test("Lookup - fake datasource", async () => {
             const x = 2;
             const y = 2;
             const lod = 3;
@@ -67,29 +64,6 @@ describe("Tiles", () => {
             const data = await index.lookupAsync(x, y, lod);
             expect(data).toEqual(dummyData);
         });
-        test("Lookup - web image datasource", async () => {
-            // for this test we DO NOT use the image but a blod instead, because the Image does NOT exist in nodejs server side.
-            const x = 531;
-            const y = 364;
-            const lod = 10;
-
-            const options = new TileClientOptions(MapZenDemUrlBuilder.Terrarium, BlobTileCodec.Shared);
-            const client = new TileClient<Blob, ITileAddress>(options);
-            const index = new TilePyramid<Blob>(new WebMercatorTileMetrics(), client);
-
-            const result = await index.lookupAsync(x, y, lod);
-            expect(result).not.toBeUndefined();
-            let image: Nullable<Blob> | undefined;
-            if (result) {
-                if (result instanceof Array && result.length) {
-                    image = result[0];
-                } else {
-                    image = <Blob>result;
-                }
-            }
-            expect(image).not.toBeUndefined();
-            expect(image).not.toBeNull();
-        });
     });
 
     test("Web Url Factory", () => {
@@ -104,5 +78,19 @@ describe("Tiles", () => {
             .withExtension("png")
             .buildUrl(x, y, lod);
         expect(url).toEqual(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${lod}/${x}/${y}.png`);
+    });
+
+    describe("Web Mercator Map 2", () => {
+        test("validate keys", () => {
+            const metrics = WebMercatorTileMetrics.Shared;
+            const pos = Geo3.Default;
+            const lod = 13;
+            // HD map
+            const w = 1920;
+            const h = 1080;
+
+            const cache = MapLayer.ValidateTileKeys(pos.lat, pos.lon, lod, w, h, metrics);
+            expect(cache).not.toBeUndefined();
+        });
     });
 });

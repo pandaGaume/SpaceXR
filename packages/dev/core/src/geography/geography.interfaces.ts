@@ -1,21 +1,5 @@
-export interface ICloneable<T> {
-    clone(): T;
-}
-
-export interface IComparable<T> {
-    equals(other: T | undefined): boolean;
-}
-
-export interface ICartesian2 {
-    x: number;
-    y: number;
-}
-
-export interface ICartesian3 {
-    x: number;
-    y: number;
-    z: number;
-}
+import { ISize3 } from "../geometry/geometry.interfaces";
+import { IComparable, ICloneable } from "../types";
 
 export interface IGeo2 extends IComparable<IGeo2>, ICloneable<IGeo2> {
     lat: number;
@@ -33,19 +17,6 @@ export interface IGeo3 extends IComparable<IGeo3>, ICloneable<IGeo3> {
 export function isLocation(b: unknown): b is IGeo3 {
     if (typeof b !== "object" || b === null) return false;
     return (<IGeo3>b).lat !== undefined && (<IGeo3>b).lon !== undefined;
-}
-
-export interface ISize2 extends IComparable<ISize2> {
-    height: number;
-    width: number;
-}
-
-export interface ISize3 extends IComparable<ISize3> {
-    height: number;
-    width: number;
-    thickness?: number;
-
-    hasThickness: boolean;
 }
 
 export interface IEnvelope extends IComparable<IEnvelope> {

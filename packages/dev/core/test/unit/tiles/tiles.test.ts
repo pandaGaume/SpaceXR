@@ -1,9 +1,9 @@
 import { TileMetrics } from "../../../src/tiles/tiles.metrics";
 import { TilePyramid } from "../../../src/tiles/tiles.pyramid";
-import { WebMercatorTileMetrics } from "../../../src/tiles/tiles.geography";
+import { EPSG3857 } from "../../../src/tiles/tiles.geography";
 import { WebTileUrlBuilder } from "../../../src/tiles/tiles.urlBuilder";
 import { ITileDatasource, ITileAddress } from "../../../src/tiles/tiles.interfaces";
-import { MapLayer } from "../../../src/map/map.mercator2";
+import { MapLayer } from "../../../src/tiles/map.prism";
 import { Geo3 } from "../../../src/geography/geography.position";
 
 class DummyDataSource<T> implements ITileDatasource<T, ITileAddress> {
@@ -23,7 +23,7 @@ describe("Tiles", () => {
         const x = 875;
         const y = 589;
         const lod = 13;
-        const metrics = new WebMercatorTileMetrics();
+        const metrics = new EPSG3857();
         const upperLeftLatLonA = metrics.getTileXYToLatLon(x, y, lod);
         const upperLeftPixelA = metrics.getTileXYToPixelXY(x, y, lod);
         const upperLeftLatLonB = metrics.getPixelXYToLatLon(upperLeftPixelA.x, upperLeftPixelA.y, lod);
@@ -48,7 +48,7 @@ describe("Tiles", () => {
             const y = 2;
             const lod = 3;
 
-            const index = new TilePyramid<Float32Array>(new WebMercatorTileMetrics(), []);
+            const index = new TilePyramid<Float32Array>(new EPSG3857(), []);
 
             const data = await index.lookupAsync(x, y, lod);
             expect(data).toBeUndefined();
@@ -60,7 +60,7 @@ describe("Tiles", () => {
             const lod = 3;
 
             const dummyData = { body: "hello world" };
-            const index = new TilePyramid<object>(new WebMercatorTileMetrics(), new DummyDataSource(dummyData));
+            const index = new TilePyramid<object>(new EPSG3857(), new DummyDataSource(dummyData));
             const data = await index.lookupAsync(x, y, lod);
             expect(data).toEqual(dummyData);
         });
@@ -82,7 +82,7 @@ describe("Tiles", () => {
 
     describe("Web Mercator Map 2", () => {
         test("validate keys", () => {
-            const metrics = WebMercatorTileMetrics.Shared;
+            const metrics = EPSG3857.Shared;
             const pos = Geo3.Default;
             const lod = 13;
             // HD map

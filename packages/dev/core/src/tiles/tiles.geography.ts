@@ -1,11 +1,12 @@
 import { AbstractTileMetrics } from "./tiles.metrics";
-import { ICartesian2, IGeo2 } from "../geography/geography.interfaces";
+import { IGeo2 } from "../geography/geography.interfaces";
+import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
 import { Scalar } from "../math/math";
 import { Geo2 } from "../geography/geography.position";
 
-export class WebMercatorTileMetrics extends AbstractTileMetrics {
-    public static Shared = new WebMercatorTileMetrics();
+export class EPSG3857 extends AbstractTileMetrics {
+    public static Shared = new EPSG3857();
 
     _ellipsoid: Ellipsoid;
 

@@ -1,4 +1,5 @@
-import { ICartesian2, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Nullable } from "../types";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
@@ -14,11 +15,6 @@ export interface ITile<T> extends IGeoBounded {
     data?: T;
 }
 
-export enum TileCellReference {
-    center,
-    upperleft,
-}
-
 export interface ITileMetricsOptions {
     tileSize?: number;
     minLOD?: number;
@@ -27,7 +23,6 @@ export interface ITileMetricsOptions {
     maxLatitude?: number;
     minLongitude?: number;
     maxLongitude?: number;
-    cellReference?: TileCellReference;
 }
 
 export interface ITileMetrics {
@@ -38,7 +33,6 @@ export interface ITileMetrics {
     maxLatitude: number;
     minLongitude: number;
     maxLongitude: number;
-    cellReference?: TileCellReference;
 
     mapSize(levelOfDetail: number): number;
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;

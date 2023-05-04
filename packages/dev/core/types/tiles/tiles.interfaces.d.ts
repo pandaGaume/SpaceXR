@@ -1,4 +1,5 @@
-import { ICartesian2, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Nullable } from "../types";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
@@ -8,10 +9,6 @@ export interface ITile<T> extends IGeoBounded {
     address?: ITileAddress;
     data?: T;
 }
-export declare enum TileCellReference {
-    center = 0,
-    upperleft = 1
-}
 export interface ITileMetricsOptions {
     tileSize?: number;
     minLOD?: number;
@@ -20,7 +17,6 @@ export interface ITileMetricsOptions {
     maxLatitude?: number;
     minLongitude?: number;
     maxLongitude?: number;
-    cellReference?: TileCellReference;
 }
 export interface ITileMetrics {
     tileSize: number;
@@ -30,7 +26,6 @@ export interface ITileMetrics {
     maxLatitude: number;
     minLongitude: number;
     maxLongitude: number;
-    cellReference?: TileCellReference;
     mapSize(levelOfDetail: number): number;
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     groundResolution(latitude: number, levelOfDetail: number): number;
@@ -64,7 +59,16 @@ export interface ITileClient<T, R extends ITileAddress> extends ITileDatasource<
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
-export interface ITileDirectory<V, R extends ITileAddress, M extends ITileMetrics> {
-    metrics: M;
-    lookupAsync(x: number, y: number, levelOfDetail: number): Promise<Nullable<V> | Array<Nullable<V>> | undefined>;
+export type LookupData<V> = V | Array<Nullable<V>> | undefined;
+export declare class TileDirectoryResult<V> implements ITileAddress {
+    x: number;
+    y: number;
+    levelOfDetail: number;
+    data: LookupData<V>;
+    args: unknown;
+    constructor(x: number, y: number, levelOfDetail: number, data: LookupData<V>, args: unknown);
+}
+export interface ITileDirectory<V> {
+    metrics: ITileMetrics;
+    lookupAsync(x: number, y: number, levelOfDetail: number, args?: unknown): Promise<TileDirectoryResult<V>>;
 }

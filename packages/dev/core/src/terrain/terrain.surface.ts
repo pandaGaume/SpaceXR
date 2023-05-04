@@ -1,4 +1,4 @@
-import { ITileAddress, ITileDirectory, ITileMetrics } from "../tiles/tiles.interfaces";
+import { ITileDirectory, ITileMetrics } from "../tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainNormalizedGridBuilder } from "../meshes/terrain.grid";
 import { IVerticesData } from "../meshes/meshes.interfaces";
 import { GeodeticSystem } from "core/geodesy/geodesy.system";
@@ -6,11 +6,11 @@ import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
 
 export class Terrain {
     // data access
-    _directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>;
+    _directory: ITileDirectory<Float32Array>;
     // geometry
     _topology: IVerticesData;
 
-    public constructor(public directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>, topology?: IVerticesData) {
+    public constructor(public directory: ITileDirectory<Float32Array>, topology?: IVerticesData) {
         this._directory = directory;
         this._topology = topology || this.buildRefGrid(this.tileSize);
     }
@@ -37,7 +37,7 @@ export class PlanetSurface extends Terrain {
     // geodesy
     _system: GeodeticSystem;
 
-    public constructor(public directory: ITileDirectory<Float32Array, ITileAddress, ITileMetrics>, topology?: IVerticesData, ellipsoid?: Ellipsoid) {
+    public constructor(public directory: ITileDirectory<Float32Array>, topology?: IVerticesData, ellipsoid?: Ellipsoid) {
         super(directory, topology);
         this._system = new GeodeticSystem(ellipsoid || Ellipsoid.WGS84);
     }

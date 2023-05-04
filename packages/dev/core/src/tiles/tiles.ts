@@ -1,5 +1,5 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { Size3 } from "../geography/geography.size";
+import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileMetrics } from "./tiles.interfaces";

@@ -1,6 +1,6 @@
-import { ICartesian2, IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions} from "./tiles.interfaces";
-
+import { ICartesian2 } from "../geometry/geometry.interfaces";
+import { IGeo2 } from "../geography/geography.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
@@ -19,7 +19,7 @@ export class TileMetricsOptions implements ITileMetricsOptions {
         minLatitude: TileMetricsOptions.DefaultMinLatitude,
         maxLatitude: TileMetricsOptions.DefaultMaxLatitude,
         minLongitude: TileMetricsOptions.DefaultMinLongitude,
-        maxLongitude: TileMetricsOptions.DefaultMaxLongitude
+        maxLongitude: TileMetricsOptions.DefaultMaxLongitude,
     };
 
     public constructor(

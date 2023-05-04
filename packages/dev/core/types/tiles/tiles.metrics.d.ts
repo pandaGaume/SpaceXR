@@ -1,4 +1,5 @@
-import { ICartesian2, IGeo2 } from "../geography/geography.interfaces";
+import { ICartesian2 } from "../geometry/geometry.interfaces";
+import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileAddress, ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
 export declare class TileMetricsOptions implements ITileMetricsOptions {
     tileSize: number;

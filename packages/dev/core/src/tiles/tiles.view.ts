@@ -1,7 +1,7 @@
-import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, LookupData } from "./tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
-import { Size2 } from "../geography/geography.size";
+import { Size2 } from "../geometry/geometry.size";
 import { Scalar } from "../math/math";
 import { EPSG3857 } from "./tiles.geography";
 import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
@@ -14,7 +14,7 @@ export class TileComponent<T> implements ITileAddress {
     _levelOfDetail: number;
     _px: number;
     _py: number;
-    _value?: T;
+    _value?: LookupData<T>;
 
     public constructor(x: number, y: number, levelOfDetail: number, px: number, py: number) {
         this._x = x;
@@ -36,10 +36,10 @@ export class TileComponent<T> implements ITileAddress {
     public get levelOfDetail(): number {
         return this._levelOfDetail;
     }
-    public get data(): T | undefined {
+    public get data(): LookupData<T> {
         return this._value;
     }
-    public set data(v: T | undefined) {
+    public set data(v: LookupData<T>) {
         this._value = v;
     }
     public get px(): number {

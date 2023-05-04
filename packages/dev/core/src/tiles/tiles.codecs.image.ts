@@ -31,6 +31,7 @@ export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
             return undefined;
         }
     }
+
 }
 
 export class ImageDataTileCodec implements ITileCodec<ImageData> {

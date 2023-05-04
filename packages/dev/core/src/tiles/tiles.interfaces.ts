@@ -77,7 +77,13 @@ export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 
-export interface ITileDirectory<V, R extends ITileAddress, M extends ITileMetrics> {
-    metrics: M;
-    lookupAsync(x: number, y: number, levelOfDetail: number): Promise<Nullable<V> | Array<Nullable<V>> | undefined>;
+export type LookupData<V> = V | Array<Nullable<V>> | undefined;
+
+export class TileDirectoryResult<V> implements ITileAddress {
+    public constructor(public x: number, public y: number, public levelOfDetail: number, public data: LookupData<V>, public args: unknown) {}
+}
+
+export interface ITileDirectory<V> {
+    metrics: ITileMetrics;
+    lookupAsync(x: number, y: number, levelOfDetail: number, args?: unknown): Promise<TileDirectoryResult<V>>;
 }

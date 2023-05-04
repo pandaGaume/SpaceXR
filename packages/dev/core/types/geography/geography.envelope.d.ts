@@ -1,4 +1,5 @@
-import { IEnvelope, IGeo2, IGeo3, ISize3, ISize2 } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3 } from "./geography.interfaces";
+import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
 export declare class Envelope implements IEnvelope {
     static MaxLongitude: number;
     static MaxLatitude: number;

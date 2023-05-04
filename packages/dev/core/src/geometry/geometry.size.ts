@@ -1,4 +1,4 @@
-import { ISize2, ISize3 } from "./geography.interfaces";
+import { ISize2, ISize3 } from "./geometry.interfaces";
 
 export class Size2 implements ISize2 {
     public static Zero() {

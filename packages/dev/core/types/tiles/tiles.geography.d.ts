@@ -1,8 +1,9 @@
 import { AbstractTileMetrics } from "./tiles.metrics";
-import { ICartesian2, IGeo2 } from "../geography/geography.interfaces";
+import { IGeo2 } from "../geography/geography.interfaces";
+import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
-export declare class WebMercatorTileMetrics extends AbstractTileMetrics {
-    static Shared: WebMercatorTileMetrics;
+export declare class EPSG3857 extends AbstractTileMetrics {
+    static Shared: EPSG3857;
     _ellipsoid: Ellipsoid;
     constructor(ellipsoid?: Ellipsoid);
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;

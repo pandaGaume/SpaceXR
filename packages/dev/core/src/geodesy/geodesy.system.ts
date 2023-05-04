@@ -1,5 +1,6 @@
 import { Ellipsoid } from "./geodesy.ellipsoid";
-import { ICartesian3, IEnvelope, IGeo3 } from "core/geography/geography.interfaces";
+import { IEnvelope, IGeo3 } from "core/geography/geography.interfaces";
+import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { Observable } from "core/events/events.observable";
 import { Scalar } from "core/math";
 

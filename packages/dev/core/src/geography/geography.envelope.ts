@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Scalar } from "../math/math";
-import { IEnvelope, IGeo2, IGeo3, ISize3, ISize2, isLocation } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3, isLocation } from "./geography.interfaces";
+import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
 import { Geo3 } from "./geography.position";
-import { Size3 } from "./geography.size";
+import { Size3 } from "../geometry/geometry.size";
 
 export class Envelope implements IEnvelope {
     public static MaxLongitude = 540;

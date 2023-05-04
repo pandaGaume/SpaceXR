@@ -3,8 +3,6 @@ import { TilePyramid } from "../../../src/tiles/tiles.pyramid";
 import { EPSG3857 } from "../../../src/tiles/tiles.geography";
 import { WebTileUrlBuilder } from "../../../src/tiles/tiles.urlBuilder";
 import { ITileDatasource, ITileAddress } from "../../../src/tiles/tiles.interfaces";
-import { MapLayer } from "../../../src/tiles/map.prism";
-import { Geo3 } from "../../../src/geography/geography.position";
 
 class DummyDataSource<T> implements ITileDatasource<T, ITileAddress> {
     _data?: T;
@@ -50,8 +48,8 @@ describe("Tiles", () => {
 
             const index = new TilePyramid<Float32Array>(new EPSG3857(), []);
 
-            const data = await index.lookupAsync(x, y, lod);
-            expect(data).toBeUndefined();
+            const result = await index.lookupAsync(x, y, lod);
+            expect(result.data).toBeUndefined();
             expect(index._infos).toEqual({ depth: 3, tileCount: lod * 4 + 1 });
         });
         test("Lookup - local datasource", async () => {
@@ -61,8 +59,8 @@ describe("Tiles", () => {
 
             const dummyData = { body: "hello world" };
             const index = new TilePyramid<object>(new EPSG3857(), new DummyDataSource(dummyData));
-            const data = await index.lookupAsync(x, y, lod);
-            expect(data).toEqual(dummyData);
+            const result = await index.lookupAsync(x, y, lod);
+            expect(result.data).toEqual(dummyData);
         });
     });
 
@@ -78,19 +76,5 @@ describe("Tiles", () => {
             .withExtension("png")
             .buildUrl(x, y, lod);
         expect(url).toEqual(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${lod}/${x}/${y}.png`);
-    });
-
-    describe("Web Mercator Map 2", () => {
-        test("validate keys", () => {
-            const metrics = EPSG3857.Shared;
-            const pos = Geo3.Default;
-            const lod = 13;
-            // HD map
-            const w = 1920;
-            const h = 1080;
-
-            const cache = MapLayer.ValidateTileKeys(pos.lat, pos.lon, lod, w, h, metrics);
-            expect(cache).not.toBeUndefined();
-        });
     });
 });

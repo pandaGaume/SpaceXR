@@ -1,9 +1,8 @@
 import { ITileAddress, ITileDatasource, ITileDirectory, ITileMetrics, TileDirectoryResult } from "./tiles.interfaces";
-import { Nullable } from "../types";
 import { TileMetrics } from "./tiles.metrics";
 import { Tile } from "./tiles";
 
-class TilePyramidNode<V extends object> extends Tile<WeakRef<V | Array<Nullable<V>>>> {
+class TilePyramidNode<V extends object> extends Tile<WeakRef<V>> {
     _parent?: TilePyramidNode<V>;
     _childrens?: Array<TilePyramidNode<V>>;
 
@@ -21,7 +20,7 @@ export class TilePyramid<V extends object> implements ITileDirectory<V> {
     _root: TilePyramidNode<V>;
     _infos: TilePyramidInfos;
 
-    public constructor(public metrics: ITileMetrics, public datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>) {
+    public constructor(public metrics: ITileMetrics, public datasource: ITileDatasource<V, ITileAddress>) {
         this._infos = new TilePyramidInfos(0, 1);
         this._root = new TilePyramidNode<V>(0, 0, 0, this);
     }
@@ -34,25 +33,18 @@ export class TilePyramid<V extends object> implements ITileDirectory<V> {
         return this._infos.tileCount;
     }
 
-    public async lookupAsync(x: number, y: number, levelOfDetail: number, args?: unknown): Promise<TileDirectoryResult<V>> {
-        this.metrics.assertValidAddress(x, y, levelOfDetail);
+    public async lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>> {
+        this.metrics.assertValidAddress(address);
 
-        const n = this.lookup(x, y, levelOfDetail);
+        const n = this.lookup(address);
         let data = n._value?.deref();
         if (data) {
-            return new TileDirectoryResult(x, y, levelOfDetail, data, args);
+            return new TileDirectoryResult(address, data, args);
         }
         // data not present. Could be because it at not beeing initialized or garbage collected.
-        if (this.datasources) {
+        if (this.datasource) {
             try {
-                if (this.datasources instanceof Array) {
-                    if (this.datasources.length) {
-                        const res = await Promise.allSettled(this.datasources.map(async (c, i) => c.fetchAsync(n)));
-                        data = res.filter((r) => r.status == "fulfilled").map((r) => (<PromiseFulfilledResult<V>>r).value);
-                    }
-                } else {
-                    data = await this.datasources.fetchAsync(n);
-                }
+                data = await this.datasource.fetchAsync(n);
             } catch (e) {
             } finally {
                 if (data) {
@@ -60,14 +52,14 @@ export class TilePyramid<V extends object> implements ITileDirectory<V> {
                 } else {
                     n._value = undefined;
                 }
-                return new TileDirectoryResult(x, y, levelOfDetail, data, args);
+                return new TileDirectoryResult(address, data, args);
             }
         }
-        return new TileDirectoryResult<V>(x, y, levelOfDetail, undefined, args);
+        return new TileDirectoryResult<V>(address, undefined, args);
     }
 
-    private lookup(tileX: number, tileY: number, levelOfDetail: number): TilePyramidNode<V> {
-        const key = TileMetrics.TileXYToQuadKey(tileX, tileY, levelOfDetail);
+    private lookup(address: ITileAddress): TilePyramidNode<V> {
+        const key = TileMetrics.TileXYToQuadKey(address);
         let lod = 0;
         let n = this._root;
         do {

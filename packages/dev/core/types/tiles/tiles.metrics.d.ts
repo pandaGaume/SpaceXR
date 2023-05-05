@@ -38,7 +38,7 @@ export declare class TileMetricsOptionsBuilder {
     build(): ITileMetricsOptions;
 }
 export declare class TileMetrics {
-    static TileXYToQuadKey(tileX: number, tileY: number, levelOfDetail: number): Uint8Array;
+    static TileXYToQuadKey(a: ITileAddress): Uint8Array;
     static QuadKeyToTileXY(quadKey: Uint8Array): ITileAddress;
 }
 export declare abstract class AbstractTileMetrics implements ITileMetrics {
@@ -53,7 +53,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     get maxLatitude(): number;
     get minLongitude(): number;
     get maxLongitude(): number;
-    assertValidAddress(x: number, y: number, levelOfDetail: number): void;
+    assertValidAddress(a: ITileAddress): void;
     abstract mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     abstract groundResolution(latitude: number, levelOfDetail: number): number;
     abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;

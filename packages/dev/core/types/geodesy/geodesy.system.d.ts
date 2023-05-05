@@ -1,7 +1,7 @@
 import { Ellipsoid } from "./geodesy.ellipsoid";
-import { IEnvelope, IGeo3 } from "core/geography/geography.interfaces";
+import { IEnvelope, IGeo3 } from "../geography/geography.interfaces";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
-import { Observable } from "core/events/events.observable";
+import { Observable } from "../events/events.observable";
 export declare enum CartesianMode {
     ECEF = 0,
     ENU = 1,

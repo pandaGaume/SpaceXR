@@ -1,4 +1,4 @@
-import { ITileAddress, ITileMetrics, LookupData } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Size2 } from "../geometry/geometry.size";
@@ -6,48 +6,11 @@ import { Scalar } from "../math/math";
 import { EPSG3857 } from "./tiles.geography";
 import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
+import { Observable } from "../events";
+import { TileAddress } from "./tiles.address";
 
-export class TileComponent<T> implements ITileAddress {
-    _x: number;
-    _y: number;
-    _levelOfDetail: number;
-    _px: number;
-    _py: number;
-    _value?: LookupData<T>;
-
-    public constructor(x: number, y: number, levelOfDetail: number, px: number, py: number) {
-        this._x = x;
-        this._y = y;
-        this._levelOfDetail = levelOfDetail;
-        this._px = px;
-        this._py = py;
-    }
-
-    public get address(): ITileAddress | undefined {
-        return this;
-    }
-    public get x(): number {
-        return this._x;
-    }
-    public get y(): number {
-        return this._y;
-    }
-    public get levelOfDetail(): number {
-        return this._levelOfDetail;
-    }
-    public get data(): LookupData<T> {
-        return this._value;
-    }
-    public set data(v: LookupData<T>) {
-        this._value = v;
-    }
-    public get px(): number {
-        return this._px;
-    }
-    public get py(): number {
-        return this._py;
-    }
+export class UpdateEvents {
+    public constructor(public bounds: IRectangle, public added?: Array<ITileAddress>, public removed?: Array<ITileAddress>, public remain?: Array<ITileAddress>) {}
 }
 
 export class View2<T> {
@@ -62,7 +25,11 @@ export class View2<T> {
     _valid: boolean;
     _innerbounds: IRectangle; // the bounds of the map in pixel coordinates, related to zoom level
     _outerbounds: IRectangle; // the bounds of the cache map in pixel coordinates, related to zoom level
-    _tiles: Array<TileComponent<T>>;
+    _outerboundsTileXY: IRectangle; // the bounds of the cache map in tile coordinates, related to zoom level
+    _tiles: Array<ITileAddress>;
+
+    // events
+    _updateObservable?: Observable<UpdateEvents>;
 
     public constructor(width: number, height: number, lat?: number, lon?: number, levelOfDetail?: number, metrics?: ITileMetrics) {
         this._metrics = metrics || EPSG3857.Shared;
@@ -71,10 +38,20 @@ export class View2<T> {
         this._valid = false;
         this._innerbounds = Rectangle.Zero();
         this._outerbounds = Rectangle.Zero();
+        this._outerboundsTileXY = Rectangle.Zero();
         this._tiles = [];
     }
 
-    public get tiles(): Array<TileComponent<T>> {
+    public get updateObservable(): Observable<UpdateEvents> {
+        this._updateObservable = this._updateObservable || new Observable<UpdateEvents>();
+        return this._updateObservable;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._metrics;
+    }
+
+    public get tiles(): Array<ITileAddress> {
         this.validate();
         return this._tiles || [];
     }
@@ -186,15 +163,43 @@ export class View2<T> {
         // given the pixel bounds we can easily validate or invalidate tile list
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
         const seTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.right, this._outerbounds.bottom, lod);
+        const rect = Rectangle.FromPoints(nwTileXY, seTileXY);
+        const remainBounds = rect.intersection(this._outerboundsTileXY);
+        this._outerboundsTileXY = rect;
 
         const components = [];
-        const tmp = Cartesian2.Zero();
+        const hasObservers = this._updateObservable && this._updateObservable.hasObservers();
+        let added = undefined;
+        let remains = undefined;
+        let removed = undefined;
+
         for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
             for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                const pixelXY = this._metrics.getTileXYToPixelXY(tx, ty, lod, tmp);
-                components.push(new TileComponent<T>(tx, ty, lod, pixelXY.x, pixelXY.y));
+                const c = new TileAddress(tx, ty, lod);
+                components.push(c);
+                if (hasObservers && !remainBounds?.contains(tx, ty)) {
+                    added = added || new Array<ITileAddress>();
+                    added.push(c);
+                }
             }
         }
-        this._tiles = components;
+
+        if (hasObservers) {
+            const old = this._tiles;
+            this._tiles = components;
+
+            for (const c of old) {
+                if (remainBounds?.contains(c.x, c.y)) {
+                    remains = remains || new Array<ITileAddress>();
+                    remains.push(c);
+                    continue;
+                }
+                removed = removed || new Array<ITileAddress>();
+                removed.push(c);
+            }
+
+            const e = new UpdateEvents(this._innerbounds, added, removed, remains);
+            this._updateObservable?.notifyObservers(e);
+        }
     }
 }

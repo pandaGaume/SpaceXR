@@ -37,6 +37,10 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         return this._value;
     }
 
+    public set data(v: T | undefined) {
+        this._value = v;
+    }
+
     public get x(): number {
         return this._x;
     }

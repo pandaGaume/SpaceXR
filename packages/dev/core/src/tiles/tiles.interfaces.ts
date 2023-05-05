@@ -1,6 +1,5 @@
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2 } from "../geometry/geometry.interfaces";
-import { Nullable } from "../types";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -45,7 +44,7 @@ export interface ITileMetrics {
     getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
     getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
 
-    assertValidAddress(x: number, y: number, levelOfDetail: number): void;
+    assertValidAddress(a: ITileAddress): void;
 }
 
 export interface ITileMetricsProvider {
@@ -77,13 +76,21 @@ export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 
-export type LookupData<V> = V | Array<Nullable<V>> | undefined;
+export type LookupData<V> = V | undefined;
 
 export class TileDirectoryResult<V> implements ITileAddress {
-    public constructor(public x: number, public y: number, public levelOfDetail: number, public data: LookupData<V>, public args: unknown) {}
+    x: number;
+    y: number;
+    levelOfDetail: number;
+
+    public constructor(a: ITileAddress, public data: LookupData<V>, public args: unknown) {
+        this.x = a.x;
+        this.y = a.y;
+        this.levelOfDetail = a.levelOfDetail;
+    }
 }
 
 export interface ITileDirectory<V> {
     metrics: ITileMetrics;
-    lookupAsync(x: number, y: number, levelOfDetail: number, args?: unknown): Promise<TileDirectoryResult<V>>;
+    lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>>;
 }

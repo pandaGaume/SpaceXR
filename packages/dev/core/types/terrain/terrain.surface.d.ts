@@ -1,7 +1,7 @@
 import { ITileDirectory, ITileMetrics } from "../tiles/tiles.interfaces";
 import { IVerticesData } from "../meshes/meshes.interfaces";
-import { GeodeticSystem } from "core/geodesy/geodesy.system";
-import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
+import { GeodeticSystem } from "../geodesy/geodesy.system";
+import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
 export declare class Terrain {
     directory: ITileDirectory<Float32Array>;
     _directory: ITileDirectory<Float32Array>;

@@ -5,28 +5,14 @@ export class Size2 implements ISize2 {
         return new Size2(0, 0);
     }
 
-    protected _height: number;
-    protected _width: number;
-
-    public constructor(height: number, width: number) {
-        this._height = height;
-        this._width = width;
-    }
-
-    public get height(): number {
-        return this._height;
-    }
-
-    public get width(): number {
-        return this._width;
-    }
+    public constructor(public height: number, public width: number) {}
 
     public clone(): ISize2 {
-        return new Size2(this._height, this._width);
+        return new Size2(this.height, this.width);
     }
 
     public equals(other: ISize2): boolean {
-        return this._height === other.height && this._width === other.width;
+        return this.height === other.height && this.width === other.width;
     }
 }
 export class Size3 extends Size2 implements ISize3 {
@@ -34,26 +20,19 @@ export class Size3 extends Size2 implements ISize3 {
         return new Size3(0, 0, 0);
     }
 
-    protected _thickness?: number;
-
-    public constructor(height: number, width: number, thickness?: number) {
+    public constructor(height: number, width: number, public thickness?: number) {
         super(height, width);
-        this._thickness = thickness;
-    }
-
-    public get thickness(): number | undefined {
-        return this._thickness;
     }
 
     public get hasThickness(): boolean {
-        return this._thickness !== undefined;
+        return this.thickness !== undefined;
     }
 
     public clone(): ISize3 {
-        return new Size3(this._height, this._width, this._thickness);
+        return new Size3(this.height, this.width, this.thickness);
     }
 
     public equals(other: ISize3): boolean {
-        return this._height === other.height && this._width === other.width && this._thickness === other.thickness;
+        return this.height === other.height && this.width === other.width && this.thickness === other.thickness;
     }
 }

@@ -29,4 +29,6 @@ export interface IRectangle {
     bottom: number;
     center: ICartesian2;
     intersect(other: IRectangle): boolean;
+    intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;
+    contains(x: number, y: number): boolean;
 }

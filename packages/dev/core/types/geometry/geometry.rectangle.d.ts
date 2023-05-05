@@ -4,8 +4,9 @@ export declare class Rectangle implements IRectangle {
     y: number;
     width: number;
     height: number;
-    static Zero(): Rectangle;
-    static FromSize(size: ISize2): Rectangle;
+    static Zero(): IRectangle;
+    static FromSize(size: ISize2): IRectangle;
+    static FromPoints(...params: Array<ICartesian2>): IRectangle;
     constructor(x: number, y: number, width: number, height: number);
     get top(): number;
     get left(): number;
@@ -13,4 +14,6 @@ export declare class Rectangle implements IRectangle {
     get bottom(): number;
     get center(): ICartesian2;
     intersect(other: IRectangle): boolean;
+    intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;
+    contains(x: number, y: number): boolean;
 }

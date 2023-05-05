@@ -2,30 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build (Dev)",
-            "type": "shell",
-            "command": "npm run build:dev",
-            "isBackground": false,
-            "runOptions": {
-                "instanceLimit": 1
-            },
-            "presentation": {
-                "group": "build"
-            },
-            "problemMatcher": ["$tsc"]
-        },
-        {
-            "label": "Build (LTS)",
-            "type": "shell",
-            "command": "npm run build:lts",
-            "isBackground": false,
-            "runOptions": {
-                "instanceLimit": 1
-            },
-            "presentation": {
-                "group": "build"
-            },
-            "problemMatcher": ["$tsc"]
+            "type": "npm",
+            "script": "publish:core:dev",
+            "path": "packages/dev/core",
+            "problemMatcher": [],
+            "label": "npm: publish:core:dev - packages/dev/core",
+            "detail": "npm run build:core:dev && npm run webpack:core:dev"
         }
     ]
 }

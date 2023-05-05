@@ -10,10 +10,12 @@
         "./src"
     ],
     "scripts": {
-        "build:core": "npm run clean:core && npm run compile:core",
+        "build:core:dev": "npm run clean:core && npm run compile:core",
         "clean:core": "rimraf dist && rimraf tsconfig.tsbuildinfo",
         "compile:core": "npm run compile:core:source",
         "compile:core:source": "tsc --project tsconfig.json",
+        "webpack:core:dev": "webpack --mode development",
+        "publish:core:dev": "npm run build:core:dev && npm run webpack:core:dev",
         "test": "jest -c ../../../jest.config.ts --verbose"
     },
     "sideEffects": false,

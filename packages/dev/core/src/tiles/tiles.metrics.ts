@@ -85,16 +85,16 @@ export class TileMetricsOptionsBuilder {
 }
 
 export class TileMetrics {
-    public static TileXYToQuadKey(tileX: number, tileY: number, levelOfDetail: number): Uint8Array {
-        const quadKey = new Uint8Array(levelOfDetail);
+    public static TileXYToQuadKey(a: ITileAddress): Uint8Array {
+        const quadKey = new Uint8Array(a.levelOfDetail);
         let j = 0;
-        for (let i = levelOfDetail; i > 0; i--) {
+        for (let i = a.levelOfDetail; i > 0; i--) {
             let digit = 0;
             const mask = 1 << (i - 1);
-            if ((tileX & mask) != 0) {
+            if ((a.x & mask) != 0) {
                 digit++;
             }
-            if ((tileY & mask) != 0) {
+            if ((a.y & mask) != 0) {
                 digit++;
                 digit++;
             }
@@ -171,16 +171,16 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
         return this._o.maxLongitude || TileMetricsOptions.DefaultMaxLongitude;
     }
 
-    public assertValidAddress(x: number, y: number, levelOfDetail: number): void {
-        if (levelOfDetail < 0 || levelOfDetail > this.maxLOD) {
-            throw new Error(`Invalid levelOfDetail ${levelOfDetail}`);
+    public assertValidAddress(a: ITileAddress): void {
+        if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
+            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
         }
-        const s = (0x01 << levelOfDetail) - 1;
-        if (x < 0 || x > s) {
-            throw new Error(`Invalid x ${x}, must be in [0,${s}] range.`);
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
         }
-        if (y < 0 || y > s) {
-            throw new Error(`Invalid y ${y}, must be in [0,${s}] range.`);
+        if (a.y < 0 || a.y > s) {
+            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
         }
     }
 

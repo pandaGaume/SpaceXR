@@ -1,7 +1,6 @@
 import { ITileAddress, ITileDatasource, ITileDirectory, ITileMetrics, TileDirectoryResult } from "./tiles.interfaces";
-import { Nullable } from "../types";
 import { Tile } from "./tiles";
-declare class TilePyramidNode<V extends object> extends Tile<WeakRef<V | Array<Nullable<V>>>> {
+declare class TilePyramidNode<V extends object> extends Tile<WeakRef<V>> {
     _parent?: TilePyramidNode<V>;
     _childrens?: Array<TilePyramidNode<V>>;
     constructor(x: number, y: number, z: number, owner: TilePyramid<V>, parent?: TilePyramidNode<V>);
@@ -13,13 +12,13 @@ declare class TilePyramidInfos {
 }
 export declare class TilePyramid<V extends object> implements ITileDirectory<V> {
     metrics: ITileMetrics;
-    datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>;
+    datasource: ITileDatasource<V, ITileAddress>;
     _root: TilePyramidNode<V>;
     _infos: TilePyramidInfos;
-    constructor(metrics: ITileMetrics, datasources: ITileDatasource<V, ITileAddress> | Array<ITileDatasource<V, ITileAddress>>);
+    constructor(metrics: ITileMetrics, datasource: ITileDatasource<V, ITileAddress>);
     get depth(): number;
     get tileCount(): number;
-    lookupAsync(x: number, y: number, levelOfDetail: number, args?: unknown): Promise<TileDirectoryResult<V>>;
+    lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>>;
     private lookup;
 }
 export {};

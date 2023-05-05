@@ -1,8 +1,8 @@
 import { ITileDirectory, ITileMetrics } from "../tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainNormalizedGridBuilder } from "../meshes/terrain.grid";
 import { IVerticesData } from "../meshes/meshes.interfaces";
-import { GeodeticSystem } from "core/geodesy/geodesy.system";
-import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
+import { GeodeticSystem } from "../geodesy/geodesy.system";
+import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
 
 export class Terrain {
     // data access

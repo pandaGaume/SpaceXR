@@ -1,22 +1,13 @@
-import { ITileAddress, ITileMetrics, LookupData } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
-export declare class TileComponent<T> implements ITileAddress {
-    _x: number;
-    _y: number;
-    _levelOfDetail: number;
-    _px: number;
-    _py: number;
-    _value?: LookupData<T>;
-    constructor(x: number, y: number, levelOfDetail: number, px: number, py: number);
-    get address(): ITileAddress | undefined;
-    get x(): number;
-    get y(): number;
-    get levelOfDetail(): number;
-    get data(): LookupData<T>;
-    set data(v: LookupData<T>);
-    get px(): number;
-    get py(): number;
+import { Observable } from "../events";
+export declare class UpdateEvents {
+    bounds: IRectangle;
+    added?: ITileAddress[] | undefined;
+    removed?: ITileAddress[] | undefined;
+    remain?: ITileAddress[] | undefined;
+    constructor(bounds: IRectangle, added?: ITileAddress[] | undefined, removed?: ITileAddress[] | undefined, remain?: ITileAddress[] | undefined);
 }
 export declare class View2<T> {
     _metrics: ITileMetrics;
@@ -27,9 +18,13 @@ export declare class View2<T> {
     _valid: boolean;
     _innerbounds: IRectangle;
     _outerbounds: IRectangle;
-    _tiles: Array<TileComponent<T>>;
+    _outerboundsTileXY: IRectangle;
+    _tiles: Array<ITileAddress>;
+    _updateObservable?: Observable<UpdateEvents>;
     constructor(width: number, height: number, lat?: number, lon?: number, levelOfDetail?: number, metrics?: ITileMetrics);
-    get tiles(): Array<TileComponent<T>>;
+    get updateObservable(): Observable<UpdateEvents>;
+    get metrics(): ITileMetrics;
+    get tiles(): Array<ITileAddress>;
     get bounds(): IRectangle;
     get levelOfDetail(): number;
     set levelOfDetail(v: number);

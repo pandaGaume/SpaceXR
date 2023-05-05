@@ -1,21 +1,30 @@
+import { Tile } from "../tiles/tiles";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileDirectory } from "../tiles/tiles.interfaces";
-import { View2 } from "../tiles/tiles.view";
+import { ITileAddress, ITileDirectory, ITileMetrics, LookupData, TileDirectoryResult } from "../tiles/tiles.interfaces";
+import { UpdateEvents, View2 } from "../tiles/tiles.view";
+import { TileMetrics } from "../tiles/tiles.metrics";
+import { IRectangle } from "../geometry/geometry.interfaces";
+import { Cartesian2 } from "../geometry/geometry.cartesian";
 
-export class CanvasMap {
+export class CanvasTileMap {
     _canvas: HTMLCanvasElement;
     _view: View2<HTMLImageElement>;
-    _directory: ITileDirectory<HTMLImageElement>;
+    _directory?: ITileDirectory<HTMLImageElement>;
+    _cache: Map<string, Tile<LookupData<HTMLImageElement>>>;
+    _bounds?: IRectangle;
 
-    public constructor(canvas: HTMLCanvasElement, directory: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number) {
+    public constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number) {
         this._canvas = canvas;
         this._directory = directory;
-        this._view = new View2(canvas.width, canvas.height, lat, lon, zoom, directory.metrics);
+        this._view = new View2(canvas.width, canvas.height, lat, lon, zoom, directory?.metrics);
+        this._view.updateObservable.add(((e: UpdateEvents) => this.onUpdate(e)).bind(this));
+        this._cache = new Map<string, Tile<LookupData<HTMLImageElement>>>();
+        this.validate();
     }
 
     /// public API begin
-    public invalidateSize(w: number, h: number) {
-        this._view.resize(w, h);
+    public invalidateSize(w?: number, h?: number) {
+        this._view.resize(w || this._canvas.clientWidth, h || this._canvas.clientHeight);
     }
 
     public setView(center: IGeo2, zoom?: number) {
@@ -28,34 +37,99 @@ export class CanvasMap {
     public setZoom(zoom: number) {
         this._view.levelOfDetail = zoom;
     }
-    /// public API End
-    private draw() {
+
+    public validate() {
         this._view.validate();
-        const c = this._canvas.getContext("2d");
-        if (c) {
-            c.translate(this._view.bounds.x, this._view.bounds.y);
-            const s = this._view.scaling;
-            for (const t of this._view.tiles) {
-                if (t.data) {
-                    if (t.data instanceof Array) {
-                        for (const d of t.data) {
-                            if (d) {
-                                c.drawImage(d, t.px * s, t.py * s);
-                            }
-                        }
-                    } else {
-                        c.drawImage(t.data, t.px * s, t.py * s);
-                    }
-                } else {
-                    this._directory.lookupAsync(t.x, t.y, t.levelOfDetail, this).then((r) => {
-                        const tiles = (<CanvasMap>r.args)._view.tiles
-                        const c = tiles.find((t) => t.x == r.x && t.y == r.y && t.levelOfDetail == r.levelOfDetail);
-                        if (c) {
-                            c.data = r.data;
-                        }
-                    });
+    }
+
+    /// public API End
+    private get metrics(): ITileMetrics {
+        return this._view.metrics;
+    }
+
+    private onUpdate(e: UpdateEvents) {
+        if (!e) {
+            return;
+        }
+
+        this._bounds = e.bounds;
+
+        if (e.removed) {
+            // this is the place to clean unactive tile
+            // fast track
+            if (!e.remain) {
+                // we remove ALL
+                this._cache.clear();
+            } else {
+                for (const c of e.removed) {
+                    const binaryKey = TileMetrics.TileXYToQuadKey(c);
+                    const key = binaryKey.join("");
+                    this._cache.delete(key);
                 }
             }
+        }
+        if (e.added) {
+            // this is the place to add new tiles from the directory
+            for (const c of e.added) {
+                const tile = new Tile<LookupData<HTMLImageElement>>(c.x, c.y, c.levelOfDetail);
+                if (this._directory) {
+                    this._directory.lookupAsync(c, tile).then(
+                        ((result: TileDirectoryResult<HTMLImageElement>) => {
+                            tile.data = result.data;
+                            if (tile.data) {
+                                this.drawImage(tile, tile.data);
+                            }
+                        }).bind(this)
+                    );
+                }
+                const binaryKey = TileMetrics.TileXYToQuadKey(c);
+                const key = binaryKey.join("");
+                this._cache.set(key, tile);
+            }
+        }
+        this.draw();
+    }
+
+    private draw() {
+        const ctx = this._canvas.getContext("2d");
+        if (ctx) {
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "red";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const offsetX = this._bounds?.x || 0;
+            const offsetY = this._bounds?.y || 0;
+            const metrics = this.metrics;
+            const temp = Cartesian2.Zero();
+            // const s = metrics.tileSize;
+            ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+            for (const entry of this._cache.entries()) {
+                const t = entry[1];
+                const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                const x = pixelXY.x - offsetX;
+                const y = pixelXY.y - offsetY;
+                if (t.data) {
+                    ctx.drawImage(t.data, x, y);
+                    continue;
+                }
+                //ctx.strokeRect(x, y, s, s);
+                //ctx.fillText(entry[0], x + s / 2, y + s / 2);
+            }
+        }
+    }
+
+    private drawImage(a: ITileAddress, data: HTMLImageElement) {
+        const ctx = this._canvas.getContext("2d");
+        if (ctx) {
+            const offsetX = this._bounds?.x || 0;
+            const offsetY = this._bounds?.y || 0;
+            const metrics = this.metrics;
+            const temp = Cartesian2.Zero();
+            const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
+            const x = pixelXY.x - offsetX;
+            const y = pixelXY.y - offsetY;
+            ctx.drawImage(data, x, y);
         }
     }
 }

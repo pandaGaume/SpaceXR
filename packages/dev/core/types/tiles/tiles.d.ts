@@ -10,6 +10,7 @@ export declare class Tile<T> implements ITile<T>, ITileAddress {
     constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics);
     get address(): ITileAddress | undefined;
     get data(): T | undefined;
+    set data(v: T | undefined);
     get x(): number;
     get y(): number;
     get levelOfDetail(): number;

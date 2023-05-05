@@ -15,6 +15,8 @@ export declare class MapzenNormalValueDecoder implements IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 export declare class MapZenTileClientOptions {
-    static Terrarium: TileClientOptions<Float32Array>;
+    static DEMImages: TileClientOptions<HTMLImageElement>;
+    static DEM: TileClientOptions<Float32Array>;
+    static NormalImages: TileClientOptions<HTMLImageElement>;
     static Normal: TileClientOptions<Float32Array>;
 }

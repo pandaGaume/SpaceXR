@@ -1065,38 +1065,37 @@ class CanvasTileMap {
         this._view.updateObservable.add(((e) => this.onUpdate(e)).bind(this));
         this._cache = new Map();
         this._offset = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-        this.validate();
+        this._view.validate();
+    }
+    get center() {
+        return this._view._center;
     }
     invalidateSize(w, h) {
-        this._view.resize(w || this._canvas.clientWidth, h || this._canvas.clientHeight);
+        this._view.resize(w || this._canvas.clientWidth, h || this._canvas.clientHeight).validate();
     }
     setView(center, zoom) {
         this._view.center(center.lat, center.lon);
         if (zoom) {
-            this.setZoom(zoom);
+            this._view.levelOfDetail = zoom;
         }
+        this._view.validate();
     }
     setZoom(zoom) {
         this._view.levelOfDetail = zoom;
-    }
-    translate(x, y) {
-        this._offset.x += x;
-        this._offset.y += y;
-        if (Math.abs(this._offset.x) < this.metrics.tileSize && Math.abs(this._offset.y) < this.metrics.tileSize) {
-            this.draw();
-        }
-        else {
-            const tx = -Math.floor(this._offset.x / this.metrics.tileSize) * this.metrics.tileSize;
-            const ty = -Math.floor(this._offset.y / this.metrics.tileSize) * this.metrics.tileSize;
-            this._offset.x = this._offset.x % this.metrics.tileSize;
-            this._offset.y = this._offset.y % this.metrics.tileSize;
-            console.log("offset:", this._offset.x, ",", this._offset.y);
-            console.log("translate:", tx, ",", ty);
-            this._view.translate(tx, ty).validate();
-        }
-    }
-    validate() {
         this._view.validate();
+    }
+    zoomIn(delta) {
+        const d = Math.abs(delta);
+        console.log("Zoom In :" + d);
+        this._view.validate();
+    }
+    zoomOut(delta) {
+        const d = Math.abs(delta);
+        console.log("Zoom out :" + d);
+        this._view.validate();
+    }
+    translate(tx, ty) {
+        this._view.translate(tx, ty).validate();
     }
     get metrics() {
         return this._view.metrics;
@@ -3636,8 +3635,6 @@ class View2 {
         pixelCenterXY.x += x;
         pixelCenterXY.y += y;
         const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._levelOfDetail);
-        console.log("initial center:", this._center.lat, ",", this._center.lon);
-        console.log("final center  :", center.lat, ",", center.lon);
         return this.center(center.lat, center.lon);
     }
     invalidate() {

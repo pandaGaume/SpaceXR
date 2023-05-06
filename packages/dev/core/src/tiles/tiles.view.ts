@@ -134,8 +134,6 @@ export class View2<T> {
         pixelCenterXY.x += x;
         pixelCenterXY.y += y;
         const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._levelOfDetail);
-        console.log("initial center:", this._center.lat, ",", this._center.lon);
-        console.log("final center  :", center.lat, ",", center.lon);
         return this.center(center.lat, center.lon);
     }
 

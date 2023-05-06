@@ -7,12 +7,12 @@ import { IRectangle } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 
 export class CanvasTileMap {
-    _canvas: HTMLCanvasElement;
-    _view: View2<HTMLImageElement>;
-    _directory?: ITileDirectory<HTMLImageElement>;
-    _cache: Map<string, Tile<LookupData<HTMLImageElement>>>;
-    _bounds?: IRectangle;
-    _offset: Cartesian2;
+    _canvas: HTMLCanvasElement; // the 2D target
+    _view: View2<HTMLImageElement>; // the view logic
+    _directory?: ITileDirectory<HTMLImageElement>; // the tiel data source
+    _cache: Map<string, Tile<LookupData<HTMLImageElement>>>; // the list of activ tiles
+    _bounds?: IRectangle; // this is a copy of the curent pixel bounds of the view
+    _offset: Cartesian2; // optional offset, not used
 
     public constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number) {
         this._canvas = canvas;
@@ -21,43 +21,46 @@ export class CanvasTileMap {
         this._view.updateObservable.add(((e: UpdateEvents) => this.onUpdate(e)).bind(this));
         this._cache = new Map<string, Tile<LookupData<HTMLImageElement>>>();
         this._offset = Cartesian2.Zero();
-        this.validate();
+        this._view.validate();
     }
 
     /// public API begin
+
+    public get center(): IGeo2 {
+        return this._view._center;
+    }
+
     public invalidateSize(w?: number, h?: number) {
-        this._view.resize(w || this._canvas.clientWidth, h || this._canvas.clientHeight);
+        this._view.resize(w || this._canvas.clientWidth, h || this._canvas.clientHeight).validate();
     }
 
     public setView(center: IGeo2, zoom?: number) {
         this._view.center(center.lat, center.lon);
         if (zoom) {
-            this.setZoom(zoom);
+            this._view.levelOfDetail = zoom;
         }
+        this._view.validate();
     }
 
     public setZoom(zoom: number) {
         this._view.levelOfDetail = zoom;
-    }
-
-    public translate(x: number, y: number) {
-        this._offset.x += x;
-        this._offset.y += y;
-        if (Math.abs(this._offset.x) < this.metrics.tileSize && Math.abs(this._offset.y) < this.metrics.tileSize) {
-            this.draw();
-        } else {
-            const tx = -Math.floor(this._offset.x / this.metrics.tileSize) * this.metrics.tileSize;
-            const ty = -Math.floor(this._offset.y / this.metrics.tileSize) * this.metrics.tileSize;
-            this._offset.x = this._offset.x % this.metrics.tileSize;
-            this._offset.y = this._offset.y % this.metrics.tileSize;
-            console.log("offset:", this._offset.x, ",", this._offset.y);
-            console.log("translate:", tx, ",", ty);
-            this._view.translate(tx, ty).validate();
-        }
-    }
-
-    public validate() {
         this._view.validate();
+    }
+
+    public zoomIn(delta: number) {
+        const d = Math.abs(delta);
+        console.log("Zoom In :" + d);
+        this._view.validate();
+    }
+
+    public zoomOut(delta: number) {
+        const d = Math.abs(delta);
+        console.log("Zoom out :" + d);
+        this._view.validate();
+    }
+
+    public translate(tx: number, ty: number) {
+        this._view.translate(tx, ty).validate();
     }
 
     /// public API End

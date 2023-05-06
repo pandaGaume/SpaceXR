@@ -1,4 +1,17 @@
-class MouseInputs {
+class MouseWheelInputs {
+    constructor(canvas, o) {
+        // ajouter un écouteur d'événements pour la souris
+        canvas.addEventListener("wheel", function (event) {
+            event.preventDefault(); // prevent default scrolling behavior
+            const deltaY = o.inc ? (event.deltaY < 0 ? -o.inc : o.inc) : event.deltaY; // get the amount of delta in the Y direction, assuming it's pixel.
+            if (o.onwheel) {
+                o.onwheel(this, deltaY);
+            }
+        });
+    }
+}
+
+class MouseDragInputs {
     // initialiser les variables
     offsetX;
     offsetY;
@@ -6,14 +19,16 @@ class MouseInputs {
     startY;
     isDragging = false;
 
-    constructor(canvas, beginCallback, moveCallback, endCallback) {
+    constructor(canvas, o) {
         // ajouter un écouteur d'événements pour la souris
         canvas.addEventListener("mousedown", function (event) {
             // enregistrer les coordonnées de départ
             this.offsetX = this.startX = event.clientX;
             this.offsetY = this.startY = event.clientY;
             this.isDragging = true;
-            beginCallback(this, this.offsetX, this.offsetY);
+            if (o.onbegin) {
+                o.onbegin(this, this.offsetX, this.offsetY);
+            }
         });
 
         canvas.addEventListener("mousemove", function (event) {
@@ -26,13 +41,17 @@ class MouseInputs {
                 this.offsetX += dx;
                 this.offsetY += dy;
 
-                moveCallback(this, dx, dy);
+                if (o.ondrag) {
+                    o.ondrag(this, dx, dy);
+                }
             }
         });
 
         canvas.addEventListener("mouseup", function (event) {
             this.isDragging = false;
-            endCallback(this, this.offsetX - this.startX, this.offsetY - this.startY);
+            if (o.onend) {
+                o.onend(this, this.offsetX - this.startX, this.offsetY - this.startY);
+            }
         });
     }
 }

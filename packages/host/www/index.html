@@ -36,16 +36,24 @@
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
                     map.invalidateSize();
-                    map.validate();
                 }
 
-                function onBegin(m, x, y) {}
-                function onMove(m, x, y) {
-                    map.translate(x, y);
+                function onDrag(m, x, y) {
+                    map.translate(-x, -y);
                 }
-                function onEnd(m, x, y) {}
 
-                const mouseManager = new MouseInputs(canvas, onBegin, onMove, onEnd);
+                function onWheel(m, dz) {
+                    if (dz < 0) {
+                        // zoom in
+                        map.zoomIn(dz);
+                    } else {
+                        // zoom out
+                        map.zoomOut(dz);
+                    }
+                }
+
+                const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
+                const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });
 
                 // Watch for browser/canvas resize events
                 window.addEventListener("resize", onResize);

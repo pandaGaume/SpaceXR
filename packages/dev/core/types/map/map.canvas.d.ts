@@ -12,11 +12,13 @@ export declare class CanvasTileMap {
     _bounds?: IRectangle;
     _offset: Cartesian2;
     constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number);
+    get center(): IGeo2;
     invalidateSize(w?: number, h?: number): void;
     setView(center: IGeo2, zoom?: number): void;
     setZoom(zoom: number): void;
-    translate(x: number, y: number): void;
-    validate(): void;
+    zoomIn(delta: number): void;
+    zoomOut(delta: number): void;
+    translate(tx: number, ty: number): void;
     private get metrics();
     private onUpdate;
     private draw;

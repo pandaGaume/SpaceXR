@@ -128,6 +128,17 @@ export class View2<T> {
         return this;
     }
 
+    public translate(x: number, y: number): View2<T> {
+        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
+
+        pixelCenterXY.x += x;
+        pixelCenterXY.y += y;
+        const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._levelOfDetail);
+        console.log("initial center:", this._center.lat, ",", this._center.lon);
+        console.log("final center  :", center.lat, ",", center.lon);
+        return this.center(center.lat, center.lon);
+    }
+
     public invalidate(): View2<T> {
         this._valid = false;
         return this;

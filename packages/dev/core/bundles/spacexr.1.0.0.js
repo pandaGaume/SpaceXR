@@ -1049,10 +1049,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CanvasTileMap": () => (/* binding */ CanvasTileMap)
 /* harmony export */ });
-/* harmony import */ var _tiles_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles/tiles */ "./dist/tiles/tiles.js");
+/* harmony import */ var _tiles_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles/tiles */ "./dist/tiles/tiles.js");
 /* harmony import */ var _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/tiles.view */ "./dist/tiles/tiles.view.js");
-/* harmony import */ var _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/tiles.metrics */ "./dist/tiles/tiles.metrics.js");
-/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles/tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
 
 
 
@@ -1064,6 +1064,7 @@ class CanvasTileMap {
         this._view = new _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2(canvas.width, canvas.height, lat, lon, zoom, directory?.metrics);
         this._view.updateObservable.add(((e) => this.onUpdate(e)).bind(this));
         this._cache = new Map();
+        this._offset = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
         this.validate();
     }
     invalidateSize(w, h) {
@@ -1077,6 +1078,22 @@ class CanvasTileMap {
     }
     setZoom(zoom) {
         this._view.levelOfDetail = zoom;
+    }
+    translate(x, y) {
+        this._offset.x += x;
+        this._offset.y += y;
+        if (Math.abs(this._offset.x) < this.metrics.tileSize && Math.abs(this._offset.y) < this.metrics.tileSize) {
+            this.draw();
+        }
+        else {
+            const tx = -Math.floor(this._offset.x / this.metrics.tileSize) * this.metrics.tileSize;
+            const ty = -Math.floor(this._offset.y / this.metrics.tileSize) * this.metrics.tileSize;
+            this._offset.x = this._offset.x % this.metrics.tileSize;
+            this._offset.y = this._offset.y % this.metrics.tileSize;
+            console.log("offset:", this._offset.x, ",", this._offset.y);
+            console.log("translate:", tx, ",", ty);
+            this._view.translate(tx, ty).validate();
+        }
     }
     validate() {
         this._view.validate();
@@ -1095,7 +1112,7 @@ class CanvasTileMap {
             }
             else {
                 for (const c of e.removed) {
-                    const binaryKey = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_1__.TileMetrics.TileXYToQuadKey(c);
+                    const binaryKey = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(c);
                     const key = binaryKey.join("");
                     this._cache.delete(key);
                 }
@@ -1103,7 +1120,7 @@ class CanvasTileMap {
         }
         if (e.added) {
             for (const c of e.added) {
-                const tile = new _tiles_tiles__WEBPACK_IMPORTED_MODULE_2__.Tile(c.x, c.y, c.levelOfDetail);
+                const tile = new _tiles_tiles__WEBPACK_IMPORTED_MODULE_3__.Tile(c.x, c.y, c.levelOfDetail);
                 if (this._directory) {
                     this._directory.lookupAsync(c, tile).then(((result) => {
                         tile.data = result.data;
@@ -1112,7 +1129,7 @@ class CanvasTileMap {
                         }
                     }).bind(this));
                 }
-                const binaryKey = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_1__.TileMetrics.TileXYToQuadKey(c);
+                const binaryKey = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(c);
                 const key = binaryKey.join("");
                 this._cache.set(key, tile);
             }
@@ -1129,8 +1146,10 @@ class CanvasTileMap {
             const offsetX = this._bounds?.x || 0;
             const offsetY = this._bounds?.y || 0;
             const metrics = this.metrics;
-            const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
+            const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
             ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+            ctx.save();
+            ctx.translate(this._offset.x, this._offset.y);
             for (const entry of this._cache.entries()) {
                 const t = entry[1];
                 const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
@@ -1141,19 +1160,23 @@ class CanvasTileMap {
                     continue;
                 }
             }
+            ctx.restore();
         }
     }
     drawImage(a, data) {
         const ctx = this._canvas.getContext("2d");
         if (ctx) {
+            ctx.save();
+            ctx.translate(this._offset.x, this._offset.y);
             const offsetX = this._bounds?.x || 0;
             const offsetY = this._bounds?.y || 0;
             const metrics = this.metrics;
-            const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
+            const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
             const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
             const x = pixelXY.x - offsetX;
             const y = pixelXY.y - offsetY;
             ctx.drawImage(data, x, y);
+            ctx.restore();
         }
     }
 }
@@ -3607,6 +3630,15 @@ class View2 {
             return this.invalidate();
         }
         return this;
+    }
+    translate(x, y) {
+        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
+        pixelCenterXY.x += x;
+        pixelCenterXY.y += y;
+        const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._levelOfDetail);
+        console.log("initial center:", this._center.lat, ",", this._center.lon);
+        console.log("final center  :", center.lat, ",", center.lon);
+        return this.center(center.lat, center.lon);
     }
     invalidate() {
         this._valid = false;

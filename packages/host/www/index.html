@@ -3,6 +3,7 @@
     <head>
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../../dev/core/bundles/spacexr.1.0.0.js"></script>
+        <script src="./scripts/inputs.js"></script>
         <style>
             #tileCanvas {
                 width: 100%;
@@ -37,7 +38,15 @@
                     map.invalidateSize();
                     map.validate();
                 }
- 
+
+                function onBegin(m, x, y) {}
+                function onMove(m, x, y) {
+                    map.translate(x, y);
+                }
+                function onEnd(m, x, y) {}
+
+                const mouseManager = new MouseInputs(canvas, onBegin, onMove, onEnd);
+
                 // Watch for browser/canvas resize events
                 window.addEventListener("resize", onResize);
             };

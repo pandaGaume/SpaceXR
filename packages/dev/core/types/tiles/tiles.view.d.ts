@@ -37,6 +37,7 @@ export declare class View2<T> {
     get isValid(): boolean;
     resize(width: number, height: number): View2<T>;
     center(lat?: number, lon?: number): View2<T>;
+    translate(x: number, y: number): View2<T>;
     invalidate(): View2<T>;
     validate(): View2<T>;
     protected doValidate(): void;

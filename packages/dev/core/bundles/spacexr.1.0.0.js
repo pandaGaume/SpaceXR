@@ -849,6 +849,9 @@ class Cartesian2 {
     static Zero() {
         return new Cartesian2(0, 0);
     }
+    static One() {
+        return new Cartesian2(1, 1);
+    }
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -1064,7 +1067,7 @@ class CanvasTileMap {
         this._view = new _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2(canvas.width, canvas.height, lat, lon, zoom, directory?.metrics);
         this._view.updateObservable.add(((e) => this.onUpdate(e)).bind(this));
         this._cache = new Map();
-        this._offset = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+        this._scale = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.One();
         this._view.validate();
     }
     get center() {
@@ -1076,23 +1079,19 @@ class CanvasTileMap {
     setView(center, zoom) {
         this._view.center(center.lat, center.lon);
         if (zoom) {
-            this._view.levelOfDetail = zoom;
+            this._view.setLevelOfDetail(zoom);
         }
         this._view.validate();
     }
     setZoom(zoom) {
-        this._view.levelOfDetail = zoom;
-        this._view.validate();
+        console.log("set zoom ", zoom);
+        this._view.setLevelOfDetail(zoom).validate();
     }
     zoomIn(delta) {
-        const d = Math.abs(delta);
-        console.log("Zoom In :" + d);
-        this._view.validate();
+        this.setZoom((this._view.levelOfDetail * _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2.ZOOM_ACC + Math.abs(delta * _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2.ZOOM_ACC)) / _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2.ZOOM_ACC);
     }
     zoomOut(delta) {
-        const d = Math.abs(delta);
-        console.log("Zoom out :" + d);
-        this._view.validate();
+        this.setZoom((this._view.levelOfDetail * _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2.ZOOM_ACC - Math.abs(delta * _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2.ZOOM_ACC)) / _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2.ZOOM_ACC);
     }
     translate(tx, ty) {
         this._view.translate(tx, ty).validate();
@@ -1136,46 +1135,46 @@ class CanvasTileMap {
         this.draw();
     }
     draw() {
-        const ctx = this._canvas.getContext("2d");
-        if (ctx) {
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = "red";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            const offsetX = this._bounds?.x || 0;
-            const offsetY = this._bounds?.y || 0;
-            const metrics = this.metrics;
-            const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-            ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
-            ctx.save();
-            ctx.translate(this._offset.x, this._offset.y);
-            for (const entry of this._cache.entries()) {
-                const t = entry[1];
-                const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
-                const x = pixelXY.x - offsetX;
-                const y = pixelXY.y - offsetY;
-                if (t.data) {
-                    ctx.drawImage(t.data, x, y);
-                    continue;
+        if (this._bounds) {
+            const ctx = this._canvas.getContext("2d");
+            if (ctx) {
+                const offsetX = this._bounds.x;
+                const offsetY = this._bounds.y;
+                const metrics = this.metrics;
+                const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+                ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+                ctx.save();
+                ctx.translate(-offsetX, -offsetY);
+                for (const entry of this._cache.entries()) {
+                    const t = entry[1];
+                    const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                    const x = pixelXY.x;
+                    const y = pixelXY.y;
+                    if (t.data) {
+                        ctx.drawImage(t.data, x, y);
+                        continue;
+                    }
                 }
+                ctx.restore();
             }
-            ctx.restore();
         }
     }
     drawImage(a, data) {
-        const ctx = this._canvas.getContext("2d");
-        if (ctx) {
-            ctx.save();
-            ctx.translate(this._offset.x, this._offset.y);
-            const offsetX = this._bounds?.x || 0;
-            const offsetY = this._bounds?.y || 0;
-            const metrics = this.metrics;
-            const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-            const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
-            const x = pixelXY.x - offsetX;
-            const y = pixelXY.y - offsetY;
-            ctx.drawImage(data, x, y);
-            ctx.restore();
+        if (this._bounds) {
+            const ctx = this._canvas.getContext("2d");
+            if (ctx) {
+                const offsetX = this._bounds.x;
+                const offsetY = this._bounds.y;
+                const metrics = this.metrics;
+                const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+                const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
+                const x = pixelXY.x;
+                const y = pixelXY.y;
+                ctx.save();
+                ctx.translate(-offsetX, -offsetY);
+                ctx.drawImage(data, x, y);
+                ctx.restore();
+            }
         }
     }
 }
@@ -3524,11 +3523,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
 /* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.geography */ "./dist/tiles/tiles.geography.js");
 /* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! .. */ "./dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -3537,8 +3538,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class UpdateEvents {
-    constructor(bounds, added, removed, remain) {
+    constructor(bounds, scale, added, removed, remain) {
         this.bounds = bounds;
+        this.scale = scale;
         this.added = added;
         this.removed = removed;
         this.remain = remain;
@@ -3549,18 +3551,19 @@ class View2 {
         this._center = _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Default;
         this._size = _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_1__.Size2.Zero();
         this._levelOfDetail = 0;
-        this._levelOfDetailOffset = 0;
         this._metrics = metrics || _tiles_geography__WEBPACK_IMPORTED_MODULE_2__.EPSG3857.Shared;
-        this.levelOfDetail = levelOfDetail || 0;
-        this.resize(width, height).center(lat, lon);
+        this.setLevelOfDetail(levelOfDetail || 0)
+            .resize(width, height)
+            .center(lat, lon);
         this._valid = false;
         this._innerbounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.Zero();
         this._outerbounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.Zero();
         this._outerboundsTileXY = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.Zero();
+        this._scale = ___WEBPACK_IMPORTED_MODULE_4__.Cartesian2.One();
         this._tiles = [];
     }
     get updateObservable() {
-        this._updateObservable = this._updateObservable || new _events__WEBPACK_IMPORTED_MODULE_4__.Observable();
+        this._updateObservable = this._updateObservable || new _events__WEBPACK_IMPORTED_MODULE_5__.Observable();
         return this._updateObservable;
     }
     get metrics() {
@@ -3575,17 +3578,7 @@ class View2 {
         return this._innerbounds;
     }
     get levelOfDetail() {
-        return Math.floor(this._levelOfDetail);
-    }
-    set levelOfDetail(v) {
-        const tmp = _math_math__WEBPACK_IMPORTED_MODULE_5__.Scalar.Clamp(v || 0, this._metrics.minLOD, this._metrics.maxLOD);
-        const lod = Math.round(tmp);
-        const offset = tmp - lod;
-        if (lod != this._levelOfDetail || offset != this._levelOfDetailOffset) {
-            this._levelOfDetail = lod;
-            this._levelOfDetailOffset = offset;
-            this.invalidate();
-        }
+        return this._levelOfDetail;
     }
     get width() {
         return this._size?.width || 0;
@@ -3599,14 +3592,16 @@ class View2 {
     get lon() {
         return this._center?.lon || _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Default.lon;
     }
-    get scaling() {
-        return this._levelOfDetailOffset < 0 ? 1 / (1 - this._levelOfDetailOffset) : 1 + this._levelOfDetailOffset;
-    }
-    get levelOfDetailOffset() {
-        return this._levelOfDetailOffset;
-    }
     get isValid() {
         return this._valid;
+    }
+    setLevelOfDetail(v) {
+        const lod = _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.Clamp(v || 0, this._metrics.minLOD, this._metrics.maxLOD);
+        if (lod != this._levelOfDetail) {
+            this._levelOfDetail = lod;
+            this.invalidate();
+        }
+        return this;
     }
     resize(width, height) {
         const w = Math.abs(width);
@@ -3620,8 +3615,8 @@ class View2 {
         return this;
     }
     center(lat, lon) {
-        const latitude = _math_math__WEBPACK_IMPORTED_MODULE_5__.Scalar.Clamp(lat || _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Default.lat, this._metrics.minLatitude, this._metrics.maxLatitude);
-        const longitude = _math_math__WEBPACK_IMPORTED_MODULE_5__.Scalar.Clamp(lon || _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Default.lon, this._metrics.minLongitude, this._metrics.maxLongitude);
+        const latitude = _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.Clamp(lat || _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Default.lat, this._metrics.minLatitude, this._metrics.maxLatitude);
+        const longitude = _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.Clamp(lon || _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Default.lon, this._metrics.minLongitude, this._metrics.maxLongitude);
         this._center = this._center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Zero();
         if (this._center.lat != latitude || this._center.lon != longitude) {
             this._center.lat = latitude;
@@ -3650,16 +3645,22 @@ class View2 {
     }
     doValidate() {
         const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
-        const scale = this.scaling;
-        const w = this._size.width * scale;
-        const h = this._size.height * scale;
-        const lod = Math.floor(this._levelOfDetail);
+        const lod = Math.round(this._levelOfDetail);
+        let lodOffset = this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC;
+        let scale = lodOffset < 0 ? View2.ZOOM_ACC / (View2.ZOOM_ACC - lodOffset) : (View2.ZOOM_ACC + lodOffset) / View2.ZOOM_ACC;
+        lodOffset /= View2.ZOOM_ACC;
+        this._scale.x = scale;
+        this._scale.y = scale;
+        console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
+        const w = this._size.width / scale;
+        const h = this._size.height / scale;
+        console.log("W:", w, "H:", h);
         const halfWitdh = w / 2;
         const halfHeight = h / 2;
         const x0 = Math.round(pixelCenterXY.x - halfWitdh);
         const y0 = Math.round(pixelCenterXY.y - halfHeight);
         this._innerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0, y0, w, h);
-        const tileSize = this._metrics.tileSize * scale;
+        const tileSize = this._metrics.tileSize;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
@@ -3674,7 +3675,7 @@ class View2 {
         let removed = undefined;
         for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
             for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                const c = new _tiles_address__WEBPACK_IMPORTED_MODULE_6__.TileAddress(tx, ty, lod);
+                const c = new _tiles_address__WEBPACK_IMPORTED_MODULE_7__.TileAddress(tx, ty, lod);
                 components.push(c);
                 if (hasObservers && !remainBounds?.contains(tx, ty)) {
                     added = added || new Array();
@@ -3694,11 +3695,13 @@ class View2 {
                 removed = removed || new Array();
                 removed.push(c);
             }
-            const e = new UpdateEvents(this._innerbounds, added, removed, remains);
+            const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);
         }
     }
 }
+View2.ZOOM_ACC = 10000;
+
 //# sourceMappingURL=tiles.view.js.map
 
 /***/ })

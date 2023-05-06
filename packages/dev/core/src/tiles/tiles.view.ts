@@ -4,22 +4,30 @@ import { Geo2 } from "../geography/geography.position";
 import { Size2 } from "../geometry/geometry.size";
 import { Scalar } from "../math/math";
 import { EPSG3857 } from "./tiles.geography";
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IRectangle, ISize2, ICartesian2 } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { Observable } from "../events";
 import { TileAddress } from "./tiles.address";
+import { Cartesian2 } from "..";
 
 export class UpdateEvents {
-    public constructor(public bounds: IRectangle, public added?: Array<ITileAddress>, public removed?: Array<ITileAddress>, public remain?: Array<ITileAddress>) {}
+    public constructor(
+        public bounds: IRectangle,
+        public scale: ICartesian2,
+        public added?: Array<ITileAddress>,
+        public removed?: Array<ITileAddress>,
+        public remain?: Array<ITileAddress>
+    ) {}
 }
 
 export class View2<T> {
+    public static ZOOM_ACC = 10000;
+
     // main map metrics
     _metrics: ITileMetrics;
     _center: IGeo2 = Geo2.Default;
     _size: ISize2 = Size2.Zero();
     _levelOfDetail: number = 0;
-    _levelOfDetailOffset: number = 0;
 
     // internal properties
     _valid: boolean;
@@ -27,18 +35,21 @@ export class View2<T> {
     _outerbounds: IRectangle; // the bounds of the cache map in pixel coordinates, related to zoom level
     _outerboundsTileXY: IRectangle; // the bounds of the cache map in tile coordinates, related to zoom level
     _tiles: Array<ITileAddress>;
+    _scale: ICartesian2;
 
     // events
     _updateObservable?: Observable<UpdateEvents>;
 
     public constructor(width: number, height: number, lat?: number, lon?: number, levelOfDetail?: number, metrics?: ITileMetrics) {
         this._metrics = metrics || EPSG3857.Shared;
-        this.levelOfDetail = levelOfDetail || 0;
-        this.resize(width, height).center(lat, lon);
+        this.setLevelOfDetail(levelOfDetail || 0)
+            .resize(width, height)
+            .center(lat, lon);
         this._valid = false;
         this._innerbounds = Rectangle.Zero();
         this._outerbounds = Rectangle.Zero();
         this._outerboundsTileXY = Rectangle.Zero();
+        this._scale = Cartesian2.One();
         this._tiles = [];
     }
 
@@ -62,18 +73,7 @@ export class View2<T> {
     }
 
     public get levelOfDetail(): number {
-        return Math.floor(this._levelOfDetail);
-    }
-
-    public set levelOfDetail(v: number) {
-        const tmp = Scalar.Clamp(v || 0, this._metrics.minLOD, this._metrics.maxLOD);
-        const lod = Math.round(tmp);
-        const offset = tmp - lod;
-        if (lod != this._levelOfDetail || offset != this._levelOfDetailOffset) {
-            this._levelOfDetail = lod;
-            this._levelOfDetailOffset = offset;
-            this.invalidate();
-        }
+        return this._levelOfDetail;
     }
 
     public get width(): number {
@@ -92,16 +92,17 @@ export class View2<T> {
         return this._center?.lon || Geo2.Default.lon;
     }
 
-    public get scaling(): number {
-        return this._levelOfDetailOffset < 0 ? 1 / (1 - this._levelOfDetailOffset) : 1 + this._levelOfDetailOffset;
-    }
-
-    public get levelOfDetailOffset(): number {
-        return this._levelOfDetailOffset;
-    }
-
     public get isValid(): boolean {
         return this._valid;
+    }
+
+    public setLevelOfDetail(v: number): View2<T> {
+        const lod = Scalar.Clamp(v || 0, this._metrics.minLOD, this._metrics.maxLOD);
+        if (lod != this._levelOfDetail) {
+            this._levelOfDetail = lod;
+            this.invalidate();
+        }
+        return this;
     }
 
     public resize(width: number, height: number): View2<T> {
@@ -155,17 +156,25 @@ export class View2<T> {
         const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
 
         // for the purpose we need to know the scale factor which is depending of the transition state between zoom level
-        const scale = this.scaling;
-        const w = this._size.width * scale;
-        const h = this._size.height * scale;
-        const lod = Math.floor(this._levelOfDetail);
+        const lod = Math.round(this._levelOfDetail);
+        let lodOffset = this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC; // Trick to avoid floating point error.
+        let scale = lodOffset < 0 ? View2.ZOOM_ACC / (View2.ZOOM_ACC - lodOffset) : (View2.ZOOM_ACC + lodOffset) / View2.ZOOM_ACC;
+        lodOffset /= View2.ZOOM_ACC;
+        this._scale.x = scale;
+        this._scale.y = scale;
+
+        console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
+
+        const w = this._size.width / scale;
+        const h = this._size.height / scale;
+        console.log("W:", w, "H:", h);
 
         const halfWitdh = w / 2;
         const halfHeight = h / 2;
         const x0 = Math.round(pixelCenterXY.x - halfWitdh);
         const y0 = Math.round(pixelCenterXY.y - halfHeight);
         this._innerbounds = new Rectangle(x0, y0, w, h);
-        const tileSize = this._metrics.tileSize * scale;
+        const tileSize = this._metrics.tileSize;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
 
@@ -207,7 +216,7 @@ export class View2<T> {
                 removed.push(c);
             }
 
-            const e = new UpdateEvents(this._innerbounds, added, removed, remains);
+            const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);
         }
     }

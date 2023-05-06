@@ -10,7 +10,7 @@ export declare class CanvasTileMap {
     _directory?: ITileDirectory<HTMLImageElement>;
     _cache: Map<string, Tile<LookupData<HTMLImageElement>>>;
     _bounds?: IRectangle;
-    _offset: Cartesian2;
+    _scale: Cartesian2;
     constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number);
     get center(): IGeo2;
     invalidateSize(w?: number, h?: number): void;

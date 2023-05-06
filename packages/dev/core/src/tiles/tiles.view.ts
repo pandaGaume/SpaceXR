@@ -152,9 +152,6 @@ export class View2<T> {
     }
 
     protected doValidate() {
-        // given center, level of detail and size, compute the map bounds
-        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
-
         // for the purpose we need to know the scale factor which is depending of the transition state between zoom level
         const lod = Math.round(this._levelOfDetail);
         let lodOffset = this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC; // Trick to avoid floating point error.
@@ -171,15 +168,21 @@ export class View2<T> {
 
         const halfWitdh = w / 2;
         const halfHeight = h / 2;
+        // given center, level of detail and size, compute the map bounds
+        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         const x0 = Math.round(pixelCenterXY.x - halfWitdh);
         const y0 = Math.round(pixelCenterXY.y - halfHeight);
         this._innerbounds = new Rectangle(x0, y0, w, h);
         const tileSize = this._metrics.tileSize;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
+        console.log("Center", pixelCenterXY.toString());
+        console.log("InnerBound", this._innerbounds.toString());
+        console.log("OuterBound", this._outerbounds.toString());
 
         // given the pixel bounds we can easily validate or invalidate tile list
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
+        console.log("TileX:", nwTileXY.x, "TileY:", nwTileXY.y, " LevelOfDetail:", lod);
         const seTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.right, this._outerbounds.bottom, lod);
         const rect = Rectangle.FromPoints(nwTileXY, seTileXY);
         const remainBounds = rect.intersection(this._outerboundsTileXY);

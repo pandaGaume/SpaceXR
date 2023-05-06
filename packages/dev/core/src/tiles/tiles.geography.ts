@@ -4,6 +4,7 @@ import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
 import { Scalar } from "../math/math";
 import { Geo2 } from "../geography/geography.position";
+import { Cartesian2 } from "../geometry/geometry.cartesian";
 
 export class EPSG3857 extends AbstractTileMetrics {
     public static Shared = new EPSG3857();
@@ -26,6 +27,7 @@ export class EPSG3857 extends AbstractTileMetrics {
     }
 
     public getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2 {
+        const t = tileXY || Cartesian2.Zero();
         latitude = Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
 
@@ -33,12 +35,9 @@ export class EPSG3857 extends AbstractTileMetrics {
         const x = Math.floor(((longitude + 180) / 360) * n);
         const lat_rad = latitude * Scalar.DEG2RAD;
         const y = Math.floor(((1 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2) * n);
-        if (tileXY) {
-            tileXY.x = x;
-            tileXY.y = y;
-            return tileXY;
-        }
-        return <ICartesian2>{ x: x, y: y };
+        t.x = x;
+        t.y = y;
+        return t;
     }
 
     public getTileXYToLatLon(x: number, y: number, levelOfDetail: number, loc?: IGeo2): IGeo2 {
@@ -54,7 +53,7 @@ export class EPSG3857 extends AbstractTileMetrics {
     }
 
     public getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2 {
-        const p = pixelXY || <ICartesian2>{};
+        const p = pixelXY || Cartesian2.Zero();
         latitude = Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
 
@@ -84,7 +83,7 @@ export class EPSG3857 extends AbstractTileMetrics {
     }
 
     public getTileXYToPixelXY(tileX: number, tileY: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2 {
-        const p = pixelXY || <ICartesian2>{};
+        const p = pixelXY || Cartesian2.Zero();
         const s = this.tileSize;
         p.x = tileX * s;
         p.y = tileY * s;
@@ -92,7 +91,7 @@ export class EPSG3857 extends AbstractTileMetrics {
     }
 
     public getPixelXYToTileXY(pixelX: number, pixelY: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2 {
-        const t = tileXY || <ICartesian2>{};
+        const t = tileXY || Cartesian2.Zero();
         const s = this.tileSize;
         t.x = Math.floor(pixelX / s);
         t.y = Math.floor(pixelY / s);

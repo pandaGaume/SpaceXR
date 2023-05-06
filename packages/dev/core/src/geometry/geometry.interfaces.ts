@@ -3,12 +3,14 @@ import { IComparable } from "../types";
 export interface ICartesian2 {
     x: number;
     y: number;
+    toString(): string;
 }
 
 export interface ICartesian3 {
     x: number;
     y: number;
     z: number;
+    toString(): string;
 }
 
 export interface ISize2 extends IComparable<ISize2> {
@@ -40,4 +42,5 @@ export interface IRectangle {
     intersect(other: IRectangle): boolean;
     intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;
     contains(x: number, y: number): boolean;
+    toString(): string;
 }

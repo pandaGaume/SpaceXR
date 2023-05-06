@@ -65,4 +65,7 @@ export class Rectangle implements IRectangle {
     public contains(x: number, y: number): boolean {
         return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
     }
+    public toString() {
+        return `left:${this.left}, top:${this.top}, right:${this.right}, bottom:${this.bottom}`;
+    }
 }

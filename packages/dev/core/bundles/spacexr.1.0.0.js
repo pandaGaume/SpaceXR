@@ -856,6 +856,9 @@ class Cartesian2 {
         this.x = x;
         this.y = y;
     }
+    toString() {
+        return `x:${this.x}, y:${this.y}`;
+    }
 }
 class Cartesian3 {
     static Zero() {
@@ -865,6 +868,9 @@ class Cartesian3 {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+    toString() {
+        return `x:${this.x}, y:${this.y}, z:${this.z}`;
     }
 }
 //# sourceMappingURL=geometry.cartesian.js.map
@@ -947,6 +953,9 @@ class Rectangle {
     }
     contains(x, y) {
         return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
+    }
+    toString() {
+        return `left:${this.left}, top:${this.top}, right:${this.right}, bottom:${this.bottom}`;
     }
 }
 //# sourceMappingURL=geometry.rectangle.js.map
@@ -1142,16 +1151,26 @@ class CanvasTileMap {
                 const offsetY = this._bounds.y;
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+                const lod = Math.round(this._view.levelOfDetail);
                 ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
                 ctx.save();
                 ctx.translate(-offsetX, -offsetY);
                 for (const entry of this._cache.entries()) {
                     const t = entry[1];
-                    const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
-                    const x = pixelXY.x;
-                    const y = pixelXY.y;
                     if (t.data) {
-                        ctx.drawImage(t.data, x, y);
+                        const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                        if (t.levelOfDetail != lod) {
+                            const p = Math.pow(2, Math.abs(t.levelOfDetail - lod));
+                            if (lod < t.levelOfDetail) {
+                                pixelXY.x /= p;
+                                pixelXY.y /= p;
+                            }
+                            else {
+                                pixelXY.x *= p;
+                                pixelXY.y *= p;
+                            }
+                        }
+                        ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
                         continue;
                     }
                 }
@@ -1163,16 +1182,26 @@ class CanvasTileMap {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
+                const lod = Math.round(this._view.levelOfDetail);
                 const offsetX = this._bounds.x;
                 const offsetY = this._bounds.y;
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
                 const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
-                const x = pixelXY.x;
-                const y = pixelXY.y;
+                if (a.levelOfDetail != lod) {
+                    const p = Math.pow(2, Math.abs(a.levelOfDetail - lod));
+                    if (lod < a.levelOfDetail) {
+                        pixelXY.x /= p;
+                        pixelXY.y /= p;
+                    }
+                    else {
+                        pixelXY.x *= p;
+                        pixelXY.y *= p;
+                    }
+                }
                 ctx.save();
                 ctx.translate(-offsetX, -offsetY);
-                ctx.drawImage(data, x, y);
+                ctx.drawImage(data, pixelXY.x, pixelXY.y);
                 ctx.restore();
             }
         }
@@ -2937,7 +2966,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
 /* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
-/* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
+/* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -2955,21 +2986,19 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
         return (Math.cos(latitude * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD) * 2 * Math.PI * this._ellipsoid.semiMajorAxis) / this.mapSize(levelOfDetail);
     }
     getLatLonToTileXY(latitude, longitude, levelOfDetail, tileXY) {
+        const t = tileXY || _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         latitude = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
         const n = Math.pow(2, levelOfDetail);
         const x = Math.floor(((longitude + 180) / 360) * n);
         const lat_rad = latitude * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
         const y = Math.floor(((1 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2) * n);
-        if (tileXY) {
-            tileXY.x = x;
-            tileXY.y = y;
-            return tileXY;
-        }
-        return { x: x, y: y };
+        t.x = x;
+        t.y = y;
+        return t;
     }
     getTileXYToLatLon(x, y, levelOfDetail, loc) {
-        const l = loc || _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero();
+        const l = loc || _geography_geography_position__WEBPACK_IMPORTED_MODULE_4__.Geo2.Zero();
         let n = Math.pow(2, levelOfDetail);
         const lon = -180 + (x / n) * 360;
         n = Math.PI - (2 * Math.PI * y) / n;
@@ -2979,7 +3008,7 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
         return l;
     }
     getLatLonToPixelXY(latitude, longitude, levelOfDetail, pixelXY) {
-        const p = pixelXY || {};
+        const p = pixelXY || _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         latitude = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
         const x = (longitude + 180) / 360;
@@ -2991,7 +3020,7 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
         return p;
     }
     getPixelXYToLatLon(pixelX, pixelY, levelOfDetail, latLon) {
-        const g = latLon || _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero();
+        const g = latLon || _geography_geography_position__WEBPACK_IMPORTED_MODULE_4__.Geo2.Zero();
         const mapSize = this.mapSize(levelOfDetail);
         const x = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(pixelX, 0, mapSize - 1) / mapSize - 0.5;
         const y = 0.5 - _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(pixelY, 0, mapSize - 1) / mapSize;
@@ -3000,14 +3029,14 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
         return g;
     }
     getTileXYToPixelXY(tileX, tileY, levelOfDetail, pixelXY) {
-        const p = pixelXY || {};
+        const p = pixelXY || _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         const s = this.tileSize;
         p.x = tileX * s;
         p.y = tileY * s;
         return p;
     }
     getPixelXYToTileXY(pixelX, pixelY, levelOfDetail, tileXY) {
-        const t = tileXY || {};
+        const t = tileXY || _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         const s = this.tileSize;
         t.x = Math.floor(pixelX / s);
         t.y = Math.floor(pixelY / s);
@@ -3644,7 +3673,6 @@ class View2 {
         return this;
     }
     doValidate() {
-        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
         const lod = Math.round(this._levelOfDetail);
         let lodOffset = this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC;
         let scale = lodOffset < 0 ? View2.ZOOM_ACC / (View2.ZOOM_ACC - lodOffset) : (View2.ZOOM_ACC + lodOffset) / View2.ZOOM_ACC;
@@ -3657,13 +3685,18 @@ class View2 {
         console.log("W:", w, "H:", h);
         const halfWitdh = w / 2;
         const halfHeight = h / 2;
+        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         const x0 = Math.round(pixelCenterXY.x - halfWitdh);
         const y0 = Math.round(pixelCenterXY.y - halfHeight);
         this._innerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0, y0, w, h);
         const tileSize = this._metrics.tileSize;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
+        console.log("Center", pixelCenterXY.toString());
+        console.log("InnerBound", this._innerbounds.toString());
+        console.log("OuterBound", this._outerbounds.toString());
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
+        console.log("TileX:", nwTileXY.x, "TileY:", nwTileXY.y, " LevelOfDetail:", lod);
         const seTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.right, this._outerbounds.bottom, lod);
         const rect = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.FromPoints(nwTileXY, seTileXY);
         const remainBounds = rect.intersection(this._outerboundsTileXY);

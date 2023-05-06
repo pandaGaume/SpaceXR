@@ -117,16 +117,25 @@ export class CanvasTileMap {
                 const offsetY = this._bounds.y;
                 const metrics = this.metrics;
                 const temp = Cartesian2.Zero();
+                const lod = Math.round(this._view.levelOfDetail);
                 ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
                 ctx.save();
                 ctx.translate(-offsetX, -offsetY);
                 for (const entry of this._cache.entries()) {
                     const t = entry[1];
-                    const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
-                    const x = pixelXY.x;
-                    const y = pixelXY.y;
                     if (t.data) {
-                        ctx.drawImage(t.data, x, y);
+                        const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                        if (t.levelOfDetail != lod) {
+                            const p = Math.pow(2, Math.abs(t.levelOfDetail - lod));
+                            if (lod < t.levelOfDetail) {
+                                pixelXY.x /= p;
+                                pixelXY.y /= p;
+                            } else {
+                                pixelXY.x *= p;
+                                pixelXY.y *= p;
+                            }
+                        }
+                        ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
                         continue;
                     }
                 }
@@ -139,16 +148,25 @@ export class CanvasTileMap {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
+                const lod = Math.round(this._view.levelOfDetail);
                 const offsetX = this._bounds.x;
                 const offsetY = this._bounds.y;
                 const metrics = this.metrics;
                 const temp = Cartesian2.Zero();
                 const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
-                const x = pixelXY.x;
-                const y = pixelXY.y;
+                if (a.levelOfDetail != lod) {
+                    const p = Math.pow(2, Math.abs(a.levelOfDetail - lod));
+                    if (lod < a.levelOfDetail) {
+                        pixelXY.x /= p;
+                        pixelXY.y /= p;
+                    } else {
+                        pixelXY.x *= p;
+                        pixelXY.y *= p;
+                    }
+                }
                 ctx.save();
                 ctx.translate(-offsetX, -offsetY);
-                ctx.drawImage(data, x, y);
+                ctx.drawImage(data, pixelXY.x, pixelXY.y);
                 ctx.restore();
             }
         }

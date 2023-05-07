@@ -1147,18 +1147,25 @@ class CanvasTileMap {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
-                const offsetX = this._bounds.x;
-                const offsetY = this._bounds.y;
+                const center = this._bounds.center;
+                console.log("center", center.toString());
+                const centerX = center.x;
+                const centerY = center.y;
+                const offsetX = center.x - this._bounds.x;
+                const offsetY = center.x - this._bounds.y;
+                console.log("offsetX", offsetX, "offestY", offsetY);
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
                 const lod = Math.round(this._view.levelOfDetail);
                 ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
                 ctx.save();
-                ctx.translate(-offsetX, -offsetY);
+                ctx.translate(offsetX, offsetY);
                 for (const entry of this._cache.entries()) {
                     const t = entry[1];
                     if (t.data) {
                         const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                        pixelXY.x -= centerX;
+                        pixelXY.y -= centerY;
                         if (t.levelOfDetail != lod) {
                             const p = Math.pow(2, Math.abs(t.levelOfDetail - lod));
                             if (lod < t.levelOfDetail) {
@@ -1183,11 +1190,16 @@ class CanvasTileMap {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
                 const lod = Math.round(this._view.levelOfDetail);
-                const offsetX = this._bounds.x;
-                const offsetY = this._bounds.y;
+                const center = this._bounds.center;
+                const centerX = center.x;
+                const centerY = center.y;
+                const offsetX = this._bounds.x - centerX;
+                const offsetY = this._bounds.y - centerY;
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
                 const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
+                pixelXY.x -= centerX;
+                pixelXY.y -= centerY;
                 if (a.levelOfDetail != lod) {
                     const p = Math.pow(2, Math.abs(a.levelOfDetail - lod));
                     if (lod < a.levelOfDetail) {

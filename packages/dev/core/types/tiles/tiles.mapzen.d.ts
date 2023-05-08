@@ -20,3 +20,7 @@ export declare class MapZenTileClientOptions {
     static NormalImages: TileClientOptions<HTMLImageElement>;
     static Normal: TileClientOptions<Float32Array>;
 }
+export declare class MapZenTileMetricOptions {
+    static MaxLevelOfDetail: number;
+    static Shared: import("./tiles.interfaces").ITileMetricsOptions;
+}

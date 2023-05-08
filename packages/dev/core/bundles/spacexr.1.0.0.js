@@ -955,7 +955,7 @@ class Rectangle {
         return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
     }
     toString() {
-        return `left:${this.left}, top:${this.top}, right:${this.right}, bottom:${this.bottom}`;
+        return `left:${this.left}, top:${this.top}, width:${this.width}, height:${this.height}`;
     }
 }
 //# sourceMappingURL=geometry.rectangle.js.map
@@ -1148,11 +1148,11 @@ class CanvasTileMap {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
                 const center = this._bounds.center;
-                console.log("center", center.toString());
                 const centerX = center.x;
                 const centerY = center.y;
-                const offsetX = center.x - this._bounds.x;
-                const offsetY = center.x - this._bounds.y;
+                const offsetX = this._canvas.width / 2;
+                const offsetY = this._canvas.height / 2;
+                console.log("center", center.toString());
                 console.log("offsetX", offsetX, "offestY", offsetY);
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
@@ -1193,8 +1193,8 @@ class CanvasTileMap {
                 const center = this._bounds.center;
                 const centerX = center.x;
                 const centerY = center.y;
-                const offsetX = this._bounds.x - centerX;
-                const offsetY = this._bounds.y - centerY;
+                const offsetX = this._canvas.width / 2;
+                const offsetY = this._canvas.height / 2;
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
                 const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
@@ -2570,6 +2570,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.JsonTileCodec),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   "MapZenTileClientOptions": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapZenTileClientOptions),
+/* harmony export */   "MapZenTileMetricOptions": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapZenTileMetricOptions),
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
 /* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapzenNormalValueDecoder),
 /* harmony export */   "TextTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.TextTileCodec),
@@ -2986,8 +2987,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileMetrics {
-    constructor(ellipsoid) {
-        super();
+    constructor(options, ellipsoid) {
+        super(options);
         this._ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
     }
     mapScale(latitude, levelOfDetail, dpi) {
@@ -3163,12 +3164,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* binding */ MapZenDemUrlBuilder),
 /* harmony export */   "MapZenTileClientOptions": () => (/* binding */ MapZenTileClientOptions),
+/* harmony export */   "MapZenTileMetricOptions": () => (/* binding */ MapZenTileMetricOptions),
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* binding */ MapzenAltitudeDecoder),
 /* harmony export */   "MapzenNormalValueDecoder": () => (/* binding */ MapzenNormalValueDecoder)
 /* harmony export */ });
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.client */ "./dist/tiles/tiles.client.js");
 /* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.urlBuilder */ "./dist/tiles/tiles.urlBuilder.js");
 /* harmony import */ var _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.codecs.image */ "./dist/tiles/tiles.codecs.image.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+
 
 
 
@@ -3211,6 +3215,11 @@ MapZenTileClientOptions.DEMImages = new _tiles_client__WEBPACK_IMPORTED_MODULE_1
 MapZenTileClientOptions.DEM = new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileClientOptions(MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenAltitudeDecoder.Shared));
 MapZenTileClientOptions.NormalImages = new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileClientOptions(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec());
 MapZenTileClientOptions.Normal = new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileClientOptions(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenNormalValueDecoder.Shared));
+
+class MapZenTileMetricOptions {
+}
+MapZenTileMetricOptions.MaxLevelOfDetail = 15;
+MapZenTileMetricOptions.Shared = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(MapZenTileMetricOptions.MaxLevelOfDetail).build();
 
 //# sourceMappingURL=tiles.mapzen.js.map
 
@@ -3667,10 +3676,11 @@ class View2 {
         return this;
     }
     translate(x, y) {
-        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
+        const lod = Math.round(this._levelOfDetail);
+        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += x;
         pixelCenterXY.y += y;
-        const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._levelOfDetail);
+        const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
         return this.center(center.lat, center.lon);
     }
     invalidate() {
@@ -3847,6 +3857,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Luminosity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Luminosity),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
 /* harmony export */   "MapZenTileClientOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenTileClientOptions),
+/* harmony export */   "MapZenTileMetricOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenTileMetricOptions),
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
 /* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenNormalValueDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Mass),

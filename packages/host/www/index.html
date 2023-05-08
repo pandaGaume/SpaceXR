@@ -26,8 +26,9 @@
                 const lod = 10;
 
                 // definir la source de donnée.
-                const terrariumImg = new SPACEXR.TileClient(SPACEXR.MapZenTileClientOptions.DEMImages);
-                const directory = new SPACEXR.TilePyramid(new SPACEXR.EPSG3857(), terrariumImg);
+                const terrariumImgClient = new SPACEXR.TileClient(SPACEXR.MapZenTileClientOptions.DEMImages);
+                const mapzenMetrics = new SPACEXR.EPSG3857(SPACEXR.MapZenTileMetricOptions.Shared);
+                const directory = new SPACEXR.TilePyramid(mapzenMetrics, terrariumImgClient);
 
                 // construire la carte.
                 const map = new SPACEXR.CanvasTileMap(canvas, directory, center.lat, center.lon, lod);

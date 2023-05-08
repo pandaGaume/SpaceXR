@@ -114,13 +114,13 @@ export class CanvasTileMap {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
                 const center = this._bounds.center;
-                console.log("center", center.toString());
                 const centerX = center.x;
                 const centerY = center.y;
 
-                const offsetX = center.x - this._bounds.x;
-                const offsetY = center.x - this._bounds.y;
+                const offsetX = this._canvas.width/2;
+                const offsetY = this._canvas.height/2;
 
+                console.log("center", center.toString());
                 console.log("offsetX", offsetX, "offestY", offsetY);
                 const metrics = this.metrics;
                 const temp = Cartesian2.Zero();
@@ -162,8 +162,8 @@ export class CanvasTileMap {
                 const center = this._bounds.center;
                 const centerX = center.x;
                 const centerY = center.y;
-                const offsetX = this._bounds.x - centerX;
-                const offsetY = this._bounds.y - centerY;
+                const offsetX = this._canvas.width/2;
+                const offsetY = this._canvas.height/2;
                 const metrics = this.metrics;
                 const temp = Cartesian2.Zero();
                 const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);

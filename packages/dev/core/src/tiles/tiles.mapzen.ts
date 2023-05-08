@@ -2,6 +2,7 @@ import { TileClientOptions } from "./tiles.client";
 import { IPixelDecoder } from "./tiles.interfaces";
 import { WebTileUrlBuilder } from "./tiles.urlBuilder";
 import { Float32TileCodec, ImageTileCodec } from "./tiles.codecs.image";
+import { TileMetricsOptionsBuilder } from "./tiles.metrics";
 
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     public static Terrarium = new MapZenDemUrlBuilder("terrarium");
@@ -45,4 +46,10 @@ export class MapZenTileClientOptions {
     public static DEM = new TileClientOptions(MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared));
     public static NormalImages = new TileClientOptions(MapZenDemUrlBuilder.Normal, new ImageTileCodec());
     public static Normal = new TileClientOptions(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared));
+}
+
+export class MapZenTileMetricOptions {
+    public static MaxLevelOfDetail = 15;
+
+    public static Shared = new TileMetricsOptionsBuilder().withMaxLOD(MapZenTileMetricOptions.MaxLevelOfDetail).build();
 }

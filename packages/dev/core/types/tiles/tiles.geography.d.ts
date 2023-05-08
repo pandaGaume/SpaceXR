@@ -2,10 +2,11 @@ import { AbstractTileMetrics } from "./tiles.metrics";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
+import { ITileMetricsOptions } from "./tiles.interfaces";
 export declare class EPSG3857 extends AbstractTileMetrics {
     static Shared: EPSG3857;
     _ellipsoid: Ellipsoid;
-    constructor(ellipsoid?: Ellipsoid);
+    constructor(options?: ITileMetricsOptions, ellipsoid?: Ellipsoid);
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     groundResolution(latitude: number, levelOfDetail: number): number;
     getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;

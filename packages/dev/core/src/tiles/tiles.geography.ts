@@ -5,14 +5,15 @@ import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
 import { Scalar } from "../math/math";
 import { Geo2 } from "../geography/geography.position";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
+import { ITileMetricsOptions } from "./tiles.interfaces";
 
 export class EPSG3857 extends AbstractTileMetrics {
     public static Shared = new EPSG3857();
 
     _ellipsoid: Ellipsoid;
 
-    public constructor(ellipsoid?: Ellipsoid) {
-        super();
+    public constructor(options?: ITileMetricsOptions, ellipsoid?: Ellipsoid) {
+        super(options);
         this._ellipsoid = ellipsoid || Ellipsoid.WGS84;
     }
 

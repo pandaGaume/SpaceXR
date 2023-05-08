@@ -130,11 +130,12 @@ export class View2<T> {
     }
 
     public translate(x: number, y: number): View2<T> {
-        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._levelOfDetail);
+        const lod = Math.round(this._levelOfDetail);
+        const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
 
         pixelCenterXY.x += x;
         pixelCenterXY.y += y;
-        const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._levelOfDetail);
+        const center = this._metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
         return this.center(center.lat, center.lon);
     }
 

@@ -50,14 +50,15 @@ export class TileClient<T, R extends ITileAddress> implements ITileClient<T, R> 
 
     public async fetchAsync(request: ITileAddress): Promise<Awaited<T> | undefined> {
         const url = this._o.urlFactory.buildUrl(request.x, request.y, request.levelOfDetail);
+        let response;
         try {
-            const response = await fetch(url);
-            if (response && response.ok) {
-                return await this._o.codec.decodeAsync(response);
-            }
+            response = await fetch(url);
         } catch (e) {
-            console.log(e);
+            console.log("Can not fetch ", url);
         } finally {
+        }
+        if (response && response.ok) {
+            return await this._o.codec.decodeAsync(response);
         }
         return undefined;
     }

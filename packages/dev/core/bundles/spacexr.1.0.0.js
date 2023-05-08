@@ -1093,7 +1093,6 @@ class CanvasTileMap {
         this._view.validate();
     }
     setZoom(zoom) {
-        console.log("set zoom ", zoom);
         this._view.setLevelOfDetail(zoom).validate();
     }
     zoomIn(delta) {
@@ -1113,8 +1112,9 @@ class CanvasTileMap {
             return;
         }
         this._bounds = e.bounds;
-        if (e.removed) {
-            if (!e.remain) {
+        this._scale = e.scale;
+        if (e.removed && e.removed.length != 0) {
+            if (!e.remain || e.remain.length == 0) {
                 this._cache.clear();
             }
             else {
@@ -1125,16 +1125,23 @@ class CanvasTileMap {
                 }
             }
         }
-        if (e.added) {
+        if (e.added && e.added.length != 0) {
             for (const c of e.added) {
                 const tile = new _tiles_tiles__WEBPACK_IMPORTED_MODULE_3__.Tile(c.x, c.y, c.levelOfDetail);
                 if (this._directory) {
-                    this._directory.lookupAsync(c, tile).then(((result) => {
-                        tile.data = result.data;
-                        if (tile.data) {
-                            this.drawImage(tile, tile.data);
-                        }
-                    }).bind(this));
+                    if (this.metrics.isValidAddress(c)) {
+                        this._directory
+                            .lookupAsync(c, tile)
+                            .then(((result) => {
+                            tile.data = result.data;
+                            if (tile.data) {
+                                this.drawImage(tile, tile.data);
+                            }
+                        }).bind(this))
+                            .catch((e) => {
+                            console.log("Error when lookup", c.toString(), e);
+                        });
+                    }
                 }
                 const binaryKey = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(c);
                 const key = binaryKey.join("");
@@ -1148,35 +1155,18 @@ class CanvasTileMap {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
                 const center = this._bounds.center;
-                const centerX = center.x;
-                const centerY = center.y;
-                const offsetX = this._canvas.width / 2;
-                const offsetY = this._canvas.height / 2;
-                console.log("center", center.toString());
-                console.log("offsetX", offsetX, "offestY", offsetY);
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-                const lod = Math.round(this._view.levelOfDetail);
                 ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
                 ctx.save();
-                ctx.translate(offsetX, offsetY);
+                ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
+                ctx.scale(this._scale.x, this._scale.y);
                 for (const entry of this._cache.entries()) {
                     const t = entry[1];
                     if (t.data) {
                         const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
-                        pixelXY.x -= centerX;
-                        pixelXY.y -= centerY;
-                        if (t.levelOfDetail != lod) {
-                            const p = Math.pow(2, Math.abs(t.levelOfDetail - lod));
-                            if (lod < t.levelOfDetail) {
-                                pixelXY.x /= p;
-                                pixelXY.y /= p;
-                            }
-                            else {
-                                pixelXY.x *= p;
-                                pixelXY.y *= p;
-                            }
-                        }
+                        pixelXY.x -= center.x;
+                        pixelXY.y -= center.y;
                         ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
                         continue;
                     }
@@ -1185,34 +1175,19 @@ class CanvasTileMap {
             }
         }
     }
-    drawImage(a, data) {
+    drawImage(t, data) {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
-                const lod = Math.round(this._view.levelOfDetail);
                 const center = this._bounds.center;
-                const centerX = center.x;
-                const centerY = center.y;
-                const offsetX = this._canvas.width / 2;
-                const offsetY = this._canvas.height / 2;
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-                const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
-                pixelXY.x -= centerX;
-                pixelXY.y -= centerY;
-                if (a.levelOfDetail != lod) {
-                    const p = Math.pow(2, Math.abs(a.levelOfDetail - lod));
-                    if (lod < a.levelOfDetail) {
-                        pixelXY.x /= p;
-                        pixelXY.y /= p;
-                    }
-                    else {
-                        pixelXY.x *= p;
-                        pixelXY.y *= p;
-                    }
-                }
                 ctx.save();
-                ctx.translate(-offsetX, -offsetY);
+                ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
+                ctx.scale(this._scale.x, this._scale.y);
+                const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                pixelXY.x -= center.x;
+                pixelXY.y -= center.y;
                 ctx.drawImage(data, pixelXY.x, pixelXY.y);
                 ctx.restore();
             }
@@ -2687,16 +2662,17 @@ class TileClient {
     }
     async fetchAsync(request) {
         const url = this._o.urlFactory.buildUrl(request.x, request.y, request.levelOfDetail);
+        let response;
         try {
-            const response = await fetch(url);
-            if (response && response.ok) {
-                return await this._o.codec.decodeAsync(response);
-            }
+            response = await fetch(url);
         }
         catch (e) {
-            console.log(e);
+            console.log("Can not fetch ", url);
         }
         finally {
+        }
+        if (response && response.ok) {
+            return await this._o.codec.decodeAsync(response);
         }
         return undefined;
     }
@@ -3375,6 +3351,19 @@ class AbstractTileMetrics {
     get maxLongitude() {
         return this._o.maxLongitude || TileMetricsOptions.DefaultMaxLongitude;
     }
+    isValidAddress(a) {
+        if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
+            return false;
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            return false;
+        }
+        if (a.y < 0 || a.y > s) {
+            return false;
+        }
+        return true;
+    }
     assertValidAddress(a) {
         if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
             throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
@@ -3433,32 +3422,27 @@ class TilePyramid {
     get tileCount() {
         return this._infos.tileCount;
     }
-    async lookupAsync(address, args) {
+    lookupAsync(address, args) {
         this.metrics.assertValidAddress(address);
-        const n = this.lookup(address);
+        const n = this._lookup(address);
         let data = n._value?.deref();
         if (data) {
-            return new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.TileDirectoryResult(address, data, args);
+            return Promise.resolve(new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.TileDirectoryResult(address, data, args));
         }
-        if (this.datasource) {
-            try {
-                data = await this.datasource.fetchAsync(n);
+        const datasource = this.datasource;
+        return new Promise((resolve, reject) => {
+            if (datasource) {
+                datasource
+                    .fetchAsync(n)
+                    .then((v) => {
+                    n._value = v ? new WeakRef(v) : undefined;
+                    resolve(new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.TileDirectoryResult(address, v, args));
+                })
+                    .catch((e) => reject(e));
             }
-            catch (e) {
-            }
-            finally {
-                if (data) {
-                    n._value = new WeakRef(data);
-                }
-                else {
-                    n._value = undefined;
-                }
-                return new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.TileDirectoryResult(address, data, args);
-            }
-        }
-        return new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.TileDirectoryResult(address, undefined, args);
+        });
     }
-    lookup(address) {
+    _lookup(address) {
         const key = _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(address);
         let lod = 0;
         let n = this._root;
@@ -3701,10 +3685,8 @@ class View2 {
         lodOffset /= View2.ZOOM_ACC;
         this._scale.x = scale;
         this._scale.y = scale;
-        console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
         const w = this._size.width / scale;
         const h = this._size.height / scale;
-        console.log("W:", w, "H:", h);
         const halfWitdh = w / 2;
         const halfHeight = h / 2;
         const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
@@ -3714,41 +3696,35 @@ class View2 {
         const tileSize = this._metrics.tileSize;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
-        console.log("Center", pixelCenterXY.toString());
-        console.log("InnerBound", this._innerbounds.toString());
-        console.log("OuterBound", this._outerbounds.toString());
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
-        console.log("TileX:", nwTileXY.x, "TileY:", nwTileXY.y, " LevelOfDetail:", lod);
         const seTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.right, this._outerbounds.bottom, lod);
         const rect = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.FromPoints(nwTileXY, seTileXY);
         const remainBounds = rect.intersection(this._outerboundsTileXY);
         this._outerboundsTileXY = rect;
         const components = [];
-        const hasObservers = this._updateObservable && this._updateObservable.hasObservers();
-        let added = undefined;
-        let remains = undefined;
-        let removed = undefined;
         for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
             for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                const c = new _tiles_address__WEBPACK_IMPORTED_MODULE_7__.TileAddress(tx, ty, lod);
-                components.push(c);
-                if (hasObservers && !remainBounds?.contains(tx, ty)) {
-                    added = added || new Array();
-                    added.push(c);
-                }
+                components.push(new _tiles_address__WEBPACK_IMPORTED_MODULE_7__.TileAddress(tx, ty, lod));
             }
         }
-        if (hasObservers) {
+        if (this._updateObservable && this._updateObservable.hasObservers()) {
+            let added = new Array();
+            let remains = new Array();
+            let removed = new Array();
             const old = this._tiles;
             this._tiles = components;
             for (const c of old) {
-                if (remainBounds?.contains(c.x, c.y)) {
-                    remains = remains || new Array();
+                if (c.levelOfDetail == lod && remainBounds?.contains(c.x, c.y)) {
                     remains.push(c);
                     continue;
                 }
-                removed = removed || new Array();
                 removed.push(c);
+            }
+            for (const c of components) {
+                if (remainBounds?.contains(c.x, c.y)) {
+                    continue;
+                }
+                added.push(c);
             }
             const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);

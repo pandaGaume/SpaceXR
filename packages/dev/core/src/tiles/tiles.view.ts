@@ -161,11 +161,11 @@ export class View2<T> {
         this._scale.x = scale;
         this._scale.y = scale;
 
-        console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
+        //console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
 
         const w = this._size.width / scale;
         const h = this._size.height / scale;
-        console.log("W:", w, "H:", h);
+        //console.log("W:", w, "H:", h);
 
         const halfWitdh = w / 2;
         const halfHeight = h / 2;
@@ -177,47 +177,47 @@ export class View2<T> {
         const tileSize = this._metrics.tileSize;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
-        console.log("Center", pixelCenterXY.toString());
-        console.log("InnerBound", this._innerbounds.toString());
-        console.log("OuterBound", this._outerbounds.toString());
+        //console.log("Center", pixelCenterXY.toString());
+        //console.log("InnerBound", this._innerbounds.toString());
+        //console.log("OuterBound", this._outerbounds.toString());
 
         // given the pixel bounds we can easily validate or invalidate tile list
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
-        console.log("TileX:", nwTileXY.x, "TileY:", nwTileXY.y, " LevelOfDetail:", lod);
+        //console.log("TileX:", nwTileXY.x, "TileY:", nwTileXY.y, " LevelOfDetail:", lod);
         const seTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.right, this._outerbounds.bottom, lod);
         const rect = Rectangle.FromPoints(nwTileXY, seTileXY);
         const remainBounds = rect.intersection(this._outerboundsTileXY);
         this._outerboundsTileXY = rect;
 
         const components = [];
-        const hasObservers = this._updateObservable && this._updateObservable.hasObservers();
-        let added = undefined;
-        let remains = undefined;
-        let removed = undefined;
 
         for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
             for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                const c = new TileAddress(tx, ty, lod);
-                components.push(c);
-                if (hasObservers && !remainBounds?.contains(tx, ty)) {
-                    added = added || new Array<ITileAddress>();
-                    added.push(c);
-                }
+                components.push(new TileAddress(tx, ty, lod));
             }
         }
 
-        if (hasObservers) {
+        if (this._updateObservable && this._updateObservable.hasObservers()) {
+            let added = new Array<ITileAddress>();
+            let remains = new Array<ITileAddress>();
+            let removed = new Array<ITileAddress>();
+
             const old = this._tiles;
             this._tiles = components;
 
             for (const c of old) {
-                if (remainBounds?.contains(c.x, c.y)) {
-                    remains = remains || new Array<ITileAddress>();
+                if (c.levelOfDetail == lod && remainBounds?.contains(c.x, c.y)) {
                     remains.push(c);
                     continue;
                 }
-                removed = removed || new Array<ITileAddress>();
                 removed.push(c);
+            }
+
+            for (const c of components) {
+                if (remainBounds?.contains(c.x, c.y)) {
+                    continue;
+                }
+                added.push(c);
             }
 
             const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);

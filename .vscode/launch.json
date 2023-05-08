@@ -11,6 +11,17 @@
             "pathMapping": {
                 "/": "${workspaceFolder}/packages/dev/core/"
             }
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch sample on ms edge",
+            "url": "http://localhost:1338/packages/host/www/index.html",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "pathMapping": {
+                "/": "${workspaceFolder}/packages/dev/core/"
+            }
         }
     ]
 }

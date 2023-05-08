@@ -171,6 +171,20 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
         return this._o.maxLongitude || TileMetricsOptions.DefaultMaxLongitude;
     }
 
+    public isValidAddress(a: ITileAddress): boolean {
+        if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
+            return false;
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            return false;
+        }
+        if (a.y < 0 || a.y > s) {
+            return false;
+        }
+        return true;
+    }
+
     public assertValidAddress(a: ITileAddress): void {
         if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
             throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);

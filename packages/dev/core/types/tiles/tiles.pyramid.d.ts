@@ -19,6 +19,6 @@ export declare class TilePyramid<V extends object> implements ITileDirectory<V> 
     get depth(): number;
     get tileCount(): number;
     lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>>;
-    private lookup;
+    private _lookup;
 }
 export {};

@@ -33,32 +33,30 @@ export class TilePyramid<V extends object> implements ITileDirectory<V> {
         return this._infos.tileCount;
     }
 
-    public async lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>> {
+    public lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>> {
         this.metrics.assertValidAddress(address);
 
-        const n = this.lookup(address);
+        const n = this._lookup(address);
         let data = n._value?.deref();
         if (data) {
-            return new TileDirectoryResult(address, data, args);
+            return Promise.resolve(new TileDirectoryResult(address, data, args));
         }
         // data not present. Could be because it at not beeing initialized or garbage collected.
-        if (this.datasource) {
-            try {
-                data = await this.datasource.fetchAsync(n);
-            } catch (e) {
-            } finally {
-                if (data) {
-                    n._value = new WeakRef(data);
-                } else {
-                    n._value = undefined;
-                }
-                return new TileDirectoryResult(address, data, args);
+        const datasource = this.datasource;
+        return new Promise((resolve, reject) => {
+            if (datasource) {
+                datasource
+                    .fetchAsync(n)
+                    .then((v) => {
+                        n._value = v ? new WeakRef(v) : undefined;
+                        resolve(new TileDirectoryResult(address, v, args));
+                    })
+                    .catch((e) => reject(e));
             }
-        }
-        return new TileDirectoryResult<V>(address, undefined, args);
+        });
     }
 
-    private lookup(address: ITileAddress): TilePyramidNode<V> {
+    private _lookup(address: ITileAddress): TilePyramidNode<V> {
         const key = TileMetrics.TileXYToQuadKey(address);
         let lod = 0;
         let n = this._root;

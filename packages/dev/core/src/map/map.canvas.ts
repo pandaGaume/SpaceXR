@@ -43,7 +43,6 @@ export class CanvasTileMap {
     }
 
     public setZoom(zoom: number) {
-        console.log("set zoom ", zoom);
         this._view.setLevelOfDetail(zoom).validate();
     }
 
@@ -70,13 +69,13 @@ export class CanvasTileMap {
         }
 
         this._bounds = e.bounds;
-        //this._scale = e.scale;
+        this._scale = e.scale;
         //console.log("Scale: x", this._scale.x, ", y", this._scale.y);
 
-        if (e.removed) {
+        if (e.removed && e.removed.length != 0) {
             // this is the place to clean unactive tile
             // fast track
-            if (!e.remain) {
+            if (!e.remain || e.remain.length == 0) {
                 // we remove ALL
                 this._cache.clear();
             } else {
@@ -87,19 +86,26 @@ export class CanvasTileMap {
                 }
             }
         }
-        if (e.added) {
+        if (e.added && e.added.length != 0) {
             // this is the place to add new tiles from the directory
             for (const c of e.added) {
                 const tile = new Tile<LookupData<HTMLImageElement>>(c.x, c.y, c.levelOfDetail);
                 if (this._directory) {
-                    this._directory.lookupAsync(c, tile).then(
-                        ((result: TileDirectoryResult<HTMLImageElement>) => {
-                            tile.data = result.data;
-                            if (tile.data) {
-                                this.drawImage(tile, tile.data);
-                            }
-                        }).bind(this)
-                    );
+                    if (this.metrics.isValidAddress(c)) {
+                        this._directory
+                            .lookupAsync(c, tile)
+                            .then(
+                                ((result: TileDirectoryResult<HTMLImageElement>) => {
+                                    tile.data = result.data;
+                                    if (tile.data) {
+                                        this.drawImage(tile, tile.data);
+                                    }
+                                }).bind(this)
+                            )
+                            .catch((e) => {
+                                console.log("Error when lookup", c.toString(), e);
+                            });
+                    }
                 }
                 const binaryKey = TileMetrics.TileXYToQuadKey(c);
                 const key = binaryKey.join("");
@@ -114,37 +120,19 @@ export class CanvasTileMap {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
                 const center = this._bounds.center;
-                const centerX = center.x;
-                const centerY = center.y;
-
-                const offsetX = this._canvas.width/2;
-                const offsetY = this._canvas.height/2;
-
-                console.log("center", center.toString());
-                console.log("offsetX", offsetX, "offestY", offsetY);
                 const metrics = this.metrics;
                 const temp = Cartesian2.Zero();
-                const lod = Math.round(this._view.levelOfDetail);
+
                 ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
                 ctx.save();
-                ctx.translate(offsetX, offsetY);
+                ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
+                ctx.scale(this._scale.x, this._scale.y);
                 for (const entry of this._cache.entries()) {
                     const t = entry[1];
                     if (t.data) {
                         const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
-                        pixelXY.x -= centerX;
-                        pixelXY.y -= centerY;
-
-                        if (t.levelOfDetail != lod) {
-                            const p = Math.pow(2, Math.abs(t.levelOfDetail - lod));
-                            if (lod < t.levelOfDetail) {
-                                pixelXY.x /= p;
-                                pixelXY.y /= p;
-                            } else {
-                                pixelXY.x *= p;
-                                pixelXY.y *= p;
-                            }
-                        }
+                        pixelXY.x -= center.x;
+                        pixelXY.y -= center.y;
                         ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
                         continue;
                     }
@@ -154,33 +142,19 @@ export class CanvasTileMap {
         }
     }
 
-    private drawImage(a: ITileAddress, data: HTMLImageElement) {
+    private drawImage(t: ITileAddress, data: HTMLImageElement) {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
-                const lod = Math.round(this._view.levelOfDetail);
                 const center = this._bounds.center;
-                const centerX = center.x;
-                const centerY = center.y;
-                const offsetX = this._canvas.width/2;
-                const offsetY = this._canvas.height/2;
                 const metrics = this.metrics;
                 const temp = Cartesian2.Zero();
-                const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
-                pixelXY.x -= centerX;
-                pixelXY.y -= centerY;
-                if (a.levelOfDetail != lod) {
-                    const p = Math.pow(2, Math.abs(a.levelOfDetail - lod));
-                    if (lod < a.levelOfDetail) {
-                        pixelXY.x /= p;
-                        pixelXY.y /= p;
-                    } else {
-                        pixelXY.x *= p;
-                        pixelXY.y *= p;
-                    }
-                }
                 ctx.save();
-                ctx.translate(-offsetX, -offsetY);
+                ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
+                ctx.scale(this._scale.x, this._scale.y);
+                const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                pixelXY.x -= center.x;
+                pixelXY.y -= center.y;
                 ctx.drawImage(data, pixelXY.x, pixelXY.y);
                 ctx.restore();
             }

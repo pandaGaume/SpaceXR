@@ -53,6 +53,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     get maxLatitude(): number;
     get minLongitude(): number;
     get maxLongitude(): number;
+    isValidAddress(a: ITileAddress): boolean;
     assertValidAddress(a: ITileAddress): void;
     abstract mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     abstract groundResolution(latitude: number, levelOfDetail: number): number;

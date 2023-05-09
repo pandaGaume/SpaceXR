@@ -85,9 +85,17 @@ export class TileMetricsOptionsBuilder {
 }
 
 export class TileMetrics {
-    public static TileXYToQuadKey(a: ITileAddress): Uint8Array {
-        const quadKey = new Uint8Array(a.levelOfDetail);
-        let j = 0;
+    public static ToParentKey(key: string): string {
+        return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
+    }
+
+    public static ToChildKey(key: string): string[] {
+        key = key || "";
+        return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
+    }
+
+    public static TileXYToQuadKey(a: ITileAddress): string {
+        let quadKey = "";
         for (let i = a.levelOfDetail; i > 0; i--) {
             let digit = 0;
             const mask = 1 << (i - 1);
@@ -98,30 +106,30 @@ export class TileMetrics {
                 digit++;
                 digit++;
             }
-            quadKey[j++] = digit;
+            quadKey = quadKey + digit;
         }
         return quadKey;
     }
 
-    public static QuadKeyToTileXY(quadKey: Uint8Array): ITileAddress {
+    public static QuadKeyToTileXY(quadKey: string): ITileAddress {
         let tileX = 0;
         let tileY = 0;
         const levelOfDetail = quadKey.length;
         for (let i = levelOfDetail; i > 0; i--) {
             const mask = 1 << (i - 1);
             switch (quadKey[levelOfDetail - i]) {
-                case 0:
+                case "0":
                     break;
 
-                case 1:
+                case "1":
                     tileX |= mask;
                     break;
 
-                case 2:
+                case "2":
                     tileY |= mask;
                     break;
 
-                case 3:
+                case "3":
                     tileX |= mask;
                     tileY |= mask;
                     break;

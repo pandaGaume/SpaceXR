@@ -1,6 +1,16 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { ITile, ITileAddress, ITileMetrics } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
+export declare class TileBuilder<T> implements ITileBuilder<T> {
+    _a?: ITileAddress;
+    _d?: T;
+    _m?: ITileMetrics;
+    withAddress(a: ITileAddress): ITileBuilder<T>;
+    withData(d?: T): ITileBuilder<T>;
+    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    build(): ITile<T>;
+}
 export declare class Tile<T> implements ITile<T>, ITileAddress {
+    static Builder<T>(): ITileBuilder<T>;
     static BuildEnvelope(x: number, y: number, lod: number, metrics?: ITileMetrics): IEnvelope | undefined;
     _x: number;
     _y: number;
@@ -8,7 +18,7 @@ export declare class Tile<T> implements ITile<T>, ITileAddress {
     _value?: T;
     _env?: IEnvelope;
     constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics);
-    get address(): ITileAddress | undefined;
+    get address(): ITileAddress;
     get data(): T | undefined;
     set data(v: T | undefined);
     get x(): number;

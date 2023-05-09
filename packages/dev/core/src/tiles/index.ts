@@ -7,7 +7,7 @@ export * from "./tiles.codecs";
 export * from "./tiles.dem";
 export * from "./tiles.geography";
 export * from "./tiles.mapzen";
-export * from "./tiles.pyramid";
+export * from "./tiles.directory";
 export * from "./tiles";
 export * from "./tiles.view";
 export * from "./tiles.urlBuilder";

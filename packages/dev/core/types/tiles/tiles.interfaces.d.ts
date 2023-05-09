@@ -5,8 +5,16 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
 }
 export interface ITile<T> extends IGeoBounded {
-    address?: ITileAddress;
+    address: ITileAddress;
+    parent?: ITile<T>;
+    childrens?: Array<ITile<T>>;
     data?: T;
+}
+export interface ITileBuilder<T> {
+    withAddress(a: ITileAddress): ITileBuilder<T>;
+    withData(d?: T): ITileBuilder<T>;
+    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    build(): ITile<T>;
 }
 export interface ITileMetricsOptions {
     tileSize?: number;
@@ -40,14 +48,14 @@ export interface ITileMetrics {
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;
 }
+export interface ITileDatasource<T, R extends ITileAddress> {
+    fetchAsync(request: R): Promise<T | undefined>;
+}
 export interface ITileUrlBuilder {
     buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string;
 }
 export interface ITileCodec<T> {
     decodeAsync(r: void | Response): Promise<Awaited<T> | undefined>;
-}
-export interface ITileDatasource<T, R extends ITileAddress> {
-    fetchAsync(request: R): Promise<T | undefined>;
 }
 export interface ITileClientOptions<T> {
     urlFactory: ITileUrlBuilder;
@@ -59,16 +67,6 @@ export interface ITileClient<T, R extends ITileAddress> extends ITileDatasource<
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
-export type LookupData<V> = V | undefined;
-export declare class TileDirectoryResult<V> implements ITileAddress {
-    data: LookupData<V>;
-    args: unknown;
-    x: number;
-    y: number;
-    levelOfDetail: number;
-    constructor(a: ITileAddress, data: LookupData<V>, args: unknown);
-}
-export interface ITileDirectory<V> {
-    metrics: ITileMetrics;
-    lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>>;
+export interface ITileDirectory<V> extends ITileMetricsProvider {
+    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined>;
 }

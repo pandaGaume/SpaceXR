@@ -10,8 +10,17 @@ export interface ITileAddress extends ICartesian2 {
 }
 
 export interface ITile<T> extends IGeoBounded {
-    address?: ITileAddress;
+    address: ITileAddress;
+    parent?: ITile<T>;
+    childrens?: Array<ITile<T>>;
     data?: T;
+}
+
+export interface ITileBuilder<T> {
+    withAddress(a: ITileAddress): ITileBuilder<T>;
+    withData(d?: T): ITileBuilder<T>;
+    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    build(): ITile<T>;
 }
 
 export interface ITileMetricsOptions {
@@ -52,16 +61,16 @@ export interface ITileMetricsProvider {
     metrics: ITileMetrics;
 }
 
+export interface ITileDatasource<T, R extends ITileAddress> {
+    fetchAsync(request: R): Promise<T | undefined>;
+}
+
 export interface ITileUrlBuilder {
     buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string;
 }
 
 export interface ITileCodec<T> {
     decodeAsync(r: void | Response): Promise<Awaited<T> | undefined>;
-}
-
-export interface ITileDatasource<T, R extends ITileAddress> {
-    fetchAsync(request: R): Promise<T | undefined>;
 }
 
 export interface ITileClientOptions<T> {
@@ -77,21 +86,6 @@ export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 
-export type LookupData<V> = V | undefined;
-
-export class TileDirectoryResult<V> implements ITileAddress {
-    x: number;
-    y: number;
-    levelOfDetail: number;
-
-    public constructor(a: ITileAddress, public data: LookupData<V>, public args: unknown) {
-        this.x = a.x;
-        this.y = a.y;
-        this.levelOfDetail = a.levelOfDetail;
-    }
-}
-
-export interface ITileDirectory<V> {
-    metrics: ITileMetrics;
-    lookupAsync(address: ITileAddress, args?: unknown): Promise<TileDirectoryResult<V>>;
+export interface ITileDirectory<V> extends ITileMetricsProvider {
+    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined>;
 }

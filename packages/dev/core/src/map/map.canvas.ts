@@ -1,6 +1,5 @@
-import { Tile } from "../tiles/tiles";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileDirectory, ITileMetrics, LookupData, TileDirectoryResult } from "../tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDirectory, ITileMetrics } from "../tiles/tiles.interfaces";
 import { UpdateEvents, View2 } from "../tiles/tiles.view";
 import { TileMetrics } from "../tiles/tiles.metrics";
 import { IRectangle } from "../geometry/geometry.interfaces";
@@ -10,7 +9,7 @@ export class CanvasTileMap {
     _canvas: HTMLCanvasElement; // the 2D target
     _view: View2<HTMLImageElement>; // the view logic
     _directory?: ITileDirectory<HTMLImageElement>; // the tiel data source
-    _cache: Map<string, Tile<LookupData<HTMLImageElement>>>; // the list of activ tiles
+    _cache: Map<string, ITile<HTMLImageElement>>; // the list of activ tiles
     _bounds?: IRectangle; // this is a copy of the curent pixel bounds of the view
     _scale: Cartesian2; //
 
@@ -19,7 +18,7 @@ export class CanvasTileMap {
         this._directory = directory;
         this._view = new View2(canvas.width, canvas.height, lat, lon, zoom, directory?.metrics);
         this._view.updateObservable.add(((e: UpdateEvents) => this.onUpdate(e)).bind(this));
-        this._cache = new Map<string, Tile<LookupData<HTMLImageElement>>>();
+        this._cache = new Map<string, ITile<HTMLImageElement>>();
         this._scale = Cartesian2.One();
         this._view.validate();
     }
@@ -80,8 +79,7 @@ export class CanvasTileMap {
                 this._cache.clear();
             } else {
                 for (const c of e.removed) {
-                    const binaryKey = TileMetrics.TileXYToQuadKey(c);
-                    const key = binaryKey.join("");
+                    const key = TileMetrics.TileXYToQuadKey(c);
                     this._cache.delete(key);
                 }
             }
@@ -89,16 +87,20 @@ export class CanvasTileMap {
         if (e.added && e.added.length != 0) {
             // this is the place to add new tiles from the directory
             for (const c of e.added) {
-                const tile = new Tile<LookupData<HTMLImageElement>>(c.x, c.y, c.levelOfDetail);
                 if (this._directory) {
                     if (this.metrics.isValidAddress(c)) {
                         this._directory
-                            .lookupAsync(c, tile)
+                            .lookupAsync(c)
                             .then(
-                                ((result: TileDirectoryResult<HTMLImageElement>) => {
-                                    tile.data = result.data;
-                                    if (tile.data) {
-                                        this.drawImage(tile, tile.data);
+                                ((tile: ITile<HTMLImageElement> | undefined) => {
+                                    if (tile) {
+                                        const a = tile.address;
+                                        const key = TileMetrics.TileXYToQuadKey(a);
+                                        this._cache.set(key, tile);
+
+                                        if (tile.data) {
+                                            this.drawImage(a, tile.data);
+                                        }
                                     }
                                 }).bind(this)
                             )
@@ -107,9 +109,6 @@ export class CanvasTileMap {
                             });
                     }
                 }
-                const binaryKey = TileMetrics.TileXYToQuadKey(c);
-                const key = binaryKey.join("");
-                this._cache.set(key, tile);
             }
         }
         this.draw();
@@ -130,7 +129,8 @@ export class CanvasTileMap {
                 for (const entry of this._cache.entries()) {
                     const t = entry[1];
                     if (t.data) {
-                        const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                        const a = t.address;
+                        const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
                         pixelXY.x -= center.x;
                         pixelXY.y -= center.y;
                         ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
@@ -142,7 +142,7 @@ export class CanvasTileMap {
         }
     }
 
-    private drawImage(t: ITileAddress, data: HTMLImageElement) {
+    private drawImage(a: ITileAddress, data: HTMLImageElement) {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
@@ -152,7 +152,7 @@ export class CanvasTileMap {
                 ctx.save();
                 ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
                 ctx.scale(this._scale.x, this._scale.y);
-                const pixelXY = metrics.getTileXYToPixelXY(t.x, t.y, t.levelOfDetail, temp);
+                const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
                 pixelXY.x -= center.x;
                 pixelXY.y -= center.y;
                 ctx.drawImage(data, pixelXY.x, pixelXY.y);

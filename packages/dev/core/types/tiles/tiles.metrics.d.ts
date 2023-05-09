@@ -38,8 +38,10 @@ export declare class TileMetricsOptionsBuilder {
     build(): ITileMetricsOptions;
 }
 export declare class TileMetrics {
-    static TileXYToQuadKey(a: ITileAddress): Uint8Array;
-    static QuadKeyToTileXY(quadKey: Uint8Array): ITileAddress;
+    static ToParentKey(key: string): string;
+    static ToChildKey(key: string): string[];
+    static TileXYToQuadKey(a: ITileAddress): string;
+    static QuadKeyToTileXY(quadKey: string): ITileAddress;
 }
 export declare abstract class AbstractTileMetrics implements ITileMetrics {
     _o: TileMetricsOptions;

@@ -2,9 +2,37 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileMetrics } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
+
+export class TileBuilder<T> implements ITileBuilder<T> {
+    _a?: ITileAddress;
+    _d?: T;
+    _m?: ITileMetrics;
+
+    public withAddress(a: ITileAddress): ITileBuilder<T> {
+        this._a = a;
+        return this;
+    }
+
+    public withData(d?: T): ITileBuilder<T> {
+        this._d = d;
+        return this;
+    }
+
+    public withMetrics(metrics: ITileMetrics): ITileBuilder<T> {
+        this._m = metrics;
+        return this;
+    }
+    public build(): ITile<T> {
+        return new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d, this._m);
+    }
+}
 
 export class Tile<T> implements ITile<T>, ITileAddress {
+    public static Builder<T>(): ITileBuilder<T> {
+        return new TileBuilder<T>();
+    }
+
     public static BuildEnvelope(x: number, y: number, lod: number, metrics?: ITileMetrics): IEnvelope | undefined {
         if (metrics) {
             const nw = metrics.getTileXYToLatLon(x, y, lod);
@@ -29,7 +57,7 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         this._env = Tile.BuildEnvelope(x, y, levelOfDetail, metrics);
     }
 
-    public get address(): ITileAddress | undefined {
+    public get address(): ITileAddress {
         return this;
     }
 

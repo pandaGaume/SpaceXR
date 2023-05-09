@@ -1,8 +1,8 @@
 import { TileMetrics } from "../../../src/tiles/tiles.metrics";
-import { TilePyramid } from "../../../src/tiles/tiles.pyramid";
 import { EPSG3857 } from "../../../src/tiles/tiles.geography";
 import { WebTileUrlBuilder } from "../../../src/tiles/tiles.urlBuilder";
 import { ITileDatasource, ITileAddress } from "../../../src/tiles/tiles.interfaces";
+import { TileAddress } from "../../../src/tiles/tiles.address";
 
 class DummyDataSource<T> implements ITileDatasource<T, ITileAddress> {
     _data?: T;
@@ -35,33 +35,9 @@ describe("Tiles", () => {
         const x = 875;
         const y = 589;
         const lod = 13;
-        const k = TileMetrics.TileXYToQuadKey(x, y, lod);
+        const k = TileMetrics.TileXYToQuadKey(new TileAddress(x, y, lod));
         const address = TileMetrics.QuadKeyToTileXY(k);
         expect(address).toEqual({ x: x, y: y, levelOfDetail: lod });
-    });
-
-    describe("Pyramid ", () => {
-        test("Lookup - fake datasource", async () => {
-            const x = 2;
-            const y = 2;
-            const lod = 3;
-
-            const index = new TilePyramid<Float32Array>(new EPSG3857(), []);
-
-            const result = await index.lookupAsync(x, y, lod);
-            expect(result.data).toBeUndefined();
-            expect(index._infos).toEqual({ depth: 3, tileCount: lod * 4 + 1 });
-        });
-        test("Lookup - local datasource", async () => {
-            const x = 2;
-            const y = 2;
-            const lod = 3;
-
-            const dummyData = { body: "hello world" };
-            const index = new TilePyramid<object>(new EPSG3857(), new DummyDataSource(dummyData));
-            const result = await index.lookupAsync(x, y, lod);
-            expect(result.data).toEqual(dummyData);
-        });
     });
 
     test("Web Url Factory", () => {

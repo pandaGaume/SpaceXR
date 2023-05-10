@@ -834,6 +834,128 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./dist/geometry/geometry.box.js":
+/*!***************************************!*\
+  !*** ./dist/geometry/geometry.box.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Box": () => (/* binding */ Box)
+/* harmony export */ });
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
+
+
+class Box {
+    static Zero() {
+        return new Box(0, 0, 0, 0, 0, 0);
+    }
+    static FromSize(size) {
+        return new Box(0, 0, 0, size?.width || 0, size.height || 0, size.thickness || 0);
+    }
+    static FromPoints(...params) {
+        let i = 0;
+        let xmin = params[i].x;
+        let xmax = params[i].x;
+        let ymin = params[i].y;
+        let ymax = params[i].y;
+        let zmin = params[i].z;
+        let zmax = params[i++].z;
+        for (; i < params.length; i++) {
+            const p = params[i];
+            if (p) {
+                xmin = Math.min(xmin, p.x);
+                xmax = Math.max(xmax, p.x);
+                ymin = Math.min(ymin, p.y);
+                ymax = Math.max(ymax, p.y);
+                zmin = Math.min(zmin, p.z);
+                zmax = Math.max(zmax, p.z);
+            }
+        }
+        return new Box(xmin, ymin, zmin, xmax - xmin, ymax - ymin, zmax - zmin);
+    }
+    constructor(x, y, z, width, height, thickness) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.width = width;
+        this.height = height;
+        this.thickness = thickness;
+    }
+    get hasThickness() {
+        return true;
+    }
+    get top() {
+        return this.y;
+    }
+    get left() {
+        return this.x;
+    }
+    get right() {
+        return this.x + this.width;
+    }
+    get bottom() {
+        return this.y + this.height;
+    }
+    get floor() {
+        return this.z;
+    }
+    get ceil() {
+        return this.z + this.thickness;
+    }
+    equals(other) {
+        if (other) {
+            if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isBox)(other)) {
+                return this.x == other.x && this.y == other.y && this.z == other.z && this.width == other.width && this.height == other.height && this.thickness == other.thickness;
+            }
+            if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isSize3)(other)) {
+                return this.width == other.width && this.height == other.height && this.thickness == other.thickness;
+            }
+            return this.width == other.width && this.height == other.height;
+        }
+        return false;
+    }
+    get center() {
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(this.x + this.width / 2, this.y + this.height / 2, this.z + this.thickness / 2);
+    }
+    intersect(other) {
+        if (!other ||
+            this.bottom < other.top ||
+            this.top > other.bottom ||
+            this.left > other.right ||
+            this.right < other.left ||
+            this.floor > other.ceil ||
+            this.ceil < other.floor) {
+            return false;
+        }
+        return true;
+    }
+    intersection(other, ref) {
+        if (!this.intersect(other)) {
+            return undefined;
+        }
+        const target = ref || Box.Zero();
+        target.y = Math.max(this.top, other.top);
+        target.height = Math.min(this.bottom, other.bottom) - target.y;
+        target.x = Math.max(this.left, other.left);
+        target.width = Math.min(this.right, other.right) - target.x;
+        target.z = Math.max(this.floor, other.floor);
+        target.width = Math.min(this.ceil, other.ceil) - target.z;
+        return target;
+    }
+    contains(x, y, z) {
+        return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom && z >= this.floor && z <= this.ceil;
+    }
+    toString() {
+        return `x:${this.x}, y:${this.y}, z:${this.z}, width:${this.width}, height:${this.height}, thickness:${this.thickness}`;
+    }
+}
+//# sourceMappingURL=geometry.box.js.map
+
+/***/ }),
+
 /***/ "./dist/geometry/geometry.cartesian.js":
 /*!*********************************************!*\
   !*** ./dist/geometry/geometry.cartesian.js ***!
@@ -877,6 +999,48 @@ class Cartesian3 {
 
 /***/ }),
 
+/***/ "./dist/geometry/geometry.interfaces.js":
+/*!**********************************************!*\
+  !*** ./dist/geometry/geometry.interfaces.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "isBox": () => (/* binding */ isBox),
+/* harmony export */   "isRectangle": () => (/* binding */ isRectangle),
+/* harmony export */   "isSize2": () => (/* binding */ isSize2),
+/* harmony export */   "isSize3": () => (/* binding */ isSize3)
+/* harmony export */ });
+function isSize2(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    return b.height !== undefined && b.width !== undefined;
+}
+function isSize3(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    return b.height !== undefined && b.width !== undefined && b.hasThickness !== undefined;
+}
+function isRectangle(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    return b.top !== undefined && b.left !== undefined && b.right !== undefined && b.bottom !== undefined;
+}
+function isBox(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    return (b.top !== undefined &&
+        b.left !== undefined &&
+        b.right !== undefined &&
+        b.bottom !== undefined &&
+        b.floor !== undefined &&
+        b.ceil !== undefined);
+}
+//# sourceMappingURL=geometry.interfaces.js.map
+
+/***/ }),
+
 /***/ "./dist/geometry/geometry.rectangle.js":
 /*!*********************************************!*\
   !*** ./dist/geometry/geometry.rectangle.js ***!
@@ -887,7 +1051,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Rectangle": () => (/* binding */ Rectangle)
 /* harmony export */ });
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
+
 
 class Rectangle {
     static Zero() {
@@ -919,6 +1085,15 @@ class Rectangle {
         this.width = width;
         this.height = height;
     }
+    equals(other) {
+        if (other) {
+            if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isRectangle)(other)) {
+                return this.x == other.x && this.y == other.y && this.width == other.width && this.height == other.height;
+            }
+            return this.width == other.width && this.height == other.height;
+        }
+        return false;
+    }
     get top() {
         return this.y;
     }
@@ -932,7 +1107,7 @@ class Rectangle {
         return this.y + this.height;
     }
     get center() {
-        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
     }
     intersect(other) {
         if (!other || this.bottom < other.top || this.top > other.bottom || this.left > other.right || this.right < other.left) {
@@ -1018,15 +1193,23 @@ class Size3 extends Size2 {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Cartesian2": () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2),
-/* harmony export */   "Cartesian3": () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3),
-/* harmony export */   "Rectangle": () => (/* reexport safe */ _geometry_rectangle__WEBPACK_IMPORTED_MODULE_1__.Rectangle),
-/* harmony export */   "Size2": () => (/* reexport safe */ _geometry_size__WEBPACK_IMPORTED_MODULE_2__.Size2),
-/* harmony export */   "Size3": () => (/* reexport safe */ _geometry_size__WEBPACK_IMPORTED_MODULE_2__.Size3)
+/* harmony export */   "Box": () => (/* reexport safe */ _geometry_box__WEBPACK_IMPORTED_MODULE_4__.Box),
+/* harmony export */   "Cartesian2": () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2),
+/* harmony export */   "Cartesian3": () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3),
+/* harmony export */   "Rectangle": () => (/* reexport safe */ _geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__.Rectangle),
+/* harmony export */   "Size2": () => (/* reexport safe */ _geometry_size__WEBPACK_IMPORTED_MODULE_3__.Size2),
+/* harmony export */   "Size3": () => (/* reexport safe */ _geometry_size__WEBPACK_IMPORTED_MODULE_3__.Size3),
+/* harmony export */   "isBox": () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isBox),
+/* harmony export */   "isRectangle": () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isRectangle),
+/* harmony export */   "isSize2": () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isSize2),
+/* harmony export */   "isSize3": () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isSize3)
 /* harmony export */ });
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry_rectangle__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
-/* harmony import */ var _geometry_size__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.size */ "./dist/geometry/geometry.size.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
+/* harmony import */ var _geometry_size__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geometry.size */ "./dist/geometry/geometry.size.js");
+/* harmony import */ var _geometry_box__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.box */ "./dist/geometry/geometry.box.js");
+
 
 
 
@@ -1046,6 +1229,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "AbstractTileMap": () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_1__.AbstractTileMap),
 /* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay),
 /* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasTileMap),
+/* harmony export */   "HologramDisplay": () => (/* reexport safe */ _map_hologram__WEBPACK_IMPORTED_MODULE_2__.HologramDisplay),
 /* harmony export */   "HologramTileMap": () => (/* reexport safe */ _map_hologram__WEBPACK_IMPORTED_MODULE_2__.HologramTileMap)
 /* harmony export */ });
 /* harmony import */ var _map_canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.canvas */ "./dist/map/map.canvas.js");
@@ -1136,11 +1320,16 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_0__.AbstractTileMap {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "HologramDisplay": () => (/* binding */ HologramDisplay),
 /* harmony export */   "HologramTileMap": () => (/* binding */ HologramTileMap)
 /* harmony export */ });
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
+/* harmony import */ var _geometry_geometry_box__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.box */ "./dist/geometry/geometry.box.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
 
-class HologramTileMap extends _map__WEBPACK_IMPORTED_MODULE_0__.AbstractTileMap {
+
+class HologramDisplay extends _geometry_geometry_box__WEBPACK_IMPORTED_MODULE_0__.Box {
+}
+class HologramTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractTileMap {
     constructor(display, directory, lat, lon, zoom) {
         super(display, directory, lat, lon, zoom);
     }
@@ -4194,6 +4383,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Angle": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Angle),
 /* harmony export */   "AxialTilt": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.AxialTilt),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.BlobTileCodec),
+/* harmony export */   "Box": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Box),
 /* harmony export */   "CachePolicy": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
 /* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
 /* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasDisplay),
@@ -4217,6 +4407,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo3),
 /* harmony export */   "GeodeticSystem": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.HSLColor),
+/* harmony export */   "HologramDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.HologramDisplay),
 /* harmony export */   "HologramTileMap": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.HologramTileMap),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodec),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileCodec),
@@ -4270,8 +4461,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Volume": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Volume),
 /* harmony export */   "WebTileUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.WebTileUrlBuilder),
 /* harmony export */   "XmlDocumentTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.XmlDocumentTileCodec),
+/* harmony export */   "isBox": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isBox),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.isEnvelope),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.isLocation),
+/* harmony export */   "isRectangle": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isRectangle),
+/* harmony export */   "isSize2": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isSize2),
+/* harmony export */   "isSize3": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isSize3),
 /* harmony export */   "isTileAddress": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.isTileAddress)
 /* harmony export */ });
 /* harmony import */ var _events_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./events/index */ "./dist/events/index.js");

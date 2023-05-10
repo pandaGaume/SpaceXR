@@ -8,6 +8,7 @@ export declare class Rectangle implements IRectangle {
     static FromSize(size: ISize2): IRectangle;
     static FromPoints(...params: Array<ICartesian2>): IRectangle;
     constructor(x: number, y: number, width: number, height: number);
+    equals(other: IRectangle | ISize2 | undefined): boolean;
     get top(): number;
     get left(): number;
     get right(): number;

@@ -1,5 +1,5 @@
 import { Cartesian2 } from "./geometry.cartesian";
-import { IRectangle, ICartesian2, ISize2 } from "./geometry.interfaces";
+import { IRectangle, ICartesian2, ISize2, isRectangle } from "./geometry.interfaces";
 
 export class Rectangle implements IRectangle {
     public static Zero(): IRectangle {
@@ -28,6 +28,16 @@ export class Rectangle implements IRectangle {
     }
 
     public constructor(public x: number, public y: number, public width: number, public height: number) {}
+
+    public equals(other: IRectangle | ISize2 | undefined): boolean {
+        if (other) {
+            if (isRectangle(other)) {
+                return this.x == other.x && this.y == other.y && this.width == other.width && this.height == other.height;
+            }
+            return this.width == other.width && this.height == other.height;
+        }
+        return false;
+    }
 
     public get top(): number {
         return this.y;

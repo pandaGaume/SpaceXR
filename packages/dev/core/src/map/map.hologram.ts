@@ -1,8 +1,11 @@
+import { Box } from "../geometry/geometry.box";
 import { ITile, ITileDirectory } from "../tiles/tiles.interfaces";
 import { AbstractTileMap, IDisplay } from "./map";
 
-export class HologramTileMap<T, D extends IDisplay> extends AbstractTileMap<T, D> {
-    public constructor(display: D, directory?: ITileDirectory<T>, lat?: number, lon?: number, zoom?: number) {
+export class HologramDisplay extends Box implements IDisplay {}
+
+export class HologramTileMap<T> extends AbstractTileMap<T, HologramDisplay> {
+    public constructor(display: HologramDisplay, directory?: ITileDirectory<T>, lat?: number, lon?: number, zoom?: number) {
         super(display, directory, lat, lon, zoom);
     }
     public onDeleted(key: string, tile: ITile<T>): void {}

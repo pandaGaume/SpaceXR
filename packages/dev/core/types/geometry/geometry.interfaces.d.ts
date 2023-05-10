@@ -14,17 +14,15 @@ export interface ISize2 extends IComparable<ISize2> {
     height: number;
     width: number;
 }
+export declare function isSize2(b: unknown): b is ISize2;
 export interface ISize3 extends IComparable<ISize3> {
     height: number;
     width: number;
     thickness?: number;
     hasThickness: boolean;
 }
-export interface IRectangle {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
+export declare function isSize3(b: unknown): b is ISize3;
+export interface IRectangle extends ISize2, ICartesian2 {
     top: number;
     left: number;
     right: number;
@@ -35,3 +33,18 @@ export interface IRectangle {
     contains(x: number, y: number): boolean;
     toString(): string;
 }
+export declare function isRectangle(b: unknown): b is IRectangle;
+export interface IBox extends ISize3, ICartesian3 {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+    floor: number;
+    ceil: number;
+    center: ICartesian3;
+    intersect(other: IBox): boolean;
+    intersection(other: IBox, ref?: IBox): IBox | undefined;
+    contains(x: number, y: number, z: number): boolean;
+    toString(): string;
+}
+export declare function isBox(b: unknown): b is IBox;

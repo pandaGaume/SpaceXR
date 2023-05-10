@@ -1111,38 +1111,41 @@ class CanvasTileMap {
         }
         this._bounds = e.bounds;
         this._scale = e.scale;
-        if (e.removed && e.removed.length != 0) {
-            if (!e.remain || e.remain.length == 0) {
-                this._cache.clear();
-            }
-            else {
-                for (const c of e.removed) {
-                    const key = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(c);
-                    this._cache.delete(key);
+        if (e.added && e.added.size != 0) {
+            for (const c of e.added.entries()) {
+                if (this._directory) {
+                    if (this.metrics.isValidAddress(c[1])) {
+                        const result = this._directory.lookupAsync(c[1]);
+                        if (result) {
+                            if (result instanceof Promise) {
+                                result
+                                    .then(((tile) => {
+                                    if (tile) {
+                                        const a = tile.address;
+                                        const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
+                                        this._cache.set(key, tile);
+                                        if (tile.data) {
+                                            this.drawImage(a, tile.data);
+                                        }
+                                    }
+                                }).bind(this))
+                                    .catch((e) => {
+                                    console.log("Error when lookup", c.toString(), e);
+                                });
+                                continue;
+                            }
+                            const tile = result;
+                            const a = tile.address;
+                            const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
+                            this._cache.set(key, tile);
+                        }
+                    }
                 }
             }
         }
-        if (e.added && e.added.length != 0) {
-            for (const c of e.added) {
-                if (this._directory) {
-                    if (this.metrics.isValidAddress(c)) {
-                        this._directory
-                            .lookupAsync(c)
-                            .then(((tile) => {
-                            if (tile) {
-                                const a = tile.address;
-                                const key = _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                                this._cache.set(key, tile);
-                                if (tile.data) {
-                                    this.drawImage(a, tile.data);
-                                }
-                            }
-                        }).bind(this))
-                            .catch((e) => {
-                            console.log("Error when lookup", c.toString(), e);
-                        });
-                    }
-                }
+        if (e.removed && e.removed.size != 0) {
+            for (const key of e.removed.keys()) {
+                this._cache.delete(key);
             }
         }
         this.draw();
@@ -2607,11 +2610,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "TileAddress": () => (/* binding */ TileAddress)
 /* harmony export */ });
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+
 class TileAddress {
     constructor(x, y, levelOfDetail) {
         this.x = x;
         this.y = y;
         this.levelOfDetail = levelOfDetail;
+    }
+    get quadkey() {
+        if (!this._k) {
+            this._k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(this);
+        }
+        return this._k;
     }
 }
 //# sourceMappingURL=tiles.address.js.map
@@ -3077,11 +3088,16 @@ class TileDirectory {
     get metrics() {
         return this._options.metrics || _tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared;
     }
-    async lookupAsync(address) {
-        const k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(address);
+    lookupAsync(address) {
+        const k = address.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
-        if (!e) {
-            if (this._datasource) {
+        if (e) {
+            const t = e?.value;
+            this.sortList(e);
+            return t;
+        }
+        if (this._datasource) {
+            return new Promise(async (resolve, reject) => {
                 try {
                     const data = await this._datasource.fetchAsync(address);
                     if (data) {
@@ -3092,17 +3108,20 @@ class TileDirectory {
                             e.slidingExpiration = this._options.cacheOptions?.slidingExpiration;
                             e.addPostEvictionCallback(this._postEvictionCallback);
                             this._cache.set(e.key, e);
+                            this.sortList(e);
                         }
+                        resolve(t);
                     }
                 }
                 catch (exception) {
                     console.log("Exception in TileDirectory while fetching for ", address, ":", exception);
+                    if (reject) {
+                        reject(exception);
+                    }
                 }
-            }
+            });
         }
-        const t = e?.value;
-        this.sortList(e);
-        return Promise.resolve(t);
+        return undefined;
     }
     buildTile(address, data) {
         const b = this._options.tileBuilder || _tiles__WEBPACK_IMPORTED_MODULE_2__.Tile.Builder();
@@ -3150,10 +3169,6 @@ class TileDirectory {
     }
     gc() {
         const now = Date.now();
-        console.log("GC()", this._count, "tile(s), now", now, " > ", this._head?.expiration);
-        if (!this._head || this._head.expiration > now) {
-            console.log("Error");
-        }
         if (this._head && this._head.expiration <= now) {
             do {
                 const tmp = this._head;
@@ -3165,14 +3180,17 @@ class TileDirectory {
                     }
                 }
             } while (this._head && this._head.expiration <= now);
-            if (this._head) {
-                const delay = this._head.expiration - Date.now();
-                console.log("timeout after clear", Math.round(delay / 1000), "seconds");
-                this._timer = setTimeout(this._gc, delay);
+        }
+        if (this._head) {
+            const delay = this._head.expiration - Date.now();
+            console.log("timeout after clear", Math.round(delay / 1000), "seconds");
+            if (this._timer) {
+                clearTimeout(this._timer);
             }
-            else {
-                this._timer = undefined;
-            }
+            this._timer = setTimeout(this._gc, delay);
+        }
+        else {
+            this._timer = undefined;
         }
     }
     sortList(e) {
@@ -3838,7 +3856,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../events */ "./dist/events/events.observable.js");
 /* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
 /* harmony import */ var ___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! .. */ "./dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -3977,30 +3997,32 @@ class View2 {
         const rect = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.FromPoints(nwTileXY, seTileXY);
         const remainBounds = rect.intersection(this._outerboundsTileXY);
         this._outerboundsTileXY = rect;
-        const components = [];
+        const addresses = [];
         for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
             for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                components.push(new _tiles_address__WEBPACK_IMPORTED_MODULE_7__.TileAddress(tx, ty, lod));
+                addresses.push(new _tiles_address__WEBPACK_IMPORTED_MODULE_7__.TileAddress(tx, ty, lod));
             }
         }
         if (this._updateObservable && this._updateObservable.hasObservers()) {
-            let added = new Array();
-            let remains = new Array();
-            let removed = new Array();
+            let added = new Map();
+            let remains = new Map();
+            let removed = new Map();
             const old = this._tiles;
-            this._tiles = components;
+            this._tiles = addresses;
             for (const c of old) {
+                const k = c.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.TileXYToQuadKey(c);
                 if (c.levelOfDetail == lod && remainBounds?.contains(c.x, c.y)) {
-                    remains.push(c);
+                    remains.set(k, c);
                     continue;
                 }
-                removed.push(c);
+                removed.set(k, c);
             }
-            for (const c of components) {
+            for (const c of addresses) {
+                const k = c.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.TileXYToQuadKey(c);
                 if (remainBounds?.contains(c.x, c.y)) {
                     continue;
                 }
-                added.push(c);
+                added.set(k, c);
             }
             const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);

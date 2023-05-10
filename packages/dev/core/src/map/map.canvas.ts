@@ -69,48 +69,53 @@ export class CanvasTileMap {
 
         this._bounds = e.bounds;
         this._scale = e.scale;
-        //console.log("Scale: x", this._scale.x, ", y", this._scale.y);
 
-        if (e.removed && e.removed.length != 0) {
-            // this is the place to clean unactive tile
-            // fast track
-            if (!e.remain || e.remain.length == 0) {
-                // we remove ALL
-                this._cache.clear();
-            } else {
-                for (const c of e.removed) {
-                    const key = TileMetrics.TileXYToQuadKey(c);
-                    this._cache.delete(key);
-                }
-            }
-        }
-        if (e.added && e.added.length != 0) {
+        if (e.added && e.added.size != 0) {
             // this is the place to add new tiles from the directory
-            for (const c of e.added) {
+            for (const c of e.added.entries()) {
                 if (this._directory) {
-                    if (this.metrics.isValidAddress(c)) {
-                        this._directory
-                            .lookupAsync(c)
-                            .then(
-                                ((tile: ITile<HTMLImageElement> | undefined) => {
-                                    if (tile) {
-                                        const a = tile.address;
-                                        const key = TileMetrics.TileXYToQuadKey(a);
-                                        this._cache.set(key, tile);
+                    if (this.metrics.isValidAddress(c[1])) {
+                        const result = this._directory.lookupAsync(c[1]);
+                        if (result) {
+                            if (result instanceof Promise) {
+                                // we get an async result
+                                result
+                                    .then(
+                                        ((tile: ITile<HTMLImageElement> | undefined) => {
+                                            if (tile) {
+                                                const a = tile.address;
+                                                const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
+                                                this._cache.set(key, tile);
 
-                                        if (tile.data) {
-                                            this.drawImage(a, tile.data);
-                                        }
-                                    }
-                                }).bind(this)
-                            )
-                            .catch((e) => {
-                                console.log("Error when lookup", c.toString(), e);
-                            });
+                                                if (tile.data) {
+                                                    this.drawImage(a, tile.data);
+                                                }
+                                            }
+                                        }).bind(this)
+                                    )
+                                    .catch((e) => {
+                                        console.log("Error when lookup", c.toString(), e);
+                                    });
+                                continue;
+                            }
+                            // Tile was in cache
+                            const tile: ITile<HTMLImageElement> = result;
+                            const a = tile.address;
+                            const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
+                            this._cache.set(key, tile);
+                        }
                     }
                 }
             }
         }
+
+        if (e.removed && e.removed.size != 0) {
+            // this is the place to clean unactive tile
+            for (const key of e.removed.keys()) {
+                this._cache.delete(key);
+            }
+        }
+
         this.draw();
     }
 

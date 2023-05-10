@@ -8,15 +8,16 @@ import { IRectangle, ISize2, ICartesian2 } from "../geometry/geometry.interfaces
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { Observable } from "../events";
 import { TileAddress } from "./tiles.address";
+import { TileMetrics } from "./tiles.metrics";
 import { Cartesian2 } from "..";
 
 export class UpdateEvents {
     public constructor(
         public bounds: IRectangle,
         public scale: ICartesian2,
-        public added?: Array<ITileAddress>,
-        public removed?: Array<ITileAddress>,
-        public remain?: Array<ITileAddress>
+        public added?: Map<string, ITileAddress>,
+        public removed?: Map<string, ITileAddress>,
+        public remain?: Map<string, ITileAddress>
     ) {}
 }
 
@@ -189,35 +190,37 @@ export class View2<T> {
         const remainBounds = rect.intersection(this._outerboundsTileXY);
         this._outerboundsTileXY = rect;
 
-        const components = [];
+        const addresses = [];
 
         for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
             for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                components.push(new TileAddress(tx, ty, lod));
+                addresses.push(new TileAddress(tx, ty, lod));
             }
         }
 
         if (this._updateObservable && this._updateObservable.hasObservers()) {
-            let added = new Array<ITileAddress>();
-            let remains = new Array<ITileAddress>();
-            let removed = new Array<ITileAddress>();
+            let added = new Map<string, ITileAddress>();
+            let remains = new Map<string, ITileAddress>();
+            let removed = new Map<string, ITileAddress>();
 
             const old = this._tiles;
-            this._tiles = components;
+            this._tiles = addresses;
 
             for (const c of old) {
+                const k = c.quadkey || TileMetrics.TileXYToQuadKey(c);
                 if (c.levelOfDetail == lod && remainBounds?.contains(c.x, c.y)) {
-                    remains.push(c);
+                    remains.set(k, c);
                     continue;
                 }
-                removed.push(c);
+                removed.set(k, c);
             }
 
-            for (const c of components) {
+            for (const c of addresses) {
+                const k = c.quadkey || TileMetrics.TileXYToQuadKey(c);
                 if (remainBounds?.contains(c.x, c.y)) {
                     continue;
                 }
-                added.push(c);
+                added.set(k, c);
             }
 
             const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);

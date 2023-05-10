@@ -71,6 +71,7 @@ class TileCacheEntry<V> {
 
 export class CachePolicy {
     slidingExpiration?: number;
+    threshold?: number;
     public constructor(init?: Partial<CachePolicy>) {
         Object.assign(this, init);
     }
@@ -78,6 +79,7 @@ export class CachePolicy {
 
 export class CachePolicyBuilder {
     _slidingExpiration?: number;
+    _threshold?: number;
 
     public withSlidingExpiration(slidingExpiration: number | undefined): CachePolicyBuilder {
         this._slidingExpiration = slidingExpiration;
@@ -91,9 +93,13 @@ export class CachePolicyBuilder {
         this._slidingExpiration = slidingExpiration ? slidingExpiration * 1000 : slidingExpiration;
         return this;
     }
+    public withThreshold(threshold: number | undefined): CachePolicyBuilder {
+        this._threshold = threshold;
+        return this;
+    }
 
     public build(): CachePolicy {
-        return new CachePolicy({ slidingExpiration: this._slidingExpiration });
+        return new CachePolicy({ slidingExpiration: this._slidingExpiration, threshold: this._threshold });
     }
 }
 
@@ -125,7 +131,7 @@ export class TileDirectoryOptions<V> {
         return new TileDirectoryOptionsBuilder<T>()
             .withMetrics(EPSG3857.Shared)
             .withTileBuilder(Tile.Builder())
-            .withCacheOptions(new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).build())
+            .withCacheOptions(new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).withThreshold(500).build())
             .build();
     }
 
@@ -161,11 +167,17 @@ export class TileDirectory<V> implements ITileDirectory<V> {
         return this._options.metrics || EPSG3857.Shared;
     }
 
-    public async lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> {
-        const k = TileMetrics.TileXYToQuadKey(address);
+    public lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined {
+        const k = address.quadkey || TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
-        if (!e) {
-            if (this._datasource) {
+        if (e) {
+            // return a sync operation
+            const t = e?.value; // the underlying code is updating the expiration time.
+            this.sortList(e); // sort the list in order to update the expiration timer.
+            return t;
+        }
+        if (this._datasource) {
+            return new Promise(async (resolve, reject) => {
                 try {
                     const data = await this._datasource.fetchAsync(address);
                     if (data) {
@@ -176,16 +188,19 @@ export class TileDirectory<V> implements ITileDirectory<V> {
                             e.slidingExpiration = this._options.cacheOptions?.slidingExpiration;
                             e.addPostEvictionCallback(this._postEvictionCallback);
                             this._cache.set(e.key, e);
+                            this.sortList(e); // sort the list in order to update the expiration timer.
                         }
+                        resolve(t);
                     }
                 } catch (exception) {
                     console.log("Exception in TileDirectory while fetching for ", address, ":", exception);
+                    if (reject) {
+                        reject(exception);
+                    }
                 }
-            }
+            });
         }
-        const t = e?.value; // the underlying code is updating the expiration time.
-        this.sortList(e); // sort the list in order to update the expiration timer.
-        return Promise.resolve(t);
+        return undefined;
     }
 
     protected buildTile(address: ITileAddress, data?: V): ITile<V> {
@@ -250,10 +265,8 @@ export class TileDirectory<V> implements ITileDirectory<V> {
 
     protected gc(): void {
         const now = Date.now();
-        console.log("GC()", this._count, "tile(s), now", now, " > ", this._head?.expiration);
-        if (!this._head || this._head.expiration > now) {
-            console.log("Error");
-        }
+        const threshold = this._options.cacheOptions?.threshold || 0;
+
         if (this._head && this._head.expiration <= now) {
             do {
                 const tmp = this._head;
@@ -264,14 +277,17 @@ export class TileDirectory<V> implements ITileDirectory<V> {
                         cb(tmp);
                     }
                 }
-            } while (this._head && this._head.expiration <= now);
-            if (this._head) {
-                const delay = this._head.expiration - Date.now();
-                console.log("timeout after clear", Math.round(delay / 1000), "seconds");
-                this._timer = setTimeout(this._gc, delay);
-            } else {
-                this._timer = undefined;
+            } while (this._head && this._head.expiration - threshold <= now);
+        }
+        if (this._head) {
+            const delay = this._head.expiration - Date.now();
+            console.log("timeout after clear", Math.round(delay / 1000), "seconds");
+            if (this._timer) {
+                clearTimeout(this._timer);
             }
+            this._timer = setTimeout(this._gc, delay);
+        } else {
+            this._timer = undefined;
         }
     }
 

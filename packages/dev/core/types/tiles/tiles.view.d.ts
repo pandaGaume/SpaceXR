@@ -5,10 +5,10 @@ import { Observable } from "../events";
 export declare class UpdateEvents {
     bounds: IRectangle;
     scale: ICartesian2;
-    added?: ITileAddress[] | undefined;
-    removed?: ITileAddress[] | undefined;
-    remain?: ITileAddress[] | undefined;
-    constructor(bounds: IRectangle, scale: ICartesian2, added?: ITileAddress[] | undefined, removed?: ITileAddress[] | undefined, remain?: ITileAddress[] | undefined);
+    added?: Map<string, ITileAddress> | undefined;
+    removed?: Map<string, ITileAddress> | undefined;
+    remain?: Map<string, ITileAddress> | undefined;
+    constructor(bounds: IRectangle, scale: ICartesian2, added?: Map<string, ITileAddress> | undefined, removed?: Map<string, ITileAddress> | undefined, remain?: Map<string, ITileAddress> | undefined);
 }
 export declare class View2<T> {
     static ZOOM_ACC: number;

@@ -3,6 +3,7 @@ import { ICartesian2 } from "../geometry/geometry.interfaces";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
+    quadkey?: string;
 }
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
@@ -68,5 +69,5 @@ export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 export interface ITileDirectory<V> extends ITileMetricsProvider {
-    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined>;
+    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined;
 }

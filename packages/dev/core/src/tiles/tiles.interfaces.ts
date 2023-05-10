@@ -7,6 +7,7 @@ export function isTileAddress(b: unknown): b is ITileAddress {
 }
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
+    quadkey?: string;
 }
 
 export interface ITile<T> extends IGeoBounded {
@@ -87,5 +88,19 @@ export interface IPixelDecoder {
 }
 
 export interface ITileDirectory<V> extends ITileMetricsProvider {
-    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined>;
+    /**
+     * lookup asynchronously for a tile. However, if the Tile is in local cache, the operation may be sync
+     * and the result may be a Tile instead of a promise.
+     * Devolper MUST test the return type of the function to know if the result is sync or async.
+     * const r = directory.lookupAsync(a);
+     * if( r instanceof Promise){
+     *    // async
+     *    const tile = await r;
+     * } else {
+     *    // sync
+     *    const tile = r;
+     * }
+     * @param address the addres to looking for.
+     */
+    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined;
 }

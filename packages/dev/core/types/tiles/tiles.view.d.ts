@@ -3,12 +3,13 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle, ISize2, ICartesian2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events";
 export declare class UpdateEvents {
+    lod: number;
     bounds: IRectangle;
     scale: ICartesian2;
     added?: Map<string, ITileAddress> | undefined;
     removed?: Map<string, ITileAddress> | undefined;
     remain?: Map<string, ITileAddress> | undefined;
-    constructor(bounds: IRectangle, scale: ICartesian2, added?: Map<string, ITileAddress> | undefined, removed?: Map<string, ITileAddress> | undefined, remain?: Map<string, ITileAddress> | undefined);
+    constructor(lod: number, bounds: IRectangle, scale: ICartesian2, added?: Map<string, ITileAddress> | undefined, removed?: Map<string, ITileAddress> | undefined, remain?: Map<string, ITileAddress> | undefined);
     toString(): string;
 }
 export declare class View2<T> {

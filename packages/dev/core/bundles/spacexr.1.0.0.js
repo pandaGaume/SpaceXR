@@ -1073,9 +1073,10 @@ class CanvasTileMap {
         this._directory = directory;
         this._view = new _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.View2(canvas.width, canvas.height, lat, lon, zoom, directory?.metrics);
         this._view.updateObservable.add(((e) => this.onUpdate(e)).bind(this));
-        this._cache = new Map();
+        this._activ = new Map();
         this._scale = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.One();
         this._view.validate();
+        this._lod = 0;
     }
     get center() {
         return this._view._center;
@@ -1111,7 +1112,12 @@ class CanvasTileMap {
         }
         this._bounds = e.bounds;
         this._scale = e.scale;
-        console.log("TileMap.onUpdate() with ", e.toString());
+        this._lod = e.lod;
+        if (e.removed && e.removed.size != 0) {
+            for (const entry of e.removed.entries()) {
+                this._activ.delete(entry[0]);
+            }
+        }
         if (e.added && e.added.size != 0) {
             for (const c of e.added.entries()) {
                 if (this._directory) {
@@ -1124,7 +1130,7 @@ class CanvasTileMap {
                                     if (tile) {
                                         const a = tile.address;
                                         const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                                        this._cache.set(key, tile);
+                                        this._activ.set(key, tile);
                                         if (tile.data) {
                                             this.draw(false, [tile]);
                                         }
@@ -1138,20 +1144,15 @@ class CanvasTileMap {
                             const tile = result;
                             const a = tile.address;
                             const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                            this._cache.set(key, tile);
+                            this._activ.set(key, tile);
                         }
                     }
                 }
             }
         }
-        if (e.removed && e.removed.size != 0) {
-            for (const key of e.removed.keys()) {
-                this._cache.delete(key);
-            }
-        }
         this.draw();
     }
-    draw(clear = true, images) {
+    draw(clear = true, tiles) {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
@@ -1164,7 +1165,7 @@ class CanvasTileMap {
                 ctx.save();
                 ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
                 ctx.scale(this._scale.x, this._scale.y);
-                const list = images || this._cache.values();
+                const list = tiles || this._activ.values();
                 for (const t of list) {
                     if (t.data) {
                         const a = t.address;
@@ -2608,6 +2609,9 @@ class TileAddress {
         }
         return this._k;
     }
+    toString() {
+        return "x:" + this.x + ", y:" + this.y + ", lod:" + this.levelOfDetail + ", k:" + this.quadkey;
+    }
 }
 //# sourceMappingURL=tiles.address.js.map
 
@@ -3854,7 +3858,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class UpdateEvents {
-    constructor(bounds, scale, added, removed, remain) {
+    constructor(lod, bounds, scale, added, removed, remain) {
+        this.lod = lod;
         this.bounds = bounds;
         this.scale = scale;
         this.added = added;
@@ -3976,11 +3981,11 @@ class View2 {
     }
     doValidate() {
         const lod = Math.round(this._levelOfDetail);
-        let lodOffset = this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC;
-        let scale = lodOffset < 0 ? View2.ZOOM_ACC / (View2.ZOOM_ACC - lodOffset) : (View2.ZOOM_ACC + lodOffset) / View2.ZOOM_ACC;
-        lodOffset /= View2.ZOOM_ACC;
+        let lodOffset = (this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC) / View2.ZOOM_ACC;
+        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         this._scale.x = scale;
         this._scale.y = scale;
+        console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
         const w = this._size.width / scale;
         const h = this._size.height / scale;
         const halfWitdh = w / 2;
@@ -3989,7 +3994,7 @@ class View2 {
         const x0 = Math.round(pixelCenterXY.x - halfWitdh);
         const y0 = Math.round(pixelCenterXY.y - halfHeight);
         this._innerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0, y0, w, h);
-        const tileSize = this._metrics.tileSize;
+        const tileSize = this._metrics.tileSize * scale;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
         const nwTileXY = this._metrics.getPixelXYToTileXY(this._outerbounds.left, this._outerbounds.top, lod);
@@ -4023,7 +4028,7 @@ class View2 {
                 }
             }
             this._tiles = address;
-            const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
+            const e = new UpdateEvents(lod, this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);
             return;
         }

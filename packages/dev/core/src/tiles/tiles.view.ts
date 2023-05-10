@@ -13,6 +13,7 @@ import { Cartesian2 } from "..";
 
 export class UpdateEvents {
     public constructor(
+        public lod: number,
         public bounds: IRectangle,
         public scale: ICartesian2,
         public added?: Map<string, ITileAddress>,
@@ -171,13 +172,12 @@ export class View2<T> {
     protected doValidate() {
         // for the purpose we need to know the scale factor which is depending of the transition state between zoom level
         const lod = Math.round(this._levelOfDetail);
-        let lodOffset = this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC; // Trick to avoid floating point error.
-        let scale = lodOffset < 0 ? View2.ZOOM_ACC / (View2.ZOOM_ACC - lodOffset) : (View2.ZOOM_ACC + lodOffset) / View2.ZOOM_ACC;
-        lodOffset /= View2.ZOOM_ACC;
+        let lodOffset = (this._levelOfDetail * View2.ZOOM_ACC - lod * View2.ZOOM_ACC) / View2.ZOOM_ACC; // Trick to avoid floating point error.
+        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         this._scale.x = scale;
         this._scale.y = scale;
 
-        //console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
+        console.log("RAW LOD:", this._levelOfDetail, "LOD:", lod, ", OFFSET:", lodOffset, ", SX:", scale, ", SY:", scale);
 
         const w = this._size.width / scale;
         const h = this._size.height / scale;
@@ -190,7 +190,7 @@ export class View2<T> {
         const x0 = Math.round(pixelCenterXY.x - halfWitdh);
         const y0 = Math.round(pixelCenterXY.y - halfHeight);
         this._innerbounds = new Rectangle(x0, y0, w, h);
-        const tileSize = this._metrics.tileSize;
+        const tileSize = this._metrics.tileSize * scale;
         const tileSize2 = tileSize * 2;
         this._outerbounds = new Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);
         //console.log("Center", pixelCenterXY.toString());
@@ -235,7 +235,7 @@ export class View2<T> {
             }
             this._tiles = address;
 
-            const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
+            const e = new UpdateEvents(lod, this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);
             return;
         }

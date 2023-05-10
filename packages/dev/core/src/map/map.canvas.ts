@@ -12,6 +12,7 @@ export class CanvasTileMap {
     _activ: Map<string, ITile<HTMLImageElement>>; // the list of activ tiles
     _bounds?: IRectangle; // this is a copy of the curent pixel bounds of the view
     _scale: Cartesian2; //
+    _lod: number;
 
     public constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number) {
         this._canvas = canvas;
@@ -21,6 +22,7 @@ export class CanvasTileMap {
         this._activ = new Map<string, ITile<HTMLImageElement>>();
         this._scale = Cartesian2.One();
         this._view.validate();
+        this._lod = 0;
     }
 
     /// public API begin
@@ -69,8 +71,16 @@ export class CanvasTileMap {
 
         this._bounds = e.bounds;
         this._scale = e.scale;
+        this._lod = e.lod;
 
-        console.log("TileMap.onUpdate() with ", e.toString());
+        //console.log("TileMap.onUpdate() with ", e.toString());
+
+        if (e.removed && e.removed.size != 0) {
+            // this is the place to clean unactive tile
+            for (const entry of e.removed.entries()) {
+                this._activ.delete(entry[0]);
+            }
+        }
 
         if (e.added && e.added.size != 0) {
             // this is the place to add new tiles from the directory
@@ -111,13 +121,6 @@ export class CanvasTileMap {
             }
         }
 
-        if (e.removed && e.removed.size != 0) {
-            // this is the place to clean unactive tile
-            for (const key of e.removed.keys()) {
-                this._activ.delete(key);
-            }
-        }
-
         this.draw();
     }
 
@@ -139,7 +142,6 @@ export class CanvasTileMap {
                 for (const t of list) {
                     if (t.data) {
                         const a = t.address;
-
                         const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
                         pixelXY.x -= center.x;
                         pixelXY.y -= center.y;

@@ -70,6 +70,8 @@ export class CanvasTileMap {
         this._bounds = e.bounds;
         this._scale = e.scale;
 
+        console.log("TileMap.onUpdate() with ", e.toString());
+
         if (e.added && e.added.size != 0) {
             // this is the place to add new tiles from the directory
             for (const c of e.added.entries()) {

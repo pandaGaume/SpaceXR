@@ -20,13 +20,16 @@ declare class TileCacheEntry<V> {
 }
 export declare class CachePolicy {
     slidingExpiration?: number;
+    threshold?: number;
     constructor(init?: Partial<CachePolicy>);
 }
 export declare class CachePolicyBuilder {
     _slidingExpiration?: number;
+    _threshold?: number;
     withSlidingExpiration(slidingExpiration: number | undefined): CachePolicyBuilder;
     withSlidingExpirationFromMinutes(slidingExpiration: number | undefined): CachePolicyBuilder;
     withSlidingExpirationFromSeconds(slidingExpiration: number | undefined): CachePolicyBuilder;
+    withThreshold(threshold: number | undefined): CachePolicyBuilder;
     build(): CachePolicy;
 }
 export declare class TileDirectoryOptionsBuilder<V> {

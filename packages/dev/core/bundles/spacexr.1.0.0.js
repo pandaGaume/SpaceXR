@@ -1111,6 +1111,7 @@ class CanvasTileMap {
         }
         this._bounds = e.bounds;
         this._scale = e.scale;
+        console.log("TileMap.onUpdate() with ", e.toString());
         if (e.added && e.added.size != 0) {
             for (const c of e.added.entries()) {
                 if (this._directory) {
@@ -3039,8 +3040,12 @@ class CachePolicyBuilder {
         this._slidingExpiration = slidingExpiration ? slidingExpiration * 1000 : slidingExpiration;
         return this;
     }
+    withThreshold(threshold) {
+        this._threshold = threshold;
+        return this;
+    }
     build() {
-        return new CachePolicy({ slidingExpiration: this._slidingExpiration });
+        return new CachePolicy({ slidingExpiration: this._slidingExpiration, threshold: this._threshold });
     }
 }
 class TileDirectoryOptionsBuilder {
@@ -3065,7 +3070,7 @@ class TileDirectoryOptions {
         return new TileDirectoryOptionsBuilder()
             .withMetrics(_tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared)
             .withTileBuilder(_tiles__WEBPACK_IMPORTED_MODULE_2__.Tile.Builder())
-            .withCacheOptions(new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).build())
+            .withCacheOptions(new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).withThreshold(500).build())
             .build();
     }
     constructor(init) {
@@ -3169,21 +3174,20 @@ class TileDirectory {
     }
     gc() {
         const now = Date.now();
+        const threshold = this._options.cacheOptions?.threshold || 0;
         if (this._head && this._head.expiration <= now) {
             do {
                 const tmp = this._head;
                 this.removeNode(tmp);
-                console.log("Clear", tmp._value.address, "remain", this._count, "tile(s)");
                 if (tmp._callbacks) {
                     for (const cb of tmp._callbacks) {
                         cb(tmp);
                     }
                 }
-            } while (this._head && this._head.expiration <= now);
+            } while (this._head && this._head.expiration - threshold <= now);
         }
         if (this._head) {
             const delay = this._head.expiration - Date.now();
-            console.log("timeout after clear", Math.round(delay / 1000), "seconds");
             if (this._timer) {
                 clearTimeout(this._timer);
             }
@@ -3231,7 +3235,6 @@ class TileDirectory {
             finally {
                 if (this._head && this._head !== head) {
                     const delay = this._head.expiration - Date.now();
-                    console.log("Set timeout", Math.round(delay / 1000), "seconds");
                     if (this._timer) {
                         clearTimeout(this._timer);
                     }
@@ -3855,8 +3858,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.geography */ "./dist/tiles/tiles.geography.js");
 /* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
 /* harmony import */ var ___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! .. */ "./dist/geometry/geometry.cartesian.js");
 
 
@@ -3874,6 +3877,20 @@ class UpdateEvents {
         this.added = added;
         this.removed = removed;
         this.remain = remain;
+    }
+    toString() {
+        return [
+            "Bounds:",
+            this.bounds.toString(),
+            ",scale:",
+            this.scale.toString(),
+            ", added:",
+            this.added?.size || 0,
+            ", remain:",
+            this.remain?.size || 0,
+            ", removed:",
+            this.removed?.size || 0,
+        ].join(" ");
     }
 }
 class View2 {
@@ -3997,36 +4014,44 @@ class View2 {
         const rect = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle.FromPoints(nwTileXY, seTileXY);
         const remainBounds = rect.intersection(this._outerboundsTileXY);
         this._outerboundsTileXY = rect;
-        const addresses = [];
-        for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
-            for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                addresses.push(new _tiles_address__WEBPACK_IMPORTED_MODULE_7__.TileAddress(tx, ty, lod));
-            }
-        }
         if (this._updateObservable && this._updateObservable.hasObservers()) {
             let added = new Map();
             let remains = new Map();
             let removed = new Map();
             const old = this._tiles;
-            this._tiles = addresses;
             for (const c of old) {
-                const k = c.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.TileXYToQuadKey(c);
+                const k = c.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_7__.TileMetrics.TileXYToQuadKey(c);
                 if (c.levelOfDetail == lod && remainBounds?.contains(c.x, c.y)) {
                     remains.set(k, c);
                     continue;
                 }
                 removed.set(k, c);
             }
-            for (const c of addresses) {
-                const k = c.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.TileXYToQuadKey(c);
-                if (remainBounds?.contains(c.x, c.y)) {
-                    continue;
+            const address = [];
+            for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
+                for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
+                    const c = new _tiles_address__WEBPACK_IMPORTED_MODULE_8__.TileAddress(tx, ty, lod);
+                    const k = c.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_7__.TileMetrics.TileXYToQuadKey(c);
+                    address.push(c);
+                    if (remainBounds?.contains(c.x, c.y)) {
+                        continue;
+                    }
+                    added.set(k, c);
                 }
-                added.set(k, c);
             }
+            this._tiles = address;
             const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);
+            return;
         }
+        const address = [];
+        for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
+            for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
+                const c = new _tiles_address__WEBPACK_IMPORTED_MODULE_8__.TileAddress(tx, ty, lod);
+                address.push(c);
+            }
+        }
+        this._tiles = address;
     }
 }
 View2.ZOOM_ACC = 10000;

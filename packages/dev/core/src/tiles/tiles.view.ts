@@ -19,6 +19,21 @@ export class UpdateEvents {
         public removed?: Map<string, ITileAddress>,
         public remain?: Map<string, ITileAddress>
     ) {}
+
+    public toString() {
+        return [
+            "Bounds:",
+            this.bounds.toString(),
+            ",scale:",
+            this.scale.toString(),
+            ", added:",
+            this.added?.size || 0,
+            ", remain:",
+            this.remain?.size || 0,
+            ", removed:",
+            this.removed?.size || 0,
+        ].join(" ");
+    }
 }
 
 export class View2<T> {
@@ -190,21 +205,12 @@ export class View2<T> {
         const remainBounds = rect.intersection(this._outerboundsTileXY);
         this._outerboundsTileXY = rect;
 
-        const addresses = [];
-
-        for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
-            for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
-                addresses.push(new TileAddress(tx, ty, lod));
-            }
-        }
-
         if (this._updateObservable && this._updateObservable.hasObservers()) {
             let added = new Map<string, ITileAddress>();
             let remains = new Map<string, ITileAddress>();
             let removed = new Map<string, ITileAddress>();
 
             const old = this._tiles;
-            this._tiles = addresses;
 
             for (const c of old) {
                 const k = c.quadkey || TileMetrics.TileXYToQuadKey(c);
@@ -215,16 +221,32 @@ export class View2<T> {
                 removed.set(k, c);
             }
 
-            for (const c of addresses) {
-                const k = c.quadkey || TileMetrics.TileXYToQuadKey(c);
-                if (remainBounds?.contains(c.x, c.y)) {
-                    continue;
+            const address = [];
+            for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
+                for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
+                    const c = new TileAddress(tx, ty, lod);
+                    const k = c.quadkey || TileMetrics.TileXYToQuadKey(c);
+                    address.push(c);
+                    if (remainBounds?.contains(c.x, c.y)) {
+                        continue;
+                    }
+                    added.set(k, c);
                 }
-                added.set(k, c);
             }
+            this._tiles = address;
 
             const e = new UpdateEvents(this._innerbounds, this._scale, added, removed, remains);
             this._updateObservable?.notifyObservers(e);
+            return;
         }
+
+        const address = [];
+        for (let ty = nwTileXY.y; ty <= seTileXY.y; ty++) {
+            for (let tx = nwTileXY.x; tx <= seTileXY.x; tx++) {
+                const c = new TileAddress(tx, ty, lod);
+                address.push(c);
+            }
+        }
+        this._tiles = address;
     }
 }

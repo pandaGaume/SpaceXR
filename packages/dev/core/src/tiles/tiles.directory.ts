@@ -271,7 +271,6 @@ export class TileDirectory<V> implements ITileDirectory<V> {
             do {
                 const tmp = this._head;
                 this.removeNode(tmp);
-                console.log("Clear", tmp._value.address, "remain", this._count, "tile(s)");
                 if (tmp._callbacks) {
                     for (const cb of tmp._callbacks) {
                         cb(tmp);
@@ -281,7 +280,7 @@ export class TileDirectory<V> implements ITileDirectory<V> {
         }
         if (this._head) {
             const delay = this._head.expiration - Date.now();
-            console.log("timeout after clear", Math.round(delay / 1000), "seconds");
+            //console.log("timeout after clear", Math.round(delay / 1000), "seconds, remains", this._count, "tile(s)");
             if (this._timer) {
                 clearTimeout(this._timer);
             }
@@ -340,7 +339,6 @@ export class TileDirectory<V> implements ITileDirectory<V> {
             } finally {
                 if (this._head && this._head !== head) {
                     const delay = this._head.expiration - Date.now();
-                    console.log("Set timeout", Math.round(delay / 1000), "seconds");
                     // we change the trigger.
                     if (this._timer) {
                         clearTimeout(this._timer);

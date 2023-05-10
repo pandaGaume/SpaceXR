@@ -9,6 +9,7 @@ export declare class UpdateEvents {
     removed?: Map<string, ITileAddress> | undefined;
     remain?: Map<string, ITileAddress> | undefined;
     constructor(bounds: IRectangle, scale: ICartesian2, added?: Map<string, ITileAddress> | undefined, removed?: Map<string, ITileAddress> | undefined, remain?: Map<string, ITileAddress> | undefined);
+    toString(): string;
 }
 export declare class View2<T> {
     static ZOOM_ACC: number;

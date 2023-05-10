@@ -21,5 +21,4 @@ export declare class CanvasTileMap {
     private get metrics();
     private onUpdate;
     private draw;
-    private drawImage;
 }

@@ -1126,7 +1126,7 @@ class CanvasTileMap {
                                         const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
                                         this._cache.set(key, tile);
                                         if (tile.data) {
-                                            this.drawImage(a, tile.data);
+                                            this.draw(false, [tile]);
                                         }
                                     }
                                 }).bind(this))
@@ -1151,46 +1151,29 @@ class CanvasTileMap {
         }
         this.draw();
     }
-    draw() {
+    draw(clear = true, images) {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
                 const center = this._bounds.center;
                 const metrics = this.metrics;
                 const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-                ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+                if (clear) {
+                    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+                }
                 ctx.save();
                 ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
                 ctx.scale(this._scale.x, this._scale.y);
-                for (const entry of this._cache.entries()) {
-                    const t = entry[1];
+                const list = images || this._cache.values();
+                for (const t of list) {
                     if (t.data) {
                         const a = t.address;
                         const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
                         pixelXY.x -= center.x;
                         pixelXY.y -= center.y;
                         ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
-                        continue;
                     }
                 }
-                ctx.restore();
-            }
-        }
-    }
-    drawImage(a, data) {
-        if (this._bounds) {
-            const ctx = this._canvas.getContext("2d");
-            if (ctx) {
-                const center = this._bounds.center;
-                const metrics = this.metrics;
-                const temp = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
-                ctx.save();
-                ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
-                ctx.scale(this._scale.x, this._scale.y);
-                const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
-                pixelXY.x -= center.x;
-                pixelXY.y -= center.y;
-                ctx.drawImage(data, pixelXY.x, pixelXY.y);
                 ctx.restore();
             }
         }

@@ -9,7 +9,7 @@ export class CanvasTileMap {
     _canvas: HTMLCanvasElement; // the 2D target
     _view: View2<HTMLImageElement>; // the view logic
     _directory?: ITileDirectory<HTMLImageElement>; // the tiel data source
-    _cache: Map<string, ITile<HTMLImageElement>>; // the list of activ tiles
+    _activ: Map<string, ITile<HTMLImageElement>>; // the list of activ tiles
     _bounds?: IRectangle; // this is a copy of the curent pixel bounds of the view
     _scale: Cartesian2; //
 
@@ -18,7 +18,7 @@ export class CanvasTileMap {
         this._directory = directory;
         this._view = new View2(canvas.width, canvas.height, lat, lon, zoom, directory?.metrics);
         this._view.updateObservable.add(((e: UpdateEvents) => this.onUpdate(e)).bind(this));
-        this._cache = new Map<string, ITile<HTMLImageElement>>();
+        this._activ = new Map<string, ITile<HTMLImageElement>>();
         this._scale = Cartesian2.One();
         this._view.validate();
     }
@@ -87,7 +87,7 @@ export class CanvasTileMap {
                                             if (tile) {
                                                 const a = tile.address;
                                                 const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                                                this._cache.set(key, tile);
+                                                this._activ.set(key, tile);
 
                                                 if (tile.data) {
                                                     this.draw(false, [tile]);
@@ -104,7 +104,7 @@ export class CanvasTileMap {
                             const tile: ITile<HTMLImageElement> = result;
                             const a = tile.address;
                             const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                            this._cache.set(key, tile);
+                            this._activ.set(key, tile);
                         }
                     }
                 }
@@ -114,7 +114,7 @@ export class CanvasTileMap {
         if (e.removed && e.removed.size != 0) {
             // this is the place to clean unactive tile
             for (const key of e.removed.keys()) {
-                this._cache.delete(key);
+                this._activ.delete(key);
             }
         }
 
@@ -135,7 +135,7 @@ export class CanvasTileMap {
                 ctx.save();
                 ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
                 ctx.scale(this._scale.x, this._scale.y);
-                const list = images || this._cache.values();
+                const list = images || this._activ.values();
                 for (const t of list) {
                     if (t.data) {
                         const a = t.address;

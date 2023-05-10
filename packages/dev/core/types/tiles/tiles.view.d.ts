@@ -12,7 +12,7 @@ export declare class UpdateEvents {
     constructor(lod: number, bounds: IRectangle, scale: ICartesian2, added?: Map<string, ITileAddress> | undefined, removed?: Map<string, ITileAddress> | undefined, remain?: Map<string, ITileAddress> | undefined);
     toString(): string;
 }
-export declare class View2<T> {
+export declare class TileMapView {
     static ZOOM_ACC: number;
     _metrics: ITileMetrics;
     _center: IGeo2;
@@ -36,11 +36,11 @@ export declare class View2<T> {
     get lat(): number;
     get lon(): number;
     get isValid(): boolean;
-    setLevelOfDetail(v: number): View2<T>;
-    resize(width: number, height: number): View2<T>;
-    center(lat?: number, lon?: number): View2<T>;
-    translate(x: number, y: number): View2<T>;
-    invalidate(): View2<T>;
-    validate(): View2<T>;
+    setLevelOfDetail(v: number): TileMapView;
+    resize(width: number, height: number): TileMapView;
+    center(lat?: number, lon?: number): TileMapView;
+    translate(x: number, y: number): TileMapView;
+    invalidate(): TileMapView;
+    validate(): TileMapView;
     protected doValidate(): void;
 }

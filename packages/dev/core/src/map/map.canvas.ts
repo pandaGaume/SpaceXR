@@ -121,7 +121,7 @@ export class CanvasTileMap {
         this.draw();
     }
 
-    private draw(clear: boolean = true, images?: Array<ITile<HTMLImageElement>>) {
+    private draw(clear: boolean = true, tiles?: Array<ITile<HTMLImageElement>>) {
         if (this._bounds) {
             const ctx = this._canvas.getContext("2d");
             if (ctx) {
@@ -135,7 +135,7 @@ export class CanvasTileMap {
                 ctx.save();
                 ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
                 ctx.scale(this._scale.x, this._scale.y);
-                const list = images || this._activ.values();
+                const list = tiles || this._activ.values();
                 for (const t of list) {
                     if (t.data) {
                         const a = t.address;

@@ -12,3 +12,9 @@ export interface ICloneable<T> {
 export interface IComparable<T> {
     equals(other: T | undefined): boolean;
 }
+
+export interface IValidable<T> {
+    isValid: boolean;
+    invalidate(): T;
+    validate(): T;
+}

@@ -104,3 +104,12 @@ export interface ITileDirectory<V> extends ITileMetricsProvider {
      */
     lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined;
 }
+
+export interface ITileMapApi {
+    invalidateSize(w: number, h: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number): ITileMapApi;
+    setZoom(zoom: number): ITileMapApi;
+    zoomIn(delta: number): ITileMapApi;
+    zoomOut(delta: number): ITileMapApi;
+    translate(tx: number, ty: number): ITileMapApi;
+}

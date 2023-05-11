@@ -4311,6 +4311,59 @@ TileMapView.ZOOM_ACC = 10000;
 
 //# sourceMappingURL=tiles.view.js.map
 
+/***/ }),
+
+/***/ "./dist/utils/index.js":
+/*!*****************************!*\
+  !*** ./dist/utils/index.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ObjectPool": () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool)
+/* harmony export */ });
+/* harmony import */ var _objectpools__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objectpools */ "./dist/utils/objectpools.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/utils/objectpools.js":
+/*!***********************************!*\
+  !*** ./dist/utils/objectpools.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ObjectPool": () => (/* binding */ ObjectPool)
+/* harmony export */ });
+class ObjectPool {
+    constructor(type) {
+        this.type = type;
+        this.metrics = {
+            allocated: 0,
+            free: 0,
+        };
+        this.pool = [];
+    }
+    alloc() {
+        let obj = this.pool.pop();
+        if (obj) {
+            this.metrics.free--;
+            return obj;
+        }
+        this.metrics.allocated++;
+        return new this.type();
+    }
+    free(obj) {
+        this.pool.push(obj);
+        this.metrics.free++;
+    }
+}
+//# sourceMappingURL=objectpools.js.map
+
 /***/ })
 
 /******/ 	});
@@ -4421,6 +4474,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenNormalValueDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Mass),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
+/* harmony export */   "ObjectPool": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.ObjectPool),
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
 /* harmony export */   "PlanetSurface": () => (/* reexport safe */ _terrain_index__WEBPACK_IMPORTED_MODULE_8__.PlanetSurface),
@@ -4479,6 +4533,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _space_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./space/index */ "./dist/space/index.js");
 /* harmony import */ var _terrain_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./terrain/index */ "./dist/terrain/index.js");
 /* harmony import */ var _tiles_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles/index */ "./dist/tiles/index.js");
+/* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./utils/index */ "./dist/utils/index.js");
+
 
 
 

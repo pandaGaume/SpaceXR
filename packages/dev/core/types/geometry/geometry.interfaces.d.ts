@@ -1,4 +1,3 @@
-import { IComparable } from "../types";
 export interface ICartesian2 {
     x: number;
     y: number;
@@ -10,12 +9,12 @@ export interface ICartesian3 {
     z: number;
     toString(): string;
 }
-export interface ISize2 extends IComparable<ISize2> {
+export interface ISize2 {
     height: number;
     width: number;
 }
 export declare function isSize2(b: unknown): b is ISize2;
-export interface ISize3 extends IComparable<ISize3> {
+export interface ISize3 {
     height: number;
     width: number;
     thickness?: number;

@@ -1,0 +1,70 @@
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IGeo2 } from "../geography/geography.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile } from "./tiles.interfaces";
+import { Observable } from "../events/events.observable";
+import { ObjectPool } from "../utils/objectpools";
+import { IValidable } from "../types";
+export declare class TileMapLevel<T> {
+    _lod: number;
+    _tiles: Map<string, ITile<T>>;
+    _bounds?: IRectangle;
+    constructor(lod: number);
+    get lod(): number;
+    get tiles(): Map<string, ITile<T>>;
+    get bounds(): IRectangle | undefined;
+    set bounds(v: IRectangle | undefined);
+}
+export declare class UpdateEvent<T> {
+    private static __pool__;
+    static Pool<T>(): ObjectPool<UpdateEvent<T>>;
+    _scale: ICartesian2;
+    _bounds: IRectangle;
+    _added: Map<string, ITile<T>>;
+    _removed: Map<string, ITile<T>>;
+    constructor();
+    get from(): TileMapView<T>;
+    get scale(): ICartesian2;
+    set scale(v: ICartesian2);
+    get bounds(): IRectangle;
+    set bounds(v: IRectangle);
+    get added(): Map<string, ITile<T>>;
+    get removed(): Map<string, ITile<T>>;
+    clear(): void;
+}
+export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
+    _d: ITileDirectory<T>;
+    _w: number;
+    _h: number;
+    _center: IGeo2;
+    _activTiles: Array<TileMapLevel<T>>;
+    _lod: number;
+    _valid: boolean;
+    _resizeObservable?: Observable<TileMapView<T>>;
+    _centerObservable?: Observable<TileMapView<T>>;
+    _zoomObservable?: Observable<TileMapView<T>>;
+    _updateObservable?: Observable<[TileMapView<T>, UpdateEvent<T>]>;
+    constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number);
+    get resizeObservable(): Observable<TileMapView<T>>;
+    get centerObservable(): Observable<TileMapView<T>>;
+    get zoomObservable(): Observable<TileMapView<T>>;
+    get updateObservable(): Observable<[TileMapView<T>, UpdateEvent<T>]>;
+    get directory(): ITileDirectory<T>;
+    get center(): IGeo2;
+    get metrics(): ITileMetrics;
+    get width(): number;
+    get height(): number;
+    invalidateSize(w: number, h: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number): ITileMapApi;
+    setZoom(zoom: number): ITileMapApi;
+    zoomIn(delta: number): ITileMapApi;
+    zoomOut(delta: number): ITileMapApi;
+    translate(tx: number, ty: number): ITileMapApi;
+    get isValid(): boolean;
+    invalidate(): TileMapView<T>;
+    validate(): TileMapView<T>;
+    private onResizeObserverAdded;
+    private onZoomObserverAdded;
+    private onCenterObserverAdded;
+    private onUpdateObserverAdded;
+    protected doValidate(): void;
+}

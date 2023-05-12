@@ -1,27 +1,32 @@
-export class ObjectPool<T> {
-    private metrics = {
-        allocated: 0,
-        free: 0,
-    };
+export class ObjectPoolOptions<T> {
+    maxCount?: number;
+    clean?: (o: T) => void;
+}
 
+export class ObjectPool<T> {
+    private _o?: ObjectPoolOptions<T>;
     private pool: T[] = [];
 
-    constructor(private type: new () => T) {}
+    constructor(private type: new () => T, options?: ObjectPoolOptions<T>) {
+        this._o = options;
+    }
 
     public alloc(): T {
         let obj = this.pool.pop();
 
         if (obj) {
-            this.metrics.free--;
             return obj;
         }
 
-        this.metrics.allocated++;
         return new this.type();
     }
 
     public free(obj: T) {
-        this.pool.push(obj);
-        this.metrics.free++;
+        if (this._o?.clean) {
+            this._o.clean(obj);
+        }
+        if (!this._o?.maxCount || this.pool.length < this._o.maxCount) {
+            this.pool.push(obj);
+        }
     }
 }

@@ -1,13 +1,12 @@
 export class ObjectPoolOptions<T> {
-    maxCount?: number;
-    clean?: (o: T) => void;
+    public constructor(public factory: () => T, public maxCount?: number, public clean?: (o: T) => void) {}
 }
 
 export class ObjectPool<T> {
-    private _o?: ObjectPoolOptions<T>;
+    private _o: ObjectPoolOptions<T>;
     private pool: T[] = [];
 
-    constructor(private type: new () => T, options?: ObjectPoolOptions<T>) {
+    constructor(options: ObjectPoolOptions<T>) {
         this._o = options;
     }
 
@@ -18,14 +17,14 @@ export class ObjectPool<T> {
             return obj;
         }
 
-        return new this.type();
+        return this._o.factory();
     }
 
     public free(obj: T) {
-        if (this._o?.clean) {
+        if (this._o.clean) {
             this._o.clean(obj);
         }
-        if (!this._o?.maxCount || this.pool.length < this._o.maxCount) {
+        if (!this._o.maxCount || this.pool.length < this._o.maxCount) {
             this.pool.push(obj);
         }
     }

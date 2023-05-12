@@ -1,4 +1,4 @@
-import { CacheEntry, CachePolicy, MemoryCache, PostEvictionCallback } from "../utils/cache";
+import { CacheEntry, CachePolicy, EvictionReason, MemoryCache, PostEvictionCallback } from "../utils/cache";
 import { ITile, ITileAddress, ITileBuilder, ITileDatasource, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
 export declare class TileDirectoryOptionsBuilder<V> {
     _tileBuilder?: ITileBuilder<V>;
@@ -29,5 +29,5 @@ export declare class TileDirectory<V> implements ITileDirectory<ITile<V>> {
     protected buildTile(address: ITileAddress, data?: V): ITile<V>;
     protected bindTile(key: string, t: ITile<V>): void;
     protected unbindTile(key: string, t: ITile<V> | undefined): void;
-    protected onEntryEvicted(e: CacheEntry<string, ITile<V>>): void;
+    protected onEntryEvicted(e: CacheEntry<string, ITile<V>>, reason: EvictionReason): void;
 }

@@ -1,4 +1,4 @@
-import { CacheEntry, CacheEntryOptions, CachePolicy, CachePolicyBuilder, MemoryCache, PostEvictionCallback } from "../utils/cache";
+import { CacheEntry, CacheEntryOptionsBuilder, CachePolicy, CachePolicyBuilder, EvictionReason, MemoryCache, PostEvictionCallback } from "../utils/cache";
 import { Tile } from "./tiles";
 import { EPSG3857 } from "./tiles.geography";
 import { ITile, ITileAddress, ITileBuilder, ITileDatasource, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
@@ -82,9 +82,8 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
                         const t = this.buildTile(address, data);
                         if (t) {
                             this.bindTile(k, t);
-                            const o = new CacheEntryOptions<string, ITile<V>>();
-                            o.postEvictionCallback().push(this._postEvictionCallback);
-                            this._cache.set(k, t, o);
+                            const b = new CacheEntryOptionsBuilder<string, ITile<V>>().withPostEvictionCallbacks(this._postEvictionCallback);
+                            this._cache.set(k, t, b.build());
                         }
                         resolve(t);
                     }
@@ -154,7 +153,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
         }
     }
 
-    protected onEntryEvicted(e: CacheEntry<string, ITile<V>>) {
+    protected onEntryEvicted(e: CacheEntry<string, ITile<V>>, reason: EvictionReason) {
         this.unbindTile(e.key, e.value);
     }
 }

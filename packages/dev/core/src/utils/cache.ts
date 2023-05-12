@@ -1,4 +1,9 @@
-export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>) => void;
+export enum EvictionReason {
+    user,
+    expired,
+}
+
+export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>, reason: EvictionReason) => void;
 export type CacheItemFactory<K, V> = (e: CacheEntry<K, V>) => V;
 
 export class CachePolicyBuilder {
@@ -42,6 +47,9 @@ export class CacheEntryOptions<K, V> {
     _slidingExpiration?: number;
     _callbacks?: Array<PostEvictionCallback<K, V>>;
 
+    public constructor(init?: Partial<CacheEntryOptions<K, V>>) {
+        Object.assign(this, init);
+    }
     public get slidingExpiration(): number | undefined {
         return this._slidingExpiration;
     }
@@ -50,13 +58,43 @@ export class CacheEntryOptions<K, V> {
         this._slidingExpiration = v;
     }
 
-    public postEvictionCallback(): Array<PostEvictionCallback<K, V>> {
+    public get postEvictionCallback(): Array<PostEvictionCallback<K, V>> {
         return (this._callbacks = this._callbacks || []);
+    }
+    public set postEvictionCallback(a: Array<PostEvictionCallback<K, V>>) {
+        this._callbacks = a;
+    }
+}
+
+export class CacheEntryOptionsBuilder<K, V> {
+    _slidingExpiration?: number;
+    _callbacks?: Array<PostEvictionCallback<K, V>>;
+
+    public withSlidingExpiration(slidingExpiration: number | undefined): CacheEntryOptionsBuilder<K, V> {
+        this._slidingExpiration = slidingExpiration;
+        return this;
+    }
+    public withSlidingExpirationFromMinutes(slidingExpiration: number | undefined): CacheEntryOptionsBuilder<K, V> {
+        this._slidingExpiration = slidingExpiration ? slidingExpiration * 60000 : slidingExpiration;
+        return this;
+    }
+    public withSlidingExpirationFromSeconds(slidingExpiration: number | undefined): CacheEntryOptionsBuilder<K, V> {
+        this._slidingExpiration = slidingExpiration ? slidingExpiration * 1000 : slidingExpiration;
+        return this;
+    }
+    public withPostEvictionCallbacks(..._callbacks: PostEvictionCallback<K, V>[]): CacheEntryOptionsBuilder<K, V> {
+        this._callbacks = this._callbacks || [];
+        this._callbacks.push(..._callbacks);
+        return this;
+    }
+
+    public build(): CacheEntryOptions<K, V> {
+        return new CacheEntryOptions({ slidingExpiration: this._slidingExpiration, postEvictionCallback: this._callbacks });
     }
 }
 
 export class CacheEntry<K, V> {
-    _key!: string;
+    _key!: K;
     _value?: V;
     _lastAccess?: number;
     _options?: CacheEntryOptions<K, V>;
@@ -70,7 +108,7 @@ export class CacheEntry<K, V> {
         this._lastAccess = Date.now();
     }
 
-    public get key(): string {
+    public get key(): K {
         return this._key;
     }
 
@@ -84,12 +122,8 @@ export class CacheEntry<K, V> {
         this._value = v;
     }
 
-    public get slidingExpiration(): number | undefined {
-        return this._options?._slidingExpiration;
-    }
-
     public get expiration(): number {
-        const se = this.slidingExpiration;
+        const se = this._options?._slidingExpiration;
         if (!this._lastAccess || !se) {
             return Infinity;
         }
@@ -140,6 +174,21 @@ export class MemoryCache<K, V> {
         return;
     }
 
+    public delete(key: K): void {
+        const e = this._cache.get(key);
+        if (e) {
+            const isHead = e === this._head;
+            this.removeNode(e);
+            this._cache.delete(key);
+            for (const cb of e.postEvictionCallback()) {
+                cb(e, EvictionReason.user);
+            }
+            if (isHead) {
+                this.updateTimer();
+            }
+        }
+    }
+
     public keys(): IterableIterator<K> {
         return this._cache.keys();
     }
@@ -152,11 +201,16 @@ export class MemoryCache<K, V> {
             do {
                 const tmp = this._head;
                 this.removeNode(tmp);
+                this._cache.delete(tmp.key);
                 for (const cb of tmp.postEvictionCallback()) {
-                    cb(tmp);
+                    cb(tmp, EvictionReason.expired);
                 }
             } while (this._head && this._head.expiration - threshold <= now);
         }
+        this.updateTimer();
+    }
+
+    private updateTimer() {
         if (this._head) {
             const delay = this._head.expiration - Date.now();
             //console.log("timeout after clear", Math.round(delay / 1000), "seconds, remains", this._count, "tile(s)");

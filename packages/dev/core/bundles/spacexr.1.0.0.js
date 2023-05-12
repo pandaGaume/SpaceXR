@@ -3324,9 +3324,8 @@ class TileDirectory {
                         const t = this.buildTile(address, data);
                         if (t) {
                             this.bindTile(k, t);
-                            const o = new _utils_cache__WEBPACK_IMPORTED_MODULE_2__.CacheEntryOptions();
-                            o.postEvictionCallback().push(this._postEvictionCallback);
-                            this._cache.set(k, t, o);
+                            const b = new _utils_cache__WEBPACK_IMPORTED_MODULE_2__.CacheEntryOptionsBuilder().withPostEvictionCallbacks(this._postEvictionCallback);
+                            this._cache.set(k, t, b.build());
                         }
                         resolve(t);
                     }
@@ -3381,7 +3380,7 @@ class TileDirectory {
             t.childrens = undefined;
         }
     }
-    onEntryEvicted(e) {
+    onEntryEvicted(e, reason) {
         this.unbindTile(e.key, e.value);
     }
 }
@@ -4149,10 +4148,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CacheEntry": () => (/* binding */ CacheEntry),
 /* harmony export */   "CacheEntryOptions": () => (/* binding */ CacheEntryOptions),
+/* harmony export */   "CacheEntryOptionsBuilder": () => (/* binding */ CacheEntryOptionsBuilder),
 /* harmony export */   "CachePolicy": () => (/* binding */ CachePolicy),
 /* harmony export */   "CachePolicyBuilder": () => (/* binding */ CachePolicyBuilder),
+/* harmony export */   "EvictionReason": () => (/* binding */ EvictionReason),
 /* harmony export */   "MemoryCache": () => (/* binding */ MemoryCache)
 /* harmony export */ });
+var EvictionReason;
+(function (EvictionReason) {
+    EvictionReason[EvictionReason["user"] = 0] = "user";
+    EvictionReason[EvictionReason["expired"] = 1] = "expired";
+})(EvictionReason || (EvictionReason = {}));
 class CachePolicyBuilder {
     withSlidingExpiration(slidingExpiration) {
         this._slidingExpiration = slidingExpiration;
@@ -4182,14 +4188,42 @@ class CachePolicy {
 CachePolicy.Default = new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).withThreshold(100).build();
 
 class CacheEntryOptions {
+    constructor(init) {
+        Object.assign(this, init);
+    }
     get slidingExpiration() {
         return this._slidingExpiration;
     }
     set slidingExpiration(v) {
         this._slidingExpiration = v;
     }
-    postEvictionCallback() {
+    get postEvictionCallback() {
         return (this._callbacks = this._callbacks || []);
+    }
+    set postEvictionCallback(a) {
+        this._callbacks = a;
+    }
+}
+class CacheEntryOptionsBuilder {
+    withSlidingExpiration(slidingExpiration) {
+        this._slidingExpiration = slidingExpiration;
+        return this;
+    }
+    withSlidingExpirationFromMinutes(slidingExpiration) {
+        this._slidingExpiration = slidingExpiration ? slidingExpiration * 60000 : slidingExpiration;
+        return this;
+    }
+    withSlidingExpirationFromSeconds(slidingExpiration) {
+        this._slidingExpiration = slidingExpiration ? slidingExpiration * 1000 : slidingExpiration;
+        return this;
+    }
+    withPostEvictionCallbacks(..._callbacks) {
+        this._callbacks = this._callbacks || [];
+        this._callbacks.push(..._callbacks);
+        return this;
+    }
+    build() {
+        return new CacheEntryOptions({ slidingExpiration: this._slidingExpiration, postEvictionCallback: this._callbacks });
     }
 }
 class CacheEntry {
@@ -4209,11 +4243,8 @@ class CacheEntry {
         this._lastAccess = Date.now();
         this._value = v;
     }
-    get slidingExpiration() {
-        return this._options?._slidingExpiration;
-    }
     get expiration() {
-        const se = this.slidingExpiration;
+        const se = this._options?._slidingExpiration;
         if (!this._lastAccess || !se) {
             return Infinity;
         }
@@ -4252,6 +4283,20 @@ class MemoryCache {
         this.sortList(e);
         return;
     }
+    delete(key) {
+        const e = this._cache.get(key);
+        if (e) {
+            const isHead = e === this._head;
+            this.removeNode(e);
+            this._cache.delete(key);
+            for (const cb of e.postEvictionCallback()) {
+                cb(e, EvictionReason.user);
+            }
+            if (isHead) {
+                this.updateTimer();
+            }
+        }
+    }
     keys() {
         return this._cache.keys();
     }
@@ -4262,11 +4307,15 @@ class MemoryCache {
             do {
                 const tmp = this._head;
                 this.removeNode(tmp);
+                this._cache.delete(tmp.key);
                 for (const cb of tmp.postEvictionCallback()) {
-                    cb(tmp);
+                    cb(tmp, EvictionReason.expired);
                 }
             } while (this._head && this._head.expiration - threshold <= now);
         }
+        this.updateTimer();
+    }
+    updateTimer() {
         if (this._head) {
             const delay = this._head.expiration - Date.now();
             if (this._timer) {
@@ -4401,8 +4450,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CacheEntry": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CacheEntry),
 /* harmony export */   "CacheEntryOptions": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CacheEntryOptions),
+/* harmony export */   "CacheEntryOptionsBuilder": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CacheEntryOptionsBuilder),
 /* harmony export */   "CachePolicy": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CachePolicy),
 /* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CachePolicyBuilder),
+/* harmony export */   "EvictionReason": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.EvictionReason),
 /* harmony export */   "MemoryCache": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.MemoryCache),
 /* harmony export */   "ObjectPool": () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool),
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPoolOptions)
@@ -4531,6 +4582,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Box": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Box),
 /* harmony export */   "CacheEntry": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CacheEntry),
 /* harmony export */   "CacheEntryOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CacheEntryOptions),
+/* harmony export */   "CacheEntryOptionsBuilder": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CacheEntryOptionsBuilder),
 /* harmony export */   "CachePolicy": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CachePolicy),
 /* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CachePolicyBuilder),
 /* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasDisplay),
@@ -4550,6 +4602,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "EventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventArgs),
 /* harmony export */   "EventEmitter": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventEmitter),
 /* harmony export */   "EventState": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventState),
+/* harmony export */   "EvictionReason": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.EvictionReason),
 /* harmony export */   "Float32TileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodec),
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo3),

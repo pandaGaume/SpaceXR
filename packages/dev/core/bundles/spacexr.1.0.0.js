@@ -3,6 +3,42 @@ var SPACEXR;
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./dist/events/events.args.js":
+/*!************************************!*\
+  !*** ./dist/events/events.args.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "EventArgs": () => (/* binding */ EventArgs),
+/* harmony export */   "PropertyChangedEventArgs": () => (/* binding */ PropertyChangedEventArgs)
+/* harmony export */ });
+class EventArgs {
+    constructor(source) {
+        this._source = source;
+    }
+    get source() {
+        return this._source;
+    }
+}
+class PropertyChangedEventArgs extends EventArgs {
+    constructor(source, oldValue, newValue) {
+        super(source);
+        this._o = oldValue;
+        this._v = newValue;
+    }
+    get oldValue() {
+        return this._o;
+    }
+    get value() {
+        return this._v;
+    }
+}
+//# sourceMappingURL=events.args.js.map
+
+/***/ }),
+
 /***/ "./dist/events/events.emitter.js":
 /*!***************************************!*\
   !*** ./dist/events/events.emitter.js ***!
@@ -314,13 +350,17 @@ class Observable {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "EventArgs": () => (/* reexport safe */ _events_args__WEBPACK_IMPORTED_MODULE_2__.EventArgs),
 /* harmony export */   "EventEmitter": () => (/* reexport safe */ _events_emitter__WEBPACK_IMPORTED_MODULE_0__.EventEmitter),
 /* harmony export */   "EventState": () => (/* reexport safe */ _events_observable__WEBPACK_IMPORTED_MODULE_1__.EventState),
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable),
-/* harmony export */   "Observer": () => (/* reexport safe */ _events_observable__WEBPACK_IMPORTED_MODULE_1__.Observer)
+/* harmony export */   "Observer": () => (/* reexport safe */ _events_observable__WEBPACK_IMPORTED_MODULE_1__.Observer),
+/* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ _events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs)
 /* harmony export */ });
 /* harmony import */ var _events_emitter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./events.emitter */ "./dist/events/events.emitter.js");
 /* harmony import */ var _events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./events.observable */ "./dist/events/events.observable.js");
+/* harmony import */ var _events_args__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./events.args */ "./dist/events/events.args.js");
+
 
 
 
@@ -2788,8 +2828,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AbstractTileMetrics": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.AbstractTileMetrics),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.BlobTileCodec),
-/* harmony export */   "CachePolicy": () => (/* reexport safe */ _tiles_directory__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
-/* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _tiles_directory__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
 /* harmony export */   "DEMMetaData": () => (/* reexport safe */ _tiles_dem__WEBPACK_IMPORTED_MODULE_6__.DEMMetaData),
 /* harmony export */   "DEMTile": () => (/* reexport safe */ _tiles_dem__WEBPACK_IMPORTED_MODULE_6__.DEMTile),
 /* harmony export */   "EPSG3857": () => (/* reexport safe */ _tiles_geography__WEBPACK_IMPORTED_MODULE_7__.EPSG3857),
@@ -3217,90 +3255,18 @@ class DEMTile extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "CachePolicy": () => (/* binding */ CachePolicy),
-/* harmony export */   "CachePolicyBuilder": () => (/* binding */ CachePolicyBuilder),
 /* harmony export */   "TileDirectory": () => (/* binding */ TileDirectory),
 /* harmony export */   "TileDirectoryOptions": () => (/* binding */ TileDirectoryOptions),
 /* harmony export */   "TileDirectoryOptionsBuilder": () => (/* binding */ TileDirectoryOptionsBuilder)
 /* harmony export */ });
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
-/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.geography */ "./dist/tiles/tiles.geography.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/cache */ "./dist/utils/cache.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
+/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.geography */ "./dist/tiles/tiles.geography.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
 
 
 
-class TileCacheEntry {
-    constructor(value) {
-        this.value = value;
-    }
-    get key() {
-        return this._key;
-    }
-    get value() {
-        this._lastAccess = Date.now();
-        return this._value;
-    }
-    set value(v) {
-        this._value = v;
-        this._key = _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(v.address);
-        this._lastAccess = Date.now();
-    }
-    get slidingExpiration() {
-        return this._se;
-    }
-    set slidingExpiration(se) {
-        this._se = se;
-    }
-    get expiration() {
-        if (!this._lastAccess || !this._se) {
-            return Infinity;
-        }
-        return this._lastAccess + this._se;
-    }
-    addPostEvictionCallback(c) {
-        if (c) {
-            this._callbacks = this._callbacks || [];
-            this._callbacks.push(c);
-        }
-    }
-    removeEvictionCallback(c) {
-        if (c && this._callbacks) {
-            const i = this._callbacks.indexOf(c);
-            if (i >= 0) {
-                this._callbacks = this._callbacks.splice(i, 1);
-                if (this._callbacks.length == 0) {
-                    this._callbacks = undefined;
-                }
-            }
-        }
-    }
-}
-class CachePolicy {
-    constructor(init) {
-        Object.assign(this, init);
-    }
-}
-class CachePolicyBuilder {
-    withSlidingExpiration(slidingExpiration) {
-        this._slidingExpiration = slidingExpiration;
-        return this;
-    }
-    withSlidingExpirationFromMinutes(slidingExpiration) {
-        this._slidingExpiration = slidingExpiration ? slidingExpiration * 60000 : slidingExpiration;
-        return this;
-    }
-    withSlidingExpirationFromSeconds(slidingExpiration) {
-        this._slidingExpiration = slidingExpiration ? slidingExpiration * 1000 : slidingExpiration;
-        return this;
-    }
-    withThreshold(threshold) {
-        this._threshold = threshold;
-        return this;
-    }
-    build() {
-        return new CachePolicy({ slidingExpiration: this._slidingExpiration, threshold: this._threshold });
-    }
-}
+
 class TileDirectoryOptionsBuilder {
     withTileBuilder(v) {
         this._tileBuilder = v;
@@ -3321,9 +3287,9 @@ class TileDirectoryOptionsBuilder {
 class TileDirectoryOptions {
     static Default() {
         return new TileDirectoryOptionsBuilder()
-            .withMetrics(_tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared)
-            .withTileBuilder(_tiles__WEBPACK_IMPORTED_MODULE_2__.Tile.Builder())
-            .withCacheOptions(new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).withThreshold(500).build())
+            .withMetrics(_tiles_geography__WEBPACK_IMPORTED_MODULE_0__.EPSG3857.Shared)
+            .withTileBuilder(_tiles__WEBPACK_IMPORTED_MODULE_1__.Tile.Builder())
+            .withCacheOptions(new _utils_cache__WEBPACK_IMPORTED_MODULE_2__.CachePolicyBuilder().withSlidingExpirationFromMinutes(5).withThreshold(500).build())
             .build();
     }
     constructor(init) {
@@ -3332,27 +3298,23 @@ class TileDirectoryOptions {
 }
 class TileDirectory {
     constructor(name, datasource, options) {
-        this._count = 0;
         this._name = name;
         this._datasource = datasource;
         this._options = { ...TileDirectoryOptions.Default(), ...options };
-        this._cache = new Map();
+        this._cache = new _utils_cache__WEBPACK_IMPORTED_MODULE_2__.MemoryCache(this._options.cacheOptions);
         this._postEvictionCallback = this.onEntryEvicted.bind(this);
-        this._gc = this.gc.bind(this);
     }
     get name() {
         return this._name;
     }
     get metrics() {
-        return this._options.metrics || _tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared;
+        return this._options.metrics || _tiles_geography__WEBPACK_IMPORTED_MODULE_0__.EPSG3857.Shared;
     }
     lookupAsync(address) {
-        const k = address.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(address);
+        const k = address.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
         if (e) {
-            const t = e?.value;
-            this.sortList(e);
-            return t;
+            return e;
         }
         if (this._datasource) {
             return new Promise(async (resolve, reject) => {
@@ -3362,11 +3324,9 @@ class TileDirectory {
                         const t = this.buildTile(address, data);
                         if (t) {
                             this.bindTile(k, t);
-                            e = new TileCacheEntry(t);
-                            e.slidingExpiration = this._options.cacheOptions?.slidingExpiration;
-                            e.addPostEvictionCallback(this._postEvictionCallback);
-                            this._cache.set(e.key, e);
-                            this.sortList(e);
+                            const o = new _utils_cache__WEBPACK_IMPORTED_MODULE_2__.CacheEntryOptions();
+                            o.postEvictionCallback().push(this._postEvictionCallback);
+                            this._cache.set(k, t, o);
                         }
                         resolve(t);
                     }
@@ -3382,13 +3342,13 @@ class TileDirectory {
         return undefined;
     }
     buildTile(address, data) {
-        const b = this._options.tileBuilder || _tiles__WEBPACK_IMPORTED_MODULE_2__.Tile.Builder();
+        const b = this._options.tileBuilder || _tiles__WEBPACK_IMPORTED_MODULE_1__.Tile.Builder();
         return b.withMetrics(this.metrics).withAddress(address).withData(data).build();
     }
     bindTile(key, t) {
         if (this.metrics.minLOD < t.address.levelOfDetail) {
-            const parentKey = _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.ToParentKey(key);
-            t.parent = this._cache.get(parentKey)?.value;
+            const parentKey = _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.ToParentKey(key);
+            t.parent = this._cache.get(parentKey);
             if (t.parent) {
                 t.parent.childrens = t.parent.childrens || [];
                 t.parent.childrens.push(t);
@@ -3396,8 +3356,8 @@ class TileDirectory {
         }
         if (this.metrics.maxLOD > t.address.levelOfDetail) {
             const childrens = [];
-            for (const k of _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.ToChildKey(key)) {
-                const c = this._cache.get(k)?.value;
+            for (const k of _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.ToChildKey(key)) {
+                const c = this._cache.get(k);
                 if (c) {
                     c.parent = t;
                     childrens.push(c);
@@ -3407,14 +3367,14 @@ class TileDirectory {
         }
     }
     unbindTile(key, t) {
-        if (t.parent) {
+        if (t?.parent) {
             const i = t.parent.childrens?.indexOf(t);
             if (i !== undefined && i >= 0) {
                 t.parent.childrens = t.parent.childrens?.splice(i, 1);
             }
             t.parent = undefined;
         }
-        if (t.childrens) {
+        if (t?.childrens) {
             for (const c of t.childrens) {
                 c.parent = undefined;
             }
@@ -3423,140 +3383,6 @@ class TileDirectory {
     }
     onEntryEvicted(e) {
         this.unbindTile(e.key, e.value);
-        e.removeEvictionCallback(this._postEvictionCallback);
-    }
-    gc() {
-        const now = Date.now();
-        const threshold = this._options.cacheOptions?.threshold || 0;
-        if (this._head && this._head.expiration <= now) {
-            do {
-                const tmp = this._head;
-                this.removeNode(tmp);
-                if (tmp._callbacks) {
-                    for (const cb of tmp._callbacks) {
-                        cb(tmp);
-                    }
-                }
-            } while (this._head && this._head.expiration - threshold <= now);
-        }
-        if (this._head) {
-            const delay = this._head.expiration - Date.now();
-            if (this._timer) {
-                clearTimeout(this._timer);
-            }
-            this._timer = setTimeout(this._gc, delay);
-        }
-        else {
-            this._timer = undefined;
-        }
-    }
-    sortList(e) {
-        if (e) {
-            const head = this._head;
-            try {
-                if (!e._next && !e._prev) {
-                    this.insertLast(e);
-                }
-                const value = e.expiration;
-                let n = e._prev;
-                if (n && n.expiration > value) {
-                    this.removeNode(e);
-                    do {
-                        n = n._prev;
-                    } while (n && n.expiration > value);
-                    if (n) {
-                        this.insertAfter(e, n);
-                        return;
-                    }
-                    this.insertFirst(e);
-                    return;
-                }
-                n = e._next;
-                if (n && n.expiration < value) {
-                    this.removeNode(e);
-                    do {
-                        n = n._next;
-                    } while (n && n.expiration < value);
-                    if (n) {
-                        this.insertBefore(e, n);
-                    }
-                    else {
-                        this.insertLast(e);
-                    }
-                }
-            }
-            finally {
-                if (this._head && this._head !== head) {
-                    const delay = this._head.expiration - Date.now();
-                    if (this._timer) {
-                        clearTimeout(this._timer);
-                    }
-                    this._timer = setTimeout(this._gc, delay);
-                }
-            }
-        }
-    }
-    removeNode(e) {
-        if (e._next) {
-            e._next._prev = e._prev;
-        }
-        if (e._prev) {
-            e._prev._next = e._next;
-        }
-        if (this._head === e) {
-            this._head = e._next;
-        }
-        if (this._tail === e) {
-            this._tail = e._prev;
-        }
-        e._next = e._prev = undefined;
-        this._count--;
-    }
-    insertFirst(node) {
-        if (!this._tail) {
-            this._tail = node;
-        }
-        if (this._head) {
-            this._head._prev = node;
-            node._next = this._head;
-        }
-        this._head = node;
-        this._count++;
-    }
-    insertLast(node) {
-        if (!this._head) {
-            this._head = node;
-        }
-        if (this._tail) {
-            this._tail._next = node;
-            node._prev = this._tail;
-        }
-        this._tail = node;
-        this._count++;
-    }
-    insertAfter(node, referenceNode) {
-        if (!referenceNode._next) {
-            this._tail = node;
-        }
-        if (referenceNode._next) {
-            referenceNode._next._prev = node;
-            node._next = referenceNode._next;
-        }
-        referenceNode._next = node;
-        node._prev = referenceNode;
-        this._count++;
-    }
-    insertBefore(node, referenceNode) {
-        if (!referenceNode._prev) {
-            this._head = node;
-        }
-        if (referenceNode._prev) {
-            referenceNode._prev._next = node;
-            node._prev = referenceNode._prev;
-        }
-        referenceNode._prev = node;
-        node._next = referenceNode;
-        this._count++;
     }
 }
 //# sourceMappingURL=tiles.directory.js.map
@@ -4313,6 +4139,258 @@ TileMapView.ZOOM_ACC = 10000;
 
 /***/ }),
 
+/***/ "./dist/utils/cache.js":
+/*!*****************************!*\
+  !*** ./dist/utils/cache.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CacheEntry": () => (/* binding */ CacheEntry),
+/* harmony export */   "CacheEntryOptions": () => (/* binding */ CacheEntryOptions),
+/* harmony export */   "CachePolicy": () => (/* binding */ CachePolicy),
+/* harmony export */   "CachePolicyBuilder": () => (/* binding */ CachePolicyBuilder),
+/* harmony export */   "MemoryCache": () => (/* binding */ MemoryCache)
+/* harmony export */ });
+class CachePolicyBuilder {
+    withSlidingExpiration(slidingExpiration) {
+        this._slidingExpiration = slidingExpiration;
+        return this;
+    }
+    withSlidingExpirationFromMinutes(slidingExpiration) {
+        this._slidingExpiration = slidingExpiration ? slidingExpiration * 60000 : slidingExpiration;
+        return this;
+    }
+    withSlidingExpirationFromSeconds(slidingExpiration) {
+        this._slidingExpiration = slidingExpiration ? slidingExpiration * 1000 : slidingExpiration;
+        return this;
+    }
+    withThreshold(threshold) {
+        this._threshold = threshold;
+        return this;
+    }
+    build() {
+        return new CachePolicy({ slidingExpiration: this._slidingExpiration, threshold: this._threshold });
+    }
+}
+class CachePolicy {
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}
+CachePolicy.Default = new CachePolicyBuilder().withSlidingExpirationFromMinutes(5).withThreshold(100).build();
+
+class CacheEntryOptions {
+    get slidingExpiration() {
+        return this._slidingExpiration;
+    }
+    set slidingExpiration(v) {
+        this._slidingExpiration = v;
+    }
+    postEvictionCallback() {
+        return (this._callbacks = this._callbacks || []);
+    }
+}
+class CacheEntry {
+    constructor(key, value, options) {
+        this._options = options;
+        this._value = value;
+        this._lastAccess = Date.now();
+    }
+    get key() {
+        return this._key;
+    }
+    get value() {
+        this._lastAccess = Date.now();
+        return this._value;
+    }
+    set value(v) {
+        this._lastAccess = Date.now();
+        this._value = v;
+    }
+    get slidingExpiration() {
+        return this._options?._slidingExpiration;
+    }
+    get expiration() {
+        const se = this.slidingExpiration;
+        if (!this._lastAccess || !se) {
+            return Infinity;
+        }
+        return this._lastAccess + se;
+    }
+    *postEvictionCallback() {
+        return this._options?._callbacks;
+    }
+}
+class MemoryCache {
+    constructor(policy) {
+        this._count = 0;
+        this._policy = { ...CachePolicy.Default, ...policy };
+        this._cache = new Map();
+        this._gc = this.gc.bind(this);
+    }
+    get(key) {
+        const e = this._cache.get(key);
+        if (e) {
+            const v = e.value;
+            this.sortList(e);
+            return v;
+        }
+        return undefined;
+    }
+    set(key, value, options) {
+        const o = { ...{ slidingExpiration: this._policy.slidingExpiration }, ...options };
+        let e = this._cache.get(key);
+        if (!e) {
+            e = new CacheEntry(key, value, o);
+            this._cache.set(key, e);
+        }
+        else {
+            e.value = value;
+        }
+        this.sortList(e);
+        return;
+    }
+    keys() {
+        return this._cache.keys();
+    }
+    gc() {
+        const now = Date.now();
+        const threshold = this._policy.threshold || 0;
+        if (this._head && this._head.expiration <= now) {
+            do {
+                const tmp = this._head;
+                this.removeNode(tmp);
+                for (const cb of tmp.postEvictionCallback()) {
+                    cb(tmp);
+                }
+            } while (this._head && this._head.expiration - threshold <= now);
+        }
+        if (this._head) {
+            const delay = this._head.expiration - Date.now();
+            if (this._timer) {
+                clearTimeout(this._timer);
+            }
+            this._timer = setTimeout(this._gc, delay);
+        }
+        else {
+            this._timer = undefined;
+        }
+    }
+    sortList(e) {
+        if (e) {
+            const head = this._head;
+            try {
+                if (!e._next && !e._prev) {
+                    this.insertLast(e);
+                }
+                const value = e.expiration;
+                let n = e._prev;
+                if (n && n.expiration > value) {
+                    this.removeNode(e);
+                    do {
+                        n = n._prev;
+                    } while (n && n.expiration > value);
+                    if (n) {
+                        this.insertAfter(e, n);
+                        return;
+                    }
+                    this.insertFirst(e);
+                    return;
+                }
+                n = e._next;
+                if (n && n.expiration < value) {
+                    this.removeNode(e);
+                    do {
+                        n = n._next;
+                    } while (n && n.expiration < value);
+                    if (n) {
+                        this.insertBefore(e, n);
+                    }
+                    else {
+                        this.insertLast(e);
+                    }
+                }
+            }
+            finally {
+                if (this._head && this._head !== head) {
+                    const delay = this._head.expiration - Date.now();
+                    if (this._timer) {
+                        clearTimeout(this._timer);
+                    }
+                    this._timer = setTimeout(this._gc, delay);
+                }
+            }
+        }
+    }
+    removeNode(e) {
+        if (e._next) {
+            e._next._prev = e._prev;
+        }
+        if (e._prev) {
+            e._prev._next = e._next;
+        }
+        if (this._head === e) {
+            this._head = e._next;
+        }
+        if (this._tail === e) {
+            this._tail = e._prev;
+        }
+        e._next = e._prev = undefined;
+        this._count--;
+    }
+    insertFirst(node) {
+        if (!this._tail) {
+            this._tail = node;
+        }
+        if (this._head) {
+            this._head._prev = node;
+            node._next = this._head;
+        }
+        this._head = node;
+        this._count++;
+    }
+    insertLast(node) {
+        if (!this._head) {
+            this._head = node;
+        }
+        if (this._tail) {
+            this._tail._next = node;
+            node._prev = this._tail;
+        }
+        this._tail = node;
+        this._count++;
+    }
+    insertAfter(node, referenceNode) {
+        if (!referenceNode._next) {
+            this._tail = node;
+        }
+        if (referenceNode._next) {
+            referenceNode._next._prev = node;
+            node._next = referenceNode._next;
+        }
+        referenceNode._next = node;
+        node._prev = referenceNode;
+        this._count++;
+    }
+    insertBefore(node, referenceNode) {
+        if (!referenceNode._prev) {
+            this._head = node;
+        }
+        if (referenceNode._prev) {
+            referenceNode._prev._next = node;
+            node._prev = referenceNode._prev;
+        }
+        referenceNode._prev = node;
+        node._next = referenceNode;
+        this._count++;
+    }
+}
+//# sourceMappingURL=cache.js.map
+
+/***/ }),
+
 /***/ "./dist/utils/index.js":
 /*!*****************************!*\
   !*** ./dist/utils/index.js ***!
@@ -4321,9 +4399,17 @@ TileMapView.ZOOM_ACC = 10000;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ObjectPool": () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool)
+/* harmony export */   "CacheEntry": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CacheEntry),
+/* harmony export */   "CacheEntryOptions": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CacheEntryOptions),
+/* harmony export */   "CachePolicy": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CachePolicy),
+/* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.CachePolicyBuilder),
+/* harmony export */   "MemoryCache": () => (/* reexport safe */ _cache__WEBPACK_IMPORTED_MODULE_1__.MemoryCache),
+/* harmony export */   "ObjectPool": () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool),
+/* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPoolOptions)
 /* harmony export */ });
 /* harmony import */ var _objectpools__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objectpools */ "./dist/utils/objectpools.js");
+/* harmony import */ var _cache__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cache */ "./dist/utils/cache.js");
+
 
 //# sourceMappingURL=index.js.map
 
@@ -4337,29 +4423,35 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ObjectPool": () => (/* binding */ ObjectPool)
+/* harmony export */   "ObjectPool": () => (/* binding */ ObjectPool),
+/* harmony export */   "ObjectPoolOptions": () => (/* binding */ ObjectPoolOptions)
 /* harmony export */ });
+class ObjectPoolOptions {
+    constructor(factory, maxCount, clean) {
+        this.factory = factory;
+        this.maxCount = maxCount;
+        this.clean = clean;
+    }
+}
 class ObjectPool {
-    constructor(type) {
-        this.type = type;
-        this.metrics = {
-            allocated: 0,
-            free: 0,
-        };
+    constructor(options) {
         this.pool = [];
+        this._o = options;
     }
     alloc() {
         let obj = this.pool.pop();
         if (obj) {
-            this.metrics.free--;
             return obj;
         }
-        this.metrics.allocated++;
-        return new this.type();
+        return this._o.factory();
     }
     free(obj) {
-        this.pool.push(obj);
-        this.metrics.free++;
+        if (this._o.clean) {
+            this._o.clean(obj);
+        }
+        if (!this._o.maxCount || this.pool.length < this._o.maxCount) {
+            this.pool.push(obj);
+        }
     }
 }
 //# sourceMappingURL=objectpools.js.map
@@ -4437,8 +4529,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "AxialTilt": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.AxialTilt),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.BlobTileCodec),
 /* harmony export */   "Box": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Box),
-/* harmony export */   "CachePolicy": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
-/* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
+/* harmony export */   "CacheEntry": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CacheEntry),
+/* harmony export */   "CacheEntryOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CacheEntryOptions),
+/* harmony export */   "CachePolicy": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CachePolicy),
+/* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.CachePolicyBuilder),
 /* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasDisplay),
 /* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasTileMap),
 /* harmony export */   "Cartesian2": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Cartesian2),
@@ -4453,6 +4547,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "EPSG3857": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
 /* harmony export */   "Ellipsoid": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid),
 /* harmony export */   "Envelope": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Envelope),
+/* harmony export */   "EventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventArgs),
 /* harmony export */   "EventEmitter": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventEmitter),
 /* harmony export */   "EventState": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventState),
 /* harmony export */   "Float32TileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodec),
@@ -4473,12 +4568,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
 /* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenNormalValueDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Mass),
+/* harmony export */   "MemoryCache": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.MemoryCache),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
 /* harmony export */   "ObjectPool": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.ObjectPool),
+/* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.ObjectPoolOptions),
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
 /* harmony export */   "PlanetSurface": () => (/* reexport safe */ _terrain_index__WEBPACK_IMPORTED_MODULE_8__.PlanetSurface),
 /* harmony export */   "Power": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Power),
+/* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.PropertyChangedEventArgs),
 /* harmony export */   "Quantity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Quantity),
 /* harmony export */   "QuantityRange": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.QuantityRange),
 /* harmony export */   "RGBAColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.RGBAColor),

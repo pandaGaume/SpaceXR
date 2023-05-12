@@ -1,53 +1,41 @@
-import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { ISize2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile } from "./tiles.interfaces";
 import { Observable } from "../events/events.observable";
-import { ObjectPool } from "../utils/objectpools";
 import { IValidable } from "../types";
+import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 export declare class TileMapLevel<T> {
     _lod: number;
     _tiles: Map<string, ITile<T>>;
-    _bounds?: IRectangle;
     constructor(lod: number);
     get lod(): number;
     get tiles(): Map<string, ITile<T>>;
-    get bounds(): IRectangle | undefined;
-    set bounds(v: IRectangle | undefined);
+    get size(): number;
 }
-export declare class UpdateEvent<T> {
-    private static __pool__;
-    static Pool<T>(): ObjectPool<UpdateEvent<T>>;
-    _scale: ICartesian2;
-    _bounds: IRectangle;
-    _added: Map<string, ITile<T>>;
-    _removed: Map<string, ITile<T>>;
-    constructor();
-    get from(): TileMapView<T>;
-    get scale(): ICartesian2;
-    set scale(v: ICartesian2);
-    get bounds(): IRectangle;
-    set bounds(v: IRectangle);
-    get added(): Map<string, ITile<T>>;
-    get removed(): Map<string, ITile<T>>;
-    clear(): void;
+export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
+    _added?: Map<string, ITile<T>>;
+    _removed?: Map<string, ITile<T>>;
+    constructor(source: TileMapView<T>, added?: Map<string, ITile<T>>, removed?: Map<string, ITile<T>>);
+    get added(): Map<string, ITile<T>> | undefined;
+    get removed(): Map<string, ITile<T>> | undefined;
 }
 export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
     _d: ITileDirectory<T>;
     _w: number;
     _h: number;
     _center: IGeo2;
-    _activTiles: Array<TileMapLevel<T>>;
+    _levels: Array<TileMapLevel<T>>;
     _lod: number;
     _valid: boolean;
-    _resizeObservable?: Observable<TileMapView<T>>;
-    _centerObservable?: Observable<TileMapView<T>>;
-    _zoomObservable?: Observable<TileMapView<T>>;
-    _updateObservable?: Observable<[TileMapView<T>, UpdateEvent<T>]>;
+    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
+    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _updateObservable?: Observable<UpdateEventArgs<T>>;
     constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number);
-    get resizeObservable(): Observable<TileMapView<T>>;
-    get centerObservable(): Observable<TileMapView<T>>;
-    get zoomObservable(): Observable<TileMapView<T>>;
-    get updateObservable(): Observable<[TileMapView<T>, UpdateEvent<T>]>;
+    get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
+    get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
+    get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    get updateObservable(): Observable<UpdateEventArgs<T>>;
     get directory(): ITileDirectory<T>;
     get center(): IGeo2;
     get metrics(): ITileMetrics;
@@ -62,6 +50,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get isValid(): boolean;
     invalidate(): TileMapView<T>;
     validate(): TileMapView<T>;
+    revalidate(): TileMapView<T>;
     private onResizeObserverAdded;
     private onZoomObserverAdded;
     private onCenterObserverAdded;

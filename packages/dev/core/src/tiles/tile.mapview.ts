@@ -1,11 +1,9 @@
-import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { ISize2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
 import { EPSG3857 } from "./tiles.geography";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
-import { Rectangle } from "../geometry/geometry.rectangle";
 import { IValidable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
@@ -14,7 +12,6 @@ import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 export class TileMapLevel<T> {
     _lod: number;
     _tiles: Map<string, ITile<T>>;
-    _bounds?: IRectangle;
 
     constructor(lod: number) {
         this._lod = lod;
@@ -29,63 +26,27 @@ export class TileMapLevel<T> {
         return this._tiles;
     }
 
-    public get bounds(): IRectangle | undefined {
-        return this.bounds;
-    }
-
-    public set bounds(v: IRectangle | undefined) {
-        this.bounds = v;
+    public get size(): number {
+        return this._tiles.size;
     }
 }
 
 export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
-    _scale: ICartesian2;
-    _bounds: IRectangle;
+    _added?: Map<string, ITile<T>>;
+    _removed?: Map<string, ITile<T>>;
 
-    _added: Map<string, ITile<T>>;
-    _removed: Map<string, ITile<T>>;
-
-    public constructor(source: TileMapView<T>) {
+    public constructor(source: TileMapView<T>, added?: Map<string, ITile<T>>, removed?: Map<string, ITile<T>>) {
         super(source);
-        this._scale = Cartesian2.One();
-        this._bounds = Rectangle.Zero();
-        this._added = new Map<string, ITile<T>>();
-        this._removed = new Map<string, ITile<T>>();
+        this._added = added;
+        this._removed = removed;
     }
 
-    public get from(): TileMapView<T> {
-        return this.from;
-    }
-
-    public get scale(): ICartesian2 {
-        return this._scale;
-    }
-
-    public set scale(v: ICartesian2) {
-        this._scale = v;
-    }
-
-    public get bounds(): IRectangle {
-        return this._bounds;
-    }
-
-    public set bounds(v: IRectangle) {
-        this._bounds = v;
-    }
-
-    public get added(): Map<string, ITile<T>> {
+    public get added(): Map<string, ITile<T>> | undefined {
         return this._added;
     }
 
-    public get removed(): Map<string, ITile<T>> {
+    public get removed(): Map<string, ITile<T>> | undefined {
         return this._removed;
-    }
-
-    public clear() {
-        this._scale = Cartesian2.One();
-        this._bounds = Rectangle.Zero();
-        this._added = new Map<string, ITile<T>>();
-        this._removed = new Map<string, ITile<T>>();
     }
 }
 
@@ -97,7 +58,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _w: number = 0;
     _h: number = 0;
     _center: IGeo2 = Geo2.Zero();
-    _activTiles: Array<TileMapLevel<T>>;
+    _levels: Array<TileMapLevel<T>>;
     _lod: number = 0;
 
     // interns
@@ -112,7 +73,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number) {
         this._d = directory;
         this.invalidateSize(width, height).setView(center, lod);
-        this._activTiles = new Array<TileMapLevel<T>>(this.metrics.maxLOD);
+        this._levels = new Array<TileMapLevel<T>>(this.metrics.maxLOD);
     }
 
     /// EVENTS
@@ -247,6 +208,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this;
     }
 
+    public revalidate(): TileMapView<T> {
+        return this.invalidate().validate();
+    }
+
     // INTERNALS
     private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
     private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
@@ -260,8 +225,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     protected doValidateLevel(lod: number) {
-        /*        const level = this._activTiles[lod];
-
+        /*        
+        const level = this._activTiles[lod];
         let lodOffset = (lod * 1000 - lod * 1000) / 1000; // Trick to avoid floating point error.
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         const w = this.width / scale;
@@ -272,6 +237,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const bounds = new Rectangle(x0, y0, w, h);
         let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top, lod);
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom, lod);
-        const boundsTileXY = Rectangle.FromPoints(nwTileXY, seTileXY);*/
+        const boundsTileXY = Rectangle.FromPoints(nwTileXY, seTileXY);
+        */
     }
 }

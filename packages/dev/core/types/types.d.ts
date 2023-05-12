@@ -11,4 +11,5 @@ export interface IValidable<T> {
     isValid: boolean;
     invalidate(): T;
     validate(): T;
+    revalidate(): T;
 }

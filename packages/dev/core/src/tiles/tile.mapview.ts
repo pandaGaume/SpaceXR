@@ -6,9 +6,10 @@ import { Observable, Observer } from "../events/events.observable";
 import { EPSG3857 } from "./tiles.geography";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Rectangle } from "../geometry/geometry.rectangle";
-import { ObjectPool } from "../utils/objectpools";
 import { IValidable } from "../types";
-import { Scalar } from "core/math/math";
+import { Scalar } from "../math/math";
+import { Size2 } from "../geometry/geometry.size";
+import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 
 export class TileMapLevel<T> {
     _lod: number;
@@ -37,23 +38,15 @@ export class TileMapLevel<T> {
     }
 }
 
-export class UpdateEvent<T> {
-    private static __pool__: any;
-
-    public static Pool<T>(): ObjectPool<UpdateEvent<T>> {
-        if (!UpdateEvent.__pool__) {
-            UpdateEvent.__pool__ = new ObjectPool(UpdateEvent<T>);
-        }
-        return this.__pool__;
-    }
-
+export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     _scale: ICartesian2;
     _bounds: IRectangle;
 
     _added: Map<string, ITile<T>>;
     _removed: Map<string, ITile<T>>;
 
-    public constructor() {
+    public constructor(source: TileMapView<T>) {
+        super(source);
         this._scale = Cartesian2.One();
         this._bounds = Rectangle.Zero();
         this._added = new Map<string, ITile<T>>();
@@ -111,10 +104,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _valid: boolean = false;
 
     // event
-    _resizeObservable?: Observable<TileMapView<T>>;
-    _centerObservable?: Observable<TileMapView<T>>;
-    _zoomObservable?: Observable<TileMapView<T>>;
-    _updateObservable?: Observable<[TileMapView<T>, UpdateEvent<T>]>;
+    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
+    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _updateObservable?: Observable<UpdateEventArgs<T>>;
 
     public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number) {
         this._d = directory;
@@ -123,21 +116,21 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     /// EVENTS
-    public get resizeObservable(): Observable<TileMapView<T>> {
-        this._resizeObservable == this._resizeObservable || new Observable<TileMapView<T>>(this.onResizeObserverAdded.bind(this));
+    public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>> {
+        this._resizeObservable == this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
         return this._resizeObservable!;
     }
-    public get centerObservable(): Observable<TileMapView<T>> {
-        this._centerObservable == this._centerObservable || new Observable<TileMapView<T>>(this.onCenterObserverAdded.bind(this));
+    public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>> {
+        this._centerObservable == this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
         return this._centerObservable!;
     }
-    public get zoomObservable(): Observable<TileMapView<T>> {
-        this._zoomObservable == this._zoomObservable || new Observable<TileMapView<T>>(this.onZoomObserverAdded.bind(this));
+    public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>> {
+        this._zoomObservable == this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable!;
     }
 
-    public get updateObservable(): Observable<[TileMapView<T>, UpdateEvent<T>]> {
-        this._updateObservable == this._updateObservable || new Observable<[TileMapView<T>, UpdateEvent<T>]>(this.onUpdateObserverAdded.bind(this));
+    public get updateObservable(): Observable<UpdateEventArgs<T>> {
+        this._updateObservable == this._updateObservable || new Observable<UpdateEventArgs<T>>(this.onUpdateObserverAdded.bind(this));
         return this._updateObservable!;
     }
 
@@ -167,11 +160,18 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     /// API
     public invalidateSize(w: number, h: number): ITileMapApi {
         if (this._w !== w || this._h != h) {
+            if (this._resizeObservable && this._resizeObservable.hasObservers()) {
+                const old = new Size2(this._w, this._h);
+                const value = new Size2(w, h);
+                this._w = w;
+                this._h = h;
+                const e = new PropertyChangedEventArgs(this, old, value);
+                this._resizeObservable.notifyObservers(e);
+                this.invalidate();
+                return this;
+            }
             this._w = w;
             this._h = h;
-            if (this._resizeObservable && this._resizeObservable.hasObservers()) {
-                this._resizeObservable.notifyObservers(this);
-            }
             this.invalidate();
         }
         return this;
@@ -179,11 +179,17 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public setView(center: IGeo2, zoom?: number): ITileMapApi {
         if (center && !this.center.equals(center)) {
+            if (this._centerObservable && this._centerObservable.hasObservers()) {
+                const old = this._center.clone();
+                this.center.lat = center.lat;
+                this.center.lon = center.lon;
+                const e = new PropertyChangedEventArgs(this, old, center);
+                this._centerObservable.notifyObservers(e);
+                this.invalidate();
+                return this;
+            }
             this.center.lat = center.lat;
             this.center.lon = center.lon;
-            if (this._centerObservable && this._centerObservable.hasObservers()) {
-                this._centerObservable.notifyObservers(this);
-            }
             this.invalidate();
         }
         return zoom ? this.setZoom(zoom) : this;
@@ -192,10 +198,15 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     public setZoom(zoom: number): ITileMapApi {
         const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
         if (this._lod != lod) {
-            this._lod = lod;
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                this._zoomObservable.notifyObservers(this);
+                const old = this._lod;
+                this._lod = lod;
+                const e = new PropertyChangedEventArgs(this, old, zoom);
+                this._zoomObservable.notifyObservers(e);
+                this.invalidate();
+                return this;
             }
+            this._lod = lod;
             this.invalidate();
         }
         return this;
@@ -237,10 +248,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     // INTERNALS
-    private onResizeObserverAdded(observer: Observer<TileMapView<T>>): void {}
-    private onZoomObserverAdded(observer: Observer<TileMapView<T>>): void {}
-    private onCenterObserverAdded(observer: Observer<TileMapView<T>>): void {}
-    private onUpdateObserverAdded(observer: Observer<[TileMapView<T>, UpdateEvent<T>]>): void {}
+    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
+    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
+    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>): void {}
+    private onUpdateObserverAdded(observer: Observer<UpdateEventArgs<T>>): void {}
 
     // VIRTUALS
     protected doValidate() {

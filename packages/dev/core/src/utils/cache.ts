@@ -4,7 +4,13 @@ export enum EvictionReason {
 }
 
 export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>, reason: EvictionReason) => void;
-export type CacheItemFactory<K, V> = (e: CacheEntry<K, V>) => V;
+
+export interface IMemoryCache<K, V> {
+    get(key: K): V | undefined;
+    set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
+    delete(key: K): void;
+    keys(): IterableIterator<K>;
+}
 
 export class CachePolicyBuilder {
     _slidingExpiration?: number;
@@ -135,7 +141,7 @@ export class CacheEntry<K, V> {
     }
 }
 
-export class MemoryCache<K, V> {
+export class MemoryCache<K, V> implements IMemoryCache<K, V> {
     _policy: CachePolicy;
     _cache: Map<K, CacheEntry<K, V>>;
 

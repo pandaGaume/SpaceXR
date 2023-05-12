@@ -67,14 +67,10 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
         return this._options.metrics || EPSG3857.Shared;
     }
 
-    public lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined {
+    public lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> {
         const k = address.quadkey || TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
-        if (e) {
-            // return a sync operation
-            return e;
-        }
-        if (this._datasource) {
+        if (!e && this._datasource) {
             return new Promise(async (resolve, reject) => {
                 try {
                     const data = await this._datasource.fetchAsync(address);
@@ -95,7 +91,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
                 }
             });
         }
-        return undefined;
+        return Promise.resolve(e);
     }
 
     protected buildTile(address: ITileAddress, data?: V): ITile<V> {

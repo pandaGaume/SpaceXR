@@ -4,6 +4,7 @@ import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile 
 import { Observable } from "../events/events.observable";
 import { IValidable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
+import { IMemoryCache } from "../utils/cache";
 export declare class TileMapLevel<T> {
     _lod: number;
     _tiles: Map<string, ITile<T>>;
@@ -20,6 +21,7 @@ export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     get removed(): Map<string, ITile<T>> | undefined;
 }
 export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
+    _cache: IMemoryCache<string, T>;
     _d: ITileDirectory<T>;
     _w: number;
     _h: number;
@@ -31,7 +33,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
-    constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number);
+    constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, T>);
     get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;

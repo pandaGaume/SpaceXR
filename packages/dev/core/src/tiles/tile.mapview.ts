@@ -8,6 +8,7 @@ import { IValidable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
+import { IMemoryCache, MemoryCache } from "../utils/cache";
 
 export class TileMapLevel<T> {
     _lod: number;
@@ -51,6 +52,9 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
 }
 
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
+    // cache
+    _cache: IMemoryCache<string, T>;
+
     // data source
     _d: ITileDirectory<T>;
 
@@ -70,7 +74,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
-    public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number) {
+    public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, T>) {
+        this._cache = cache || new MemoryCache<string, T>();
         this._d = directory;
         this.invalidateSize(width, height).setView(center, lod);
         this._levels = new Array<TileMapLevel<T>>(this.metrics.maxLOD);

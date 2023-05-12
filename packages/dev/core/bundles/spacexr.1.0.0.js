@@ -1453,32 +1453,22 @@ class AbstractTileMap {
             for (const c of e.added.entries()) {
                 if (this._directory) {
                     if (this.metrics.isValidAddress(c[1])) {
-                        const result = this._directory.lookupAsync(c[1]);
-                        if (result) {
-                            if (result instanceof Promise) {
-                                result
-                                    .then(((tile) => {
-                                    if (tile) {
-                                        const a = tile.address;
-                                        const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                                        this._activ.set(key, tile);
-                                        this.onAdded(key, tile);
-                                        if (tile.data) {
-                                            this.draw(false, [tile]);
-                                        }
-                                    }
-                                }).bind(this))
-                                    .catch((e) => {
-                                    console.log("Error when lookup", c.toString(), e);
-                                });
-                                continue;
+                        this._directory
+                            .lookupAsync(c[1])
+                            .then(((tile) => {
+                            if (tile) {
+                                const a = tile.address;
+                                const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
+                                this._activ.set(key, tile);
+                                this.onAdded(key, tile);
+                                if (tile.data) {
+                                    this.draw(false, [tile]);
+                                }
                             }
-                            const tile = result;
-                            const a = tile.address;
-                            const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                            this._activ.set(key, tile);
-                            this.onAdded(key, tile);
-                        }
+                        }).bind(this))
+                            .catch((e) => {
+                            console.log("Error when lookup", c.toString(), e);
+                        });
                     }
                 }
             }
@@ -3313,10 +3303,7 @@ class TileDirectory {
     lookupAsync(address) {
         const k = address.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
-        if (e) {
-            return e;
-        }
-        if (this._datasource) {
+        if (!e && this._datasource) {
             return new Promise(async (resolve, reject) => {
                 try {
                     const data = await this._datasource.fetchAsync(address);
@@ -3338,7 +3325,7 @@ class TileDirectory {
                 }
             });
         }
-        return undefined;
+        return Promise.resolve(e);
     }
     buildTile(address, data) {
         const b = this._options.tileBuilder || _tiles__WEBPACK_IMPORTED_MODULE_1__.Tile.Builder();

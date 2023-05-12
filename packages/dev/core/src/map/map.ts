@@ -86,37 +86,25 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
             for (const c of e.added.entries()) {
                 if (this._directory) {
                     if (this.metrics.isValidAddress(c[1])) {
-                        const result = this._directory.lookupAsync(c[1]);
-                        if (result) {
-                            if (result instanceof Promise) {
-                                // we get an async result
-                                result
-                                    .then(
-                                        ((tile: ITile<T> | undefined) => {
-                                            if (tile) {
-                                                const a = tile.address;
-                                                const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                                                this._activ.set(key, tile);
-                                                this.onAdded(key, tile);
+                        this._directory
+                            .lookupAsync(c[1])
+                            .then(
+                                ((tile: ITile<T> | undefined) => {
+                                    if (tile) {
+                                        const a = tile.address;
+                                        const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
+                                        this._activ.set(key, tile);
+                                        this.onAdded(key, tile);
 
-                                                if (tile.data) {
-                                                    this.draw(false, [tile]);
-                                                }
-                                            }
-                                        }).bind(this)
-                                    )
-                                    .catch((e) => {
-                                        console.log("Error when lookup", c.toString(), e);
-                                    });
-                                continue;
-                            }
-                            // Tile was in cache
-                            const tile: ITile<T> = result;
-                            const a = tile.address;
-                            const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                            this._activ.set(key, tile);
-                            this.onAdded(key, tile);
-                        }
+                                        if (tile.data) {
+                                            this.draw(false, [tile]);
+                                        }
+                                    }
+                                }).bind(this)
+                            )
+                            .catch((e) => {
+                                console.log("Error when lookup", c.toString(), e);
+                            });
                     }
                 }
             }

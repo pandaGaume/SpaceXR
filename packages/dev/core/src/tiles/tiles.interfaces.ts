@@ -88,21 +88,7 @@ export interface IPixelDecoder {
 }
 
 export interface ITileDirectory<V> extends ITileMetricsProvider {
-    /**
-     * lookup asynchronously for a tile. However, if the Tile is in local cache, the operation may be sync
-     * and the result may be a Tile instead of a promise.
-     * Devolper MUST test the return type of the function to know if the result is sync or async.
-     * const r = directory.lookupAsync(a);
-     * if( r instanceof Promise){
-     *    // async
-     *    const tile = await r;
-     * } else {
-     *    // sync
-     *    const tile = r;
-     * }
-     * @param address the addres to looking for.
-     */
-    lookupAsync(address: ITileAddress): Promise<V | undefined> | V | undefined;
+    lookupAsync(address: ITileAddress): Promise<V | undefined>;
 }
 
 export interface ITileMapApi {

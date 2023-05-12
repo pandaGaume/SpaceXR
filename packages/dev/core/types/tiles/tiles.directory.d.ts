@@ -25,7 +25,7 @@ export declare class TileDirectory<V> implements ITileDirectory<ITile<V>> {
     constructor(name: string, datasource: ITileDatasource<V, ITileAddress>, options?: TileDirectoryOptions<V>);
     get name(): string;
     get metrics(): ITileMetrics;
-    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined;
+    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined>;
     protected buildTile(address: ITileAddress, data?: V): ITile<V>;
     protected bindTile(key: string, t: ITile<V>): void;
     protected unbindTile(key: string, t: ITile<V> | undefined): void;

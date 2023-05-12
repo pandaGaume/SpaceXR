@@ -24,7 +24,7 @@ export class CanvasDisplay implements IDisplay {
 }
 
 export class CanvasTileMap extends AbstractTileMap<HTMLImageElement, CanvasDisplay> {
-    public constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number) {
+    public constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<ITile<HTMLImageElement>>, lat?: number, lon?: number, zoom?: number) {
         super(new CanvasDisplay(canvas), directory, lat, lon, zoom);
     }
 

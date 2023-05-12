@@ -8,12 +8,12 @@ export interface IDisplay extends ISize2 {
 export declare abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMetricsProvider {
     _display: D;
     _view: TileMapView;
-    _directory?: ITileDirectory<T>;
+    _directory?: ITileDirectory<ITile<T>>;
     _activ: Map<string, ITile<T>>;
     _pixelBounds?: IRectangle;
     _scale: Cartesian2;
     _lod: number;
-    constructor(display: D, directory?: ITileDirectory<T>, lat?: number, lon?: number, zoom?: number);
+    constructor(display: D, directory?: ITileDirectory<ITile<T>>, lat?: number, lon?: number, zoom?: number);
     invalidateSize(w?: number, h?: number): void;
     setView(center: IGeo2, zoom?: number): void;
     setZoom(zoom: number): void;

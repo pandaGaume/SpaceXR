@@ -69,7 +69,7 @@ export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 export interface ITileDirectory<V> extends ITileMetricsProvider {
-    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined;
+    lookupAsync(address: ITileAddress): Promise<V | undefined> | V | undefined;
 }
 export interface ITileMapApi {
     invalidateSize(w: number, h: number): ITileMapApi;

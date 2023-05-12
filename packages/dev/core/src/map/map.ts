@@ -11,14 +11,14 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
     _display: D;
 
     _view: TileMapView; // the view logic
-    _directory?: ITileDirectory<T>; // the tile data source
+    _directory?: ITileDirectory<ITile<T>>; // the tile data source
     _activ: Map<string, ITile<T>>; // the list of activ tiles
 
     _pixelBounds?: IRectangle; // this is a copy of the curent pixel bounds of the view
     _scale: Cartesian2; //
     _lod: number;
 
-    public constructor(display: D, directory?: ITileDirectory<T>, lat?: number, lon?: number, zoom?: number) {
+    public constructor(display: D, directory?: ITileDirectory<ITile<T>>, lat?: number, lon?: number, zoom?: number) {
         this._display = display;
         this._directory = directory;
         this._view = new TileMapView(display.width, display.height, lat, lon, zoom, directory?.metrics);

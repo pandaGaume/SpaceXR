@@ -143,7 +143,7 @@ export class TileDirectoryOptions<V> {
     }
 }
 
-export class TileDirectory<V> implements ITileDirectory<V> {
+export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
     _name: string;
     _datasource: ITileDatasource<V, ITileAddress>;
     _cache: Map<string, TileCacheEntry<V>>;

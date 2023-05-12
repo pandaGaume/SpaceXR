@@ -10,7 +10,7 @@ export declare class CanvasDisplay implements IDisplay {
     equals(other: ISize2): boolean;
 }
 export declare class CanvasTileMap extends AbstractTileMap<HTMLImageElement, CanvasDisplay> {
-    constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<HTMLImageElement>, lat?: number, lon?: number, zoom?: number);
+    constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<ITile<HTMLImageElement>>, lat?: number, lon?: number, zoom?: number);
     onDeleted(key: string, tile: ITile<HTMLImageElement>): void;
     onAdded(key: string, tile: ITile<HTMLImageElement>): void;
     draw(clear?: boolean, tiles?: Array<ITile<HTMLImageElement>>): void;

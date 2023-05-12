@@ -102,7 +102,7 @@ export interface ITileDirectory<V> extends ITileMetricsProvider {
      * }
      * @param address the addres to looking for.
      */
-    lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> | ITile<V> | undefined;
+    lookupAsync(address: ITileAddress): Promise<V | undefined> | V | undefined;
 }
 
 export interface ITileMapApi {

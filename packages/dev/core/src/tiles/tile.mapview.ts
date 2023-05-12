@@ -14,6 +14,7 @@ export class TileMapLevel<T> {
     _lod: number;
     _tiles: Map<string, ITile<T>>;
     _bounds?: IRectangle;
+
     constructor(lod: number) {
         this._lod = lod;
         this._tiles = new Map<string, ITile<T>>();
@@ -243,18 +244,23 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // VIRTUALS
     protected doValidate() {
-        /*const lod = Math.round(this._lod);
-        let lodOffset = (this._lod * 1000 - lod * 1000) / 1000; // Trick to avoid floating point error.
+        const clod = Math.round(this._lod);
+        this.doValidateLevel(clod);
+    }
+
+    protected doValidateLevel(lod: number) {
+        /*        const level = this._activTiles[lod];
+
+        let lodOffset = (lod * 1000 - lod * 1000) / 1000; // Trick to avoid floating point error.
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         const w = this.width / scale;
         const h = this.height / scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         const x0 = Math.round(pixelCenterXY.x - w / 2);
         const y0 = Math.round(pixelCenterXY.y - h / 2);
-        const innerbounds = new Rectangle(x0, y0, w, h);
-        const tileSize = this.metrics.tileSize * scale;
-        const tileSize2 = tileSize * 2;
-        const outerbounds = new Rectangle(x0 - tileSize, y0 - tileSize, w + tileSize2, h + tileSize2);*/
- 
+        const bounds = new Rectangle(x0, y0, w, h);
+        let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top, lod);
+        let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom, lod);
+        const boundsTileXY = Rectangle.FromPoints(nwTileXY, seTileXY);*/
     }
 }

@@ -67,4 +67,5 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onCenterObserverAdded;
     private onUpdateObserverAdded;
     protected doValidate(): void;
+    protected doValidateLevel(lod: number): void;
 }

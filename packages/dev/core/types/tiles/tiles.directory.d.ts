@@ -48,7 +48,7 @@ export declare class TileDirectoryOptions<V> {
     metrics?: ITileMetrics;
     constructor(init?: Partial<TileDirectoryOptions<V>>);
 }
-export declare class TileDirectory<V> implements ITileDirectory<V> {
+export declare class TileDirectory<V> implements ITileDirectory<ITile<V>> {
     _name: string;
     _datasource: ITileDatasource<V, ITileAddress>;
     _cache: Map<string, TileCacheEntry<V>>;

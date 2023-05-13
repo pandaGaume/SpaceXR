@@ -98,7 +98,7 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
                                         this._activ.set(key, tile);
                                         this.onAdded(key, tile);
 
-                                        if (tile.data) {
+                                        if (tile.content) {
                                             this.draw(false, [tile]);
                                         }
                                     }

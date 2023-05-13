@@ -10,7 +10,7 @@ export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
     parent?: ITile<T>;
     childrens?: Array<ITile<T>>;
-    data?: T;
+    content?: Nullable<T>;
 }
 export interface ITileBuilder<T> {
     withAddress(a: ITileAddress): ITileBuilder<T>;

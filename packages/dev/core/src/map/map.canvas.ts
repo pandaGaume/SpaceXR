@@ -47,12 +47,12 @@ export class CanvasTileMap extends AbstractTileMap<HTMLImageElement, CanvasDispl
                 ctx.scale(this._scale.x, this._scale.y);
                 const list = tiles || this._activ.values();
                 for (const t of list) {
-                    if (t.data) {
+                    if (t.content) {
                         const a = t.address;
                         const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
                         pixelXY.x -= center.x;
                         pixelXY.y -= center.y;
-                        ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
+                        ctx.drawImage(t.content, pixelXY.x, pixelXY.y);
                     }
                 }
                 ctx.restore();

@@ -1335,12 +1335,12 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_0__.AbstractTileMap {
                 ctx.scale(this._scale.x, this._scale.y);
                 const list = tiles || this._activ.values();
                 for (const t of list) {
-                    if (t.data) {
+                    if (t.content) {
                         const a = t.address;
                         const pixelXY = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail, temp);
                         pixelXY.x -= center.x;
                         pixelXY.y -= center.y;
-                        ctx.drawImage(t.data, pixelXY.x, pixelXY.y);
+                        ctx.drawImage(t.content, pixelXY.x, pixelXY.y);
                     }
                 }
                 ctx.restore();
@@ -1462,7 +1462,7 @@ class AbstractTileMap {
                                 const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
                                 this._activ.set(key, tile);
                                 this.onAdded(key, tile);
-                                if (tile.data) {
+                                if (tile.content) {
                                     this.draw(false, [tile]);
                                 }
                             }
@@ -3562,10 +3562,10 @@ class Tile {
     get address() {
         return this;
     }
-    get data() {
+    get content() {
         return this._value;
     }
-    set data(v) {
+    set content(v) {
         this._value = v;
     }
     get x() {
@@ -3741,6 +3741,11 @@ class TileMetricsOptionsBuilder {
     }
 }
 class TileMetrics {
+    static getScale(lod) {
+        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
+        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
+        return scale;
+    }
     static ToParentKey(key) {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }

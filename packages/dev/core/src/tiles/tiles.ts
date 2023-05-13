@@ -4,6 +4,7 @@ import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
 import { TileMetrics } from "./tiles.metrics";
+import { Nullable } from "../types";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
@@ -48,7 +49,7 @@ export class Tile<T> implements ITile<T>, ITileAddress {
     private _x: number;
     private _y: number;
     private _levelOfDetail: number;
-    private _value?: T;
+    private _value?: Nullable<T>;
     private _env?: IEnvelope;
 
     public constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics) {
@@ -63,11 +64,11 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         return this;
     }
 
-    public get data(): T | undefined {
+    public get content(): Nullable<T> | undefined {
         return this._value;
     }
 
-    public set data(v: T | undefined) {
+    public set content(v: Nullable<T> | undefined) {
         this._value = v;
     }
 

@@ -12,6 +12,7 @@ import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { Tile } from "./tiles";
+import { TileMetrics } from "./tiles.metrics";
 
 export class TileMapLevel<T> {
     _lod: number = 0;
@@ -245,10 +246,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     protected doValidateLevel(level: TileMapLevel<T>) {
         // current level of detail
         const lod = level.lod;
-        // the decimal part of lod
-        let lodOffset = (this.levelOfDetail * 1000 - lod * 1000) / 1000; // Trick to avoid floating point error.
         // scale corresponding to the decimal part
-        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
+        let scale = TileMetrics.getScale(this.levelOfDetail);
         // compute the pixel bounds
         const w = this.width / scale;
         const h = this.height / scale;
@@ -259,14 +258,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top, lod);
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom, lod);
-        const boundsTileXY = Rectangle.FromPoints(nwTileXY, seTileXY);
-        x0 = boundsTileXY.left;
-        y0 = boundsTileXY.top;
-        const x1 = boundsTileXY.right;
-        const y1 = boundsTileXY.bottom;
+        level.tileXYBounds = Rectangle.FromPoints(nwTileXY, seTileXY);
+        x0 = level.tileXYBounds.left;
+        y0 = level.tileXYBounds.top;
+        const x1 = level.tileXYBounds.right;
+        const y1 = level.tileXYBounds.bottom;
 
         const remains = new Array<ITile<T>>();
-        const added = new Array<ITile<T>>();
+        let added = new Array<ITile<T>>();
 
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
@@ -289,29 +288,26 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 this._cache.set(key, t);
                 // and retreive the content.
                 this._directory
-                    .lookupAsync(a, t)
-                    .then(
-                        ((result: LookupResult<Nullable<T>>) => {
-                            if (result.content) {
-                                // we have the content of the tile.
-                                // 'this' is defined as the tile view, thanks to the bind(this) instruction.
-                                const t = <ITile<T>>result.userArgs[0];
-                                t.data = result.content;
-                                this.onTileReady(t);
-                                return;
-                            }
-                            // the content is not defined - TODO describe a strategy
-                        }).bind(this)
-                    )
-                    .catch(
-                        ((reason: any) => {
-                            // the lookup operation has failed - TODO describe a strategy
-                        }).bind(this)
-                    );
+                    .lookupAsync(a, this, t)
+                    .then((result: LookupResult<Nullable<T>>) => {
+                        const view = <TileMapView<T>>result.userArgs[0];
+                        const t = <ITile<T>>result.userArgs[1];
+                        if (result.content) {
+                            // we have the content of the tile.
+                            t.content = result.content;
+                            view.onTileReady(t);
+                            return;
+                        }
+                        // the content is not defined.
+                        view.onTileNotFound(t);
+                    })
+                    .catch((reason: any) => {
+                        // the lookup operation has failed - TODO describe a strategy
+                    });
             }
         }
 
-        const deleted = Array.from(level.tiles.values());
+        let deleted = Array.from(level.tiles.values());
         level.tiles.clear();
 
         for (const t of remains) {
@@ -321,11 +317,30 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             level.tiles.set(t.address.quadkey, t);
         }
 
-        level.tileXYBounds = boundsTileXY;
+        // filter the tile, selecting only one with content. Null is consider as content.
+        added = added.filter((t) => t.content !== undefined);
+        deleted = deleted.filter((t) => t.content !== undefined);
 
         const updateEvent = new UpdateEventArgs(this, added.length ? added : undefined, deleted.length ? deleted : undefined);
         this.updateObservable.notifyObservers(updateEvent);
     }
 
-    private onTileReady(t: ITile<T>) {}
+    /**
+     * This is the place to add the tile to the active list in response to a successful content load.
+     * Additionally, we should also check if any parents or children are no longer being utilized.
+     * This includes parents or children that was used to provide alternative content while asynchronously loading the current tile content.
+     * @param t the new tile with a valid content
+     */
+    private onTileReady(t: ITile<T>) {
+        if (t.address.levelOfDetail == this._level.lod) {
+            this._level.tiles.set(t.address.quadkey, t);
+            const added = [t];
+            const updateEvent = new UpdateEventArgs(this, added);
+            this.updateObservable.notifyObservers(updateEvent);
+        }
+    }
+
+    protected onTileNotFound(t: ITile<T>) {
+        t.content = null;
+    }
 }

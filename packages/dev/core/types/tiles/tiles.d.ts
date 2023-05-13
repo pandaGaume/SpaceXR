@@ -1,5 +1,6 @@
 import { IEnvelope } from "../geography/geography.interfaces";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
+import { Nullable } from "../types";
 export declare class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
     _d?: T;
@@ -20,8 +21,8 @@ export declare class Tile<T> implements ITile<T>, ITileAddress {
     private _env?;
     constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics);
     get address(): ITileAddress;
-    get data(): T | undefined;
-    set data(v: T | undefined);
+    get content(): Nullable<T> | undefined;
+    set content(v: Nullable<T> | undefined);
     get x(): number;
     get y(): number;
     get levelOfDetail(): number;

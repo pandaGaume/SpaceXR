@@ -63,4 +63,5 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     protected doValidate(): void;
     protected doValidateLevel(level: TileMapLevel<T>): void;
     private onTileReady;
+    protected onTileNotFound(t: ITile<T>): void;
 }

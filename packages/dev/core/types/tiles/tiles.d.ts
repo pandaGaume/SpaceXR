@@ -12,11 +12,12 @@ export declare class TileBuilder<T> implements ITileBuilder<T> {
 export declare class Tile<T> implements ITile<T>, ITileAddress {
     static Builder<T>(): ITileBuilder<T>;
     static BuildEnvelope(x: number, y: number, lod: number, metrics?: ITileMetrics): IEnvelope | undefined;
-    _x: number;
-    _y: number;
-    _levelOfDetail: number;
-    _value?: T;
-    _env?: IEnvelope;
+    private _k?;
+    private _x;
+    private _y;
+    private _levelOfDetail;
+    private _value?;
+    private _env?;
     constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics);
     get address(): ITileAddress;
     get data(): T | undefined;
@@ -26,4 +27,5 @@ export declare class Tile<T> implements ITile<T>, ITileAddress {
     get levelOfDetail(): number;
     get bounds(): IEnvelope | undefined;
     set bounds(e: IEnvelope | undefined);
+    get quadkey(): string;
 }

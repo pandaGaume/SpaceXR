@@ -1,26 +1,28 @@
-import { ISize2 } from "../geometry/geometry.interfaces";
+import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile } from "./tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile, LookupResult } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
 import { EPSG3857 } from "./tiles.geography";
-import { IValidable } from "../types";
+import { IValidable, Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache, MemoryCache } from "../utils/cache";
+import { Rectangle } from "../geometry/geometry.rectangle";
+import { TileAddress } from "./tiles.address";
+import { Tile } from "./tiles";
 
 export class TileMapLevel<T> {
-    _lod: number;
-    _tiles: Map<string, ITile<T>>;
-
-    constructor(lod: number) {
-        this._lod = lod;
-        this._tiles = new Map<string, ITile<T>>();
-    }
+    _lod: number = 0;
+    _tiles: Map<string, ITile<T>> = new Map<string, ITile<T>>();
+    _bounds: IRectangle = Rectangle.Zero();
 
     public get lod(): number {
         return this.lod;
+    }
+    public set lod(v: number) {
+        this.lod = v;
     }
 
     public get tiles(): Map<string, ITile<T>> {
@@ -30,40 +32,47 @@ export class TileMapLevel<T> {
     public get size(): number {
         return this._tiles.size;
     }
+
+    public get tileXYBounds(): IRectangle {
+        return this._bounds;
+    }
+
+    public set tileXYBounds(v: IRectangle) {
+        this._bounds = v;
+    }
 }
 
 export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
-    _added?: Map<string, ITile<T>>;
-    _removed?: Map<string, ITile<T>>;
+    _added?: Array<ITile<T>>;
+    _removed?: Array<ITile<T>>;
 
-    public constructor(source: TileMapView<T>, added?: Map<string, ITile<T>>, removed?: Map<string, ITile<T>>) {
+    public constructor(source: TileMapView<T>, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
         super(source);
         this._added = added;
         this._removed = removed;
     }
 
-    public get added(): Map<string, ITile<T>> | undefined {
+    public get added(): Array<ITile<T>> | undefined {
         return this._added;
     }
 
-    public get removed(): Map<string, ITile<T>> | undefined {
+    public get removed(): Array<ITile<T>> | undefined {
         return this._removed;
     }
 }
 
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
     // cache
-    _cache: IMemoryCache<string, T>;
+    _cache: IMemoryCache<string, ITile<T>>;
 
     // data source
-    _d: ITileDirectory<T>;
+    _directory: ITileDirectory<T>;
 
     // current navigation parameters
     _w: number = 0;
     _h: number = 0;
     _center: IGeo2 = Geo2.Zero();
-    _levels: Array<TileMapLevel<T>>;
-    _lod: number = 0;
+    _level: TileMapLevel<T>;
 
     // interns
     _valid: boolean = false;
@@ -74,11 +83,11 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
-    public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, T>) {
-        this._cache = cache || new MemoryCache<string, T>();
-        this._d = directory;
+    public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
+        this._cache = cache || new MemoryCache<string, ITile<T>>();
+        this._directory = directory;
         this.invalidateSize(width, height).setView(center, lod);
-        this._levels = new Array<TileMapLevel<T>>(this.metrics.maxLOD);
+        this._level = new TileMapLevel<T>();
     }
 
     /// EVENTS
@@ -102,7 +111,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     /// PROPERTIES
     public get directory(): ITileDirectory<T> {
-        return this._d;
+        return this._directory;
     }
 
     public get center(): IGeo2 {
@@ -111,7 +120,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
-        return this._d.metrics || EPSG3857.Shared;
+        return this._directory.metrics || EPSG3857.Shared;
     }
 
     // SIZE
@@ -121,6 +130,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public get height(): number {
         return this._h;
+    }
+
+    public get levelOfDetail(): number {
+        return this._level.lod;
     }
 
     /// API
@@ -163,31 +176,31 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public setZoom(zoom: number): ITileMapApi {
         const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this._lod != lod) {
+        if (this.levelOfDetail != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lod;
-                this._lod = lod;
+                const old = this._level.lod;
+                this._level.lod = lod;
                 const e = new PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
                 this.invalidate();
                 return this;
             }
-            this._lod = lod;
+            this._level.lod = lod;
             this.invalidate();
         }
         return this;
     }
 
     public zoomIn(delta: number): ITileMapApi {
-        return this.setZoom(this._lod + delta);
+        return this.setZoom(this.levelOfDetail + delta);
     }
 
     public zoomOut(delta: number): ITileMapApi {
-        return this.setZoom(this._lod - delta);
+        return this.setZoom(this.levelOfDetail - delta);
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
-        const lod = Math.round(this._lod);
+        const lod = Math.round(this.levelOfDetail);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -225,24 +238,94 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // VIRTUALS
     protected doValidate() {
-        const clod = Math.round(this._lod);
-        this.doValidateLevel(clod);
+        this._level.lod = Math.round(this.levelOfDetail);
+        this.doValidateLevel(this._level);
     }
 
-    protected doValidateLevel(lod: number) {
-        /*        
-        const level = this._activTiles[lod];
-        let lodOffset = (lod * 1000 - lod * 1000) / 1000; // Trick to avoid floating point error.
+    protected doValidateLevel(level: TileMapLevel<T>) {
+        // current level of detail
+        const lod = level.lod;
+        // the decimal part of lod
+        let lodOffset = (this.levelOfDetail * 1000 - lod * 1000) / 1000; // Trick to avoid floating point error.
+        // scale corresponding to the decimal part
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
+        // compute the pixel bounds
         const w = this.width / scale;
         const h = this.height / scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
-        const x0 = Math.round(pixelCenterXY.x - w / 2);
-        const y0 = Math.round(pixelCenterXY.y - h / 2);
+        let x0 = Math.round(pixelCenterXY.x - w / 2);
+        let y0 = Math.round(pixelCenterXY.y - h / 2);
         const bounds = new Rectangle(x0, y0, w, h);
+        // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top, lod);
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom, lod);
         const boundsTileXY = Rectangle.FromPoints(nwTileXY, seTileXY);
-        */
+        x0 = boundsTileXY.left;
+        y0 = boundsTileXY.top;
+        const x1 = boundsTileXY.right;
+        const y1 = boundsTileXY.bottom;
+
+        const remains = new Array<ITile<T>>();
+        const added = new Array<ITile<T>>();
+
+        for (let y = y0; y <= y1; y++) {
+            for (let x = x0; x <= x1; x++) {
+                const a = new TileAddress(x, y, lod);
+                const key = a.quadkey;
+                let t = level.tiles.get(key);
+                if (t) {
+                    remains.push(t);
+                    level.tiles.delete(key);
+                    continue;
+                }
+                // first have a look in cache
+                t = this._cache.get(key);
+                if (t) {
+                    added.push(t);
+                    continue;
+                }
+                // we need to create the tile.
+                t = new Tile<T>(a.x, a.y, a.levelOfDetail, undefined, this.metrics);
+                this._cache.set(key, t);
+                // and retreive the content.
+                this._directory
+                    .lookupAsync(a, t)
+                    .then(
+                        ((result: LookupResult<Nullable<T>>) => {
+                            if (result.content) {
+                                // we have the content of the tile.
+                                // 'this' is defined as the tile view, thanks to the bind(this) instruction.
+                                const t = <ITile<T>>result.userArgs[0];
+                                t.data = result.content;
+                                this.onTileReady(t);
+                                return;
+                            }
+                            // the content is not defined - TODO describe a strategy
+                        }).bind(this)
+                    )
+                    .catch(
+                        ((reason: any) => {
+                            // the lookup operation has failed - TODO describe a strategy
+                        }).bind(this)
+                    );
+            }
+        }
+
+        const deleted = Array.from(level.tiles.values());
+        level.tiles.clear();
+
+        for (const t of remains) {
+            level.tiles.set(t.address.quadkey, t);
+        }
+        for (const t of added) {
+            level.tiles.set(t.address.quadkey, t);
+        }
+
+        level.tileXYBounds = boundsTileXY;
+
+        const updateEvent = new UpdateEventArgs(this, added.length ? added : undefined, deleted.length ? deleted : undefined);
+        this.updateObservable.notifyObservers(updateEvent);
     }
+
+    private onTileReady(t: ITile<T>) {}
 }

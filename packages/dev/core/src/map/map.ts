@@ -1,9 +1,10 @@
 import { TileMapView, UpdateEvents } from "../tiles/tiles.view";
 import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
-import { ITile, ITileDirectory, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileDirectory, ITileMetrics, ITileMetricsProvider, LookupResult } from "../tiles/tiles.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { TileMetrics } from "../tiles/tiles.metrics";
 import { IGeo2 } from "../geography/geography.interfaces";
+import { Nullable } from "../types";
 
 export interface IDisplay extends ISize2 {}
 
@@ -89,7 +90,8 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
                         this._directory
                             .lookupAsync(c[1])
                             .then(
-                                ((tile: ITile<T> | undefined) => {
+                                ((result: LookupResult<Nullable<ITile<T>>>) => {
+                                    const tile = result.content;
                                     if (tile) {
                                         const a = tile.address;
                                         const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);

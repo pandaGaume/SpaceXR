@@ -5,7 +5,7 @@ export class TileAddress implements ITileAddress {
     private _k?: string;
 
     public constructor(public x: number, public y: number, public levelOfDetail: number) {}
-    public get quadkey(): string | undefined {
+    public get quadkey(): string {
         if (!this._k) {
             this._k = TileMetrics.TileXYToQuadKey(this);
         }

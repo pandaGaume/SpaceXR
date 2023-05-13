@@ -5,6 +5,6 @@ export declare class TileAddress implements ITileAddress {
     levelOfDetail: number;
     private _k?;
     constructor(x: number, y: number, levelOfDetail: number);
-    get quadkey(): string | undefined;
+    get quadkey(): string;
     toString(): string;
 }

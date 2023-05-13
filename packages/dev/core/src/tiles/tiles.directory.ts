@@ -1,7 +1,8 @@
+import { Nullable } from "../types";
 import { CacheEntry, CacheEntryOptionsBuilder, CachePolicy, CachePolicyBuilder, EvictionReason, MemoryCache, PostEvictionCallback } from "../utils/cache";
 import { Tile } from "./tiles";
 import { EPSG3857 } from "./tiles.geography";
-import { ITile, ITileAddress, ITileBuilder, ITileDatasource, ITileDirectory, ITileMetrics } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileDatasource, ITileDirectory, ITileMetrics, LookupResult } from "./tiles.interfaces";
 import { TileMetrics } from "./tiles.metrics";
 
 export class TileDirectoryOptionsBuilder<V> {
@@ -67,7 +68,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
         return this._options.metrics || EPSG3857.Shared;
     }
 
-    public lookupAsync(address: ITileAddress): Promise<ITile<V> | undefined> {
+    public lookupAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<LookupResult<Nullable<ITile<V>>>> {
         const k = address.quadkey || TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
         if (!e && this._datasource) {
@@ -81,7 +82,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
                             const b = new CacheEntryOptionsBuilder<string, ITile<V>>().withPostEvictionCallbacks(this._postEvictionCallback);
                             this._cache.set(k, t, b.build());
                         }
-                        resolve(t);
+                        resolve(new LookupResult(t.address, t, userArgs));
                     }
                 } catch (exception) {
                     console.log("Exception in TileDirectory while fetching for ", address, ":", exception);
@@ -91,7 +92,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
                 }
             });
         }
-        return Promise.resolve(e);
+        return Promise.resolve(new LookupResult(e?.address || address, e ? e : null, userArgs));
     }
 
     protected buildTile(address: ITileAddress, data?: V): ITile<V> {

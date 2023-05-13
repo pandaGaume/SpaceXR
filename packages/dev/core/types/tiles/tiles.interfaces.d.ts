@@ -1,9 +1,10 @@
+import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
-    quadkey?: string;
+    quadkey: string;
 }
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
@@ -68,8 +69,14 @@ export interface ITileClient<T, R extends ITileAddress> extends ITileDatasource<
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
+export declare class LookupResult<V> {
+    address: ITileAddress;
+    content: V;
+    userArgs: Array<unknown>;
+    constructor(address: ITileAddress, content: V, userArgs: Array<unknown>);
+}
 export interface ITileDirectory<V> extends ITileMetricsProvider {
-    lookupAsync(address: ITileAddress): Promise<V | undefined>;
+    lookupAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<LookupResult<Nullable<V>>>;
 }
 export interface ITileMapApi {
     invalidateSize(w: number, h: number): ITileMapApi;

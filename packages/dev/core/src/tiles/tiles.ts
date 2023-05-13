@@ -3,6 +3,7 @@ import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
+import { TileMetrics } from "./tiles.metrics";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
@@ -43,11 +44,12 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         }
         return undefined;
     }
-    _x: number;
-    _y: number;
-    _levelOfDetail: number;
-    _value?: T;
-    _env?: IEnvelope;
+    private _k?: string;
+    private _x: number;
+    private _y: number;
+    private _levelOfDetail: number;
+    private _value?: T;
+    private _env?: IEnvelope;
 
     public constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics) {
         this._x = x;
@@ -85,5 +87,11 @@ export class Tile<T> implements ITile<T>, ITileAddress {
 
     public set bounds(e: IEnvelope | undefined) {
         this._env = e;
+    }
+    public get quadkey(): string {
+        if (!this._k) {
+            this._k = TileMetrics.TileXYToQuadKey(this);
+        }
+        return this._k;
     }
 }

@@ -1455,7 +1455,8 @@ class AbstractTileMap {
                     if (this.metrics.isValidAddress(c[1])) {
                         this._directory
                             .lookupAsync(c[1])
-                            .then(((tile) => {
+                            .then(((result) => {
+                            const tile = result.content;
                             if (tile) {
                                 const a = tile.address;
                                 const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
@@ -2825,6 +2826,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodec),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageTileCodec),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.JsonTileCodec),
+/* harmony export */   "LookupResult": () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.LookupResult),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   "MapZenTileClientOptions": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapZenTileClientOptions),
 /* harmony export */   "MapZenTileMetricOptions": () => (/* reexport safe */ _tiles_mapzen__WEBPACK_IMPORTED_MODULE_8__.MapZenTileMetricOptions),
@@ -3252,7 +3254,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/cache */ "./dist/utils/cache.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
 /* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.geography */ "./dist/tiles/tiles.geography.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+
 
 
 
@@ -3300,7 +3304,7 @@ class TileDirectory {
     get metrics() {
         return this._options.metrics || _tiles_geography__WEBPACK_IMPORTED_MODULE_0__.EPSG3857.Shared;
     }
-    lookupAsync(address) {
+    lookupAsync(address, ...userArgs) {
         const k = address.quadkey || _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.TileXYToQuadKey(address);
         let e = this._cache.get(k);
         if (!e && this._datasource) {
@@ -3314,7 +3318,7 @@ class TileDirectory {
                             const b = new _utils_cache__WEBPACK_IMPORTED_MODULE_2__.CacheEntryOptionsBuilder().withPostEvictionCallbacks(this._postEvictionCallback);
                             this._cache.set(k, t, b.build());
                         }
-                        resolve(t);
+                        resolve(new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_4__.LookupResult(t.address, t, userArgs));
                     }
                 }
                 catch (exception) {
@@ -3325,7 +3329,7 @@ class TileDirectory {
                 }
             });
         }
-        return Promise.resolve(e);
+        return Promise.resolve(new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_4__.LookupResult(e?.address || address, e ? e : null, userArgs));
     }
     buildTile(address, data) {
         const b = this._options.tileBuilder || _tiles__WEBPACK_IMPORTED_MODULE_1__.Tile.Builder();
@@ -3479,12 +3483,20 @@ EPSG3857.Shared = new EPSG3857();
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "LookupResult": () => (/* binding */ LookupResult),
 /* harmony export */   "isTileAddress": () => (/* binding */ isTileAddress)
 /* harmony export */ });
 function isTileAddress(b) {
     if (typeof b !== "object" || b === null)
         return false;
     return b.x !== undefined && b.y !== undefined && b.levelOfDetail !== undefined;
+}
+class LookupResult {
+    constructor(address, content, userArgs) {
+        this.address = address;
+        this.content = content;
+        this.userArgs = userArgs;
+    }
 }
 //# sourceMappingURL=tiles.interfaces.js.map
 
@@ -3504,6 +3516,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
 /* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.envelope */ "./dist/geography/geography.envelope.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+
 
 
 
@@ -3568,6 +3582,12 @@ class Tile {
     }
     set bounds(e) {
         this._env = e;
+    }
+    get quadkey() {
+        if (!this._k) {
+            this._k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.TileXYToQuadKey(this);
+        }
+        return this._k;
     }
 }
 //# sourceMappingURL=tiles.js.map
@@ -4601,6 +4621,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileCodec),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.JsonTileCodec),
 /* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.KeplerOrbitBase),
+/* harmony export */   "LookupResult": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.LookupResult),
 /* harmony export */   "Luminosity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Luminosity),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
 /* harmony export */   "MapZenTileClientOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenTileClientOptions),

@@ -1,4 +1,4 @@
-import { ITileUrlBuilder } from "./tiles.interfaces";
+import { ITileAddress, ITileUrlBuilder } from "./tiles.interfaces";
 declare class RoundRobinOptions {
     from: number;
     to: number;
@@ -21,7 +21,7 @@ export declare class WebTileUrlBuilder implements ITileUrlBuilder {
     withQuery(v: string): WebTileUrlBuilder;
     withExtension(v: string): WebTileUrlBuilder;
     withRoundRobin(from: number, to: number): WebTileUrlBuilder;
-    buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string;
+    buildUrl(a: ITileAddress, ...params: unknown[]): string;
     private nextRRIndex;
 }
 export {};

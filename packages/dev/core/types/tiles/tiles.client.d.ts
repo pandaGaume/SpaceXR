@@ -1,21 +1,22 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileClientOptions, ITileUrlBuilder } from "./tiles.interfaces";
+import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult } from "./tiles.interfaces";
 import { Nullable } from "../types";
-export declare class TileClientOptions<T> implements ITileClientOptions<T> {
-    urlFactory: ITileUrlBuilder;
-    codec: ITileCodec<T>;
-    constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>);
+export declare class TileWebClientOptions {
+    static Default: TileWebClientOptions;
+    maxRetry?: number;
+    initialDelay?: number;
+    constructor(p: Partial<TileWebClientOptions>);
 }
-export declare class TileClientOptionsBuilder<T> {
-    _urlFactory?: ITileUrlBuilder;
-    _codec?: ITileCodec<T>;
-    withUrlFactory(v: ITileUrlBuilder): TileClientOptionsBuilder<T>;
-    withCodec(v: ITileCodec<T>): TileClientOptionsBuilder<T>;
-    build(): Nullable<TileClientOptions<T>>;
+export declare class TileWebClientOptionsBuilder {
+    _maxRetry?: number;
+    _initialDelay?: number;
+    withMaxRetry(v: number): TileWebClientOptionsBuilder;
+    withInitialDelay(v: number): TileWebClientOptionsBuilder;
+    build(): TileWebClientOptions;
 }
-export declare class TileClient<T, R extends ITileAddress> implements ITileClient<T, R> {
-    protected _o: TileClientOptions<T>;
-    constructor(options: TileClientOptions<T>);
-    get options(): TileClientOptions<T>;
-    set options(value: TileClientOptions<T>);
-    fetchAsync(request: ITileAddress): Promise<Awaited<T> | undefined>;
+export declare class TileWebClient<T> implements ITileClient<T> {
+    _o: TileWebClientOptions;
+    _urlFactory: ITileUrlBuilder;
+    _codec: ITileCodec<T>;
+    constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, options?: TileWebClientOptions);
+    fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }

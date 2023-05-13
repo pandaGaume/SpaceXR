@@ -1,4 +1,4 @@
-import { TileClientOptions } from "./tiles.client";
+import { TileWebClient, TileWebClientOptions } from "./tiles.client";
 import { IPixelDecoder } from "./tiles.interfaces";
 import { WebTileUrlBuilder } from "./tiles.urlBuilder";
 import { Float32TileCodec, ImageTileCodec } from "./tiles.codecs.image";
@@ -41,15 +41,20 @@ export class MapzenNormalValueDecoder implements IPixelDecoder {
     }
 }
 
-export class MapZenTileClientOptions {
-    public static DEMImages = new TileClientOptions(MapZenDemUrlBuilder.Terrarium, new ImageTileCodec());
-    public static DEM = new TileClientOptions(MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared));
-    public static NormalImages = new TileClientOptions(MapZenDemUrlBuilder.Normal, new ImageTileCodec());
-    public static Normal = new TileClientOptions(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared));
-}
-
-export class MapZenTileMetricOptions {
+export class MapZen {
     public static MaxLevelOfDetail = 15;
+    public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
 
-    public static Shared = new TileMetricsOptionsBuilder().withMaxLOD(MapZenTileMetricOptions.MaxLevelOfDetail).build();
+    public static DemImagesClient(options?: TileWebClientOptions) {
+        return new TileWebClient(MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), options);
+    }
+    public static DemClient(options?: TileWebClientOptions) {
+        return new TileWebClient(MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared), options);
+    }
+    public static NormalImagesClient(options?: TileWebClientOptions) {
+        return new TileWebClient(MapZenDemUrlBuilder.Normal, new ImageTileCodec());
+    }
+    public static NormalClient(options?: TileWebClientOptions) {
+        return new TileWebClient(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared), options);
+    }
 }

@@ -8,7 +8,7 @@ import { Nullable } from "../types";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
-    _d?: T;
+    _d?: Nullable<T>;
     _m?: ITileMetrics;
 
     public withAddress(a: ITileAddress): ITileBuilder<T> {
@@ -16,7 +16,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         return this;
     }
 
-    public withData(d?: T): ITileBuilder<T> {
+    public withData(d: Nullable<T>): ITileBuilder<T> {
         this._d = d;
         return this;
     }
@@ -49,10 +49,10 @@ export class Tile<T> implements ITile<T>, ITileAddress {
     private _x: number;
     private _y: number;
     private _levelOfDetail: number;
-    private _value?: Nullable<T>;
+    private _value: Nullable<T>;
     private _env?: IEnvelope;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data?: T, metrics?: ITileMetrics) {
+    public constructor(x: number, y: number, levelOfDetail: number, data: Nullable<T> = null, metrics?: ITileMetrics) {
         this._x = x;
         this._y = y;
         this._levelOfDetail = levelOfDetail;
@@ -64,11 +64,11 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         return this;
     }
 
-    public get content(): Nullable<T> | undefined {
+    public get content(): Nullable<T> {
         return this._value;
     }
 
-    public set content(v: Nullable<T> | undefined) {
+    public set content(v: Nullable<T>) {
         this._value = v;
     }
 

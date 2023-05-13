@@ -1,4 +1,4 @@
-import { ITileUrlBuilder } from "./tiles.interfaces";
+import { ITileAddress, ITileUrlBuilder } from "./tiles.interfaces";
 
 /**
  * The round-robin strategy can be used for tile servers to distribute the load among multiple servers.
@@ -61,7 +61,7 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
         return this;
     }
 
-    public buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string {
+    public buildUrl(a: ITileAddress, ...params: unknown[]): string {
         const scheme = this._isSecure ? "https" : "http";
         const host = this._port ? `${this._host}:${this._port}` : `${this._host}`;
         const query = this._query ? `?${this._query}` : "";
@@ -70,9 +70,9 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
             template = template.replaceAll("{extension}", this._extension);
         }
 
-        let str = template.replaceAll("{x}", x.toString());
-        str = str.replaceAll("{y}", y.toString());
-        str = str.replaceAll("{z}", levelOfDetail.toString());
+        let str = template.replaceAll("{x}", a.x.toString());
+        str = str.replaceAll("{y}", a.y.toString());
+        str = str.replaceAll("{z}", a.levelOfDetail.toString());
         str = str.replace("{s}", this._i.toString());
         this._i = this.nextRRIndex();
         return str;

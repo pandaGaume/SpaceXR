@@ -14,7 +14,7 @@ export interface ITile<T> extends IGeoBounded {
 }
 export interface ITileBuilder<T> {
     withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d?: T): ITileBuilder<T>;
+    withData(d: Nullable<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
@@ -50,21 +50,22 @@ export interface ITileMetrics {
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;
 }
+export declare class FetchResult<T> {
+    address: ITileAddress;
+    content: T;
+    userArgs: Array<unknown>;
+    constructor(address: ITileAddress, content: T, userArgs: Array<unknown>);
+}
 export interface ITileDatasource<T, R extends ITileAddress> {
-    fetchAsync(request: R): Promise<T | undefined>;
+    fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 export interface ITileUrlBuilder {
-    buildUrl(x: number, y: number, levelOfDetail: number, ...params: unknown[]): string;
+    buildUrl(address: ITileAddress, ...params: unknown[]): string;
 }
 export interface ITileCodec<T> {
-    decodeAsync(r: void | Response): Promise<Awaited<T> | undefined>;
+    decodeAsync(r: void | Response): Promise<Awaited<Nullable<T>>>;
 }
-export interface ITileClientOptions<T> {
-    urlFactory: ITileUrlBuilder;
-    codec: ITileCodec<T>;
-}
-export interface ITileClient<T, R extends ITileAddress> extends ITileDatasource<T, R> {
-    options: ITileClientOptions<T>;
+export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
 }
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;

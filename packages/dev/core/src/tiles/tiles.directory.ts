@@ -76,7 +76,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
                 try {
                     const data = await this._datasource.fetchAsync(address);
                     if (data) {
-                        const t = this.buildTile(address, data);
+                        const t = this.buildTile(address, data.content);
                         if (t) {
                             this.bindTile(k, t);
                             const b = new CacheEntryOptionsBuilder<string, ITile<V>>().withPostEvictionCallbacks(this._postEvictionCallback);
@@ -95,7 +95,7 @@ export class TileDirectory<V> implements ITileDirectory<ITile<V>> {
         return Promise.resolve(new LookupResult(e?.address || address, e ? e : null, userArgs));
     }
 
-    protected buildTile(address: ITileAddress, data?: V): ITile<V> {
+    protected buildTile(address: ITileAddress, data: Nullable<V>): ITile<V> {
         const b = this._options.tileBuilder || Tile.Builder<V>();
         return b.withMetrics(this.metrics).withAddress(address).withData(data).build();
     }

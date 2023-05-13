@@ -1,6 +1,6 @@
 import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileDirectory, ITileMapApi, ITile, LookupResult } from "./tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
 import { EPSG3857 } from "./tiles.geography";
@@ -67,7 +67,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _cache: IMemoryCache<string, ITile<T>>;
 
     // data source
-    _directory: ITileDirectory<T>;
+    _datasource: ITileDatasource<T, ITileAddress>;
+    _metrics: ITileMetrics;
 
     // current navigation parameters
     _w: number = 0;
@@ -84,9 +85,18 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
-    public constructor(directory: ITileDirectory<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
+    public constructor(
+        datasource: ITileDatasource<T, ITileAddress>,
+        metrics: ITileMetrics,
+        width: number,
+        height: number,
+        center: IGeo2,
+        lod: number,
+        cache?: IMemoryCache<string, ITile<T>>
+    ) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
-        this._directory = directory;
+        this._datasource = datasource;
+        this._metrics = metrics || EPSG3857.Shared;
         this.invalidateSize(width, height).setView(center, lod);
         this._level = new TileMapLevel<T>();
     }
@@ -111,8 +121,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     /// PROPERTIES
-    public get directory(): ITileDirectory<T> {
-        return this._directory;
+    public get datasource(): ITileDatasource<T, ITileAddress> {
+        return this._datasource;
     }
 
     public get center(): IGeo2 {
@@ -121,7 +131,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
-        return this._directory.metrics || EPSG3857.Shared;
+        return this._metrics;
     }
 
     // SIZE
@@ -287,9 +297,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 t = new Tile<T>(a.x, a.y, a.levelOfDetail, undefined, this.metrics);
                 this._cache.set(key, t);
                 // and retreive the content.
-                this._directory
-                    .lookupAsync(a, this, t)
-                    .then((result: LookupResult<Nullable<T>>) => {
+                this._datasource
+                    .fetchAsync(a, this, t)
+                    .then((result: FetchResult<Nullable<T>>) => {
                         const view = <TileMapView<T>>result.userArgs[0];
                         const t = <ITile<T>>result.userArgs[1];
                         if (result.content) {

@@ -6,6 +6,7 @@ export declare class Scalar {
     static WithinEpsilon(a: number, b: number, epsilon?: number): boolean;
     static Sign: (value: number) => 1 | -1;
     static Clamp: (value: number, min: number, max: number) => number;
+    static GetRandomInt(min: number, max: number): number;
 }
 export declare abstract class AbstractRange<T> {
     protected _min: T;

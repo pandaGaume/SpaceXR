@@ -26,8 +26,8 @@
                 const lod = 5;
 
                 // definir la source de donnée.
-                const terrariumImgClient = new SPACEXR.TileClient(SPACEXR.MapZenTileClientOptions.DEMImages);
-                const mapzenMetrics = new SPACEXR.EPSG3857(SPACEXR.MapZenTileMetricOptions.Shared);
+                const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
+                const mapzenMetrics = new SPACEXR.EPSG3857(SPACEXR.MapZen.MetricsOptions);
                 const cachePolicy = new SPACEXR.CachePolicyBuilder().withSlidingExpirationFromSeconds(10).build();
                 const options = new SPACEXR.TileDirectoryOptionsBuilder().withMetrics(mapzenMetrics).withCacheOptions(cachePolicy).build();
                 const directory = new SPACEXR.TileDirectory("terrarium", terrariumImgClient, options);

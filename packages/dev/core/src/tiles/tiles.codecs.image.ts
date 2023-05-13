@@ -1,9 +1,10 @@
+import { Nullable } from "../types";
 import { IPixelDecoder, ITileCodec } from "./tiles.interfaces";
 
 export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     public static Shared = new ImageTileCodec();
 
-    async decodeAsync(r: void | Response): Promise<HTMLImageElement | undefined> {
+    async decodeAsync(r: void | Response): Promise<Nullable<HTMLImageElement>> {
         const blob = r instanceof Response ? await r.blob() : null;
         if (blob) {
             return new Promise((resolve, reject) => {
@@ -28,7 +29,7 @@ export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
                 }
             });
         } else {
-            return undefined;
+            return null;
         }
     }
 }
@@ -49,7 +50,7 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
         this._canvas = canvas;
     }
 
-    public async decodeAsync(r: void | Response): Promise<Awaited<ImageData> | undefined> {
+    public async decodeAsync(r: void | Response): Promise<Awaited<Nullable<ImageData>>> {
         const image = await ImageTileCodec.Shared.decodeAsync(r);
         if (image) {
             const w = image.width;
@@ -68,7 +69,7 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
             workingContext.drawImage(image, 0, 0);
             return workingContext.getImageData(0, 0, w, h);
         }
-        return undefined;
+        return null;
     }
 }
 
@@ -79,7 +80,7 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
         this._canvas = canvas;
     }
 
-    public async decodeAsync(r: void | Response): Promise<Awaited<Float32Array> | undefined> {
+    public async decodeAsync(r: void | Response): Promise<Nullable<Float32Array>> {
         const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decodeAsync(r);
         if (imgData) {
             const pixels = imgData.data;
@@ -102,6 +103,6 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
 
             return values;
         }
-        return undefined;
+        return null;
     }
 }

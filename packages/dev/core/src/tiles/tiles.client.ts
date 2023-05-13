@@ -1,65 +1,83 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileClientOptions, ITileUrlBuilder } from "./tiles.interfaces";
+import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult } from "./tiles.interfaces";
 import { Nullable } from "../types";
+import { Scalar } from "../math/math";
 
-export class TileClientOptions<T> implements ITileClientOptions<T> {
-    urlFactory: ITileUrlBuilder;
-    codec: ITileCodec<T>;
+export class TileWebClientOptions {
+    public static Default = new TileWebClientOptions({ maxRetry: 3, initialDelay: 1000 });
+    maxRetry?: number;
+    initialDelay?: number;
 
-    public constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>) {
-        this.urlFactory = urlFactory;
-        this.codec = codec;
+    public constructor(p: Partial<TileWebClientOptions>) {
+        Object.assign(this, p);
     }
 }
 
-export class TileClientOptionsBuilder<T> {
-    _urlFactory?: ITileUrlBuilder;
-    _codec?: ITileCodec<T>;
+export class TileWebClientOptionsBuilder {
+    _maxRetry?: number;
+    _initialDelay?: number;
 
-    public withUrlFactory(v: ITileUrlBuilder): TileClientOptionsBuilder<T> {
-        this._urlFactory = v;
+    public withMaxRetry(v: number): TileWebClientOptionsBuilder {
+        this._maxRetry = v;
+        return this;
+    }
+    public withInitialDelay(v: number): TileWebClientOptionsBuilder {
+        this._initialDelay = v;
         return this;
     }
 
-    public withCodec(v: ITileCodec<T>): TileClientOptionsBuilder<T> {
-        this._codec = v;
-        return this;
-    }
-
-    public build(): Nullable<TileClientOptions<T>> {
-        if (this._urlFactory && this._codec) {
-            return new TileClientOptions<T>(this._urlFactory, this._codec);
-        }
-        return null;
+    public build(): TileWebClientOptions {
+        return new TileWebClientOptions({ maxRetry: this._maxRetry, initialDelay: this._initialDelay });
     }
 }
 
-export class TileClient<T, R extends ITileAddress> implements ITileClient<T, R> {
-    protected _o: TileClientOptions<T>;
+export class TileWebClient<T> implements ITileClient<T> {
+    _o: TileWebClientOptions;
+    _urlFactory: ITileUrlBuilder;
+    _codec: ITileCodec<T>;
 
-    public constructor(options: TileClientOptions<T>) {
-        this._o = options;
-    }
-
-    public get options(): TileClientOptions<T> {
-        return this._o;
-    }
-
-    public set options(value: TileClientOptions<T>) {
-        this._o = value;
-    }
-
-    public async fetchAsync(request: ITileAddress): Promise<Awaited<T> | undefined> {
-        const url = this._o.urlFactory.buildUrl(request.x, request.y, request.levelOfDetail);
-        let response;
-        try {
-            response = await fetch(url);
-        } catch (e) {
-            console.log("Can not fetch ", url);
-        } finally {
+    public constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, options?: TileWebClientOptions) {
+        if (!urlFactory) {
+            throw new Error(`invalid url factory parameter ${urlFactory}`);
         }
-        if (response && response.ok) {
-            return await this._o.codec.decodeAsync(response);
+        if (!codec) {
+            throw new Error(`invalid codec parameter ${codec}`);
         }
-        return undefined;
+        this._urlFactory = urlFactory;
+        this._codec = codec;
+        this._o = { ...TileWebClientOptions.Default, ...options };
+    }
+
+    public async fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
+        if (!request) {
+            throw new Error(`invalid request parameter ${request}`);
+        }
+        const url = this._urlFactory.buildUrl(request, ...userArgs);
+        if (!url) {
+            throw new Error(`Builded url of ${request.toString()} can not be null`);
+        }
+
+        const maxRetry = this._o.maxRetry || 1;
+        let delay = this._o.initialDelay || 1000;
+        let retryCount = 0;
+        do {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const content = await this._codec.decodeAsync(response);
+                    return new FetchResult<Nullable<T>>(request, content, userArgs);
+                } else if (response.status === 404) {
+                    return new FetchResult<Nullable<T>>(request, null, userArgs);
+                }
+            } catch (error) {
+                console.error(`Error fetching URL: ${url}`, error);
+            }
+            // Retry after delay using exponential backoff
+            const jitter = Scalar.GetRandomInt(0, this._o.initialDelay || 1000); // Random number between 0 and 1000 (milliseconds)
+            await new Promise((resolve) => setTimeout(resolve, delay + jitter));
+            delay *= 2; // simple Exponential backoff: double the delay for each retry
+            retryCount++;
+        } while (retryCount < maxRetry);
+
+        throw new Error(`Exceeded maximum retries for URL: ${url}`);
     }
 }

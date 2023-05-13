@@ -27,7 +27,7 @@ export declare class TileDirectory<V> implements ITileDirectory<ITile<V>> {
     get name(): string;
     get metrics(): ITileMetrics;
     lookupAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<LookupResult<Nullable<ITile<V>>>>;
-    protected buildTile(address: ITileAddress, data?: V): ITile<V>;
+    protected buildTile(address: ITileAddress, data: Nullable<V>): ITile<V>;
     protected bindTile(key: string, t: ITile<V>): void;
     protected unbindTile(key: string, t: ITile<V> | undefined): void;
     protected onEntryEvicted(e: CacheEntry<string, ITile<V>>, reason: EvictionReason): void;

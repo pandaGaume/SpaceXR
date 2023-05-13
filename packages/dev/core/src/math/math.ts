@@ -23,6 +23,12 @@ export class Scalar {
         }
         return Math.min(max, Math.max(min, value));
     };
+
+    public static GetRandomInt(min: number, max: number): number {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 }
 
 export abstract class AbstractRange<T> {

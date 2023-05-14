@@ -37,7 +37,7 @@ export class UpdateEvents {
     }
 }
 
-export class TileMapView {
+export class ___TileMapView {
     public static ZOOM_ACC = 10000;
 
     // main map metrics
@@ -113,7 +113,7 @@ export class TileMapView {
         return this._valid;
     }
 
-    public setLevelOfDetail(v: number): TileMapView {
+    public setLevelOfDetail(v: number): ___TileMapView {
         const lod = Scalar.Clamp(v || 0, this._metrics.minLOD, this._metrics.maxLOD);
         if (lod != this._levelOfDetail) {
             this._levelOfDetail = lod;
@@ -122,7 +122,7 @@ export class TileMapView {
         return this;
     }
 
-    public resize(width: number, height: number): TileMapView {
+    public resize(width: number, height: number): ___TileMapView {
         const w = Math.abs(width);
         const h = Math.abs(height);
         this._size = this._size || Size2.Zero();
@@ -134,7 +134,7 @@ export class TileMapView {
         return this;
     }
 
-    public center(lat?: number, lon?: number): TileMapView {
+    public center(lat?: number, lon?: number): ___TileMapView {
         const latitude = Scalar.Clamp(lat || Geo2.Default.lat, this._metrics.minLatitude, this._metrics.maxLatitude);
         const longitude = Scalar.Clamp(lon || Geo2.Default.lon, this._metrics.minLongitude, this._metrics.maxLongitude);
         this._center = this._center || Geo2.Zero();
@@ -146,7 +146,7 @@ export class TileMapView {
         return this;
     }
 
-    public translate(x: number, y: number): TileMapView {
+    public translate(x: number, y: number): ___TileMapView {
         const lod = Math.round(this._levelOfDetail);
         const pixelCenterXY = this._metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
 
@@ -156,12 +156,12 @@ export class TileMapView {
         return this.center(center.lat, center.lon);
     }
 
-    public invalidate(): TileMapView {
+    public invalidate(): ___TileMapView {
         this._valid = false;
         return this;
     }
 
-    public validate(): TileMapView {
+    public validate(): ___TileMapView {
         if (!this._valid) {
             this.doValidate();
             this._valid = true;
@@ -172,7 +172,7 @@ export class TileMapView {
     protected doValidate() {
         // for the purpose we need to know the scale factor which is depending of the transition state between zoom level
         const lod = Math.round(this._levelOfDetail);
-        let lodOffset = (this._levelOfDetail * TileMapView.ZOOM_ACC - lod * TileMapView.ZOOM_ACC) / TileMapView.ZOOM_ACC; // Trick to avoid floating point error.
+        let lodOffset = (this._levelOfDetail * ___TileMapView.ZOOM_ACC - lod * ___TileMapView.ZOOM_ACC) / ___TileMapView.ZOOM_ACC; // Trick to avoid floating point error.
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         this._scale.x = scale;
         this._scale.y = scale;

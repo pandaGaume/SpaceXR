@@ -1,30 +1,32 @@
-import { TileMapView } from "../tiles/tiles.view";
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
-import { ITile, ITileDirectory, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
+import { TileMapView, UpdateEventArgs } from "../tiles/tile.mapview";
+import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
+import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
 export interface IDisplay extends ISize2 {
 }
-export declare abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMetricsProvider {
+export declare abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider, ITileMapApi {
     _display: D;
-    _view: TileMapView;
-    _directory?: ITileDirectory<ITile<T>>;
+    _view: TileMapView<T>;
     _activ: Map<string, ITile<T>>;
-    _pixelBounds?: IRectangle;
-    _scale: Cartesian2;
     _lod: number;
-    constructor(display: D, directory?: ITileDirectory<ITile<T>>, lat?: number, lon?: number, zoom?: number);
-    invalidateSize(w?: number, h?: number): void;
-    setView(center: IGeo2, zoom?: number): void;
-    setZoom(zoom: number): void;
-    zoomIn(delta: number): void;
-    zoomOut(delta: number): void;
-    translate(tx: number, ty: number): void;
+    _scale: number;
+    _center: ICartesian2;
+    constructor(display: D, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
+    invalidateSize(w: number, h: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number | undefined): ITileMapApi;
+    setZoom(zoom: number): ITileMapApi;
+    zoomIn(delta: number): ITileMapApi;
+    zoomOut(delta: number): ITileMapApi;
+    translate(tx: number, ty: number): ITileMapApi;
+    get view(): TileMapView<T>;
     get metrics(): ITileMetrics;
-    private onUpdate;
-    _tilequeue: Array<ITile<T>>;
-    private dequeue;
-    abstract onDeleted(key: string, tile: ITile<T>): void;
-    abstract onAdded(key: string, tile: ITile<T>): void;
-    abstract draw(clear?: boolean, tile?: Array<ITile<T>>): void;
+    protected onUpdate(args: UpdateEventArgs<T>): void;
+    protected onUpdateTiles(args: UpdateEventArgs<T>): void;
+    protected onUpdateView(args: UpdateEventArgs<T>): void;
+    private processRemoved;
+    private processAdded;
+    protected abstract onDeleted(key: string, tile: ITile<T>): void;
+    protected abstract onAdded(key: string, tile: ITile<T>): void;
+    protected abstract invalidateDisplay(): void;
+    protected abstract invalidateTiles(added: ITile<T>[] | undefined, removed: ITile<T>[] | undefined): void;
 }

@@ -1,6 +1,8 @@
-import { ITile, ITileDirectory } from "../tiles/tiles.interfaces";
-import { AbstractTileMap, IDisplay } from "./map";
-import { ISize2 } from "../geometry/geometry.interfaces";
+import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
+import { AbstractDisplayMap } from "./map";
+import { IGeo2 } from "../geography/geography.interfaces";
+import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IDisplay } from "./map";
 export declare class CanvasDisplay implements IDisplay {
     canvas: HTMLCanvasElement;
     constructor(canvas: HTMLCanvasElement);
@@ -8,10 +10,14 @@ export declare class CanvasDisplay implements IDisplay {
     get height(): number;
     get width(): number;
     equals(other: ISize2): boolean;
+    resizeToDisplaySize(): boolean;
 }
-export declare class CanvasTileMap extends AbstractTileMap<HTMLImageElement, CanvasDisplay> {
-    constructor(canvas: HTMLCanvasElement, directory?: ITileDirectory<ITile<HTMLImageElement>>, lat?: number, lon?: number, zoom?: number);
-    onDeleted(key: string, tile: ITile<HTMLImageElement>): void;
-    onAdded(key: string, tile: ITile<HTMLImageElement>): void;
-    draw(clear?: boolean, tiles?: Array<ITile<HTMLImageElement>>): void;
+export declare class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, CanvasDisplay> {
+    _observer: ResizeObserver;
+    constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
+    protected onDeleted(key: string, tile: ITile<HTMLImageElement>): void;
+    protected onAdded(key: string, tile: ITile<HTMLImageElement>): void;
+    protected invalidateTiles(added: ITile<HTMLImageElement>[] | undefined, removed: ITile<HTMLImageElement>[] | undefined): void;
+    protected invalidateDisplay(rect?: IRectangle): void;
+    private invalidate;
 }

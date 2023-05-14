@@ -1,150 +1,136 @@
-import { TileMapView, UpdateEvents } from "../tiles/tiles.view";
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
-import { ITile, ITileDirectory, ITileMetrics, ITileMetricsProvider, LookupResult } from "../tiles/tiles.interfaces";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
-import { TileMetrics } from "../tiles/tiles.metrics";
+import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tile.mapview";
+import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { Nullable } from "../types";
+import { Geo2 } from "../geography/geography.position";
+import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
+import { Cartesian2 } from "../geometry/geometry.cartesian";
 
 export interface IDisplay extends ISize2 {}
 
-export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMetricsProvider {
-    _display: D;
-
-    _view: TileMapView; // the view logic
-    _directory?: ITileDirectory<ITile<T>>; // the tile data source
+export abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider, ITileMapApi {
+    _display: D; // the display
+    _view: TileMapView<T>; // the view logic
     _activ: Map<string, ITile<T>>; // the list of activ tiles
 
-    _pixelBounds?: IRectangle; // this is a copy of the curent pixel bounds of the view
-    _scale: Cartesian2; //
-    _lod: number;
+    _lod: number = 0;
+    _scale: number = 1;
+    _center: ICartesian2 = Cartesian2.Zero();
 
-    public constructor(display: D, directory?: ITileDirectory<ITile<T>>, lat?: number, lon?: number, zoom?: number) {
+    public constructor(display: D, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {
         this._display = display;
-        this._directory = directory;
-        this._view = new TileMapView(display.width, display.height, lat, lon, zoom, directory?.metrics);
-        this._view.updateObservable.add(((e: UpdateEvents) => this.onUpdate(e)).bind(this));
+        this._view = new TileMapView(datasource, metrics, display.width, display.height, center || Geo2.Zero(), lod || metrics.minLOD);
+        this._view.updateObservable.add((e: UpdateEventArgs<T>) => this.onUpdate(e));
         this._activ = new Map<string, ITile<T>>();
-        this._scale = Cartesian2.One();
-        this._view.validate();
-        this._lod = 0;
-    }
-
-    public invalidateSize(w?: number, h?: number) {
-        this._view.resize(w || this._display.width, h || this._display.height).validate();
-    }
-
-    public setView(center: IGeo2, zoom?: number) {
-        this._view.center(center.lat, center.lon);
-        if (zoom) {
-            this._view.setLevelOfDetail(zoom);
-        }
         this._view.validate();
     }
-
-    public setZoom(zoom: number) {
-        this._view.setLevelOfDetail(zoom).validate();
+    public invalidateSize(w: number, h: number): ITileMapApi {
+        this._view.invalidateSize(w, h);
+        this._view.validate();
+        return this;
+    }
+    public setView(center: IGeo2, zoom?: number | undefined): ITileMapApi {
+        this._view.setView(center, zoom);
+        this._view.validate();
+        return this;
+    }
+    public setZoom(zoom: number): ITileMapApi {
+        this._view.setZoom(zoom);
+        this._view.validate();
+        return this;
+    }
+    public zoomIn(delta: number): ITileMapApi {
+        this._view.zoomIn(delta);
+        this._view.validate();
+        return this;
+    }
+    public zoomOut(delta: number): ITileMapApi {
+        this._view.zoomOut(delta);
+        this._view.validate();
+        return this;
+    }
+    public translate(tx: number, ty: number): ITileMapApi {
+        this._view.translate(tx, ty);
+        this._view.validate();
+        return this;
     }
 
-    public zoomIn(delta: number) {
-        this.setZoom((this._view.levelOfDetail * TileMapView.ZOOM_ACC + Math.abs(delta * TileMapView.ZOOM_ACC)) / TileMapView.ZOOM_ACC);
-    }
-
-    public zoomOut(delta: number) {
-        this.setZoom((this._view.levelOfDetail * TileMapView.ZOOM_ACC - Math.abs(delta * TileMapView.ZOOM_ACC)) / TileMapView.ZOOM_ACC);
-    }
-
-    public translate(tx: number, ty: number) {
-        this._view.translate(tx, ty).validate();
+    public get view(): TileMapView<T> {
+        return this._view;
     }
 
     public get metrics(): ITileMetrics {
-        return this._view.metrics;
+        return this.view.metrics;
     }
 
-    private onUpdate(e: UpdateEvents) {
-        if (!e) {
+    protected onUpdate(args: UpdateEventArgs<T>): void {
+        if (!args) {
             return;
         }
 
-        this._pixelBounds = e.bounds;
-        this._scale = e.scale;
-        this._lod = e.lod;
+        switch (args.reason) {
+            case UpdateReason.tileReady: {
+                this.onUpdateTiles(args);
+                break;
+            }
+            case UpdateReason.viewChanged:
+            default: {
+                this.onUpdateView(args);
+                break;
+            }
+        }
+    }
 
-        if (e.removed && e.removed.size != 0) {
+    protected onUpdateTiles(args: UpdateEventArgs<T>): void {
+        // process tiles
+        this.processRemoved(args);
+        this.processAdded(args);
+
+        // invalidate tiles
+        this.invalidateTiles(args.added, args.removed);
+    }
+
+    protected onUpdateView(args: UpdateEventArgs<T>): void {
+        // update the view parameters
+        this._lod = args.lod;
+        this._scale = args.scale;
+        this._center = args.center;
+
+        // process tiles
+        this.processRemoved(args);
+        this.processAdded(args);
+
+        // invalidate display
+        this.invalidateDisplay();
+    }
+
+    private processRemoved(args: UpdateEventArgs<T>): void {
+        if (args.removed && args.removed.length != 0) {
             // this is the place to clean unactive tile
-            for (const entry of e.removed.entries()) {
-                const old = this._activ.get(entry[0]);
+            for (const t of args.removed) {
+                const key = t.address.quadkey;
+                const old = this._activ.get(key);
                 if (old) {
-                    this._activ.delete(entry[0]);
-                    this.onDeleted(entry[0], old);
+                    this._activ.delete(key);
+                    this.onDeleted(key, old);
                 }
             }
         }
+    }
 
-        const allSettled: boolean = false;
-
-        if (e.added && e.added.size != 0) {
-            // this is the place to add new tiles from the directory
-            if (!allSettled) {
-                Array.from(e.added.entries()).forEach(async (c) => {
-                    if (this._directory) {
-                        if (this.metrics.isValidAddress(c[1])) {
-                            const result = await this._directory.lookupAsync(c[1]);
-                            const tile = result.content;
-                            if (tile) {
-                                const a = tile.address;
-                                const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                                this._activ.set(key, tile);
-                                this.onAdded(key, tile);
-
-                                if (tile.content) {
-                                    this._tilequeue.push(tile);
-                                    if (this._tilequeue.length === 1) {
-                                        queueMicrotask(() => this.dequeue());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            } else {
-                Promise.allSettled(
-                    Array.from(e.added.entries()).map((c) => {
-                        return this._directory!.lookupAsync(c[1]).then(
-                            ((result: LookupResult<Nullable<ITile<T>>>) => {
-                                const tile = result.content;
-                                if (tile) {
-                                    const a = tile.address;
-                                    const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                                    this._activ.set(key, tile);
-                                    this.onAdded(key, tile);
-                                }
-                                return tile;
-                            }).bind(this)
-                        );
-                    })
-                ).then((res) => {
-                    const tiles = res.filter((r) => r.status === "fulfilled").map((r) => (<any>r).value);
-                    this.draw(false, tiles);
-                });
+    private processAdded(args: UpdateEventArgs<T>): void {
+        if (args.added && args.added.length != 0) {
+            for (const t of args.added) {
+                const key = t.address.quadkey;
+                if (!this._activ.has(key)) {
+                    this._activ.set(key, t);
+                    this.onAdded(key, t);
+                }
             }
         }
-        this.draw(true);
     }
 
-    _tilequeue: Array<ITile<T>> = [];
-
-    private dequeue(): void {
-        if (this._tilequeue.length) {
-            console.log("Draw", this._tilequeue.length, "image(s)");
-            const copy = this._tilequeue.slice();
-            this._tilequeue.length = 0;
-            this.draw(false, copy);
-        }
-    }
-
-    public abstract onDeleted(key: string, tile: ITile<T>): void;
-    public abstract onAdded(key: string, tile: ITile<T>): void;
-    public abstract draw(clear?: boolean, tile?: Array<ITile<T>>): void;
+    protected abstract onDeleted(key: string, tile: ITile<T>): void;
+    protected abstract onAdded(key: string, tile: ITile<T>): void;
+    protected abstract invalidateDisplay(): void;
+    protected abstract invalidateTiles(added: ITile<T>[] | undefined, removed: ITile<T>[] | undefined): void;
 }

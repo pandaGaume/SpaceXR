@@ -47,7 +47,7 @@ export enum UpdateReason {
     tileReady,
 }
 
-export class UpdateEventArgs<T> extends EventArgs<TileMapView2<T>> {
+export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     _reason: UpdateReason;
     _added?: Array<ITile<T>>;
     _removed?: Array<ITile<T>>;
@@ -55,7 +55,7 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView2<T>> {
     _scale: number;
     _center: ICartesian2;
 
-    public constructor(source: TileMapView2<T>, reason: UpdateReason, lod: number, scale: number, center: ICartesian2, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
+    public constructor(source: TileMapView<T>, reason: UpdateReason, lod: number, scale: number, center: ICartesian2, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
         super(source);
         this._reason = reason;
         this._lod = lod;
@@ -88,7 +88,7 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView2<T>> {
     }
 }
 
-export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView2<T>> {
+export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
     // cache
     _cache: IMemoryCache<string, ITile<T>>;
 
@@ -107,9 +107,9 @@ export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvide
     _valid: boolean = false;
 
     // event
-    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>;
-    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>;
-    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView2<T>, number>>;
+    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
+    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
     public constructor(
@@ -129,16 +129,16 @@ export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvide
     }
 
     /// EVENTS
-    public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>> {
-        this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
+    public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>> {
+        this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
         return this._resizeObservable!;
     }
-    public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>> {
-        this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
+    public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>> {
+        this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
         return this._centerObservable!;
     }
-    public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, number>> {
-        this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, number>>(this.onZoomObserverAdded.bind(this));
+    public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>> {
+        this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable!;
     }
 
@@ -257,27 +257,29 @@ export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvide
         return this._valid;
     }
 
-    public invalidate(): TileMapView2<T> {
+    public invalidate(): TileMapView<T> {
         this._valid = false;
         return this;
     }
 
-    public validate(): TileMapView2<T> {
+    public validate(): TileMapView<T> {
         if (!this._valid) {
-            this.doValidate();
-            this._valid = true;
+            queueMicrotask(() => {
+                this.doValidate();
+                this._valid = true;
+            });
         }
         return this;
     }
 
-    public revalidate(): TileMapView2<T> {
+    public revalidate(): TileMapView<T> {
         return this.invalidate().validate();
     }
 
     // INTERNALS
-    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>): void {}
-    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView2<T>, number>>): void {}
-    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>): void {}
+    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
+    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
+    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>): void {}
     private onUpdateObserverAdded(observer: Observer<UpdateEventArgs<T>>): void {}
 
     // VIRTUALS
@@ -338,7 +340,7 @@ export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvide
                 this._datasource
                     .fetchAsync(a, this, t)
                     .then((result: FetchResult<Nullable<T>>) => {
-                        const view = <TileMapView2<T>>result.userArgs[0];
+                        const view = <TileMapView<T>>result.userArgs[0];
                         const t = <ITile<T>>result.userArgs[1];
                         if (result.content) {
                             // we have the content of the tile.

@@ -5,9 +5,15 @@
         <script src="../../dev/core/bundles/spacexr.1.0.0.js"></script>
         <script src="./scripts/inputs.js"></script>
         <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
             #tileCanvas {
                 width: 100%;
                 height: 100%;
+                display: block;
                 touch-action: none;
             }
         </style>
@@ -18,29 +24,16 @@
             window.onload = () => {
                 // Récupérer le canvas
                 const canvas = document.getElementById("tileCanvas");
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
 
                 // initialiser la localisation et le niveau de zoom
                 let center = new SPACEXR.Geo2(27.98817689833976, 86.92491071824738); // everest
-                const lod = 5;
+                const lod = 11;
 
                 // definir la source de donnée.
                 const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
                 const mapzenMetrics = new SPACEXR.EPSG3857(SPACEXR.MapZen.MetricsOptions);
-                //const cachePolicy = new SPACEXR.CachePolicyBuilder().withSlidingExpirationFromSeconds(10).build();
-                //const options = new SPACEXR.TileDirectoryOptionsBuilder().withMetrics(mapzenMetrics).withCacheOptions(cachePolicy).build();
-                //const directory = new SPACEXR.TileDirectory("terrarium", terrariumImgClient, options);
-
                 // construire la carte.
-                //const map = new SPACEXR.CanvasTileMap(canvas, directory, center.lat, center.lon, lod);
-                const map = new SPACEXR.CanvasTileMap2(canvas, terrariumImgClient, mapzenMetrics, center, lod);
-
-                function onResize() {
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                    map.invalidateSize();
-                }
+                const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, mapzenMetrics, center, lod);
 
                 function onDrag(m, x, y) {
                     map.translate(-x, -y);
@@ -58,9 +51,6 @@
 
                 const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
                 const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });
-
-                // Watch for browser/canvas resize events
-                window.addEventListener("resize", onResize);
             };
         </script>
     </body>

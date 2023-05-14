@@ -4,6 +4,7 @@ import { CanvasDisplay } from "./map.canvas";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 export declare class CanvasTileMap2 extends AbstractDisplayMap<HTMLImageElement, CanvasDisplay> {
+    _observer: ResizeObserver;
     constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
     onDeleted(key: string, tile: ITile<HTMLImageElement>): void;
     onAdded(key: string, tile: ITile<HTMLImageElement>): void;

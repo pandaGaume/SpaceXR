@@ -130,20 +130,20 @@ export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvide
 
     /// EVENTS
     public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>> {
-        this._resizeObservable == this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
+        this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
         return this._resizeObservable!;
     }
     public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>> {
-        this._centerObservable == this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
+        this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
         return this._centerObservable!;
     }
     public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, number>> {
-        this._zoomObservable == this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, number>>(this.onZoomObserverAdded.bind(this));
+        this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, number>>(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable!;
     }
 
     public get updateObservable(): Observable<UpdateEventArgs<T>> {
-        this._updateObservable == this._updateObservable || new Observable<UpdateEventArgs<T>>(this.onUpdateObserverAdded.bind(this));
+        this._updateObservable = this._updateObservable || new Observable<UpdateEventArgs<T>>(this.onUpdateObserverAdded.bind(this));
         return this._updateObservable!;
     }
 
@@ -234,11 +234,13 @@ export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvide
     }
 
     public zoomIn(delta: number): ITileMapApi {
-        return this.setZoom(this.levelOfDetail + delta);
+        // ensure delta is positiv
+        return this.setZoom(this.levelOfDetail + Math.abs(delta));
     }
 
     public zoomOut(delta: number): ITileMapApi {
-        return this.setZoom(this.levelOfDetail - delta);
+        // ensure delta is positiv
+        return this.setZoom(this.levelOfDetail - Math.abs(delta));
     }
 
     public translate(tx: number, ty: number): ITileMapApi {

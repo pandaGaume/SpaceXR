@@ -28,12 +28,13 @@
                 // definir la source de donnée.
                 const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
                 const mapzenMetrics = new SPACEXR.EPSG3857(SPACEXR.MapZen.MetricsOptions);
-                const cachePolicy = new SPACEXR.CachePolicyBuilder().withSlidingExpirationFromSeconds(10).build();
-                const options = new SPACEXR.TileDirectoryOptionsBuilder().withMetrics(mapzenMetrics).withCacheOptions(cachePolicy).build();
-                const directory = new SPACEXR.TileDirectory("terrarium", terrariumImgClient, options);
+                //const cachePolicy = new SPACEXR.CachePolicyBuilder().withSlidingExpirationFromSeconds(10).build();
+                //const options = new SPACEXR.TileDirectoryOptionsBuilder().withMetrics(mapzenMetrics).withCacheOptions(cachePolicy).build();
+                //const directory = new SPACEXR.TileDirectory("terrarium", terrariumImgClient, options);
 
                 // construire la carte.
-                const map = new SPACEXR.CanvasTileMap(canvas, directory, center.lat, center.lon, lod);
+                //const map = new SPACEXR.CanvasTileMap(canvas, directory, center.lat, center.lon, lod);
+                const map = new SPACEXR.CanvasTileMap2(canvas, terrariumImgClient, mapzenMetrics, center, lod);
 
                 function onResize() {
                     canvas.width = window.innerWidth;

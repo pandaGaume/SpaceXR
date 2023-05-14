@@ -1,9 +1,9 @@
 import { TileMapView2, UpdateEventArgs } from "../tiles/tile.mapview";
-import { ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { IDisplay } from "./map";
 import { ICartesian2 } from "../geometry/geometry.interfaces";
-export declare abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider {
+export declare abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider, ITileMapApi {
     _display: D;
     _view: TileMapView2<T>;
     _activ: Map<string, ITile<T>>;
@@ -11,6 +11,12 @@ export declare abstract class AbstractDisplayMap<T, D extends IDisplay> implemen
     _scale: number;
     _center: ICartesian2;
     constructor(display: D, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
+    invalidateSize(w: number, h: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number | undefined): ITileMapApi;
+    setZoom(zoom: number): ITileMapApi;
+    zoomIn(delta: number): ITileMapApi;
+    zoomOut(delta: number): ITileMapApi;
+    translate(tx: number, ty: number): ITileMapApi;
     get view(): TileMapView2<T>;
     get metrics(): ITileMetrics;
     protected onUpdate(args: UpdateEventArgs<T>): void;

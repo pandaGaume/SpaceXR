@@ -1,12 +1,12 @@
 import { TileMapView2, UpdateEventArgs, UpdateReason } from "../tiles/tile.mapview";
-import { ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { IDisplay } from "./map";
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 
-export abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider {
+export abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider, ITileMapApi {
     _display: D; // the display
     _view: TileMapView2<T>; // the view logic
     _activ: Map<string, ITile<T>>; // the list of activ tiles
@@ -18,9 +18,39 @@ export abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITile
     public constructor(display: D, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {
         this._display = display;
         this._view = new TileMapView2(datasource, metrics, display.width, display.height, center || Geo2.Zero(), lod || metrics.minLOD);
-        this._view.updateObservable.add(((e: UpdateEventArgs<T>) => this.onUpdate(e)).bind(this));
+        this._view.updateObservable.add((e: UpdateEventArgs<T>) => this.onUpdate(e));
         this._activ = new Map<string, ITile<T>>();
         this._view.validate();
+    }
+    public invalidateSize(w: number, h: number): ITileMapApi {
+        this._view.invalidateSize(w, h);
+        this._view.validate();
+        return this;
+    }
+    public setView(center: IGeo2, zoom?: number | undefined): ITileMapApi {
+        this._view.setView(center, zoom);
+        this._view.validate();
+        return this;
+    }
+    public setZoom(zoom: number): ITileMapApi {
+        this._view.setZoom(zoom);
+        this._view.validate();
+        return this;
+    }
+    public zoomIn(delta: number): ITileMapApi {
+        this._view.zoomIn(delta);
+        this._view.validate();
+        return this;
+    }
+    public zoomOut(delta: number): ITileMapApi {
+        this._view.zoomOut(delta);
+        this._view.validate();
+        return this;
+    }
+    public translate(tx: number, ty: number): ITileMapApi {
+        this._view.translate(tx, ty);
+        this._view.validate();
+        return this;
     }
 
     public get view(): TileMapView2<T> {

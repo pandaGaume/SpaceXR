@@ -30,8 +30,8 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     public build(): ITile<T> {
         const t = new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
-            t.bounds = Tile.BuildEnvelope(t.address);
-            t.rect = Tile.BuildBounds(t.address);
+            t.bounds = Tile.BuildEnvelope(t.address, this._m);
+            t.rect = Tile.BuildBounds(t.address, this._m);
         }
         return t;
     }

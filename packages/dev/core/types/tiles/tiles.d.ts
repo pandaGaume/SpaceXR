@@ -1,6 +1,7 @@
 import { IEnvelope } from "../geography/geography.interfaces";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
+import { IRectangle } from "../geometry/geometry.interfaces";
 export declare class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
     _d?: Nullable<T>;
@@ -12,21 +13,25 @@ export declare class TileBuilder<T> implements ITileBuilder<T> {
 }
 export declare class Tile<T> implements ITile<T>, ITileAddress {
     static Builder<T>(): ITileBuilder<T>;
-    static BuildEnvelope(x: number, y: number, lod: number, metrics?: ITileMetrics): IEnvelope | undefined;
+    static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined;
+    static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined;
     private _k?;
     private _x;
     private _y;
     private _levelOfDetail;
-    private _value;
+    private _value?;
     private _env?;
-    constructor(x: number, y: number, levelOfDetail: number, data?: Nullable<T>, metrics?: ITileMetrics);
+    private _rect?;
+    constructor(x: number, y: number, levelOfDetail: number, data?: Nullable<T>);
     get address(): ITileAddress;
-    get content(): Nullable<T>;
-    set content(v: Nullable<T>);
+    get content(): Nullable<T> | undefined;
+    set content(v: Nullable<T> | undefined);
     get x(): number;
     get y(): number;
     get levelOfDetail(): number;
     get bounds(): IEnvelope | undefined;
     set bounds(e: IEnvelope | undefined);
+    get rect(): IRectangle | undefined;
+    set rect(r: IRectangle | undefined);
     get quadkey(): string;
 }

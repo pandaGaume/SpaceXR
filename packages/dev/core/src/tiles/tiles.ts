@@ -5,6 +5,8 @@ import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
 import { TileMetrics } from "./tiles.metrics";
 import { Nullable } from "../types";
+import { IRectangle } from "../geometry/geometry.interfaces";
+import { Rectangle } from "../geometry/geometry.rectangle";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
@@ -26,7 +28,12 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         return this;
     }
     public build(): ITile<T> {
-        return new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d, this._m);
+        const t = new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
+        if (this._m) {
+            t.bounds = Tile.BuildEnvelope(t.address);
+            t.rect = Tile.BuildBounds(t.address);
+        }
+        return t;
     }
 }
 
@@ -35,40 +42,49 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         return new TileBuilder<T>();
     }
 
-    public static BuildEnvelope(x: number, y: number, lod: number, metrics?: ITileMetrics): IEnvelope | undefined {
+    public static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
         if (metrics) {
-            const nw = metrics.getTileXYToLatLon(x, y, lod);
-            const se = metrics.getTileXYToLatLon(x + 1, y + 1, lod);
+            const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
+            const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
             const size = new Size3(nw.lat - se.lat, se.lon - nw.lon);
             const pos = new Geo3(se.lat, nw.lon);
             return Envelope.FromSize(pos, size);
         }
         return undefined;
     }
+
+    public static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined {
+        if (metrics) {
+            const p = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail);
+            return new Rectangle(p.x, p.y, metrics.tileSize, metrics.tileSize);
+        }
+        return undefined;
+    }
+
     private _k?: string;
     private _x: number;
     private _y: number;
     private _levelOfDetail: number;
-    private _value: Nullable<T>;
+    private _value?: Nullable<T>;
     private _env?: IEnvelope;
+    private _rect?: IRectangle;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data: Nullable<T> = null, metrics?: ITileMetrics) {
+    public constructor(x: number, y: number, levelOfDetail: number, data?: Nullable<T>) {
         this._x = x;
         this._y = y;
         this._levelOfDetail = levelOfDetail;
         this._value = data;
-        this._env = Tile.BuildEnvelope(x, y, levelOfDetail, metrics);
     }
 
     public get address(): ITileAddress {
         return this;
     }
 
-    public get content(): Nullable<T> {
+    public get content(): Nullable<T> | undefined {
         return this._value;
     }
 
-    public set content(v: Nullable<T>) {
+    public set content(v: Nullable<T> | undefined) {
         this._value = v;
     }
 
@@ -89,6 +105,15 @@ export class Tile<T> implements ITile<T>, ITileAddress {
     public set bounds(e: IEnvelope | undefined) {
         this._env = e;
     }
+
+    public get rect(): IRectangle | undefined {
+        return this._rect;
+    }
+
+    public set rect(r: IRectangle | undefined) {
+        this._rect = r;
+    }
+
     public get quadkey(): string {
         if (!this._k) {
             this._k = TileMetrics.TileXYToQuadKey(this);

@@ -29,6 +29,10 @@ export class Rectangle implements IRectangle {
 
     public constructor(public x: number, public y: number, public width: number, public height: number) {}
 
+    public clone(): IRectangle {
+        return new Rectangle(this.x, this.y, this.width, this.height);
+    }
+
     public equals(other: IRectangle | ISize2 | undefined): boolean {
         if (other) {
             if (isRectangle(other)) {
@@ -72,9 +76,23 @@ export class Rectangle implements IRectangle {
         return target;
     }
 
+    public unionInPlace(other: IRectangle): IRectangle {
+        const x1 = Math.min(this.x, other.x);
+        const y1 = Math.min(this.y, other.y);
+        const x2 = Math.max(this.right, other.right);
+        const y2 = Math.max(this.bottom, other.bottom);
+
+        this.x = x1;
+        this.y = y1;
+        this.width = x2 - x1;
+        this.height = y2 - y1;
+        return this;
+    }
+
     public contains(x: number, y: number): boolean {
         return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
     }
+
     public toString() {
         return `left:${this.left}, top:${this.top}, width:${this.width}, height:${this.height}`;
     }

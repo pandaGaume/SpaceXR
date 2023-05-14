@@ -22,6 +22,8 @@ export declare abstract class AbstractTileMap<T, D extends IDisplay> implements 
     translate(tx: number, ty: number): void;
     get metrics(): ITileMetrics;
     private onUpdate;
+    _tilequeue: Array<ITile<T>>;
+    private dequeue;
     abstract onDeleted(key: string, tile: ITile<T>): void;
     abstract onAdded(key: string, tile: ITile<T>): void;
     abstract draw(clear?: boolean, tile?: Array<ITile<T>>): void;

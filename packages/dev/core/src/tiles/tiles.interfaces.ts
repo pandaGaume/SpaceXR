@@ -1,6 +1,6 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -16,6 +16,7 @@ export interface ITile<T> extends IGeoBounded {
     parent?: ITile<T>;
     childrens?: Array<ITile<T>>;
     content?: Nullable<T>;
+    rect?: IRectangle;
 }
 
 export interface ITileBuilder<T> {

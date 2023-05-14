@@ -82,36 +82,72 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
             }
         }
 
+        const allSettled: boolean = false;
+
         if (e.added && e.added.size != 0) {
             // this is the place to add new tiles from the directory
-            for (const c of e.added.entries()) {
-                if (this._directory) {
-                    if (this.metrics.isValidAddress(c[1])) {
-                        this._directory
-                            .lookupAsync(c[1])
-                            .then(
-                                ((result: LookupResult<Nullable<ITile<T>>>) => {
-                                    const tile = result.content;
-                                    if (tile) {
-                                        const a = tile.address;
-                                        const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                                        this._activ.set(key, tile);
-                                        this.onAdded(key, tile);
+            if (!allSettled) {
+                Array.from(e.added.entries()).forEach((c) => {
+                    if (this._directory) {
+                        if (this.metrics.isValidAddress(c[1])) {
+                            this._directory
+                                .lookupAsync(c[1])
+                                .then(
+                                    ((result: LookupResult<Nullable<ITile<T>>>) => {
+                                        const tile = result.content;
+                                        if (tile) {
+                                            const a = tile.address;
+                                            const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
+                                            this._activ.set(key, tile);
+                                            this.onAdded(key, tile);
 
-                                        if (tile.content) {
-                                            this.draw(false, [tile]);
+                                            if (tile.content) {
+                                                this._tilequeue.push(tile);
+                                                if (this._tilequeue.length === 1) {
+                                                    queueMicrotask((() => this.dequeue()).bind(this));
+                                                }
+                                            }
                                         }
-                                    }
-                                }).bind(this)
-                            )
-                            .catch((e) => {
-                                console.log("Error when lookup", c.toString(), e);
-                            });
+                                    }).bind(this)
+                                )
+                                .catch((e) => {});
+                        }
                     }
-                }
+                });
+            } else {
+                Promise.allSettled(
+                    Array.from(e.added.entries()).map((c) => {
+                        return this._directory!.lookupAsync(c[1]).then(
+                            ((result: LookupResult<Nullable<ITile<T>>>) => {
+                                const tile = result.content;
+                                if (tile) {
+                                    const a = tile.address;
+                                    const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
+                                    this._activ.set(key, tile);
+                                    this.onAdded(key, tile);
+                                }
+                                return tile;
+                            }).bind(this)
+                        );
+                    })
+                ).then((res) => {
+                    const tiles = res.filter((r) => r.status === "fulfilled").map((r) => (<any>r).value);
+                    this.draw(false, tiles);
+                });
             }
         }
         this.draw(true);
+    }
+
+    _tilequeue: Array<ITile<T>> = [];
+
+    private dequeue(): void {
+        if (this._tilequeue.length) {
+            console.log("Draw", this._tilequeue.length, "image(s)");
+            const copy = this._tilequeue.slice();
+            this._tilequeue.length = 0;
+            queueMicrotask(() => this.draw(false, copy));
+        }
     }
 
     public abstract onDeleted(key: string, tile: ITile<T>): void;

@@ -16,7 +16,7 @@ export declare class MapzenNormalValueDecoder implements IPixelDecoder {
 }
 export declare class MapZen {
     static MaxLevelOfDetail: number;
-    static Metrics: import("./tiles.interfaces").ITileMetricsOptions;
+    static MetricsOptions: import("./tiles.interfaces").ITileMetricsOptions;
     static DemImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static DemClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
     static NormalImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;

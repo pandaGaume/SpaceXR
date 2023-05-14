@@ -1,4 +1,4 @@
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
@@ -11,19 +11,22 @@ import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
-import { Tile } from "./tiles";
+import { TileBuilder } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
+import { Cartesian2 } from "..";
 
 export class TileMapLevel<T> {
     _lod: number = 0;
+    _scale: number = 1;
+    _center: ICartesian2 = Cartesian2.Zero();
     _tiles: Map<string, ITile<T>> = new Map<string, ITile<T>>();
-    _bounds: IRectangle = Rectangle.Zero();
 
     public get lod(): number {
-        return this.lod;
+        return this._lod;
     }
-    public set lod(v: number) {
-        this.lod = v;
+
+    public get scale(): number {
+        return this._scale;
     }
 
     public get tiles(): Map<string, ITile<T>> {
@@ -34,23 +37,36 @@ export class TileMapLevel<T> {
         return this._tiles.size;
     }
 
-    public get tileXYBounds(): IRectangle {
-        return this._bounds;
-    }
-
-    public set tileXYBounds(v: IRectangle) {
-        this._bounds = v;
+    public get center(): ICartesian2 {
+        return this._center;
     }
 }
 
-export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
+export enum UpdateReason {
+    viewChanged,
+    tileReady,
+}
+
+export class UpdateEventArgs<T> extends EventArgs<TileMapView2<T>> {
+    _reason: UpdateReason;
     _added?: Array<ITile<T>>;
     _removed?: Array<ITile<T>>;
+    _lod: number;
+    _scale: number;
+    _center: ICartesian2;
 
-    public constructor(source: TileMapView<T>, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
+    public constructor(source: TileMapView2<T>, reason: UpdateReason, lod: number, scale: number, center: ICartesian2, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
         super(source);
+        this._reason = reason;
+        this._lod = lod;
+        this._scale = scale;
+        this._center = center;
         this._added = added;
         this._removed = removed;
+    }
+
+    public get reason(): UpdateReason {
+        return this._reason;
     }
 
     public get added(): Array<ITile<T>> | undefined {
@@ -60,9 +76,19 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     public get removed(): Array<ITile<T>> | undefined {
         return this._removed;
     }
+
+    public get lod(): number {
+        return this._lod;
+    }
+    public get scale(): number {
+        return this._scale;
+    }
+    public get center(): ICartesian2 {
+        return this._center;
+    }
 }
 
-export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
+export class TileMapView2<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView2<T>> {
     // cache
     _cache: IMemoryCache<string, ITile<T>>;
 
@@ -73,6 +99,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // current navigation parameters
     _w: number = 0;
     _h: number = 0;
+    _lod: number = 0;
     _center: IGeo2 = Geo2.Zero();
     _level: TileMapLevel<T>;
 
@@ -80,9 +107,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _valid: boolean = false;
 
     // event
-    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
-    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
-    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>;
+    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView2<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
     public constructor(
@@ -102,16 +129,16 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     /// EVENTS
-    public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>> {
-        this._resizeObservable == this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
+    public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>> {
+        this._resizeObservable == this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
         return this._resizeObservable!;
     }
-    public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>> {
-        this._centerObservable == this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
+    public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>> {
+        this._centerObservable == this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
         return this._centerObservable!;
     }
-    public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>> {
-        this._zoomObservable == this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onZoomObserverAdded.bind(this));
+    public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView2<T>, number>> {
+        this._zoomObservable == this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView2<T>, number>>(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable!;
     }
 
@@ -123,6 +150,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     /// PROPERTIES
     public get datasource(): ITileDatasource<T, ITileAddress> {
         return this._datasource;
+    }
+
+    public get level(): TileMapLevel<T> {
+        return this._level;
+    }
+
+    public get levelOfDetail(): number {
+        return this._lod;
     }
 
     public get center(): IGeo2 {
@@ -141,10 +176,6 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public get height(): number {
         return this._h;
-    }
-
-    public get levelOfDetail(): number {
-        return this._level.lod;
     }
 
     /// API
@@ -189,14 +220,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
         if (this.levelOfDetail != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._level.lod;
-                this._level.lod = lod;
+                const old = this._lod;
+                this._lod = lod;
                 const e = new PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
                 this.invalidate();
                 return this;
             }
-            this._level.lod = lod;
+            this._lod = lod;
             this.invalidate();
         }
         return this;
@@ -224,12 +255,12 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._valid;
     }
 
-    public invalidate(): TileMapView<T> {
+    public invalidate(): TileMapView2<T> {
         this._valid = false;
         return this;
     }
 
-    public validate(): TileMapView<T> {
+    public validate(): TileMapView2<T> {
         if (!this._valid) {
             this.doValidate();
             this._valid = true;
@@ -237,19 +268,19 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this;
     }
 
-    public revalidate(): TileMapView<T> {
+    public revalidate(): TileMapView2<T> {
         return this.invalidate().validate();
     }
 
     // INTERNALS
-    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
-    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
-    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>): void {}
+    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView2<T>, ISize2>>): void {}
+    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView2<T>, number>>): void {}
+    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView2<T>, IGeo2>>): void {}
     private onUpdateObserverAdded(observer: Observer<UpdateEventArgs<T>>): void {}
 
     // VIRTUALS
     protected doValidate() {
-        this._level.lod = Math.round(this.levelOfDetail);
+        this._level._lod = Math.round(this.levelOfDetail);
         this.doValidateLevel(this._level);
     }
 
@@ -257,25 +288,30 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // current level of detail
         const lod = level.lod;
         // scale corresponding to the decimal part
-        let scale = TileMetrics.getScale(this.levelOfDetail);
+        let scale = TileMetrics.GetScale(this.levelOfDetail);
+        this._level._scale = scale;
+
         // compute the pixel bounds
         const w = this.width / scale;
         const h = this.height / scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
+        this._level._center = pixelCenterXY;
+
         let x0 = Math.round(pixelCenterXY.x - w / 2);
         let y0 = Math.round(pixelCenterXY.y - h / 2);
         const bounds = new Rectangle(x0, y0, w, h);
         // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top, lod);
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom, lod);
-        level.tileXYBounds = Rectangle.FromPoints(nwTileXY, seTileXY);
-        x0 = level.tileXYBounds.left;
-        y0 = level.tileXYBounds.top;
-        const x1 = level.tileXYBounds.right;
-        const y1 = level.tileXYBounds.bottom;
+        const tileXYBounds = Rectangle.FromPoints(nwTileXY, seTileXY);
+        x0 = tileXYBounds.left;
+        y0 = tileXYBounds.top;
+        const x1 = tileXYBounds.right;
+        const y1 = tileXYBounds.bottom;
 
         const remains = new Array<ITile<T>>();
         let added = new Array<ITile<T>>();
+        const builder = new TileBuilder<T>().withMetrics(this.metrics);
 
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
@@ -294,13 +330,13 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                     continue;
                 }
                 // we need to create the tile.
-                t = new Tile<T>(a.x, a.y, a.levelOfDetail, undefined, this.metrics);
+                t = builder.withAddress(a).build();
                 this._cache.set(key, t);
                 // and retreive the content.
                 this._datasource
                     .fetchAsync(a, this, t)
                     .then((result: FetchResult<Nullable<T>>) => {
-                        const view = <TileMapView<T>>result.userArgs[0];
+                        const view = <TileMapView2<T>>result.userArgs[0];
                         const t = <ITile<T>>result.userArgs[1];
                         if (result.content) {
                             // we have the content of the tile.
@@ -331,7 +367,15 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         added = added.filter((t) => t.content !== undefined);
         deleted = deleted.filter((t) => t.content !== undefined);
 
-        const updateEvent = new UpdateEventArgs(this, added.length ? added : undefined, deleted.length ? deleted : undefined);
+        const updateEvent = new UpdateEventArgs(
+            this,
+            UpdateReason.viewChanged,
+            this._level.lod,
+            this._level.scale,
+            this._level.center,
+            added.length ? added : undefined,
+            deleted.length ? deleted : undefined
+        );
         this.updateObservable.notifyObservers(updateEvent);
     }
 
@@ -345,7 +389,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         if (t.address.levelOfDetail == this._level.lod) {
             this._level.tiles.set(t.address.quadkey, t);
             const added = [t];
-            const updateEvent = new UpdateEventArgs(this, added);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._level.lod, this._level.scale, this._level.center, added);
             this.updateObservable.notifyObservers(updateEvent);
         }
     }

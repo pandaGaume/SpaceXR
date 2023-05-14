@@ -38,7 +38,7 @@ export declare class TileMetricsOptionsBuilder {
     build(): ITileMetricsOptions;
 }
 export declare class TileMetrics {
-    static getScale(lod: number): number;
+    static GetScale(lod: number): number;
     static ToParentKey(key: string): string;
     static ToChildKey(key: string): string[];
     static TileXYToQuadKey(a: ITileAddress): string;

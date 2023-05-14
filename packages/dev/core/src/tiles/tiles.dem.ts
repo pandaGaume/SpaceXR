@@ -1,4 +1,3 @@
-import { ITileMetrics } from "./tiles.interfaces";
 import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
 import { Tile } from "./tiles";
 
@@ -60,8 +59,8 @@ export class DEMTile extends Tile<Float32Array> {
     _latLookupTable?: Float32Array;
     _lonLookupTable?: Float32Array;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data?: Float32Array, metrics?: ITileMetrics) {
-        super(x, y, levelOfDetail, data, metrics);
+    public constructor(x: number, y: number, levelOfDetail: number, data?: Float32Array) {
+        super(x, y, levelOfDetail, data);
         this._dataMetrics = DEMMetaData.From(data);
     }
 

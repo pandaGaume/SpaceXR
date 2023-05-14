@@ -1,3 +1,5 @@
+import { ICloneable } from "..";
+
 export interface ICartesian2 {
     x: number;
     y: number;
@@ -34,7 +36,7 @@ export function isSize3(b: unknown): b is ISize3 {
     return (<ISize3>b).height !== undefined && (<ISize3>b).width !== undefined && (<ISize3>b).hasThickness !== undefined;
 }
 
-export interface IRectangle extends ISize2, ICartesian2 {
+export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
     top: number;
     left: number;
     right: number;
@@ -44,6 +46,7 @@ export interface IRectangle extends ISize2, ICartesian2 {
 
     intersect(other: IRectangle): boolean;
     intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;
+    unionInPlace(other: IRectangle): IRectangle;
     contains(x: number, y: number): boolean;
     toString(): string;
 }

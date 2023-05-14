@@ -1125,6 +1125,9 @@ class Rectangle {
         this.width = width;
         this.height = height;
     }
+    clone() {
+        return new Rectangle(this.x, this.y, this.width, this.height);
+    }
     equals(other) {
         if (other) {
             if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isRectangle)(other)) {
@@ -1165,6 +1168,17 @@ class Rectangle {
         target.x = Math.max(this.left, other.left);
         target.width = Math.min(this.right, other.right) - target.x;
         return target;
+    }
+    unionInPlace(other) {
+        const x1 = Math.min(this.x, other.x);
+        const y1 = Math.min(this.y, other.y);
+        const x2 = Math.max(this.right, other.right);
+        const y2 = Math.max(this.bottom, other.bottom);
+        this.x = x1;
+        this.y = y1;
+        this.width = x2 - x1;
+        this.height = y2 - y1;
+        return this;
     }
     contains(x, y) {
         return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
@@ -1399,6 +1413,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class AbstractTileMap {
     constructor(display, directory, lat, lon, zoom) {
+        this._tilequeue = [];
         this._display = display;
         this._directory = directory;
         this._view = new _tiles_tiles_view__WEBPACK_IMPORTED_MODULE_0__.TileMapView(display.width, display.height, lat, lon, zoom, directory?.metrics);
@@ -1449,32 +1464,61 @@ class AbstractTileMap {
                 }
             }
         }
+        const allSettled = false;
         if (e.added && e.added.size != 0) {
-            for (const c of e.added.entries()) {
-                if (this._directory) {
-                    if (this.metrics.isValidAddress(c[1])) {
-                        this._directory
-                            .lookupAsync(c[1])
-                            .then(((result) => {
-                            const tile = result.content;
-                            if (tile) {
-                                const a = tile.address;
-                                const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                                this._activ.set(key, tile);
-                                this.onAdded(key, tile);
-                                if (tile.content) {
-                                    this.draw(false, [tile]);
+            if (!allSettled) {
+                Array.from(e.added.entries()).forEach((c) => {
+                    if (this._directory) {
+                        if (this.metrics.isValidAddress(c[1])) {
+                            this._directory
+                                .lookupAsync(c[1])
+                                .then(((result) => {
+                                const tile = result.content;
+                                if (tile) {
+                                    const a = tile.address;
+                                    const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
+                                    this._activ.set(key, tile);
+                                    this.onAdded(key, tile);
+                                    if (tile.content) {
+                                        this._tilequeue.push(tile);
+                                        if (this._tilequeue.length === 1) {
+                                            queueMicrotask((() => this.dequeue()).bind(this));
+                                        }
+                                    }
                                 }
-                            }
-                        }).bind(this))
-                            .catch((e) => {
-                            console.log("Error when lookup", c.toString(), e);
-                        });
+                            }).bind(this))
+                                .catch((e) => { });
+                        }
                     }
-                }
+                });
+            }
+            else {
+                Promise.allSettled(Array.from(e.added.entries()).map((c) => {
+                    return this._directory.lookupAsync(c[1]).then(((result) => {
+                        const tile = result.content;
+                        if (tile) {
+                            const a = tile.address;
+                            const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
+                            this._activ.set(key, tile);
+                            this.onAdded(key, tile);
+                        }
+                        return tile;
+                    }).bind(this));
+                })).then((res) => {
+                    const tiles = res.filter((r) => r.status === "fulfilled").map((r) => r.value);
+                    this.draw(false, tiles);
+                });
             }
         }
         this.draw(true);
+    }
+    dequeue() {
+        if (this._tilequeue.length) {
+            console.log("Draw", this._tilequeue.length, "image(s)");
+            const copy = this._tilequeue.slice();
+            this._tilequeue.length = 0;
+            queueMicrotask(() => this.draw(false, copy));
+        }
     }
 }
 //# sourceMappingURL=map.js.map
@@ -3229,8 +3273,8 @@ class DEMTile extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
         }
         return tbl;
     }
-    constructor(x, y, levelOfDetail, data, metrics) {
-        super(x, y, levelOfDetail, data, metrics);
+    constructor(x, y, levelOfDetail, data) {
+        super(x, y, levelOfDetail, data);
         this._dataMetrics = DEMMetaData.From(data);
     }
     get dataMetrics() {
@@ -3549,7 +3593,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
 /* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.envelope */ "./dist/geography/geography.envelope.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
+
 
 
 
@@ -3568,29 +3614,40 @@ class TileBuilder {
         return this;
     }
     build() {
-        return new Tile(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d, this._m);
+        const t = new Tile(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
+        if (this._m) {
+            t.bounds = Tile.BuildEnvelope(t.address);
+            t.rect = Tile.BuildBounds(t.address);
+        }
+        return t;
     }
 }
 class Tile {
     static Builder() {
         return new TileBuilder();
     }
-    static BuildEnvelope(x, y, lod, metrics) {
+    static BuildEnvelope(a, metrics) {
         if (metrics) {
-            const nw = metrics.getTileXYToLatLon(x, y, lod);
-            const se = metrics.getTileXYToLatLon(x + 1, y + 1, lod);
+            const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
+            const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
             const size = new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__.Size3(nw.lat - se.lat, se.lon - nw.lon);
             const pos = new _geography_geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(se.lat, nw.lon);
             return _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope.FromSize(pos, size);
         }
         return undefined;
     }
-    constructor(x, y, levelOfDetail, data = null, metrics) {
+    static BuildBounds(a, metrics) {
+        if (metrics) {
+            const p = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail);
+            return new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_3__.Rectangle(p.x, p.y, metrics.tileSize, metrics.tileSize);
+        }
+        return undefined;
+    }
+    constructor(x, y, levelOfDetail, data) {
         this._x = x;
         this._y = y;
         this._levelOfDetail = levelOfDetail;
         this._value = data;
-        this._env = Tile.BuildEnvelope(x, y, levelOfDetail, metrics);
     }
     get address() {
         return this;
@@ -3616,9 +3673,15 @@ class Tile {
     set bounds(e) {
         this._env = e;
     }
+    get rect() {
+        return this._rect;
+    }
+    set rect(r) {
+        this._rect = r;
+    }
     get quadkey() {
         if (!this._k) {
-            this._k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetrics.TileXYToQuadKey(this);
+            this._k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.TileXYToQuadKey(this);
         }
         return this._k;
     }
@@ -3696,7 +3759,7 @@ class MapZen {
     }
 }
 MapZen.MaxLevelOfDetail = 15;
-MapZen.Metrics = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
+MapZen.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
 
 //# sourceMappingURL=tiles.mapzen.js.map
 
@@ -3778,7 +3841,7 @@ class TileMetricsOptionsBuilder {
     }
 }
 class TileMetrics {
-    static getScale(lod) {
+    static GetScale(lod) {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         return scale;

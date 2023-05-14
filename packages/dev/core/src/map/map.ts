@@ -87,30 +87,24 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
         if (e.added && e.added.size != 0) {
             // this is the place to add new tiles from the directory
             if (!allSettled) {
-                Array.from(e.added.entries()).forEach((c) => {
+                Array.from(e.added.entries()).forEach(async (c) => {
                     if (this._directory) {
                         if (this.metrics.isValidAddress(c[1])) {
-                            this._directory
-                                .lookupAsync(c[1])
-                                .then(
-                                    ((result: LookupResult<Nullable<ITile<T>>>) => {
-                                        const tile = result.content;
-                                        if (tile) {
-                                            const a = tile.address;
-                                            const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
-                                            this._activ.set(key, tile);
-                                            this.onAdded(key, tile);
+                            const result = await this._directory.lookupAsync(c[1]);
+                            const tile = result.content;
+                            if (tile) {
+                                const a = tile.address;
+                                const key = a.quadkey || TileMetrics.TileXYToQuadKey(a);
+                                this._activ.set(key, tile);
+                                this.onAdded(key, tile);
 
-                                            if (tile.content) {
-                                                this._tilequeue.push(tile);
-                                                if (this._tilequeue.length === 1) {
-                                                    queueMicrotask((() => this.dequeue()).bind(this));
-                                                }
-                                            }
-                                        }
-                                    }).bind(this)
-                                )
-                                .catch((e) => {});
+                                if (tile.content) {
+                                    this._tilequeue.push(tile);
+                                    if (this._tilequeue.length === 1) {
+                                        queueMicrotask(() => this.dequeue());
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -146,7 +140,7 @@ export abstract class AbstractTileMap<T, D extends IDisplay> implements ITileMet
             console.log("Draw", this._tilequeue.length, "image(s)");
             const copy = this._tilequeue.slice();
             this._tilequeue.length = 0;
-            queueMicrotask(() => this.draw(false, copy));
+            this.draw(false, copy);
         }
     }
 

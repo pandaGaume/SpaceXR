@@ -1467,27 +1467,23 @@ class AbstractTileMap {
         const allSettled = false;
         if (e.added && e.added.size != 0) {
             if (!allSettled) {
-                Array.from(e.added.entries()).forEach((c) => {
+                Array.from(e.added.entries()).forEach(async (c) => {
                     if (this._directory) {
                         if (this.metrics.isValidAddress(c[1])) {
-                            this._directory
-                                .lookupAsync(c[1])
-                                .then(((result) => {
-                                const tile = result.content;
-                                if (tile) {
-                                    const a = tile.address;
-                                    const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
-                                    this._activ.set(key, tile);
-                                    this.onAdded(key, tile);
-                                    if (tile.content) {
-                                        this._tilequeue.push(tile);
-                                        if (this._tilequeue.length === 1) {
-                                            queueMicrotask((() => this.dequeue()).bind(this));
-                                        }
+                            const result = await this._directory.lookupAsync(c[1]);
+                            const tile = result.content;
+                            if (tile) {
+                                const a = tile.address;
+                                const key = a.quadkey || _tiles_tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics.TileXYToQuadKey(a);
+                                this._activ.set(key, tile);
+                                this.onAdded(key, tile);
+                                if (tile.content) {
+                                    this._tilequeue.push(tile);
+                                    if (this._tilequeue.length === 1) {
+                                        queueMicrotask(() => this.dequeue());
                                     }
                                 }
-                            }).bind(this))
-                                .catch((e) => { });
+                            }
                         }
                     }
                 });
@@ -1517,7 +1513,7 @@ class AbstractTileMap {
             console.log("Draw", this._tilequeue.length, "image(s)");
             const copy = this._tilequeue.slice();
             this._tilequeue.length = 0;
-            queueMicrotask(() => this.draw(false, copy));
+            this.draw(false, copy);
         }
     }
 }

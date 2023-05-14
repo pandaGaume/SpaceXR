@@ -1,9 +1,8 @@
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
-import { AbstractDisplayMap } from "./map";
+import { AbstractDisplayMap,IDisplay } from "./map";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
-import { IDisplay } from "./map";
 
 export class CanvasDisplay implements IDisplay {
     public constructor(public canvas: HTMLCanvasElement) {
@@ -22,9 +21,6 @@ export class CanvasDisplay implements IDisplay {
         return this.canvas.width;
     }
 
-    public equals(other: ISize2): boolean {
-        return this.height === other.height && this.width === other.width;
-    }
     /**
      * Check what size that element is being displayed (clientWidth & clientHeight properties) and then adjust
      * its drawingbuffer size (width & height properties) to match.

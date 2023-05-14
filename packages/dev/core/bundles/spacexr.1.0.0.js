@@ -1321,9 +1321,6 @@ class CanvasDisplay {
     get width() {
         return this.canvas.width;
     }
-    equals(other) {
-        return this.height === other.height && this.width === other.width;
-    }
     resizeToDisplaySize() {
         const displayWidth = this.canvas.clientWidth;
         const displayHeight = this.canvas.clientHeight;

@@ -296,13 +296,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this._level._scale = scale;
 
         // compute the pixel bounds
-        const w = this.width / scale;
-        const h = this.height / scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._level._center = pixelCenterXY;
 
-        let x0 = Math.round(pixelCenterXY.x - w / 2);
-        let y0 = Math.round(pixelCenterXY.y - h / 2);
+        const cellSize = this.metrics.cellSize;
+        const w = this.width / scale / cellSize;
+        const h = this.height / scale / cellSize;
+        let x0 = Math.round(pixelCenterXY.x / cellSize - w / 2);
+        let y0 = Math.round(pixelCenterXY.y / cellSize - h / 2);
         const bounds = new Rectangle(x0, y0, w, h);
         // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top, lod);

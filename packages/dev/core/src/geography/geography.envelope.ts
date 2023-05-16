@@ -125,9 +125,9 @@ export class Envelope implements IEnvelope {
     public get size(): ISize3 {
         const w = this._max.lon - this._min.lon;
         const h = this._max.lat - this._min.lat;
-        const t = this.hasAltitude ? this._max.alt! - this._min.alt! : undefined;
+        const t = this.hasAltitude ? this._max.alt! - this._min.alt! : 0;
 
-        return new Size3(h, w, t);
+        return new Size3(w, h, t);
     }
 
     public add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope {

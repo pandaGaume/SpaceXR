@@ -1,27 +1,46 @@
 import { IGeo2 } from "../geography/geography.interfaces";
-import { AbstractDisplayMap, IDisplay } from "./map";
+import { AbstractDisplayMap, IMapDisplay } from "./map";
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
-import { ISize3 } from "../geometry/geometry.interfaces";
+import { ICartesian3, ISize2, ISize3, isCartesian3 } from "../geometry/geometry.interfaces";
 import { IVerticesData } from "../meshes/meshes.interfaces";
 import { TerrainGridOptions, TerrainNormalizedGridBuilder } from "../meshes/terrain.grid";
+import { Cartesian3 } from "../geometry/geometry.cartesian";
+import { Size2 } from "../geometry/geometry.size";
 
-export class HologramDisplay implements IDisplay {
-    _size: ISize3;
-
-    public constructor(size: ISize3) {
-        this._size = size;
+/**
+ * fixed physical sizes in inches, within the 3 axes
+ * Resolution in dpi within the 3 axes
+ * the formula will be
+ *       width = dimension.width * dpi.width
+ *       height = dimension.height * dpi.height
+ */
+export class HologramMapDisplay implements IMapDisplay {
+    public static FromResolution(dimensions: ISize3, resolutions: ICartesian3) {
+        const d = new HologramMapDisplay(dimensions, 0);
+        d._dpi.x = resolutions.x / dimensions.width;
+        d._dpi.y = resolutions.y / dimensions.height;
+        d._dpi.z = resolutions.z / dimensions.thickness;
+        return d;
     }
 
-    public get height(): number {
-        return this._size.height;
+    _dimensions: ISize3;
+    _dpi: ICartesian3;
+
+    public constructor(dimensions: ISize3, dpi: number | ICartesian3) {
+        this._dimensions = dimensions;
+        this._dpi = isCartesian3(dpi) ? new Cartesian3(dpi.x, dpi.y, dpi.z) : new Cartesian3(dpi, dpi, dpi);
     }
 
-    public get width(): number {
-        return this._size.width;
+    public get resolution(): ISize2 {
+        return new Size2(this._dimensions.width * this._dpi.y, this._dimensions.height * this._dpi.z);
     }
 }
 
-export class HologramTileMap<T, H extends HologramDisplay> extends AbstractDisplayMap<T, H> {
+export class HologramTileMapOptions {
+    public constructor(cellScale: ISize3) {}
+}
+
+export class HologramTileMap<T, H extends HologramMapDisplay> extends AbstractDisplayMap<T, H> {
     _gridSeed: IVerticesData;
 
     public constructor(display: H, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {

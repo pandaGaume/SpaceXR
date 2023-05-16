@@ -1,6 +1,6 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
@@ -11,6 +11,21 @@ export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultMaxLatitude = 85.05112878;
     public static DefaultMinLongitude = -180;
     public static DefaultMaxLongitude = 180;
+    public static DefaultCellSize = 1;
+    public static DefaultCoordinateReference = CellCoordinateReference.center;
+    public static DefaultOverlap = 0;
+
+    minLOD?: number;
+    maxLOD?: number;
+    minLatitude?: number;
+    maxLatitude?: number;
+    minLongitude?: number;
+    maxLongitude?: number;
+
+    tileSize?: number;
+    cellSize?: number;
+    cellCoordinateReference?: CellCoordinateReference;
+    overlap?: number;
 
     public static Shared: TileMetricsOptions = {
         tileSize: TileMetricsOptions.DefaultTileSize,
@@ -20,21 +35,17 @@ export class TileMetricsOptions implements ITileMetricsOptions {
         maxLatitude: TileMetricsOptions.DefaultMaxLatitude,
         minLongitude: TileMetricsOptions.DefaultMinLongitude,
         maxLongitude: TileMetricsOptions.DefaultMaxLongitude,
+        cellSize: TileMetricsOptions.DefaultCellSize,
+        cellCoordinateReference: TileMetricsOptions.DefaultCoordinateReference,
+        overlap: TileMetricsOptions.DefaultOverlap,
     };
 
-    public constructor(
-        public tileSize: number,
-        public minLOD: number,
-        public maxLOD: number,
-        public minLatitude: number,
-        public maxLatitude: number,
-        public minLongitude: number,
-        public maxLongitude: number
-    ) {}
+    public constructor(p: Partial<TileMetricsOptions>) {
+        Object.assign(this, p);
+    }
 }
 
 export class TileMetricsOptionsBuilder {
-    _tileSize?: number;
     _minLOD?: number;
     _maxLOD?: number;
     _minLatitude?: number;
@@ -42,8 +53,25 @@ export class TileMetricsOptionsBuilder {
     _minLongitude?: number;
     _maxLongitude?: number;
 
+    _tileSize?: number;
+    _cellSize?: number;
+    _cellCoordinateReference?: CellCoordinateReference;
+    _overlap?: number;
+
     public withTileSize(v?: number): TileMetricsOptionsBuilder {
         this._tileSize = v;
+        return this;
+    }
+    public withCellSize(v?: number): TileMetricsOptionsBuilder {
+        this._cellSize = v;
+        return this;
+    }
+    public withCellCoordinateReference(v?: CellCoordinateReference): TileMetricsOptionsBuilder {
+        this._cellCoordinateReference = v;
+        return this;
+    }
+    public withTOverlap(v?: number): TileMetricsOptionsBuilder {
+        this._overlap = v;
         return this;
     }
     public withMinLOD(v?: number): TileMetricsOptionsBuilder {
@@ -72,15 +100,18 @@ export class TileMetricsOptionsBuilder {
     }
 
     public build(): ITileMetricsOptions {
-        return new TileMetricsOptions(
-            this._tileSize || TileMetricsOptions.DefaultTileSize,
-            this._minLOD || TileMetricsOptions.DefaultMinLOD,
-            this._maxLOD || TileMetricsOptions.DefaultMaxLOD,
-            this._minLatitude || TileMetricsOptions.DefaultMinLatitude,
-            this._maxLatitude || TileMetricsOptions.DefaultMaxLatitude,
-            this._minLongitude || TileMetricsOptions.DefaultMinLongitude,
-            this._maxLongitude || TileMetricsOptions.DefaultMaxLongitude
-        );
+        return new TileMetricsOptions({
+            tileSize: this._tileSize,
+            minLOD: this._minLOD,
+            maxLOD: this._maxLOD,
+            minLatitude: this._minLatitude,
+            maxLatitude: this._maxLatitude,
+            minLongitude: this._minLongitude,
+            maxLongitude: this._maxLongitude,
+            cellSize: this._cellSize,
+            cellCoordinateReference: this._cellCoordinateReference,
+            overlap: this._overlap,
+        });
     }
 }
 
@@ -164,9 +195,6 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
         return this.tileSize << levelOfDetail;
     }
 
-    public get tileSize(): number {
-        return this._o.tileSize || TileMetricsOptions.DefaultTileSize;
-    }
     public get minLOD(): number {
         return this._o.minLOD || TileMetricsOptions.DefaultMinLOD;
     }
@@ -184,6 +212,19 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
     }
     public get maxLongitude(): number {
         return this._o.maxLongitude || TileMetricsOptions.DefaultMaxLongitude;
+    }
+
+    public get tileSize(): number {
+        return this._o.tileSize || TileMetricsOptions.DefaultTileSize;
+    }
+    public get cellSize(): number {
+        return this._o.cellSize || TileMetricsOptions.DefaultCellSize;
+    }
+    public get cellCoordinateReference(): CellCoordinateReference {
+        return this._o.cellCoordinateReference || TileMetricsOptions.DefaultCoordinateReference;
+    }
+    public get overlap(): number {
+        return this._o.overlap || TileMetricsOptions.DefaultOverlap;
     }
 
     public isValidAddress(a: ITileAddress): boolean {

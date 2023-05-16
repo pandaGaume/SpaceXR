@@ -19,7 +19,7 @@ export class EPSG3857 extends AbstractTileMetrics {
 
     public mapScale(latitude: number, levelOfDetail: number, dpi: number): number {
         // remember here that Ellipsoid unit are meters
-        return (this.groundResolution(latitude, levelOfDetail) * dpi) / Scalar.INCH2METER;
+        return this.groundResolution(latitude, levelOfDetail) * dpi * Scalar.INCH2METER;
     }
 
     public groundResolution(latitude: number, levelOfDetail: number): number {

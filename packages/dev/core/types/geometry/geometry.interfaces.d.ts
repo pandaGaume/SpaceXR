@@ -10,6 +10,7 @@ export interface ICartesian3 {
     z: number;
     toString(): string;
 }
+export declare function isCartesian3(b: unknown): b is ICartesian3;
 export interface ISize2 {
     height: number;
     width: number;
@@ -18,8 +19,7 @@ export declare function isSize2(b: unknown): b is ISize2;
 export interface ISize3 {
     height: number;
     width: number;
-    thickness?: number;
-    hasThickness: boolean;
+    thickness: number;
 }
 export declare function isSize3(b: unknown): b is ISize3;
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {

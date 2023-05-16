@@ -2,9 +2,10 @@ import { TileMapView, UpdateEventArgs } from "../tiles/tile.mapview";
 import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
-export interface IDisplay extends ISize2 {
+export interface IMapDisplay {
+    resolution: ISize2;
 }
-export declare abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider, ITileMapApi {
+export declare abstract class AbstractDisplayMap<T, D extends IMapDisplay> implements ITileMetricsProvider, ITileMapApi {
     _display: D;
     _view: TileMapView<T>;
     _activ: Map<string, ITile<T>>;

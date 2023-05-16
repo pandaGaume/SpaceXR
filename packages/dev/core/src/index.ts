@@ -7,6 +7,5 @@ export * from "./map/index";
 export * from "./math/index";
 export * from "./meshes/index";
 export * from "./space/index";
-export * from "./terrain/index";
 export * from "./tiles/index";
 export * from "./utils/index";

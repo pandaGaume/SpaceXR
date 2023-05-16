@@ -19,23 +19,36 @@ export interface ITileBuilder<T> {
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
+export declare enum CellCoordinateReference {
+    center = "center",
+    nw = "nw",
+    ne = "ne",
+    sw = "sw",
+    se = "se"
+}
 export interface ITileMetricsOptions {
-    tileSize?: number;
     minLOD?: number;
     maxLOD?: number;
     minLatitude?: number;
     maxLatitude?: number;
     minLongitude?: number;
     maxLongitude?: number;
+    tileSize?: number;
+    cellSize?: number;
+    cellCoordinateReference?: CellCoordinateReference;
+    overlap?: number;
 }
 export interface ITileMetrics {
-    tileSize: number;
     minLOD: number;
     maxLOD: number;
     minLatitude: number;
     maxLatitude: number;
     minLongitude: number;
     maxLongitude: number;
+    tileSize: number;
+    cellSize: number;
+    cellCoordinateReference: CellCoordinateReference;
+    overlap: number;
     mapSize(levelOfDetail: number): number;
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     groundResolution(latitude: number, levelOfDetail: number): number;
@@ -70,15 +83,6 @@ export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
 }
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
-}
-export declare class LookupResult<V> {
-    address: ITileAddress;
-    content: V;
-    userArgs: Array<unknown>;
-    constructor(address: ITileAddress, content: V, userArgs: Array<unknown>);
-}
-export interface ITileDirectory<V> extends ITileMetricsProvider {
-    lookupAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<LookupResult<Nullable<V>>>;
 }
 export interface ITileMapApi {
     invalidateSize(w: number, h: number): ITileMapApi;

@@ -1,10 +1,11 @@
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
-import { AbstractDisplayMap,IDisplay } from "./map";
+import { AbstractDisplayMap, IMapDisplay } from "./map";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { IRectangle } from "../geometry/geometry.interfaces";
+import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
+import { Size2 } from "../geometry/geometry.size";
 
-export class CanvasDisplay implements IDisplay {
+export class CanvasDisplay implements IMapDisplay {
     public constructor(public canvas: HTMLCanvasElement) {
         this.resizeToDisplaySize();
     }
@@ -13,12 +14,8 @@ export class CanvasDisplay implements IDisplay {
         return this.canvas.getContext("2d", options);
     }
 
-    public get height(): number {
-        return this.canvas.height;
-    }
-
-    public get width(): number {
-        return this.canvas.width;
+    public get resolution(): ISize2 {
+        return new Size2(this.canvas.width, this.canvas.height);
     }
 
     /**
@@ -36,9 +33,11 @@ export class CanvasDisplay implements IDisplay {
         const needResize = this.canvas.width !== displayWidth || this.canvas.height !== displayHeight;
 
         if (needResize) {
+            // Set actual size in memory (scaled to account for extra pixel density).
+            const scale = window.devicePixelRatio;
             // Make the canvas the same size
-            this.canvas.width = displayWidth;
-            this.canvas.height = displayHeight;
+            this.canvas.width = displayWidth * scale;
+            this.canvas.height = displayHeight * scale;
         }
 
         return needResize;
@@ -52,7 +51,9 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, CanvasDi
         super(new CanvasDisplay(canvas), datasource, metrics, center, lod);
         this._observer = new ResizeObserver(() => {
             this._display.resizeToDisplaySize();
-            this.invalidateSize(canvas.width, canvas.height);
+
+            const cellSize = this.metrics.cellSize;
+            this.invalidateSize(canvas.width / cellSize, canvas.height / cellSize);
         });
         this._observer.observe(canvas);
     }
@@ -72,7 +73,8 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, CanvasDi
     protected invalidateDisplay(rect?: IRectangle) {
         const ctx = this._display.getContext();
         if (ctx) {
-            rect = rect || new Rectangle(0, 0, this._display.width, this._display.height);
+            const res = this._display.resolution;
+            rect = rect || new Rectangle(0, 0, res.width, res.height);
             ctx.clearRect(rect.x, rect.y, rect.width, rect.height);
             this.invalidate(ctx, this._activ.values());
         }
@@ -83,12 +85,15 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, CanvasDi
             const scale = this._scale;
             const center = this._center;
             ctx.save();
-            ctx.translate(this._display.width / 2, this._display.height / 2);
+            const res = this._display.resolution;
+            ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
+            const cellSize = this.metrics.cellSize;
+
             for (const t of tiles) {
                 if (t.content && t.rect) {
-                    const x = t.rect.x - center.x;
-                    const y = t.rect.y - center.y;
+                    const x = t.rect.x / cellSize - center.x;
+                    const y = t.rect.y / cellSize - center.y;
                     ctx.drawImage(t.content, x, y);
                 }
             }

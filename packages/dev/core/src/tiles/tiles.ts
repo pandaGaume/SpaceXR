@@ -46,7 +46,7 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         if (metrics) {
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
-            const size = new Size3(nw.lat - se.lat, se.lon - nw.lon);
+            const size = new Size3(nw.lat - se.lat, se.lon - nw.lon, 0);
             const pos = new Geo3(se.lat, nw.lon);
             return Envelope.FromSize(pos, size);
         }

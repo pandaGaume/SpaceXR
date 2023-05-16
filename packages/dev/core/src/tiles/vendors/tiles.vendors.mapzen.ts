@@ -1,8 +1,8 @@
-import { TileWebClient, TileWebClientOptions } from "./tiles.client";
-import { IPixelDecoder } from "./tiles.interfaces";
-import { WebTileUrlBuilder } from "./tiles.urlBuilder";
-import { Float32TileCodec, ImageTileCodec } from "./tiles.codecs.image";
-import { TileMetricsOptionsBuilder } from "./tiles.metrics";
+import { TileWebClient, TileWebClientOptions } from "../tiles.client";
+import { IPixelDecoder } from "../tiles.interfaces";
+import { WebTileUrlBuilder } from "../tiles.urlBuilder";
+import { Float32TileCodec, ImageTileCodec } from "../tiles.codecs.image";
+import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     public static Terrarium = new MapZenDemUrlBuilder("terrarium");

@@ -13,6 +13,11 @@ export interface ICartesian3 {
     toString(): string;
 }
 
+export function isCartesian3(b: unknown): b is ICartesian3 {
+    if (typeof b !== "object" || b === null) return false;
+    return (<ICartesian3>b).x !== undefined && (<ICartesian3>b).y !== undefined && (<ICartesian3>b).z !== undefined;
+}
+
 export interface ISize2 {
     height: number;
     width: number;
@@ -26,14 +31,12 @@ export function isSize2(b: unknown): b is ISize2 {
 export interface ISize3 {
     height: number;
     width: number;
-    thickness?: number;
-
-    hasThickness: boolean;
+    thickness: number;
 }
 
 export function isSize3(b: unknown): b is ISize3 {
     if (typeof b !== "object" || b === null) return false;
-    return (<ISize3>b).height !== undefined && (<ISize3>b).width !== undefined && (<ISize3>b).hasThickness !== undefined;
+    return (<ISize3>b).height !== undefined && (<ISize3>b).width !== undefined && (<ISize3>b).thickness !== undefined;
 }
 
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {

@@ -5,9 +5,11 @@ import { Geo2 } from "../geography/geography.position";
 import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 
-export interface IDisplay extends ISize2 {}
+export interface IMapDisplay {
+    resolution: ISize2;
+}
 
-export abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITileMetricsProvider, ITileMapApi {
+export abstract class AbstractDisplayMap<T, D extends IMapDisplay> implements ITileMetricsProvider, ITileMapApi {
     _display: D; // the display
     _view: TileMapView<T>; // the view logic
     _activ: Map<string, ITile<T>>; // the list of activ tiles
@@ -18,7 +20,7 @@ export abstract class AbstractDisplayMap<T, D extends IDisplay> implements ITile
 
     public constructor(display: D, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {
         this._display = display;
-        this._view = new TileMapView(datasource, metrics, display.width, display.height, center || Geo2.Zero(), lod || metrics.minLOD);
+        this._view = new TileMapView(datasource, metrics, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || metrics.minLOD);
         this._view.updateObservable.add((e: UpdateEventArgs<T>) => this.onUpdate(e));
         this._activ = new Map<string, ITile<T>>();
         this._view.validate();

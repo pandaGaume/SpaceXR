@@ -1,2 +1,2 @@
-export * from "./material.terrain";
+export * from "./material.terrain.map";
 export * from "./material.wireframe";

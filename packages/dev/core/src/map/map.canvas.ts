@@ -44,7 +44,7 @@ export class CanvasDisplay implements IMapDisplay {
     }
 }
 
-export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, CanvasDisplay> {
+export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
     _observer: ResizeObserver;
 
     public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {

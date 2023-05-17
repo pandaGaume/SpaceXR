@@ -261,6 +261,6 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
     public abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): IGeo2;
     public abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
     public abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    public abstract getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    public abstract getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
+    public abstract getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
+    public abstract getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
 }

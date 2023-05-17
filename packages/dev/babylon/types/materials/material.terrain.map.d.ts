@@ -1,11 +1,9 @@
 import { ShaderMaterial, Scene } from "@babylonjs/core";
-import { Ellipsoid } from "@dev/core/src/geodesy/geodesy.ellipsoid";
 import { WireframeMaterialOptions } from "./material.wireframe";
-export declare class TerrainMaterialOptions {
+export declare class MapMaterialOptions {
     wireframe?: WireframeMaterialOptions;
-    ellipsoid?: Ellipsoid;
 }
-export declare class TerrainMaterial extends ShaderMaterial {
+export declare class MapMaterial extends ShaderMaterial {
     static TerrainKeyword: string;
     private static ShaderOptions;
     constructor(name: string, scene: Scene);

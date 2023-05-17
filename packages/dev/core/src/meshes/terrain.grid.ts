@@ -1,24 +1,32 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { Nullable } from "../types";
 
+export enum GridCoordinateReference {
+    center,
+    upperLeft,
+}
+
 export class TerrainGridOptions {
     public static Shared = new TerrainGridOptions();
 
     public static DefaultGridSize = 256;
     public static DefaultInvertIndices = false;
+    public static DefaultCoordinateReference = GridCoordinateReference.center;
 
     public width: number;
     public height?: number;
     public invertIndices: boolean;
+    public coordinateReference: GridCoordinateReference;
 
-    public constructor(size: number = TerrainGridOptions.DefaultGridSize, height?: number) {
+    public constructor(size: number = TerrainGridOptions.DefaultGridSize, height?: number, ref?: GridCoordinateReference) {
         this.width = size;
         this.height = height || size;
+        this.coordinateReference = ref || TerrainGridOptions.DefaultCoordinateReference;
         this.invertIndices = TerrainGridOptions.DefaultInvertIndices;
     }
 
     public clone(): TerrainGridOptions {
-        const other = new TerrainGridOptions(this.width, this.height);
+        const other = new TerrainGridOptions(this.width, this.height, this.coordinateReference);
         other.invertIndices = this.invertIndices;
         return other;
     }
@@ -37,8 +45,8 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         return this;
     }
 
-    public build(data?: IVerticesData): IVerticesData {
-        data = data || <IVerticesData>{};
+    public build<T extends IVerticesData>(data?: T): T {
+        data = data || <T>{};
         const w = this._o?.width || TerrainGridOptions.DefaultGridSize;
         const h = this._o?.height || w;
         const sx = 1;
@@ -46,16 +54,16 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         const positions = [];
         const indices = [];
 
-        // we decided to center the grid.
-        const x0 = -0.5;
-        const y0 = 0.5;
+        const isCentered = this._o?.coordinateReference == GridCoordinateReference.center;
+        const x0 = isCentered ? -0.5 : 0;
+        const y0 = isCentered ? 0.5 : 0;
         const dx = 1 / (w - 1);
-        const dy = 1 / (h - 1);
+        const dy = (isCentered ? 1 : -1) / (h - 1);
 
         // positions and uvs. Note the uvs origin upper left.
         for (let row = 0; row < h; row++) {
             const v = row * dy;
-            const y = (y0 - v) * sy;
+            const y = (y0 + v) * sy;
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;

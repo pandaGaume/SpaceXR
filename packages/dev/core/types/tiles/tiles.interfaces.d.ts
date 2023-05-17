@@ -8,10 +8,11 @@ export interface ITileAddress extends ICartesian2 {
 }
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
-    parent?: ITile<T>;
-    childrens?: Array<ITile<T>>;
     content?: Nullable<T>;
     rect?: IRectangle;
+}
+export interface ITileProxy<T> {
+    delegate: ITile<T>;
 }
 export interface ITileBuilder<T> {
     withAddress(a: ITileAddress): ITileBuilder<T>;
@@ -56,8 +57,8 @@ export interface ITileMetrics {
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
     getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
     getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    getTileXYToPixelXY(x: number, y: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    getPixelXYToTileXY(x: number, y: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
+    getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
+    getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
     assertValidAddress(a: ITileAddress): void;
     isValidAddress(a: ITileAddress): boolean;
 }

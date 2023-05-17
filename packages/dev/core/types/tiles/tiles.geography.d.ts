@@ -13,6 +13,6 @@ export declare class EPSG3857 extends AbstractTileMetrics {
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number, loc?: IGeo2): IGeo2;
     getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
     getPixelXYToLatLon(pixelX: number, pixelY: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    getTileXYToPixelXY(tileX: number, tileY: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    getPixelXYToTileXY(pixelX: number, pixelY: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
+    getTileXYToPixelXY(tileX: number, tileY: number, pixelXY?: ICartesian2): ICartesian2;
+    getPixelXYToTileXY(pixelX: number, pixelY: number, tileXY?: ICartesian2): ICartesian2;
 }

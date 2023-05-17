@@ -55,7 +55,7 @@ export class Tile<T> implements ITile<T>, ITileAddress {
 
     public static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined {
         if (metrics) {
-            const p = metrics.getTileXYToPixelXY(a.x, a.y, a.levelOfDetail);
+            const p = metrics.getTileXYToPixelXY(a.x, a.y);
             return new Rectangle(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }
         return undefined;

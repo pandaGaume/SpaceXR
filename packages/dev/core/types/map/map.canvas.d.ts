@@ -9,7 +9,7 @@ export declare class CanvasDisplay implements IMapDisplay {
     get resolution(): ISize2;
     resizeToDisplaySize(): boolean;
 }
-export declare class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, CanvasDisplay> {
+export declare class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
     _observer: ResizeObserver;
     constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
     protected onDeleted(key: string, tile: ITile<HTMLImageElement>): void;

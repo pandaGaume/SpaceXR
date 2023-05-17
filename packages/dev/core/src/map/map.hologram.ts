@@ -36,11 +36,7 @@ export class HologramMapDisplay implements IMapDisplay {
     }
 }
 
-export class HologramTileMapOptions {
-    public constructor(cellScale: ISize3) {}
-}
-
-export class HologramTileMap<T, H extends HologramMapDisplay> extends AbstractDisplayMap<T, H> {
+export class HologramTileMap<T, H extends HologramMapDisplay> extends AbstractDisplayMap<T, ITile<T>, H> {
     _gridSeed: IVerticesData;
 
     public constructor(display: H, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {

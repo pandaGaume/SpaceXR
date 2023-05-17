@@ -83,7 +83,7 @@ export class EPSG3857 extends AbstractTileMetrics {
         return g;
     }
 
-    public getTileXYToPixelXY(tileX: number, tileY: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2 {
+    public getTileXYToPixelXY(tileX: number, tileY: number, pixelXY?: ICartesian2): ICartesian2 {
         const p = pixelXY || Cartesian2.Zero();
         const s = this.tileSize;
         p.x = tileX * s;
@@ -91,7 +91,7 @@ export class EPSG3857 extends AbstractTileMetrics {
         return p;
     }
 
-    public getPixelXYToTileXY(pixelX: number, pixelY: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2 {
+    public getPixelXYToTileXY(pixelX: number, pixelY: number, tileXY?: ICartesian2): ICartesian2 {
         const t = tileXY || Cartesian2.Zero();
         const s = this.tileSize;
         t.x = Math.floor(pixelX / s);

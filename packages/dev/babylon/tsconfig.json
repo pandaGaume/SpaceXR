@@ -13,6 +13,6 @@
         }
     },
     "references": [{ "path": "../core" }],
-    "include": ["./src/**/*.ts", "../core/src/materials/glsl.d.ts"],
+    "include": ["./src/**/*.ts", "../core/src/materials/glsl.d.ts", "src/materials/material.terrain.map.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

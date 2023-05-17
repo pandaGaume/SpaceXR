@@ -10,10 +10,7 @@ export declare class HologramMapDisplay implements IMapDisplay {
     constructor(dimensions: ISize3, dpi: number | ICartesian3);
     get resolution(): ISize2;
 }
-export declare class HologramTileMapOptions {
-    constructor(cellScale: ISize3);
-}
-export declare class HologramTileMap<T, H extends HologramMapDisplay> extends AbstractDisplayMap<T, H> {
+export declare class HologramTileMap<T, H extends HologramMapDisplay> extends AbstractDisplayMap<T, ITile<T>, H> {
     _gridSeed: IVerticesData;
     constructor(display: H, datasource: ITileDatasource<T, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
     protected onDeleted(key: string, tile: ITile<T>): void;

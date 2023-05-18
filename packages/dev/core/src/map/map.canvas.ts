@@ -4,6 +4,7 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { Size2 } from "../geometry/geometry.size";
+import { Scalar } from "../math/math";
 
 export class CanvasDisplay implements IMapDisplay {
     public constructor(public canvas: HTMLCanvasElement) {
@@ -79,7 +80,10 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-
+            if (this._view.rotation) {
+                const angle = this._view.rotation * Scalar.DEG2RAD;
+                ctx.rotate(angle);
+            }
             for (const t of tiles) {
                 if (t.content && t.rect) {
                     const x = t.rect.x - center.x;

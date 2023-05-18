@@ -30,13 +30,18 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         this._view.validate();
         return this;
     }
-    public setView(center: IGeo2, zoom?: number | undefined): ITileMapApi {
-        this._view.setView(center, zoom);
+    public setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi {
+        this._view.setView(center, zoom, rotation);
         this._view.validate();
         return this;
     }
     public setZoom(zoom: number): ITileMapApi {
         this._view.setZoom(zoom);
+        this._view.validate();
+        return this;
+    }
+    public setRotation(r: number): ITileMapApi {
+        this._view.setRotation(r);
         this._view.validate();
         return this;
     }
@@ -52,6 +57,11 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     }
     public translate(tx: number, ty: number): ITileMapApi {
         this._view.translate(tx, ty);
+        this._view.validate();
+        return this;
+    }
+    public rotate(r: number): ITileMapApi {
+        this._view.rotate(r);
         this._view.validate();
         return this;
     }

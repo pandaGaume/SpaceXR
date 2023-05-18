@@ -21,6 +21,10 @@ class MouseDragInputs {
     button;
 
     constructor(canvas, o) {
+        canvas.addEventListener("contextmenu", (event) => {
+            event.preventDefault(); // Annule le menu contextuel par défaut
+        });
+
         // ajouter un écouteur d'événements pour la souris
         canvas.addEventListener("mousedown", function (event) {
             // enregistrer les coordonnées de départ

@@ -14,11 +14,13 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     _center: ICartesian2;
     constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);
     invalidateSize(w: number, h: number): ITileMapApi;
-    setView(center: IGeo2, zoom?: number | undefined): ITileMapApi;
+    setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
+    setRotation(r: number): ITileMapApi;
     zoomIn(delta: number): ITileMapApi;
     zoomOut(delta: number): ITileMapApi;
     translate(tx: number, ty: number): ITileMapApi;
+    rotate(r: number): ITileMapApi;
     get display(): D;
     get view(): TileMapView<V>;
     get metrics(): ITileMetrics;

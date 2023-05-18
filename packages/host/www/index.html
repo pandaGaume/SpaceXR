@@ -36,14 +36,14 @@
                 // construire la carte.
                 const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, mapzenMetrics, center, lod);
 
-                function onDrag(m, x, y, b) {
-                    console.log("button : ", b);
+                function onDrag(m, dx, dy, b) {
                     switch (b) {
                         case 0: {
-                            map.translate(-x, -y);
+                            map.translate(-dx, -dy);
                             break;
                         }
                         case 2: {
+                            map.rotate(dx);
                             break;
                         }
                     }

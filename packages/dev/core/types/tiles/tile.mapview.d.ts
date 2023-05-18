@@ -44,6 +44,9 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _lod: number;
     _center: IGeo2;
     _level: TileMapLevel<T>;
+    _rotation: number;
+    _cosangle: number;
+    _sinangle: number;
     _valid: boolean;
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
@@ -58,15 +61,18 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get level(): TileMapLevel<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;
+    get rotation(): number;
     get metrics(): ITileMetrics;
     get width(): number;
     get height(): number;
     invalidateSize(w: number, h: number): ITileMapApi;
-    setView(center: IGeo2, zoom?: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
+    setRotation(r: number): ITileMapApi;
     zoomIn(delta: number): ITileMapApi;
     zoomOut(delta: number): ITileMapApi;
     translate(tx: number, ty: number): ITileMapApi;
+    rotate(r: number): ITileMapApi;
     get isValid(): boolean;
     invalidate(): TileMapView<T>;
     validate(): TileMapView<T>;
@@ -79,4 +85,6 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     protected doValidateLevel(level: TileMapLevel<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;
+    private rotatePoints;
+    private rotatePoint;
 }

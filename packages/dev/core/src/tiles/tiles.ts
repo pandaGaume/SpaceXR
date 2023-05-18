@@ -3,10 +3,10 @@ import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
-import { TileMetrics } from "./tiles.metrics";
 import { Nullable } from "../types";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
+import { TileAddress } from "./tiles.address";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
@@ -37,7 +37,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     }
 }
 
-export class Tile<T> implements ITile<T>, ITileAddress {
+export class Tile<T> extends TileAddress implements ITile<T> {
     public static Builder<T>(): ITileBuilder<T> {
         return new TileBuilder<T>();
     }
@@ -61,18 +61,12 @@ export class Tile<T> implements ITile<T>, ITileAddress {
         return undefined;
     }
 
-    private _k?: string;
-    private _x: number;
-    private _y: number;
-    private _levelOfDetail: number;
     private _value?: Nullable<T>;
     private _env?: IEnvelope;
     private _rect?: IRectangle;
 
     public constructor(x: number, y: number, levelOfDetail: number, data?: Nullable<T>) {
-        this._x = x;
-        this._y = y;
-        this._levelOfDetail = levelOfDetail;
+        super(x, y, levelOfDetail);
         this._value = data;
     }
 
@@ -86,16 +80,6 @@ export class Tile<T> implements ITile<T>, ITileAddress {
 
     public set content(v: Nullable<T> | undefined) {
         this._value = v;
-    }
-
-    public get x(): number {
-        return this._x;
-    }
-    public get y(): number {
-        return this._y;
-    }
-    public get levelOfDetail(): number {
-        return this._levelOfDetail;
     }
 
     public get bounds(): IEnvelope | undefined {
@@ -112,12 +96,5 @@ export class Tile<T> implements ITile<T>, ITileAddress {
 
     public set rect(r: IRectangle | undefined) {
         this._rect = r;
-    }
-
-    public get quadkey(): string {
-        if (!this._k) {
-            this._k = TileMetrics.TileXYToQuadKey(this);
-        }
-        return this._k;
     }
 }

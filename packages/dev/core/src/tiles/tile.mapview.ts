@@ -102,6 +102,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _lod: number = 0;
     _center: IGeo2 = Geo2.Zero();
     _level: TileMapLevel<T>;
+    _rotation: number;
+    _cosangle: number;
+    _sinangle: number;
 
     // interns
     _valid: boolean = false;
@@ -126,6 +129,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this._metrics = metrics || EPSG3857.Shared;
         this.invalidateSize(width, height).setView(center, lod);
         this._level = new TileMapLevel<T>();
+        this._rotation = 0;
+        this._cosangle = 0;
+        this._sinangle = 1;
     }
 
     /// EVENTS
@@ -164,6 +170,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._center;
     }
 
+    public get rotation(): number {
+        return this._rotation;
+    }
+
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
         return this._metrics;
@@ -198,7 +208,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this;
     }
 
-    public setView(center: IGeo2, zoom?: number): ITileMapApi {
+    public setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi {
         if (center && !this.center.equals(center)) {
             if (this._centerObservable && this._centerObservable.hasObservers()) {
                 const old = this._center.clone();
@@ -213,7 +223,13 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             this.center.lon = center.lon;
             this.invalidate();
         }
-        return zoom ? this.setZoom(zoom) : this;
+        if (zoom) {
+            this.setZoom(zoom);
+        }
+        if (rotation) {
+            this.setRotation(rotation);
+        }
+        return this;
     }
 
     public setZoom(zoom: number): ITileMapApi {
@@ -233,6 +249,19 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this;
     }
 
+    public setRotation(r: number): ITileMapApi {
+        // ensure r is [360, 360]
+        const r0 = r % 360;
+        this._rotation = r0 < 0 ? 360 + r0 : r0;
+        const rad = this._rotation * Scalar.DEG2RAD;
+        this._cosangle = Math.cos(rad);
+        this._sinangle = Math.sin(rad);
+        this.invalidate();
+        console.log(`rotation:${this._rotation}`);
+
+        return this;
+    }
+
     public zoomIn(delta: number): ITileMapApi {
         // ensure delta is positiv
         return this.setZoom(this.levelOfDetail + Math.abs(delta));
@@ -244,12 +273,21 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
+        if (this._rotation) {
+            const p = this.rotatePoint(tx, ty);
+            tx = p.x;
+            ty = p.y;
+        }
         const lod = Math.round(this.levelOfDetail);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
         const center = this.metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
         return this.setView(center);
+    }
+
+    public rotate(r: number): ITileMapApi {
+        return this.setRotation(this._rotation + r);
     }
 
     /// VALIDABLE
@@ -303,11 +341,18 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const h = this.height / scale;
         let x0 = Math.round(pixelCenterXY.x - w / 2);
         let y0 = Math.round(pixelCenterXY.y - h / 2);
-        const bounds = new Rectangle(x0, y0, w, h);
+        let bounds = new Rectangle(x0, y0, w, h);
+        if (this._rotation) {
+            const corners = bounds.points();
+            const rotated = Array.from(this.rotatePoints(bounds.center, ...corners));
+            bounds = Rectangle.FromPoints(...rotated);
+        }
+
         // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top);
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom);
         const tileXYBounds = Rectangle.FromPoints(nwTileXY, seTileXY);
+
         x0 = tileXYBounds.left;
         y0 = tileXYBounds.top;
         const x1 = tileXYBounds.right;
@@ -400,5 +445,24 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     protected onTileNotFound(t: ITile<T>) {
         t.content = null;
+    }
+    private *rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
+        for (const p of points) {
+            yield this.rotatePoint(p.x, p.y, center);
+        }
+    }
+
+    /**
+     * Rotate point arround optional center, with reference of azimuth zero up to the North
+     * and clockwise rotation.
+     */
+    private rotatePoint(x: number, y: number, center?: ICartesian2): ICartesian2 {
+        const translatedX = center ? x - center.x : x;
+        const translatedY = center ? y - center.y : y;
+
+        const rotatedX = translatedX * this._cosangle + translatedY * this._sinangle;
+        const rotatedY = translatedY * this._cosangle - translatedX * this._sinangle;
+
+        return new Cartesian2(center ? rotatedX + center.x : rotatedX, center ? rotatedY + center.y : rotatedY);
     }
 }

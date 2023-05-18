@@ -52,6 +52,7 @@ export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> 
     unionInPlace(other: IRectangle): IRectangle;
     contains(x: number, y: number): boolean;
     toString(): string;
+    points(): IterableIterator<ICartesian2>;
 }
 
 export function isRectangle(b: unknown): b is IRectangle {

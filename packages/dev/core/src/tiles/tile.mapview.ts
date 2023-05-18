@@ -257,8 +257,6 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this._cosangle = Math.cos(rad);
         this._sinangle = Math.sin(rad);
         this.invalidate();
-        console.log(`rotation:${this._rotation}`);
-
         return this;
     }
 
@@ -302,10 +300,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public validate(): TileMapView<T> {
         if (!this._valid) {
-            queueMicrotask(() => {
-                this.doValidate();
-                this._valid = true;
-            });
+            this.doValidate();
+            this._valid = true;
         }
         return this;
     }
@@ -413,8 +409,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         }
 
         // filter the tile, selecting only one with content. Null is consider as content.
-        added = added.filter((t) => t.content !== undefined);
-        deleted = deleted.filter((t) => t.content !== undefined);
+        added = added.filter((t) => t.content !== undefined && t.content !== null);
+        deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
 
         const updateEvent = new UpdateEventArgs(
             this,
@@ -444,8 +440,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     protected onTileNotFound(t: ITile<T>) {
+        console.log("tile not found", t.address);
         t.content = null;
     }
+
     private *rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
         for (const p of points) {
             yield this.rotatePoint(p.x, p.y, center);

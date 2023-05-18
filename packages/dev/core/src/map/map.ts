@@ -78,6 +78,10 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         return this.view.metrics;
     }
 
+    public get rotation(): number {
+        return this._view.rotation;
+    }
+
     protected onUpdate(args: UpdateEventArgs<V>): void {
         if (!args) {
             return;

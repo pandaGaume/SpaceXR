@@ -69,6 +69,7 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
             rect = rect || new Rectangle(0, 0, res.width, res.height);
             ctx.clearRect(rect.x, rect.y, rect.width, rect.height);
             this.invalidate(ctx, this._activ.values());
+            console.log(`display ${this._activ.size} tiles.`);
         }
     }
 

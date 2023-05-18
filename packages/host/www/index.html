@@ -16,10 +16,27 @@
                 display: block;
                 touch-action: none;
             }
+            #compass {
+                position: absolute;
+                top: 20px; /* Adjust this to position the compass */
+                right: 20px; /* Adjust this to position the compass */
+                width: 200px; /* Adjust this according to your compass image size */
+                height: 200px; /* Adjust this according to your compass image size */
+                transform-origin: center;
+            }
+
+            #compassImage {
+                width: 100%;
+                height: 100%;
+            }
         </style>
     </head>
     <body>
-        <canvas id="tileCanvas"></canvas>
+        <div id="mapContainer">
+            <canvas id="tileCanvas"></canvas>
+            <div id="compass">
+              <img id="compassImage" src="./images/compass.png" alt="Compass">
+            </div>
         <script>
             window.onload = () => {
                 // Récupérer le canvas
@@ -36,6 +53,7 @@
                 // construire la carte.
                 const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, mapzenMetrics, center, lod);
 
+
                 function onDrag(m, dx, dy, b) {
                     switch (b) {
                         case 0: {
@@ -44,6 +62,7 @@
                         }
                         case 2: {
                             map.rotate(dx);
+                            updateCompassRotation(map.rotation);
                             break;
                         }
                     }
@@ -58,6 +77,24 @@
                         map.zoomOut(dz);
                     }
                 }
+                
+                function updateCompassRotation(rotation) {
+                    var compass = document.getElementById('compass');
+                    compass.style.transform = 'rotate(' + rotation + 'deg)';
+                }
+
+ 
+                    // Function to handle the compass click event
+                function handleCompassClick(event) {
+                    map.setRotation(0);
+                    updateCompassRotation(0);
+                }
+
+                // Get the compass element
+                var compass = document.getElementById('compass');
+
+                // Add a click event listener to the compass
+                compass.addEventListener('click', handleCompassClick);
 
                 const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
                 const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });

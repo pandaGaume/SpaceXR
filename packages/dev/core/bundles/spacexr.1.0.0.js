@@ -1364,6 +1364,7 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
             rect = rect || new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__.Rectangle(0, 0, res.width, res.height);
             ctx.clearRect(rect.x, rect.y, rect.width, rect.height);
             this.invalidate(ctx, this._activ.values());
+            console.log(`display ${this._activ.size} tiles.`);
         }
     }
     invalidate(ctx, tiles) {
@@ -1528,6 +1529,9 @@ class AbstractDisplayMap {
     }
     get metrics() {
         return this.view.metrics;
+    }
+    get rotation() {
+        return this._view.rotation;
     }
     onUpdate(args) {
         if (!args) {
@@ -3143,7 +3147,6 @@ class TileMapView {
         this._cosangle = Math.cos(rad);
         this._sinangle = Math.sin(rad);
         this.invalidate();
-        console.log(`rotation:${this._rotation}`);
         return this;
     }
     zoomIn(delta) {
@@ -3177,10 +3180,8 @@ class TileMapView {
     }
     validate() {
         if (!this._valid) {
-            queueMicrotask(() => {
-                this.doValidate();
-                this._valid = true;
-            });
+            this.doValidate();
+            this._valid = true;
         }
         return this;
     }
@@ -3262,8 +3263,8 @@ class TileMapView {
         for (const t of added) {
             level.tiles.set(t.address.quadkey, t);
         }
-        added = added.filter((t) => t.content !== undefined);
-        deleted = deleted.filter((t) => t.content !== undefined);
+        added = added.filter((t) => t.content !== undefined && t.content !== null);
+        deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
         const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, this._level.lod, this._level.scale, this._level.center, added.length ? added : undefined, deleted.length ? deleted : undefined);
         this.updateObservable.notifyObservers(updateEvent);
     }
@@ -3276,6 +3277,7 @@ class TileMapView {
         }
     }
     onTileNotFound(t) {
+        console.log("tile not found", t.address);
         t.content = null;
     }
     *rotatePoints(center, ...points) {

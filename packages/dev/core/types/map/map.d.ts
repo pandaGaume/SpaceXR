@@ -24,6 +24,7 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     get display(): D;
     get view(): TileMapView<V>;
     get metrics(): ITileMetrics;
+    get rotation(): number;
     protected onUpdate(args: UpdateEventArgs<V>): void;
     protected onUpdateTiles(args: UpdateEventArgs<V>): void;
     protected onUpdateView(args: UpdateEventArgs<V>): void;

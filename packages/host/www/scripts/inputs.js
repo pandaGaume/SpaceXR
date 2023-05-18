@@ -18,6 +18,7 @@ class MouseDragInputs {
     startX;
     startY;
     isDragging = false;
+    button;
 
     constructor(canvas, o) {
         // ajouter un écouteur d'événements pour la souris
@@ -25,9 +26,10 @@ class MouseDragInputs {
             // enregistrer les coordonnées de départ
             this.offsetX = this.startX = event.clientX;
             this.offsetY = this.startY = event.clientY;
+            this.button = event.button;
             this.isDragging = true;
             if (o.onbegin) {
-                o.onbegin(this, this.offsetX, this.offsetY);
+                o.onbegin(this, this.offsetX, this.offsetY, this.button);
             }
         });
 
@@ -42,7 +44,7 @@ class MouseDragInputs {
                 this.offsetY += dy;
 
                 if (o.ondrag) {
-                    o.ondrag(this, dx, dy);
+                    o.ondrag(this, dx, dy, this.button);
                 }
             }
         });
@@ -50,7 +52,7 @@ class MouseDragInputs {
         canvas.addEventListener("mouseup", function (event) {
             this.isDragging = false;
             if (o.onend) {
-                o.onend(this, this.offsetX - this.startX, this.offsetY - this.startY);
+                o.onend(this, this.offsetX - this.startX, this.offsetY - this.startY, this.button);
             }
         });
     }

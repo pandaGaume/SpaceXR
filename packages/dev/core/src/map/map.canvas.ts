@@ -24,23 +24,16 @@ export class CanvasDisplay implements IMapDisplay {
      * Let's call this function just before we render so it will always adjust the canvas to our desired size just before drawing.
      * @returns
      */
-    public resizeToDisplaySize() {
+    public resizeToDisplaySize(scale: number = 1) {
         // Lookup the size the browser is displaying the canvas in CSS pixels.
         const displayWidth = this.canvas.clientWidth;
         const displayHeight = this.canvas.clientHeight;
 
-        // Check if the canvas is not the same size.
-        const needResize = this.canvas.width !== displayWidth || this.canvas.height !== displayHeight;
-
-        if (needResize) {
-            // Set actual size in memory (scaled to account for extra pixel density).
-            const scale = window.devicePixelRatio;
-            // Make the canvas the same size
-            this.canvas.width = displayWidth * scale;
-            this.canvas.height = displayHeight * scale;
-        }
-
-        return needResize;
+        // Set actual size in memory (scaled to account for extra pixel density).
+        const ratio = window.devicePixelRatio;
+        // Make the canvas the same size
+        this.canvas.width = displayWidth * ratio * scale;
+        this.canvas.height = displayHeight * ratio * scale;
     }
 }
 
@@ -50,10 +43,8 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
     public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {
         super(new CanvasDisplay(canvas), datasource, metrics, center, lod);
         this._observer = new ResizeObserver(() => {
-            this._display.resizeToDisplaySize();
-
-            const cellSize = this.metrics.cellSize;
-            this.invalidateSize(canvas.width / cellSize, canvas.height / cellSize);
+            this._display.resizeToDisplaySize(1 / this.metrics.cellSize);
+            this.invalidateSize(canvas.width, canvas.height);
         });
         this._observer.observe(canvas);
     }
@@ -88,12 +79,11 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-            const cellSize = this.metrics.cellSize;
 
             for (const t of tiles) {
                 if (t.content && t.rect) {
-                    const x = t.rect.x / cellSize - center.x;
-                    const y = t.rect.y / cellSize - center.y;
+                    const x = t.rect.x - center.x;
+                    const y = t.rect.y - center.y;
                     ctx.drawImage(t.content, x, y);
                 }
             }

@@ -299,9 +299,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._level._center = pixelCenterXY;
 
-        const cellSize = this.metrics.cellSize;
-        const w = this.width / (scale * cellSize);
-        const h = this.height / (scale * cellSize);
+        const w = this.width / scale;
+        const h = this.height / scale;
         let x0 = Math.round(pixelCenterXY.x - w / 2);
         let y0 = Math.round(pixelCenterXY.y - h / 2);
         const bounds = new Rectangle(x0, y0, w, h);

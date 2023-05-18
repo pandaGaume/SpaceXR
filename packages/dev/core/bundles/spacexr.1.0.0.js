@@ -1331,25 +1331,20 @@ class CanvasDisplay {
     get resolution() {
         return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__.Size2(this.canvas.width, this.canvas.height);
     }
-    resizeToDisplaySize() {
+    resizeToDisplaySize(scale = 1) {
         const displayWidth = this.canvas.clientWidth;
         const displayHeight = this.canvas.clientHeight;
-        const needResize = this.canvas.width !== displayWidth || this.canvas.height !== displayHeight;
-        if (needResize) {
-            const scale = window.devicePixelRatio;
-            this.canvas.width = displayWidth * scale;
-            this.canvas.height = displayHeight * scale;
-        }
-        return needResize;
+        const ratio = window.devicePixelRatio;
+        this.canvas.width = displayWidth * ratio * scale;
+        this.canvas.height = displayHeight * ratio * scale;
     }
 }
 class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap {
     constructor(canvas, datasource, metrics, center, lod) {
         super(new CanvasDisplay(canvas), datasource, metrics, center, lod);
         this._observer = new ResizeObserver(() => {
-            this._display.resizeToDisplaySize();
-            const cellSize = this.metrics.cellSize;
-            this.invalidateSize(canvas.width / cellSize, canvas.height / cellSize);
+            this._display.resizeToDisplaySize(1 / this.metrics.cellSize);
+            this.invalidateSize(canvas.width, canvas.height);
         });
         this._observer.observe(canvas);
     }
@@ -1380,11 +1375,10 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-            const cellSize = this.metrics.cellSize;
             for (const t of tiles) {
                 if (t.content && t.rect) {
-                    const x = t.rect.x / cellSize - center.x;
-                    const y = t.rect.y / cellSize - center.y;
+                    const x = t.rect.x - center.x;
+                    const y = t.rect.y - center.y;
                     ctx.drawImage(t.content, x, y);
                 }
             }
@@ -3164,9 +3158,8 @@ class TileMapView {
         this._level._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._level._center = pixelCenterXY;
-        const cellSize = this.metrics.cellSize;
-        const w = this.width / (scale * cellSize);
-        const h = this.height / (scale * cellSize);
+        const w = this.width / scale;
+        const h = this.height / scale;
         let x0 = Math.round(pixelCenterXY.x - w / 2);
         let y0 = Math.round(pixelCenterXY.y - h / 2);
         const bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_9__.Rectangle(x0, y0, w, h);

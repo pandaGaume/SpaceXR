@@ -1334,15 +1334,20 @@ class CanvasDisplay {
         const displayWidth = this.canvas.clientWidth;
         const displayHeight = this.canvas.clientHeight;
         const ratio = window.devicePixelRatio;
-        this.canvas.width = displayWidth * ratio * scale;
-        this.canvas.height = displayHeight * ratio * scale;
+        const w = displayWidth * ratio * scale;
+        const h = displayHeight * ratio * scale;
+        if (this.canvas.width != w || this.canvas.height != h) {
+            this.canvas.width = w;
+            this.canvas.height = h;
+            return true;
+        }
+        return false;
     }
 }
 class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap {
     constructor(canvas, datasource, metrics, center, lod) {
         super(new CanvasDisplay(canvas), datasource, metrics, center, lod);
         this._observer = new ResizeObserver(() => {
-            this._display.resizeToDisplaySize(1 / this.metrics.cellSize);
             this.invalidateSize(canvas.width, canvas.height);
         });
         this._observer.observe(canvas);
@@ -1364,7 +1369,6 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
             rect = rect || new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__.Rectangle(0, 0, res.width, res.height);
             ctx.clearRect(rect.x, rect.y, rect.width, rect.height);
             this.invalidate(ctx, this._activ.values());
-            console.log(`display ${this._activ.size} tiles.`);
         }
     }
     invalidate(ctx, tiles) {
@@ -1375,8 +1379,8 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-            if (this._view.rotation) {
-                const angle = this._view.rotation * _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
+            if (this.rotation) {
+                const angle = this.rotation * _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
                 ctx.rotate(angle);
             }
             for (const t of tiles) {

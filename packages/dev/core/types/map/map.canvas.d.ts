@@ -7,7 +7,7 @@ export declare class CanvasDisplay implements IMapDisplay {
     constructor(canvas: HTMLCanvasElement);
     getContext(options?: CanvasRenderingContext2DSettings | undefined): CanvasRenderingContext2D | null;
     get resolution(): ISize2;
-    resizeToDisplaySize(scale?: number): void;
+    resizeToDisplaySize(scale?: number): boolean;
 }
 export declare class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
     _observer: ResizeObserver;

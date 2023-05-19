@@ -98,6 +98,19 @@
 
                 const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
                 const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });
+
+                document.addEventListener('keydown', function(event) {
+                    if (event.ctrlKey) {
+                        console.log('DOWN')
+                    }
+                });
+                
+                document.addEventListener('keyup', function(event) {
+                    if (event.key === 'Control' || event.key === 'Meta') {
+                          console.log('UP')
+                     }
+                });
+
             };
         </script>
     </body>

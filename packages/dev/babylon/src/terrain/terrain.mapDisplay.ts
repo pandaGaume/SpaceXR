@@ -5,11 +5,13 @@ import { Size2, Size3 } from "@dev/core/src/geometry/geometry.size";
 import { Scene, TransformNode } from "@babylonjs/core";
 
 /**
- * fixed physical sizes in inches, within the 3 axes
- * Resolution in dpi within the 3 axes
- * the formula will be
+ * The surface map display is a virtual surface holding the anchor and dimension of the map with :
+ *  - Fixed physical sizes in inches, within the 3 axes
+ *  - Resolution in dpi within the 3 axes
+ *  * the formula will be
  *       width = dimension.width * dpi.width
  *       height = dimension.height * dpi.height
+ *  This logical display will be used to be placed accordingly of a existing mesh surface into the scene.
  */
 export class SurfaceMapDisplay extends TransformNode implements IMapDisplay {
     public static FromResolution(name: string, scene: Scene, dimensions: Size3, resolutions: ICartesian3) {

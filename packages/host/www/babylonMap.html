@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Exemple de dessin de tuiles sur canvas</title>
+        <script src="./libs/babylon.js"></script>
+        <script src="./libs/babylonjs.loaders.js"></script>
+        <script src="./libs/babylon.glTF2FileLoader.js"></script>
+        <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+        <script src="./scripts/inputs.js"></script>
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+            #mapcanvas3d {
+                width: 100%;
+                height: 100%;
+                display: block;
+                touch-action: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapcontainer">
+            <canvas id="mapcanvas3d"></canvas>
+        </div>
+        <script>
+            function createScene(canvas, engine) {
+                // This creates a basic Babylon Scene object (non-mesh)
+                const scene = new BABYLON.Scene(engine);
+                // Parameters: name, alpha, beta, radius, target position, scene
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 3, new BABYLON.Vector3(0, 1, 0), scene);
+                // This attaches the camera to the canvas
+                camera.attachControl(canvas, true);
+                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+                // Default intensity is 1. Let's dim the light a small amount
+                light.intensity = 0.7;
+
+                BABYLON.SceneLoader.Append("./models/", "table.gltf", scene, function (scene) {});
+                return scene;
+            }
+            window.onload = () => {
+                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
+                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+                const scene = createScene(canvas, engine); //Call the createScene function
+
+                // Register a render loop to repeatedly render the scene
+                engine.runRenderLoop(function () {
+                    scene.render();
+                });
+                // Watch for browser/canvas resize events
+                window.addEventListener("resize", function () {
+                    engine.resize();
+                });
+            };
+        </script>
+    </body>
+</html>

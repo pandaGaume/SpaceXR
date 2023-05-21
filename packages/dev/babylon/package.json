@@ -7,16 +7,17 @@
     "types": "dist/index",
     "private": true,
     "files": [
-        "dist",
         "src"
     ],
     "scripts": {
-        "build:babylon": "npm run clean:babylon && npm run compile:babylon",
         "clean:babylon": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+        "build:babylon:dev": "npm run clean:babylon && npm run compile:babylon",
         "compile:babylon": "npm run precompile:babylon && npm run compile:babylon:source",
         "compile:babylon:source": "tsc --project tsconfig.json",
         "precompile:babylon": "npm run build:babylon:assets",
-        "build:babylon:assets": "npx build-tools -c process-assets"
+        "build:babylon:assets": "npx build-tools -c process-assets",
+        "webpack:babylon:dev": "webpack --mode development  --stats-error-details",
+        "publish:babylon:dev": "npm run build:babylon:dev && npm run webpack:babylon:dev"
     },
     "sideEffects": false,
     "dependencies": {

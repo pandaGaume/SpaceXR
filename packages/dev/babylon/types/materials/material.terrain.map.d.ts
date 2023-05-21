@@ -4,7 +4,7 @@ export declare class MapMaterialOptions {
     wireframe?: WireframeMaterialOptions;
 }
 export declare class MapMaterial extends ShaderMaterial {
-    static TerrainKeyword: string;
+    static MapKeyword: string;
     private static ShaderOptions;
     constructor(name: string, scene: Scene);
 }

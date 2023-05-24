@@ -42,12 +42,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "SurfaceTileMapOptionsBuilder": () => (/* binding */ SurfaceTileMapOptionsBuilder)
 /* harmony export */ });
 /* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
 /* harmony import */ var core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./terrain.tile */ "./dist/terrain/terrain.tile.js");
+/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./terrain.tile */ "./dist/terrain/terrain.tile.js");
 /* harmony import */ var core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles/tiles.geography */ "../core/dist/tiles/tiles.geography.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! .. */ "../core/dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -59,7 +61,13 @@ class SurfaceTileMapOptions {
         Object.assign(this, p);
     }
 }
-SurfaceTileMapOptions.Default = new SurfaceTileMapOptions({ metrics: core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared, center: core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(), levelOfDetail: 10, gridOptions: core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainGridOptions.Shared });
+SurfaceTileMapOptions.Default = new SurfaceTileMapOptions({
+    metrics: core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared,
+    center: core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(),
+    levelOfDetail: 10,
+    gridOptions: core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainGridOptions.Shared,
+    insets: ___WEBPACK_IMPORTED_MODULE_4__.Cartesian3.Zero(),
+});
 
 class SurfaceTileMapOptionsBuilder {
     withMetrics(v) {
@@ -78,11 +86,15 @@ class SurfaceTileMapOptionsBuilder {
         this._gridOptions = v;
         return this;
     }
+    withInsets(v) {
+        this._insets = v;
+        return this;
+    }
     build() {
-        return new SurfaceTileMapOptions({ metrics: this._metrics, center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions });
+        return new SurfaceTileMapOptions({ metrics: this._metrics, center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets });
     }
 }
-class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDisplayMap {
+class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDisplayMap {
     constructor(name, display, datasource, options, scene) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
         super(display, datasource, o.metrics, o.center, o.levelOfDetail);
@@ -93,6 +105,9 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         this._translate.parent = this._pivot;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
+    }
+    get template() {
+        return this._template;
     }
     buildGrid() {
         const s = this._options.metrics?.tileSize;
@@ -112,7 +127,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         return instance;
     }
     buildMapTile(t) {
-        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_5__.TerrainTile(t);
+        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_6__.TerrainTile(t);
     }
     onDeleted(key, tile) {
         tile.dispose();
@@ -121,7 +136,8 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         const instance = this.buildInstance(key, tile);
         instance.parent = this._translate;
         const s = this.metrics.tileSize;
-        instance.position = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(tile.rect?.x || 0, tile.rect?.y || 0, 0).subtract(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._center.x - s / 2, this._center.y - s / 2, 0));
+        const s2 = s / 2;
+        instance.position = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(tile.rect?.x || 0, tile.rect?.y || 0, 0).addInPlace(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(-this._center.x + s2, -this._center.y - s2, 0));
         instance.scaling.x = s;
         instance.scaling.y = s;
         tile.mesh = instance;
@@ -131,12 +147,10 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         const resolution = this._display.resolution;
         const sw = dimension.width / resolution.width;
         const sh = dimension.height / resolution.height;
-        console.log("dimension", dimension);
-        console.log("resolution", resolution);
-        console.log("scale", this._scale, "sw", sw, "sh", sh);
-        console.log("scale", this._scale, "sw", sw, "sh", sh);
         this._pivot.scaling = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._scale * sw, this._scale * sh, 1);
         this._pivot.rotation.z = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(this.rotation);
+        const zOffset = this._options.insets?.z || 0;
+        this._translate.position.z = zOffset;
     }
     invalidateTiles(added, removed) { }
 }

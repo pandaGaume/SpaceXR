@@ -7,14 +7,22 @@ import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { AbstractMesh, Mesh, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 import { TerrainTile } from "./terrain.tile";
 import { EPSG3857 } from "core/tiles/tiles.geography";
+import { Cartesian3, ICartesian3 } from "..";
 
 export class SurfaceTileMapOptions {
-    public static Default = new SurfaceTileMapOptions({ metrics: EPSG3857.Shared, center: Geo2.Zero(), levelOfDetail: 10, gridOptions: TerrainGridOptions.Shared });
+    public static Default = new SurfaceTileMapOptions({
+        metrics: EPSG3857.Shared,
+        center: Geo2.Zero(),
+        levelOfDetail: 10,
+        gridOptions: TerrainGridOptions.Shared,
+        insets: Cartesian3.Zero(),
+    });
 
     metrics?: ITileMetrics;
     center?: IGeo2;
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
+    insets?: ICartesian3;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
         Object.assign(this, p);
@@ -26,6 +34,7 @@ export class SurfaceTileMapOptionsBuilder {
     _center?: IGeo2;
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
+    _insets?: ICartesian3;
 
     public withMetrics(v?: ITileMetrics): SurfaceTileMapOptionsBuilder {
         this._metrics = v;
@@ -43,8 +52,12 @@ export class SurfaceTileMapOptionsBuilder {
         this._gridOptions = v;
         return this;
     }
+    public withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder {
+        this._insets = v;
+        return this;
+    }
     public build(): SurfaceTileMapOptions {
-        return new SurfaceTileMapOptions({ metrics: this._metrics, center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions });
+        return new SurfaceTileMapOptions({ metrics: this._metrics, center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets });
     }
 }
 
@@ -65,6 +78,10 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         this._translate.parent = this._pivot;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
+    }
+
+    public get template(): Mesh {
+        return this._template;
     }
 
     protected buildGrid(): VertexData {
@@ -112,7 +129,8 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         const instance = this.buildInstance(key, tile);
         instance.parent = this._translate;
         const s = this.metrics.tileSize;
-        instance.position = new Vector3(tile.rect?.x || 0, tile.rect?.y || 0, 0).subtract(new Vector3(this._center.x - s / 2, this._center.y - s / 2, 0));
+        const s2 = s / 2;
+        instance.position = new Vector3(tile.rect?.x || 0, tile.rect?.y || 0, 0).addInPlace(new Vector3(-this._center.x + s2, -this._center.y - s2, 0));
         instance.scaling.x = s;
         instance.scaling.y = s;
         //console.log(instance.position);
@@ -126,15 +144,10 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         const resolution = this._display.resolution;
         const sw = dimension.width / resolution.width;
         const sh = dimension.height / resolution.height;
-
-        console.log("dimension", dimension);
-        console.log("resolution", resolution);
-        console.log("scale", this._scale, "sw", sw, "sh", sh);
-        console.log("scale", this._scale, "sw", sw, "sh", sh);
         this._pivot.scaling = new Vector3(this._scale * sw, this._scale * sh, 1);
         this._pivot.rotation.z = Tools.ToRadians(this.rotation);
-        //this._translate.position.x = -this._center.x;
-        //this._translate.position.z = -this._center.y;
+        const zOffset = this._options.insets?.z || 0;
+        this._translate.position.z = zOffset;
     }
 
     protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: ITile<V>[] | undefined): void {}

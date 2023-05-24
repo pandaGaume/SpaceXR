@@ -43,12 +43,12 @@
                 light.intensity = 0.7;
 
                 // create a basic table (in meter)
-                const h = 2;
-                const w = 1;
+                const h = 1;
+                const w = 2;
                 const t = 1;
-                const table = BABYLON.MeshBuilder.CreatePlane("plane", { height: h, width: w });
+                const table = BABYLON.MeshBuilder.CreatePlane("plane", { height: h, width: w, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
                 table.position.y = 0.9;
-                table.rotation.x = Math.PI / 2;
+                table.rotation.x = -Math.PI / 2;
                 var tableMaterial = new BABYLON.StandardMaterial("table", scene);
                 tableMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
                 tableMaterial.alpha = 0.4;
@@ -58,7 +58,7 @@
                 const display = SPACEXR.SurfaceMapDisplay.FromResolution(
                     "display",
                     { height: h, width: w, thickness: t },
-                    { x: 1280, y: 720, z: 720 }, // in 'pixel', ratio of 16/9
+                    { x: 128, y: 72, z: 72 }, // in 'pixel', ratio of 16/9
                     scene
                 );
                 display.parent = table;
@@ -72,11 +72,15 @@
                     metrics: mapzenMetrics,
                     center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
                     levelOfDetail: 11,
-                    gridOptions: new SPACEXR.TerrainGridOptionsBuilder().withInvertIndices(true).build(),
+                    gridOptions: new SPACEXR.TerrainGridOptionsBuilder().build(),
+                    insets: new SPACEXR.Cartesian3(0, 0, 0.2),
                 };
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("map", display, terrariumImgClient, options, scene);
+                const terrainMaterial = new BABYLON.StandardMaterial("terrain_material", scene);
+                terrainMaterial.wireframe = true;
+                map.template.material = terrainMaterial;
                 map.view.validate();
 
                 const axes = new BABYLON.AxesViewer(scene, 1);

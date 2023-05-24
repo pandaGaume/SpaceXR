@@ -1,34 +1,60 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { Nullable } from "../types";
 
-export enum GridCoordinateReference {
-    center,
-    upperLeft,
-}
-
 export class TerrainGridOptions {
-    public static Shared = new TerrainGridOptions();
-
     public static DefaultGridSize = 256;
     public static DefaultInvertIndices = false;
-    public static DefaultCoordinateReference = GridCoordinateReference.center;
+    public static DefaultInvertYZ = false;
 
-    public width: number;
+    public static Shared = new TerrainGridOptions({
+        width: TerrainGridOptions.DefaultGridSize,
+        height: TerrainGridOptions.DefaultGridSize,
+        invertIndices: TerrainGridOptions.DefaultInvertIndices,
+        invertYZ: TerrainGridOptions.DefaultInvertYZ,
+    });
+
+    public width?: number;
     public height?: number;
-    public invertIndices: boolean;
-    public coordinateReference: GridCoordinateReference;
+    public invertIndices?: boolean;
+    public invertYZ?: boolean;
 
-    public constructor(size: number = TerrainGridOptions.DefaultGridSize, height?: number, ref?: GridCoordinateReference) {
-        this.width = size;
-        this.height = height || size;
-        this.coordinateReference = ref || TerrainGridOptions.DefaultCoordinateReference;
-        this.invertIndices = TerrainGridOptions.DefaultInvertIndices;
+    public constructor(p: Partial<TerrainGridOptions>) {
+        Object.assign(this, p);
     }
-
     public clone(): TerrainGridOptions {
-        const other = new TerrainGridOptions(this.width, this.height, this.coordinateReference);
-        other.invertIndices = this.invertIndices;
-        return other;
+        return new TerrainGridOptions(this);
+    }
+}
+
+export class TerrainGridOptionsBuilder {
+    _width?: number;
+    _height?: number;
+    _invertIndices?: boolean;
+    _invertYZ?: boolean;
+
+    public withWidth(v?: number): TerrainGridOptionsBuilder {
+        this._width = v;
+        return this;
+    }
+    public withHeight(v?: number): TerrainGridOptionsBuilder {
+        this._height = v;
+        return this;
+    }
+    public withInvertIndices(v?: boolean): TerrainGridOptionsBuilder {
+        this._invertIndices = v;
+        return this;
+    }
+    public withInvertYZ(v?: boolean): TerrainGridOptionsBuilder {
+        this._invertYZ = v;
+        return this;
+    }
+    public build() {
+        return new TerrainGridOptions({
+            width: this._width || this._height,
+            height: this._height || this._width,
+            invertIndices: this._invertIndices,
+            invertYZ: this._invertYZ,
+        });
     }
 }
 
@@ -54,11 +80,10 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         const positions = [];
         const indices = [];
 
-        const isCentered = this._o?.coordinateReference == GridCoordinateReference.center;
-        const x0 = isCentered ? -0.5 : 0;
-        const y0 = isCentered ? 0.5 : 0;
+        const x0 = -0.5;
+        const y0 = 0.5;
         const dx = 1 / (w - 1);
-        const dy = (isCentered ? 1 : -1) / (h - 1);
+        const dy = 1 / (h - 1);
 
         // positions and uvs. Note the uvs origin upper left.
         for (let row = 0; row < h; row++) {
@@ -68,7 +93,11 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
                 const z = 0;
-                positions.push(x, y, z);
+                if (this._o?.invertYZ) {
+                    positions.push(x, z, y);
+                } else {
+                    positions.push(x, y, z);
+                }
             }
         }
 

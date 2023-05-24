@@ -5,6 +5,8 @@
         <script src="./libs/babylon.js"></script>
         <script src="./libs/babylonjs.loaders.js"></script>
         <script src="./libs/babylon.glTF2FileLoader.js"></script>
+        <script src="./libs/babylon.inspector.bundle.js"></script>
+
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
         <script src="./scripts/inputs.js"></script>
         <style>
@@ -31,6 +33,8 @@
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 3, new BABYLON.Vector3(0, 1, 0), scene);
+                camera.wheelPrecision = 100;
+                camera.minZ = 0;
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, true);
                 // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
@@ -38,14 +42,53 @@
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.7;
 
-                BABYLON.SceneLoader.Append("./models/", "table.gltf", scene, function (scene) {});
+                // create a basic table (in meter)
+                const h = 2;
+                const w = 1;
+                const t = 1;
+                const table = BABYLON.MeshBuilder.CreatePlane("plane", { height: h, width: w });
+                table.position.y = 0.9;
+                table.rotation.x = Math.PI / 2;
+                var tableMaterial = new BABYLON.StandardMaterial("table", scene);
+                tableMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                tableMaterial.alpha = 0.4;
+                table.material = tableMaterial;
+
+                // create an hologram display reference with a 96 dpi
+                const display = SPACEXR.SurfaceMapDisplay.FromResolution(
+                    "display",
+                    { height: h, width: w, thickness: t },
+                    { x: 1280, y: 720, z: 720 }, // in 'pixel', ratio of 16/9
+                    scene
+                );
+                display.parent = table;
+
+                // definir la source de donnée.
+                const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
+                const metricOptions = new SPACEXR.TileMetricsOptionsBuilder().withMaxLOD(SPACEXR.MapZen.MaxLevelOfDetail).build();
+                const mapzenMetrics = new SPACEXR.EPSG3857(metricOptions);
+
+                const options = {
+                    metrics: mapzenMetrics,
+                    center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
+                    levelOfDetail: 11,
+                    gridOptions: new SPACEXR.TerrainGridOptionsBuilder().withInvertIndices(true).build(),
+                };
+
+                // construire la carte.
+                const map = new SPACEXR.SurfaceTileMap("map", display, terrariumImgClient, options, scene);
+                map.view.validate();
+
+                const axes = new BABYLON.AxesViewer(scene, 1);
+
                 return scene;
             }
+
             window.onload = () => {
                 const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = createScene(canvas, engine); //Call the createScene function
-
+                scene.debugLayer.show();
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {
                     scene.render();

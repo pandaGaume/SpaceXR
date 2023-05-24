@@ -1,6 +1,6 @@
 {
     "extends": "../../../tsconfig.json",
-    "name": "spacexr",
+    "name": "spacexr-core",
     "compilerOptions": {
         "composite": true,
         "outDir": "./dist",
@@ -8,10 +8,10 @@
         "declarationDir": "./types",
         "skipLibCheck": true,
         "paths": {
-            "core/*": ["dev/core/src/*"]
+            "core/*": ["./dev/core/src/*"]
         }
     },
 
-    "include": ["./src/**/*.ts", "../shelly/src/events/events.emitter.ts"],
+    "include": ["./src/**/*.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

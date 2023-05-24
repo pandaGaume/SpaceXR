@@ -7,7 +7,6 @@ module.exports = [
         entry: {
             stellar_landscape_xr: path.resolve(__dirname, "./dist/index.js"),
         },
-        mode: "development",
         devtool: "source-map",
         output: {
             library: "SPACEXR",
@@ -20,7 +19,7 @@ module.exports = [
         },
         resolve: {
             alias: {
-                "@dev/core/src": `${__dirname}/../core/dist`,
+                core: `${__dirname}/../core/dist`,
             },
         },
         externals: [

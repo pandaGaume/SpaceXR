@@ -1,6 +1,6 @@
 {
     "extends": "../../../tsconfig.json",
-
+    "name": "spacexr-babylon",
     "compilerOptions": {
         "composite": true,
         "outDir": "./dist",
@@ -8,11 +8,10 @@
         "declarationDir": "./types",
         "skipLibCheck": true,
         "paths": {
-            "spacegx/*": ["dev/core/types/*"],
-            "shelly/*": ["dev/shelly/types/*"]
+            "core/*": ["./dev/core/src/*"] // base url set in parent config
         }
     },
     "references": [{ "path": "../core" }],
-    "include": ["./src/**/*.ts", "../core/src/materials/glsl.d.ts", "src/materials/material.terrain.map.ts"],
+    "include": ["./src/**/*.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

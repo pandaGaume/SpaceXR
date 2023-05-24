@@ -1,13 +1,4 @@
 {
     "version": "2.0.0",
-    "tasks": [
-        {
-            "type": "npm",
-            "script": "publish:core:dev",
-            "path": "packages/dev/core",
-            "problemMatcher": [],
-            "label": "npm: publish:core:dev - packages/dev/core",
-            "detail": "npm run build:core:dev && npm run webpack:core:dev"
-        }
-    ]
+    "tasks": []
 }

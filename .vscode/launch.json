@@ -31,7 +31,8 @@
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "pathMapping": {
-                "/": "${workspaceFolder}/packages/dev/core/"
+                "/core": "${workspaceFolder}/packages/dev/core/",
+                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
             }
         },
         {
@@ -42,7 +43,8 @@
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "pathMapping": {
-                "/": "${workspaceFolder}/packages/dev/core/"
+                "/core": "${workspaceFolder}/packages/dev/core/",
+                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
             }
         }
     ]

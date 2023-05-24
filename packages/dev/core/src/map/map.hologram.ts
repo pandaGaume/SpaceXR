@@ -3,7 +3,7 @@ import { AbstractDisplayMap, IMapDisplay } from "./map";
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
 import { ICartesian3, ISize2, ISize3, isCartesian3 } from "../geometry/geometry.interfaces";
 import { IVerticesData } from "../meshes/meshes.interfaces";
-import { TerrainGridOptions, TerrainNormalizedGridBuilder } from "../meshes/terrain.grid";
+import { TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "../meshes/terrain.grid";
 import { Cartesian3 } from "../geometry/geometry.cartesian";
 import { Size2 } from "../geometry/geometry.size";
 
@@ -43,7 +43,7 @@ export class HologramTileMap<T, H extends HologramMapDisplay> extends AbstractDi
         super(display, datasource, metrics, center, lod);
         // build a normalized grid of tile size.
         // this grid will be used to allocate meshes and instances.
-        const o = new TerrainGridOptions(metrics.tileSize);
+        const o = new TerrainGridOptionsBuilder().withWidth(metrics.tileSize).build();
         this._gridSeed = new TerrainNormalizedGridBuilder().withOptions(o).build();
     }
 

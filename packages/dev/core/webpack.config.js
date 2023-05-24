@@ -7,7 +7,6 @@ module.exports = [
         entry: {
             spacexr: path.resolve(__dirname, "./dist/index.js"),
         },
-        mode: "development",
         devtool: "source-map",
         output: {
             library: "SPACEXR",

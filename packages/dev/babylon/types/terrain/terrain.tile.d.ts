@@ -1,6 +1,8 @@
 import { AbstractMesh } from "@babylonjs/core";
-import { ITile, ITileAddress, ITileProxy } from "@dev/core/src/tiles/tiles.interfaces";
-import { Nullable, IRectangle, IEnvelope } from "dev/core/src";
+import { IEnvelope } from "core/geography";
+import { IRectangle } from "core/geometry";
+import { ITile, ITileAddress, ITileProxy } from "core/tiles/tiles.interfaces";
+import { Nullable } from "core/types";
 export declare class TerrainTile<V> implements ITile<V>, ITileProxy<V> {
     _delegate: ITile<V>;
     _mesh: AbstractMesh | undefined;

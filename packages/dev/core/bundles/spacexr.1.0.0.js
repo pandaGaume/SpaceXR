@@ -1438,7 +1438,7 @@ class HologramMapDisplay {
 class HologramTileMap extends _map__WEBPACK_IMPORTED_MODULE_3__.AbstractDisplayMap {
     constructor(display, datasource, metrics, center, lod) {
         super(display, datasource, metrics, center, lod);
-        const o = new _meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_4__.TerrainGridOptions(metrics.tileSize);
+        const o = new _meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_4__.TerrainGridOptionsBuilder().withWidth(metrics.tileSize).build();
         this._gridSeed = new _meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_4__.TerrainNormalizedGridBuilder().withOptions(o).build();
     }
     onDeleted(key, tile) {
@@ -1468,9 +1468,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AbstractDisplayMap": () => (/* binding */ AbstractDisplayMap)
 /* harmony export */ });
-/* harmony import */ var _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/tile.mapview */ "./dist/tiles/tile.mapview.js");
-/* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
+/* harmony import */ var _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles/tile.mapview */ "./dist/tiles/tile.mapview.js");
+/* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
 /* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/tiles.geography */ "./dist/tiles/tiles.geography.js");
+
 
 
 
@@ -1480,10 +1482,10 @@ class AbstractDisplayMap {
         this._scale = 1;
         this._center = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         this._display = display;
-        this._view = new _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__.TileMapView(datasource, metrics, display.resolution.width, display.resolution.height, center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(), lod || metrics.minLOD);
+        const m = metrics || _tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared;
+        this._view = new _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(datasource, m, display.resolution.width, display.resolution.height, center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || m.minLOD);
         this._view.updateObservable.add((e) => this.onUpdate(e));
         this._activ = new Map();
-        this._view.validate();
     }
     invalidateSize(w, h) {
         this._view.invalidateSize(w, h);
@@ -1542,11 +1544,11 @@ class AbstractDisplayMap {
             return;
         }
         switch (args.reason) {
-            case _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__.UpdateReason.tileReady: {
+            case _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_2__.UpdateReason.tileReady: {
                 this.onUpdateTiles(args);
                 break;
             }
-            case _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__.UpdateReason.viewChanged:
+            case _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_2__.UpdateReason.viewChanged:
             default: {
                 this.onUpdateView(args);
                 break;
@@ -1771,6 +1773,7 @@ class Scalar {
 Scalar.EPSILON = 1.401298e-45;
 Scalar.DEG2RAD = Math.PI / 180;
 Scalar.INCH2METER = 0.0254;
+Scalar.METER2INCH = 39.3701;
 Scalar.Sign = function (value) {
     return value > 0 ? 1 : -1;
 };
@@ -2208,8 +2211,8 @@ Speed.Units = {};
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "GridCoordinateReference": () => (/* reexport safe */ _terrain_grid__WEBPACK_IMPORTED_MODULE_0__.GridCoordinateReference),
 /* harmony export */   "TerrainGridOptions": () => (/* reexport safe */ _terrain_grid__WEBPACK_IMPORTED_MODULE_0__.TerrainGridOptions),
+/* harmony export */   "TerrainGridOptionsBuilder": () => (/* reexport safe */ _terrain_grid__WEBPACK_IMPORTED_MODULE_0__.TerrainGridOptionsBuilder),
 /* harmony export */   "TerrainNormalizedGridBuilder": () => (/* reexport safe */ _terrain_grid__WEBPACK_IMPORTED_MODULE_0__.TerrainNormalizedGridBuilder)
 /* harmony export */ });
 /* harmony import */ var _terrain_grid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./terrain.grid */ "./dist/meshes/terrain.grid.js");
@@ -2227,33 +2230,54 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "GridCoordinateReference": () => (/* binding */ GridCoordinateReference),
 /* harmony export */   "TerrainGridOptions": () => (/* binding */ TerrainGridOptions),
+/* harmony export */   "TerrainGridOptionsBuilder": () => (/* binding */ TerrainGridOptionsBuilder),
 /* harmony export */   "TerrainNormalizedGridBuilder": () => (/* binding */ TerrainNormalizedGridBuilder)
 /* harmony export */ });
-var GridCoordinateReference;
-(function (GridCoordinateReference) {
-    GridCoordinateReference[GridCoordinateReference["center"] = 0] = "center";
-    GridCoordinateReference[GridCoordinateReference["upperLeft"] = 1] = "upperLeft";
-})(GridCoordinateReference || (GridCoordinateReference = {}));
 class TerrainGridOptions {
-    constructor(size = TerrainGridOptions.DefaultGridSize, height, ref) {
-        this.width = size;
-        this.height = height || size;
-        this.coordinateReference = ref || TerrainGridOptions.DefaultCoordinateReference;
-        this.invertIndices = TerrainGridOptions.DefaultInvertIndices;
+    constructor(p) {
+        Object.assign(this, p);
     }
     clone() {
-        const other = new TerrainGridOptions(this.width, this.height, this.coordinateReference);
-        other.invertIndices = this.invertIndices;
-        return other;
+        return new TerrainGridOptions(this);
     }
 }
-TerrainGridOptions.Shared = new TerrainGridOptions();
 TerrainGridOptions.DefaultGridSize = 256;
 TerrainGridOptions.DefaultInvertIndices = false;
-TerrainGridOptions.DefaultCoordinateReference = GridCoordinateReference.center;
+TerrainGridOptions.DefaultInvertYZ = false;
+TerrainGridOptions.Shared = new TerrainGridOptions({
+    width: TerrainGridOptions.DefaultGridSize,
+    height: TerrainGridOptions.DefaultGridSize,
+    invertIndices: TerrainGridOptions.DefaultInvertIndices,
+    invertYZ: TerrainGridOptions.DefaultInvertYZ,
+});
 
+class TerrainGridOptionsBuilder {
+    withWidth(v) {
+        this._width = v;
+        return this;
+    }
+    withHeight(v) {
+        this._height = v;
+        return this;
+    }
+    withInvertIndices(v) {
+        this._invertIndices = v;
+        return this;
+    }
+    withInvertYZ(v) {
+        this._invertYZ = v;
+        return this;
+    }
+    build() {
+        return new TerrainGridOptions({
+            width: this._width || this._height,
+            height: this._height || this._width,
+            invertIndices: this._invertIndices,
+            invertYZ: this._invertYZ,
+        });
+    }
+}
 class TerrainNormalizedGridBuilder {
     constructor(options = null) {
         this.withOptions(options);
@@ -2270,11 +2294,10 @@ class TerrainNormalizedGridBuilder {
         const sy = 1;
         const positions = [];
         const indices = [];
-        const isCentered = this._o?.coordinateReference == GridCoordinateReference.center;
-        const x0 = isCentered ? -0.5 : 0;
-        const y0 = isCentered ? 0.5 : 0;
+        const x0 = -0.5;
+        const y0 = 0.5;
         const dx = 1 / (w - 1);
-        const dy = (isCentered ? 1 : -1) / (h - 1);
+        const dy = 1 / (h - 1);
         for (let row = 0; row < h; row++) {
             const v = row * dy;
             const y = (y0 + v) * sy;
@@ -2282,7 +2305,12 @@ class TerrainNormalizedGridBuilder {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
                 const z = 0;
-                positions.push(x, y, z);
+                if (this._o?.invertYZ) {
+                    positions.push(x, z, y);
+                }
+                else {
+                    positions.push(x, y, z);
+                }
             }
         }
         const isWEven = w % 2 == 0;
@@ -4770,7 +4798,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo3),
 /* harmony export */   "GeodeticSystem": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
-/* harmony export */   "GridCoordinateReference": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.GridCoordinateReference),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.HSLColor),
 /* harmony export */   "HologramMapDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.HologramMapDisplay),
 /* harmony export */   "HologramTileMap": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.HologramTileMap),
@@ -4805,6 +4832,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "StarColor": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.StarColor),
 /* harmony export */   "Temperature": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Temperature),
 /* harmony export */   "TerrainGridOptions": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptions),
+/* harmony export */   "TerrainGridOptionsBuilder": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptionsBuilder),
 /* harmony export */   "TerrainNormalizedGridBuilder": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainNormalizedGridBuilder),
 /* harmony export */   "TextTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TextTileCodec),
 /* harmony export */   "Tile": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.Tile),

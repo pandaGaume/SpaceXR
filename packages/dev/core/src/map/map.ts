@@ -4,6 +4,7 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
+import { EPSG3857 } from "../tiles/tiles.geography";
 
 export interface IMapDisplay {
     resolution: ISize2;
@@ -18,12 +19,12 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     _scale: number = 1;
     _center: ICartesian2 = Cartesian2.Zero();
 
-    public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {
+    public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, metrics?: ITileMetrics, center?: IGeo2, lod?: number) {
         this._display = display;
-        this._view = new TileMapView(datasource, metrics, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || metrics.minLOD);
+        const m = metrics || EPSG3857.Shared;
+        this._view = new TileMapView(datasource, m, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || m.minLOD);
         this._view.updateObservable.add((e: UpdateEventArgs<V>) => this.onUpdate(e));
         this._activ = new Map<string, T>();
-        this._view.validate();
     }
     public invalidateSize(w: number, h: number): ITileMapApi {
         this._view.invalidateSize(w, h);

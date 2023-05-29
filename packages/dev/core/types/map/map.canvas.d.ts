@@ -1,12 +1,12 @@
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
 import { AbstractDisplayMap, IMapDisplay } from "./map";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IRectangle, ISize3 } from "../geometry/geometry.interfaces";
 export declare class CanvasDisplay implements IMapDisplay {
     canvas: HTMLCanvasElement;
     constructor(canvas: HTMLCanvasElement);
     getContext(options?: CanvasRenderingContext2DSettings | undefined): CanvasRenderingContext2D | null;
-    get resolution(): ISize2;
+    get resolution(): ISize3;
     resizeToDisplaySize(scale?: number): boolean;
 }
 export declare class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {

@@ -1,7 +1,7 @@
 import { IMapDisplay } from "core/map";
-import { ICartesian3, ISize2, ISize3, isCartesian3 } from "core/geometry/geometry.interfaces";
+import { ICartesian3, ISize3, isCartesian3 } from "core/geometry/geometry.interfaces";
 import { Cartesian3 } from "core/geometry/geometry.cartesian";
-import { Size2 } from "core/geometry/geometry.size";
+import { Size3 } from "core/geometry/geometry.size";
 import { Scene, TransformNode } from "@babylonjs/core";
 import { Scalar } from "core/math";
 
@@ -38,12 +38,21 @@ export class SurfaceMapDisplay extends TransformNode implements IMapDisplay {
         this._dpi = isCartesian3(dpi) ? new Cartesian3(dpi.x, dpi.y, dpi.z) : new Cartesian3(dpi, dpi, dpi);
     }
 
-    public get resolution(): ISize2 {
-        return new Size2(this._dimension.width * Scalar.METER2INCH * this._dpi.x, this._dimension.height * Scalar.METER2INCH * this._dpi.y);
+    public get resolution(): ISize3 {
+        return new Size3(
+            this._dimension.width * Scalar.METER2INCH * this._dpi.x,
+            this._dimension.height * Scalar.METER2INCH * this._dpi.y,
+            this._dimension.thickness * Scalar.METER2INCH * this._dpi.z
+        );
     }
 
     public get dimension(): ISize3 {
         return this._dimension;
+    }
+
+    public getPixelsPerUnits(): ICartesian3 {
+        const r = this.resolution;
+        return new Cartesian3(r.width / this._dimension.width, r.height / this._dimension.height, r.thickness / this._dimension.thickness);
     }
 
     public getAspectRatio(ref: SurfaceMapPlane = SurfaceMapPlane.XY): number {

@@ -1,9 +1,9 @@
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
 import { AbstractDisplayMap, IMapDisplay } from "./map";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IRectangle, ISize3 } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
-import { Size2 } from "../geometry/geometry.size";
+import { Size3 } from "../geometry/geometry.size";
 import { Scalar } from "../math/math";
 
 export class CanvasDisplay implements IMapDisplay {
@@ -15,8 +15,8 @@ export class CanvasDisplay implements IMapDisplay {
         return this.canvas.getContext("2d", options);
     }
 
-    public get resolution(): ISize2 {
-        return new Size2(this.canvas.width, this.canvas.height);
+    public get resolution(): ISize3 {
+        return new Size3(this.canvas.width, this.canvas.height, 0);
     }
 
     /**

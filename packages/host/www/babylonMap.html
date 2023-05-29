@@ -132,11 +132,8 @@
                         if (current) {
                             var diff = current.subtract(startingPoint);
                             setTimeout(() => {
-                                const s = display.dimension;
-                                const r = display.resolution;
-                                const dx = r.width / s.width;
-                                const dy = r.height / s.height;
-                                map.translate(-diff.x * dx, -diff.z * dy);
+                                const ppu = display.getPixelsPerUnits();
+                                map.translate(-diff.x * ppu.x, -diff.z * ppu.y);
                             });
                             greenBox.position.addInPlace(diff);
                             startingPoint = current;

@@ -240,10 +240,14 @@ class SurfaceMapDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tra
         this._dpi = (0,core_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.isCartesian3)(dpi) ? new core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3(dpi.x, dpi.y, dpi.z) : new core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3(dpi, dpi, dpi);
     }
     get resolution() {
-        return new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_4__.Size2(this._dimension.width * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.x, this._dimension.height * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.y);
+        return new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_4__.Size3(this._dimension.width * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.x, this._dimension.height * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.y, this._dimension.thickness * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.z);
     }
     get dimension() {
         return this._dimension;
+    }
+    getPixelsPerUnits() {
+        const r = this.resolution;
+        return new core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3(r.width / this._dimension.width, r.height / this._dimension.height, r.thickness / this._dimension.thickness);
     }
     getAspectRatio(ref = SurfaceMapPlane.XY) {
         switch (ref) {
@@ -1628,8 +1632,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo3),
 /* harmony export */   "GeodeticSystem": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.HSLColor),
-/* harmony export */   "HologramMapDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.HologramMapDisplay),
-/* harmony export */   "HologramTileMap": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.HologramTileMap),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
@@ -1723,14 +1725,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AbstractDisplayMap": () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap),
 /* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay),
-/* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasTileMap),
-/* harmony export */   "HologramMapDisplay": () => (/* reexport safe */ _map_hologram__WEBPACK_IMPORTED_MODULE_2__.HologramMapDisplay),
-/* harmony export */   "HologramTileMap": () => (/* reexport safe */ _map_hologram__WEBPACK_IMPORTED_MODULE_2__.HologramTileMap)
+/* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasTileMap)
 /* harmony export */ });
 /* harmony import */ var _map_canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.canvas */ "../core/dist/map/map.canvas.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "../core/dist/map/map.js");
-/* harmony import */ var _map_hologram__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.hologram */ "../core/dist/map/map.hologram.js");
-
 
 
 //# sourceMappingURL=index.js.map
@@ -1765,7 +1763,7 @@ class CanvasDisplay {
         return this.canvas.getContext("2d", options);
     }
     get resolution() {
-        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__.Size2(this.canvas.width, this.canvas.height);
+        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__.Size3(this.canvas.width, this.canvas.height, 0);
     }
     resizeToDisplaySize(scale = 1) {
         const displayWidth = this.canvas.clientWidth;
@@ -1832,66 +1830,6 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
     }
 }
 //# sourceMappingURL=map.canvas.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/map.hologram.js":
-/*!****************************************!*\
-  !*** ../core/dist/map/map.hologram.js ***!
-  \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "HologramMapDisplay": () => (/* binding */ HologramMapDisplay),
-/* harmony export */   "HologramTileMap": () => (/* binding */ HologramTileMap)
-/* harmony export */ });
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ "../core/dist/map/map.js");
-/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
-/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
-
-
-
-
-
-class HologramMapDisplay {
-    static FromResolution(dimensions, resolutions) {
-        const d = new HologramMapDisplay(dimensions, 0);
-        d._dpi.x = resolutions.x / dimensions.width;
-        d._dpi.y = resolutions.y / dimensions.height;
-        d._dpi.z = resolutions.z / dimensions.thickness;
-        return d;
-    }
-    constructor(dimensions, dpi) {
-        this._dimensions = dimensions;
-        this._dpi = (0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isCartesian3)(dpi) ? new _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(dpi.x, dpi.y, dpi.z) : new _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(dpi, dpi, dpi);
-    }
-    get resolution() {
-        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_2__.Size2(this._dimensions.width * this._dpi.y, this._dimensions.height * this._dpi.z);
-    }
-}
-class HologramTileMap extends _map__WEBPACK_IMPORTED_MODULE_3__.AbstractDisplayMap {
-    constructor(display, datasource, metrics, center, lod) {
-        super(display, datasource, metrics, center, lod);
-        const o = new _meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_4__.TerrainGridOptionsBuilder().withWidth(metrics.tileSize).build();
-        this._gridSeed = new _meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_4__.TerrainNormalizedGridBuilder().withOptions(o).build();
-    }
-    onDeleted(key, tile) {
-        throw new Error("Method not implemented.");
-    }
-    onAdded(key, tile) {
-        throw new Error("Method not implemented.");
-    }
-    invalidateDisplay() {
-        throw new Error("Method not implemented.");
-    }
-    invalidateTiles(added, removed) {
-        throw new Error("Method not implemented.");
-    }
-}
-//# sourceMappingURL=map.hologram.js.map
 
 /***/ }),
 
@@ -5261,8 +5199,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo3": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.Geo3),
 /* harmony export */   "GeodeticSystem": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.HSLColor),
-/* harmony export */   "HologramMapDisplay": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.HologramMapDisplay),
-/* harmony export */   "HologramTileMap": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.HologramTileMap),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodec),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_1__.JsonTileCodec),

@@ -2,12 +2,12 @@ import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tile.mapvie
 import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
-import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { EPSG3857 } from "../tiles/tiles.geography";
 
 export interface IMapDisplay {
-    resolution: ISize2;
+    resolution: ISize3;
 }
 
 export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDisplay> implements ITileMetricsProvider, ITileMapApi {

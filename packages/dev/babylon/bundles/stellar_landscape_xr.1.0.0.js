@@ -43,12 +43,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
+/* harmony import */ var core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles/tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./terrain.tile */ "./dist/terrain/terrain.tile.js");
 /* harmony import */ var core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles/tiles.geography */ "../core/dist/tiles/tiles.geography.js");
 /* harmony import */ var ___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! .. */ "../core/dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -109,6 +111,9 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
     get template() {
         return this._template;
     }
+    hasMesh(mesh) {
+        return this._activ.has(mesh.name);
+    }
     buildGrid() {
         const s = this._options.metrics?.tileSize;
         const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainGridOptionsBuilder().withWidth(s).build();
@@ -135,24 +140,59 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
     onAdded(key, tile) {
         const instance = this.buildInstance(key, tile);
         instance.parent = this._translate;
-        const s = this.metrics.tileSize;
+        let s = this.metrics.tileSize;
+        let x = tile.rect?.x || 0;
+        let y = tile.rect?.y || 0;
+        switch (this.metrics.cellCoordinateReference) {
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.nw: {
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.ne: {
+                x++;
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.se: {
+                x++;
+                y++;
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.sw: {
+                y++;
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.center:
+            default: {
+                s--;
+                x += 0.5;
+                y += 0.5;
+                break;
+            }
+        }
+        const mapsize = this.metrics.mapSize(tile.address.levelOfDetail);
         const s2 = s / 2;
-        instance.position = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(tile.rect?.x || 0, tile.rect?.y || 0, 0).addInPlace(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(-this._center.x + s2, -this._center.y - s2, 0));
+        instance.position = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(x + s2, mapsize - (y + s2), 0);
         instance.scaling.x = s;
         instance.scaling.y = s;
         tile.mesh = instance;
     }
     invalidateDisplay() {
-        const dimension = this._display.dimensions;
+        console.log(this.view.center);
+        const dimension = this._display.dimension;
         const resolution = this._display.resolution;
         const sw = dimension.width / resolution.width;
         const sh = dimension.height / resolution.height;
         this._pivot.scaling = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._scale * sw, this._scale * sh, 1);
         this._pivot.rotation.z = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(this.rotation);
+        const mapsize = this.metrics.mapSize(this._lod);
+        const tilesize = this.metrics.tileSize;
         const zOffset = this._options.insets?.z || 0;
+        this._translate.position.x = -this._center.x;
+        this._translate.position.y = -(mapsize - this._center.y + tilesize);
         this._translate.position.z = zOffset;
     }
-    invalidateTiles(added, removed) { }
+    invalidateTiles(added, removed) {
+        this.invalidateDisplay();
+    }
 }
 //# sourceMappingURL=terrain.map.js.map
 
@@ -196,26 +236,26 @@ class SurfaceMapDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tra
     }
     constructor(name, dimensions, dpi, scene) {
         super(name, scene);
-        this._dimensions = dimensions;
+        this._dimension = dimensions;
         this._dpi = (0,core_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.isCartesian3)(dpi) ? new core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3(dpi.x, dpi.y, dpi.z) : new core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3(dpi, dpi, dpi);
     }
     get resolution() {
-        return new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_4__.Size2(this._dimensions.width * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.x, this._dimensions.height * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.y);
+        return new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_4__.Size2(this._dimension.width * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.x, this._dimension.height * core_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.METER2INCH * this._dpi.y);
     }
-    get dimensions() {
-        return this._dimensions;
+    get dimension() {
+        return this._dimension;
     }
     getAspectRatio(ref = SurfaceMapPlane.XY) {
         switch (ref) {
             case SurfaceMapPlane.XZ: {
-                return this._dimensions.width / this._dimensions.thickness;
+                return this._dimension.width / this._dimension.thickness;
             }
             case SurfaceMapPlane.YZ: {
-                return this._dimensions.height / this._dimensions.thickness;
+                return this._dimension.height / this._dimension.thickness;
             }
             case SurfaceMapPlane.XY:
             default: {
-                return this._dimensions.width / this._dimensions.height;
+                return this._dimension.width / this._dimension.height;
             }
         }
     }
@@ -1398,17 +1438,17 @@ class Rectangle {
     }
     *points() {
         const r = this.right;
-        const b = this.bottom;
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, this.top);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.top);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, b);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, b);
+        const t = this.top;
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, this.bottom);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, t);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, t);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.bottom);
     }
     clone() {
         return new Rectangle(this.x, this.y, this.width, this.height);
     }
     get top() {
-        return this.y;
+        return this.y + this.height;
     }
     get left() {
         return this.x;
@@ -1417,13 +1457,13 @@ class Rectangle {
         return this.x + this.width;
     }
     get bottom() {
-        return this.y + this.height;
+        return this.y;
     }
     get center() {
         return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
     }
     intersect(other) {
-        if (!other || this.bottom < other.top || this.top > other.bottom || this.left > other.right || this.right < other.left) {
+        if (!other || this.bottom > other.top || this.top < other.bottom || this.left > other.right || this.right < other.left) {
             return false;
         }
         return true;
@@ -1433,8 +1473,8 @@ class Rectangle {
             return undefined;
         }
         const target = ref || Rectangle.Zero();
-        target.y = Math.max(this.top, other.top);
-        target.height = Math.min(this.bottom, other.bottom) - target.y;
+        target.y = Math.max(this.bottom, other.bottom);
+        target.height = Math.min(this.top, other.top) - target.y;
         target.x = Math.max(this.left, other.left);
         target.width = Math.min(this.right, other.right) - target.x;
         return target;
@@ -1443,7 +1483,7 @@ class Rectangle {
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
         const x2 = Math.max(this.right, other.right);
-        const y2 = Math.max(this.bottom, other.bottom);
+        const y2 = Math.max(this.top, other.top);
         this.x = x1;
         this.y = y1;
         this.width = x2 - x1;
@@ -1883,6 +1923,9 @@ class AbstractDisplayMap {
         this._view = new _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(datasource, m, display.resolution.width, display.resolution.height, center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || m.minLOD);
         this._view.updateObservable.add((e) => this.onUpdate(e));
         this._activ = new Map();
+    }
+    hasTile(key) {
+        return this._activ.has(key);
     }
     invalidateSize(w, h) {
         this._view.invalidateSize(w, h);
@@ -3645,9 +3688,9 @@ class TileMapView {
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom);
         const tileXYBounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_9__.Rectangle.FromPoints(nwTileXY, seTileXY);
         x0 = tileXYBounds.left;
-        y0 = tileXYBounds.top;
+        y0 = tileXYBounds.bottom;
         const x1 = tileXYBounds.right;
-        const y1 = tileXYBounds.bottom;
+        const y1 = tileXYBounds.top;
         const remains = new Array();
         let added = new Array();
         const builder = new _tiles__WEBPACK_IMPORTED_MODULE_10__.TileBuilder().withMetrics(this.metrics);

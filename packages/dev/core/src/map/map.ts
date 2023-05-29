@@ -26,6 +26,10 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         this._view.updateObservable.add((e: UpdateEventArgs<V>) => this.onUpdate(e));
         this._activ = new Map<string, T>();
     }
+
+    public hasTile(key: string) {
+        return this._activ.has(key);
+    }
     public invalidateSize(w: number, h: number): ITileMapApi {
         this._view.invalidateSize(w, h);
         this._view.validate();

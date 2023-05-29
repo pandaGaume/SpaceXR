@@ -1,7 +1,7 @@
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
-import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "core/tiles/tiles.interfaces";
+import { CellCoordinateReference, ITile, ITileAddress, ITileDatasource, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { AbstractMesh, Mesh, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
@@ -84,6 +84,10 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         return this._template;
     }
 
+    public hasMesh(mesh: Mesh): boolean {
+        return this._activ.has(mesh.name);
+    }
+
     protected buildGrid(): VertexData {
         // build topology
         const s = this._options.metrics?.tileSize;
@@ -124,31 +128,68 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         tile.dispose();
     }
 
+    // TODO,introduce metrics overlaps
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
         const instance = this.buildInstance(key, tile);
         instance.parent = this._translate;
-        const s = this.metrics.tileSize;
+        let s = this.metrics.tileSize;
+        let x = tile.rect?.x || 0;
+        let y = tile.rect?.y || 0;
+
+        // compute origin end size using coordinate references.
+        switch (this.metrics.cellCoordinateReference) {
+            case CellCoordinateReference.nw: {
+                break;
+            }
+            case CellCoordinateReference.ne: {
+                x++;
+                break;
+            }
+            case CellCoordinateReference.se: {
+                x++;
+                y++;
+                break;
+            }
+            case CellCoordinateReference.sw: {
+                y++;
+                break;
+            }
+            case CellCoordinateReference.center:
+            default: {
+                s--;
+                x += 0.5;
+                y += 0.5;
+                break;
+            }
+        }
+        const mapsize = this.metrics.mapSize(tile.address.levelOfDetail);
         const s2 = s / 2;
-        instance.position = new Vector3(tile.rect?.x || 0, tile.rect?.y || 0, 0).addInPlace(new Vector3(-this._center.x + s2, -this._center.y - s2, 0));
+        instance.position = new Vector3(x + s2, mapsize - (y + s2), 0);
         instance.scaling.x = s;
         instance.scaling.y = s;
-        //console.log(instance.position);
-        // finally bind to display as root
-        //console.log("scaling", instance.scaling);
+
         tile.mesh = instance;
     }
 
     protected invalidateDisplay(): void {
-        const dimension = this._display.dimensions;
+        console.log(this.view.center);
+
+        const dimension = this._display.dimension;
         const resolution = this._display.resolution;
         const sw = dimension.width / resolution.width;
         const sh = dimension.height / resolution.height;
         this._pivot.scaling = new Vector3(this._scale * sw, this._scale * sh, 1);
         this._pivot.rotation.z = Tools.ToRadians(this.rotation);
+        const mapsize = this.metrics.mapSize(this._lod);
+        const tilesize = this.metrics.tileSize;
         const zOffset = this._options.insets?.z || 0;
+        this._translate.position.x = -this._center.x;
+        this._translate.position.y = -(mapsize - this._center.y + tilesize);
         this._translate.position.z = zOffset;
     }
 
-    protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: ITile<V>[] | undefined): void {}
+    protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: ITile<V>[] | undefined): void {
+        this.invalidateDisplay();
+    }
 }

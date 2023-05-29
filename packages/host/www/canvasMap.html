@@ -97,6 +97,7 @@
                 compass.addEventListener('click', handleCompassClick);
 
                 const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
+                translateManager.attachControl(canvas);
                 const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });
 
                 document.addEventListener('keydown', function(event) {

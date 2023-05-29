@@ -31,11 +31,11 @@ export class Rectangle implements IRectangle {
 
     public *points(): IterableIterator<ICartesian2> {
         const r = this.right;
-        const b = this.bottom;
-        yield new Cartesian2(this.left, this.top);
-        yield new Cartesian2(r, this.top);
-        yield new Cartesian2(r, b);
-        yield new Cartesian2(this.left, b);
+        const t = this.top;
+        yield new Cartesian2(this.left, this.bottom);
+        yield new Cartesian2(this.left, t);
+        yield new Cartesian2(r, t);
+        yield new Cartesian2(r, this.bottom);
     }
 
     public clone(): IRectangle {
@@ -43,7 +43,7 @@ export class Rectangle implements IRectangle {
     }
 
     public get top(): number {
-        return this.y;
+        return this.y + this.height;
     }
     public get left(): number {
         return this.x;
@@ -52,13 +52,13 @@ export class Rectangle implements IRectangle {
         return this.x + this.width;
     }
     public get bottom(): number {
-        return this.y + this.height;
+        return this.y;
     }
     public get center(): ICartesian2 {
         return new Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
     }
     public intersect(other: IRectangle): boolean {
-        if (!other || this.bottom < other.top || this.top > other.bottom || this.left > other.right || this.right < other.left) {
+        if (!other || this.bottom > other.top || this.top < other.bottom || this.left > other.right || this.right < other.left) {
             return false;
         }
         return true;
@@ -68,8 +68,8 @@ export class Rectangle implements IRectangle {
             return undefined;
         }
         const target = ref || Rectangle.Zero();
-        target.y = Math.max(this.top, other.top);
-        target.height = Math.min(this.bottom, other.bottom) - target.y;
+        target.y = Math.max(this.bottom, other.bottom);
+        target.height = Math.min(this.top, other.top) - target.y;
         target.x = Math.max(this.left, other.left);
         target.width = Math.min(this.right, other.right) - target.x;
         return target;
@@ -79,7 +79,7 @@ export class Rectangle implements IRectangle {
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
         const x2 = Math.max(this.right, other.right);
-        const y2 = Math.max(this.bottom, other.bottom);
+        const y2 = Math.max(this.top, other.top);
 
         this.x = x1;
         this.y = y1;

@@ -350,9 +350,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const tileXYBounds = Rectangle.FromPoints(nwTileXY, seTileXY);
 
         x0 = tileXYBounds.left;
-        y0 = tileXYBounds.top;
+        y0 = tileXYBounds.bottom;
         const x1 = tileXYBounds.right;
-        const y1 = tileXYBounds.bottom;
+        const y1 = tileXYBounds.top;
 
         const remains = new Array<ITile<T>>();
         let added = new Array<ITile<T>>();

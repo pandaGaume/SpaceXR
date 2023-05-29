@@ -32,7 +32,7 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 3, new BABYLON.Vector3(0, 1, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 50, new BABYLON.Vector3(0, 1, 0), scene);
                 camera.wheelPrecision = 100;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
@@ -42,10 +42,10 @@
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.7;
 
-                // create a basic table (in meter)
-                const h = 1;
-                const w = 2;
-                const t = 1;
+                // create a basic table (in centimeter)
+                const h = 100;
+                const w = 200;
+                const t = 100;
                 const table = BABYLON.MeshBuilder.CreatePlane("plane", { height: h, width: w, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
                 table.position.y = 0.9;
                 table.rotation.x = -Math.PI / 2;
@@ -58,14 +58,17 @@
                 const display = SPACEXR.SurfaceMapDisplay.FromResolution(
                     "display",
                     { height: h, width: w, thickness: t },
-                    { x: 128, y: 72, z: 72 }, // in 'pixel', ratio of 16/9
+                    { x: 256, y: 144, z: 144 }, // in 'pixel', ratio of 16/9
                     scene
                 );
                 display.parent = table;
 
                 // definir la source de donnée.
                 const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
-                const metricOptions = new SPACEXR.TileMetricsOptionsBuilder().withMaxLOD(SPACEXR.MapZen.MaxLevelOfDetail).build();
+                const metricOptions = new SPACEXR.TileMetricsOptionsBuilder()
+                    .withMaxLOD(SPACEXR.MapZen.MaxLevelOfDetail)
+                    .withCellCoordinateReference(SPACEXR.CellCoordinateReference.center)
+                    .build();
                 const mapzenMetrics = new SPACEXR.EPSG3857(metricOptions);
 
                 const options = {
@@ -82,6 +85,80 @@
                 terrainMaterial.wireframe = true;
                 map.template.material = terrainMaterial;
                 map.view.validate();
+
+                // interaction avec la carte
+                var greenMat = new BABYLON.StandardMaterial("ground", scene);
+                greenMat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+                greenMat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+                greenMat.emissiveColor = BABYLON.Color3.Green();
+
+                var greenBox = BABYLON.MeshBuilder.CreateBox("green", { size: 0.1 }, scene);
+                greenBox.material = greenMat;
+
+                let startingPoint;
+
+                var getDisplayPosition = function () {
+                    var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) {
+                        return mesh == table;
+                    });
+                    if (pickinfo.hit) {
+                        return pickinfo.pickedPoint;
+                    }
+
+                    return null;
+                };
+
+                var pointerDown = function (mesh) {
+                    startingPoint = getDisplayPosition();
+                    if (startingPoint) {
+                        // we need to disconnect camera from canvas
+                        setTimeout(function () {
+                            camera.detachControl(canvas);
+                        }, 0);
+                    }
+                };
+
+                var pointerUp = function () {
+                    if (startingPoint) {
+                        camera.attachControl(canvas, true);
+                        startingPoint = null;
+                        return;
+                    }
+                };
+
+                var pointerMove = function (pointerInfo) {
+                    if (startingPoint) {
+                        const current = getDisplayPosition();
+                        if (current) {
+                            var diff = current.subtract(startingPoint);
+                            setTimeout(() => {
+                                const s = display.dimension;
+                                const r = display.resolution;
+                                const dx = r.width / s.width;
+                                const dy = r.height / s.height;
+                                map.translate(-diff.x * dx, -diff.z * dy);
+                            });
+                            greenBox.position.addInPlace(diff);
+                            startingPoint = current;
+                        }
+                    }
+                };
+
+                scene.onPointerObservable.add((pointerInfo) => {
+                    switch (pointerInfo.type) {
+                        case BABYLON.PointerEventTypes.POINTERDOWN:
+                            if (pointerInfo.pickInfo.hit && map.hasMesh(pointerInfo.pickInfo.pickedMesh)) {
+                                pointerDown(pointerInfo.pickInfo.pickedMesh);
+                            }
+                            break;
+                        case BABYLON.PointerEventTypes.POINTERUP:
+                            pointerUp();
+                            break;
+                        case BABYLON.PointerEventTypes.POINTERMOVE:
+                            pointerMove(pointerInfo);
+                            break;
+                    }
+                });
 
                 const axes = new BABYLON.AxesViewer(scene, 1);
 

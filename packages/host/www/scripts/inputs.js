@@ -20,13 +20,15 @@ class MouseDragInputs {
     isDragging = false;
     button;
 
+    _ctxMenu;
+    _mouseDown;
+    _mouseMove;
+    _mouseUp;
     constructor(canvas, o) {
-        canvas.addEventListener("contextmenu", (event) => {
+        this._ctxMenu = function (event) {
             event.preventDefault(); // Annule le menu contextuel par défaut
-        });
-
-        // ajouter un écouteur d'événements pour la souris
-        canvas.addEventListener("mousedown", function (event) {
+        };
+        this._mouseDown = function (event) {
             // enregistrer les coordonnées de départ
             this.offsetX = this.startX = event.clientX;
             this.offsetY = this.startY = event.clientY;
@@ -35,9 +37,8 @@ class MouseDragInputs {
             if (o.onbegin) {
                 o.onbegin(this, this.offsetX, this.offsetY, this.button);
             }
-        });
-
-        canvas.addEventListener("mousemove", function (event) {
+        }.bind(this);
+        this._mouseMove = function (event) {
             if (this.isDragging) {
                 // calculer le décalage
                 const dx = event.clientX - this.offsetX;
@@ -51,13 +52,25 @@ class MouseDragInputs {
                     o.ondrag(this, dx, dy, this.button);
                 }
             }
-        });
-
-        canvas.addEventListener("mouseup", function (event) {
+        }.bind(this);
+        this._mouseUp = function (event) {
             this.isDragging = false;
             if (o.onend) {
                 o.onend(this, this.offsetX - this.startX, this.offsetY - this.startY, this.button);
             }
-        });
+        }.bind(this);
+    }
+
+    attachControl(canvas) {
+        canvas.addEventListener("contextmenu", this._ctxMenu);
+        canvas.addEventListener("mousedown", this._mouseDown);
+        canvas.addEventListener("mousemove", this._mouseMove);
+        canvas.addEventListener("mouseup", this._mouseUp);
+    }
+    detachControl(canvas) {
+        canvas.removeEventListener("contextmenu", this._ctxMenu);
+        canvas.removeEventListener("mousedown", this._mouseDown);
+        canvas.removeEventListener("mousemove", this._mouseMove);
+        canvas.removeEventListener("mouseup", this._mouseUp);
     }
 }

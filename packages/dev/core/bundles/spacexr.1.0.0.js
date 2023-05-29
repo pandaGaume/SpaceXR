@@ -1131,17 +1131,17 @@ class Rectangle {
     }
     *points() {
         const r = this.right;
-        const b = this.bottom;
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, this.top);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.top);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, b);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, b);
+        const t = this.top;
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, this.bottom);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, t);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, t);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.bottom);
     }
     clone() {
         return new Rectangle(this.x, this.y, this.width, this.height);
     }
     get top() {
-        return this.y;
+        return this.y + this.height;
     }
     get left() {
         return this.x;
@@ -1150,13 +1150,13 @@ class Rectangle {
         return this.x + this.width;
     }
     get bottom() {
-        return this.y + this.height;
+        return this.y;
     }
     get center() {
         return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
     }
     intersect(other) {
-        if (!other || this.bottom < other.top || this.top > other.bottom || this.left > other.right || this.right < other.left) {
+        if (!other || this.bottom > other.top || this.top < other.bottom || this.left > other.right || this.right < other.left) {
             return false;
         }
         return true;
@@ -1166,8 +1166,8 @@ class Rectangle {
             return undefined;
         }
         const target = ref || Rectangle.Zero();
-        target.y = Math.max(this.top, other.top);
-        target.height = Math.min(this.bottom, other.bottom) - target.y;
+        target.y = Math.max(this.bottom, other.bottom);
+        target.height = Math.min(this.top, other.top) - target.y;
         target.x = Math.max(this.left, other.left);
         target.width = Math.min(this.right, other.right) - target.x;
         return target;
@@ -1176,7 +1176,7 @@ class Rectangle {
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
         const x2 = Math.max(this.right, other.right);
-        const y2 = Math.max(this.bottom, other.bottom);
+        const y2 = Math.max(this.top, other.top);
         this.x = x1;
         this.y = y1;
         this.width = x2 - x1;
@@ -1486,6 +1486,9 @@ class AbstractDisplayMap {
         this._view = new _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(datasource, m, display.resolution.width, display.resolution.height, center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || m.minLOD);
         this._view.updateObservable.add((e) => this.onUpdate(e));
         this._activ = new Map();
+    }
+    hasTile(key) {
+        return this._activ.has(key);
     }
     invalidateSize(w, h) {
         this._view.invalidateSize(w, h);
@@ -3248,9 +3251,9 @@ class TileMapView {
         let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom);
         const tileXYBounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_9__.Rectangle.FromPoints(nwTileXY, seTileXY);
         x0 = tileXYBounds.left;
-        y0 = tileXYBounds.top;
+        y0 = tileXYBounds.bottom;
         const x1 = tileXYBounds.right;
-        const y1 = tileXYBounds.bottom;
+        const y1 = tileXYBounds.top;
         const remains = new Array();
         let added = new Array();
         const builder = new _tiles__WEBPACK_IMPORTED_MODULE_10__.TileBuilder().withMetrics(this.metrics);

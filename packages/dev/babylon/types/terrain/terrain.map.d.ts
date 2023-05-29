@@ -36,6 +36,7 @@ export declare class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends Abst
     _options: SurfaceTileMapOptions;
     constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene);
     get template(): Mesh;
+    hasMesh(mesh: Mesh): boolean;
     protected buildGrid(): VertexData;
     protected buildMesh(name: string, scene?: Scene): Mesh;
     protected buildInstance(name: string, tile: TerrainTile<V>): AbstractMesh;

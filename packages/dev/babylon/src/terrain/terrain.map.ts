@@ -173,8 +173,6 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
     }
 
     protected invalidateDisplay(): void {
-        console.log(this.view.center);
-
         const dimension = this._display.dimension;
         const resolution = this._display.resolution;
         const sw = dimension.width / resolution.width;

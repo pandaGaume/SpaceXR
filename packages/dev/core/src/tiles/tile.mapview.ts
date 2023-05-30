@@ -1,5 +1,5 @@
 import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
-import { IGeo2 } from "../geography/geography.interfaces";
+import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
@@ -13,7 +13,7 @@ import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { TileBuilder } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
-import { Cartesian2 } from "..";
+import { Cartesian2, Envelope } from "..";
 
 export class TileMapLevel<T> {
     _lod: number = 0;
@@ -88,7 +88,7 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     }
 }
 
-export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
+export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
     // cache
     _cache: IMemoryCache<string, ITile<T>>;
 
@@ -100,6 +100,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _w: number = 0;
     _h: number = 0;
     _lod: number = 0;
+    _bounds?: IEnvelope;
     _center: IGeo2 = Geo2.Zero();
     _level: TileMapLevel<T>;
     _rotation: number;
@@ -154,6 +155,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     /// PROPERTIES
+    public get bounds(): IEnvelope | undefined {
+        return this.validateBounds();
+    }
+
     public get datasource(): ITileDatasource<T, ITileAddress> {
         return this._datasource;
     }
@@ -286,6 +291,32 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public rotate(r: number): ITileMapApi {
         return this.setRotation(this._rotation + r);
+    }
+
+    public validateBounds(): IEnvelope | undefined {
+        if (!this._bounds) {
+            // compute the pixel bounds
+            const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._level._lod);
+            this._level._center = pixelCenterXY;
+
+            const w = this.width / this._level._scale;
+            const h = this.height / this._level._scale;
+            let x0 = Math.round(pixelCenterXY.x - w / 2);
+            let y0 = Math.round(pixelCenterXY.y - h / 2);
+            let bounds = new Rectangle(x0, y0, w, h);
+            if (this._rotation) {
+                const corners = bounds.points();
+                const rotated = Array.from(this.rotatePoints(bounds.center, ...corners));
+                bounds = Rectangle.FromPoints(...rotated);
+            }
+
+            // compute the bounds of tile xy
+            let nwTileXY = this.metrics.getPixelXYToLatLon(bounds.left, bounds.top, this._level._lod);
+            let seTileXY = this.metrics.getPixelXYToLatLon(bounds.right, bounds.bottom, this._level._lod);
+
+            this._bounds = Envelope.FromPoints(nwTileXY, seTileXY);
+        }
+        return this._bounds;
     }
 
     /// VALIDABLE

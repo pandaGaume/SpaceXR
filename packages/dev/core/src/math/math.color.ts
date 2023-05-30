@@ -1,6 +1,18 @@
 import { ParametricValue } from "./math";
 
 export class RGBAColor {
+    public static White() {
+        return new RGBAColor(255, 255, 255);
+    }
+
+    public static Black() {
+        return new RGBAColor(0, 0, 0);
+    }
+
+    public static NeonBlue() {
+        return new RGBAColor(77, 77, 255);
+    }
+
     public constructor(public r: number, public g: number, public b: number, public a: number = 1) {}
 
     public toHSL(): HSLColor {

@@ -4,6 +4,8 @@ export declare class RGBAColor {
     g: number;
     b: number;
     a: number;
+    static White(): RGBAColor;
+    static Black(): RGBAColor;
     constructor(r: number, g: number, b: number, a?: number);
     toHSL(): HSLColor;
     interpolate(color: RGBAColor, t: ParametricValue, keepAlpha?: boolean): RGBAColor;

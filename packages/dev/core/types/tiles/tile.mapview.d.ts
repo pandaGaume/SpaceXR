@@ -1,5 +1,5 @@
 import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
-import { IGeo2 } from "../geography/geography.interfaces";
+import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
 import { Observable } from "../events/events.observable";
 import { IValidable } from "../types";
@@ -35,13 +35,14 @@ export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     get scale(): number;
     get center(): ICartesian2;
 }
-export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>> {
+export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
     _cache: IMemoryCache<string, ITile<T>>;
     _datasource: ITileDatasource<T, ITileAddress>;
     _metrics: ITileMetrics;
     _w: number;
     _h: number;
     _lod: number;
+    _bounds?: IEnvelope;
     _center: IGeo2;
     _level: TileMapLevel<T>;
     _rotation: number;
@@ -57,6 +58,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     get updateObservable(): Observable<UpdateEventArgs<T>>;
+    get bounds(): IEnvelope | undefined;
     get datasource(): ITileDatasource<T, ITileAddress>;
     get level(): TileMapLevel<T>;
     get levelOfDetail(): number;
@@ -73,6 +75,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     zoomOut(delta: number): ITileMapApi;
     translate(tx: number, ty: number): ITileMapApi;
     rotate(r: number): ITileMapApi;
+    validateBounds(): IEnvelope | undefined;
     get isValid(): boolean;
     invalidate(): TileMapView<T>;
     validate(): TileMapView<T>;

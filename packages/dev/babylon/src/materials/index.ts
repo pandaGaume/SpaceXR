@@ -1,1 +1,1 @@
-export * from "./materials.tilemap";
+export * from "./tileMap/index";

@@ -137,7 +137,16 @@
                             var diff = current.subtract(startingPoint);
                             setTimeout(() => {
                                 const ppu = display.getPixelsPerUnits();
-                                map.translate(-diff.x * ppu.x, -diff.z * ppu.y);
+                                switch (pointerInfo.event.buttons) {
+                                    case 1: {
+                                        map.translate(-diff.x * ppu.x, -diff.z * ppu.y);
+                                        break;
+                                    }
+                                    case 2: {
+                                        map.rotate(diff.x * ppu.x);
+                                        break;
+                                    }
+                                }
                             });
                             greenBox.position.addInPlace(diff);
                             startingPoint = current;

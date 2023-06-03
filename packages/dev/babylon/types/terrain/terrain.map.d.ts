@@ -1,11 +1,11 @@
+import { AbstractMesh, Mesh, Scene, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions } from "core/meshes/terrain.grid";
+import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
-import { AbstractMesh, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { TerrainTile } from "./terrain.tile";
-import { ICartesian3 } from "..";
 export declare class SurfaceTileMapOptions {
     static Default: SurfaceTileMapOptions;
     metrics?: ITileMetrics;
@@ -30,10 +30,11 @@ export declare class SurfaceTileMapOptionsBuilder {
 }
 export declare class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
     _pivot: TransformNode;
-    _translate: TransformNode;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
+    _tileSize?: number;
+    _tileOffset?: Vector3;
     constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene);
     get template(): Mesh;
     hasMesh(mesh: Mesh): boolean;
@@ -43,6 +44,8 @@ export declare class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends Abst
     protected buildMapTile(t: ITile<V>): TerrainTile<V>;
     protected onDeleted(key: string, tile: TerrainTile<V>): void;
     protected onAdded(key: string, tile: TerrainTile<V>): void;
-    protected invalidateDisplay(): void;
-    protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: ITile<V>[] | undefined): void;
+    protected invalidateDisplay(rect?: IRectangle): void;
+    protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: TerrainTile<V>[] | undefined): void;
+    private invalidate;
+    private initialize;
 }

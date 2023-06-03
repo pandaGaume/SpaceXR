@@ -7,6 +7,7 @@ export class Cartesian2 implements ICartesian2 {
     public static One() {
         return new Cartesian2(1, 1);
     }
+
     public constructor(public x: number, public y: number) {}
 
     public toString() {

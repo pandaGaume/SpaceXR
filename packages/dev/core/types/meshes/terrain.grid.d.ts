@@ -4,23 +4,29 @@ export declare class TerrainGridOptions {
     static DefaultGridSize: number;
     static DefaultInvertIndices: boolean;
     static DefaultInvertYZ: boolean;
+    static DefaultScale: number;
     static Shared: TerrainGridOptions;
-    width?: number;
-    height?: number;
+    columns?: number;
+    rows?: number;
+    sx?: number;
+    sy?: number;
     invertIndices?: boolean;
     invertYZ?: boolean;
     constructor(p: Partial<TerrainGridOptions>);
     clone(): TerrainGridOptions;
 }
 export declare class TerrainGridOptionsBuilder {
-    _width?: number;
-    _height?: number;
+    _cols?: number;
+    _rows?: number;
+    _sx?: number;
+    _sy?: number;
     _invertIndices?: boolean;
     _invertYZ?: boolean;
-    withWidth(v?: number): TerrainGridOptionsBuilder;
-    withHeight(v?: number): TerrainGridOptionsBuilder;
+    withColumns(v?: number): TerrainGridOptionsBuilder;
+    withRows(v?: number): TerrainGridOptionsBuilder;
     withInvertIndices(v?: boolean): TerrainGridOptionsBuilder;
     withInvertYZ(v?: boolean): TerrainGridOptionsBuilder;
+    withScale(x: number, y?: number): TerrainGridOptionsBuilder;
     build(): TerrainGridOptions;
 }
 export declare class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {

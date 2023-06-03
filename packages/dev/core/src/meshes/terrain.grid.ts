@@ -5,16 +5,21 @@ export class TerrainGridOptions {
     public static DefaultGridSize = 256;
     public static DefaultInvertIndices = false;
     public static DefaultInvertYZ = false;
+    public static DefaultScale = 1;
 
     public static Shared = new TerrainGridOptions({
-        width: TerrainGridOptions.DefaultGridSize,
-        height: TerrainGridOptions.DefaultGridSize,
+        columns: TerrainGridOptions.DefaultGridSize,
+        rows: TerrainGridOptions.DefaultGridSize,
         invertIndices: TerrainGridOptions.DefaultInvertIndices,
         invertYZ: TerrainGridOptions.DefaultInvertYZ,
+        sx: TerrainGridOptions.DefaultScale,
+        sy: TerrainGridOptions.DefaultScale,
     });
 
-    public width?: number;
-    public height?: number;
+    public columns?: number;
+    public rows?: number;
+    public sx?: number;
+    public sy?: number;
     public invertIndices?: boolean;
     public invertYZ?: boolean;
 
@@ -27,17 +32,19 @@ export class TerrainGridOptions {
 }
 
 export class TerrainGridOptionsBuilder {
-    _width?: number;
-    _height?: number;
+    _cols?: number;
+    _rows?: number;
+    _sx?: number;
+    _sy?: number;
     _invertIndices?: boolean;
     _invertYZ?: boolean;
 
-    public withWidth(v?: number): TerrainGridOptionsBuilder {
-        this._width = v;
+    public withColumns(v?: number): TerrainGridOptionsBuilder {
+        this._cols = v;
         return this;
     }
-    public withHeight(v?: number): TerrainGridOptionsBuilder {
-        this._height = v;
+    public withRows(v?: number): TerrainGridOptionsBuilder {
+        this._rows = v;
         return this;
     }
     public withInvertIndices(v?: boolean): TerrainGridOptionsBuilder {
@@ -48,10 +55,18 @@ export class TerrainGridOptionsBuilder {
         this._invertYZ = v;
         return this;
     }
+
+    public withScale(x: number, y?: number): TerrainGridOptionsBuilder {
+        this._sx = x;
+        this._sy = y || x;
+        return this;
+    }
     public build() {
         return new TerrainGridOptions({
-            width: this._width || this._height,
-            height: this._height || this._width,
+            columns: this._cols || this._rows,
+            rows: this._rows || this._cols,
+            sx: this._sx,
+            sy: this._sy,
             invertIndices: this._invertIndices,
             invertYZ: this._invertYZ,
         });
@@ -73,10 +88,10 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
 
     public build<T extends IVerticesData>(data?: T): T {
         data = data || <T>{};
-        const w = this._o?.width || TerrainGridOptions.DefaultGridSize;
-        const h = this._o?.height || w;
-        const sx = 1;
-        const sy = 1;
+        const w = this._o?.columns || TerrainGridOptions.DefaultGridSize;
+        const h = this._o?.rows || w;
+        const sx = this._o?.sx || TerrainGridOptions.DefaultScale;
+        const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
         const positions = [];
         const indices = [];
 
@@ -88,7 +103,7 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         // positions and uvs. Note the uvs origin upper left.
         for (let row = 0; row < h; row++) {
             const v = row * dy;
-            const y = (y0 + v) * sy;
+            const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;

@@ -12,7 +12,7 @@ precision highp float;
 
     void main(void) {
         
-        if (fClipDistance > 0.0)
+        if (fClipDistance.x > 0.0 || fClipDistance.y > 0.0 || fClipDistance.z > 0.0 || fClipDistance.w > 0.0)
 	    {
 		    discard;
 	    }

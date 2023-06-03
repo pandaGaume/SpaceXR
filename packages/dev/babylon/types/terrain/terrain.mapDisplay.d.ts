@@ -1,18 +1,7 @@
 import { IMapDisplay } from "core/map";
-import { ICartesian3, ISize3 } from "core/geometry/geometry.interfaces";
-import { Scene, TransformNode } from "@babylonjs/core";
-export declare enum SurfaceMapPlane {
-    XY = 0,
-    XZ = 1,
-    YZ = 2
-}
-export declare class SurfaceMapDisplay extends TransformNode implements IMapDisplay {
-    static FromResolution(name: string, dimensions: ISize3, resolutions: ICartesian3, scene?: Scene): SurfaceMapDisplay;
-    _dimension: ISize3;
-    _dpi: ICartesian3;
-    constructor(name: string, dimensions: ISize3, dpi: number | ICartesian3, scene?: Scene);
-    get resolution(): ISize3;
-    get dimension(): ISize3;
-    getPixelsPerUnits(): ICartesian3;
-    getAspectRatio(ref?: SurfaceMapPlane): number;
+import { ISize3 } from "core/geometry/geometry.interfaces";
+import { Scene } from "@babylonjs/core";
+import { VirtualDisplay } from "../meshes/virtualdisplay";
+export declare class SurfaceMapDisplay extends VirtualDisplay implements IMapDisplay {
+    constructor(name: string, dimension: ISize3, resolution: ISize3, scene?: Scene);
 }

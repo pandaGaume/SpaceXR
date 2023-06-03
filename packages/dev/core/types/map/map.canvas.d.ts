@@ -2,7 +2,7 @@ import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/til
 import { AbstractDisplayMap } from "./map";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
-import { CanvasDisplay } from "./map.canvas display";
+import { CanvasDisplay } from "./map.canvas.display";
 export declare class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
     _observer: ResizeObserver;
     constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number);

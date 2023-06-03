@@ -93,6 +93,6 @@ export class Rectangle implements IRectangle {
     }
 
     public toString() {
-        return `left:${this.left}, top:${this.top}, width:${this.width}, height:${this.height}`;
+        return `left:${this.left}, bottom:${this.bottom}, right:${this.right}, top:${this.top}, width:${this.width}, height:${this.height}`;
     }
 }

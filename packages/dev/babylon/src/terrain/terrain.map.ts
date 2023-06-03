@@ -1,13 +1,16 @@
+import { AbstractMesh, Mesh, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
+
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
 import { CellCoordinateReference, ITile, ITileAddress, ITileDatasource, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
-import { SurfaceMapDisplay } from "./terrain.mapDisplay";
-import { AbstractMesh, Mesh, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
-import { TerrainTile } from "./terrain.tile";
 import { EPSG3857 } from "core/tiles/tiles.geography";
-import { Cartesian3, ICartesian3 } from "..";
+import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
+import { Cartesian3 } from "core/geometry/geometry.cartesian";
+
+import { SurfaceMapDisplay } from "./terrain.mapDisplay";
+import { TerrainTile } from "./terrain.tile";
 
 export class SurfaceTileMapOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -63,10 +66,12 @@ export class SurfaceTileMapOptionsBuilder {
 
 export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
     _pivot: TransformNode;
-    _translate: TransformNode;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
+
+    _tileSize?: number;
+    _tileOffset?: Vector3;
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
@@ -74,10 +79,9 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         this._options = o;
         this._pivot = new TransformNode(`__${name}_root__`, scene);
         this._pivot.parent = display;
-        this._translate = new TransformNode(`__${name}_trans__`, scene);
-        this._translate.parent = this._pivot;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
+        this.initialize();
     }
 
     public get template(): Mesh {
@@ -91,9 +95,8 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
     protected buildGrid(): VertexData {
         // build topology
         const s = this._options.metrics?.tileSize;
-        const o = new TerrainGridOptionsBuilder().withWidth(s).build();
-        o.invertIndices = this._options.gridOptions?.invertIndices;
-        o.invertYZ = this._options.gridOptions?.invertYZ;
+        // note : we need to invert indices because we reverse the y and x, as scale -1
+        const o = new TerrainGridOptionsBuilder().withColumns(s).withInvertIndices(true).build();
         return new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());
     }
 
@@ -132,10 +135,45 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
         const instance = this.buildInstance(key, tile);
-        instance.parent = this._translate;
+        instance.scaling.x = instance.scaling.y = this._tileSize || this.metrics.tileSize;
+        instance.parent = this._pivot;
+        tile.mesh = instance;
+    }
+
+    protected invalidateDisplay(rect?: IRectangle): void {
+        this.invalidate(this._activ.values());
+    }
+
+    protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: TerrainTile<V>[] | undefined): void {
+        if (added) {
+            this.invalidate(added);
+        }
+    }
+
+    private invalidate(tiles: IterableIterator<TerrainTile<V>> | Array<TerrainTile<V>>) {
+        const scale = this._scale;
+        const center = this._center;
+
+        this._pivot.scaling = new Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
+        if (this.rotation) {
+            this._pivot.rotation.z = Tools.ToRadians(this.rotation);
+        }
+
+        const offset = this._tileOffset || Vector3.Zero();
+        for (const t of tiles) {
+            if (t.content && t.rect && t.mesh) {
+                const c = t.rect.center;
+                t.mesh.position.x = c.x - center.x + offset.x;
+                t.mesh.position.y = c.y - center.y + offset.y;
+                t.mesh.position.z = offset.z;
+            }
+        }
+    }
+
+    private initialize(): void {
         let s = this.metrics.tileSize;
-        let x = tile.rect?.x || 0;
-        let y = tile.rect?.y || 0;
+        let x = 0;
+        let y = 0;
 
         // compute origin end size using coordinate references.
         switch (this.metrics.cellCoordinateReference) {
@@ -163,31 +201,8 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
                 break;
             }
         }
-        const mapsize = this.metrics.mapSize(tile.address.levelOfDetail);
-        const s2 = s / 2;
-        instance.position = new Vector3(x + s2, mapsize - (y + s2), 0);
-        instance.scaling.x = s;
-        instance.scaling.y = s;
-
-        tile.mesh = instance;
-    }
-
-    protected invalidateDisplay(): void {
-        const dimension = this._display.dimension;
-        const resolution = this._display.resolution;
-        const sw = dimension.width / resolution.width;
-        const sh = dimension.height / resolution.height;
-        this._pivot.scaling = new Vector3(this._scale * sw, this._scale * sh, 1);
-        this._pivot.rotation.z = Tools.ToRadians(this.rotation);
-        const mapsize = this.metrics.mapSize(this._lod);
-        const tilesize = this.metrics.tileSize;
-        const zOffset = this._options.insets?.z || 0;
-        this._translate.position.x = -this._center.x;
-        this._translate.position.y = -(mapsize - this._center.y + tilesize);
-        this._translate.position.z = zOffset;
-    }
-
-    protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: ITile<V>[] | undefined): void {
-        this.invalidateDisplay();
+        this._tileSize = s;
+        this._tileOffset = new Vector3(x, y, 0);
+        this._pivot.position.z = this._options.insets?.z || 0;
     }
 }

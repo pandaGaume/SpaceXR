@@ -8,12 +8,12 @@ precision highp float;
     uniform mat4 worldViewProjection;
     uniform vec3 tileSize; // the size of the tile 
     uniform vec3 cellSize; // the size of one cell - ie the size in 3D coordinate of a pixel.
-    uniform vec4 vClipPlane;
-  
+    uniform vec2 size;
+ 
     // Varying
     varying vec4 vPosition;
     varying vec3 vNormal;
-	varying float fClipDistance;
+	varying vec4 fClipDistance;
 
     void main(void) {
 
@@ -21,9 +21,8 @@ precision highp float;
         // ----------------------------------------------
         // 1 - get the coordinate in pixel
         vec4 p = vec4(position * tileSize * cellSize, 1);
- 
-        vec4 worldPos = world * p;
-        fClipDistance = dot(worldPos, vClipPlane);
+        vec2 halfSize = size / 2.0; 
+        fClipDistance = vec4(p.x+halfSize.x,halfSize.y-p.y,halfSize.x-p.x,p.y+halfSize.y );
       
         // finally assign position 
         // --------------------

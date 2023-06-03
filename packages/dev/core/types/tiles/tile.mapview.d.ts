@@ -88,6 +88,6 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     protected doValidateLevel(level: TileMapLevel<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;
-    private rotatePoints;
-    private rotatePoint;
+    rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2>;
+    rotatePoint<R extends ICartesian2>(x: number, y: number, center?: ICartesian2, target?: R, inv?: boolean): R;
 }

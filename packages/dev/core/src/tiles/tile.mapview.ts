@@ -295,14 +295,12 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public validateBounds(): IEnvelope | undefined {
         if (!this._bounds) {
-            // compute the pixel bounds
-            const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._level._lod);
-            this._level._center = pixelCenterXY;
+            const c = this._level._center;
 
             const w = this.width / this._level._scale;
             const h = this.height / this._level._scale;
-            let x0 = Math.round(pixelCenterXY.x - w / 2);
-            let y0 = Math.round(pixelCenterXY.y - h / 2);
+            let x0 = c.x - w / 2;
+            let y0 = c.y - h / 2;
             let bounds = new Rectangle(x0, y0, w, h);
             if (this._rotation) {
                 const corners = bounds.points();
@@ -475,7 +473,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         t.content = null;
     }
 
-    private *rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
+    public *rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
         for (const p of points) {
             yield this.rotatePoint(p.x, p.y, center);
         }
@@ -483,15 +481,18 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     /**
      * Rotate point arround optional center, with reference of azimuth zero up to the North
-     * and clockwise rotation.
+     * and clockwise rotation / counter clockwize depending the inv parameter
      */
-    private rotatePoint(x: number, y: number, center?: ICartesian2): ICartesian2 {
+    public rotatePoint<R extends ICartesian2>(x: number, y: number, center?: ICartesian2, target?: R, inv = false): R {
         const translatedX = center ? x - center.x : x;
         const translatedY = center ? y - center.y : y;
 
-        const rotatedX = translatedX * this._cosangle + translatedY * this._sinangle;
-        const rotatedY = translatedY * this._cosangle - translatedX * this._sinangle;
+        const rotatedX = translatedX * this._cosangle + (inv ? translatedY * -this._sinangle : translatedY * this._sinangle);
+        const rotatedY = translatedY * this._cosangle - (inv ? translatedX * -this._sinangle : translatedX * this._sinangle);
 
-        return new Cartesian2(center ? rotatedX + center.x : rotatedX, center ? rotatedY + center.y : rotatedY);
+        const r = target || Cartesian2.Zero();
+        r.x = center ? rotatedX + center.x : rotatedX;
+        r.y = center ? rotatedY + center.y : rotatedY;
+        return <R>r;
     }
 }

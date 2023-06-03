@@ -1187,7 +1187,7 @@ class Rectangle {
         return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
     }
     toString() {
-        return `left:${this.left}, top:${this.top}, width:${this.width}, height:${this.height}`;
+        return `left:${this.left}, bottom:${this.bottom}, right:${this.right}, top:${this.top}, width:${this.width}, height:${this.height}`;
     }
 }
 //# sourceMappingURL=geometry.rectangle.js.map
@@ -1441,9 +1441,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/map/map.canvas display.js":
+/***/ "./dist/map/map.canvas.display.js":
 /*!****************************************!*\
-  !*** ./dist/map/map.canvas display.js ***!
+  !*** ./dist/map/map.canvas.display.js ***!
   \****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -1478,7 +1478,7 @@ class CanvasDisplay {
         return false;
     }
 }
-//# sourceMappingURL=map.canvas%20display.js.map
+//# sourceMappingURL=map.canvas.display.js.map
 
 /***/ }),
 
@@ -1495,7 +1495,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
 /* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
-/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas display */ "./dist/map/map.canvas display.js");
+/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/map.canvas.display.js");
 
 
 
@@ -1758,6 +1758,9 @@ class RGBAColor {
     }
     static Black() {
         return new RGBAColor(0, 0, 0);
+    }
+    static NeonBlue() {
+        return new RGBAColor(77, 77, 255);
     }
     constructor(r, g, b, a = 1) {
         this.r = r;
@@ -2350,20 +2353,23 @@ class TerrainGridOptions {
 TerrainGridOptions.DefaultGridSize = 256;
 TerrainGridOptions.DefaultInvertIndices = false;
 TerrainGridOptions.DefaultInvertYZ = false;
+TerrainGridOptions.DefaultScale = 1;
 TerrainGridOptions.Shared = new TerrainGridOptions({
-    width: TerrainGridOptions.DefaultGridSize,
-    height: TerrainGridOptions.DefaultGridSize,
+    columns: TerrainGridOptions.DefaultGridSize,
+    rows: TerrainGridOptions.DefaultGridSize,
     invertIndices: TerrainGridOptions.DefaultInvertIndices,
     invertYZ: TerrainGridOptions.DefaultInvertYZ,
+    sx: TerrainGridOptions.DefaultScale,
+    sy: TerrainGridOptions.DefaultScale,
 });
 
 class TerrainGridOptionsBuilder {
-    withWidth(v) {
-        this._width = v;
+    withColumns(v) {
+        this._cols = v;
         return this;
     }
-    withHeight(v) {
-        this._height = v;
+    withRows(v) {
+        this._rows = v;
         return this;
     }
     withInvertIndices(v) {
@@ -2374,10 +2380,17 @@ class TerrainGridOptionsBuilder {
         this._invertYZ = v;
         return this;
     }
+    withScale(x, y) {
+        this._sx = x;
+        this._sy = y || x;
+        return this;
+    }
     build() {
         return new TerrainGridOptions({
-            width: this._width || this._height,
-            height: this._height || this._width,
+            columns: this._cols || this._rows,
+            rows: this._rows || this._cols,
+            sx: this._sx,
+            sy: this._sy,
             invertIndices: this._invertIndices,
             invertYZ: this._invertYZ,
         });
@@ -2393,10 +2406,10 @@ class TerrainNormalizedGridBuilder {
     }
     build(data) {
         data = data || {};
-        const w = this._o?.width || TerrainGridOptions.DefaultGridSize;
-        const h = this._o?.height || w;
-        const sx = 1;
-        const sy = 1;
+        const w = this._o?.columns || TerrainGridOptions.DefaultGridSize;
+        const h = this._o?.rows || w;
+        const sx = this._o?.sx || TerrainGridOptions.DefaultScale;
+        const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
         const positions = [];
         const indices = [];
         const x0 = -0.5;
@@ -2405,7 +2418,7 @@ class TerrainNormalizedGridBuilder {
         const dy = 1 / (h - 1);
         for (let row = 0; row < h; row++) {
             const v = row * dy;
-            const y = (y0 + v) * sy;
+            const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
@@ -3314,12 +3327,11 @@ class TileMapView {
     }
     validateBounds() {
         if (!this._bounds) {
-            const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._level._lod);
-            this._level._center = pixelCenterXY;
+            const c = this._level._center;
             const w = this.width / this._level._scale;
             const h = this.height / this._level._scale;
-            let x0 = Math.round(pixelCenterXY.x - w / 2);
-            let y0 = Math.round(pixelCenterXY.y - h / 2);
+            let x0 = c.x - w / 2;
+            let y0 = c.y - h / 2;
             let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_8__.Rectangle(x0, y0, w, h);
             if (this._rotation) {
                 const corners = bounds.points();
@@ -3446,12 +3458,15 @@ class TileMapView {
             yield this.rotatePoint(p.x, p.y, center);
         }
     }
-    rotatePoint(x, y, center) {
+    rotatePoint(x, y, center, target, inv = false) {
         const translatedX = center ? x - center.x : x;
         const translatedY = center ? y - center.y : y;
-        const rotatedX = translatedX * this._cosangle + translatedY * this._sinangle;
-        const rotatedY = translatedY * this._cosangle - translatedX * this._sinangle;
-        return new ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2(center ? rotatedX + center.x : rotatedX, center ? rotatedY + center.y : rotatedY);
+        const rotatedX = translatedX * this._cosangle + (inv ? translatedY * -this._sinangle : translatedY * this._sinangle);
+        const rotatedY = translatedY * this._cosangle - (inv ? translatedX * -this._sinangle : translatedX * this._sinangle);
+        const r = target || ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
+        r.x = center ? rotatedX + center.x : rotatedX;
+        r.y = center ? rotatedY + center.y : rotatedY;
+        return r;
     }
 }
 //# sourceMappingURL=tile.mapview.js.map

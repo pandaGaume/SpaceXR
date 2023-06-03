@@ -4,7 +4,7 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { Scalar } from "../math/math";
-import { CanvasDisplay } from "./map.canvas display";
+import { CanvasDisplay } from "./map.canvas.display";
 
 export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
     _observer: ResizeObserver;

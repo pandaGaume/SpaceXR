@@ -7,10 +7,10 @@ const tsShaderTemplate = `// Important Note: This file has been generated as par
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-
-const ##NAME_PLACEHOLDER## = \`##SHADER_PLACEHOLDER##\`;
-ShaderStore.##SHADERSTORE_PLACEHOLDER##["##NAME_PLACEHOLDER##"] = ##NAME_PLACEHOLDER##;
-`;
+const name = "##NAME_PLACEHOLDER##";
+const shader = \`##SHADER_PLACEHOLDER##\`;
+ShaderStore.##SHADERSTORE_PLACEHOLDER##[name] = shader;
+/** @internal */ export const ##NAME_PLACEHOLDER## = { name, shader };`;
 
 /**
  * Get the shaders name from their path.

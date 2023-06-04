@@ -16,7 +16,7 @@
         "compile:babylon:source": "tsc --project tsconfig.json",
         "precompile:babylon": "npm run build:babylon:assets",
         "build:babylon:assets": "npx build-tools -c process-assets",
-        "webpack:babylon:dev": "webpack --mode development",
+        "webpack:babylon:dev": "webpack --mode development --stats-error-details",
         "publish:babylon:dev": "npm run build:babylon:dev && npm run webpack:babylon:dev"
     },
     "sideEffects": false,

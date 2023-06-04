@@ -2,8 +2,8 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-
-const terrainVertexShader = `precision highp float;#if defined(WIREFRAME) || defined(WIREFRAME_SQUARE) 
+const name = "terrainVertexShader";
+const shader = `precision highp float;#if defined(WIREFRAME) || defined(WIREFRAME_SQUARE) 
 #include<wireframe_vertex_decl>
 #endif
 #include<geodesy>
@@ -12,4 +12,5 @@ vec3 tmp=barycentricWeight(gl_VertexID,altitudesSize);vBarys=tmp.xy ;#endif
 #if defined(WIREFRAME_SQUARE) && defined(WIREFRAME_EDGE_WEIGHT)
 vEdgeWeight=tmp.z;#endif
 }`;
-ShaderStore.ShadersStore["terrainVertexShader"] = terrainVertexShader;
+ShaderStore.ShadersStore["terrainVertexShader"] = shader;
+/** @internal */ export const terrainVertexShader = { name, shader };

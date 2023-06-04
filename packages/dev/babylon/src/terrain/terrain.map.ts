@@ -82,7 +82,7 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         let s = this.metrics.tileSize;
-        
+
         let x = 0;
         let y = 0;
 
@@ -135,6 +135,9 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
 
     protected buildMesh(name: string, scene?: Scene): Mesh {
         const mesh = new Mesh(name, scene);
+        const normals: Array<number> = [];
+        VertexData.ComputeNormals(this._grid.positions, this._grid.indices, normals);
+        this._grid.normals = normals;
         this._grid.applyToMesh(mesh, true);
 
         // define material
@@ -151,7 +154,7 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         const instance = this._template.createInstance(name);
         // fill instanced properties - which are declared into buildTemplate - with instance.instancedBuffers
         //const a = tile.address;
-        //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);
+        //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);$
         return instance;
     }
 
@@ -202,4 +205,4 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
             }
         }
     }
- }
+}

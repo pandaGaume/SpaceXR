@@ -79,13 +79,34 @@
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("map", display, terrariumImgClient, options, scene);
-                const terrainMaterial = new BABYLON.StandardMaterial("terrain_material", scene);
-                terrainMaterial.wireframe = false;
-                terrainMaterial.clipPlane = new BABYLON.Plane(1, 0, 0, -w / 2);
-                terrainMaterial.clipPlane2 = new BABYLON.Plane(-1, 0, 0, -w / 2);
-                terrainMaterial.clipPlane3 = new BABYLON.Plane(0, 0, 1, -h / 2);
-                terrainMaterial.clipPlane4 = new BABYLON.Plane(0, 0, -1, -h / 2);
-                map.template.material = terrainMaterial;
+                const materialName = "tilemap";
+                const shaderOptions = {
+                    attributes: ["position", "normal"],
+                    uniforms: ["world", "viewProjection", "light", "material"],
+                };
+
+                var m = new BABYLON.ShaderMaterial(
+                    materialName,
+                    scene,
+                    {
+                        vertex: materialName,
+                        fragment: materialName,
+                    },
+                    shaderOptions
+                );
+
+                m.setVector3("material.ambient", new BABYLON.Vector3(1.0, 0.5, 0.31));
+                m.setVector3("material.diffuse", new BABYLON.Vector3(1.0, 0.5, 0.31));
+                m.setVector3("material.specular", new BABYLON.Vector3(0.1, 0.1, 0.1));
+                m.setFloat("material.shininess", 32);
+
+                m.setVector3("light.direction", new BABYLON.Vector3(1, 1, 1));
+                m.setVector3("light.ambient", new BABYLON.Vector3(0.2, 0.2, 0.2));
+                m.setVector3("light.diffuse", new BABYLON.Vector3(0.5, 0.5, 0.5));
+                m.setVector3("light.specular", new BABYLON.Vector3(1, 1, 1));
+
+                map.template.material = m;
+
                 map.view.validate();
 
                 // interaction avec la carte

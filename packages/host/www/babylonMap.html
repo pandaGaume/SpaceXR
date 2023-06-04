@@ -60,6 +60,7 @@
                 displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
                 displayMaterial.alpha = 0.4;
                 display.material = displayMaterial;
+                display.freezeWorldMatrix();
 
                 // definir la source de donnée.
                 const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
@@ -159,13 +160,6 @@
                             break;
                     }
                 });
-
-                //const axes = new BABYLON.AxesViewer(scene, 100);
-                //const displayAxes = new BABYLON.AxesViewer(scene, 50);
-                //displayAxes.xAxis.parent = display;
-                //displayAxes.yAxis.parent = display;
-                //displayAxes.zAxis.parent = display;
-
                 return scene;
             }
 

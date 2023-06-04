@@ -70,8 +70,8 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
     _template: Mesh;
     _options: SurfaceTileMapOptions;
 
-    _tileSize?: number;
-    _tileOffset?: Vector3;
+    _tileCurrentSize?: number;
+    _tileCurrentOffset?: Vector3;
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
@@ -81,7 +81,40 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         this._pivot.parent = display;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        this.initialize();
+        let s = this.metrics.tileSize;
+        
+        let x = 0;
+        let y = 0;
+
+        // compute origin end size using coordinate references.
+        switch (this.metrics.cellCoordinateReference) {
+            case CellCoordinateReference.nw: {
+                break;
+            }
+            case CellCoordinateReference.ne: {
+                x++;
+                break;
+            }
+            case CellCoordinateReference.se: {
+                x++;
+                y++;
+                break;
+            }
+            case CellCoordinateReference.sw: {
+                y++;
+                break;
+            }
+            case CellCoordinateReference.center:
+            default: {
+                s--;
+                x += 0.5;
+                y += 0.5;
+                break;
+            }
+        }
+        this._tileCurrentSize = s;
+        this._tileCurrentOffset = new Vector3(x, y, 0);
+        this._pivot.position.z = this._options.insets?.z || 0;
     }
 
     public get template(): Mesh {
@@ -135,7 +168,7 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
         const instance = this.buildInstance(key, tile);
-        instance.scaling.x = instance.scaling.y = this._tileSize || this.metrics.tileSize;
+        instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
         instance.parent = this._pivot;
         tile.mesh = instance;
     }
@@ -159,7 +192,7 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
             this._pivot.rotation.z = Tools.ToRadians(this.rotation);
         }
 
-        const offset = this._tileOffset || Vector3.Zero();
+        const offset = this._tileCurrentOffset || Vector3.Zero();
         for (const t of tiles) {
             if (t.content && t.rect && t.mesh) {
                 const c = t.rect.center;
@@ -169,40 +202,4 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
             }
         }
     }
-
-    private initialize(): void {
-        let s = this.metrics.tileSize;
-        let x = 0;
-        let y = 0;
-
-        // compute origin end size using coordinate references.
-        switch (this.metrics.cellCoordinateReference) {
-            case CellCoordinateReference.nw: {
-                break;
-            }
-            case CellCoordinateReference.ne: {
-                x++;
-                break;
-            }
-            case CellCoordinateReference.se: {
-                x++;
-                y++;
-                break;
-            }
-            case CellCoordinateReference.sw: {
-                y++;
-                break;
-            }
-            case CellCoordinateReference.center:
-            default: {
-                s--;
-                x += 0.5;
-                y += 0.5;
-                break;
-            }
-        }
-        this._tileSize = s;
-        this._tileOffset = new Vector3(x, y, 0);
-        this._pivot.position.z = this._options.insets?.z || 0;
-    }
-}
+ }

@@ -103,8 +103,6 @@ __webpack_require__.r(__webpack_exports__);
 class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
     constructor(name, dimension, resolution, scene) {
         super(name, scene);
-        this._invTmp = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Identity();
-        this._transformedTmp = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
         this._dimension = dimension;
         this._halfDimension = new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_1__.Size3(dimension.width / 2, dimension.height / 2, dimension.thickness / 2);
         this._resolution = resolution;
@@ -123,13 +121,34 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
     get dimension() {
         return this._dimension;
     }
+    getInverseWorldMatrix() {
+        if (this.isWorldMatrixFrozen) {
+            this._invWorld = this._invWorld || this.worldMatrixFromCache.invertToRef(this._invWorld || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
+        }
+        else {
+            const cached = this.worldMatrixFromCache;
+            const world = this.getWorldMatrix();
+            if (!world.equals(cached) || !this._invWorld) {
+                this._invWorld = world.invertToRef(this._invWorld || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
+            }
+        }
+        return this._invWorld;
+    }
     getPixelToRef(pickedCoordinates, pixel) {
-        const transform = this.getWorldMatrix().invertToRef(this._invTmp);
-        const transformed = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinatesToRef(pickedCoordinates, transform, this._transformedTmp);
+        const invWorld = this.getInverseWorldMatrix();
+        const transformed = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinatesToRef(pickedCoordinates, invWorld, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[0]);
         pixel = pixel || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
         pixel.x = this._resolution.width - Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
         pixel.y = this._resolution.height - Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
         return pixel;
+    }
+    getXYZWorldVectors() {
+        const transform = this.getWorldMatrix();
+        return [
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Right(), transform),
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Up(), transform),
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Forward(), transform),
+        ];
     }
 }
 //# sourceMappingURL=virtualdisplay.js.map
@@ -177,11 +196,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
-/* harmony import */ var core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles/tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles/tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
 /* harmony import */ var core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles/tiles.geography */ "../core/dist/tiles/tiles.geography.js");
 /* harmony import */ var core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./terrain.tile */ "./dist/terrain/terrain.tile.js");
+/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./terrain.tile */ "./dist/terrain/terrain.tile.js");
 
 
 
@@ -237,7 +256,37 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
         this._pivot.parent = display;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        this.initialize();
+        let s = this.metrics.tileSize;
+        let x = 0;
+        let y = 0;
+        switch (this.metrics.cellCoordinateReference) {
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_6__.CellCoordinateReference.nw: {
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_6__.CellCoordinateReference.ne: {
+                x++;
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_6__.CellCoordinateReference.se: {
+                x++;
+                y++;
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_6__.CellCoordinateReference.sw: {
+                y++;
+                break;
+            }
+            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_6__.CellCoordinateReference.center:
+            default: {
+                s--;
+                x += 0.5;
+                y += 0.5;
+                break;
+            }
+        }
+        this._tileCurrentSize = s;
+        this._tileCurrentOffset = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(x, y, 0);
+        this._pivot.position.z = this._options.insets?.z || 0;
     }
     get template() {
         return this._template;
@@ -261,14 +310,14 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
         return instance;
     }
     buildMapTile(t) {
-        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_6__.TerrainTile(t);
+        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_7__.TerrainTile(t);
     }
     onDeleted(key, tile) {
         tile.dispose();
     }
     onAdded(key, tile) {
         const instance = this.buildInstance(key, tile);
-        instance.scaling.x = instance.scaling.y = this._tileSize || this.metrics.tileSize;
+        instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
         instance.parent = this._pivot;
         tile.mesh = instance;
     }
@@ -287,7 +336,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
         if (this.rotation) {
             this._pivot.rotation.z = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(this.rotation);
         }
-        const offset = this._tileOffset || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
+        const offset = this._tileCurrentOffset || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
         for (const t of tiles) {
             if (t.content && t.rect && t.mesh) {
                 const c = t.rect.center;
@@ -296,39 +345,6 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
                 t.mesh.position.z = offset.z;
             }
         }
-    }
-    initialize() {
-        let s = this.metrics.tileSize;
-        let x = 0;
-        let y = 0;
-        switch (this.metrics.cellCoordinateReference) {
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.nw: {
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.ne: {
-                x++;
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.se: {
-                x++;
-                y++;
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.sw: {
-                y++;
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference.center:
-            default: {
-                s--;
-                x += 0.5;
-                y += 0.5;
-                break;
-            }
-        }
-        this._tileSize = s;
-        this._tileOffset = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(x, y, 0);
-        this._pivot.position.z = this._options.insets?.z || 0;
     }
 }
 //# sourceMappingURL=terrain.map.js.map

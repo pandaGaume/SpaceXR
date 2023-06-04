@@ -33,8 +33,8 @@ export declare class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends Abst
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
-    _tileSize?: number;
-    _tileOffset?: Vector3;
+    _tileCurrentSize?: number;
+    _tileCurrentOffset?: Vector3;
     constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene);
     get template(): Mesh;
     hasMesh(mesh: Mesh): boolean;
@@ -47,5 +47,4 @@ export declare class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends Abst
     protected invalidateDisplay(rect?: IRectangle): void;
     protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: TerrainTile<V>[] | undefined): void;
     private invalidate;
-    private initialize;
 }

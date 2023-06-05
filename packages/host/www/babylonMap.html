@@ -63,7 +63,9 @@
                 display.freezeWorldMatrix();
 
                 // definir la source de donnée.
-                const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
+                const elevationsClient = SPACEXR.MapZen.ElevationsClient();
+                const normalsClient = SPACEXR.MapZen.NormalsClient();
+                const demClient = new SPACEXR.DemTileWebClient(elevationsClient, normalsClient);
 
                 const options = {
                     center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
@@ -72,7 +74,7 @@
                 };
 
                 // construire la carte.
-                const map = new SPACEXR.SurfaceTileMap("map", display, terrariumImgClient, options, scene);
+                const map = new SPACEXR.SurfaceTileMap("map", display, demClient, options, scene);
                 const materialName = "tilemap";
                 const shaderOptions = {
                     attributes: ["position", "normal"],

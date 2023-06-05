@@ -45,4 +45,8 @@ export class DemInfos implements IDemInfos {
     public get normals(): Nullable<Float32Array> {
         return this._normals;
     }
+
+    public toString(): string {
+        return `elevations count:${this._elevations?.length || 0}, min:${this._min}, max:${this._max}, mean:${this._mean},normals count:${this._normals?.length || 0}`;
+    }
 }

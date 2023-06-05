@@ -47,16 +47,16 @@ export class MapZen {
     public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
     public static Metrics = new EPSG3857(MapZen.MetricsOptions);
 
-    public static DemImagesClient(options?: TileWebClientOptions) {
+    public static ElevationsImagesClient(options?: TileWebClientOptions) {
         return new TileWebClient(MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);
     }
-    public static DemClient(options?: TileWebClientOptions) {
+    public static ElevationsClient(options?: TileWebClientOptions) {
         return new TileWebClient(MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
     }
-    public static NormalImagesClient(options?: TileWebClientOptions) {
+    public static NormalsImagesClient(options?: TileWebClientOptions) {
         return new TileWebClient(MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);
     }
-    public static NormalClient(options?: TileWebClientOptions) {
+    public static NormalsClient(options?: TileWebClientOptions) {
         return new TileWebClient(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
     }
 }

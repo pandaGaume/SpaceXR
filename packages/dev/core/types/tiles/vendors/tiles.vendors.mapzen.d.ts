@@ -19,8 +19,8 @@ export declare class MapZen {
     static MaxLevelOfDetail: number;
     static MetricsOptions: import("../tiles.interfaces").ITileMetricsOptions;
     static Metrics: EPSG3857;
-    static DemImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
-    static DemClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
-    static NormalImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
-    static NormalClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
+    static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
+    static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
+    static NormalsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
+    static NormalsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
 }

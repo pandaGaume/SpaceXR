@@ -12,4 +12,5 @@ export declare class DemInfos implements IDemInfos {
     get mean(): number;
     get elevations(): Nullable<Float32Array>;
     get normals(): Nullable<Float32Array>;
+    toString(): string;
 }

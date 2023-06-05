@@ -6,6 +6,7 @@ import { TerrainGridOptions } from "core/meshes/terrain.grid";
 import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "./terrain.tile";
+import { IDemInfos } from "core/dem/dem.interfaces";
 export declare class SurfaceTileMapOptions {
     static Default: SurfaceTileMapOptions;
     center?: IGeo2;
@@ -25,7 +26,7 @@ export declare class SurfaceTileMapOptionsBuilder {
     withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder;
     build(): SurfaceTileMapOptions;
 }
-export declare class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
+export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
     _pivot: TransformNode;
     _grid: VertexData;
     _template: Mesh;

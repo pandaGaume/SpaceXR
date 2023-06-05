@@ -53,6 +53,9 @@ class DemInfos {
     get normals() {
         return this._normals;
     }
+    toString() {
+        return `elevations count:${this._elevations?.length || 0}, min:${this._min}, max:${this._max}, mean:${this._mean},normals count:${this._normals?.length || 0}`;
+    }
 }
 //# sourceMappingURL=dem.infos.js.map
 
@@ -4651,16 +4654,16 @@ class MapzenNormalValueDecoder {
 MapzenNormalValueDecoder.Shared = new MapzenNormalValueDecoder();
 
 class MapZen {
-    static DemImagesClient(options) {
+    static ElevationsImagesClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
-    static DemClient(options) {
+    static ElevationsClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
     }
-    static NormalImagesClient(options) {
+    static NormalsImagesClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
-    static NormalClient(options) {
+    static NormalsClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
     }
 }

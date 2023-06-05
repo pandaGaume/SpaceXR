@@ -10,6 +10,7 @@ import { Cartesian3 } from "core/geometry/geometry.cartesian";
 
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "./terrain.tile";
+import { IDemInfos } from "core/dem/dem.interfaces";
 
 export class SurfaceTileMapOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -56,7 +57,7 @@ export class SurfaceTileMapOptionsBuilder {
     }
 }
 
-export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
+export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
     _pivot: TransformNode;
     _grid: VertexData;
     _template: Mesh;
@@ -147,6 +148,9 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
         // fill instanced properties - which are declared into buildTemplate - with instance.instancedBuffers
         //const a = tile.address;
         //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);$
+        const infos = tile.content;
+        if (infos) {
+        }
         return instance;
     }
 
@@ -163,9 +167,11 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
         const instance = this.buildInstance(key, tile);
-        instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
-        instance.parent = this._pivot;
-        tile.mesh = instance;
+        if (instance) {
+            instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
+            instance.parent = this._pivot;
+            tile.mesh = instance;
+        }
     }
 
     protected invalidateDisplay(rect?: IRectangle): void {

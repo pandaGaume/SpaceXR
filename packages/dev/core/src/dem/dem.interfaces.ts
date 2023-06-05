@@ -7,4 +7,6 @@ export interface IDemInfos {
 
     elevations: Nullable<Float32Array>;
     normals: Nullable<Float32Array>;
+
+    toString(): string;
 }

@@ -1,7 +1,7 @@
 precision highp float;
 
-#include<light_decl>
-#include<mat_decl>
+#include<lightDeclarations>
+#include<materialDeclarations>
 
 // Varying
 varying vec4 vPosition;

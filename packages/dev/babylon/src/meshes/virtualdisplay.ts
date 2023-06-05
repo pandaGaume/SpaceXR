@@ -66,10 +66,11 @@ export class VirtualDisplay extends Mesh {
 
     public getXYZWorldVectors(): Array<Vector3> {
         const transform = this.getWorldMatrix();
+        const p = this.getAbsolutePosition();
         return [
-            Vector3.TransformCoordinates(Vector3.Right(), transform),
-            Vector3.TransformCoordinates(Vector3.Up(), transform),
-            Vector3.TransformCoordinates(Vector3.Forward(), transform),
+            Vector3.TransformCoordinates(Vector3.Right(), transform).subtractInPlace(p),
+            Vector3.TransformCoordinates(Vector3.Up(), transform).subtractInPlace(p),
+            Vector3.TransformCoordinates(Vector3.Forward(), transform).subtractInPlace(p),
         ];
     }
 }

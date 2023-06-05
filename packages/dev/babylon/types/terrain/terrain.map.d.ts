@@ -1,4 +1,4 @@
-import { AbstractMesh, Mesh, Scene, TransformNode, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
@@ -38,7 +38,7 @@ export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDis
     hasMesh(mesh: Mesh): boolean;
     protected buildGrid(): VertexData;
     protected buildMesh(name: string, scene?: Scene): Mesh;
-    protected buildInstance(name: string, tile: TerrainTile<V>): AbstractMesh;
+    protected buildInstance(name: string, tile: TerrainTile<V>): Nullable<AbstractMesh>;
     protected buildMapTile(t: ITile<V>): TerrainTile<V>;
     protected onDeleted(key: string, tile: TerrainTile<V>): void;
     protected onAdded(key: string, tile: TerrainTile<V>): void;

@@ -78,10 +78,11 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
     }
     getXYZWorldVectors() {
         const transform = this.getWorldMatrix();
+        const p = this.getAbsolutePosition();
         return [
-            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Right(), transform),
-            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Up(), transform),
-            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Forward(), transform),
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Right(), transform).subtractInPlace(p),
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Up(), transform).subtractInPlace(p),
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Forward(), transform).subtractInPlace(p),
         ];
     }
 }
@@ -236,11 +237,12 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         return mesh;
     }
     buildInstance(name, tile) {
-        const instance = this._template.createInstance(name);
         const infos = tile.content;
         if (infos) {
+            const instance = this._template.createInstance(name);
+            return instance;
         }
-        return instance;
+        return null;
     }
     buildMapTile(t) {
         return new _terrain_tile__WEBPACK_IMPORTED_MODULE_6__.TerrainTile(t);
@@ -5613,6 +5615,106 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
 (() => {
 var __webpack_exports__ = {};
+/*!**************************************************!*\
+  !*** ./dist/shaders/includes/clipDeclaration.js ***!
+  \**************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "clipDeclaration": () => (/* binding */ clipDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "clipDeclaration";
+const shader = `struct ClipPlanes {vec3 north;vec3 south;vec3 east;vec3 west;}uniform ClipPlanes clipPlanes;varying vec4 vfClipDistance;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.clipDeclaration = shader;
+const clipDeclaration = { name, shader };
+//# sourceMappingURL=clipDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!***********************************************!*\
+  !*** ./dist/shaders/includes/clipFragment.js ***!
+  \***********************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "clipFragment": () => (/* binding */ clipFragment)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "clipFragment";
+const shader = `bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.clipFragment = shader;
+const clipFragment = { name, shader };
+//# sourceMappingURL=clipFragment.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!**********************************************************!*\
+  !*** ./dist/shaders/includes/clipFragmentDeclaration.js ***!
+  \**********************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "clipFragmentDeclaration": () => (/* binding */ clipFragmentDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "clipFragmentDeclaration";
+const shader = `varying vec4 vfClipDistance;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.clipFragmentDeclaration = shader;
+const clipFragmentDeclaration = { name, shader };
+//# sourceMappingURL=clipFragmentDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!*********************************************!*\
+  !*** ./dist/shaders/includes/clipVertex.js ***!
+  \*********************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "clipVertex": () => (/* binding */ clipVertex)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "clipVertex";
+const shader = `vfClipDistance.x=clipDistance(worldPos,northClip);vfClipDistance.y=clipDistance(worldPos,southClip);vfClipDistance.z=clipDistance(worldPos,eastClip);vfClipDistance.w=clipDistance(worldPos,westClip);`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.clipVertex = shader;
+const clipVertex = { name, shader };
+//# sourceMappingURL=clipVertex.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!********************************************************!*\
+  !*** ./dist/shaders/includes/clipVertexDeclaration.js ***!
+  \********************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "clipVertexDeclaration": () => (/* binding */ clipVertexDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "clipVertexDeclaration";
+const shader = `struct Plane {vec3 point;vec3 normal;};float clipDistance(vec4 worldPos,Plane plane ){vec3 p=worldPos.xyz-plane.point ;return dot(p,plane.normal);} uniform Plane northClip;uniform Plane southClip;uniform Plane eastClip;uniform Plane westClip;varying vec4 vfClipDistance;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.clipVertexDeclaration = shader;
+const clipVertexDeclaration = { name, shader };
+//# sourceMappingURL=clipVertexDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
 /*!******************************************!*\
   !*** ./dist/shaders/includes/geodesy.js ***!
   \******************************************/
@@ -5648,6 +5750,46 @@ const geodesy_decl = { name, shader };
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
 (() => {
 var __webpack_exports__ = {};
+/*!***************************************************!*\
+  !*** ./dist/shaders/includes/lightDeclaration.js ***!
+  \***************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "lightDeclaration": () => (/* binding */ lightDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "lightDeclaration";
+const shader = `struct DirLight {vec3 direction;vec3 ambient;vec3 diffuse;vec3 specular;}; `;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.lightDeclaration = shader;
+const lightDeclaration = { name, shader };
+//# sourceMappingURL=lightDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!***********************************************************!*\
+  !*** ./dist/shaders/includes/lightFragmentDeclaration.js ***!
+  \***********************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "lightFragmentDeclaration": () => (/* binding */ lightFragmentDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "lightFragmentDeclaration";
+const shader = `struct DirLight {vec3 direction;vec3 ambient;vec3 diffuse;vec3 specular;}; `;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.lightFragmentDeclaration = shader;
+const lightFragmentDeclaration = { name, shader };
+//# sourceMappingURL=lightFragmentDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
 /*!*********************************************!*\
   !*** ./dist/shaders/includes/light_decl.js ***!
   \*********************************************/
@@ -5663,6 +5805,46 @@ const shader = `struct DirLight {vec3 direction;vec3 ambient;vec3 diffuse;ve
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.light_decl = shader;
 const light_decl = { name, shader };
 //# sourceMappingURL=light_decl.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!******************************************************!*\
+  !*** ./dist/shaders/includes/materialDeclaration.js ***!
+  \******************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "materialDeclaration": () => (/* binding */ materialDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "materialDeclaration";
+const shader = `struct Material {vec3 ambient;vec3 diffuse;vec3 specular;float shininess;}; `;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.materialDeclaration = shader;
+const materialDeclaration = { name, shader };
+//# sourceMappingURL=materialDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!**************************************************************!*\
+  !*** ./dist/shaders/includes/materialFragmentDeclaration.js ***!
+  \**************************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "materialFragmentDeclaration": () => (/* binding */ materialFragmentDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "materialFragmentDeclaration";
+const shader = `struct Material {vec3 ambient;vec3 diffuse;vec3 specular;float shininess;}; `;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.materialFragmentDeclaration = shader;
+const materialFragmentDeclaration = { name, shader };
+//# sourceMappingURL=materialFragmentDeclaration.js.map
 })();
 
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
@@ -5748,8 +5930,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "standardFragmentShader";
-const shader = `precision highp float;#include<light_decl>
-#include<mat_decl>
+const shader = `precision highp float;#include<lightDeclarations>
+#include<materialDeclarations>
 varying vec4 vPosition;varying vec3 vNormal;uniform mat4 world;uniform DirLight light;uniform Material material;uniform vec3 viewPos;void main(void) {vec3 ambient =light.ambient*material.ambient;vec3 norm=normalize(vNormal);vec3 lightDir=normalize(light.direction);float diff=max(dot(norm,lightDir),0.0);vec3 diffuse =light.diffuse*(diff*material.diffuse);vec3 viewDir=normalize(viewPos-vPosition.xyz);vec3 reflectDir=reflect(lightDir,norm); float spec=pow(max(dot(viewDir,reflectDir),0.0),material.shininess);vec3 specular=light.specular*(spec*material.specular); vec3 result=ambient+diffuse+specular;gl_FragColor=vec4(1.0,0.2,0.3,1.0); }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore.standardFragmentShader = shader;
 const standardFragmentShader = { name, shader };
@@ -5845,9 +6027,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "tilemapFragmentShader";
-const shader = `precision highp float;#include<light_decl>
-#include<mat_decl>
-varying vec4 vPosition;varying vec3 vNormal;uniform mat4 world;uniform DirLight light;uniform Material material;uniform vec3 viewPos;void main(void) {vec3 ambient =light.ambient*material.ambient;vec3 norm=normalize(vNormal);vec3 lightDir=normalize(light.direction);float diff=max(dot(norm,lightDir),0.0);vec3 diffuse =light.diffuse*(diff*material.diffuse);vec3 viewDir=normalize(viewPos-vPosition.xyz);vec3 reflectDir=reflect(lightDir,norm); float spec=pow(max(dot(viewDir,reflectDir),0.0),material.shininess);vec3 specular=light.specular*(spec*material.specular); vec3 result=ambient+diffuse+specular;gl_FragColor=vec4(result,1.0);}`;
+const shader = `precision highp float;#include<lightFragmentDeclaration>
+#include<materialFragmentDeclaration>
+#include<clipFragmentDeclaration>
+varying vec4 vPosition;varying vec3 vNormal;uniform mat4 world;uniform DirLight light;uniform Material material;uniform vec3 viewPos;void main(void) {#include<clipFragment>
+vec3 ambient =light.ambient*material.ambient;vec3 norm=normalize(vNormal);vec3 lightDir=normalize(light.direction);float diff=max(dot(norm,lightDir),0.0);vec3 diffuse =light.diffuse*(diff*material.diffuse);vec3 viewDir=normalize(viewPos-vPosition.xyz);vec3 reflectDir=reflect(lightDir,norm); float spec=pow(max(dot(viewDir,reflectDir),0.0),material.shininess);vec3 specular=light.specular*(spec*material.specular); vec3 result=ambient+diffuse+specular;gl_FragColor=vec4(result,1.0);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore.tilemapFragmentShader = shader;
 const tilemapFragmentShader = { name, shader };
 //# sourceMappingURL=tilemap.fragment.js.map
@@ -5868,8 +6052,10 @@ __webpack_require__.r(__webpack_exports__);
 
 const name = "tilemapVertexShader";
 const shader = `precision highp float;attribute vec3 position;attribute vec3 normal;#include<instancesDeclaration>
+#include<clipVertexDeclaration>
 uniform mat4 viewProjection;varying vec4 vPosition;varying vec3 vNormal;void main(void) {#include<instancesVertex>
-vPosition=vec4(position,1.0);vec4 outPosition=viewProjection*finalWorld*vPosition ;gl_Position=outPosition;vNormal=normal; }`;
+vPosition=vec4(position,1.0);vec4 worldPos=finalWorld*vPosition ;vec4 outPosition=viewProjection*worldPos ;gl_Position=outPosition;vNormal=normal; #include<clipVertex>
+}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore.tilemapVertexShader = shader;
 const tilemapVertexShader = { name, shader };
 //# sourceMappingURL=tilemap.vertex.js.map

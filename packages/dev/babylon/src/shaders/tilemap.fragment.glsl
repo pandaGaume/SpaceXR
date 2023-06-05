@@ -1,7 +1,9 @@
 precision highp float;
 
-#include<light_decl>
-#include<mat_decl>
+#include<lightFragmentDeclaration>
+#include<materialFragmentDeclaration>
+#include<clipFragmentDeclaration>
+
 
 // Varying
 varying vec4 vPosition;
@@ -13,7 +15,9 @@ uniform DirLight light;
 uniform Material material;
 uniform vec3 viewPos;
 
-    void main(void) {
+void main(void) {
+
+    #include<clipFragment>
         
     // ambient
     vec3 ambient  = light.ambient * material.ambient;

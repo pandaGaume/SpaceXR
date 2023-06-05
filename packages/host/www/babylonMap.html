@@ -62,6 +62,8 @@
                 display.material = displayMaterial;
                 display.freezeWorldMatrix();
 
+                camera.setTarget(display);
+
                 // definir la source de donnée.
                 const elevationsClient = SPACEXR.MapZen.ElevationsClient();
                 const normalsClient = SPACEXR.MapZen.NormalsClient();
@@ -78,7 +80,7 @@
                 const materialName = "tilemap";
                 const shaderOptions = {
                     attributes: ["position", "normal"],
-                    uniforms: ["world", "viewProjection", "light", "material"],
+                    uniforms: ["world", "viewProjection", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
                 };
 
                 var m = new BABYLON.ShaderMaterial(
@@ -100,6 +102,35 @@
                 m.setVector3("light.ambient", new BABYLON.Vector3(0.2, 0.2, 0.2));
                 m.setVector3("light.diffuse", new BABYLON.Vector3(0.5, 0.5, 0.5));
                 m.setVector3("light.specular", new BABYLON.Vector3(1, 1, 1));
+
+                const axes = display.getXYZWorldVectors();
+                const w2 = w / 2;
+                const h2 = h / 2;
+
+                const vx = axes[0].multiply(new BABYLON.Vector3(w2, w2, w2));
+                const vy = axes[1].multiply(new BABYLON.Vector3(h2, h2, h2));
+
+                const p = display.getAbsolutePosition();
+
+                let a = p.subtract(vy);
+                let b = axes[1];
+                m.setVector3("northClip.point", a);
+                m.setVector3("northClip.normal", b);
+
+                let a1 = p.add(vy);
+                let b1 = axes[1].negate();
+                m.setVector3("southClip.point", a1);
+                m.setVector3("southClip.normal", b1);
+
+                let a2 = p.subtract(vx);
+                let b2 = axes[0];
+                m.setVector3("westClip.point", a2);
+                m.setVector3("westClip.normal", b2);
+
+                let a3 = p.add(vx);
+                let b3 = axes[0].negate();
+                m.setVector3("eastClip.point", a3);
+                m.setVector3("eastClip.normal", b3);
 
                 map.template.material = m;
 

@@ -1,4 +1,4 @@
-import { AbstractMesh, Mesh, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Mesh, Nullable, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
@@ -143,15 +143,16 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         return mesh;
     }
 
-    protected buildInstance(name: string, tile: TerrainTile<V>): AbstractMesh {
-        const instance = this._template.createInstance(name);
+    protected buildInstance(name: string, tile: TerrainTile<V>): Nullable<AbstractMesh> {
         // fill instanced properties - which are declared into buildTemplate - with instance.instancedBuffers
         //const a = tile.address;
         //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);$
         const infos = tile.content;
         if (infos) {
+            const instance = this._template.createInstance(name);
+            return instance;
         }
-        return instance;
+        return null;
     }
 
     protected buildMapTile(t: ITile<V>): TerrainTile<V> {

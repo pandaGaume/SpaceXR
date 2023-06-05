@@ -3,7 +3,6 @@ import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
-import { EPSG3857 } from "./tiles.geography";
 import { IValidable, Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
@@ -94,7 +93,6 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // data source
     _datasource: ITileDatasource<T, ITileAddress>;
-    _metrics: ITileMetrics;
 
     // current navigation parameters
     _w: number = 0;
@@ -116,18 +114,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
-    public constructor(
-        datasource: ITileDatasource<T, ITileAddress>,
-        metrics: ITileMetrics,
-        width: number,
-        height: number,
-        center: IGeo2,
-        lod: number,
-        cache?: IMemoryCache<string, ITile<T>>
-    ) {
+    public constructor(datasource: ITileDatasource<T, ITileAddress>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
         this._datasource = datasource;
-        this._metrics = metrics || EPSG3857.Shared;
         this.invalidateSize(width, height).setView(center, lod);
         this._level = new TileMapLevel<T>();
         this._rotation = 0;
@@ -181,7 +170,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
-        return this._metrics;
+        return this._datasource.metrics;
     }
 
     // SIZE

@@ -1,4 +1,4 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult } from "./tiles.interfaces";
+import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { Scalar } from "../math/math";
 
@@ -34,8 +34,9 @@ export class TileWebClient<T> implements ITileClient<T> {
     _o: TileWebClientOptions;
     _urlFactory: ITileUrlBuilder;
     _codec: ITileCodec<T>;
+    _metrics: ITileMetrics;
 
-    public constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, options?: TileWebClientOptions) {
+    public constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions) {
         if (!urlFactory) {
             throw new Error(`invalid url factory parameter ${urlFactory}`);
         }
@@ -44,7 +45,12 @@ export class TileWebClient<T> implements ITileClient<T> {
         }
         this._urlFactory = urlFactory;
         this._codec = codec;
+        this._metrics = metrics;
         this._o = { ...TileWebClientOptions.Default, ...options };
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._metrics;
     }
 
     public async fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {

@@ -1,14 +1,13 @@
 import { AbstractMesh, Mesh, Scene, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { AbstractDisplayMap } from "core/map";
-import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "core/tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions } from "core/meshes/terrain.grid";
 import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "./terrain.tile";
 export declare class SurfaceTileMapOptions {
     static Default: SurfaceTileMapOptions;
-    metrics?: ITileMetrics;
     center?: IGeo2;
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
@@ -16,12 +15,10 @@ export declare class SurfaceTileMapOptions {
     constructor(p: Partial<SurfaceTileMapOptions>);
 }
 export declare class SurfaceTileMapOptionsBuilder {
-    _metrics?: ITileMetrics;
     _center?: IGeo2;
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
     _insets?: ICartesian3;
-    withMetrics(v?: ITileMetrics): SurfaceTileMapOptionsBuilder;
     withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder;
     withLeveOfDetail(v?: number): SurfaceTileMapOptionsBuilder;
     withGridOptions(v?: TerrainGridOptions): SurfaceTileMapOptionsBuilder;

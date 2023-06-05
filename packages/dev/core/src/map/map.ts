@@ -4,7 +4,6 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
-import { EPSG3857 } from "../tiles/tiles.geography";
 
 export interface IMapDisplay {
     resolution: ISize3;
@@ -19,10 +18,9 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     _scale: number = 1;
     _center: ICartesian2 = Cartesian2.Zero();
 
-    public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, metrics?: ITileMetrics, center?: IGeo2, lod?: number) {
+    public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number) {
         this._display = display;
-        const m = metrics || EPSG3857.Shared;
-        this._view = new TileMapView(datasource, m, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || m.minLOD);
+        this._view = new TileMapView(datasource, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || datasource.metrics.minLOD);
         this._view.updateObservable.add((e: UpdateEventArgs<V>) => this.onUpdate(e));
         this._activ = new Map<string, T>();
     }

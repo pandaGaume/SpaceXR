@@ -64,14 +64,8 @@
 
                 // definir la source de donnée.
                 const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
-                const metricOptions = new SPACEXR.TileMetricsOptionsBuilder()
-                    .withMaxLOD(SPACEXR.MapZen.MaxLevelOfDetail)
-                    .withCellCoordinateReference(SPACEXR.CellCoordinateReference.center)
-                    .build();
-                const mapzenMetrics = new SPACEXR.EPSG3857(metricOptions);
 
                 const options = {
-                    metrics: mapzenMetrics,
                     center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
                     levelOfDetail: 11,
                     insets: new SPACEXR.Cartesian3(0, 0, 10),

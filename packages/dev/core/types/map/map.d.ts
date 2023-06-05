@@ -12,7 +12,7 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     _lod: number;
     _scale: number;
     _center: ICartesian2;
-    constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, metrics?: ITileMetrics, center?: IGeo2, lod?: number);
+    constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number);
     hasTile(key: string): boolean;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;

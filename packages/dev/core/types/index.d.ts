@@ -9,3 +9,4 @@ export * from "./meshes/index";
 export * from "./space/index";
 export * from "./tiles/index";
 export * from "./utils/index";
+export * from "./dem/index";

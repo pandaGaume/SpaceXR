@@ -71,14 +71,14 @@ export declare class FetchResult<T> {
     userArgs: Array<unknown>;
     constructor(address: ITileAddress, content: T, userArgs: Array<unknown>);
 }
-export interface ITileDatasource<T, R extends ITileAddress> {
+export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {
     fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 export interface ITileUrlBuilder {
     buildUrl(address: ITileAddress, ...params: unknown[]): string;
 }
 export interface ITileCodec<T> {
-    decodeAsync(r: void | Response): Promise<Awaited<Nullable<T>>>;
+    decodeAsync(r: void | Response): Promise<Nullable<T>>;
 }
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
 }

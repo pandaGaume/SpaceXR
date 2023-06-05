@@ -1,6 +1,7 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
+import { EPSG3857 } from "../tiles.geography";
 export declare class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     static Terrarium: MapZenDemUrlBuilder;
     static Normal: MapZenDemUrlBuilder;
@@ -17,6 +18,7 @@ export declare class MapzenNormalValueDecoder implements IPixelDecoder {
 export declare class MapZen {
     static MaxLevelOfDetail: number;
     static MetricsOptions: import("../tiles.interfaces").ITileMetricsOptions;
+    static Metrics: EPSG3857;
     static DemImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static DemClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
     static NormalImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;

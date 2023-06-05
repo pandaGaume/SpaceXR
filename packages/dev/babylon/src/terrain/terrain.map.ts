@@ -3,9 +3,8 @@ import { AbstractMesh, Mesh, Scene, Tools, TransformNode, Vector3, VertexData } 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
-import { CellCoordinateReference, ITile, ITileAddress, ITileDatasource, ITileMetrics } from "core/tiles/tiles.interfaces";
+import { CellCoordinateReference, ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
-import { EPSG3857 } from "core/tiles/tiles.geography";
 import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { Cartesian3 } from "core/geometry/geometry.cartesian";
 
@@ -14,14 +13,12 @@ import { TerrainTile } from "./terrain.tile";
 
 export class SurfaceTileMapOptions {
     public static Default = new SurfaceTileMapOptions({
-        metrics: EPSG3857.Shared,
         center: Geo2.Zero(),
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
         insets: Cartesian3.Zero(),
     });
 
-    metrics?: ITileMetrics;
     center?: IGeo2;
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
@@ -33,16 +30,11 @@ export class SurfaceTileMapOptions {
 }
 
 export class SurfaceTileMapOptionsBuilder {
-    _metrics?: ITileMetrics;
     _center?: IGeo2;
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
     _insets?: ICartesian3;
 
-    public withMetrics(v?: ITileMetrics): SurfaceTileMapOptionsBuilder {
-        this._metrics = v;
-        return this;
-    }
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
         return this;
@@ -60,7 +52,7 @@ export class SurfaceTileMapOptionsBuilder {
         return this;
     }
     public build(): SurfaceTileMapOptions {
-        return new SurfaceTileMapOptions({ metrics: this._metrics, center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets });
+        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets });
     }
 }
 
@@ -75,7 +67,7 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, datasource, o.metrics, o.center, o.levelOfDetail);
+        super(display, datasource, o.center, o.levelOfDetail);
         this._options = o;
         this._pivot = new TransformNode(`__${name}_root__`, scene);
         this._pivot.parent = display;
@@ -127,7 +119,7 @@ export class SurfaceTileMap<V, H extends SurfaceMapDisplay> extends AbstractDisp
 
     protected buildGrid(): VertexData {
         // build topology
-        const s = this._options.metrics?.tileSize;
+        const s = this.metrics?.tileSize;
         // note : we need to invert indices because we reverse the y and x, as scale -1
         const o = new TerrainGridOptionsBuilder().withColumns(s).withInvertIndices(true).build();
         return new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());

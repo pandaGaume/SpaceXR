@@ -1,4 +1,4 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult } from "./tiles.interfaces";
+import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 export declare class TileWebClientOptions {
     static Default: TileWebClientOptions;
@@ -17,6 +17,8 @@ export declare class TileWebClient<T> implements ITileClient<T> {
     _o: TileWebClientOptions;
     _urlFactory: ITileUrlBuilder;
     _codec: ITileCodec<T>;
-    constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, options?: TileWebClientOptions);
+    _metrics: ITileMetrics;
+    constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions);
+    get metrics(): ITileMetrics;
     fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }

@@ -1,4 +1,4 @@
-import { ITile, ITileAddress, ITileDatasource, ITileMetrics } from "../tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource } from "../tiles/tiles.interfaces";
 import { AbstractDisplayMap } from "./map";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
@@ -9,8 +9,8 @@ import { CanvasDisplay } from "./map.canvas.display";
 export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
     _observer: ResizeObserver;
 
-    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, metrics: ITileMetrics, center?: IGeo2, lod?: number) {
-        super(new CanvasDisplay(canvas), datasource, metrics, center, lod);
+    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, center?: IGeo2, lod?: number) {
+        super(new CanvasDisplay(canvas), datasource, center, lod);
         this._observer = new ResizeObserver(() => {
             this.invalidateSize(canvas.width, canvas.height);
         });

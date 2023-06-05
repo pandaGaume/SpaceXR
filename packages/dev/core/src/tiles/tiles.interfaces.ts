@@ -86,7 +86,7 @@ export class FetchResult<T> {
     public constructor(public address: ITileAddress, public content: T, public userArgs: Array<unknown>) {}
 }
 
-export interface ITileDatasource<T, R extends ITileAddress> {
+export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider{
     fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 
@@ -95,7 +95,7 @@ export interface ITileUrlBuilder {
 }
 
 export interface ITileCodec<T> {
-    decodeAsync(r: void | Response): Promise<Awaited<Nullable<T>>>;
+    decodeAsync(r: void | Response): Promise<Nullable<T>>;
 }
 
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}

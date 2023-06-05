@@ -48,10 +48,8 @@
 
                 // definir la source de donnée.
                 const terrariumImgClient = SPACEXR.MapZen.DemImagesClient();
-                const metricOptions = new SPACEXR.TileMetricsOptionsBuilder().withMaxLOD(SPACEXR.MapZen.MaxLevelOfDetail).withCellSize(1).build();
-                const mapzenMetrics = new SPACEXR.EPSG3857(metricOptions);
                 // construire la carte.
-                const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, mapzenMetrics, center, lod);
+                const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, center, lod);
 
 
                 function onDrag(m, dx, dy, b) {

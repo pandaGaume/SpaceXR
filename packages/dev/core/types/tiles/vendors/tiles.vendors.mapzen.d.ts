@@ -12,10 +12,6 @@ export declare class MapzenAltitudeDecoder implements IPixelDecoder {
     static Shared: MapzenAltitudeDecoder;
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
-export declare class MapzenNormalValueDecoder implements IPixelDecoder {
-    static Shared: MapzenNormalValueDecoder;
-    decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
-}
 export declare class MapZen {
     static MaxLevelOfDetail: number;
     static MetricsOptions: import("../tiles.interfaces").ITileMetricsOptions;
@@ -23,6 +19,6 @@ export declare class MapZen {
     static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
     static NormalsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
-    static NormalsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
+    static NormalsClient(options?: TileWebClientOptions): TileWebClient<Uint8ClampedArray>;
     static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions): DemTileWebClient;
 }

@@ -10,16 +10,13 @@
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
         <script src="./scripts/inputs.js"></script>
         <style>
-            html,
-            body {
+            #mapcontainer {
+                width: 100%;
                 height: 100%;
-                margin: 0;
             }
             #mapcanvas3d {
                 width: 100%;
                 height: 100%;
-                display: block;
-                touch-action: none;
             }
             #compass {
                 position: absolute;
@@ -48,7 +45,7 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 300, new BABYLON.Vector3(0, 0, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 150, new BABYLON.Vector3(0, 0, 0), scene);
                 camera.wheelPrecision = 100;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
@@ -85,7 +82,7 @@
 
                 const options = {
                     center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
-                    levelOfDetail: 11,
+                    levelOfDetail: 12,
                     insets: new SPACEXR.Cartesian3(0, 0, 10),
                 };
 
@@ -93,8 +90,9 @@
                 const map = new SPACEXR.SurfaceTileMap("map", display, demClient, options, scene);
                 const materialName = "tilemap";
                 const shaderOptions = {
-                    attributes: ["position", "normal"],
-                    uniforms: ["world", "viewProjection", "elevationSampler", "normalSampler", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
+                    attributes: ["position"],
+                    uniforms: ["world", "viewProjection", "demInfos", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
+                    samplers: ["altitudes", "normals"],
                 };
 
                 var m = new BABYLON.ShaderMaterial(
@@ -107,15 +105,12 @@
                     shaderOptions
                 );
 
-                m.setVector3("material.ambient", new BABYLON.Vector3(1.0, 0.5, 0.31));
-                m.setVector3("material.diffuse", new BABYLON.Vector3(1.0, 0.5, 0.31));
-                m.setVector3("material.specular", new BABYLON.Vector3(0.1, 0.1, 0.1));
-                m.setFloat("material.shininess", 32);
-
-                m.setVector3("light.direction", new BABYLON.Vector3(1, 1, 1));
                 m.setVector3("light.ambient", new BABYLON.Vector3(0.2, 0.2, 0.2));
+                m.setVector3("material.ambient", new BABYLON.Vector3(0.1, 0.5, 0.8));
                 m.setVector3("light.diffuse", new BABYLON.Vector3(0.5, 0.5, 0.5));
-                m.setVector3("light.specular", new BABYLON.Vector3(1, 1, 1));
+                m.setVector3("material.diffuse", new BABYLON.Vector3(0.5, 0.8, 0.8));
+
+                m.setVector3("light.direction", new BABYLON.Vector3(1, 1, 1).normalize());
 
                 const axes = display.getXYZWorldVectors();
                 const w2 = w / 2;
@@ -147,6 +142,35 @@
                 m.setVector3("eastClip.normal", b3);
 
                 map.template.material = m;
+
+                const tileSize = demClient.metrics.tileSize;
+
+                map.addedObservable.add((t) => {
+                    const invertY = true;
+                    const generateMipmap = false;
+                    const elevationSampler = new BABYLON.RawTexture(
+                        t.content.elevations,
+                        tileSize,
+                        tileSize,
+                        BABYLON.Constants.TEXTUREFORMAT_R,
+                        scene,
+                        generateMipmap,
+                        invertY,
+                        BABYLON.Texture.NEAREST_SAMPLINGMODE,
+                        BABYLON.Constants.TEXTURETYPE_FLOAT
+                    );
+                    elevationSampler.name = "altitudes";
+                    m.setTexture("altitudes", elevationSampler);
+
+                    const normalSampler = new BABYLON.RawTexture(t.content.normals, tileSize, tileSize, BABYLON.Constants.TEXTUREFORMAT_RGB, scene, generateMipmap, invertY);
+                    normalSampler.name = "normals";
+                    m.setTexture("normals", normalSampler);
+
+                    m.setVector3("demInfos.min", t.content.min);
+                    m.setVector3("demInfos.max", t.content.max);
+                    m.setFloat("demInfos.delta", t.content.delta);
+                    m.setFloat("demInfos.mean", t.content.mean);
+                });
 
                 map.view.validate();
 

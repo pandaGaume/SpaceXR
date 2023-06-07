@@ -1,7 +1,7 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
-import { Float32TileCodec, ImageTileCodec } from "../tiles.codecs.image";
+import { Float32TileCodec, ImageTileCodec, RGBTileCodec } from "../tiles.codecs.image";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { EPSG3857 } from "../tiles.geography";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
@@ -29,20 +29,6 @@ export class MapzenAltitudeDecoder implements IPixelDecoder {
     }
 }
 
-export class MapzenNormalValueDecoder implements IPixelDecoder {
-    public static Shared = new MapzenNormalValueDecoder();
-
-    public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {
-        const r = pixels[offset++];
-        const g = pixels[offset++];
-        const b = pixels[offset];
-        target[targetOffset++] = (2 * r) / 255 - 1;
-        target[targetOffset++] = (2 * g) / 255 - 1;
-        target[targetOffset++] = (b - 128) / 127;
-        return targetOffset;
-    }
-}
-
 export class MapZen {
     public static MaxLevelOfDetail = 15;
     public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
@@ -58,7 +44,7 @@ export class MapZen {
         return new TileWebClient(MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);
     }
     public static NormalsClient(options?: TileWebClientOptions) {
-        return new TileWebClient(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
+        return new TileWebClient(MapZenDemUrlBuilder.Normal, new RGBTileCodec(), MapZen.Metrics, options);
     }
     public static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions) {
         return new DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));

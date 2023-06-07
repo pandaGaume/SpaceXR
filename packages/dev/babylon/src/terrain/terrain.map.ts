@@ -128,9 +128,9 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     protected buildMesh(name: string, scene?: Scene): Mesh {
         const mesh = new Mesh(name, scene);
-        const normals: Array<number> = [];
-        VertexData.ComputeNormals(this._grid.positions, this._grid.indices, normals);
-        this._grid.normals = normals;
+        //const normals: Array<number> = [];
+        //VertexData.ComputeNormals(this._grid.positions, this._grid.indices, normals);
+        //this._grid.normals = normals;
         this._grid.applyToMesh(mesh, true);
 
         // define material

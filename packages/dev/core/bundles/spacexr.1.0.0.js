@@ -13,10 +13,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DemInfos": () => (/* binding */ DemInfos)
 /* harmony export */ });
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+
 class DemInfos {
-    constructor(elevations, normals = null) {
-        this._max = 0;
-        this._min = 0;
+    static GetVector(z, i, stride) {
+        const y = Math.floor(i / stride);
+        const x = i - y * stride;
+        return new _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x, y, z);
+    }
+    constructor(elevations, normals = null, stride) {
+        this._max = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Zero();
+        this._min = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Zero();
+        this._delta = 0;
         this._mean = 0;
         this._elevations = null;
         this._normals = null;
@@ -24,17 +32,27 @@ class DemInfos {
         this._normals = normals;
         if (this._elevations) {
             const size = this._elevations?.length;
+            stride = stride || Math.sqrt(size);
             let min = Number.MAX_SAFE_INTEGER;
             let max = Number.MIN_SAFE_INTEGER;
             let mean = -this._elevations[0] / size;
+            let mini = 0;
+            let maxi = 0;
             for (let i = 0; i != size; i++) {
                 const z = this._elevations[i];
-                min = Math.min(z, min);
-                max = Math.max(z, max);
+                if (z < min) {
+                    min = z;
+                    mini = i;
+                }
+                else if (z > max) {
+                    max = z;
+                    maxi = i;
+                }
                 mean += z / size;
             }
-            this._max = max;
-            this._min = min;
+            this._max = DemInfos.GetVector(max, maxi, stride);
+            this._min = DemInfos.GetVector(min, mini, stride);
+            this._delta = this._max.z - this._min.z;
             this._mean = mean;
         }
     }
@@ -43,6 +61,9 @@ class DemInfos {
     }
     get min() {
         return this._min;
+    }
+    get delta() {
+        return this._delta;
     }
     get mean() {
         return this._mean;
@@ -54,7 +75,7 @@ class DemInfos {
         return this._normals;
     }
     toString() {
-        return `elevations count:${this._elevations?.length || 0}, min:${this._min}, max:${this._max}, mean:${this._mean},normals count:${this._normals?.length || 0}`;
+        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean},normals count:${this._normals?.length || 0}`;
     }
 }
 //# sourceMappingURL=dem.infos.js.map
@@ -103,7 +124,7 @@ class DemTileWebClient {
         }
         if (results.length > 1) {
             if (results[1].status == "fulfilled") {
-                normals = results[0].value.content;
+                normals = results[1].value.content;
             }
         }
         if (normals == null) {
@@ -113,7 +134,7 @@ class DemTileWebClient {
         return new _tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, new _dem_infos__WEBPACK_IMPORTED_MODULE_1__.DemInfos(elevations, normals), userArgs);
     }
     computeNormals(positions, w, h) {
-        const normals = new Float32Array(w * h);
+        const normals = new Uint8ClampedArray(w * h * 3);
         const indices = [0, 3, 6, 15, 24, 21, 18, 9];
         let i = 0;
         for (let row = 0; row < w; row++) {
@@ -149,9 +170,12 @@ class DemTileWebClient {
                 const y = ny / nn;
                 const z = nz / nn;
                 const l = Math.sqrt(x * x + y * y + z * z);
-                normals[i++] = x / l;
-                normals[i++] = y / l;
-                normals[i++] = z / l;
+                const R = ((x / l + 1) / 2) * 255;
+                const G = ((y / l + 1) / 2) * 255;
+                const B = (z / l) * 127 + 128;
+                normals[i++] = R;
+                normals[i++] = G;
+                normals[i++] = B;
             }
         }
         return normals;
@@ -3260,7 +3284,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapZen": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
-/* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapzenNormalValueDecoder),
+/* harmony export */   "RGBTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.RGBTileCodec),
 /* harmony export */   "TextTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.TextTileCodec),
 /* harmony export */   "Tile": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_9__.Tile),
 /* harmony export */   "TileAddress": () => (/* reexport safe */ _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress),
@@ -3819,7 +3843,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Float32TileCodec": () => (/* binding */ Float32TileCodec),
 /* harmony export */   "ImageDataTileCodec": () => (/* binding */ ImageDataTileCodec),
-/* harmony export */   "ImageTileCodec": () => (/* binding */ ImageTileCodec)
+/* harmony export */   "ImageTileCodec": () => (/* binding */ ImageTileCodec),
+/* harmony export */   "RGBTileCodec": () => (/* binding */ RGBTileCodec)
 /* harmony export */ });
 class ImageTileCodec {
     async decodeAsync(r) {
@@ -3884,6 +3909,30 @@ class ImageDataTileCodec {
 }
 ImageDataTileCodec.Shared = new ImageDataTileCodec();
 
+class RGBTileCodec {
+    constructor(canvas) {
+        this._canvas = canvas;
+    }
+    async decodeAsync(r) {
+        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decodeAsync(r);
+        if (imgData) {
+            const pixels = imgData.data;
+            const size = imgData.width * imgData.height;
+            const n = pixels.length / size;
+            if (n == 4) {
+                const a = new Uint8ClampedArray(size * 3);
+                for (let i = 0, j = 0; i < pixels.length; i += 4, j += 3) {
+                    a[j] = pixels[i];
+                    a[j + 1] = pixels[i + 1];
+                    a[j + 2] = pixels[i + 2];
+                }
+                return a;
+            }
+            return pixels;
+        }
+        return null;
+    }
+}
 class Float32TileCodec {
     constructor(pixelDecoder, canvas) {
         this.pixelDecoder = pixelDecoder;
@@ -4606,8 +4655,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "MapZen": () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
-/* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
-/* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenNormalValueDecoder)
+/* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapzen */ "./dist/tiles/vendors/tiles.vendors.mapzen.js");
 
@@ -4625,8 +4673,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "MapZen": () => (/* binding */ MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* binding */ MapZenDemUrlBuilder),
-/* harmony export */   "MapzenAltitudeDecoder": () => (/* binding */ MapzenAltitudeDecoder),
-/* harmony export */   "MapzenNormalValueDecoder": () => (/* binding */ MapzenNormalValueDecoder)
+/* harmony export */   "MapzenAltitudeDecoder": () => (/* binding */ MapzenAltitudeDecoder)
 /* harmony export */ });
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client */ "./dist/tiles/tiles.client.js");
 /* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "./dist/tiles/tiles.urlBuilder.js");
@@ -4660,19 +4707,6 @@ class MapzenAltitudeDecoder {
 }
 MapzenAltitudeDecoder.Shared = new MapzenAltitudeDecoder();
 
-class MapzenNormalValueDecoder {
-    decode(pixels, offset, target, targetOffset) {
-        const r = pixels[offset++];
-        const g = pixels[offset++];
-        const b = pixels[offset];
-        target[targetOffset++] = (2 * r) / 255 - 1;
-        target[targetOffset++] = (2 * g) / 255 - 1;
-        target[targetOffset++] = (b - 128) / 127;
-        return targetOffset;
-    }
-}
-MapzenNormalValueDecoder.Shared = new MapzenNormalValueDecoder();
-
 class MapZen {
     static ElevationsImagesClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
@@ -4684,7 +4718,7 @@ class MapZen {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static NormalsClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBTileCodec(), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
         return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
@@ -5183,7 +5217,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapZen": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
-/* harmony export */   "MapzenNormalValueDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapzenNormalValueDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Mass),
 /* harmony export */   "MemoryCache": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.MemoryCache),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
@@ -5196,6 +5229,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Quantity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Quantity),
 /* harmony export */   "QuantityRange": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.QuantityRange),
 /* harmony export */   "RGBAColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.RGBAColor),
+/* harmony export */   "RGBTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.RGBTileCodec),
 /* harmony export */   "Range": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Range),
 /* harmony export */   "Rectangle": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Rectangle),
 /* harmony export */   "Scalar": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Scalar),

@@ -2,6 +2,7 @@ import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { EPSG3857 } from "../tiles.geography";
+import { DemTileWebClient } from "../../dem/dem.tileclient";
 export declare class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     static Terrarium: MapZenDemUrlBuilder;
     static Normal: MapZenDemUrlBuilder;
@@ -23,4 +24,5 @@ export declare class MapZen {
     static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
     static NormalsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static NormalsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
+    static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions): DemTileWebClient;
 }

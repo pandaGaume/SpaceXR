@@ -1,1 +1,1 @@
-export * from "./texture.rawTexture3D";
+export * from "./texture.rawTexture2DArray";

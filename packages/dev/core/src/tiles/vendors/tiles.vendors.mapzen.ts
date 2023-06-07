@@ -4,6 +4,7 @@ import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { Float32TileCodec, ImageTileCodec } from "../tiles.codecs.image";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { EPSG3857 } from "../tiles.geography";
+import { DemTileWebClient } from "../../dem/dem.tileclient";
 
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     public static Terrarium = new MapZenDemUrlBuilder("terrarium");
@@ -58,5 +59,8 @@ export class MapZen {
     }
     public static NormalsClient(options?: TileWebClientOptions) {
         return new TileWebClient(MapZenDemUrlBuilder.Normal, new Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
+    }
+    public static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions) {
+        return new DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
     }
 }

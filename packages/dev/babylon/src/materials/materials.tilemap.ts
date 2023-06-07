@@ -1,30 +1,29 @@
-import { MaterialDefines, Scene, ShaderMaterial, Vector3 } from "@babylonjs/core";
+import { MaterialDefines, RawTexture2DArray, Scene, ShaderMaterial } from "@babylonjs/core";
 
 export class TileMapMaterialDefines extends MaterialDefines {}
 
-export class TileMapMaterialOptions {}
+export class TileMapMaterialOptions {
+    public constructor(p: Partial<TileMapMaterialOptions>) {
+        Object.assign(this, p);
+    }
+}
 
 export class TileMapMaterial extends ShaderMaterial {
     static ShaderName = "tilemap";
     static Name = `${TileMapMaterial.ShaderName}.material`;
 
+    elevationTexture?: RawTexture2DArray;
+    normalTexture?: RawTexture2DArray;
+
+    _o: TileMapMaterialOptions;
+
     public constructor(name: string, options: TileMapMaterialOptions, scene: Scene) {
-        super(
-            name,
-            scene,
-            { vertex: TileMapMaterial.ShaderName, fragment: TileMapMaterial.ShaderName },
-            {
-                attributes: ["position", "normal"],
-                uniforms: ["worldViewProjection", "world", "lightPosition", "terrainColor"],
-            }
-        );
-    }
+        const shaderOptions = {
+            attributes: ["position", "normal"],
+            uniforms: ["world", "viewProjection", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
+        };
 
-    public set lightPosition(v: Vector3) {
-        this.setVector3("lightPosition", v);
-    }
-
-    public set terrainColor(v: Vector3) {
-        this.setVector3("terrainColor", v);
+        super(name, scene, { vertex: TileMapMaterial.ShaderName, fragment: TileMapMaterial.ShaderName }, shaderOptions);
+        this._o = options;
     }
 }

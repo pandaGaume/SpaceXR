@@ -3,10 +3,10 @@ var SPACEXR;
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./dist/engines/extensions/engine.rawTexture3D.js":
-/*!********************************************************!*\
-  !*** ./dist/engines/extensions/engine.rawTexture3D.js ***!
-  \********************************************************/
+/***/ "./dist/engines/extensions/engine.rawTexture.js":
+/*!******************************************************!*\
+  !*** ./dist/engines/extensions/engine.rawTexture.js ***!
+  \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -46,7 +46,7 @@ function _makeUpdatePartialRawTextureFunction(is3D) {
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.updatePartialRawTexture2DArray = _makeUpdatePartialRawTextureFunction(false);
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.updatePartialRawTexture3D = _makeUpdatePartialRawTextureFunction(true);
 const __thinEngineExtensions = [_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.updatePartialRawTexture2DArray, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.updatePartialRawTexture3D];
-//# sourceMappingURL=engine.rawTexture3D.js.map
+//# sourceMappingURL=engine.rawTexture.js.map
 
 /***/ }),
 
@@ -58,9 +58,9 @@ const __thinEngineExtensions = [_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Thi
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "__thinEngineExtensions": () => (/* reexport safe */ _engine_rawTexture3D__WEBPACK_IMPORTED_MODULE_0__.__thinEngineExtensions)
+/* harmony export */   "__thinEngineExtensions": () => (/* reexport safe */ _engine_rawTexture__WEBPACK_IMPORTED_MODULE_0__.__thinEngineExtensions)
 /* harmony export */ });
-/* harmony import */ var _engine_rawTexture3D__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./engine.rawTexture3D */ "./dist/engines/extensions/engine.rawTexture3D.js");
+/* harmony import */ var _engine_rawTexture__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./engine.rawTexture */ "./dist/engines/extensions/engine.rawTexture.js");
 
 //# sourceMappingURL=index.js.map
 
@@ -121,19 +121,18 @@ __webpack_require__.r(__webpack_exports__);
 class TileMapMaterialDefines extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialDefines {
 }
 class TileMapMaterialOptions {
+    constructor(p) {
+        Object.assign(this, p);
+    }
 }
 class TileMapMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderMaterial {
     constructor(name, options, scene) {
-        super(name, scene, { vertex: TileMapMaterial.ShaderName, fragment: TileMapMaterial.ShaderName }, {
+        const shaderOptions = {
             attributes: ["position", "normal"],
-            uniforms: ["worldViewProjection", "world", "lightPosition", "terrainColor"],
-        });
-    }
-    set lightPosition(v) {
-        this.setVector3("lightPosition", v);
-    }
-    set terrainColor(v) {
-        this.setVector3("terrainColor", v);
+            uniforms: ["world", "viewProjection", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
+        };
+        super(name, scene, { vertex: TileMapMaterial.ShaderName, fragment: TileMapMaterial.ShaderName }, shaderOptions);
+        this._o = options;
     }
 }
 TileMapMaterial.ShaderName = "tilemap";
@@ -151,18 +150,18 @@ TileMapMaterial.Name = `${TileMapMaterial.ShaderName}.material`;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "__RawTexture2DArrayExtensions": () => (/* reexport safe */ _texture_rawTexture3D__WEBPACK_IMPORTED_MODULE_0__.__RawTexture2DArrayExtensions)
+/* harmony export */   "__RawTexture2DArrayExtensions": () => (/* reexport safe */ _texture_rawTexture2DArray__WEBPACK_IMPORTED_MODULE_0__.__RawTexture2DArrayExtensions)
 /* harmony export */ });
-/* harmony import */ var _texture_rawTexture3D__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./texture.rawTexture3D */ "./dist/materials/textures/texture.rawTexture3D.js");
+/* harmony import */ var _texture_rawTexture2DArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./texture.rawTexture2DArray */ "./dist/materials/textures/texture.rawTexture2DArray.js");
 
 //# sourceMappingURL=index.js.map
 
 /***/ }),
 
-/***/ "./dist/materials/textures/texture.rawTexture3D.js":
-/*!*********************************************************!*\
-  !*** ./dist/materials/textures/texture.rawTexture3D.js ***!
-  \*********************************************************/
+/***/ "./dist/materials/textures/texture.rawTexture2DArray.js":
+/*!**************************************************************!*\
+  !*** ./dist/materials/textures/texture.rawTexture2DArray.js ***!
+  \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -192,7 +191,7 @@ _babylonjs_core_Materials_Textures_rawTexture2DArray__WEBPACK_IMPORTED_MODULE_0_
     }
 };
 const __RawTexture2DArrayExtensions = [_babylonjs_core_Materials_Textures_rawTexture2DArray__WEBPACK_IMPORTED_MODULE_0__.RawTexture2DArray.prototype.updatePartial];
-//# sourceMappingURL=texture.rawTexture3D.js.map
+//# sourceMappingURL=texture.rawTexture2DArray.js.map
 
 /***/ }),
 
@@ -300,7 +299,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./terrain.tile */ "./dist/terrain/terrain.tile.js");
 /* harmony import */ var _terrain_mapDisplay__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./terrain.mapDisplay */ "./dist/terrain/terrain.mapDisplay.js");
 /* harmony import */ var _terrain_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./terrain.map */ "./dist/terrain/terrain.map.js");
-
 
 
 
@@ -5293,8 +5291,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
 /* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "../core/dist/tiles/tiles.urlBuilder.js");
 /* harmony import */ var _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.codecs.image */ "../core/dist/tiles/tiles.codecs.image.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
-/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../tiles.geography */ "../core/dist/tiles/tiles.geography.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.geography */ "../core/dist/tiles/tiles.geography.js");
+/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
+
 
 
 
@@ -5346,10 +5346,13 @@ class MapZen {
     static NormalsClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
     }
+    static DemClient(optionsElevations, optionsNormals) {
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
+    }
 }
 MapZen.MaxLevelOfDetail = 15;
-MapZen.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
-MapZen.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857(MapZen.MetricsOptions);
+MapZen.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
+MapZen.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_5__.EPSG3857(MapZen.MetricsOptions);
 
 //# sourceMappingURL=tiles.vendors.mapzen.js.map
 

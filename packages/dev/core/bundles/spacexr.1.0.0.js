@@ -4613,8 +4613,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client */ "./dist/tiles/tiles.client.js");
 /* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "./dist/tiles/tiles.urlBuilder.js");
 /* harmony import */ var _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.codecs.image */ "./dist/tiles/tiles.codecs.image.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.metrics */ "./dist/tiles/tiles.metrics.js");
-/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../tiles.geography */ "./dist/tiles/tiles.geography.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.geography */ "./dist/tiles/tiles.geography.js");
+/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "./dist/dem/dem.tileclient.js");
+
 
 
 
@@ -4666,10 +4668,13 @@ class MapZen {
     static NormalsClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenNormalValueDecoder.Shared), MapZen.Metrics, options);
     }
+    static DemClient(optionsElevations, optionsNormals) {
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
+    }
 }
 MapZen.MaxLevelOfDetail = 15;
-MapZen.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
-MapZen.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857(MapZen.MetricsOptions);
+MapZen.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
+MapZen.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_5__.EPSG3857(MapZen.MetricsOptions);
 
 //# sourceMappingURL=tiles.vendors.mapzen.js.map
 

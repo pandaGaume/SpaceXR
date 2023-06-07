@@ -81,9 +81,7 @@
                 camera.setTarget(display);
 
                 // definir la source de donnée.
-                const elevationsClient = SPACEXR.MapZen.ElevationsClient();
-                const normalsClient = SPACEXR.MapZen.NormalsClient();
-                const demClient = new SPACEXR.DemTileWebClient(elevationsClient, normalsClient);
+                const demClient = SPACEXR.MapZen.DemClient();
 
                 const options = {
                     center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
@@ -96,7 +94,7 @@
                 const materialName = "tilemap";
                 const shaderOptions = {
                     attributes: ["position", "normal"],
-                    uniforms: ["world", "viewProjection", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
+                    uniforms: ["world", "viewProjection", "elevationSampler", "normalSampler", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
                 };
 
                 var m = new BABYLON.ShaderMaterial(

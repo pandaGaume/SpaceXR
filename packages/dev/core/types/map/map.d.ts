@@ -2,6 +2,7 @@ import { TileMapView, UpdateEventArgs } from "../tiles/tile.mapview";
 import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
+import { Observable, Observer } from "../events/events.observable";
 export interface IMapDisplay {
     resolution: ISize3;
 }
@@ -12,7 +13,11 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     _lod: number;
     _scale: number;
     _center: ICartesian2;
+    _addedObservable?: Observable<T>;
+    _removedObservable?: Observable<T>;
     constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number);
+    get addedObservable(): Observable<T>;
+    get removedObservable(): Observable<T>;
     hasTile(key: string): boolean;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
@@ -32,6 +37,8 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     private processRemoved;
     private processAdded;
     protected buildMapTile(t: ITile<V>): T;
+    protected onAddedObserverAdded(observer: Observer<T>): void;
+    protected onRemovedObserverAdded(observer: Observer<T>): void;
     protected abstract onDeleted(key: string, tile: T): void;
     protected abstract onAdded(key: string, tile: T): void;
     protected abstract invalidateDisplay(): void;

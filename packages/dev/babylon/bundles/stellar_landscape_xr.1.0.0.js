@@ -2448,6 +2448,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/tile.mapview */ "../core/dist/tiles/tile.mapview.js");
 /* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
+
 
 
 
@@ -2460,6 +2462,14 @@ class AbstractDisplayMap {
         this._view = new _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__.TileMapView(datasource, display.resolution.width, display.resolution.height, center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(), lod || datasource.metrics.minLOD);
         this._view.updateObservable.add((e) => this.onUpdate(e));
         this._activ = new Map();
+    }
+    get addedObservable() {
+        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable(this.onAddedObserverAdded.bind(this));
+        return this._addedObservable;
+    }
+    get removedObservable() {
+        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable(this.onRemovedObserverAdded.bind(this));
+        return this._removedObservable;
     }
     hasTile(key) {
         return this._activ.has(key);
@@ -2553,6 +2563,9 @@ class AbstractDisplayMap {
                 if (old) {
                     this._activ.delete(key);
                     this.onDeleted(key, old);
+                    if (this._removedObservable && this._removedObservable.hasObservers()) {
+                        this._removedObservable.notifyObservers(old);
+                    }
                 }
             }
         }
@@ -2567,6 +2580,9 @@ class AbstractDisplayMap {
                     allocated.push(t1);
                     this._activ.set(key, t1);
                     this.onAdded(key, t1);
+                    if (this._addedObservable && this._addedObservable.hasObservers()) {
+                        this._addedObservable.notifyObservers(t1);
+                    }
                 }
             }
             return allocated;
@@ -2576,6 +2592,8 @@ class AbstractDisplayMap {
     buildMapTile(t) {
         return t;
     }
+    onAddedObserverAdded(observer) { }
+    onRemovedObserverAdded(observer) { }
 }
 //# sourceMappingURL=map.js.map
 

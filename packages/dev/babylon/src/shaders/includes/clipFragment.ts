@@ -4,5 +4,5 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "clipFragment";
 const shader = `bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}`;
-ShaderStore.IncludesShadersStore["clipFragment"] = shader;
+ShaderStore.IncludesShadersStore[name] = shader;
 /** @internal */ export const clipFragment = { name, shader };

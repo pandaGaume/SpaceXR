@@ -21,11 +21,27 @@
                 display: block;
                 touch-action: none;
             }
+            #compass {
+                position: absolute;
+                top: 20px; /* Adjust this to position the compass */
+                right: 20px; /* Adjust this to position the compass */
+                width: 200px; /* Adjust this according to your compass image size */
+                height: 200px; /* Adjust this according to your compass image size */
+                transform-origin: center;
+            }
+
+            #compassImage {
+                width: 100%;
+                height: 100%;
+            }
         </style>
     </head>
     <body>
         <div id="mapcontainer">
             <canvas id="mapcanvas3d"></canvas>
+            <div id="compass">
+                <img id="compassImage" src="./images/compass.png" alt="Compass" />
+            </div>
         </div>
         <script>
             function createScene(canvas, engine) {
@@ -56,7 +72,7 @@
                 );
                 display.position.y = 90;
                 display.rotation.x = -Math.PI / 2;
-                var displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
+                const displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
                 displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
                 displayMaterial.alpha = 0.4;
                 display.material = displayMaterial;
@@ -185,6 +201,7 @@
                                 }
                                 case 2: {
                                     map.rotate(diff.x);
+                                    updateCompassRotation(map.rotation);
                                     break;
                                 }
                             }
@@ -208,6 +225,24 @@
                             break;
                     }
                 });
+
+                updateCompassRotation = function (rotation) {
+                    var compass = document.getElementById("compass");
+                    compass.style.transform = "rotate(" + rotation + "deg)";
+                };
+
+                // Function to handle the compass click event
+                handleCompassClick = function (event) {
+                    map.setRotation(0);
+                    updateCompassRotation(0);
+                };
+
+                // Get the compass element
+                var compass = document.getElementById("compass");
+
+                // Add a click event listener to the compass
+                compass.addEventListener("click", handleCompassClick);
+
                 return scene;
             }
 
@@ -220,6 +255,7 @@
                 engine.runRenderLoop(function () {
                     scene.render();
                 });
+
                 // Watch for browser/canvas resize events
                 window.addEventListener("resize", function () {
                     engine.resize();

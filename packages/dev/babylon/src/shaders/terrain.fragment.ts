@@ -11,5 +11,5 @@ if( edgeThickness != 0.0 #if defined(WIREFRAME_SQUARE) && defined(WIREFRAME_EDG
 && (vEdgeWeight<=edgeVisibilityRange.x || vEdgeWeight>=edgeVisibilityRange.y ) #endif
 ) {gl_FragColor=mix(edgeColor,gl_FragColor,edgeFactor(vBarys,edgeThickness));}#endif 
 }`;
-ShaderStore.ShadersStore["terrainFragmentShader"] = shader;
+ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const terrainFragmentShader = { name, shader };

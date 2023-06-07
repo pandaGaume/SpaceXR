@@ -8,5 +8,5 @@ const shader = `precision highp float;attribute vec3 position;attribute vec3 n
 uniform mat4 viewProjection;varying vec4 vPosition;varying vec3 vNormal;void main(void) {#include<instancesVertex>
 vPosition=vec4(position,1.0);vec4 worldPos=finalWorld*vPosition ;vec4 outPosition=viewProjection*worldPos ;gl_Position=outPosition;vNormal=normal; #include<clipVertex>
 }`;
-ShaderStore.ShadersStore["tilemapVertexShader"] = shader;
+ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const tilemapVertexShader = { name, shader };

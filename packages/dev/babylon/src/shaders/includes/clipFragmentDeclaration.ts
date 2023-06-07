@@ -4,5 +4,5 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "clipFragmentDeclaration";
 const shader = `varying vec4 vfClipDistance;`;
-ShaderStore.IncludesShadersStore["clipFragmentDeclaration"] = shader;
+ShaderStore.IncludesShadersStore[name] = shader;
 /** @internal */ export const clipFragmentDeclaration = { name, shader };

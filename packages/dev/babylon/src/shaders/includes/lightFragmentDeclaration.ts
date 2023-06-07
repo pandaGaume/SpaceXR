@@ -4,5 +4,5 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "lightFragmentDeclaration";
 const shader = `struct DirLight {vec3 direction;vec3 ambient;vec3 diffuse;vec3 specular;}; `;
-ShaderStore.IncludesShadersStore["lightFragmentDeclaration"] = shader;
+ShaderStore.IncludesShadersStore[name] = shader;
 /** @internal */ export const lightFragmentDeclaration = { name, shader };

@@ -12,5 +12,5 @@ vec3 tmp=barycentricWeight(gl_VertexID,altitudesSize);vBarys=tmp.xy ;#endif
 #if defined(WIREFRAME_SQUARE) && defined(WIREFRAME_EDGE_WEIGHT)
 vEdgeWeight=tmp.z;#endif
 }`;
-ShaderStore.ShadersStore["terrainVertexShader"] = shader;
+ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const terrainVertexShader = { name, shader };

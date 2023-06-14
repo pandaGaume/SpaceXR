@@ -1,4 +1,4 @@
-import { AbstractMesh, Mesh, Nullable, Scene, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Nullable, Scene, ShaderMaterial, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
@@ -9,7 +9,7 @@ import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { Cartesian3 } from "core/geometry/geometry.cartesian";
 
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
-import { TerrainTile } from "./terrain.tile";
+import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 
 export class SurfaceTileMapOptions {
@@ -66,7 +66,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     _tileCurrentSize?: number;
     _tileCurrentOffset?: Vector3;
 
-    public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Scene) {
+    public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
         super(display, datasource, o.center, o.levelOfDetail);
         this._options = o;
@@ -108,6 +108,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._tileCurrentSize = s;
         this._tileCurrentOffset = new Vector3(x, y, 0);
         this._pivot.position.z = this._options.insets?.z || 0;
+        this._template.material = this.buildMaterial(scene);
     }
 
     public get template(): Mesh {
@@ -122,11 +123,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         // build topology
         const s = this.metrics?.tileSize;
         // note : we need to invert indices because we reverse the y and x, as scale -1
-        const o = new TerrainGridOptionsBuilder().withColumns(s).withInvertIndices(true).build();
+        const o = new TerrainGridOptionsBuilder().withColumns(s).withScale(-1,1).build();
         return new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());
     }
 
-    protected buildMesh(name: string, scene?: Scene): Mesh {
+    protected buildMesh(name: string, scene?: Nullable<Scene>): Mesh {
         const mesh = new Mesh(name, scene);
         //const normals: Array<number> = [];
         //VertexData.ComputeNormals(this._grid.positions, this._grid.indices, normals);
@@ -137,8 +138,6 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         // mesh.material = new MapMaterial(`${name}_material`, scene);
 
         // define instance properties using .registerInstancedBuffer
-        //mesh.registerInstancedBuffer("address", 3); // X,Y,LOD
-
         mesh.setEnabled(false);
         return mesh;
     }
@@ -171,7 +170,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         if (instance) {
             instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
             instance.parent = this._pivot;
-            tile.mesh = instance;
+            tile.surface = instance;
         }
     }
 
@@ -185,6 +184,69 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         }
     }
 
+    protected buildMaterial(scene?: Nullable<Scene>): Nullable<Material> {
+        if (!scene) {
+            // shader material need scene to access engine..
+            return null;
+        }
+
+        const materialName = "tilemap";
+        const shaderOptions = {
+            attributes: ["position"],
+            uniforms: ["world", "viewProjection", "demInfos", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
+            samplers: ["altitudes", "normals"],
+        };
+
+        var m = new ShaderMaterial(
+            materialName,
+            scene,
+            {
+                vertex: materialName,
+                fragment: materialName,
+            },
+            shaderOptions
+        );
+
+        m.setVector3("light.ambient", new Vector3(0.2, 0.2, 0.2));
+        m.setVector3("material.ambient", new Vector3(0.1, 0.5, 0.8));
+        m.setVector3("light.diffuse", new Vector3(0.5, 0.5, 0.5));
+        m.setVector3("material.diffuse", new Vector3(0.5, 0.8, 0.8));
+
+        m.setVector3("light.direction", new Vector3(1, 1, 1).normalize());
+
+        const axes = this.display.getXYZWorldVectors();
+        const res = this.display.resolution;
+        const w2 = res.width / 2;
+        const h2 = res.height / 2;
+
+        const vx = axes[0].multiply(new Vector3(w2, w2, w2));
+        const vy = axes[1].multiply(new Vector3(h2, h2, h2));
+
+        const p = this.display.getAbsolutePosition();
+
+        let a = p.subtract(vy);
+        let b = axes[1];
+        m.setVector3("northClip.point", a);
+        m.setVector3("northClip.normal", b);
+
+        let a1 = p.add(vy);
+        let b1 = axes[1].negate();
+        m.setVector3("southClip.point", a1);
+        m.setVector3("southClip.normal", b1);
+
+        let a2 = p.subtract(vx);
+        let b2 = axes[0];
+        m.setVector3("westClip.point", a2);
+        m.setVector3("westClip.normal", b2);
+
+        let a3 = p.add(vx);
+        let b3 = axes[0].negate();
+        m.setVector3("eastClip.point", a3);
+        m.setVector3("eastClip.normal", b3);
+
+        return m;
+    }
+
     private invalidate(tiles: IterableIterator<TerrainTile<V>> | Array<TerrainTile<V>>) {
         const scale = this._scale;
         const center = this._center;
@@ -196,11 +258,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
         const offset = this._tileCurrentOffset || Vector3.Zero();
         for (const t of tiles) {
-            if (t.content && t.rect && t.mesh) {
+            if (t.content && t.rect && t.surface) {
                 const c = t.rect.center;
-                t.mesh.position.x = c.x - center.x + offset.x;
-                t.mesh.position.y = c.y - center.y + offset.y;
-                t.mesh.position.z = offset.z;
+                t.surface.position.x = c.x - center.x + offset.x;
+                t.surface.position.y = c.y - center.y + offset.y;
+                t.surface.position.z = offset.z;
             }
         }
     }

@@ -30,7 +30,7 @@ export class VirtualDisplay extends Mesh {
         data.positions = [-0.5 * sx, 0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
         data.indices = [2, 3, 0, 0, 1, 2];
         data.applyToMesh(this);
-        this.scaling.x = this.scaling.y = -1;
+        //this.scaling.x = this.scaling.y = -1;
     }
 
     public get resolution(): ISize3 {

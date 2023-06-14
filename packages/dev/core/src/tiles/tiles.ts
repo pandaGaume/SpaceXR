@@ -73,6 +73,9 @@ export class Tile<T> extends TileAddress implements ITile<T> {
     public get address(): ITileAddress {
         return this;
     }
+    public get key(): string {
+        return this.address.quadkey;
+    }
 
     public get content(): Nullable<T> | undefined {
         return this._value;

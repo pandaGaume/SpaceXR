@@ -5,12 +5,13 @@ import { ITile, ITileAddress, ITileProxy } from "core/tiles/tiles.interfaces";
 import { Nullable } from "core/types";
 export declare class TerrainTile<V> implements ITile<V>, ITileProxy<V> {
     _delegate: ITile<V>;
-    _mesh: AbstractMesh | undefined;
+    _surface: AbstractMesh | undefined;
     constructor(delegate: ITile<V>, mesh?: AbstractMesh);
     get delegate(): ITile<V>;
-    get mesh(): AbstractMesh | undefined;
-    set mesh(v: AbstractMesh | undefined);
+    get surface(): AbstractMesh | undefined;
+    set surface(v: AbstractMesh | undefined);
     get address(): ITileAddress;
+    get key(): string;
     get content(): Nullable<V> | undefined;
     get rect(): IRectangle | undefined;
     get bounds(): IEnvelope | undefined;

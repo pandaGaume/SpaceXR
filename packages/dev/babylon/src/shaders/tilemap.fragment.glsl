@@ -6,12 +6,15 @@ precision highp float;
 
 
 // Varying
-varying vec4 vPosition;
-varying vec3 vNormal;
+//varying vec4 vPosition;
+in vec3 vNormal;
+in vec2 vUv;
+in float aDepth;
 
 // Uniforms
 uniform DirLight light;
 uniform Material material;
+uniform highp sampler2DArray normals;
 
 void main(void) {
 
@@ -26,5 +29,5 @@ void main(void) {
     vec3 diffuse  = light.diffuse * (diff * material.diffuse);
        
     vec3 result = ambient + diffuse ;
-    gl_FragColor = vec4(result,1.0) ;
+    glFragColor = vec4(result,1.0) ;
 }

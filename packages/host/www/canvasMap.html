@@ -44,10 +44,10 @@
 
                 // initialiser la localisation et le niveau de zoom
                 let center = new SPACEXR.Geo2(27.98817689833976, 86.92491071824738); // everest
-                const lod = 11;
+                const lod = 12;
 
                 // definir la source de donnée.
-                const terrariumImgClient = SPACEXR.MapZen.ElevationsImagesClient();
+                const terrariumImgClient = SPACEXR.MapZen.NormalsImagesClient();
                 // construire la carte.
                 const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, center, lod);
 

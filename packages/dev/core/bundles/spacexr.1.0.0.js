@@ -3284,6 +3284,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapZen": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
+/* harmony export */   "RGBATileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.RGBATileCodec),
 /* harmony export */   "RGBTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.RGBTileCodec),
 /* harmony export */   "TextTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.TextTileCodec),
 /* harmony export */   "Tile": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_9__.Tile),
@@ -3844,6 +3845,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Float32TileCodec": () => (/* binding */ Float32TileCodec),
 /* harmony export */   "ImageDataTileCodec": () => (/* binding */ ImageDataTileCodec),
 /* harmony export */   "ImageTileCodec": () => (/* binding */ ImageTileCodec),
+/* harmony export */   "RGBATileCodec": () => (/* binding */ RGBATileCodec),
 /* harmony export */   "RGBTileCodec": () => (/* binding */ RGBTileCodec)
 /* harmony export */ });
 class ImageTileCodec {
@@ -3928,6 +3930,19 @@ class RGBTileCodec {
                 }
                 return a;
             }
+            return pixels;
+        }
+        return null;
+    }
+}
+class RGBATileCodec {
+    constructor(canvas) {
+        this._canvas = canvas;
+    }
+    async decodeAsync(r) {
+        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decodeAsync(r);
+        if (imgData) {
+            const pixels = imgData.data;
             return pixels;
         }
         return null;
@@ -4321,6 +4336,9 @@ class Tile extends _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
     }
     get address() {
         return this;
+    }
+    get key() {
+        return this.address.quadkey;
     }
     get content() {
         return this._value;
@@ -4718,7 +4736,7 @@ class MapZen {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static NormalsClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBTileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec(), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
         return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
@@ -5229,6 +5247,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Quantity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Quantity),
 /* harmony export */   "QuantityRange": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.QuantityRange),
 /* harmony export */   "RGBAColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.RGBAColor),
+/* harmony export */   "RGBATileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.RGBATileCodec),
 /* harmony export */   "RGBTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.RGBTileCodec),
 /* harmony export */   "Range": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Range),
 /* harmony export */   "Rectangle": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Rectangle),

@@ -1,27 +1,35 @@
 precision highp float;
 
 // Attributes
-attribute vec3 position;
+in vec3 position;
+in vec4 demInfos;
+in vec2 textureIds;
+
 #include<instancesDeclaration>
 #include<clipVertexDeclaration>
-#include<demVertexDeclaration>
 
 // Uniforms
 uniform mat4 viewProjection;
-uniform sampler2D altitudes;
-uniform sampler2D normals;
+uniform highp sampler2DArray altitudes;
+uniform highp sampler2DArray normals;
+uniform highp float minAlt;
 
 // Varying
-varying vec4 vPosition;
-varying vec3 vNormal;
+out vec4 vPosition;
+out vec3 vNormal;
+out vec2 vUv;
+out float aDepth;
 
 void main(void) {
     #include<instancesVertex>
-    float x = (position.x + .5);
-    float y = (position.y + .5);
+    float x = max(position.x + .5, 0.01) ;
+    float y = position.y + .5 ;
     vec2 uv = vec2(x,y);
-    float alt = float(texture2D(altitudes, uv )) ;
-    float z = ((alt - demInfos.min.z)/ demInfos.delta) * 10.0 ;
+    float alt = float(texture(altitudes, vec3(uv,textureIds.x) )) ;
+    // float alt = y < 0.0 || y > 1.0 ? demInfos.y : float(texture(altitudes, vec3(uv,textureIds.x) )) ;
+    // todo : revisit the formula as this one is for individual tile and did not keep the scale...
+    // float z = ((alt - demInfos.x)/ demInfos.z) * 10.0 ;
+    float z = (alt - minAlt) * 0.01;
 
     vPosition = vec4(position.xy, z ,1.0) ;
     vec4 worldPos = finalWorld * vPosition;
@@ -40,11 +48,13 @@ void main(void) {
     // divided by the maximum possible value for the respective data type.
     // So we need to restore them to their original range by multply by 255
     
-    vec4 pixel = texture2D(normals, uv );
+    vec4 pixel = texture(normals, vec3(uv,textureIds.y) );
     x = (2.0 * pixel.r) - 1.0;
     y = (2.0 * pixel.g) - 1.0;
     z = (pixel.b * 255.0 - 128.0) / 127.0;
-    vNormal = vec3(x,y,z);
-    
+    vNormal = vec3(x,z,y);
+    vUv = uv;
+    aDepth = textureIds.y;
+
     #include<clipVertex>
 }

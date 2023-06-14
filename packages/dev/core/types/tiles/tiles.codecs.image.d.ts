@@ -16,6 +16,11 @@ export declare class RGBTileCodec implements ITileCodec<Uint8ClampedArray> {
     constructor(canvas?: HTMLCanvasElement);
     decodeAsync(r: void | Response): Promise<Awaited<Nullable<Uint8ClampedArray>>>;
 }
+export declare class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
+    private _canvas?;
+    constructor(canvas?: HTMLCanvasElement);
+    decodeAsync(r: void | Response): Promise<Awaited<Nullable<Uint8ClampedArray>>>;
+}
 export declare class Float32TileCodec implements ITileCodec<Float32Array> {
     pixelDecoder: IPixelDecoder;
     private _canvas?;

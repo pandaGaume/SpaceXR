@@ -10,6 +10,7 @@ export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
     content?: Nullable<T>;
     rect?: IRectangle;
+    key: string;
 }
 export interface ITileProxy<T> {
     delegate: ITile<T>;

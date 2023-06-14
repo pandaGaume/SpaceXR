@@ -1,7 +1,7 @@
 import { IMapDisplay } from "core/map";
 import { ISize3 } from "core/geometry/geometry.interfaces";
 import { Scene } from "@babylonjs/core";
-import { VirtualDisplay } from "../meshes/virtualdisplay";
+import { VirtualDisplay } from "../../holograms/virtualdisplay";
 
 /**
  * The surface map display is a virtual surface holding the anchor and dimension of the map with :

@@ -118,11 +118,11 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     }
 
     protected onUpdateTiles(args: UpdateEventArgs<V>): void {
-        // process tiles
+        // process tiles - process removed first lets framework doing some cleanup before allocating new tiles
         this.processRemoved(args);
         const allocated = this.processAdded(args);
 
-        // invalidate tiles
+        // invalidate only newly allocated tiles
         this.invalidateTiles(allocated, args.removed);
     }
 
@@ -132,7 +132,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         this._scale = args.scale;
         this._center = args.center;
 
-        // process tiles
+        // process tiles - process removed first lets framework doing some cleanup before allocating new tiles
         this.processRemoved(args);
         this.processAdded(args);
 

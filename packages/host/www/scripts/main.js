@@ -1,7 +1,3 @@
-const canvas = document.getElementById("glCanvas");
-const gl = canvas.getContext("webgl2");
-const program = gl.createProgram();
-
 const vertexShaderSource = `#version 300 es
 
 void main(){
@@ -15,6 +11,10 @@ out vec4 fragColor;
 void main(){
     fragColor = vec4(1.0,0.0,0.0,1.0);
 }`;
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+const program = gl.createProgram();
 
 const vertexShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertexShader, vertexShaderSource);

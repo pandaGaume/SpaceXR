@@ -88,11 +88,15 @@
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("map", display, demClient, options, scene);
+
+                const template = map.template;
+                template.registerInstancedBuffer("demInfos", 4); // dem infos
+                template.registerInstancedBuffer("textureIds", 2); // id elevations, id normals
+
                 const materialName = "tilemap";
                 const shaderOptions = {
-                    attributes: ["position"],
-                    uniforms: ["world", "viewProjection", "demInfos", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
-                    samplers: ["altitudes", "normals"],
+                    attributes: ["position", "demInfos", "textureIds"],
+                    uniforms: ["world", "viewProjection", "altitudes", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
                 };
 
                 var m = new BABYLON.ShaderMaterial(
@@ -141,36 +145,74 @@
                 m.setVector3("eastClip.point", a3);
                 m.setVector3("eastClip.normal", b3);
 
+                const depth = 16;
+                const s = demClient.metrics.tileSize;
+
+                const tilePoolElevationOptions = new SPACEXR.TilePoolTextureOptions({
+                    // data: new Float32Array(s * s * depth).fill(6000),
+                    metrics: demClient.metrics,
+                    count: depth,
+                    format: BABYLON.Constants.TEXTUREFORMAT_R,
+                    textureType: BABYLON.Constants.TEXTURETYPE_FLOAT,
+                    samplingMode: BABYLON.Texture.NEAREST_SAMPLINGMODE,
+                });
+
+                const elevationSampler = new SPACEXR.TilePoolTexture("altitudes", tilePoolElevationOptions, scene);
+
+                m.setTexture("altitudes", elevationSampler);
+
+                const tilePoolNormalOptions = new SPACEXR.TilePoolTextureOptions({
+                    metrics: demClient.metrics,
+                    count: depth,
+                    samplingMode: BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
+                });
+
+                const normalSampler = new SPACEXR.TilePoolTexture("normals", tilePoolNormalOptions, scene);
+
+                m.setTexture("normals", normalSampler);
+
                 map.template.material = m;
 
-                const tileSize = demClient.metrics.tileSize;
+                const min = 10000;
 
                 map.addedObservable.add((t) => {
-                    const invertY = true;
-                    const generateMipmap = false;
-                    const elevationSampler = new BABYLON.RawTexture(
-                        t.content.elevations,
-                        tileSize,
-                        tileSize,
-                        BABYLON.Constants.TEXTUREFORMAT_R,
-                        scene,
-                        generateMipmap,
-                        invertY,
-                        BABYLON.Texture.NEAREST_SAMPLINGMODE,
-                        BABYLON.Constants.TEXTURETYPE_FLOAT
-                    );
-                    elevationSampler.name = "altitudes";
-                    m.setTexture("altitudes", elevationSampler);
+                    const m = t.surface;
+                    if (m) {
+                        const c = t.content;
+                        // add instance attributes
+                        m.instancedBuffers.demInfos = new BABYLON.Vector4(c.min.z, c.max.z, c.delta, c.mean);
+                        const elevationArea = elevationSampler.reserveArea();
+                        const normalArea = normalSampler.reserveArea();
+                        if (elevationArea && normalArea) {
+                            if( c.min < min ){
+                                min = c.min;
+                                m.setFloat("minAlt",min);
+                            }                             
+                            elevationArea.update(c.elevations);
+                            normalArea.update(c.normals);
+                            t.elevationArea = elevationArea;
+                            t.normalArea = normalArea;
 
-                    const normalSampler = new BABYLON.RawTexture(t.content.normals, tileSize, tileSize, BABYLON.Constants.TEXTUREFORMAT_RGB, scene, generateMipmap, invertY);
-                    normalSampler.name = "normals";
-                    m.setTexture("normals", normalSampler);
-
-                    m.setVector3("demInfos.min", t.content.min);
-                    m.setVector3("demInfos.max", t.content.max);
-                    m.setFloat("demInfos.delta", t.content.delta);
-                    m.setFloat("demInfos.mean", t.content.mean);
+                            m.instancedBuffers.textureIds = new BABYLON.Vector2(elevationArea.id, normalArea.id);
+                        }
+                    }
                 });
+
+                const insertFirst = true;
+                map.removedObservable.add(
+                    (t) => {
+                        if (t.elevationArea) {
+                            t.elevationArea.release();
+                            t.elevationArea = undefined;
+                        }
+                        if (t.normalArea) {
+                            t.normalArea.release();
+                            t.normalArea = undefined;
+                        }
+                    },
+                    -1,
+                    insertFirst
+                );
 
                 map.view.validate();
 
@@ -264,6 +306,8 @@
 
                 // Add a click event listener to the compass
                 compass.addEventListener("click", handleCompassClick);
+
+                const mainAxes = new BABYLON.AxesViewer(scene, 50);
 
                 return scene;
             }

@@ -102,6 +102,23 @@ export class RGBTileCodec implements ITileCodec<Uint8ClampedArray> {
     }
 }
 
+export class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
+    private _canvas?: HTMLCanvasElement;
+
+    public constructor(canvas?: HTMLCanvasElement) {
+        this._canvas = canvas;
+    }
+
+    public async decodeAsync(r: void | Response): Promise<Awaited<Nullable<Uint8ClampedArray>>> {
+        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decodeAsync(r);
+        if (imgData) {
+            const pixels = imgData.data;
+            return pixels;
+        }
+        return null;
+    }
+}
+
 export class Float32TileCodec implements ITileCodec<Float32Array> {
     private _canvas?: HTMLCanvasElement;
 

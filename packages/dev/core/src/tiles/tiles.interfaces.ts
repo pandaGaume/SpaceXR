@@ -15,6 +15,7 @@ export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
     content?: Nullable<T>;
     rect?: IRectangle;
+    key: string;
 }
 
 export interface ITileProxy<T> {
@@ -86,7 +87,7 @@ export class FetchResult<T> {
     public constructor(public address: ITileAddress, public content: T, public userArgs: Array<unknown>) {}
 }
 
-export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider{
+export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {
     fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 

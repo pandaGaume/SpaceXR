@@ -10,10 +10,6 @@
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
         <script src="./scripts/inputs.js"></script>
         <style>
-            #mapcontainer {
-                width: 100%;
-                height: 100%;
-            }
             #mapcanvas3d {
                 width: 100%;
                 height: 100%;
@@ -45,7 +41,8 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 150, new BABYLON.Vector3(0, 0, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 100, new BABYLON.Vector3(0, 150, 0), scene);
+                camera.setTarget(new BABYLON.Vector3(0, 150, 0));
                 camera.wheelPrecision = 100;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
@@ -54,6 +51,8 @@
                 const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.7;
+
+                // BABYLON.SceneLoader.Append("./models/", "holographic_table.glb", scene, function (scene) {});
 
                 // create a basic table (in centimeter)
                 const h = 90;
@@ -78,7 +77,8 @@
                 camera.setTarget(display);
 
                 // definir la source de donnée.
-                const demClient = SPACEXR.MapZen.DemClient();
+                // const demClient = SPACEXR.MapZen.DemClient();
+                const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
 
                 const options = {
                     center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
@@ -95,7 +95,7 @@
 
                 const materialName = "tilemap";
                 const shaderOptions = {
-                    attributes: ["position", "demInfos", "textureIds"],
+                    attributes: ["position", "uv", "demInfos", "textureIds"],
                     uniforms: ["world", "viewProjection", "altitudes", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
                 };
 
@@ -149,22 +149,26 @@
                 const s = demClient.metrics.tileSize;
 
                 const tilePoolElevationOptions = new SPACEXR.TilePoolTextureOptions({
-                    // data: new Float32Array(s * s * depth).fill(6000),
                     metrics: demClient.metrics,
                     count: depth,
                     format: BABYLON.Constants.TEXTUREFORMAT_R,
                     textureType: BABYLON.Constants.TEXTURETYPE_FLOAT,
-                    samplingMode: BABYLON.Texture.NEAREST_SAMPLINGMODE,
+                    samplingMode: BABYLON.Constants.TEXTURE_NEAREST_NEAREST,
+                    internalFormat: engine._gl.R16F, // force internal format to save half space
                 });
 
                 const elevationSampler = new SPACEXR.TilePoolTexture("altitudes", tilePoolElevationOptions, scene);
+                elevationSampler.WrapR = BABYLON.Texture.CLAMP_ADDRESS_MODE;
 
                 m.setTexture("altitudes", elevationSampler);
 
                 const tilePoolNormalOptions = new SPACEXR.TilePoolTextureOptions({
                     metrics: demClient.metrics,
                     count: depth,
-                    samplingMode: BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
+                    format: BABYLON.Constants.TEXTUREFORMAT_RGB,
+                    textureType: BABYLON.Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: BABYLON.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: engine._gl.RGB8, // force internal format
                 });
 
                 const normalSampler = new SPACEXR.TilePoolTexture("normals", tilePoolNormalOptions, scene);
@@ -184,10 +188,10 @@
                         const elevationArea = elevationSampler.reserveArea();
                         const normalArea = normalSampler.reserveArea();
                         if (elevationArea && normalArea) {
-                            if( c.min < min ){
+                            if (c.min < min) {
                                 min = c.min;
-                                m.setFloat("minAlt",min);
-                            }                             
+                                m.setFloat("minAlt", min);
+                            }
                             elevationArea.update(c.elevations);
                             normalArea.update(c.normals);
                             t.elevationArea = elevationArea;
@@ -260,7 +264,7 @@
                             }
                             switch (pointerInfo.event.buttons) {
                                 case 1: {
-                                    map.translate(-diff.x, -diff.y);
+                                    map.translate(-diff.x, diff.y);
                                     break;
                                 }
                                 case 2: {

@@ -21,7 +21,15 @@ declare module "@babylonjs/core/Engines/thinEngine" {
             textureType: number
         ): void;
 
-        __SpaceXR___createRawTexture2DArray(width: number, height: number, depth: number, format: number, samplingMode: number, textureType: number): InternalTexture;
+        __SpaceXR___createRawTexture2DArray(
+            width: number,
+            height: number,
+            depth: number,
+            format: number,
+            samplingMode: number,
+            textureType: number,
+            internalFormat?: number
+        ): InternalTexture;
     }
 }
 
@@ -64,7 +72,8 @@ function _makeCreateRawTextureFunction(is3D: boolean) {
         depth: number,
         format: number,
         samplingMode: number,
-        textureType: number = Constants.TEXTURETYPE_UNSIGNED_INT
+        textureType: number = Constants.TEXTURETYPE_UNSIGNED_INT,
+        internalFormat?: number
     ): InternalTexture {
         const target = is3D ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D_ARRAY;
         const source = is3D ? InternalTextureSource.Raw3D : InternalTextureSource.Raw2DArray;
@@ -86,7 +95,7 @@ function _makeCreateRawTextureFunction(is3D: boolean) {
         if (texture.width % 4 !== 0) {
             this._gl.pixelStorei(this._gl.UNPACK_ALIGNMENT, 1);
         }
-        const internalSizedFomat = this._getRGBABufferInternalSizedFormat(textureType, format);
+        const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
         this._bindTextureDirectly(target, texture, true);
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
@@ -126,6 +135,7 @@ export class TilePoolTextureOptions {
     count: number = 1;
     format: number = Constants.TEXTUREFORMAT_RGBA;
     textureType: number = Constants.TEXTURETYPE_UNSIGNED_INT;
+    internalFormat?: number;
 
     generateMipmap: boolean = false;
     samplingMode: number = Texture.NEAREST_NEAREST;
@@ -182,7 +192,9 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
         this._used = 0;
 
         const s = this._o.metrics.tileSize;
-        this._texture = scene.getEngine().__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType);
+        this._texture = scene
+            .getEngine()
+            .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = Texture.CLAMP_ADDRESSMODE;
         this.wrapV = Texture.CLAMP_ADDRESSMODE;
         this.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);

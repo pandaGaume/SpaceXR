@@ -131,19 +131,18 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
         if (imgData) {
             const pixels = imgData.data;
             const size = imgData.width * imgData.height;
-            const n = pixels.length / size;
-            const stride = imgData.width * n;
+            const pixelSize = pixels.length / size;
+            const stride = imgData.width * pixelSize;
 
             const values = new Float32Array(size);
 
-            // initialize mean value
-            let i = this.pixelDecoder.decode(pixels, 0, values, 0);
+            let i = 0;
             // loop the rows
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
                 // then columns
                 for (let column = 0; column != imgData.width; column++) {
-                    i = this.pixelDecoder.decode(pixels, offset + column * n, values, i);
+                    i = this.pixelDecoder.decode(pixels, offset + column * pixelSize, values, i);
                 }
             }
 

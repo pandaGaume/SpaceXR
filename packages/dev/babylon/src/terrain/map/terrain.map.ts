@@ -3,7 +3,7 @@ import { AbstractMesh, Material, Mesh, Nullable, Scene, ShaderMaterial, Tools, T
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
-import { CellCoordinateReference, ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
 import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { Cartesian3 } from "core/geometry/geometry.cartesian";
@@ -58,13 +58,18 @@ export class SurfaceTileMapOptionsBuilder {
 }
 
 export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
+    private static InitZ(x: number, y: number, w: number, h: number) {
+        let i = x == w ? 1 : 0;
+        let j = y == h ? 2 : 0;
+        return i + j;
+    }
+
     _pivot: TransformNode;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
 
-    _tileCurrentSize?: number;
-    _tileCurrentOffset?: Vector3;
+    _offset?: Vector3;
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
@@ -74,39 +79,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._pivot.parent = display;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        let s = this.metrics.tileSize;
 
-        let x = 0;
-        let y = 0;
-
-        // compute origin end size using coordinate references.
-        switch (this.metrics.cellCoordinateReference) {
-            case CellCoordinateReference.nw: {
-                break;
-            }
-            case CellCoordinateReference.ne: {
-                x++;
-                break;
-            }
-            case CellCoordinateReference.se: {
-                x++;
-                y++;
-                break;
-            }
-            case CellCoordinateReference.sw: {
-                y++;
-                break;
-            }
-            case CellCoordinateReference.center:
-            default: {
-                s--;
-                x += 0.5;
-                y += 0.5;
-                break;
-            }
-        }
-        this._tileCurrentSize = s;
-        this._tileCurrentOffset = new Vector3(x, y, 0);
         this._pivot.position.z = this._options.insets?.z || 0;
         this._template.material = this.buildMaterial(scene);
     }
@@ -122,9 +95,14 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     protected buildGrid(): VertexData {
         // build topology
         const s = this.metrics?.tileSize;
-        // note : we need to invert indices because we reverse the y and x, as scale -1
-        const o = new TerrainGridOptionsBuilder().withColumns(s).withScale(-1,1).build();
-        return new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());
+
+        const o = new TerrainGridOptionsBuilder()
+            .withUvs(true)
+            .withColumns(s + 1) // add one to row and column to fill the gap - note that if only column/row are defined, the builder build a square
+            .withZInitializer(SurfaceTileMap.InitZ)
+            .build();
+        const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData(), s, s);
+        return data;
     }
 
     protected buildMesh(name: string, scene?: Nullable<Scene>): Mesh {
@@ -168,7 +146,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         // create the instance
         const instance = this.buildInstance(key, tile);
         if (instance) {
-            instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
+            instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
             instance.parent = this._pivot;
             tile.surface = instance;
         }
@@ -248,7 +226,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     }
 
     private invalidate(tiles: IterableIterator<TerrainTile<V>> | Array<TerrainTile<V>>) {
-        const scale = this._scale;
+        const scale = Math.abs(this._scale);
         const center = this._center;
 
         this._pivot.scaling = new Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
@@ -256,12 +234,12 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
             this._pivot.rotation.z = Tools.ToRadians(this.rotation);
         }
 
-        const offset = this._tileCurrentOffset || Vector3.Zero();
+        const offset = this._offset || Vector3.Zero();
         for (const t of tiles) {
             if (t.content && t.rect && t.surface) {
                 const c = t.rect.center;
                 t.surface.position.x = c.x - center.x + offset.x;
-                t.surface.position.y = c.y - center.y + offset.y;
+                t.surface.position.y = -(c.y - center.y + offset.y);
                 t.surface.position.z = offset.z;
             }
         }

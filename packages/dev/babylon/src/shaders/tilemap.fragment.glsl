@@ -30,4 +30,5 @@ void main(void) {
        
     vec3 result = ambient + diffuse ;
     glFragColor = vec4(result,1.0) ;
+    //glFragColor = texture(normals, vec3(vUv, aDepth)) ;
 }

@@ -47,6 +47,6 @@ export class MapZen {
         return new TileWebClient(MapZenDemUrlBuilder.Normal, new RGBATileCodec(), MapZen.Metrics, options);
     }
     public static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions) {
-        return new DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
+        return new DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
     }
 }

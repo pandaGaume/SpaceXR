@@ -14,9 +14,9 @@ export class DemInfos implements IDemInfos {
     _delta: number = 0;
     _mean: number = 0;
     _elevations: Nullable<Float32Array> = null;
-    _normals: Nullable<Uint8ClampedArray> = null;
+    _normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null;
 
-    public constructor(elevations: Nullable<Float32Array>, normals: Nullable<Uint8ClampedArray> = null, stride?: number) {
+    public constructor(elevations: Nullable<Float32Array>, normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null, stride?: number) {
         this._elevations = elevations;
         this._normals = normals;
 
@@ -63,13 +63,11 @@ export class DemInfos implements IDemInfos {
     public get elevations(): Nullable<Float32Array> {
         return this._elevations;
     }
-    public get normals(): Nullable<Uint8ClampedArray> {
+    public get normals(): Nullable<Uint8ClampedArray | HTMLImageElement> {
         return this._normals;
     }
 
     public toString(): string {
-        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${
-            this._mean
-        },normals count:${this._normals?.length || 0}`;
+        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean}}`;
     }
 }

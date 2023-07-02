@@ -106,9 +106,26 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/materials/textures/TilePoolTexture.js":
+/***/ "./dist/materials/textures/index.js":
+/*!******************************************!*\
+  !*** ./dist/materials/textures/index.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "TilePoolTexture": () => (/* reexport safe */ _tilePoolTexture__WEBPACK_IMPORTED_MODULE_0__.TilePoolTexture),
+/* harmony export */   "TilePoolTextureOptions": () => (/* reexport safe */ _tilePoolTexture__WEBPACK_IMPORTED_MODULE_0__.TilePoolTextureOptions)
+/* harmony export */ });
+/* harmony import */ var _tilePoolTexture__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tilePoolTexture */ "./dist/materials/textures/tilePoolTexture.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/materials/textures/tilePoolTexture.js":
 /*!****************************************************!*\
-  !*** ./dist/materials/textures/TilePoolTexture.js ***!
+  !*** ./dist/materials/textures/tilePoolTexture.js ***!
   \****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -139,7 +156,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
 }
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR___updateSubRawTexture2DArray = _makeUpdateSubRawTexture2DArrayFunction(false);
 function _makeCreateRawTextureFunction(is3D) {
-    return function (width, height, depth, format, samplingMode, textureType = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_INT) {
+    return function (width, height, depth, format, samplingMode, textureType = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_INT, internalFormat) {
         const target = is3D ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D_ARRAY;
         const source = is3D ? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InternalTextureSource.Raw3D : _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InternalTextureSource.Raw2DArray;
         const texture = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InternalTexture(this, source);
@@ -161,7 +178,7 @@ function _makeCreateRawTextureFunction(is3D) {
         if (texture.width % 4 !== 0) {
             this._gl.pixelStorei(this._gl.UNPACK_ALIGNMENT, 1);
         }
-        const internalSizedFomat = this._getRGBABufferInternalSizedFormat(textureType, format);
+        const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
         this._bindTextureDirectly(target, texture, true);
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
@@ -221,7 +238,9 @@ class TilePoolTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Textu
         this._areas = new Array(this.areaCount).fill(null);
         this._used = 0;
         const s = this._o.metrics.tileSize;
-        this._texture = scene.getEngine().__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType);
+        this._texture = scene
+            .getEngine()
+            .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
         this.wrapV = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
         this.updateSamplingMode(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.NEAREST_SAMPLINGMODE);
@@ -262,24 +281,7 @@ class TilePoolTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Textu
         }
     }
 }
-//# sourceMappingURL=TilePoolTexture.js.map
-
-/***/ }),
-
-/***/ "./dist/materials/textures/index.js":
-/*!******************************************!*\
-  !*** ./dist/materials/textures/index.js ***!
-  \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "TilePoolTexture": () => (/* reexport safe */ _TilePoolTexture__WEBPACK_IMPORTED_MODULE_0__.TilePoolTexture),
-/* harmony export */   "TilePoolTextureOptions": () => (/* reexport safe */ _TilePoolTexture__WEBPACK_IMPORTED_MODULE_0__.TilePoolTextureOptions)
-/* harmony export */ });
-/* harmony import */ var _TilePoolTexture__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TilePoolTexture */ "./dist/materials/textures/TilePoolTexture.js");
-
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=tilePoolTexture.js.map
 
 /***/ }),
 
@@ -342,11 +344,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
-/* harmony import */ var core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles/tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
 /* harmony import */ var core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../terrain.tile */ "./dist/terrain/terrain.tile.js");
-
+/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../terrain.tile */ "./dist/terrain/terrain.tile.js");
 
 
 
@@ -387,6 +387,11 @@ class SurfaceTileMapOptionsBuilder {
     }
 }
 class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDisplayMap {
+    static InitZ(x, y, w, h) {
+        let i = x == w ? 1 : 0;
+        let j = y == h ? 2 : 0;
+        return i + j;
+    }
     constructor(name, display, datasource, options, scene) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
         super(display, datasource, o.center, o.levelOfDetail);
@@ -395,36 +400,6 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         this._pivot.parent = display;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        let s = this.metrics.tileSize;
-        let x = 0;
-        let y = 0;
-        switch (this.metrics.cellCoordinateReference) {
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.CellCoordinateReference.nw: {
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.CellCoordinateReference.ne: {
-                x++;
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.CellCoordinateReference.se: {
-                x++;
-                y++;
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.CellCoordinateReference.sw: {
-                y++;
-                break;
-            }
-            case core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.CellCoordinateReference.center:
-            default: {
-                s--;
-                x += 0.5;
-                y += 0.5;
-                break;
-            }
-        }
-        this._tileCurrentSize = s;
-        this._tileCurrentOffset = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(x, y, 0);
         this._pivot.position.z = this._options.insets?.z || 0;
         this._template.material = this.buildMaterial(scene);
     }
@@ -436,8 +411,13 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
     }
     buildGrid() {
         const s = this.metrics?.tileSize;
-        const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptionsBuilder().withColumns(s).withScale(-1, 1).build();
-        return new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
+        const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptionsBuilder()
+            .withUvs(true)
+            .withColumns(s + 1)
+            .withZInitializer(SurfaceTileMap.InitZ)
+            .build();
+        const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData(), s, s);
+        return data;
     }
     buildMesh(name, scene) {
         const mesh = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
@@ -454,7 +434,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         return null;
     }
     buildMapTile(t) {
-        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_6__.TerrainTile(t);
+        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_5__.TerrainTile(t);
     }
     onDeleted(key, tile) {
         tile.dispose();
@@ -462,7 +442,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
     onAdded(key, tile) {
         const instance = this.buildInstance(key, tile);
         if (instance) {
-            instance.scaling.x = instance.scaling.y = this._tileCurrentSize || this.metrics.tileSize;
+            instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
             instance.parent = this._pivot;
             tile.surface = instance;
         }
@@ -520,18 +500,18 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         return m;
     }
     invalidate(tiles) {
-        const scale = this._scale;
+        const scale = Math.abs(this._scale);
         const center = this._center;
         this._pivot.scaling = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
         if (this.rotation) {
             this._pivot.rotation.z = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(this.rotation);
         }
-        const offset = this._tileCurrentOffset || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
+        const offset = this._offset || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
         for (const t of tiles) {
             if (t.content && t.rect && t.surface) {
                 const c = t.rect.center;
                 t.surface.position.x = c.x - center.x + offset.x;
-                t.surface.position.y = c.y - center.y + offset.y;
+                t.surface.position.y = -(c.y - center.y + offset.y);
                 t.surface.position.z = offset.z;
             }
         }
@@ -683,7 +663,7 @@ class DemInfos {
         return this._normals;
     }
     toString() {
-        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean},normals count:${this._normals?.length || 0}`;
+        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean}}`;
     }
 }
 //# sourceMappingURL=dem.infos.js.map
@@ -3338,18 +3318,20 @@ class TerrainGridOptions {
 }
 TerrainGridOptions.DefaultGridSize = 256;
 TerrainGridOptions.DefaultInvertIndices = false;
-TerrainGridOptions.DefaultInvertYZ = false;
 TerrainGridOptions.DefaultScale = 1;
 TerrainGridOptions.Shared = new TerrainGridOptions({
     columns: TerrainGridOptions.DefaultGridSize,
     rows: TerrainGridOptions.DefaultGridSize,
     invertIndices: TerrainGridOptions.DefaultInvertIndices,
-    invertYZ: TerrainGridOptions.DefaultInvertYZ,
     sx: TerrainGridOptions.DefaultScale,
     sy: TerrainGridOptions.DefaultScale,
 });
 
 class TerrainGridOptionsBuilder {
+    withUvs(flag) {
+        this._uvs = flag;
+        return this;
+    }
     withColumns(v) {
         this._cols = v;
         return this;
@@ -3371,14 +3353,18 @@ class TerrainGridOptionsBuilder {
         this._sy = y || x;
         return this;
     }
+    withZInitializer(zinit) {
+        this._zInitializer = zinit;
+        return this;
+    }
     build() {
         return new TerrainGridOptions({
+            uvs: this._uvs,
             columns: this._cols || this._rows,
             rows: this._rows || this._cols,
             sx: this._sx,
             sy: this._sy,
             invertIndices: this._invertIndices,
-            invertYZ: this._invertYZ,
         });
     }
 }
@@ -3390,7 +3376,7 @@ class TerrainNormalizedGridBuilder {
         this._o = { ...TerrainGridOptions.Shared, ...options };
         return this;
     }
-    build(data) {
+    build(data, ...params) {
         data = data || {};
         const w = this._o?.columns || TerrainGridOptions.DefaultGridSize;
         const h = this._o?.rows || w;
@@ -3398,22 +3384,21 @@ class TerrainNormalizedGridBuilder {
         const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
         const positions = [];
         const indices = [];
-        const x0 = -0.5;
-        const y0 = 0.5;
+        const uvs = this._o?.uvs ? [] : null;
         const dx = 1 / (w - 1);
         const dy = 1 / (h - 1);
+        const x0 = -0.5;
+        const y0 = 0.5;
         for (let row = 0; row < h; row++) {
             const v = row * dy;
             const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
-                const z = 0;
-                if (this._o?.invertYZ) {
-                    positions.push(x, z, y);
-                }
-                else {
-                    positions.push(x, y, z);
+                const z = this._o?.zInitializer ? this._o.zInitializer(x, y, ...params) : 0;
+                positions.push(x, y, z);
+                if (uvs) {
+                    uvs.push(u, v);
                 }
             }
         }
@@ -3428,24 +3413,25 @@ class TerrainNormalizedGridBuilder {
                 const idx4 = idx1 + 1;
                 if (idx1 % 2 != indice) {
                     if (this._o?.invertIndices) {
-                        indices.push(idx1, idx4, idx2, idx2, idx4, idx3);
+                        indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
                     }
                     else {
-                        indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
+                        indices.push(idx1, idx4, idx2, idx2, idx4, idx3);
                     }
                 }
                 else {
                     if (this._o?.invertIndices) {
-                        indices.push(idx1, idx3, idx2, idx3, idx1, idx4);
+                        indices.push(idx1, idx2, idx3, idx3, idx4, idx1);
                     }
                     else {
-                        indices.push(idx1, idx2, idx3, idx3, idx4, idx1);
+                        indices.push(idx1, idx3, idx2, idx3, idx1, idx4);
                     }
                 }
             }
         }
         data.indices = indices;
         data.positions = positions;
+        data.uvs = uvs;
         return data;
     }
 }
@@ -4702,14 +4688,14 @@ class Float32TileCodec {
         if (imgData) {
             const pixels = imgData.data;
             const size = imgData.width * imgData.height;
-            const n = pixels.length / size;
-            const stride = imgData.width * n;
+            const pixelSize = pixels.length / size;
+            const stride = imgData.width * pixelSize;
             const values = new Float32Array(size);
-            let i = this.pixelDecoder.decode(pixels, 0, values, 0);
+            let i = 0;
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
                 for (let column = 0; column != imgData.width; column++) {
-                    i = this.pixelDecoder.decode(pixels, offset + column * n, values, i);
+                    i = this.pixelDecoder.decode(pixels, offset + column * pixelSize, values, i);
                 }
             }
             return values;
@@ -5483,7 +5469,7 @@ class MapZen {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec(), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
     }
 }
 MapZen.MaxLevelOfDetail = 15;
@@ -5947,6 +5933,26 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
 (() => {
 var __webpack_exports__ = {};
+/*!*******************************!*\
+  !*** ./dist/shaders/dummy.js ***!
+  \*******************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "dummy": () => (/* binding */ dummy)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "dummy";
+const shader = `uniform highp Sampler2DArray u_altitudeSampler;in float neighbours_indices[4];in vec3 tex_coordinates;main(){float i=neighbours_indices[tex_coordinates.z];vec3 v=vec3(tex_coordinates.xy,i);if( i<0) {v.x=v.x != 0.0 ? v.x : 1.0;v.y=v.y != 0.0 ? v.y : 1.0; v.z=0.0;} float altitude=float(texture(u_altitudeSampler,tex_coordinates));}`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
+const dummy = { name, shader };
+//# sourceMappingURL=dummy.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
 /*!**************************************************!*\
   !*** ./dist/shaders/includes/clipDeclaration.js ***!
   \**************************************************/
@@ -6403,10 +6409,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "tilemapVertexShader";
-const shader = `precision highp float;in vec3 position;in vec4 demInfos;in vec2 textureIds;#include<instancesDeclaration>
+const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 demInfos;in vec2 textureIds;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
-uniform mat4 viewProjection;uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;out vec4 vPosition;out vec3 vNormal;out vec2 vUv;out float aDepth;void main(void) {#include<instancesVertex>
-float x=max(position.x+.5,0.01) ;float y=position.y+.5 ;vec2 uv=vec2(x,y);float alt=float(texture(altitudes,vec3(uv,textureIds.x) )) ;float z=(alt-minAlt)*0.01;vPosition=vec4(position.xy,z ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,vec3(uv,textureIds.y) );x=(2.0*pixel.r)-1.0;y=(2.0*pixel.g)-1.0;z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);vUv=uv;aDepth=textureIds.y;#include<clipVertex>
+uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;out vec4 vPosition;out vec3 vNormal;out vec2 vUv;out float aDepth;void main(void) {#include<instancesVertex>
+float alt=float(texture(altitudes,vec3(uv.x,uv.y,textureIds.x) )) ;alt=(alt-minAlt)*0.01;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,vec3(uv,textureIds.y) );float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);vUv=uv;aDepth=textureIds.y;#include<clipVertex>
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapVertexShader = { name, shader };

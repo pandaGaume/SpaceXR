@@ -8,7 +8,7 @@ export interface IDemInfos {
     mean: number;
 
     elevations: Nullable<Float32Array>;
-    normals: Nullable<Uint8ClampedArray>;
+    normals: Nullable<Uint8ClampedArray | HTMLImageElement>;
 
     toString(): string;
 }

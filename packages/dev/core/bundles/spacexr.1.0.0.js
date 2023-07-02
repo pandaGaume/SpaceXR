@@ -75,7 +75,7 @@ class DemInfos {
         return this._normals;
     }
     toString() {
-        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean},normals count:${this._normals?.length || 0}`;
+        return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean}}`;
     }
 }
 //# sourceMappingURL=dem.infos.js.map
@@ -2594,18 +2594,20 @@ class TerrainGridOptions {
 }
 TerrainGridOptions.DefaultGridSize = 256;
 TerrainGridOptions.DefaultInvertIndices = false;
-TerrainGridOptions.DefaultInvertYZ = false;
 TerrainGridOptions.DefaultScale = 1;
 TerrainGridOptions.Shared = new TerrainGridOptions({
     columns: TerrainGridOptions.DefaultGridSize,
     rows: TerrainGridOptions.DefaultGridSize,
     invertIndices: TerrainGridOptions.DefaultInvertIndices,
-    invertYZ: TerrainGridOptions.DefaultInvertYZ,
     sx: TerrainGridOptions.DefaultScale,
     sy: TerrainGridOptions.DefaultScale,
 });
 
 class TerrainGridOptionsBuilder {
+    withUvs(flag) {
+        this._uvs = flag;
+        return this;
+    }
     withColumns(v) {
         this._cols = v;
         return this;
@@ -2627,14 +2629,18 @@ class TerrainGridOptionsBuilder {
         this._sy = y || x;
         return this;
     }
+    withZInitializer(zinit) {
+        this._zInitializer = zinit;
+        return this;
+    }
     build() {
         return new TerrainGridOptions({
+            uvs: this._uvs,
             columns: this._cols || this._rows,
             rows: this._rows || this._cols,
             sx: this._sx,
             sy: this._sy,
             invertIndices: this._invertIndices,
-            invertYZ: this._invertYZ,
         });
     }
 }
@@ -2646,7 +2652,7 @@ class TerrainNormalizedGridBuilder {
         this._o = { ...TerrainGridOptions.Shared, ...options };
         return this;
     }
-    build(data) {
+    build(data, ...params) {
         data = data || {};
         const w = this._o?.columns || TerrainGridOptions.DefaultGridSize;
         const h = this._o?.rows || w;
@@ -2654,22 +2660,21 @@ class TerrainNormalizedGridBuilder {
         const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
         const positions = [];
         const indices = [];
-        const x0 = -0.5;
-        const y0 = 0.5;
+        const uvs = this._o?.uvs ? [] : null;
         const dx = 1 / (w - 1);
         const dy = 1 / (h - 1);
+        const x0 = -0.5;
+        const y0 = 0.5;
         for (let row = 0; row < h; row++) {
             const v = row * dy;
             const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
-                const z = 0;
-                if (this._o?.invertYZ) {
-                    positions.push(x, z, y);
-                }
-                else {
-                    positions.push(x, y, z);
+                const z = this._o?.zInitializer ? this._o.zInitializer(x, y, ...params) : 0;
+                positions.push(x, y, z);
+                if (uvs) {
+                    uvs.push(u, v);
                 }
             }
         }
@@ -2684,24 +2689,25 @@ class TerrainNormalizedGridBuilder {
                 const idx4 = idx1 + 1;
                 if (idx1 % 2 != indice) {
                     if (this._o?.invertIndices) {
-                        indices.push(idx1, idx4, idx2, idx2, idx4, idx3);
+                        indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
                     }
                     else {
-                        indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
+                        indices.push(idx1, idx4, idx2, idx2, idx4, idx3);
                     }
                 }
                 else {
                     if (this._o?.invertIndices) {
-                        indices.push(idx1, idx3, idx2, idx3, idx1, idx4);
+                        indices.push(idx1, idx2, idx3, idx3, idx4, idx1);
                     }
                     else {
-                        indices.push(idx1, idx2, idx3, idx3, idx4, idx1);
+                        indices.push(idx1, idx3, idx2, idx3, idx1, idx4);
                     }
                 }
             }
         }
         data.indices = indices;
         data.positions = positions;
+        data.uvs = uvs;
         return data;
     }
 }
@@ -3958,14 +3964,14 @@ class Float32TileCodec {
         if (imgData) {
             const pixels = imgData.data;
             const size = imgData.width * imgData.height;
-            const n = pixels.length / size;
-            const stride = imgData.width * n;
+            const pixelSize = pixels.length / size;
+            const stride = imgData.width * pixelSize;
             const values = new Float32Array(size);
-            let i = this.pixelDecoder.decode(pixels, 0, values, 0);
+            let i = 0;
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
                 for (let column = 0; column != imgData.width; column++) {
-                    i = this.pixelDecoder.decode(pixels, offset + column * n, values, i);
+                    i = this.pixelDecoder.decode(pixels, offset + column * pixelSize, values, i);
                 }
             }
             return values;
@@ -4739,7 +4745,7 @@ class MapZen {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec(), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsClient(optionsNormals));
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
     }
 }
 MapZen.MaxLevelOfDetail = 15;

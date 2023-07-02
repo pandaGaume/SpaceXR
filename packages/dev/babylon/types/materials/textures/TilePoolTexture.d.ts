@@ -3,7 +3,7 @@ import { ITileMetrics } from "../..";
 declare module "@babylonjs/core/Engines/thinEngine" {
     interface ThinEngine {
         __SpaceXR___updateSubRawTexture2DArray(texture: InternalTexture, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, data: Nullable<ArrayBufferView>, format: number, textureType: number): void;
-        __SpaceXR___createRawTexture2DArray(width: number, height: number, depth: number, format: number, samplingMode: number, textureType: number): InternalTexture;
+        __SpaceXR___createRawTexture2DArray(width: number, height: number, depth: number, format: number, samplingMode: number, textureType: number, internalFormat?: number): InternalTexture;
     }
 }
 export interface ITilePoolTextureArea {
@@ -24,6 +24,7 @@ export declare class TilePoolTextureOptions {
     count: number;
     format: number;
     textureType: number;
+    internalFormat?: number;
     generateMipmap: boolean;
     samplingMode: number;
     constructor(p?: Partial<TilePoolTextureOptions>);

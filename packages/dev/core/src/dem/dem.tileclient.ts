@@ -5,9 +5,9 @@ import { DemInfos } from "./dem.infos";
 
 export class DemTileWebClient implements ITileClient<IDemInfos> {
     _elevationsDataSource: ITileClient<Float32Array>;
-    _normalsDataSource?: ITileClient<Uint8ClampedArray>;
+    _normalsDataSource?: ITileClient<Uint8ClampedArray | HTMLImageElement>;
 
-    public constructor(elevationSrc: ITileClient<Float32Array>, normalSrc?: ITileClient<Uint8ClampedArray>) {
+    public constructor(elevationSrc: ITileClient<Float32Array>, normalSrc?: ITileClient<Uint8ClampedArray | HTMLImageElement>) {
         this._elevationsDataSource = elevationSrc;
         this._normalsDataSource = normalSrc;
     }
@@ -17,7 +17,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
     }
 
     public async fetchAsync(request: ITileAddress, ...userArgs: unknown[]): Promise<FetchResult<Nullable<IDemInfos>>> {
-        const requests: Array<Promise<FetchResult<Nullable<Float32Array> | Nullable<Uint8ClampedArray>>>> = [];
+        const requests: Array<Promise<FetchResult<Nullable<Float32Array> | Nullable<Uint8ClampedArray> | Nullable<HTMLImageElement>>>> = [];
         requests.push(this._elevationsDataSource.fetchAsync(request, ...userArgs));
         if (this._normalsDataSource) {
             requests.push(this._normalsDataSource.fetchAsync(request, ...userArgs));
@@ -26,7 +26,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         const results = await Promise.allSettled(requests);
 
         let elevations: Nullable<Float32Array> = null;
-        let normals: Nullable<Uint8ClampedArray> = null;
+        let normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null;
 
         // elevations
         if (results[0].status == "fulfilled") {
@@ -42,7 +42,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         // normals
         if (results.length > 1) {
             if (results[1].status == "fulfilled") {
-                normals = <Nullable<Uint8ClampedArray>>results[1].value.content;
+                normals = <Nullable<Uint8ClampedArray | HTMLImageElement>>results[1].value.content;
             }
         }
         if (normals == null) {

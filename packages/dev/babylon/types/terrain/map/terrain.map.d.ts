@@ -27,12 +27,12 @@ export declare class SurfaceTileMapOptionsBuilder {
     build(): SurfaceTileMapOptions;
 }
 export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
+    private static InitZ;
     _pivot: TransformNode;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
-    _tileCurrentSize?: number;
-    _tileCurrentOffset?: Vector3;
+    _offset?: Vector3;
     constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>);
     get template(): Mesh;
     hasMesh(mesh: Mesh): boolean;

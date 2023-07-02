@@ -8,13 +8,13 @@ export declare class DemInfos implements IDemInfos {
     _delta: number;
     _mean: number;
     _elevations: Nullable<Float32Array>;
-    _normals: Nullable<Uint8ClampedArray>;
-    constructor(elevations: Nullable<Float32Array>, normals?: Nullable<Uint8ClampedArray>, stride?: number);
+    _normals: Nullable<Uint8ClampedArray | HTMLImageElement>;
+    constructor(elevations: Nullable<Float32Array>, normals?: Nullable<Uint8ClampedArray | HTMLImageElement>, stride?: number);
     get max(): ICartesian3;
     get min(): ICartesian3;
     get delta(): number;
     get mean(): number;
     get elevations(): Nullable<Float32Array>;
-    get normals(): Nullable<Uint8ClampedArray>;
+    get normals(): Nullable<Uint8ClampedArray | HTMLImageElement>;
     toString(): string;
 }

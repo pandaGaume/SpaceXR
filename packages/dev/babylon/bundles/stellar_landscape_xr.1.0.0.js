@@ -2605,12 +2605,12 @@ class AbstractDisplayMap {
         return this;
     }
     zoomIn(delta) {
-        this._view.zoomIn(delta);
+        this._view.zoomIn(delta ?? 1);
         this._view.validate();
         return this;
     }
     zoomOut(delta) {
-        this._view.zoomOut(delta);
+        this._view.zoomOut(delta ?? 1);
         this._view.validate();
         return this;
     }
@@ -6432,7 +6432,7 @@ const name = "tilemapFragmentShader";
 const shader = `precision highp float;#include<lightFragmentDeclaration>
 #include<materialFragmentDeclaration>
 #include<clipFragmentDeclaration>
-in vec3 vNormal;in vec2 vUv;in float aDepth;uniform DirLight light;uniform Material material;uniform highp sampler2DArray normals;void main(void) {#include<clipFragment>
+in vec3 vNormal;uniform DirLight light;uniform Material material;void main(void) {#include<clipFragment>
 vec3 ambient =light.ambient*material.ambient;vec3 norm=normalize(vNormal);float diff=max(dot(norm,light.direction),0.0);vec3 diffuse =light.diffuse*(diff*material.diffuse);vec3 result=ambient+diffuse ;glFragColor=vec4(result,1.0) ;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapFragmentShader = { name, shader };
@@ -6453,10 +6453,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "tilemapVertexShader";
-const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 demInfos;in vec2 textureIds;#include<instancesDeclaration>
+const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 altIds;in vec4 normIds;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
-uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;out vec4 vPosition;out vec3 vNormal;out vec2 vUv;out float aDepth;void main(void) {#include<instancesVertex>
-float alt=float(texture(altitudes,vec3(uv.x,uv.y,textureIds.x) )) ;alt=(alt-minAlt)*mapscale;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,vec3(uv,textureIds.y) );float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);vUv=uv;aDepth=textureIds.y;#include<clipVertex>
+uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;out vec4 vPosition;out vec3 vNormal;void main(void) {#include<instancesVertex>
+float alt=float(texture(altitudes,vec3(uv.x,uv.y,altIds.x) )) ;alt=(alt-minAlt)*mapscale;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,vec3(uv,normIds.x) );float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);#include<clipVertex>
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapVertexShader = { name, shader };

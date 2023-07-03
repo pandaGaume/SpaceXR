@@ -16,16 +16,46 @@
             }
             #compass {
                 position: absolute;
-                top: 20px; /* Adjust this to position the compass */
-                right: 20px; /* Adjust this to position the compass */
-                width: 200px; /* Adjust this according to your compass image size */
-                height: 200px; /* Adjust this according to your compass image size */
+                top: 20px;
+                right: 20px;
+                width: 200px;
+                height: 200px;
                 transform-origin: center;
             }
 
             #compassImage {
                 width: 100%;
                 height: 100%;
+            }
+
+            #zoomin {
+                position: absolute;
+                top: 250px;
+                right: 90px;
+                width: 64px;
+                height: 64px;
+                transform-origin: center;
+            }
+
+            #zoominImage {
+                width: 100%;
+                height: 100%;
+            }
+
+            #zoomout {
+                position: absolute;
+                top: 340px;
+                right: 74px;
+                width: 64px;
+                height: 64px;
+                transform-origin: center;
+            }
+
+            #zoomoutImage {
+                width: 100%;
+                height: 100%;
+                -webkit-transform: scaleX(-1);
+                transform: scaleX(-1);
             }
         </style>
     </head>
@@ -34,6 +64,12 @@
             <canvas id="mapcanvas3d"></canvas>
             <div id="compass">
                 <img id="compassImage" src="./images/compass.png" alt="Compass" />
+            </div>
+            <div id="zoomin">
+                <img id="zoominImage" src="./images/zoom_in.png" alt="Zoom_in" />
+            </div>
+            <div id="zoomout">
+                <img id="zoomoutImage" src="./images/zoom_out.png" alt="Zoom_out" />
             </div>
         </div>
         <script>
@@ -81,8 +117,8 @@
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
 
                 const options = {
-                    center: SPACEXR.KnownPlaces.Locations.MountRainier,
-                    levelOfDetail: 15,
+                    center: SPACEXR.KnownPlaces.Locations.Chamonix,
+                    levelOfDetail: 13,
                 };
 
                 // construire la carte.
@@ -91,11 +127,12 @@
                 // construire le material - WARNING !!! This is temporary emplacement for this code, which is MUST beeing located into the map.
                 const template = map.template;
                 template.registerInstancedBuffer("demInfos", 4); // dem infos
-                template.registerInstancedBuffer("textureIds", 2); // id elevations, id normals
+                template.registerInstancedBuffer("altIds", 4);
+                template.registerInstancedBuffer("normIds", 4);
 
                 const materialName = "tilemap";
                 const shaderOptions = {
-                    attributes: ["position", "uv", "demInfos", "textureIds"],
+                    attributes: ["position", "uv", "demInfos", "altIds", "normIds"],
                     uniforms: ["world", "viewProjection", "altitudes", "mapscale", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
                 };
 
@@ -203,7 +240,8 @@
                             t.elevationArea = elevationArea;
                             t.normalArea = normalArea;
 
-                            m.instancedBuffers.textureIds = new BABYLON.Vector2(elevationArea.id, normalArea.id);
+                            m.instancedBuffers.altIds = new BABYLON.Vector4(elevationArea.id, 0, 0, 0);
+                            m.instancedBuffers.normIds = new BABYLON.Vector4(normalArea.id, 0, 0, 0);
                         }
                     }
                 });
@@ -312,11 +350,17 @@
                     updateCompassRotation(0);
                 };
 
-                // Get the compass element
-                var compass = document.getElementById("compass");
-
                 // Add a click event listener to the compass
+                var compass = document.getElementById("compass");
                 compass.addEventListener("click", handleCompassClick);
+
+                // Add a click event listener to the zoom in button
+                var zoomInBt = document.getElementById("zoomin");
+                zoomInBt.addEventListener("click", () => map.zoomIn(0.1));
+
+                // Add a click event listener to the zoom out button
+                var zoomOutBt = document.getElementById("zoomout");
+                zoomOutBt.addEventListener("click", () => map.zoomOut(0.1));
 
                 const mainAxes = new BABYLON.AxesViewer(scene, 20);
                 const screenAxes = new BABYLON.AxesViewer(scene, 20);

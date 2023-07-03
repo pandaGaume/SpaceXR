@@ -1871,12 +1871,12 @@ class AbstractDisplayMap {
         return this;
     }
     zoomIn(delta) {
-        this._view.zoomIn(delta);
+        this._view.zoomIn(delta ?? 1);
         this._view.validate();
         return this;
     }
     zoomOut(delta) {
-        this._view.zoomOut(delta);
+        this._view.zoomOut(delta ?? 1);
         this._view.validate();
         return this;
     }

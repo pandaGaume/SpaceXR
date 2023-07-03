@@ -4,8 +4,8 @@ precision highp float;
 in vec3 position; // babylon build in
 in vec2 uv; // babylon build in
 
-in vec4 demInfos;
-in vec2 textureIds;
+in vec4 altIds;
+in vec4 normIds;
 
 #include<instancesDeclaration>
 #include<clipVertexDeclaration>
@@ -21,12 +21,10 @@ uniform highp float mapscale;
 // Varying
 out vec4 vPosition;
 out vec3 vNormal;
-out vec2 vUv;
-out float aDepth;
 
 void main(void) {
     #include<instancesVertex>
-    float alt = float(texture(altitudes, vec3(uv.x, uv.y,textureIds.x) )) ;
+    float alt = float(texture(altitudes, vec3(uv.x, uv.y,altIds.x) )) ;
     alt = (alt - minAlt) * mapscale;
 
     vPosition = vec4(position.xy, alt ,1.0) ;
@@ -46,13 +44,11 @@ void main(void) {
     // divided by the maximum possible value for the respective data type.
     // So we need to restore them to their original range by multply by 255
     
-    vec4 pixel = texture(normals, vec3(uv,textureIds.y) );
+    vec4 pixel = texture(normals, vec3(uv,normIds.x) );
     float x = (2.0 * pixel.r) - 1.0;
     float y = (2.0 * pixel.g) - 1.0;
     float z = (pixel.b * 255.0 - 128.0) / 127.0;
     vNormal = vec3(x,z,y);
-    vUv = uv;
-    aDepth = textureIds.y;
 
     #include<clipVertex>
 }

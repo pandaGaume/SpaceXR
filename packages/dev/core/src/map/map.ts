@@ -63,12 +63,12 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         return this;
     }
     public zoomIn(delta: number): ITileMapApi {
-        this._view.zoomIn(delta);
+        this._view.zoomIn(delta ?? 1);
         this._view.validate();
         return this;
     }
     public zoomOut(delta: number): ITileMapApi {
-        this._view.zoomOut(delta);
+        this._view.zoomOut(delta ?? 1);
         this._view.validate();
         return this;
     }

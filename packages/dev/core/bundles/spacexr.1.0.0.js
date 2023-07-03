@@ -2627,10 +2627,6 @@ TerrainGridOptions.DefaultInvertIndices = false;
 TerrainGridOptions.DefaultScale = 1;
 TerrainGridOptions.Shared = new TerrainGridOptions({
     columns: TerrainGridOptions.DefaultGridSize,
-    rows: TerrainGridOptions.DefaultGridSize,
-    invertIndices: TerrainGridOptions.DefaultInvertIndices,
-    sx: TerrainGridOptions.DefaultScale,
-    sy: TerrainGridOptions.DefaultScale,
 });
 
 class TerrainGridOptionsBuilder {
@@ -2663,6 +2659,10 @@ class TerrainGridOptionsBuilder {
         this._zInitializer = zinit;
         return this;
     }
+    withUVInitializer(uvinit) {
+        this._uvInitializer = uvinit;
+        return this;
+    }
     build() {
         return new TerrainGridOptions({
             uvs: this._uvs,
@@ -2671,6 +2671,8 @@ class TerrainGridOptionsBuilder {
             sx: this._sx,
             sy: this._sy,
             invertIndices: this._invertIndices,
+            zInitializer: this._zInitializer,
+            uvInitializer: this._uvInitializer,
         });
     }
 }
@@ -2701,10 +2703,11 @@ class TerrainNormalizedGridBuilder {
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
-                const z = this._o?.zInitializer ? this._o.zInitializer(x, y, ...params) : 0;
+                const z = this._o?.zInitializer ? this._o.zInitializer(column, row, w, h, ...params) : 0;
                 positions.push(x, y, z);
                 if (uvs) {
-                    uvs.push(u, v);
+                    const uv = this._o?.uvInitializer ? this._o.uvInitializer(column, row, w, h, ...params) : [u, v];
+                    uvs.push(...uv);
                 }
             }
         }

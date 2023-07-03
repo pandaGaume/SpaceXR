@@ -396,9 +396,9 @@ class SurfaceTileMapOptionsBuilder {
     }
 }
 class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDisplayMap {
-    static InitZ(x, y, w, h) {
-        let i = x == w ? 1 : 0;
-        let j = y == h ? 2 : 0;
+    static InitZ(column, row, w, h) {
+        let i = column == w - 1 ? 1 : 0;
+        let j = row == h - 1 ? 2 : 0;
         return i + j;
     }
     constructor(name, display, datasource, options, scene) {
@@ -424,7 +424,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
             .withInvertIndices(true)
             .withZInitializer(SurfaceTileMap.InitZ)
             .build();
-        const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData(), s, s);
+        const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
         return data;
     }
     buildMesh(name, scene) {
@@ -3361,10 +3361,6 @@ TerrainGridOptions.DefaultInvertIndices = false;
 TerrainGridOptions.DefaultScale = 1;
 TerrainGridOptions.Shared = new TerrainGridOptions({
     columns: TerrainGridOptions.DefaultGridSize,
-    rows: TerrainGridOptions.DefaultGridSize,
-    invertIndices: TerrainGridOptions.DefaultInvertIndices,
-    sx: TerrainGridOptions.DefaultScale,
-    sy: TerrainGridOptions.DefaultScale,
 });
 
 class TerrainGridOptionsBuilder {
@@ -3397,6 +3393,10 @@ class TerrainGridOptionsBuilder {
         this._zInitializer = zinit;
         return this;
     }
+    withUVInitializer(uvinit) {
+        this._uvInitializer = uvinit;
+        return this;
+    }
     build() {
         return new TerrainGridOptions({
             uvs: this._uvs,
@@ -3405,6 +3405,8 @@ class TerrainGridOptionsBuilder {
             sx: this._sx,
             sy: this._sy,
             invertIndices: this._invertIndices,
+            zInitializer: this._zInitializer,
+            uvInitializer: this._uvInitializer,
         });
     }
 }
@@ -3435,10 +3437,11 @@ class TerrainNormalizedGridBuilder {
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
-                const z = this._o?.zInitializer ? this._o.zInitializer(x, y, ...params) : 0;
+                const z = this._o?.zInitializer ? this._o.zInitializer(column, row, w, h, ...params) : 0;
                 positions.push(x, y, z);
                 if (uvs) {
-                    uvs.push(u, v);
+                    const uv = this._o?.uvInitializer ? this._o.uvInitializer(column, row, w, h, ...params) : [u, v];
+                    uvs.push(...uv);
                 }
             }
         }

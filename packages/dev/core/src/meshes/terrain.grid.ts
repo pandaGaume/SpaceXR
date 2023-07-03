@@ -1,6 +1,8 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { FloatArray, Nullable } from "../types";
 
+type VInitializerFn = (column: number, row: number, w: number, h: number, ...data: any[]) => number | number[];
+
 export class TerrainGridOptions {
     public static DefaultGridSize = 256;
     public static DefaultInvertIndices = false;
@@ -8,10 +10,6 @@ export class TerrainGridOptions {
 
     public static Shared = new TerrainGridOptions({
         columns: TerrainGridOptions.DefaultGridSize,
-        rows: TerrainGridOptions.DefaultGridSize,
-        invertIndices: TerrainGridOptions.DefaultInvertIndices,
-        sx: TerrainGridOptions.DefaultScale,
-        sy: TerrainGridOptions.DefaultScale,
     });
 
     public uvs?: boolean;
@@ -20,7 +18,8 @@ export class TerrainGridOptions {
     public sx?: number;
     public sy?: number;
     public invertIndices?: boolean;
-    public zInitializer?: (x: number, y: number, ...data: any[]) => number;
+    public zInitializer?: VInitializerFn;
+    public uvInitializer?: VInitializerFn;
 
     public constructor(p: Partial<TerrainGridOptions>) {
         Object.assign(this, p);
@@ -38,7 +37,8 @@ export class TerrainGridOptionsBuilder {
     _sy?: number;
     _invertIndices?: boolean;
     _invertYZ?: boolean;
-    _zInitializer?: (x: number, y: number, ...data: any[]) => number;
+    _zInitializer?: VInitializerFn;
+    _uvInitializer?: VInitializerFn;
 
     public withUvs(flag: boolean): TerrainGridOptionsBuilder {
         this._uvs = flag;
@@ -67,8 +67,13 @@ export class TerrainGridOptionsBuilder {
         return this;
     }
 
-    public withZInitializer(zinit: (x: number, y: number, ...data: any[]) => number): TerrainGridOptionsBuilder {
+    public withZInitializer(zinit: VInitializerFn): TerrainGridOptionsBuilder {
         this._zInitializer = zinit;
+        return this;
+    }
+
+    public withUVInitializer(uvinit: VInitializerFn): TerrainGridOptionsBuilder {
+        this._uvInitializer = uvinit;
         return this;
     }
 
@@ -80,6 +85,8 @@ export class TerrainGridOptionsBuilder {
             sx: this._sx,
             sy: this._sy,
             invertIndices: this._invertIndices,
+            zInitializer: this._zInitializer,
+            uvInitializer: this._uvInitializer,
         });
     }
 }
@@ -120,10 +127,11 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
             for (let column = 0; column < w; column++) {
                 const u = column * dx;
                 const x = (x0 + u) * sx;
-                const z = this._o?.zInitializer ? this._o.zInitializer(x, y, ...params) : 0;
+                const z: number = this._o?.zInitializer ? <number>this._o.zInitializer(column, row, w, h, ...params) : 0;
                 positions.push(x, y, z);
                 if (uvs) {
-                    uvs.push(u, v);
+                    const uv: number[] = this._o?.uvInitializer ? <number[]>this._o.uvInitializer(column, row, w, h, ...params) : [u, v];
+                    uvs.push(...uv);
                 }
             }
         }

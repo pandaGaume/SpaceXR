@@ -58,11 +58,17 @@ export class SurfaceTileMapOptionsBuilder {
 }
 
 export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
-    private static InitZ(x: number, y: number, w: number, h: number) {
-        let i = x == w ? 1 : 0;
-        let j = y == h ? 2 : 0;
+    private static InitZ(column: number, row: number, w: number, h: number): number {
+        let i = column == w - 1 ? 1 : 0;
+        let j = row == h - 1 ? 2 : 0;
         return i + j;
     }
+
+    // private static InitUV(column: number, row: number, w: number, h: number): number[] {
+    //     let u = column == w - 1 ? 0 : column / (w - 2);
+    //     let v = row == h - 1 ? 0 : row / (h - 2);
+    //     return [u, v];
+    // }
 
     _grid: VertexData;
     _template: Mesh;
@@ -97,8 +103,9 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
             .withScale(1, -1) // we consider a grid of "texel" or "pixel" oriented as an image is oriented in display
             .withInvertIndices(true) //  we need to invert indices as we reverse y
             .withZInitializer(SurfaceTileMap.InitZ)
+            //.withUVInitializer(SurfaceTileMap.InitUV)
             .build();
-        const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData(), s, s);
+        const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());
         return data;
     }
 

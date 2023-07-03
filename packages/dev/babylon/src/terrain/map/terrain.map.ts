@@ -1,4 +1,4 @@
-import { AbstractMesh, Material, Mesh, Nullable, Scene, ShaderMaterial, Tools, TransformNode, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Nullable, Scene, ShaderMaterial, Tools, Vector3, VertexData } from "@babylonjs/core";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
@@ -64,7 +64,6 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         return i + j;
     }
 
-    _pivot: TransformNode;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
@@ -75,12 +74,8 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         const o = { ...SurfaceTileMapOptions.Default, ...options };
         super(display, datasource, o.center, o.levelOfDetail);
         this._options = o;
-        this._pivot = new TransformNode(`__${name}_root__`, scene);
-        this._pivot.parent = display;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-
-        this._pivot.position.z = this._options.insets?.z || 0;
         this._template.material = this.buildMaterial(scene);
     }
 
@@ -99,6 +94,8 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         const o = new TerrainGridOptionsBuilder()
             .withUvs(true)
             .withColumns(s + 1) // add one to row and column to fill the gap - note that if only column/row are defined, the builder build a square
+            .withScale(1, -1) // we consider a grid of "texel" or "pixel" oriented as an image is oriented in display
+            .withInvertIndices(true) //  we need to invert indices as we reverse y
             .withZInitializer(SurfaceTileMap.InitZ)
             .build();
         const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData(), s, s);
@@ -147,7 +144,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         const instance = this.buildInstance(key, tile);
         if (instance) {
             instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
-            instance.parent = this._pivot;
+            instance.parent = this.display.context;
             tile.surface = instance;
         }
     }
@@ -227,19 +224,23 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     private invalidate(tiles: IterableIterator<TerrainTile<V>> | Array<TerrainTile<V>>) {
         const scale = Math.abs(this._scale);
+        // this is the center expressed in "texel" or "pixel"
         const center = this._center;
+        const context = this.display.context;
 
-        this._pivot.scaling = new Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
-        if (this.rotation) {
-            this._pivot.rotation.z = Tools.ToRadians(this.rotation);
+        context.scaling = new Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
+
+        if (this.azimuth !== undefined) {
+            context.rotation.z = Tools.ToRadians(this.azimuth);
         }
 
         const offset = this._offset || Vector3.Zero();
         for (const t of tiles) {
             if (t.content && t.rect && t.surface) {
+                // this is the rect expressed in "texel" or "pixel"
                 const c = t.rect.center;
                 t.surface.position.x = c.x - center.x + offset.x;
-                t.surface.position.y = -(c.y - center.y + offset.y);
+                t.surface.position.y = c.y - center.y + offset.y;
                 t.surface.position.z = offset.z;
             }
         }

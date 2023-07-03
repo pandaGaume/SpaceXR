@@ -30,35 +30,35 @@ export class Rectangle implements IRectangle {
     public constructor(public x: number, public y: number, public width: number, public height: number) {}
 
     public *points(): IterableIterator<ICartesian2> {
-        const r = this.right;
-        const t = this.top;
-        yield new Cartesian2(this.left, this.bottom);
-        yield new Cartesian2(this.left, t);
+        const r = this.xmax;
+        const t = this.ymax;
+        yield new Cartesian2(this.xmin, this.ymin);
+        yield new Cartesian2(this.xmin, t);
         yield new Cartesian2(r, t);
-        yield new Cartesian2(r, this.bottom);
+        yield new Cartesian2(r, this.ymin);
     }
 
     public clone(): IRectangle {
         return new Rectangle(this.x, this.y, this.width, this.height);
     }
 
-    public get top(): number {
+    public get ymax(): number {
         return this.y + this.height;
     }
-    public get left(): number {
+    public get xmin(): number {
         return this.x;
     }
-    public get right(): number {
+    public get xmax(): number {
         return this.x + this.width;
     }
-    public get bottom(): number {
+    public get ymin(): number {
         return this.y;
     }
     public get center(): ICartesian2 {
         return new Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
     }
     public intersect(other: IRectangle): boolean {
-        if (!other || this.bottom > other.top || this.top < other.bottom || this.left > other.right || this.right < other.left) {
+        if (!other || this.ymin > other.ymax || this.ymax < other.ymin || this.xmin > other.xmax || this.xmax < other.xmin) {
             return false;
         }
         return true;
@@ -68,18 +68,18 @@ export class Rectangle implements IRectangle {
             return undefined;
         }
         const target = ref || Rectangle.Zero();
-        target.y = Math.max(this.bottom, other.bottom);
-        target.height = Math.min(this.top, other.top) - target.y;
-        target.x = Math.max(this.left, other.left);
-        target.width = Math.min(this.right, other.right) - target.x;
+        target.y = Math.max(this.ymin, other.ymin);
+        target.height = Math.min(this.ymax, other.ymax) - target.y;
+        target.x = Math.max(this.xmin, other.xmin);
+        target.width = Math.min(this.xmax, other.xmax) - target.x;
         return target;
     }
 
     public unionInPlace(other: IRectangle): IRectangle {
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
-        const x2 = Math.max(this.right, other.right);
-        const y2 = Math.max(this.top, other.top);
+        const x2 = Math.max(this.xmax, other.xmax);
+        const y2 = Math.max(this.ymax, other.ymax);
 
         this.x = x1;
         this.y = y1;
@@ -89,10 +89,10 @@ export class Rectangle implements IRectangle {
     }
 
     public contains(x: number, y: number): boolean {
-        return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
+        return x >= this.xmin && x <= this.xmax && y >= this.ymax && y <= this.ymin;
     }
 
     public toString() {
-        return `left:${this.left}, bottom:${this.bottom}, right:${this.right}, top:${this.top}, width:${this.width}, height:${this.height}`;
+        return `left:${this.xmin}, bottom:${this.ymin}, right:${this.xmax}, top:${this.ymax}, width:${this.width}, height:${this.height}`;
     }
 }

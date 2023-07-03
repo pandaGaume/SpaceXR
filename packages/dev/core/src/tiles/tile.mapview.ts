@@ -1,4 +1,4 @@
-import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
@@ -88,6 +88,19 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
 }
 
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
+    /**
+     * Keep an azimuth angle within the range of 0 to 360 degrees
+     * @param a the azimuth value
+     * @returns the clampled value.
+     */
+    public static ClampAzimuth(a: number): number {
+        // the modulo operator (%) is used to get the remainder when the azimuth is divided by 360.
+        // Adding 360 to the result ensures that negative values are shifted into the positive range.
+        // Finally, taking the modulo 360 of the sum ensures that values greater than 360 are wrapped
+        // back to the range of 0 to 360.
+        return ((a % 360) + 360) % 360;
+    }
+
     // cache
     _cache: IMemoryCache<string, ITile<T>>;
 
@@ -101,12 +114,13 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _bounds?: IEnvelope;
     _center: IGeo2 = Geo2.Zero();
     _level: TileMapLevel<T>;
-    _rotation: number;
+    _azimuth: number;
     _cosangle: number;
     _sinangle: number;
 
     // interns
     _valid: boolean = false;
+    _cartesianCache: ICartesian2 = Cartesian2.Zero();
 
     // event
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
@@ -119,7 +133,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this._datasource = datasource;
         this.invalidateSize(width, height).setView(center, lod);
         this._level = new TileMapLevel<T>();
-        this._rotation = 0;
+        this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
     }
@@ -164,8 +178,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._center;
     }
 
-    public get rotation(): number {
-        return this._rotation;
+    public get azimuth(): number {
+        return this._azimuth;
     }
 
     // METRICS PROVIDER
@@ -202,7 +216,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this;
     }
 
-    public setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi {
+    public setView(center: IGeo2, zoom?: number, azimuth?: number): ITileMapApi {
         if (center && !this.center.equals(center)) {
             if (this._centerObservable && this._centerObservable.hasObservers()) {
                 const old = this._center.clone();
@@ -220,8 +234,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         if (zoom) {
             this.setZoom(zoom);
         }
-        if (rotation) {
-            this.setRotation(rotation);
+        if (azimuth) {
+            this.setAzimuth(azimuth);
         }
         return this;
     }
@@ -234,20 +248,17 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 this._lod = lod;
                 const e = new PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
-                this.invalidate();
-                return this;
+            } else {
+                this._lod = lod;
             }
-            this._lod = lod;
             this.invalidate();
         }
         return this;
     }
 
-    public setRotation(r: number): ITileMapApi {
-        // ensure r is [360, 360]
-        const r0 = r % 360;
-        this._rotation = r0 < 0 ? 360 + r0 : r0;
-        const rad = this._rotation * Scalar.DEG2RAD;
+    public setAzimuth(r: number): ITileMapApi {
+        this._azimuth = TileMapView.ClampAzimuth(r);
+        const rad = this._azimuth * Scalar.DEG2RAD;
         this._cosangle = Math.cos(rad);
         this._sinangle = Math.sin(rad);
         this.invalidate();
@@ -265,8 +276,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
-        if (this._rotation) {
-            const p = this.rotatePoint(tx, ty);
+        if (this._azimuth) {
+            const p = this.rotatePointInv(tx, ty, this._cartesianCache);
             tx = p.x;
             ty = p.y;
         }
@@ -279,29 +290,18 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     public rotate(r: number): ITileMapApi {
-        return this.setRotation(this._rotation + r);
+        return this.setAzimuth(this._azimuth + r);
     }
 
     public validateBounds(): IEnvelope | undefined {
         if (!this._bounds) {
-            const c = this._level._center;
-
-            const w = this.width / this._level._scale;
-            const h = this.height / this._level._scale;
-            let x0 = c.x - w / 2;
-            let y0 = c.y - h / 2;
-            let bounds = new Rectangle(x0, y0, w, h);
-            if (this._rotation) {
-                const corners = bounds.points();
-                const rotated = Array.from(this.rotatePoints(bounds.center, ...corners));
-                bounds = Rectangle.FromPoints(...rotated);
-            }
+            let rect = this.getRectangle(this._level._center, this._level._scale);
 
             // compute the bounds of tile xy
-            let nwTileXY = this.metrics.getPixelXYToLatLon(bounds.left, bounds.top, this._level._lod);
-            let seTileXY = this.metrics.getPixelXYToLatLon(bounds.right, bounds.bottom, this._level._lod);
+            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._level._lod);
+            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._level._lod);
 
-            this._bounds = Envelope.FromPoints(nwTileXY, seTileXY);
+            this._bounds = Envelope.FromPoints(nw, se);
         }
         return this._bounds;
     }
@@ -350,27 +350,16 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // compute the pixel bounds
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._level._center = pixelCenterXY;
-
-        const w = this.width / scale;
-        const h = this.height / scale;
-        let x0 = Math.round(pixelCenterXY.x - w / 2);
-        let y0 = Math.round(pixelCenterXY.y - h / 2);
-        let bounds = new Rectangle(x0, y0, w, h);
-        if (this._rotation) {
-            const corners = bounds.points();
-            const rotated = Array.from(this.rotatePoints(bounds.center, ...corners));
-            bounds = Rectangle.FromPoints(...rotated);
-        }
+        const rect = this.getRectangle(pixelCenterXY, scale);
 
         // compute the bounds of tile xy
-        let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top);
-        let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom);
-        const tileXYBounds = Rectangle.FromPoints(nwTileXY, seTileXY);
+        let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
+        let seTileXY = this.metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
 
-        x0 = tileXYBounds.left;
-        y0 = tileXYBounds.bottom;
-        const x1 = tileXYBounds.right;
-        const y1 = tileXYBounds.top;
+        const x0 = nwTileXY.x;
+        const y0 = nwTileXY.y;
+        const x1 = seTileXY.x;
+        const y1 = seTileXY.y;
 
         const remains = new Array<ITile<T>>();
         let added = new Array<ITile<T>>();
@@ -462,26 +451,41 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         t.content = null;
     }
 
-    public *rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
+    private *rotatePointsArround(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
         for (const p of points) {
-            yield this.rotatePoint(p.x, p.y, center);
+            yield this.rotatePointArround(p.x, p.y, center);
         }
     }
 
-    /**
-     * Rotate point arround optional center, with reference of azimuth zero up to the North
-     * and clockwise rotation / counter clockwize depending the inv parameter
-     */
-    public rotatePoint<R extends ICartesian2>(x: number, y: number, center?: ICartesian2, target?: R, inv = false): R {
-        const translatedX = center ? x - center.x : x;
-        const translatedY = center ? y - center.y : y;
-
-        const rotatedX = translatedX * this._cosangle + (inv ? translatedY * -this._sinangle : translatedY * this._sinangle);
-        const rotatedY = translatedY * this._cosangle - (inv ? translatedX * -this._sinangle : translatedX * this._sinangle);
-
+    private rotatePointInv<R extends ICartesian2>(x: number, y: number, target?: R): R {
         const r = target || Cartesian2.Zero();
-        r.x = center ? rotatedX + center.x : rotatedX;
-        r.y = center ? rotatedY + center.y : rotatedY;
+        r.x = x * this._cosangle + y * this._sinangle;
+        r.y = -x * this._sinangle + y * this._cosangle;
         return <R>r;
+    }
+
+    private rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, target?: R): R {
+        const r = target || Cartesian2.Zero();
+        const translatedX = x - center.x;
+        const translatedY = y - center.y;
+        r.x = translatedX * this._cosangle - translatedY * this._sinangle + center.x;
+        r.y = translatedX * this._sinangle + translatedY * this._cosangle + center.y;
+        return <R>r;
+    }
+
+    private getRectangle(center: ICartesian2, scale: number): IRectangle {
+        const w = this.width / scale;
+        const h = this.height / scale;
+        const x0 = center.x - w / 2;
+        const y0 = center.y - h / 2;
+        let bounds = new Rectangle(x0, y0, w, h);
+
+        if (this._azimuth) {
+            const corners = bounds.points();
+            const rotated = Array.from(this.rotatePointsArround(center, ...corners));
+            bounds = Rectangle.FromPoints(...rotated);
+            return bounds;
+        }
+        return bounds;
     }
 }

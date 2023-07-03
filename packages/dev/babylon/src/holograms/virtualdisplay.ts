@@ -1,6 +1,6 @@
 import { ISize3 } from "core/geometry/geometry.interfaces";
 import { Size3 } from "core/geometry/geometry.size";
-import { Matrix, Mesh, Scene, TmpVectors, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { Matrix, Mesh, Scene, TmpVectors, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
 
 /**
  * The surface map display is a virtual surface holding the anchor and dimension of the map with :
@@ -9,6 +9,8 @@ import { Matrix, Mesh, Scene, TmpVectors, Vector2, Vector3, VertexData } from "@
  *  This logical display will be used to be placed accordingly of a existing mesh surface into the scene.
  */
 export class VirtualDisplay extends Mesh {
+    _context: TransformNode;
+
     _dimension: ISize3;
     _halfDimension: ISize3;
     _resolution: ISize3;
@@ -30,7 +32,13 @@ export class VirtualDisplay extends Mesh {
         data.positions = [-0.5 * sx, 0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
         data.indices = [2, 3, 0, 0, 1, 2];
         data.applyToMesh(this);
-        //this.scaling.x = this.scaling.y = -1;
+        this.scaling.x = this.scaling.y = -1;
+        this._context = new TransformNode(`${name}_context`, scene);
+        this._context.parent = this;
+    }
+
+    public get context(): TransformNode {
+        return this._context;
     }
 
     public get resolution(): ISize3 {
@@ -59,8 +67,8 @@ export class VirtualDisplay extends Mesh {
         const invWorld = this.getInverseWorldMatrix();
         const transformed = Vector3.TransformCoordinatesToRef(pickedCoordinates, invWorld, TmpVectors.Vector3[0]);
         pixel = pixel || Vector2.Zero();
-        pixel.x = this._resolution.width - Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
-        pixel.y = this._resolution.height - Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
+        pixel.x = Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
+        pixel.y = Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
         return pixel;
     }
 

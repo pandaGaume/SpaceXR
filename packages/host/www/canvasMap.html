@@ -55,13 +55,14 @@
                 function onDrag(m, dx, dy, b) {
                     switch (b) {
                         case 0: {
+                            // translate the center of the map according the drag displacement
+                            // then we have to negate the drag displacement
                             map.translate(-dx, -dy);
                             break;
                         }
                         case 2: {
                             map.rotate(dx);
-                            updateCompassRotation(map.rotation);
-                            
+                            updateCompassRotation(map.azimuth);
                             break;
                         }
                     }
@@ -77,15 +78,15 @@
                     }
                 }
                 
-                function updateCompassRotation(rotation) {
+                function updateCompassRotation(azimuth) {
                     var compass = document.getElementById('compass');
-                    compass.style.transform = 'rotate(' + rotation + 'deg)';
+                    compass.style.transform = 'rotate(' + azimuth + 'deg)';
                 }
 
  
                     // Function to handle the compass click event
                 function handleCompassClick(event) {
-                    map.setRotation(0);
+                    map.setAzimuth(0);
                     updateCompassRotation(0);
                 }
 

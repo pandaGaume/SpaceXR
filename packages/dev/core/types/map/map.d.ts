@@ -22,7 +22,7 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
-    setRotation(r: number): ITileMapApi;
+    setAzimuth(r: number): ITileMapApi;
     zoomIn(delta: number): ITileMapApi;
     zoomOut(delta: number): ITileMapApi;
     translate(tx: number, ty: number): ITileMapApi;
@@ -30,7 +30,7 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     get display(): D;
     get view(): TileMapView<V>;
     get metrics(): ITileMetrics;
-    get rotation(): number;
+    get azimuth(): number;
     protected onUpdate(args: UpdateEventArgs<V>): void;
     protected onUpdateTiles(args: UpdateEventArgs<V>): void;
     protected onUpdateView(args: UpdateEventArgs<V>): void;

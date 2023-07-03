@@ -36,6 +36,7 @@ export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     get center(): ICartesian2;
 }
 export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
+    static ClampAzimuth(a: number): number;
     _cache: IMemoryCache<string, ITile<T>>;
     _datasource: ITileDatasource<T, ITileAddress>;
     _w: number;
@@ -44,10 +45,11 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _bounds?: IEnvelope;
     _center: IGeo2;
     _level: TileMapLevel<T>;
-    _rotation: number;
+    _azimuth: number;
     _cosangle: number;
     _sinangle: number;
     _valid: boolean;
+    _cartesianCache: ICartesian2;
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
@@ -62,14 +64,14 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get level(): TileMapLevel<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;
-    get rotation(): number;
+    get azimuth(): number;
     get metrics(): ITileMetrics;
     get width(): number;
     get height(): number;
     invalidateSize(w: number, h: number): ITileMapApi;
-    setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number, azimuth?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
-    setRotation(r: number): ITileMapApi;
+    setAzimuth(r: number): ITileMapApi;
     zoomIn(delta: number): ITileMapApi;
     zoomOut(delta: number): ITileMapApi;
     translate(tx: number, ty: number): ITileMapApi;
@@ -87,6 +89,8 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     protected doValidateLevel(level: TileMapLevel<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;
-    rotatePoints(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2>;
-    rotatePoint<R extends ICartesian2>(x: number, y: number, center?: ICartesian2, target?: R, inv?: boolean): R;
+    private rotatePointsArround;
+    private rotatePointInv;
+    private rotatePointArround;
+    private getRectangle;
 }

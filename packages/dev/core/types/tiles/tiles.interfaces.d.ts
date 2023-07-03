@@ -90,7 +90,7 @@ export interface ITileMapApi {
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
-    setRotation(r: number): ITileMapApi;
+    setAzimuth(r: number): ITileMapApi;
     zoomIn(delta: number): ITileMapApi;
     zoomOut(delta: number): ITileMapApi;
     translate(tx: number, ty: number): ITileMapApi;

@@ -1,4 +1,4 @@
-import { AbstractMesh, Material, Mesh, Nullable, Scene, TransformNode, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Nullable, Scene, Vector3, VertexData } from "@babylonjs/core";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
@@ -28,7 +28,6 @@ export declare class SurfaceTileMapOptionsBuilder {
 }
 export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
     private static InitZ;
-    _pivot: TransformNode;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;

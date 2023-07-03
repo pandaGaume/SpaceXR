@@ -25,7 +25,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number) {
         this._display = display;
         this._view = new TileMapView(datasource, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || datasource.metrics.minLOD);
-        this._view.updateObservable.add((e: UpdateEventArgs<V>) => this.onUpdate(e));
+        this._view.updateObservable.add(this.onUpdate.bind(this));
         this._activ = new Map<string, T>();
     }
 
@@ -57,8 +57,8 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         this._view.validate();
         return this;
     }
-    public setRotation(r: number): ITileMapApi {
-        this._view.setRotation(r);
+    public setAzimuth(r: number): ITileMapApi {
+        this._view.setAzimuth(r);
         this._view.validate();
         return this;
     }
@@ -95,8 +95,8 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         return this.view.metrics;
     }
 
-    public get rotation(): number {
-        return this._view.rotation;
+    public get azimuth(): number {
+        return this._view.azimuth;
     }
 
     protected onUpdate(args: UpdateEventArgs<V>): void {

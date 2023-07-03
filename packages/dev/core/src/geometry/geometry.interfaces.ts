@@ -40,10 +40,10 @@ export function isSize3(b: unknown): b is ISize3 {
 }
 
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
+    ymax: number;
+    xmin: number;
+    xmax: number;
+    ymin: number;
 
     center: ICartesian2;
 
@@ -57,7 +57,7 @@ export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> 
 
 export function isRectangle(b: unknown): b is IRectangle {
     if (typeof b !== "object" || b === null) return false;
-    return (<IRectangle>b).top !== undefined && (<IRectangle>b).left !== undefined && (<IRectangle>b).right !== undefined && (<IRectangle>b).bottom !== undefined;
+    return (<IRectangle>b).ymax !== undefined && (<IRectangle>b).xmin !== undefined && (<IRectangle>b).xmax !== undefined && (<IRectangle>b).ymin !== undefined;
 }
 
 export interface IBox extends ISize3, ICartesian3 {

@@ -94,7 +94,7 @@ export class CanvasController<V> implements ICanvasView {
             ctx.save();
             ctx.translate(rect.width / 2, rect.height / 2);
             ctx.scale(scale, scale);
-            const rotation = this._view?.rotation;
+            const rotation = this._view?.azimuth;
             if (rotation) {
                 const angle = rotation * Scalar.DEG2RAD;
                 ctx.rotate(angle);

@@ -41,8 +41,8 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 100, new BABYLON.Vector3(0, 150, 0), scene);
-                camera.setTarget(new BABYLON.Vector3(0, 150, 0));
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
+                camera.setTarget(new BABYLON.Vector3(0, 100, 0));
                 camera.wheelPrecision = 100;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
@@ -81,14 +81,14 @@
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
 
                 const options = {
-                    center: new SPACEXR.Geo2(27.98817689833976, 86.92491071824738), // everest,
+                    center: SPACEXR.KnownPlaces.Locations.Chamonix,
                     levelOfDetail: 12,
-                    insets: new SPACEXR.Cartesian3(0, 0, 10),
                 };
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("map", display, demClient, options, scene);
 
+                // construire le material - WARNING !!! This is temporary emplacement for this code, which is MUST beeing located into the map.
                 const template = map.template;
                 template.registerInstancedBuffer("demInfos", 4); // dem infos
                 template.registerInstancedBuffer("textureIds", 2); // id elevations, id normals
@@ -221,6 +221,7 @@
                 map.view.validate();
 
                 // interaction avec la carte
+                // Warning !! this MUST be include into a Manager somewher
                 let startingPixel;
 
                 var getDisplayPosition = function () {
@@ -264,12 +265,12 @@
                             }
                             switch (pointerInfo.event.buttons) {
                                 case 1: {
-                                    map.translate(-diff.x, diff.y);
+                                    map.translate(diff.x, diff.y);
                                     break;
                                 }
                                 case 2: {
                                     map.rotate(diff.x);
-                                    updateCompassRotation(map.rotation);
+                                    updateCompassRotation(map.azimuth);
                                     break;
                                 }
                             }
@@ -301,7 +302,7 @@
 
                 // Function to handle the compass click event
                 handleCompassClick = function (event) {
-                    map.setRotation(0);
+                    map.setAzimuth(0);
                     updateCompassRotation(0);
                 };
 
@@ -311,7 +312,13 @@
                 // Add a click event listener to the compass
                 compass.addEventListener("click", handleCompassClick);
 
-                const mainAxes = new BABYLON.AxesViewer(scene, 50);
+                const mainAxes = new BABYLON.AxesViewer(scene, 20);
+                const screenAxes = new BABYLON.AxesViewer(scene, 20);
+
+                const ctx = display.context;
+                screenAxes.xAxis.parent = ctx;
+                screenAxes.yAxis.parent = ctx;
+                screenAxes.zAxis.parent = ctx;
 
                 return scene;
             }
@@ -320,7 +327,7 @@
                 const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = createScene(canvas, engine); //Call the createScene function
-                scene.debugLayer.show();
+                // scene.debugLayer.show();
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {
                     scene.render();

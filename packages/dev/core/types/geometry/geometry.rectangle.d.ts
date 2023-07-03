@@ -10,10 +10,10 @@ export declare class Rectangle implements IRectangle {
     constructor(x: number, y: number, width: number, height: number);
     points(): IterableIterator<ICartesian2>;
     clone(): IRectangle;
-    get top(): number;
-    get left(): number;
-    get right(): number;
-    get bottom(): number;
+    get ymax(): number;
+    get xmin(): number;
+    get xmax(): number;
+    get ymin(): number;
     get center(): ICartesian2;
     intersect(other: IRectangle): boolean;
     intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;

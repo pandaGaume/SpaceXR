@@ -47,8 +47,9 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-            if (this.rotation) {
-                const angle = this.rotation * Scalar.DEG2RAD;
+            if (this.azimuth) {
+                // convert azimuth to canvas rotation, which is clockwize, and cartesian
+                const angle = this.azimuth * Scalar.DEG2RAD;
                 ctx.rotate(angle);
             }
             for (const t of tiles) {

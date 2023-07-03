@@ -47,6 +47,12 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         data.positions = [-0.5 * sx, 0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
         data.indices = [2, 3, 0, 0, 1, 2];
         data.applyToMesh(this);
+        this.scaling.x = this.scaling.y = -1;
+        this._context = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`${name}_context`, scene);
+        this._context.parent = this;
+    }
+    get context() {
+        return this._context;
     }
     get resolution() {
         return this._resolution;
@@ -71,8 +77,8 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         const invWorld = this.getInverseWorldMatrix();
         const transformed = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinatesToRef(pickedCoordinates, invWorld, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[0]);
         pixel = pixel || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
-        pixel.x = this._resolution.width - Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
-        pixel.y = this._resolution.height - Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
+        pixel.x = Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
+        pixel.y = Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
         return pixel;
     }
     getXYZWorldVectors() {
@@ -396,11 +402,8 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         const o = { ...SurfaceTileMapOptions.Default, ...options };
         super(display, datasource, o.center, o.levelOfDetail);
         this._options = o;
-        this._pivot = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`__${name}_root__`, scene);
-        this._pivot.parent = display;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        this._pivot.position.z = this._options.insets?.z || 0;
         this._template.material = this.buildMaterial(scene);
     }
     get template() {
@@ -414,6 +417,8 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptionsBuilder()
             .withUvs(true)
             .withColumns(s + 1)
+            .withScale(1, -1)
+            .withInvertIndices(true)
             .withZInitializer(SurfaceTileMap.InitZ)
             .build();
         const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData(), s, s);
@@ -443,7 +448,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         const instance = this.buildInstance(key, tile);
         if (instance) {
             instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
-            instance.parent = this._pivot;
+            instance.parent = this.display.context;
             tile.surface = instance;
         }
     }
@@ -502,16 +507,17 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
     invalidate(tiles) {
         const scale = Math.abs(this._scale);
         const center = this._center;
-        this._pivot.scaling = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
-        if (this.rotation) {
-            this._pivot.rotation.z = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(this.rotation);
+        const context = this.display.context;
+        context.scaling = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(scale / this.display._ppu.x, scale / this.display._ppu.y, 1);
+        if (this.azimuth !== undefined) {
+            context.rotation.z = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(this.azimuth);
         }
         const offset = this._offset || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
         for (const t of tiles) {
             if (t.content && t.rect && t.surface) {
                 const c = t.rect.center;
                 t.surface.position.x = c.x - center.x + offset.x;
-                t.surface.position.y = -(c.y - center.y + offset.y);
+                t.surface.position.y = c.y - center.y + offset.y;
                 t.surface.position.z = offset.z;
             }
         }
@@ -1597,6 +1603,29 @@ function isEnvelope(b) {
 
 /***/ }),
 
+/***/ "../core/dist/geography/geography.knownPlaces.js":
+/*!*******************************************************!*\
+  !*** ../core/dist/geography/geography.knownPlaces.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "KnownPlaces": () => (/* binding */ KnownPlaces)
+/* harmony export */ });
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
+
+class KnownPlaces {
+}
+KnownPlaces.Locations = {
+    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.98817689833976, 86.92491071824738),
+    Chamonix: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.923351087244384, 6.871072898119941),
+};
+
+//# sourceMappingURL=geography.knownPlaces.js.map
+
+/***/ }),
+
 /***/ "../core/dist/geography/geography.position.js":
 /*!****************************************************!*\
   !*** ../core/dist/geography/geography.position.js ***!
@@ -1676,12 +1705,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Envelope": () => (/* reexport safe */ _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope),
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3),
+/* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isEnvelope),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)
 /* harmony export */ });
 /* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
 /* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.envelope */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.knownPlaces */ "../core/dist/geography/geography.knownPlaces.js");
+
 
 
 
@@ -1886,7 +1918,7 @@ function isSize3(b) {
 function isRectangle(b) {
     if (typeof b !== "object" || b === null)
         return false;
-    return b.top !== undefined && b.left !== undefined && b.right !== undefined && b.bottom !== undefined;
+    return b.ymax !== undefined && b.xmin !== undefined && b.xmax !== undefined && b.ymin !== undefined;
 }
 function isBox(b) {
     if (typeof b !== "object" || b === null)
@@ -1945,33 +1977,33 @@ class Rectangle {
         this.height = height;
     }
     *points() {
-        const r = this.right;
-        const t = this.top;
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, this.bottom);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.left, t);
+        const r = this.xmax;
+        const t = this.ymax;
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.xmin, this.ymin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.xmin, t);
         yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, t);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.bottom);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.ymin);
     }
     clone() {
         return new Rectangle(this.x, this.y, this.width, this.height);
     }
-    get top() {
+    get ymax() {
         return this.y + this.height;
     }
-    get left() {
+    get xmin() {
         return this.x;
     }
-    get right() {
+    get xmax() {
         return this.x + this.width;
     }
-    get bottom() {
+    get ymin() {
         return this.y;
     }
     get center() {
         return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
     }
     intersect(other) {
-        if (!other || this.bottom > other.top || this.top < other.bottom || this.left > other.right || this.right < other.left) {
+        if (!other || this.ymin > other.ymax || this.ymax < other.ymin || this.xmin > other.xmax || this.xmax < other.xmin) {
             return false;
         }
         return true;
@@ -1981,17 +2013,17 @@ class Rectangle {
             return undefined;
         }
         const target = ref || Rectangle.Zero();
-        target.y = Math.max(this.bottom, other.bottom);
-        target.height = Math.min(this.top, other.top) - target.y;
-        target.x = Math.max(this.left, other.left);
-        target.width = Math.min(this.right, other.right) - target.x;
+        target.y = Math.max(this.ymin, other.ymin);
+        target.height = Math.min(this.ymax, other.ymax) - target.y;
+        target.x = Math.max(this.xmin, other.xmin);
+        target.width = Math.min(this.xmax, other.xmax) - target.x;
         return target;
     }
     unionInPlace(other) {
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
-        const x2 = Math.max(this.right, other.right);
-        const y2 = Math.max(this.top, other.top);
+        const x2 = Math.max(this.xmax, other.xmax);
+        const y2 = Math.max(this.ymax, other.ymax);
         this.x = x1;
         this.y = y1;
         this.width = x2 - x1;
@@ -1999,10 +2031,10 @@ class Rectangle {
         return this;
     }
     contains(x, y) {
-        return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
+        return x >= this.xmin && x <= this.xmax && y >= this.ymax && y <= this.ymin;
     }
     toString() {
-        return `left:${this.left}, bottom:${this.bottom}, right:${this.right}, top:${this.top}, width:${this.width}, height:${this.height}`;
+        return `left:${this.xmin}, bottom:${this.ymin}, right:${this.xmax}, top:${this.ymax}, width:${this.width}, height:${this.height}`;
     }
 }
 //# sourceMappingURL=geometry.rectangle.js.map
@@ -2145,6 +2177,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
 /* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.KeplerOrbitBase),
+/* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.KnownPlaces),
 /* harmony export */   "Luminosity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Luminosity),
 /* harmony export */   "MapZen": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
@@ -2310,7 +2343,7 @@ class CanvasController {
             ctx.save();
             ctx.translate(rect.width / 2, rect.height / 2);
             ctx.scale(scale, scale);
-            const rotation = this._view?.rotation;
+            const rotation = this._view?.azimuth;
             if (rotation) {
                 const angle = rotation * _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
                 ctx.rotate(angle);
@@ -2486,8 +2519,8 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_0__.AbstractDisplayMap
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-            if (this.rotation) {
-                const angle = this.rotation * _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
+            if (this.azimuth) {
+                const angle = this.azimuth * _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
                 ctx.rotate(angle);
             }
             for (const t of tiles) {
@@ -2530,7 +2563,7 @@ class AbstractDisplayMap {
         this._center = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         this._display = display;
         this._view = new _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__.TileMapView(datasource, display.resolution.width, display.resolution.height, center || _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(), lod || datasource.metrics.minLOD);
-        this._view.updateObservable.add((e) => this.onUpdate(e));
+        this._view.updateObservable.add(this.onUpdate.bind(this));
         this._activ = new Map();
     }
     get addedObservable() {
@@ -2559,8 +2592,8 @@ class AbstractDisplayMap {
         this._view.validate();
         return this;
     }
-    setRotation(r) {
-        this._view.setRotation(r);
+    setAzimuth(r) {
+        this._view.setAzimuth(r);
         this._view.validate();
         return this;
     }
@@ -2593,8 +2626,8 @@ class AbstractDisplayMap {
     get metrics() {
         return this.view.metrics;
     }
-    get rotation() {
-        return this._view.rotation;
+    get azimuth() {
+        return this._view.azimuth;
     }
     onUpdate(args) {
         if (!args) {
@@ -4075,12 +4108,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
 /* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/events.args */ "../core/dist/events/events.args.js");
 /* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/cache */ "../core/dist/utils/cache.js");
-/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "../core/dist/geometry/geometry.rectangle.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "../core/dist/geometry/geometry.rectangle.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
 /* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! .. */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! .. */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! .. */ "../core/dist/geography/geography.envelope.js");
 
 
 
@@ -4150,17 +4183,21 @@ class UpdateEventArgs extends _events_events_args__WEBPACK_IMPORTED_MODULE_1__.E
     }
 }
 class TileMapView {
+    static ClampAzimuth(a) {
+        return ((a % 360) + 360) % 360;
+    }
     constructor(datasource, width, height, center, lod, cache) {
         this._w = 0;
         this._h = 0;
         this._lod = 0;
         this._center = _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero();
         this._valid = false;
+        this._cartesianCache = ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_3__.MemoryCache();
         this._datasource = datasource;
         this.invalidateSize(width, height).setView(center, lod);
         this._level = new TileMapLevel();
-        this._rotation = 0;
+        this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
     }
@@ -4195,8 +4232,8 @@ class TileMapView {
     get center() {
         return this._center;
     }
-    get rotation() {
-        return this._rotation;
+    get azimuth() {
+        return this._azimuth;
     }
     get metrics() {
         return this._datasource.metrics;
@@ -4225,7 +4262,7 @@ class TileMapView {
         }
         return this;
     }
-    setView(center, zoom, rotation) {
+    setView(center, zoom, azimuth) {
         if (center && !this.center.equals(center)) {
             if (this._centerObservable && this._centerObservable.hasObservers()) {
                 const old = this._center.clone();
@@ -4243,8 +4280,8 @@ class TileMapView {
         if (zoom) {
             this.setZoom(zoom);
         }
-        if (rotation) {
-            this.setRotation(rotation);
+        if (azimuth) {
+            this.setAzimuth(azimuth);
         }
         return this;
     }
@@ -4256,18 +4293,17 @@ class TileMapView {
                 this._lod = lod;
                 const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
-                this.invalidate();
-                return this;
             }
-            this._lod = lod;
+            else {
+                this._lod = lod;
+            }
             this.invalidate();
         }
         return this;
     }
-    setRotation(r) {
-        const r0 = r % 360;
-        this._rotation = r0 < 0 ? 360 + r0 : r0;
-        const rad = this._rotation * _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.DEG2RAD;
+    setAzimuth(r) {
+        this._azimuth = TileMapView.ClampAzimuth(r);
+        const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.DEG2RAD;
         this._cosangle = Math.cos(rad);
         this._sinangle = Math.sin(rad);
         this.invalidate();
@@ -4280,8 +4316,8 @@ class TileMapView {
         return this.setZoom(this.levelOfDetail - Math.abs(delta));
     }
     translate(tx, ty) {
-        if (this._rotation) {
-            const p = this.rotatePoint(tx, ty);
+        if (this._azimuth) {
+            const p = this.rotatePointInv(tx, ty, this._cartesianCache);
             tx = p.x;
             ty = p.y;
         }
@@ -4293,24 +4329,14 @@ class TileMapView {
         return this.setView(center);
     }
     rotate(r) {
-        return this.setRotation(this._rotation + r);
+        return this.setAzimuth(this._azimuth + r);
     }
     validateBounds() {
         if (!this._bounds) {
-            const c = this._level._center;
-            const w = this.width / this._level._scale;
-            const h = this.height / this._level._scale;
-            let x0 = c.x - w / 2;
-            let y0 = c.y - h / 2;
-            let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_7__.Rectangle(x0, y0, w, h);
-            if (this._rotation) {
-                const corners = bounds.points();
-                const rotated = Array.from(this.rotatePoints(bounds.center, ...corners));
-                bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_7__.Rectangle.FromPoints(...rotated);
-            }
-            let nwTileXY = this.metrics.getPixelXYToLatLon(bounds.left, bounds.top, this._level._lod);
-            let seTileXY = this.metrics.getPixelXYToLatLon(bounds.right, bounds.bottom, this._level._lod);
-            this._bounds = ___WEBPACK_IMPORTED_MODULE_8__.Envelope.FromPoints(nwTileXY, seTileXY);
+            let rect = this.getRectangle(this._level._center, this._level._scale);
+            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._level._lod);
+            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._level._lod);
+            this._bounds = ___WEBPACK_IMPORTED_MODULE_7__.Envelope.FromPoints(nw, se);
         }
         return this._bounds;
     }
@@ -4341,33 +4367,23 @@ class TileMapView {
     }
     doValidateLevel(level) {
         const lod = level.lod;
-        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_9__.TileMetrics.GetScale(this.levelOfDetail);
+        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.GetScale(this.levelOfDetail);
         this._level._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._level._center = pixelCenterXY;
-        const w = this.width / scale;
-        const h = this.height / scale;
-        let x0 = Math.round(pixelCenterXY.x - w / 2);
-        let y0 = Math.round(pixelCenterXY.y - h / 2);
-        let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_7__.Rectangle(x0, y0, w, h);
-        if (this._rotation) {
-            const corners = bounds.points();
-            const rotated = Array.from(this.rotatePoints(bounds.center, ...corners));
-            bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_7__.Rectangle.FromPoints(...rotated);
-        }
-        let nwTileXY = this.metrics.getPixelXYToTileXY(bounds.left, bounds.top);
-        let seTileXY = this.metrics.getPixelXYToTileXY(bounds.right, bounds.bottom);
-        const tileXYBounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_7__.Rectangle.FromPoints(nwTileXY, seTileXY);
-        x0 = tileXYBounds.left;
-        y0 = tileXYBounds.bottom;
-        const x1 = tileXYBounds.right;
-        const y1 = tileXYBounds.top;
+        const rect = this.getRectangle(pixelCenterXY, scale);
+        let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
+        let seTileXY = this.metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
+        const x0 = nwTileXY.x;
+        const y0 = nwTileXY.y;
+        const x1 = seTileXY.x;
+        const y1 = seTileXY.y;
         const remains = new Array();
         let added = new Array();
-        const builder = new _tiles__WEBPACK_IMPORTED_MODULE_10__.TileBuilder().withMetrics(this.metrics);
+        const builder = new _tiles__WEBPACK_IMPORTED_MODULE_9__.TileBuilder().withMetrics(this.metrics);
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
-                const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_11__.TileAddress(x, y, lod);
+                const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_10__.TileAddress(x, y, lod);
                 const key = a.quadkey;
                 let t = level.tiles.get(key);
                 if (t) {
@@ -4423,20 +4439,38 @@ class TileMapView {
         console.log("tile not found", t.address);
         t.content = null;
     }
-    *rotatePoints(center, ...points) {
+    *rotatePointsArround(center, ...points) {
         for (const p of points) {
-            yield this.rotatePoint(p.x, p.y, center);
+            yield this.rotatePointArround(p.x, p.y, center);
         }
     }
-    rotatePoint(x, y, center, target, inv = false) {
-        const translatedX = center ? x - center.x : x;
-        const translatedY = center ? y - center.y : y;
-        const rotatedX = translatedX * this._cosangle + (inv ? translatedY * -this._sinangle : translatedY * this._sinangle);
-        const rotatedY = translatedY * this._cosangle - (inv ? translatedX * -this._sinangle : translatedX * this._sinangle);
+    rotatePointInv(x, y, target) {
         const r = target || ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
-        r.x = center ? rotatedX + center.x : rotatedX;
-        r.y = center ? rotatedY + center.y : rotatedY;
+        r.x = x * this._cosangle + y * this._sinangle;
+        r.y = -x * this._sinangle + y * this._cosangle;
         return r;
+    }
+    rotatePointArround(x, y, center, target) {
+        const r = target || ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
+        const translatedX = x - center.x;
+        const translatedY = y - center.y;
+        r.x = translatedX * this._cosangle - translatedY * this._sinangle + center.x;
+        r.y = translatedX * this._sinangle + translatedY * this._cosangle + center.y;
+        return r;
+    }
+    getRectangle(center, scale) {
+        const w = this.width / scale;
+        const h = this.height / scale;
+        const x0 = center.x - w / 2;
+        const y0 = center.y - h / 2;
+        let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__.Rectangle(x0, y0, w, h);
+        if (this._azimuth) {
+            const corners = bounds.points();
+            const rotated = Array.from(this.rotatePointsArround(center, ...corners));
+            bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__.Rectangle.FromPoints(...rotated);
+            return bounds;
+        }
+        return bounds;
     }
 }
 //# sourceMappingURL=tile.mapview.js.map
@@ -6472,6 +6506,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.JsonTileCodec),
 /* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.KeplerOrbitBase),
+/* harmony export */   "KnownPlaces": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
 /* harmony export */   "Luminosity": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Luminosity),
 /* harmony export */   "MapZen": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapZen),
 /* harmony export */   "MapZenDemUrlBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapZenDemUrlBuilder),

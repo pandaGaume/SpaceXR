@@ -23,10 +23,10 @@ export interface ISize3 {
 }
 export declare function isSize3(b: unknown): b is ISize3;
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
+    ymax: number;
+    xmin: number;
+    xmax: number;
+    ymin: number;
     center: ICartesian2;
     intersect(other: IRectangle): boolean;
     intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;

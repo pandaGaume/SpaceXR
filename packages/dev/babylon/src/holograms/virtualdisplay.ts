@@ -1,4 +1,4 @@
-import { ISize3 } from "core/geometry/geometry.interfaces";
+import { ICartesian3, ISize3 } from "core/geometry/geometry.interfaces";
 import { Size3 } from "core/geometry/geometry.size";
 import { Matrix, Mesh, Scene, TmpVectors, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
 
@@ -47,6 +47,10 @@ export class VirtualDisplay extends Mesh {
 
     public get dimension(): ISize3 {
         return this._dimension;
+    }
+
+    public get pixelPerUnit(): ICartesian3 {
+        return this._ppu;
     }
 
     public getInverseWorldMatrix(): Matrix {

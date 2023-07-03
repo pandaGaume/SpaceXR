@@ -50,7 +50,7 @@ export declare class TileMetricsOptionsBuilder {
     build(): ITileMetricsOptions;
 }
 export declare class TileMetrics {
-    static GetScale(lod: number): number;
+    static GetLodScale(lod: number): number;
     static ToParentKey(key: string): string;
     static ToChildKey(key: string): string[];
     static TileXYToQuadKey(a: ITileAddress): string;
@@ -73,7 +73,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     get overlap(): number;
     isValidAddress(a: ITileAddress): boolean;
     assertValidAddress(a: ITileAddress): void;
-    abstract mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
+    mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number;
     abstract groundResolution(latitude: number, levelOfDetail: number): number;
     abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
     abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): IGeo2;

@@ -1,4 +1,4 @@
-import { ISize3 } from "core/geometry/geometry.interfaces";
+import { ICartesian3, ISize3 } from "core/geometry/geometry.interfaces";
 import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
 export declare class VirtualDisplay extends Mesh {
     _context: TransformNode;
@@ -11,6 +11,7 @@ export declare class VirtualDisplay extends Mesh {
     get context(): TransformNode;
     get resolution(): ISize3;
     get dimension(): ISize3;
+    get pixelPerUnit(): ICartesian3;
     getInverseWorldMatrix(): Matrix;
     getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2;
     getXYZWorldVectors(): Array<Vector3>;

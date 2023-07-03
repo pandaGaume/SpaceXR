@@ -1026,6 +1026,10 @@ class KnownPlaces {
 KnownPlaces.Locations = {
     Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.98817689833976, 86.92491071824738),
     Chamonix: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.923351087244384, 6.871072898119941),
+    MountRainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.8523798847489, -121.76034290971147),
+    Haleakala: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.714420811112593, -156.25254225132156),
+    DiamondHead: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(21.26226248048085, -157.80602016703813),
+    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.1019466866649115, 105.42296583233852),
 };
 
 //# sourceMappingURL=geography.knownPlaces.js.map
@@ -3636,7 +3640,7 @@ class TileMapView {
     }
     doValidateLevel(level) {
         const lod = level.lod;
-        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.GetScale(this.levelOfDetail);
+        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.GetLodScale(this.levelOfDetail);
         this._level._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._level._center = pixelCenterXY;
@@ -4192,9 +4196,6 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
         super(options);
         this._ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
     }
-    mapScale(latitude, levelOfDetail, dpi) {
-        return this.groundResolution(latitude, levelOfDetail) * dpi * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.INCH2METER;
-    }
     groundResolution(latitude, levelOfDetail) {
         latitude = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         return (Math.cos(latitude * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD) * 2 * Math.PI * this._ellipsoid.semiMajorAxis) / this.mapSize(levelOfDetail);
@@ -4497,7 +4498,7 @@ class TileMetricsOptionsBuilder {
     }
 }
 class TileMetrics {
-    static GetScale(lod) {
+    static GetLodScale(lod) {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         return scale;
@@ -4615,6 +4616,9 @@ class AbstractTileMetrics {
         if (a.y < 0 || a.y > s) {
             throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
         }
+    }
+    mapScale(latitude, levelOfDetail, pixelPerUnit) {
+        return 1 / (this.groundResolution(latitude, levelOfDetail) * pixelPerUnit);
     }
 }
 //# sourceMappingURL=tiles.metrics.js.map

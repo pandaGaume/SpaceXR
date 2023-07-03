@@ -16,6 +16,7 @@ uniform mat4 viewProjection; // babylon build in
 uniform highp sampler2DArray altitudes;
 uniform highp sampler2DArray normals;
 uniform highp float minAlt;
+uniform highp float mapscale;
 
 // Varying
 out vec4 vPosition;
@@ -26,10 +27,7 @@ out float aDepth;
 void main(void) {
     #include<instancesVertex>
     float alt = float(texture(altitudes, vec3(uv.x, uv.y,textureIds.x) )) ;
-    // float alt = y < 0.0 || y > 1.0 ? demInfos.y : float(texture(altitudes, vec3(uv,textureIds.x) )) ;
-    // todo : revisit the formula as this one is for individual tile and did not keep the scale...
-    // float z = ((alt - demInfos.x)/ demInfos.z) * 10.0 ;
-    alt = (alt - minAlt) * 0.01;
+    alt = (alt - minAlt) * mapscale;
 
     vPosition = vec4(position.xy, alt ,1.0) ;
     vec4 worldPos = finalWorld * vPosition;

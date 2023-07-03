@@ -344,7 +344,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // current level of detail
         const lod = level.lod;
         // scale corresponding to the decimal part
-        let scale = TileMetrics.GetScale(this.levelOfDetail);
+        let scale = TileMetrics.GetLodScale(this.levelOfDetail);
         this._level._scale = scale;
 
         // compute the pixel bounds

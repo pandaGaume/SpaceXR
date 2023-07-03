@@ -81,8 +81,8 @@
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
 
                 const options = {
-                    center: SPACEXR.KnownPlaces.Locations.Chamonix,
-                    levelOfDetail: 12,
+                    center: SPACEXR.KnownPlaces.Locations.MountRainier,
+                    levelOfDetail: 15,
                 };
 
                 // construire la carte.
@@ -96,10 +96,10 @@
                 const materialName = "tilemap";
                 const shaderOptions = {
                     attributes: ["position", "uv", "demInfos", "textureIds"],
-                    uniforms: ["world", "viewProjection", "altitudes", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
+                    uniforms: ["world", "viewProjection", "altitudes", "mapscale", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
                 };
 
-                var m = new BABYLON.ShaderMaterial(
+                var mat = new BABYLON.ShaderMaterial(
                     materialName,
                     scene,
                     {
@@ -109,12 +109,12 @@
                     shaderOptions
                 );
 
-                m.setVector3("light.ambient", new BABYLON.Vector3(0.2, 0.2, 0.2));
-                m.setVector3("material.ambient", new BABYLON.Vector3(0.1, 0.5, 0.8));
-                m.setVector3("light.diffuse", new BABYLON.Vector3(0.5, 0.5, 0.5));
-                m.setVector3("material.diffuse", new BABYLON.Vector3(0.5, 0.8, 0.8));
+                mat.setVector3("light.ambient", new BABYLON.Vector3(0.2, 0.2, 0.2));
+                mat.setVector3("material.ambient", new BABYLON.Vector3(0.1, 0.5, 0.8));
+                mat.setVector3("light.diffuse", new BABYLON.Vector3(0.5, 0.5, 0.5));
+                mat.setVector3("material.diffuse", new BABYLON.Vector3(0.5, 0.8, 0.8));
 
-                m.setVector3("light.direction", new BABYLON.Vector3(1, 1, 1).normalize());
+                mat.setVector3("light.direction", new BABYLON.Vector3(1, 1, 1).normalize());
 
                 const axes = display.getXYZWorldVectors();
                 const w2 = w / 2;
@@ -127,23 +127,23 @@
 
                 let a = p.subtract(vy);
                 let b = axes[1];
-                m.setVector3("northClip.point", a);
-                m.setVector3("northClip.normal", b);
+                mat.setVector3("northClip.point", a);
+                mat.setVector3("northClip.normal", b);
 
                 let a1 = p.add(vy);
                 let b1 = axes[1].negate();
-                m.setVector3("southClip.point", a1);
-                m.setVector3("southClip.normal", b1);
+                mat.setVector3("southClip.point", a1);
+                mat.setVector3("southClip.normal", b1);
 
                 let a2 = p.subtract(vx);
                 let b2 = axes[0];
-                m.setVector3("westClip.point", a2);
-                m.setVector3("westClip.normal", b2);
+                mat.setVector3("westClip.point", a2);
+                mat.setVector3("westClip.normal", b2);
 
                 let a3 = p.add(vx);
                 let b3 = axes[0].negate();
-                m.setVector3("eastClip.point", a3);
-                m.setVector3("eastClip.normal", b3);
+                mat.setVector3("eastClip.point", a3);
+                mat.setVector3("eastClip.normal", b3);
 
                 const depth = 16;
                 const s = demClient.metrics.tileSize;
@@ -160,7 +160,7 @@
                 const elevationSampler = new SPACEXR.TilePoolTexture("altitudes", tilePoolElevationOptions, scene);
                 elevationSampler.WrapR = BABYLON.Texture.CLAMP_ADDRESS_MODE;
 
-                m.setTexture("altitudes", elevationSampler);
+                mat.setTexture("altitudes", elevationSampler);
 
                 const tilePoolNormalOptions = new SPACEXR.TilePoolTextureOptions({
                     metrics: demClient.metrics,
@@ -173,11 +173,16 @@
 
                 const normalSampler = new SPACEXR.TilePoolTexture("normals", tilePoolNormalOptions, scene);
 
-                m.setTexture("normals", normalSampler);
+                mat.setTexture("normals", normalSampler);
 
-                map.template.material = m;
+                map.template.material = mat;
 
-                const min = 10000;
+                let min = 10000;
+
+                map.view.updateObservable.add((updateEvent) => {
+                    let scale = demClient.metrics.mapScale(map.view.center.lat, map.view.levelOfDetail, display.pixelPerUnit.x);
+                    mat.setFloat("mapscale", scale);
+                });
 
                 map.addedObservable.add((t) => {
                     const m = t.surface;
@@ -188,9 +193,10 @@
                         const elevationArea = elevationSampler.reserveArea();
                         const normalArea = normalSampler.reserveArea();
                         if (elevationArea && normalArea) {
-                            if (c.min < min) {
-                                min = c.min;
-                                m.setFloat("minAlt", min);
+                            if (c.min.z < min) {
+                                // TODO : Get Minimum when remove tiles
+                                min = c.min.z;
+                                mat.setFloat("minAlt", min);
                             }
                             elevationArea.update(c.elevations);
                             normalArea.update(c.normals);

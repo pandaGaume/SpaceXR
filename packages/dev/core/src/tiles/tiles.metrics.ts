@@ -116,7 +116,7 @@ export class TileMetricsOptionsBuilder {
 }
 
 export class TileMetrics {
-    public static GetScale(lod: number): number {
+    public static GetLodScale(lod: number): number {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
         // scale corresponding to the decimal part
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
@@ -254,9 +254,11 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
         }
     }
 
-    public abstract mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
-    public abstract groundResolution(latitude: number, levelOfDetail: number): number;
+    public mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number {
+        return 1 / (this.groundResolution(latitude, levelOfDetail) * pixelPerUnit);
+    }
 
+    public abstract groundResolution(latitude: number, levelOfDetail: number): number;
     public abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
     public abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): IGeo2;
     public abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;

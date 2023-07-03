@@ -17,11 +17,6 @@ export class EPSG3857 extends AbstractTileMetrics {
         this._ellipsoid = ellipsoid || Ellipsoid.WGS84;
     }
 
-    public mapScale(latitude: number, levelOfDetail: number, dpi: number): number {
-        // remember here that Ellipsoid unit are meters
-        return this.groundResolution(latitude, levelOfDetail) * dpi * Scalar.INCH2METER;
-    }
-
     public groundResolution(latitude: number, levelOfDetail: number): number {
         latitude = Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         return (Math.cos(latitude * Scalar.DEG2RAD) * 2 * Math.PI * this._ellipsoid.semiMajorAxis) / this.mapSize(levelOfDetail);

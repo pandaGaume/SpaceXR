@@ -7,7 +7,6 @@ export declare class EPSG3857 extends AbstractTileMetrics {
     static Shared: EPSG3857;
     _ellipsoid: Ellipsoid;
     constructor(options?: ITileMetricsOptions, ellipsoid?: Ellipsoid);
-    mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     groundResolution(latitude: number, levelOfDetail: number): number;
     getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number, loc?: IGeo2): IGeo2;

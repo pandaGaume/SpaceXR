@@ -1,4 +1,4 @@
-import { AbstractMesh, Material, Mesh, Nullable, Scene, ShaderMaterial, Tools, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Nullable, Scene, Tools, Vector3, VertexData } from "@babylonjs/core";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
@@ -18,12 +18,14 @@ export class SurfaceTileMapOptions {
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
         insets: Cartesian3.Zero(),
+        exageration: 1.0,
     });
 
     center?: IGeo2;
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
     insets?: ICartesian3;
+    exageration?: number;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
         Object.assign(this, p);
@@ -35,6 +37,7 @@ export class SurfaceTileMapOptionsBuilder {
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
     _insets?: ICartesian3;
+    _exageration?: number;
 
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
@@ -52,8 +55,12 @@ export class SurfaceTileMapOptionsBuilder {
         this._insets = v;
         return this;
     }
+    public withExageration(v?: number): SurfaceTileMapOptionsBuilder {
+        this._exageration = v;
+        return this;
+    }
     public build(): SurfaceTileMapOptions {
-        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets });
+        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets, exageration: this._exageration });
     }
 }
 
@@ -151,6 +158,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         const instance = this.buildInstance(key, tile);
         if (instance) {
             instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
+            instance.scaling.z = this._options.exageration ?? 1.0;
             instance.parent = this.display.context;
             tile.surface = instance;
         }

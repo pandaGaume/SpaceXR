@@ -372,6 +372,7 @@ SurfaceTileMapOptions.Default = new SurfaceTileMapOptions({
     levelOfDetail: 10,
     gridOptions: core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptions.Shared,
     insets: core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero(),
+    exageration: 1.0,
 });
 
 class SurfaceTileMapOptionsBuilder {
@@ -391,8 +392,12 @@ class SurfaceTileMapOptionsBuilder {
         this._insets = v;
         return this;
     }
+    withExageration(v) {
+        this._exageration = v;
+        return this;
+    }
     build() {
-        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets });
+        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets, exageration: this._exageration });
     }
 }
 class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDisplayMap {
@@ -451,6 +456,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         const instance = this.buildInstance(key, tile);
         if (instance) {
             instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
+            instance.scaling.z = this._options.exageration ?? 1.0;
             instance.parent = this.display.context;
             tile.surface = instance;
         }
@@ -467,45 +473,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         if (!scene) {
             return null;
         }
-        const materialName = "tilemap";
-        const shaderOptions = {
-            attributes: ["position"],
-            uniforms: ["world", "viewProjection", "demInfos", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
-            samplers: ["altitudes", "normals"],
-        };
-        var m = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderMaterial(materialName, scene, {
-            vertex: materialName,
-            fragment: materialName,
-        }, shaderOptions);
-        m.setVector3("light.ambient", new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0.2, 0.2, 0.2));
-        m.setVector3("material.ambient", new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0.1, 0.5, 0.8));
-        m.setVector3("light.diffuse", new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0.5, 0.5, 0.5));
-        m.setVector3("material.diffuse", new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0.5, 0.8, 0.8));
-        m.setVector3("light.direction", new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(1, 1, 1).normalize());
-        const axes = this.display.getXYZWorldVectors();
-        const res = this.display.resolution;
-        const w2 = res.width / 2;
-        const h2 = res.height / 2;
-        const vx = axes[0].multiply(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(w2, w2, w2));
-        const vy = axes[1].multiply(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(h2, h2, h2));
-        const p = this.display.getAbsolutePosition();
-        let a = p.subtract(vy);
-        let b = axes[1];
-        m.setVector3("northClip.point", a);
-        m.setVector3("northClip.normal", b);
-        let a1 = p.add(vy);
-        let b1 = axes[1].negate();
-        m.setVector3("southClip.point", a1);
-        m.setVector3("southClip.normal", b1);
-        let a2 = p.subtract(vx);
-        let b2 = axes[0];
-        m.setVector3("westClip.point", a2);
-        m.setVector3("westClip.normal", b2);
-        let a3 = p.add(vx);
-        let b3 = axes[0].negate();
-        m.setVector3("eastClip.point", a3);
-        m.setVector3("eastClip.normal", b3);
-        return m;
+        return null;
     }
     invalidate(tiles) {
         const scale = Math.abs(this._scale);

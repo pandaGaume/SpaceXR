@@ -13,6 +13,7 @@ export declare class SurfaceTileMapOptions {
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
     insets?: ICartesian3;
+    exageration?: number;
     constructor(p: Partial<SurfaceTileMapOptions>);
 }
 export declare class SurfaceTileMapOptionsBuilder {
@@ -20,10 +21,12 @@ export declare class SurfaceTileMapOptionsBuilder {
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
     _insets?: ICartesian3;
+    _exageration?: number;
     withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder;
     withLeveOfDetail(v?: number): SurfaceTileMapOptionsBuilder;
     withGridOptions(v?: TerrainGridOptions): SurfaceTileMapOptionsBuilder;
     withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder;
+    withExageration(v?: number): SurfaceTileMapOptionsBuilder;
     build(): SurfaceTileMapOptions;
 }
 export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {

@@ -96,3 +96,8 @@ export interface ITileMapApi {
     translate(tx: number, ty: number): ITileMapApi;
     rotate(r: number): ITileMapApi;
 }
+export interface ITileMapLayerApi<T> {
+    addLayer(key: string, source: ITileClient<T>): ITileMapLayerApi<T>;
+    removeLayer(key: string): ITileMapLayerApi<T>;
+    setMainLayer(key: string): ITileMapLayerApi<T>;
+}

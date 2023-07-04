@@ -23,6 +23,13 @@ export interface ISize2 {
     width: number;
 }
 
+export enum Side {
+    left = 0,
+    top = 1,
+    right = 2,
+    bottom = 3,
+}
+
 export function isSize2(b: unknown): b is ISize2 {
     if (typeof b !== "object" || b === null) return false;
     return (<ISize2>b).height !== undefined && (<ISize2>b).width !== undefined;

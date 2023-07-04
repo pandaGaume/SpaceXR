@@ -15,6 +15,12 @@ export interface ISize2 {
     height: number;
     width: number;
 }
+export declare enum Side {
+    left = 0,
+    top = 1,
+    right = 2,
+    bottom = 3
+}
 export declare function isSize2(b: unknown): b is ISize2;
 export interface ISize3 {
     height: number;

@@ -119,8 +119,10 @@
                 // definir la source de donnée.
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
 
+                mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
+
                 const options = {
-                    center: SPACEXR.KnownPlaces.Locations.Chamonix,
+                    center: mapboxDemoLocation, //SPACEXR.KnownPlaces.Locations.Chamonix,
                     levelOfDetail: 13,
                     exageration: 1.5,
                 };

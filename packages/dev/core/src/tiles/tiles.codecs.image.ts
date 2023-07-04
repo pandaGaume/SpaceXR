@@ -1,3 +1,4 @@
+import { Side } from "..";
 import { Nullable } from "../types";
 import { IPixelDecoder, ITileCodec } from "./tiles.interfaces";
 
@@ -34,6 +35,29 @@ export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     }
 }
 
+export class ImageDataTileCodecOptions {
+    insets?: [number, number, number, number];
+
+    public constructor(p: Partial<ImageDataTileCodecOptions>) {
+        Object.assign(this, p);
+    }
+}
+
+export class ImageDataTileCodecOptionsBuilder {
+    _insets?: [number, number, number, number];
+
+    public withInsets(v: number, side: Side): ImageDataTileCodecOptionsBuilder {
+        this._insets = this._insets ?? [0, 0, 0, 0];
+        this._insets[side] = v;
+        return this;
+    }
+    public build() {
+        return new ImageDataTileCodecOptions({
+            insets: this._insets,
+        });
+    }
+}
+
 export class ImageDataTileCodec implements ITileCodec<ImageData> {
     public static Shared = new ImageDataTileCodec();
 
@@ -45,16 +69,19 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
     }
 
     private _canvas?: HTMLCanvasElement;
+    private _options?: ImageDataTileCodecOptions;
 
-    public constructor(canvas?: HTMLCanvasElement) {
+    public constructor(canvas?: HTMLCanvasElement, options?: ImageDataTileCodecOptions) {
         this._canvas = canvas;
+        this._options = options;
     }
 
     public async decodeAsync(r: void | Response): Promise<Awaited<Nullable<ImageData>>> {
         const image = await ImageTileCodec.Shared.decodeAsync(r);
         if (image) {
-            const w = image.width;
-            const h = image.height;
+            const insets = this._options?.insets ?? [0, 0, 0, 0];
+            const w = image.width - (insets[Side.left] + insets[Side.right]);
+            const h = image.height - (insets[Side.top] + insets[Side.bottom]);
 
             const workingCanvas = this._canvas || ImageDataTileCodec.CreateCanvas(w, h);
             if (!workingCanvas) {
@@ -66,7 +93,9 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
             }
 
             workingContext.clearRect(0, 0, w, h);
-            workingContext.drawImage(image, 0, 0);
+            const sx = insets[Side.left];
+            const sy = insets[Side.top];
+            workingContext.drawImage(image, sx, sy, w, h, 0, 0, w, h);
             return workingContext.getImageData(0, 0, w, h);
         }
         return null;
@@ -119,24 +148,37 @@ export class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
     }
 }
 
+export class Float32TileCodecOptions extends ImageDataTileCodecOptions {
+    public constructor(p: Partial<Float32TileCodecOptions>) {
+        super(p);
+    }
+}
+
+export class Float32TileCodecOptionsBuilder extends ImageDataTileCodecOptionsBuilder {}
+
 export class Float32TileCodec implements ITileCodec<Float32Array> {
     private _canvas?: HTMLCanvasElement;
+    private _options?: Float32TileCodecOptions;
 
-    public constructor(public pixelDecoder: IPixelDecoder, canvas?: HTMLCanvasElement) {
+    public constructor(public pixelDecoder: IPixelDecoder, options?: Float32TileCodecOptions, canvas?: HTMLCanvasElement) {
+        this._options = options;
         this._canvas = canvas;
     }
 
     public async decodeAsync(r: void | Response): Promise<Nullable<Float32Array>> {
-        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas) : ImageDataTileCodec.Shared).decodeAsync(r);
+        const imgData = await (this._canvas ? new ImageDataTileCodec(this._canvas, this._options) : ImageDataTileCodec.Shared).decodeAsync(r);
         if (imgData) {
             const pixels = imgData.data;
-            const size = imgData.width * imgData.height;
+            const w = imgData.width;
+            const h = imgData.height;
+            const size = w * h;
             const pixelSize = pixels.length / size;
             const stride = imgData.width * pixelSize;
 
             const values = new Float32Array(size);
 
             let i = 0;
+
             // loop the rows
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;

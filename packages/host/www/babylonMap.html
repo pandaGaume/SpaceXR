@@ -78,7 +78,7 @@
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
-                camera.setTarget(new BABYLON.Vector3(0, 100, 0));
+                camera.setTarget(new BABYLON.Vector3(0, 50, 0));
                 camera.wheelPrecision = 20;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
@@ -88,11 +88,14 @@
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.7;
 
-                // BABYLON.SceneLoader.Append("./models/", "holographic_table.glb", scene, function (scene) {});
+                BABYLON.SceneLoader.ImportMesh(null, "./models/", "holographic_table.glb", scene, function (meshes) {
+                    meshes[0].position = new BABYLON.Vector3(-25, 0, -10);
+                    meshes[0].scaling = new BABYLON.Vector3(-100, 100, 100);
+                });
 
                 // create a basic table (in centimeter)
-                const h = 90;
-                const w = 160;
+                const h = 170;
+                const w = 270;
                 const t = 100;
 
                 // create an hologram display reference with a 96 dpi
@@ -104,16 +107,16 @@
                 );
                 display.position.y = 90;
                 display.rotation.x = -Math.PI / 2;
+                display.rotation.z = -Math.PI / 2;
                 const displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
                 displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-                displayMaterial.alpha = 0.4;
+                displayMaterial.alpha = 0.1;
                 display.material = displayMaterial;
                 display.freezeWorldMatrix();
 
                 camera.setTarget(display);
 
                 // definir la source de donnée.
-                // const demClient = SPACEXR.MapZen.DemClient();
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
 
                 const options = {
@@ -380,7 +383,7 @@
                 // screenAxes.xAxis.parent = ctx;
                 // screenAxes.yAxis.parent = ctx;
                 // screenAxes.zAxis.parent = ctx;
-                // scene.debugLayer.show();
+                scene.debugLayer.show();
                 return scene;
             }
 

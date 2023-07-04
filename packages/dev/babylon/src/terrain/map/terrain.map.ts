@@ -171,25 +171,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
             // shader material need scene to access engine..
             return null;
         }
-
-        const materialName = "tilemap";
-        const shaderOptions = {
-            attributes: ["position"],
-            uniforms: ["world", "viewProjection", "demInfos", "light", "material", "northClip", "southClip", "westClip", "eastClip"],
-            samplers: ["altitudes", "normals"],
-        };
-
-        var m = new ShaderMaterial(
-            materialName,
-            scene,
-            {
-                vertex: materialName,
-                fragment: materialName,
-            },
-            shaderOptions
-        );
-
-        return m;
+        return null;
     }
 
     private invalidate(tiles: IterableIterator<TerrainTile<V>> | Array<TerrainTile<V>>) {

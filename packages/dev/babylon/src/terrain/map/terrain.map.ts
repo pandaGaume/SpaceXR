@@ -189,43 +189,6 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
             shaderOptions
         );
 
-        m.setVector3("light.ambient", new Vector3(0.2, 0.2, 0.2));
-        m.setVector3("material.ambient", new Vector3(0.1, 0.5, 0.8));
-        m.setVector3("light.diffuse", new Vector3(0.5, 0.5, 0.5));
-        m.setVector3("material.diffuse", new Vector3(0.5, 0.8, 0.8));
-
-        m.setVector3("light.direction", new Vector3(1, 1, 1).normalize());
-
-        const axes = this.display.getXYZWorldVectors();
-        const res = this.display.resolution;
-        const w2 = res.width / 2;
-        const h2 = res.height / 2;
-
-        const vx = axes[0].multiply(new Vector3(w2, w2, w2));
-        const vy = axes[1].multiply(new Vector3(h2, h2, h2));
-
-        const p = this.display.getAbsolutePosition();
-
-        let a = p.subtract(vy);
-        let b = axes[1];
-        m.setVector3("northClip.point", a);
-        m.setVector3("northClip.normal", b);
-
-        let a1 = p.add(vy);
-        let b1 = axes[1].negate();
-        m.setVector3("southClip.point", a1);
-        m.setVector3("southClip.normal", b1);
-
-        let a2 = p.subtract(vx);
-        let b2 = axes[0];
-        m.setVector3("westClip.point", a2);
-        m.setVector3("westClip.normal", b2);
-
-        let a3 = p.add(vx);
-        let b3 = axes[0].negate();
-        m.setVector3("eastClip.point", a3);
-        m.setVector3("eastClip.normal", b3);
-
         return m;
     }
 

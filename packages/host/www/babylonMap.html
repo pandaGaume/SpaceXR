@@ -79,7 +79,7 @@
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
                 camera.setTarget(new BABYLON.Vector3(0, 100, 0));
-                camera.wheelPrecision = 100;
+                camera.wheelPrecision = 20;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, true);
@@ -99,7 +99,7 @@
                 const display = new SPACEXR.SurfaceMapDisplay(
                     "display",
                     { height: h, width: w, thickness: t },
-                    { width: 640, height: 360, thickness: 360 }, // in 'pixel', ratio of 16/9
+                    { width: 1280, height: 720, thickness: 720 }, // in 'pixel', ratio of 16/9
                     scene
                 );
                 display.position.y = 90;
@@ -182,8 +182,14 @@
                 mat.setVector3("eastClip.point", a3);
                 mat.setVector3("eastClip.normal", b3);
 
-                const depth = 16;
                 const s = demClient.metrics.tileSize;
+                const resw = display.resolution.width;
+                const resh = display.resolution.height;
+                // remember that this diagonal value is calculated as mid-zoom level, which mean
+                // that the maximum size will be at lower zoom  and a scale of 1.5
+                const diag = Math.sqrt(resw * resw + resh * resh) * 1.5;
+                const ntiles = Math.floor(diag / s) + 1;
+                const depth = ntiles * ntiles;
 
                 const tilePoolElevationOptions = new SPACEXR.TilePoolTextureOptions({
                     metrics: demClient.metrics,
@@ -224,6 +230,7 @@
                 map.addedObservable.add((t) => {
                     const m = t.surface;
                     if (m) {
+                        // m.showBoundingBox = true;
                         const c = t.content;
                         // add instance attributes
                         m.instancedBuffers.demInfos = new BABYLON.Vector4(c.min.z, c.max.z, c.delta, c.mean);
@@ -242,6 +249,9 @@
 
                             m.instancedBuffers.altIds = new BABYLON.Vector4(elevationArea.id, 0, 0, 0);
                             m.instancedBuffers.normIds = new BABYLON.Vector4(normalArea.id, 0, 0, 0);
+                            //console.log(`area count after add ${elevationSampler.usedAreaCount}/${elevationSampler.areaCount}`);
+                        } else {
+                            console.log(`Warning ! unable to allocate area  ${elevationSampler.usedAreaCount}/${elevationSampler.areaCount}`);
                         }
                     }
                 });
@@ -252,6 +262,7 @@
                         if (t.elevationArea) {
                             t.elevationArea.release();
                             t.elevationArea = undefined;
+                            //console.log(`area count after release ${elevationSampler.usedAreaCount}/${elevationSampler.areaCount}`);
                         }
                         if (t.normalArea) {
                             t.normalArea.release();
@@ -362,14 +373,14 @@
                 var zoomOutBt = document.getElementById("zoomout");
                 zoomOutBt.addEventListener("click", () => map.zoomOut(0.1));
 
-                const mainAxes = new BABYLON.AxesViewer(scene, 20);
-                const screenAxes = new BABYLON.AxesViewer(scene, 20);
+                // const mainAxes = new BABYLON.AxesViewer(scene, 20);
+                // const screenAxes = new BABYLON.AxesViewer(scene, 20);
 
-                const ctx = display.context;
-                screenAxes.xAxis.parent = ctx;
-                screenAxes.yAxis.parent = ctx;
-                screenAxes.zAxis.parent = ctx;
-
+                // const ctx = display.context;
+                // screenAxes.xAxis.parent = ctx;
+                // screenAxes.yAxis.parent = ctx;
+                // screenAxes.zAxis.parent = ctx;
+                // scene.debugLayer.show();
                 return scene;
             }
 

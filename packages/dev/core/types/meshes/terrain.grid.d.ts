@@ -11,6 +11,8 @@ export declare class TerrainGridOptions {
     rows?: number;
     sx?: number;
     sy?: number;
+    ox?: number;
+    oy?: number;
     invertIndices?: boolean;
     zInitializer?: VInitializerFn;
     uvInitializer?: VInitializerFn;
@@ -23,6 +25,8 @@ export declare class TerrainGridOptionsBuilder {
     _rows?: number;
     _sx?: number;
     _sy?: number;
+    _ox?: number;
+    _oy?: number;
     _invertIndices?: boolean;
     _invertYZ?: boolean;
     _zInitializer?: VInitializerFn;
@@ -33,6 +37,7 @@ export declare class TerrainGridOptionsBuilder {
     withInvertIndices(v?: boolean): TerrainGridOptionsBuilder;
     withInvertYZ(v?: boolean): TerrainGridOptionsBuilder;
     withScale(x: number, y?: number): TerrainGridOptionsBuilder;
+    withOffset(x: number, y?: number): TerrainGridOptionsBuilder;
     withZInitializer(zinit: VInitializerFn): TerrainGridOptionsBuilder;
     withUVInitializer(uvinit: VInitializerFn): TerrainGridOptionsBuilder;
     build(): TerrainGridOptions;

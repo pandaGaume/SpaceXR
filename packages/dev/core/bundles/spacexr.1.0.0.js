@@ -2664,6 +2664,11 @@ class TerrainGridOptionsBuilder {
         this._sy = y || x;
         return this;
     }
+    withOffset(x, y) {
+        this._ox = x;
+        this._oy = y || x;
+        return this;
+    }
     withZInitializer(zinit) {
         this._zInitializer = zinit;
         return this;
@@ -2699,13 +2704,15 @@ class TerrainNormalizedGridBuilder {
         const h = this._o?.rows || w;
         const sx = this._o?.sx || TerrainGridOptions.DefaultScale;
         const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
+        const ox = this._o?.ox || 0;
+        const oy = this._o?.oy || 0;
         const positions = [];
         const indices = [];
         const uvs = this._o?.uvs ? [] : null;
         const dx = 1 / (w - 1);
         const dy = 1 / (h - 1);
-        const x0 = -0.5;
-        const y0 = 0.5;
+        const x0 = -0.5 + ox * dx;
+        const y0 = 0.5 + oy * dy;
         for (let row = 0; row < h; row++) {
             const v = row * dy;
             const y = (y0 - v) * sy;

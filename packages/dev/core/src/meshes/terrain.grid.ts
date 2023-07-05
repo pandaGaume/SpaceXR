@@ -17,6 +17,8 @@ export class TerrainGridOptions {
     public rows?: number;
     public sx?: number;
     public sy?: number;
+    public ox?: number;
+    public oy?: number;
     public invertIndices?: boolean;
     public zInitializer?: VInitializerFn;
     public uvInitializer?: VInitializerFn;
@@ -35,6 +37,8 @@ export class TerrainGridOptionsBuilder {
     _rows?: number;
     _sx?: number;
     _sy?: number;
+    _ox?: number;
+    _oy?: number;
     _invertIndices?: boolean;
     _invertYZ?: boolean;
     _zInitializer?: VInitializerFn;
@@ -64,6 +68,12 @@ export class TerrainGridOptionsBuilder {
     public withScale(x: number, y?: number): TerrainGridOptionsBuilder {
         this._sx = x;
         this._sy = y || x;
+        return this;
+    }
+
+    public withOffset(x: number, y?: number): TerrainGridOptionsBuilder {
+        this._ox = x;
+        this._oy = y || x;
         return this;
     }
 
@@ -110,6 +120,8 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         const h = this._o?.rows || w;
         const sx = this._o?.sx || TerrainGridOptions.DefaultScale;
         const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
+        const ox = this._o?.ox || 0;
+        const oy = this._o?.oy || 0;
         const positions = [];
         const indices = [];
         const uvs: Nullable<FloatArray> = this._o?.uvs ? [] : null;
@@ -117,8 +129,8 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         const dx = 1 / (w - 1);
         const dy = 1 / (h - 1);
 
-        const x0 = -0.5;
-        const y0 = 0.5;
+        const x0 = -0.5 + ox * dx;
+        const y0 = 0.5 + oy * dy;
 
         // positions  origin upper left.
         for (let row = 0; row < h; row++) {

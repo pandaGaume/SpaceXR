@@ -4,7 +4,7 @@ precision highp float;
 in vec3 position; // babylon build in
 in vec2 uv; // babylon build in
 
-in vec4 ids;
+in vec4 ids; // the depth of the textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
 
 #include<instancesDeclaration>
 #include<clipVertexDeclaration>
@@ -22,7 +22,12 @@ out vec4 vPosition;
 out vec3 vNormal;
 
 void main(void) {
+    
     #include<instancesVertex>
+
+    // we choose the index using the value stored into the z of the position.
+    // this value will be [0,3] to index one value into the ids vector. 
+    // we assume the value is already clamped.
     float depth = ids[int(position.z)] ;
 
     vec3 v = vec3(uv.xy, depth);

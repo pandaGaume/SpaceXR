@@ -19,6 +19,7 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     get addedObservable(): Observable<T>;
     get removedObservable(): Observable<T>;
     hasTile(key: string): boolean;
+    getTile(key: string): T | undefined;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;

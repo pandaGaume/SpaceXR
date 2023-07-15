@@ -71,11 +71,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         return i + j;
     }
 
-    // private static InitUV(column: number, row: number, w: number, h: number): number[] {
-    //     let u = column == w - 1 ? 0 : column / (w - 2);
-    //     let v = row == h - 1 ? 0 : row / (h - 2);
-    //     return [u, v];
-    // }
+    private static InitUV(column: number, row: number, w: number, h: number): number[] {
+        let u = column == w - 1 ? 0 : column / (w - 2);
+        let v = row == h - 1 ? 0 : row / (h - 2);
+        return [u, v];
+    }
 
     _grid: VertexData;
     _template: Mesh;
@@ -105,12 +105,13 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         const s = this.metrics?.tileSize;
 
         const o = new TerrainGridOptionsBuilder()
-            .withUvs(true)
-            .withColumns(s + 1) // add one to row and column to fill the gap - note that if only column/row are defined, the builder build a square
+            .withColumns(s + 1) // add one column to fill the gap
+            .withRows(s + 1) // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
             .withScale(1, -1) // we consider a grid of "texel" or "pixel" oriented as an image is oriented in display
             .withInvertIndices(true) //  we need to invert indices as we reverse y
-            .withZInitializer(SurfaceTileMap.InitZ)
-            //.withUVInitializer(SurfaceTileMap.InitUV)
+            .withZInitializer(SurfaceTileMap.InitZ) // register the z initializer, which serve as referencing the texture depth
+            .withUvs(true) // generate uvs.
+            .withUVInitializer(SurfaceTileMap.InitUV) // register the uv initializer, which serve as referencing the texture coordinate used in conjunction with depth
             .build();
         const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());
         return data;

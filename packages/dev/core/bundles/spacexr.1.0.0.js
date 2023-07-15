@@ -1859,6 +1859,9 @@ class AbstractDisplayMap {
     hasTile(key) {
         return this._activ.has(key);
     }
+    getTile(key) {
+        return this._activ.get(key);
+    }
     invalidateSize(w, h) {
         this._view.invalidateSize(w, h);
         this._view.validate();
@@ -3710,6 +3713,7 @@ class TileMapView {
                     view.onTileNotFound(t);
                 })
                     .catch((reason) => {
+                    console.log(reason);
                 });
             }
         }
@@ -4474,6 +4478,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* binding */ TileMetricsOptionsBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
+
 
 class TileMetricsOptions {
     constructor(p) {
@@ -4569,9 +4575,27 @@ class TileMetrics {
     static ToParentKey(key) {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
-    static ToChildKey(key) {
+    static ToChildsKey(key) {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
+    }
+    static ToNeigborsKey(key) {
+        return TileMetrics.ToNeigborsXY(TileMetrics.QuadKeyToTileXY(key)).map((a) => (a ? TileMetrics.TileXYToQuadKey(a) : null));
+    }
+    static ToNeigborsXY(a) {
+        const max = Math.pow(2, a.levelOfDetail);
+        const n = [
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x, a.y - 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x - 1, a.y, a.levelOfDetail),
+            a,
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x + 1, a.y, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x, a.y + 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
+        ];
+        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
     }
     static TileXYToQuadKey(a) {
         let quadKey = "";

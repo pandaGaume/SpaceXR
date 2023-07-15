@@ -1,6 +1,8 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
+import { TileAddress } from "./tiles.address";
+import { Nullable } from "../types";
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
@@ -127,9 +129,29 @@ export class TileMetrics {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
 
-    public static ToChildKey(key: string): string[] {
+    public static ToChildsKey(key: string): string[] {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
+    }
+
+    public static ToNeigborsKey(key: string): Nullable<string>[] {
+        return TileMetrics.ToNeigborsXY(TileMetrics.QuadKeyToTileXY(key)).map((a) => (a ? TileMetrics.TileXYToQuadKey(a) : null));
+    }
+
+    public static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[] {
+        const max = Math.pow(2, a.levelOfDetail);
+        const n = [
+            new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x - 1, a.y, a.levelOfDetail),
+            a,
+            new TileAddress(a.x + 1, a.y, a.levelOfDetail),
+            new TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
+            new TileAddress(a.x, a.y + 1, a.levelOfDetail),
+            new TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
+        ];
+        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
     }
 
     public static TileXYToQuadKey(a: ITileAddress): string {

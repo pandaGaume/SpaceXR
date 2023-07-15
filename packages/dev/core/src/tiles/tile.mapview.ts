@@ -401,6 +401,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                     })
                     .catch((reason: any) => {
                         // the lookup operation has failed - TODO describe a strategy
+                        console.log(reason);
                     });
             }
         }

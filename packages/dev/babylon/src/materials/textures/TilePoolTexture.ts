@@ -175,6 +175,7 @@ class TilePoolTextureArea implements ITilePoolTextureArea {
     public get id(): number {
         return this._id;
     }
+
 }
 
 export class TilePoolTexture extends Texture implements ITilePoolTexture {

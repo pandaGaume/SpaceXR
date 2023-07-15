@@ -39,9 +39,14 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         return this._removedObservable!;
     }
 
-    public hasTile(key: string) {
+    public hasTile(key: string): boolean {
         return this._activ.has(key);
     }
+
+    public getTile(key: string): T | undefined {
+        return this._activ.get(key);
+    }
+
     public invalidateSize(w: number, h: number): ITileMapApi {
         this._view.invalidateSize(w, h);
         this._view.validate();

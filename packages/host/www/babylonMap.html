@@ -118,6 +118,7 @@
 
                 // definir la source de donnée.
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
+                //const demClient = SPACEXR.MapBox.TerrainDemV1Client("pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q");
 
                 mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
 
@@ -133,12 +134,11 @@
                 // construire le material - WARNING !!! This is temporary emplacement for this code, which is MUST beeing located into the map.
                 const template = map.template;
                 template.registerInstancedBuffer("demInfos", 4); // dem infos
-                template.registerInstancedBuffer("altIds", 4);
-                template.registerInstancedBuffer("normIds", 4);
+                template.registerInstancedBuffer("ids", 4);
 
                 const materialName = "tilemap";
                 const shaderOptions = {
-                    attributes: ["position", "uv", "demInfos", "altIds", "normIds"],
+                    attributes: ["position", "uv", "demInfos", "ids"],
                     uniforms: ["world", "viewProjection", "altitudes", "mapscale", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
                 };
 
@@ -253,9 +253,56 @@
                             t.elevationArea = elevationArea;
                             t.normalArea = normalArea;
 
-                            m.instancedBuffers.altIds = new BABYLON.Vector4(elevationArea.id, 0, 0, 0);
-                            m.instancedBuffers.normIds = new BABYLON.Vector4(normalArea.id, 0, 0, 0);
-                            //console.log(`area count after add ${elevationSampler.usedAreaCount}/${elevationSampler.areaCount}`);
+                            // register neighbor ids
+                            const neigbors = SPACEXR.TileMetrics.ToNeigborsXY(t.address);
+
+                            let ids = [5, 7, 8];
+                            m.instancedBuffers.ids = new BABYLON.Vector4(elevationArea.id, -1, -1, -1);
+                            for (let i = 0; i != ids.length; i++) {
+                                const a = neigbors[ids[i]];
+                                const keyOfInterest = SPACEXR.TileMetrics.TileXYToQuadKey(a);
+                                const tileOfInterest = map.getTile(keyOfInterest);
+                                if (tileOfInterest?.elevationArea) {
+                                    switch (i) {
+                                        case 0: {
+                                            m.instancedBuffers.ids.y = tileOfInterest.elevationArea.id;
+                                            break;
+                                        }
+                                        case 1: {
+                                            m.instancedBuffers.ids.z = tileOfInterest.elevationArea.id;
+                                            break;
+                                        }
+                                        case 2: {
+                                            m.instancedBuffers.ids.w = tileOfInterest.elevationArea.id;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 2 - register the tile to the interested neighbors which are 3, 1, 0
+                            ids = [3, 1, 0];
+                            for (let i = 0; i != ids.length; i++) {
+                                const a = neigbors[ids[i]];
+                                const keyOfInterest = SPACEXR.TileMetrics.TileXYToQuadKey(a);
+                                const tileOfInterest = map.getTile(keyOfInterest);
+                                if (tileOfInterest?.elevationArea) {
+                                    switch (i) {
+                                        case 0: {
+                                            tileOfInterest.surface.instancedBuffers.ids.y = elevationArea.id;
+                                            break;
+                                        }
+                                        case 1: {
+                                            tileOfInterest.surface.instancedBuffers.ids.z = elevationArea.id;
+                                            break;
+                                        }
+                                        case 2: {
+                                            tileOfInterest.surface.instancedBuffers.ids.w = elevationArea.id;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                         } else {
                             console.log(`Warning ! unable to allocate area  ${elevationSampler.usedAreaCount}/${elevationSampler.areaCount}`);
                         }

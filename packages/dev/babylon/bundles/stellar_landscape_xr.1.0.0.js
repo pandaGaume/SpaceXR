@@ -406,6 +406,11 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         let j = row == h - 1 ? 2 : 0;
         return i + j;
     }
+    static InitUV(column, row, w, h) {
+        let u = column == w - 1 ? 0 : column / (w - 2);
+        let v = row == h - 1 ? 0 : row / (h - 2);
+        return [u, v];
+    }
     constructor(name, display, datasource, options, scene) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
         super(display, datasource, o.center, o.levelOfDetail);
@@ -423,11 +428,13 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
     buildGrid() {
         const s = this.metrics?.tileSize;
         const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptionsBuilder()
-            .withUvs(true)
             .withColumns(s + 1)
+            .withRows(s + 1)
             .withScale(1, -1)
             .withInvertIndices(true)
             .withZInitializer(SurfaceTileMap.InitZ)
+            .withUvs(true)
+            .withUVInitializer(SurfaceTileMap.InitUV)
             .build();
         const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
         return data;
@@ -2569,6 +2576,9 @@ class AbstractDisplayMap {
     hasTile(key) {
         return this._activ.has(key);
     }
+    getTile(key) {
+        return this._activ.get(key);
+    }
     invalidateSize(w, h) {
         this._view.invalidateSize(w, h);
         this._view.validate();
@@ -3374,6 +3384,11 @@ class TerrainGridOptionsBuilder {
         this._sy = y || x;
         return this;
     }
+    withOffset(x, y) {
+        this._ox = x;
+        this._oy = y || x;
+        return this;
+    }
     withZInitializer(zinit) {
         this._zInitializer = zinit;
         return this;
@@ -3409,13 +3424,15 @@ class TerrainNormalizedGridBuilder {
         const h = this._o?.rows || w;
         const sx = this._o?.sx || TerrainGridOptions.DefaultScale;
         const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
+        const ox = this._o?.ox || 0;
+        const oy = this._o?.oy || 0;
         const positions = [];
         const indices = [];
         const uvs = this._o?.uvs ? [] : null;
         const dx = 1 / (w - 1);
         const dy = 1 / (h - 1);
-        const x0 = -0.5;
-        const y0 = 0.5;
+        const x0 = -0.5 + ox * dx;
+        const y0 = 0.5 + oy * dy;
         for (let row = 0; row < h; row++) {
             const v = row * dy;
             const y = (y0 - v) * sy;
@@ -4413,6 +4430,7 @@ class TileMapView {
                     view.onTileNotFound(t);
                 })
                     .catch((reason) => {
+                    console.log(reason);
                 });
             }
         }
@@ -5177,6 +5195,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* binding */ TileMetricsOptionsBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
+
 
 class TileMetricsOptions {
     constructor(p) {
@@ -5272,9 +5292,27 @@ class TileMetrics {
     static ToParentKey(key) {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
-    static ToChildKey(key) {
+    static ToChildsKey(key) {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
+    }
+    static ToNeigborsKey(key) {
+        return TileMetrics.ToNeigborsXY(TileMetrics.QuadKeyToTileXY(key)).map((a) => (a ? TileMetrics.TileXYToQuadKey(a) : null));
+    }
+    static ToNeigborsXY(a) {
+        const max = Math.pow(2, a.levelOfDetail);
+        const n = [
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x, a.y - 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x - 1, a.y, a.levelOfDetail),
+            a,
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x + 1, a.y, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x, a.y + 1, a.levelOfDetail),
+            new _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
+        ];
+        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
     }
     static TileXYToQuadKey(a) {
         let quadKey = "";
@@ -6549,10 +6587,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "tilemapVertexShader";
-const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 altIds;in vec4 normIds;#include<instancesDeclaration>
+const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 ids;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;out vec4 vPosition;out vec3 vNormal;void main(void) {#include<instancesVertex>
-float alt=float(texture(altitudes,vec3(uv.x,uv.y,altIds.x) )) ;alt=(alt-minAlt)*mapscale;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,vec3(uv,normIds.x) );float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);#include<clipVertex>
+float depth=ids[int(position.z)] ;vec3 v=vec3(uv.x,uv.y,depth);if( depth<0.0) {v.x=v.x != 0.0 ? v.x : 1.0;v.y=v.y != 0.0 ? v.y : 1.0; v.z=0.0;} float alt=float(texture(altitudes,v)) ;alt=(alt-minAlt)*mapscale;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);#include<clipVertex>
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapVertexShader = { name, shader };

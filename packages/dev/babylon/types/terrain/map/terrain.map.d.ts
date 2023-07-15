@@ -31,6 +31,7 @@ export declare class SurfaceTileMapOptionsBuilder {
 }
 export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> extends AbstractDisplayMap<V, TerrainTile<V>, H> {
     private static InitZ;
+    private static InitUV;
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;

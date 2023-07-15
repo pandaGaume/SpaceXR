@@ -25,10 +25,10 @@ void main(void) {
     #include<instancesVertex>
     float depth = ids[int(position.z)] ;
 
-    vec3 v = vec3(uv.x, uv.y, depth);
+    vec3 v = vec3(uv.xy, depth);
     if( depth < 0.0) {
-        v.x = v.x != 0.0 ? v.x : 1.0;
-        v.y = v.y != 0.0 ? v.y : 1.0;   
+        v.x = v.x == 0.0 ? 1.0 : v.x;
+        v.y = v.y == 0.0 ? 1.0 : v.y;   
         v.z = 0.0;
     } 
 

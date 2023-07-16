@@ -3338,6 +3338,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Float32TileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.Float32TileCodec),
 /* harmony export */   "Float32TileCodecOptions": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.Float32TileCodecOptions),
 /* harmony export */   "Float32TileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.Float32TileCodecOptionsBuilder),
+/* harmony export */   "Google": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.Google),
+/* harmony export */   "GoogleMap2DLayerCode": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
+/* harmony export */   "GoogleMap2DUrlBuilder": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodecOptionsBuilder),
@@ -4795,6 +4798,9 @@ class WebTileUrlBuilder {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Google": () => (/* reexport safe */ _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_2__.Google),
+/* harmony export */   "GoogleMap2DLayerCode": () => (/* reexport safe */ _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_2__.GoogleMap2DLayerCode),
+/* harmony export */   "GoogleMap2DUrlBuilder": () => (/* reexport safe */ _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_2__.GoogleMap2DUrlBuilder),
 /* harmony export */   "MapBox": () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_1__.MapBox),
 /* harmony export */   "MapBoxTerrainDemV1UrlBuilder": () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_1__.MapBoxTerrainDemV1UrlBuilder),
 /* harmony export */   "MapZen": () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZen),
@@ -4804,9 +4810,78 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapzen */ "./dist/tiles/vendors/tiles.vendors.mapzen.js");
 /* harmony import */ var _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vendors.mapbox */ "./dist/tiles/vendors/tiles.vendors.mapbox.js");
+/* harmony import */ var _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vendors.google */ "./dist/tiles/vendors/tiles.vendors.google.js");
+
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/vendors/tiles.vendors.google.js":
+/*!****************************************************!*\
+  !*** ./dist/tiles/vendors/tiles.vendors.google.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Google": () => (/* binding */ Google),
+/* harmony export */   "GoogleMap2DLayerCode": () => (/* binding */ GoogleMap2DLayerCode),
+/* harmony export */   "GoogleMap2DUrlBuilder": () => (/* binding */ GoogleMap2DUrlBuilder)
+/* harmony export */ });
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client */ "./dist/tiles/tiles.client.js");
+/* harmony import */ var _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.codecs.image */ "./dist/tiles/tiles.codecs.image.js");
+/* harmony import */ var _tiles_geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../tiles.geography */ "./dist/tiles/tiles.geography.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "./dist/tiles/tiles.urlBuilder.js");
+
+
+
+
+
+var GoogleMap2DLayerCode;
+(function (GoogleMap2DLayerCode) {
+    GoogleMap2DLayerCode["street"] = "m";
+    GoogleMap2DLayerCode["satellite"] = "s";
+    GoogleMap2DLayerCode["hybrid"] = "h";
+    GoogleMap2DLayerCode["terrain"] = "p";
+})(GoogleMap2DLayerCode || (GoogleMap2DLayerCode = {}));
+class GoogleMap2DUrlBuilder extends _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+    constructor(...types) {
+        super();
+        this.withRoundRobin(1, 4)
+            .withHost("mt{s}.google.com")
+            .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`);
+    }
+}
+GoogleMap2DUrlBuilder.Street = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.street);
+GoogleMap2DUrlBuilder.Satellite = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.satellite);
+GoogleMap2DUrlBuilder.Hybrid = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.satellite, GoogleMap2DLayerCode.hybrid);
+GoogleMap2DUrlBuilder.Terrain = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.terrain);
+
+class Google {
+    static Client2d(urlBuilder, options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(urlBuilder, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+    }
+    static StreetClient2d(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Street, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+    }
+    static SatelliteClient2d(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Satellite, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+    }
+    static HybridClient2d(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Hybrid, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+    }
+    static TerrainClient2d(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Terrain, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+    }
+}
+Google.MaxLevelOfDetail = 20;
+Google.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(Google.MaxLevelOfDetail).build();
+Google.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857(Google.MetricsOptions);
+
+//# sourceMappingURL=tiles.vendors.google.js.map
 
 /***/ }),
 
@@ -5419,6 +5494,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GeodeticGridView": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridView),
 /* harmony export */   "GeodeticGridViewOptions": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridViewOptions),
 /* harmony export */   "GeodeticSystem": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
+/* harmony export */   "Google": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.Google),
+/* harmony export */   "GoogleMap2DLayerCode": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
+/* harmony export */   "GoogleMap2DUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.HSLColor),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),

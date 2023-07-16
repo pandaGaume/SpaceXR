@@ -4,7 +4,8 @@ precision highp float;
 in vec3 position; // babylon build in
 in vec2 uv; // babylon build in
 
-in vec4 ids; // the depth of the textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
+in vec4 demIds; // the depth of the dem textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
+in vec4 layerIds; // the depth of the layer textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
 
 #include<instancesDeclaration>
 #include<clipVertexDeclaration>
@@ -20,6 +21,7 @@ uniform highp float mapscale;
 // Varying
 out vec4 vPosition;
 out vec3 vNormal;
+out vec3 vUvs;
 
 void main(void) {
     
@@ -28,8 +30,7 @@ void main(void) {
     // we choose the index using the value stored into the z of the position.
     // this value will be [0,3] to index one value into the ids vector. 
     // we assume the value is already clamped.
-    float depth = ids[int(position.z)] ;
-
+    float depth = demIds[int(position.z)] ;
     vec3 v = vec3(uv.xy, depth);
     if( depth < 0.0) {
         v.x = v.x == 0.0 ? 1.0 : v.x;
@@ -62,6 +63,9 @@ void main(void) {
     float y = (2.0 * pixel.g) - 1.0;
     float z = (pixel.b * 255.0 - 128.0) / 127.0;
     vNormal = vec3(x,z,y);
+
+    depth = layerIds[0] ;
+    vUvs = vec3(position.xy + 0.5, depth);
 
     #include<clipVertex>
 }

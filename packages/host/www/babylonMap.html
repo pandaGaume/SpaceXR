@@ -118,28 +118,46 @@
 
                 // definir la source de donnée.
                 const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
-                //const demClient = SPACEXR.MapBox.TerrainDemV1Client("pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q");
+                const layerClient = SPACEXR.Google.SatelliteClient2d();
 
-                mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
+                const mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
+                const everest = SPACEXR.KnownPlaces.Locations.Everest;
+                const chamonix = SPACEXR.KnownPlaces.Locations.Chamonix;
+                const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
 
-                const options = {
-                    center: mapboxDemoLocation, //SPACEXR.KnownPlaces.Locations.Chamonix,
-                    levelOfDetail: 13,
+                const surfaceOptions = {
+                    center: corsica,
+                    levelOfDetail: 12,
                     exageration: 1.5,
                 };
 
                 // construire la carte.
-                const map = new SPACEXR.SurfaceTileMap("map", display, demClient, options, scene);
+                const map = new SPACEXR.SurfaceTileMap("map", display, demClient, surfaceOptions, scene);
 
                 // construire le material - WARNING !!! This is temporary emplacement for this code, which is MUST beeing located into the map.
                 const template = map.template;
                 template.registerInstancedBuffer("demInfos", 4); // dem infos
-                template.registerInstancedBuffer("ids", 4);
+                template.registerInstancedBuffer("demIds", 4);
+                template.registerInstancedBuffer("layerIds", 4);
 
                 const materialName = "tilemap";
                 const shaderOptions = {
-                    attributes: ["position", "uv", "demInfos", "ids"],
-                    uniforms: ["world", "viewProjection", "altitudes", "mapscale", "normals", "light", "material", "northClip", "southClip", "westClip", "eastClip", "minAlt"],
+                    attributes: ["position", "uv", "demInfos", "demIds", "layerIds"],
+                    uniforms: [
+                        "world",
+                        "viewProjection",
+                        "altitudes",
+                        "mapscale",
+                        "normals",
+                        "layer",
+                        "light",
+                        "material",
+                        "northClip",
+                        "southClip",
+                        "westClip",
+                        "eastClip",
+                        "minAlt",
+                    ],
                 };
 
                 var mat = new BABYLON.ShaderMaterial(
@@ -207,8 +225,6 @@
                 });
 
                 const elevationSampler = new SPACEXR.TilePoolTexture("altitudes", tilePoolElevationOptions, scene);
-                elevationSampler.WrapR = BABYLON.Texture.CLAMP_ADDRESS_MODE;
-
                 mat.setTexture("altitudes", elevationSampler);
 
                 const tilePoolNormalOptions = new SPACEXR.TilePoolTextureOptions({
@@ -221,11 +237,21 @@
                 });
 
                 const normalSampler = new SPACEXR.TilePoolTexture("normals", tilePoolNormalOptions, scene);
-
                 mat.setTexture("normals", normalSampler);
 
-                map.template.material = mat;
+                const tilePoolLayerOptions = new SPACEXR.TilePoolTextureOptions({
+                    metrics: layerClient.metrics,
+                    count: depth,
+                    format: BABYLON.Constants.TEXTUREFORMAT_RGB,
+                    textureType: BABYLON.Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: BABYLON.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: engine._gl.RGB8, // force internal format
+                });
 
+                const layerSampler = new SPACEXR.TilePoolTexture("layer", tilePoolLayerOptions, scene);
+                mat.setTexture("layer", layerSampler);
+
+                map.template.material = mat;
                 let min = 10000;
 
                 map.view.updateObservable.add((updateEvent) => {
@@ -233,15 +259,42 @@
                     mat.setFloat("mapscale", scale);
                 });
 
+                var loadLayer = function (tile, client, map) {
+                    client
+                        .fetchAsync(tile.address)
+                        .then((result) => {
+                            if (result.content) {
+                                if (map.hasTile(tile.key)) {
+                                    const layerArea = layerSampler.reserveArea();
+                                    if (layerArea) {
+                                        layerArea.update(result.content);
+                                        tile.layerArea = layerArea;
+                                        tile.surface.instancedBuffers.layerIds.x = layerArea.id;
+                                    }
+                                    return;
+                                }
+                                // the content is not defined.
+                            }
+                        })
+                        .catch((reason) => {
+                            // the lookup operation has failed - TODO describe a strategy
+                            console.log(reason);
+                        });
+                };
+
                 map.addedObservable.add((t) => {
                     const m = t.surface;
                     if (m) {
-                        // m.showBoundingBox = true;
+                        // load layer
+                        m.instancedBuffers.layerIds = new BABYLON.Vector4(0, -1, -1, -1);
+                        loadLayer(t, layerClient, map);
+
                         const c = t.content;
                         // add instance attributes
                         m.instancedBuffers.demInfos = new BABYLON.Vector4(c.min.z, c.max.z, c.delta, c.mean);
                         const elevationArea = elevationSampler.reserveArea();
                         const normalArea = normalSampler.reserveArea();
+
                         if (elevationArea && normalArea) {
                             if (c.min.z < min) {
                                 // TODO : Get Minimum when remove tiles
@@ -257,7 +310,7 @@
                             const neigbors = SPACEXR.TileMetrics.ToNeigborsXY(t.address);
 
                             let ids = [5, 7, 8];
-                            m.instancedBuffers.ids = new BABYLON.Vector4(elevationArea.id, -1, -1, -1);
+                            m.instancedBuffers.demIds = new BABYLON.Vector4(elevationArea.id, -1, -1, -1);
                             for (let i = 0; i != ids.length; i++) {
                                 const a = neigbors[ids[i]];
                                 const keyOfInterest = SPACEXR.TileMetrics.TileXYToQuadKey(a);
@@ -265,15 +318,15 @@
                                 if (tileOfInterest?.elevationArea) {
                                     switch (i) {
                                         case 0: {
-                                            m.instancedBuffers.ids.y = tileOfInterest.elevationArea.id;
+                                            m.instancedBuffers.demIds.y = tileOfInterest.elevationArea.id;
                                             break;
                                         }
                                         case 1: {
-                                            m.instancedBuffers.ids.z = tileOfInterest.elevationArea.id;
+                                            m.instancedBuffers.demIds.z = tileOfInterest.elevationArea.id;
                                             break;
                                         }
                                         case 2: {
-                                            m.instancedBuffers.ids.w = tileOfInterest.elevationArea.id;
+                                            m.instancedBuffers.demIds.w = tileOfInterest.elevationArea.id;
                                             break;
                                         }
                                     }
@@ -289,15 +342,15 @@
                                 if (tileOfInterest?.elevationArea) {
                                     switch (i) {
                                         case 0: {
-                                            tileOfInterest.surface.instancedBuffers.ids.y = elevationArea.id;
+                                            tileOfInterest.surface.instancedBuffers.demIds.y = elevationArea.id;
                                             break;
                                         }
                                         case 1: {
-                                            tileOfInterest.surface.instancedBuffers.ids.z = elevationArea.id;
+                                            tileOfInterest.surface.instancedBuffers.demIds.z = elevationArea.id;
                                             break;
                                         }
                                         case 2: {
-                                            tileOfInterest.surface.instancedBuffers.ids.w = elevationArea.id;
+                                            tileOfInterest.surface.instancedBuffers.demIds.w = elevationArea.id;
                                             break;
                                         }
                                     }
@@ -320,6 +373,10 @@
                         if (t.normalArea) {
                             t.normalArea.release();
                             t.normalArea = undefined;
+                        }
+                        if (t.layerArea) {
+                            t.layerArea.release();
+                            t.layerArea = undefined;
                         }
                     },
                     -1,
@@ -433,7 +490,7 @@
                 // screenAxes.xAxis.parent = ctx;
                 // screenAxes.yAxis.parent = ctx;
                 // screenAxes.zAxis.parent = ctx;
-                scene.debugLayer.show();
+                // scene.debugLayer.show();
                 return scene;
             }
 

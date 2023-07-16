@@ -47,10 +47,10 @@
                 const lod = 12;
 
                 // definir la source de donnée.
-                const terrariumImgClient = SPACEXR.MapZen.NormalsImagesClient();
+                const tileClient = SPACEXR.Google.TerrainClient2d() ;
+                 
                 // construire la carte.
-                const map = new SPACEXR.CanvasTileMap(canvas, terrariumImgClient, center, lod);
-
+                const map = new SPACEXR.CanvasTileMap(canvas, tileClient, center, lod);
 
                 function onDrag(m, dx, dy, b) {
                     switch (b) {

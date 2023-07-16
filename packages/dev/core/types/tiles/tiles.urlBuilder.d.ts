@@ -12,7 +12,7 @@ export declare class WebTileUrlBuilder implements ITileUrlBuilder {
     _query?: string;
     _extension?: string;
     _roundRobin?: RoundRobinOptions;
-    _i: number;
+    _i?: number;
     constructor();
     withSecure(v: boolean): WebTileUrlBuilder;
     withHost(v: string): WebTileUrlBuilder;

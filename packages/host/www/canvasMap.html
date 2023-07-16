@@ -47,7 +47,7 @@
                 const lod = 12;
 
                 // definir la source de donnée.
-                const tileClient = SPACEXR.Google.TerrainClient2d() ;
+                const tileClient = SPACEXR.Google.SatelliteClient2d() ;
                  
                 // construire la carte.
                 const map = new SPACEXR.CanvasTileMap(canvas, tileClient, center, lod);

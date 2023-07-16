@@ -26,11 +26,9 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
     _extension?: string;
     _roundRobin?: RoundRobinOptions;
 
-    _i: number; // cached round robin value
+    _i?: number; // cached round robin value
 
-    public constructor() {
-        this._i = this._roundRobin ? this._roundRobin.from : 0;
-    }
+    public constructor() {}
 
     public withSecure(v: boolean): WebTileUrlBuilder {
         this._isSecure = v;
@@ -73,8 +71,7 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
         let str = template.replaceAll("{x}", a.x.toString());
         str = str.replaceAll("{y}", a.y.toString());
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
-        str = str.replace("{s}", this._i.toString());
-        this._i = this.nextRRIndex();
+        str = str.replace("{s}", this.nextRRIndex().toString());
         return str;
     }
 
@@ -83,10 +80,12 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
      * @returnsthe next index of the round robin, used as part of sub domains.
      */
     private nextRRIndex(): number {
-        const i = this._i;
-        if (this._roundRobin) {
+        if (this._i === undefined) {
+            this._i = this._roundRobin?.from ?? 0;
+        } else if (this._roundRobin) {
             this._i = this._i == this._roundRobin.to ? this._roundRobin.from : this._i + 1;
         }
-        return i;
+
+        return this._i;
     }
 }

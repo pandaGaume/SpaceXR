@@ -4732,9 +4732,7 @@ class RoundRobinOptions {
     }
 }
 class WebTileUrlBuilder {
-    constructor() {
-        this._i = this._roundRobin ? this._roundRobin.from : 0;
-    }
+    constructor() { }
     withSecure(v) {
         this._isSecure = v;
         return this;
@@ -4774,16 +4772,17 @@ class WebTileUrlBuilder {
         let str = template.replaceAll("{x}", a.x.toString());
         str = str.replaceAll("{y}", a.y.toString());
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
-        str = str.replace("{s}", this._i.toString());
-        this._i = this.nextRRIndex();
+        str = str.replace("{s}", this.nextRRIndex().toString());
         return str;
     }
     nextRRIndex() {
-        const i = this._i;
-        if (this._roundRobin) {
+        if (this._i === undefined) {
+            this._i = this._roundRobin?.from ?? 0;
+        }
+        else if (this._roundRobin) {
             this._i = this._i == this._roundRobin.to ? this._roundRobin.from : this._i + 1;
         }
-        return i;
+        return this._i;
     }
 }
 //# sourceMappingURL=tiles.urlBuilder.js.map
@@ -4850,7 +4849,7 @@ var GoogleMap2DLayerCode;
 class GoogleMap2DUrlBuilder extends _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
     constructor(...types) {
         super();
-        this.withRoundRobin(1, 4)
+        this.withRoundRobin(1, 3)
             .withHost("mt{s}.google.com")
             .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`);
     }

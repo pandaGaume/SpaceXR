@@ -3423,7 +3423,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "TileMapLevel": () => (/* binding */ TileMapLevel),
+/* harmony export */   "TileMapContext": () => (/* binding */ TileMapContext),
 /* harmony export */   "TileMapView": () => (/* binding */ TileMapView),
 /* harmony export */   "UpdateEventArgs": () => (/* binding */ UpdateEventArgs),
 /* harmony export */   "UpdateReason": () => (/* binding */ UpdateReason)
@@ -3451,7 +3451,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileMapLevel {
+class TileMapContext {
     constructor() {
         this._lod = 0;
         this._scale = 1;
@@ -3522,7 +3522,7 @@ class TileMapView {
         this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_3__.MemoryCache();
         this._datasource = datasource;
         this.invalidateSize(width, height).setView(center, lod);
-        this._level = new TileMapLevel();
+        this._context = new TileMapContext();
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
@@ -3549,8 +3549,8 @@ class TileMapView {
     get datasource() {
         return this._datasource;
     }
-    get level() {
-        return this._level;
+    get context() {
+        return this._context;
     }
     get levelOfDetail() {
         return this._lod;
@@ -3659,9 +3659,9 @@ class TileMapView {
     }
     validateBounds() {
         if (!this._bounds) {
-            let rect = this.getRectangle(this._level._center, this._level._scale);
-            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._level._lod);
-            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._level._lod);
+            let rect = this.getRectangle(this._context._center, this._context._scale);
+            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._context._lod);
+            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._context._lod);
             this._bounds = ___WEBPACK_IMPORTED_MODULE_7__.Envelope.FromPoints(nw, se);
         }
         return this._bounds;
@@ -3688,15 +3688,15 @@ class TileMapView {
     onCenterObserverAdded(observer) { }
     onUpdateObserverAdded(observer) { }
     doValidate() {
-        this._level._lod = Math.round(this.levelOfDetail);
-        this.doValidateLevel(this._level);
+        this._context._lod = Math.round(this.levelOfDetail);
+        this.doValidateContext(this._context);
     }
-    doValidateLevel(level) {
+    doValidateContext(level) {
         const lod = level.lod;
         let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.GetLodScale(this.levelOfDetail);
-        this._level._scale = scale;
+        this._context._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
-        this._level._center = pixelCenterXY;
+        this._context._center = pixelCenterXY;
         const rect = this.getRectangle(pixelCenterXY, scale);
         let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
         let seTileXY = this.metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
@@ -3752,14 +3752,14 @@ class TileMapView {
         }
         added = added.filter((t) => t.content !== undefined && t.content !== null);
         deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
-        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, this._level.lod, this._level.scale, this._level.center, added.length ? added : undefined, deleted.length ? deleted : undefined);
+        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, this._context.lod, this._context.scale, this._context.center, added.length ? added : undefined, deleted.length ? deleted : undefined);
         this.updateObservable.notifyObservers(updateEvent);
     }
     onTileReady(t) {
-        if (t.address.levelOfDetail == this._level.lod) {
-            this._level.tiles.set(t.address.quadkey, t);
+        if (t.address.levelOfDetail == this._context.lod) {
+            this._context.tiles.set(t.address.quadkey, t);
             const added = [t];
-            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._level.lod, this._level.scale, this._level.center, added);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._context.lod, this._context.scale, this._context.center, added);
             this.updateObservable.notifyObservers(updateEvent);
         }
     }

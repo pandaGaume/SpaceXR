@@ -14,7 +14,7 @@ import { TileBuilder } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
 import { Cartesian2, Envelope } from "..";
 
-export class TileMapLevel<T> {
+export class TileMapContext<T> {
     _lod: number = 0;
     _scale: number = 1;
     _center: ICartesian2 = Cartesian2.Zero();
@@ -113,7 +113,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _lod: number = 0;
     _bounds?: IEnvelope;
     _center: IGeo2 = Geo2.Zero();
-    _level: TileMapLevel<T>;
+    _context: TileMapContext<T>;
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
@@ -132,7 +132,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this._cache = cache || new MemoryCache<string, ITile<T>>();
         this._datasource = datasource;
         this.invalidateSize(width, height).setView(center, lod);
-        this._level = new TileMapLevel<T>();
+        this._context = new TileMapContext<T>();
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
@@ -166,8 +166,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._datasource;
     }
 
-    public get level(): TileMapLevel<T> {
-        return this._level;
+    public get context(): TileMapContext<T> {
+        return this._context;
     }
 
     public get levelOfDetail(): number {
@@ -295,11 +295,11 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public validateBounds(): IEnvelope | undefined {
         if (!this._bounds) {
-            let rect = this.getRectangle(this._level._center, this._level._scale);
+            let rect = this.getRectangle(this._context._center, this._context._scale);
 
             // compute the bounds of tile xy
-            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._level._lod);
-            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._level._lod);
+            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._context._lod);
+            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._context._lod);
 
             this._bounds = Envelope.FromPoints(nw, se);
         }
@@ -336,20 +336,20 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // VIRTUALS
     protected doValidate() {
-        this._level._lod = Math.round(this.levelOfDetail);
-        this.doValidateLevel(this._level);
+        this._context._lod = Math.round(this.levelOfDetail);
+        this.doValidateContext(this._context);
     }
 
-    protected doValidateLevel(level: TileMapLevel<T>) {
+    protected doValidateContext(level: TileMapContext<T>) {
         // current level of detail
         const lod = level.lod;
         // scale corresponding to the decimal part
         let scale = TileMetrics.GetLodScale(this.levelOfDetail);
-        this._level._scale = scale;
+        this._context._scale = scale;
 
         // compute the pixel bounds
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
-        this._level._center = pixelCenterXY;
+        this._context._center = pixelCenterXY;
         const rect = this.getRectangle(pixelCenterXY, scale);
 
         // compute the bounds of tile xy
@@ -417,16 +417,16 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             level.tiles.set(t.address.quadkey, t);
         }
 
-        // filter the tile, selecting only one with content. Null is consider as content.
+        // filter the tile, selecting only one with content.
         added = added.filter((t) => t.content !== undefined && t.content !== null);
         deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
 
         const updateEvent = new UpdateEventArgs(
             this,
             UpdateReason.viewChanged,
-            this._level.lod,
-            this._level.scale,
-            this._level.center,
+            this._context.lod,
+            this._context.scale,
+            this._context.center,
             added.length ? added : undefined,
             deleted.length ? deleted : undefined
         );
@@ -440,10 +440,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
      * @param t the new tile with a valid content
      */
     private onTileReady(t: ITile<T>) {
-        if (t.address.levelOfDetail == this._level.lod) {
-            this._level.tiles.set(t.address.quadkey, t);
+        if (t.address.levelOfDetail == this._context.lod) {
+            this._context.tiles.set(t.address.quadkey, t);
             const added = [t];
-            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._level.lod, this._level.scale, this._level.center, added);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._context.lod, this._context.scale, this._context.center, added);
             this.updateObservable.notifyObservers(updateEvent);
         }
     }

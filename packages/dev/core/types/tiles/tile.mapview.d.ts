@@ -5,7 +5,7 @@ import { Observable } from "../events/events.observable";
 import { IValidable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
-export declare class TileMapLevel<T> {
+export declare class TileMapContext<T> {
     _lod: number;
     _scale: number;
     _center: ICartesian2;
@@ -44,7 +44,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _lod: number;
     _bounds?: IEnvelope;
     _center: IGeo2;
-    _level: TileMapLevel<T>;
+    _context: TileMapContext<T>;
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
@@ -61,7 +61,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get updateObservable(): Observable<UpdateEventArgs<T>>;
     get bounds(): IEnvelope | undefined;
     get datasource(): ITileDatasource<T, ITileAddress>;
-    get level(): TileMapLevel<T>;
+    get context(): TileMapContext<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;
     get azimuth(): number;
@@ -86,7 +86,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onCenterObserverAdded;
     private onUpdateObserverAdded;
     protected doValidate(): void;
-    protected doValidateLevel(level: TileMapLevel<T>): void;
+    protected doValidateContext(level: TileMapContext<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;
     private rotatePointsArround;

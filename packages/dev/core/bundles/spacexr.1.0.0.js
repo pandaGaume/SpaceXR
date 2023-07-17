@@ -1542,20 +1542,20 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/map/controller.canvas.js":
-/*!***************************************!*\
-  !*** ./dist/map/controller.canvas.js ***!
-  \***************************************/
+/***/ "./dist/map/canvas/controller.canvas.js":
+/*!**********************************************!*\
+  !*** ./dist/map/canvas/controller.canvas.js ***!
+  \**********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CanvasController": () => (/* binding */ CanvasController)
 /* harmony export */ });
-/* harmony import */ var _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/tile.mapview */ "./dist/tiles/tile.mapview.js");
-/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
-/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
+/* harmony import */ var _tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../tiles/tile.mapview */ "./dist/tiles/tile.mapview.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../math/math */ "./dist/math/math.js");
+/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
 
 
 
@@ -1640,66 +1640,21 @@ class CanvasController {
 
 /***/ }),
 
-/***/ "./dist/map/geodetic.view.js":
-/*!***********************************!*\
-  !*** ./dist/map/geodetic.view.js ***!
-  \***********************************/
+/***/ "./dist/map/canvas/index.js":
+/*!**********************************!*\
+  !*** ./dist/map/canvas/index.js ***!
+  \**********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "GeodeticGridPainter": () => (/* binding */ GeodeticGridPainter),
-/* harmony export */   "GeodeticGridView": () => (/* binding */ GeodeticGridView),
-/* harmony export */   "GeodeticGridViewOptions": () => (/* binding */ GeodeticGridViewOptions)
-/* harmony export */ });
-/* harmony import */ var _math_math_color__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math.color */ "./dist/math/math.color.js");
-
-class GeodeticGridPainter {
-    paint(ctx, rect, src, bounds) { }
-}
-GeodeticGridPainter.DefaultColor = new _math_math_color__WEBPACK_IMPORTED_MODULE_0__.RGBAColor(38, 222, 255);
-GeodeticGridPainter.Default = new GeodeticGridPainter();
-
-class GeodeticGridViewOptions {
-}
-GeodeticGridViewOptions.Default = new GeodeticGridViewOptions();
-
-class GeodeticGridView {
-    constructor(options) {
-        this._o = { ...GeodeticGridViewOptions.Default, ...options };
-    }
-    invalidateContent(ctx, rect, src) {
-        const envelope = src.view?.bounds;
-        if (envelope) {
-            const painter = (this._o.painters ? this._o.painters[src.levelOfDetail] : GeodeticGridPainter.Default) || GeodeticGridPainter.Default;
-            painter.paint(ctx, rect, src, envelope);
-        }
-    }
-}
-//# sourceMappingURL=geodetic.view.js.map
-
-/***/ }),
-
-/***/ "./dist/map/index.js":
-/*!***************************!*\
-  !*** ./dist/map/index.js ***!
-  \***************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AbstractDisplayMap": () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap),
 /* harmony export */   "CanvasController": () => (/* reexport safe */ _controller_canvas__WEBPACK_IMPORTED_MODULE_2__.CanvasController),
-/* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasTileMap),
-/* harmony export */   "GeodeticGridPainter": () => (/* reexport safe */ _geodetic_view__WEBPACK_IMPORTED_MODULE_3__.GeodeticGridPainter),
-/* harmony export */   "GeodeticGridView": () => (/* reexport safe */ _geodetic_view__WEBPACK_IMPORTED_MODULE_3__.GeodeticGridView),
-/* harmony export */   "GeodeticGridViewOptions": () => (/* reexport safe */ _geodetic_view__WEBPACK_IMPORTED_MODULE_3__.GeodeticGridViewOptions)
+/* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__.CanvasDisplay),
+/* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_canvas__WEBPACK_IMPORTED_MODULE_0__.CanvasTileMap)
 /* harmony export */ });
-/* harmony import */ var _map_canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.canvas */ "./dist/map/map.canvas.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
-/* harmony import */ var _controller_canvas__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./controller.canvas */ "./dist/map/controller.canvas.js");
-/* harmony import */ var _geodetic_view__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geodetic.view */ "./dist/map/geodetic.view.js");
-
+/* harmony import */ var _map_canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.canvas */ "./dist/map/canvas/map.canvas.js");
+/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/canvas/map.canvas.display.js");
+/* harmony import */ var _controller_canvas__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./controller.canvas */ "./dist/map/canvas/controller.canvas.js");
 
 
 
@@ -1707,17 +1662,17 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/map/map.canvas.display.js":
-/*!****************************************!*\
-  !*** ./dist/map/map.canvas.display.js ***!
-  \****************************************/
+/***/ "./dist/map/canvas/map.canvas.display.js":
+/*!***********************************************!*\
+  !*** ./dist/map/canvas/map.canvas.display.js ***!
+  \***********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CanvasDisplay": () => (/* binding */ CanvasDisplay)
 /* harmony export */ });
-/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
+/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
 
 class CanvasDisplay {
     constructor(canvas) {
@@ -1748,20 +1703,20 @@ class CanvasDisplay {
 
 /***/ }),
 
-/***/ "./dist/map/map.canvas.js":
-/*!********************************!*\
-  !*** ./dist/map/map.canvas.js ***!
-  \********************************/
+/***/ "./dist/map/canvas/map.canvas.js":
+/*!***************************************!*\
+  !*** ./dist/map/canvas/map.canvas.js ***!
+  \***************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CanvasTileMap": () => (/* binding */ CanvasTileMap)
 /* harmony export */ });
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
-/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
-/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/map.canvas.display.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map */ "./dist/map/map.js");
+/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../math/math */ "./dist/math/math.js");
+/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/canvas/map.canvas.display.js");
 
 
 
@@ -1817,6 +1772,72 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_0__.AbstractDisplayMap
     }
 }
 //# sourceMappingURL=map.canvas.js.map
+
+/***/ }),
+
+/***/ "./dist/map/geodetic.view.js":
+/*!***********************************!*\
+  !*** ./dist/map/geodetic.view.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "GeodeticGridPainter": () => (/* binding */ GeodeticGridPainter),
+/* harmony export */   "GeodeticGridView": () => (/* binding */ GeodeticGridView),
+/* harmony export */   "GeodeticGridViewOptions": () => (/* binding */ GeodeticGridViewOptions)
+/* harmony export */ });
+/* harmony import */ var _math_math_color__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math.color */ "./dist/math/math.color.js");
+
+class GeodeticGridPainter {
+    paint(ctx, rect, src, bounds) { }
+}
+GeodeticGridPainter.DefaultColor = new _math_math_color__WEBPACK_IMPORTED_MODULE_0__.RGBAColor(38, 222, 255);
+GeodeticGridPainter.Default = new GeodeticGridPainter();
+
+class GeodeticGridViewOptions {
+}
+GeodeticGridViewOptions.Default = new GeodeticGridViewOptions();
+
+class GeodeticGridView {
+    constructor(options) {
+        this._o = { ...GeodeticGridViewOptions.Default, ...options };
+    }
+    invalidateContent(ctx, rect, src) {
+        const envelope = src.view?.bounds;
+        if (envelope) {
+            const painter = (this._o.painters ? this._o.painters[src.levelOfDetail] : GeodeticGridPainter.Default) || GeodeticGridPainter.Default;
+            painter.paint(ctx, rect, src, envelope);
+        }
+    }
+}
+//# sourceMappingURL=geodetic.view.js.map
+
+/***/ }),
+
+/***/ "./dist/map/index.js":
+/*!***************************!*\
+  !*** ./dist/map/index.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "AbstractDisplayMap": () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap),
+/* harmony export */   "CanvasController": () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasController),
+/* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay),
+/* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasTileMap),
+/* harmony export */   "GeodeticGridPainter": () => (/* reexport safe */ _geodetic_view__WEBPACK_IMPORTED_MODULE_2__.GeodeticGridPainter),
+/* harmony export */   "GeodeticGridView": () => (/* reexport safe */ _geodetic_view__WEBPACK_IMPORTED_MODULE_2__.GeodeticGridView),
+/* harmony export */   "GeodeticGridViewOptions": () => (/* reexport safe */ _geodetic_view__WEBPACK_IMPORTED_MODULE_2__.GeodeticGridViewOptions)
+/* harmony export */ });
+/* harmony import */ var _canvas_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./canvas/index */ "./dist/map/canvas/index.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
+/* harmony import */ var _geodetic_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geodetic.view */ "./dist/map/geodetic.view.js");
+
+
+
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -3717,7 +3738,7 @@ class TileMapView {
                     view.onTileNotFound(t);
                 })
                     .catch((reason) => {
-                    console.log(reason);
+                    console.log(`the lookup operation has failed because of ${reason}`);
                 });
             }
         }
@@ -3882,16 +3903,16 @@ class TileWebClient {
         do {
             try {
                 const response = await fetch(url);
+                let content = null;
                 if (response.ok) {
-                    const content = await this._codec.decodeAsync(response);
-                    return new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, content, userArgs);
+                    content = await this._codec.decodeAsync(response);
                 }
-                else if (response.status === 404) {
-                    return new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, null, userArgs);
-                }
+                const r = new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, content, userArgs);
+                r.status = response.status;
+                r.statusText = response.statusText;
+                return r;
             }
             catch (error) {
-                console.error(`Error fetching URL: ${url}`, error);
             }
             const jitter = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.GetRandomInt(0, this._o.initialDelay || 1000);
             await new Promise((resolve) => setTimeout(resolve, delay + jitter));
@@ -4769,10 +4790,11 @@ class WebTileUrlBuilder {
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
         if (this._subdomains) {
             let i = this._i ?? 0;
-            if (i <= this._subdomains.length) {
+            if (i >= this._subdomains.length) {
                 i = 0;
             }
-            str = str.replace("{s}", this._subdomains[i]);
+            const s = this._subdomains[i];
+            str = str.replace("{s}", s);
             this._i = i + 1;
         }
         return str;
@@ -4842,7 +4864,7 @@ var GoogleMap2DLayerCode;
 class GoogleMap2DUrlBuilder extends _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
     constructor(...types) {
         super();
-        this.withSubDomains(["mt1", "mt2", "mt3"])
+        this.withSubDomains(["mt0", "mt1", "mt2", "mt3"])
             .withHost("{s}.google.com")
             .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`);
     }
@@ -5456,6 +5478,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "CachePolicy": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
 /* harmony export */   "CachePolicyBuilder": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
 /* harmony export */   "CanvasController": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasController),
+/* harmony export */   "CanvasDisplay": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasDisplay),
 /* harmony export */   "CanvasTileMap": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.CanvasTileMap),
 /* harmony export */   "Cartesian2": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Cartesian2),
 /* harmony export */   "Cartesian3": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Cartesian3),

@@ -68,14 +68,16 @@ export class TileWebClient<T> implements ITileClient<T> {
         do {
             try {
                 const response = await fetch(url);
+                let content = null;
                 if (response.ok) {
-                    const content = await this._codec.decodeAsync(response);
-                    return new FetchResult<Nullable<T>>(request, content, userArgs);
-                } else if (response.status === 404) {
-                    return new FetchResult<Nullable<T>>(request, null, userArgs);
+                    content = await this._codec.decodeAsync(response);
                 }
-            } catch (error) {
-                console.error(`Error fetching URL: ${url}`, error);
+                const r = new FetchResult<Nullable<T>>(request, content, userArgs);
+                r.status = response.status;
+                r.statusText = response.statusText;
+                return r;
+            } catch (error: any) {
+                // Handle the error here. We have ONLY error.message and error.name
             }
             // Retry after delay using exponential backoff
             const jitter = Scalar.GetRandomInt(0, this._o.initialDelay || 1000); // Random number between 0 and 1000 (milliseconds)

@@ -70,6 +70,8 @@ export declare class FetchResult<T> {
     address: ITileAddress;
     content: T;
     userArgs: Array<unknown>;
+    status?: number;
+    statusText?: string;
     constructor(address: ITileAddress, content: T, userArgs: Array<unknown>);
 }
 export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {

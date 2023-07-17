@@ -1,5 +1,5 @@
 import { IRectangle } from "../geometry/geometry.interfaces";
-import { CanvasController, ICanvasView } from "./controller.canvas";
+import { CanvasController, ICanvasView } from "./canvas/controller.canvas";
 import { RGBAColor } from "../math/math.color";
 import { IEnvelope, Nullable } from "..";
 export declare class GeodeticGridPainter {

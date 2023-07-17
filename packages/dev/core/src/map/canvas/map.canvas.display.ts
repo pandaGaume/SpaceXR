@@ -1,6 +1,6 @@
-import { IMapDisplay } from "./map";
-import { ISize3 } from "../geometry/geometry.interfaces";
-import { Size3 } from "../geometry/geometry.size";
+import { IMapDisplay } from "../map";
+import { ISize3 } from "../../geometry/geometry.interfaces";
+import { Size3 } from "../../geometry/geometry.size";
 
 export class CanvasDisplay implements IMapDisplay {
     public constructor(public canvas: HTMLCanvasElement) {

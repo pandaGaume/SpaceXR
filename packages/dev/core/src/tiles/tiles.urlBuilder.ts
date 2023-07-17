@@ -64,11 +64,12 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
         if (this._subdomains) {
             let i = this._i ?? 0;
-            if (i <= this._subdomains.length) {
+            if (i >= this._subdomains.length) {
                 i = 0;
             }
-            str = str.replace("{s}", this._subdomains[i]);
-            this._i = i+1;
+            const s = this._subdomains[i];
+            str = str.replace("{s}", s);
+            this._i = i + 1;
         }
         return str;
     }

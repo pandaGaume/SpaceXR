@@ -1,10 +1,10 @@
-import { Nullable } from "../types";
-import { Observer } from "../events/events.observable";
-import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tile.mapview";
-import { ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
-import { Scalar } from "../math/math";
-import { Rectangle } from "../geometry/geometry.rectangle";
+import { Nullable } from "../../types";
+import { Observer } from "../../events/events.observable";
+import { TileMapView, UpdateEventArgs, UpdateReason } from "../../tiles/tile.mapview";
+import { ICartesian2, IRectangle } from "../../geometry/geometry.interfaces";
+import { Cartesian2 } from "../../geometry/geometry.cartesian";
+import { Scalar } from "../../math/math";
+import { Rectangle } from "../../geometry/geometry.rectangle";
 
 export interface ICanvasView {
     invalidateContent<V>(ctx: CanvasRenderingContext2D, rect: IRectangle, src: CanvasController<V>): void;

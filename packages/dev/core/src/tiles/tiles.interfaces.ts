@@ -84,6 +84,8 @@ export interface ITileMetricsProvider {
 }
 
 export class FetchResult<T> {
+    status?: number;
+    statusText?: string;
     public constructor(public address: ITileAddress, public content: T, public userArgs: Array<unknown>) {}
 }
 

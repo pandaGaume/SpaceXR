@@ -19,7 +19,7 @@ export class GoogleMap2DUrlBuilder extends WebTileUrlBuilder {
 
     public constructor(...types: (GoogleMap2DLayerCode | string)[]) {
         super();
-        this.withSubDomains(["mt1", "mt2", "mt3"])
+        this.withSubDomains(["mt0", "mt1", "mt2", "mt3"])
             .withHost("{s}.google.com")
             .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`);
     }

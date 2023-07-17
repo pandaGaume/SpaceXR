@@ -1970,10 +1970,18 @@ class AbstractDisplayMap {
                 const key = t.address.quadkey;
                 const old = this._activ.get(key);
                 if (old) {
-                    this._activ.delete(key);
-                    this.onDeleted(key, old);
-                    if (this._removedObservable && this._removedObservable.hasObservers()) {
-                        this._removedObservable.notifyObservers(old);
+                    const mustDelete = true;
+                    if (args.previousInfos) {
+                        const lod = args.previousInfos.lod;
+                        if (old.address.levelOfDetail != lod) {
+                        }
+                    }
+                    if (mustDelete) {
+                        this._activ.delete(key);
+                        this.onDeleted(key, old);
+                        if (this._removedObservable && this._removedObservable.hasObservers()) {
+                            this._removedObservable.notifyObservers(old);
+                        }
                     }
                 }
             }
@@ -3426,6 +3434,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileMapContext": () => (/* binding */ TileMapContext),
 /* harmony export */   "TileMapView": () => (/* binding */ TileMapView),
 /* harmony export */   "UpdateEventArgs": () => (/* binding */ UpdateEventArgs),
+/* harmony export */   "UpdateInfos": () => (/* binding */ UpdateInfos),
 /* harmony export */   "UpdateReason": () => (/* binding */ UpdateReason)
 /* harmony export */ });
 /* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
@@ -3479,13 +3488,19 @@ var UpdateReason;
     UpdateReason[UpdateReason["viewChanged"] = 0] = "viewChanged";
     UpdateReason[UpdateReason["tileReady"] = 1] = "tileReady";
 })(UpdateReason || (UpdateReason = {}));
+class UpdateInfos {
+    constructor(lod, scale, center) {
+        this.lod = lod;
+        this.scale = scale;
+        this.center = center;
+    }
+}
 class UpdateEventArgs extends _events_events_args__WEBPACK_IMPORTED_MODULE_1__.EventArgs {
-    constructor(source, reason, lod, scale, center, added, removed) {
+    constructor(source, reason, infos, oldInfos, added, removed) {
         super(source);
         this._reason = reason;
-        this._lod = lod;
-        this._scale = scale;
-        this._center = center;
+        this._infos = infos;
+        this._previousInfos = oldInfos;
         this._added = added;
         this._removed = removed;
     }
@@ -3498,14 +3513,20 @@ class UpdateEventArgs extends _events_events_args__WEBPACK_IMPORTED_MODULE_1__.E
     get removed() {
         return this._removed;
     }
+    get infos() {
+        return this._infos;
+    }
+    get previousInfos() {
+        return this._previousInfos;
+    }
     get lod() {
-        return this._lod;
+        return this._infos.lod;
     }
     get scale() {
-        return this._scale;
+        return this._infos.scale;
     }
     get center() {
-        return this._center;
+        return this._infos.center;
     }
 }
 class TileMapView {
@@ -3613,7 +3634,7 @@ class TileMapView {
     }
     setZoom(zoom) {
         const lod = _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this.levelOfDetail != lod) {
+        if (this._lod != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
                 const old = this._lod;
                 this._lod = lod;
@@ -3636,10 +3657,10 @@ class TileMapView {
         return this;
     }
     zoomIn(delta) {
-        return this.setZoom(this.levelOfDetail + Math.abs(delta));
+        return this.setZoom(this._lod + Math.abs(delta));
     }
     zoomOut(delta) {
-        return this.setZoom(this.levelOfDetail - Math.abs(delta));
+        return this.setZoom(this._lod - Math.abs(delta));
     }
     translate(tx, ty) {
         if (this._azimuth) {
@@ -3647,7 +3668,7 @@ class TileMapView {
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this.levelOfDetail);
+        const lod = Math.round(this._lod);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -3752,14 +3773,18 @@ class TileMapView {
         }
         added = added.filter((t) => t.content !== undefined && t.content !== null);
         deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
-        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, this._context.lod, this._context.scale, this._context.center, added.length ? added : undefined, deleted.length ? deleted : undefined);
+        const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
+        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newInfos, this._oldInfos, added.length ? added : undefined, deleted.length ? deleted : undefined);
+        this._oldInfos = newInfos;
         this.updateObservable.notifyObservers(updateEvent);
     }
     onTileReady(t) {
         if (t.address.levelOfDetail == this._context.lod) {
             this._context.tiles.set(t.address.quadkey, t);
             const added = [t];
-            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._context.lod, this._context.scale, this._context.center, added);
+            const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, newInfos, this._oldInfos, added);
+            this._oldInfos = newInfos;
             this.updateObservable.notifyObservers(updateEvent);
         }
     }

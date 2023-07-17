@@ -152,10 +152,23 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
                 const key = t.address.quadkey;
                 const old = this._activ.get(key);
                 if (old) {
-                    this._activ.delete(key);
-                    this.onDeleted(key, old);
-                    if (this._removedObservable && this._removedObservable.hasObservers()) {
-                        this._removedObservable.notifyObservers(old);
+                    const mustDelete = true;
+                    
+                    // this is where we may guess the reason it being removed
+                    if (args.previousInfos) {
+                        const lod = args.previousInfos.lod;
+                        if (old.address.levelOfDetail != lod) {
+                            // we changed level. We may keep the tile arround in order to
+                            // allow the UI make a smooth transition
+                        } 
+                    }
+
+                    if (mustDelete) {
+                        this._activ.delete(key);
+                        this.onDeleted(key, old);
+                        if (this._removedObservable && this._removedObservable.hasObservers()) {
+                            this._removedObservable.notifyObservers(old);
+                        }
                     }
                 }
             }

@@ -46,20 +46,22 @@ export enum UpdateReason {
     tileReady,
 }
 
+export class UpdateInfos {
+    public constructor(public lod: number, public scale: number, public center: ICartesian2) {}
+}
+
 export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     _reason: UpdateReason;
     _added?: Array<ITile<T>>;
     _removed?: Array<ITile<T>>;
-    _lod: number;
-    _scale: number;
-    _center: ICartesian2;
+    _previousInfos?: UpdateInfos;
+    _infos: UpdateInfos;
 
-    public constructor(source: TileMapView<T>, reason: UpdateReason, lod: number, scale: number, center: ICartesian2, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
+    public constructor(source: TileMapView<T>, reason: UpdateReason, infos: UpdateInfos, oldInfos?: UpdateInfos, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
         super(source);
         this._reason = reason;
-        this._lod = lod;
-        this._scale = scale;
-        this._center = center;
+        this._infos = infos;
+        this._previousInfos = oldInfos;
         this._added = added;
         this._removed = removed;
     }
@@ -76,14 +78,22 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
         return this._removed;
     }
 
+    public get infos(): UpdateInfos {
+        return this._infos;
+    }
+
+    public get previousInfos(): UpdateInfos | undefined {
+        return this._previousInfos;
+    }
+
     public get lod(): number {
-        return this._lod;
+        return this._infos.lod;
     }
     public get scale(): number {
-        return this._scale;
+        return this._infos.scale;
     }
     public get center(): ICartesian2 {
-        return this._center;
+        return this._infos.center;
     }
 }
 
@@ -119,6 +129,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _sinangle: number;
 
     // interns
+    _oldInfos?: UpdateInfos;
     _valid: boolean = false;
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
 
@@ -242,7 +253,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public setZoom(zoom: number): ITileMapApi {
         const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this.levelOfDetail != lod) {
+        if (this._lod != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
                 const old = this._lod;
                 this._lod = lod;
@@ -267,12 +278,12 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public zoomIn(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this.levelOfDetail + Math.abs(delta));
+        return this.setZoom(this._lod + Math.abs(delta));
     }
 
     public zoomOut(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this.levelOfDetail - Math.abs(delta));
+        return this.setZoom(this._lod - Math.abs(delta));
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
@@ -281,7 +292,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this.levelOfDetail);
+        const lod = Math.round(this._lod);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -420,30 +431,24 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // filter the tile, selecting only one with content.
         added = added.filter((t) => t.content !== undefined && t.content !== null);
         deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
+        const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
 
-        const updateEvent = new UpdateEventArgs(
-            this,
-            UpdateReason.viewChanged,
-            this._context.lod,
-            this._context.scale,
-            this._context.center,
-            added.length ? added : undefined,
-            deleted.length ? deleted : undefined
-        );
+        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newInfos, this._oldInfos, added.length ? added : undefined, deleted.length ? deleted : undefined);
+        this._oldInfos = newInfos;
         this.updateObservable.notifyObservers(updateEvent);
     }
 
     /**
      * This is the place to add the tile to the active list in response to a successful content load.
-     * Additionally, we should also check if any parents or children are no longer being utilized.
-     * This includes parents or children that was used to provide alternative content while asynchronously loading the current tile content.
      * @param t the new tile with a valid content
      */
     private onTileReady(t: ITile<T>) {
         if (t.address.levelOfDetail == this._context.lod) {
             this._context.tiles.set(t.address.quadkey, t);
             const added = [t];
-            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._context.lod, this._context.scale, this._context.center, added);
+            const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, newInfos, this._oldInfos, added);
+            this._oldInfos = newInfos;
             this.updateObservable.notifyObservers(updateEvent);
         }
     }

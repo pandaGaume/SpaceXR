@@ -20,17 +20,24 @@ export declare enum UpdateReason {
     viewChanged = 0,
     tileReady = 1
 }
+export declare class UpdateInfos {
+    lod: number;
+    scale: number;
+    center: ICartesian2;
+    constructor(lod: number, scale: number, center: ICartesian2);
+}
 export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     _reason: UpdateReason;
     _added?: Array<ITile<T>>;
     _removed?: Array<ITile<T>>;
-    _lod: number;
-    _scale: number;
-    _center: ICartesian2;
-    constructor(source: TileMapView<T>, reason: UpdateReason, lod: number, scale: number, center: ICartesian2, added?: Array<ITile<T>>, removed?: Array<ITile<T>>);
+    _previousInfos?: UpdateInfos;
+    _infos: UpdateInfos;
+    constructor(source: TileMapView<T>, reason: UpdateReason, infos: UpdateInfos, oldInfos?: UpdateInfos, added?: Array<ITile<T>>, removed?: Array<ITile<T>>);
     get reason(): UpdateReason;
     get added(): Array<ITile<T>> | undefined;
     get removed(): Array<ITile<T>> | undefined;
+    get infos(): UpdateInfos;
+    get previousInfos(): UpdateInfos | undefined;
     get lod(): number;
     get scale(): number;
     get center(): ICartesian2;
@@ -48,6 +55,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
+    _oldInfos?: UpdateInfos;
     _valid: boolean;
     _cartesianCache: ICartesian2;
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;

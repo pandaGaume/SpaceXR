@@ -3679,10 +3679,11 @@ class TileMapView {
         const rect = this.getRectangle(pixelCenterXY, scale);
         let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
         let seTileXY = this.metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
-        const x0 = nwTileXY.x;
-        const y0 = nwTileXY.y;
-        const x1 = seTileXY.x;
-        const y1 = seTileXY.y;
+        const maxIndex = this.metrics.mapSize(lod) / this.metrics.tileSize - 1;
+        const x0 = Math.max(0, nwTileXY.x);
+        const y0 = Math.max(0, nwTileXY.y);
+        const x1 = Math.min(maxIndex, seTileXY.x);
+        const y1 = Math.min(maxIndex, seTileXY.y);
         const remains = new Array();
         let added = new Array();
         const builder = new _tiles__WEBPACK_IMPORTED_MODULE_9__.TileBuilder().withMetrics(this.metrics);
@@ -4725,12 +4726,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "WebTileUrlBuilder": () => (/* binding */ WebTileUrlBuilder)
 /* harmony export */ });
-class RoundRobinOptions {
-    constructor(f = 0, t = 1) {
-        this.from = f;
-        this.to = t;
-    }
-}
 class WebTileUrlBuilder {
     constructor() { }
     withSecure(v) {
@@ -4757,8 +4752,8 @@ class WebTileUrlBuilder {
         this._extension = v;
         return this;
     }
-    withRoundRobin(from, to) {
-        this._roundRobin = new RoundRobinOptions(from, to);
+    withSubDomains(subdomains) {
+        this._subdomains = subdomains;
         return this;
     }
     buildUrl(a, ...params) {
@@ -4772,17 +4767,15 @@ class WebTileUrlBuilder {
         let str = template.replaceAll("{x}", a.x.toString());
         str = str.replaceAll("{y}", a.y.toString());
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
-        str = str.replace("{s}", this.nextRRIndex().toString());
+        if (this._subdomains) {
+            let i = this._i ?? 0;
+            if (i <= this._subdomains.length) {
+                i = 0;
+            }
+            str = str.replace("{s}", this._subdomains[i]);
+            this._i = i + 1;
+        }
         return str;
-    }
-    nextRRIndex() {
-        if (this._i === undefined) {
-            this._i = this._roundRobin?.from ?? 0;
-        }
-        else if (this._roundRobin) {
-            this._i = this._i == this._roundRobin.to ? this._roundRobin.from : this._i + 1;
-        }
-        return this._i;
     }
 }
 //# sourceMappingURL=tiles.urlBuilder.js.map
@@ -4849,8 +4842,8 @@ var GoogleMap2DLayerCode;
 class GoogleMap2DUrlBuilder extends _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
     constructor(...types) {
         super();
-        this.withRoundRobin(1, 3)
-            .withHost("mt{s}.google.com")
+        this.withSubDomains(["mt1", "mt2", "mt3"])
+            .withHost("{s}.google.com")
             .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`);
     }
 }

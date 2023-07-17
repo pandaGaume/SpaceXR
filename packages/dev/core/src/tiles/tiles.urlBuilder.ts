@@ -1,21 +1,5 @@
 import { ITileAddress, ITileUrlBuilder } from "./tiles.interfaces";
 
-/**
- * The round-robin strategy can be used for tile servers to distribute the load among multiple servers.
- * Typically, a DNS round-robin configuration is set up to resolve the domain name for the tile server
- * to multiple IP addresses that correspond to different servers. When a client requests a tile,
- * the DNS resolver returns one of the IP addresses in a round-robin fashion, so each server receives
- * a roughly equal share of the load.
- */
-class RoundRobinOptions {
-    from;
-    to;
-    public constructor(f = 0, t = 1) {
-        this.from = f;
-        this.to = t;
-    }
-}
-
 export class WebTileUrlBuilder implements ITileUrlBuilder {
     // options
     _host?: string;
@@ -24,8 +8,8 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
     _path?: string;
     _query?: string;
     _extension?: string;
-    _roundRobin?: RoundRobinOptions;
 
+    _subdomains?: string[];
     _i?: number; // cached round robin value
 
     public constructor() {}
@@ -54,8 +38,15 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
         this._extension = v;
         return this;
     }
-    public withRoundRobin(from: number, to: number): WebTileUrlBuilder {
-        this._roundRobin = new RoundRobinOptions(from, to);
+    /**
+     * The subdomains can be used for tile servers to distribute the load among multiple servers.
+     * Typically, a DNS round-robin configuration is set up to resolve the domain name for the tile server
+     * to multiple IP addresses that correspond to different servers. When a client requests a tile,
+     * the DNS resolver returns one of the IP addresses in a round-robin fashion, so each server receives
+     * a roughly equal share of the load.
+     */
+    public withSubDomains(subdomains: string[]): WebTileUrlBuilder {
+        this._subdomains = subdomains;
         return this;
     }
 
@@ -71,21 +62,14 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
         let str = template.replaceAll("{x}", a.x.toString());
         str = str.replaceAll("{y}", a.y.toString());
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
-        str = str.replace("{s}", this.nextRRIndex().toString());
-        return str;
-    }
-
-    /**
-     * this function is used by the round robin pattern to get the next index used as part of sub domains.
-     * @returnsthe next index of the round robin, used as part of sub domains.
-     */
-    private nextRRIndex(): number {
-        if (this._i === undefined) {
-            this._i = this._roundRobin?.from ?? 0;
-        } else if (this._roundRobin) {
-            this._i = this._i == this._roundRobin.to ? this._roundRobin.from : this._i + 1;
+        if (this._subdomains) {
+            let i = this._i ?? 0;
+            if (i <= this._subdomains.length) {
+                i = 0;
+            }
+            str = str.replace("{s}", this._subdomains[i]);
+            this._i = i+1;
         }
-
-        return this._i;
+        return str;
     }
 }

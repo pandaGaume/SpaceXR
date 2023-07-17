@@ -1,9 +1,4 @@
 import { ITileAddress, ITileUrlBuilder } from "./tiles.interfaces";
-declare class RoundRobinOptions {
-    from: number;
-    to: number;
-    constructor(f?: number, t?: number);
-}
 export declare class WebTileUrlBuilder implements ITileUrlBuilder {
     _host?: string;
     _port?: number;
@@ -11,7 +6,7 @@ export declare class WebTileUrlBuilder implements ITileUrlBuilder {
     _path?: string;
     _query?: string;
     _extension?: string;
-    _roundRobin?: RoundRobinOptions;
+    _subdomains?: string[];
     _i?: number;
     constructor();
     withSecure(v: boolean): WebTileUrlBuilder;
@@ -20,8 +15,6 @@ export declare class WebTileUrlBuilder implements ITileUrlBuilder {
     withPath(v: string): WebTileUrlBuilder;
     withQuery(v: string): WebTileUrlBuilder;
     withExtension(v: string): WebTileUrlBuilder;
-    withRoundRobin(from: number, to: number): WebTileUrlBuilder;
+    withSubDomains(subdomains: string[]): WebTileUrlBuilder;
     buildUrl(a: ITileAddress, ...params: unknown[]): string;
-    private nextRRIndex;
 }
-export {};

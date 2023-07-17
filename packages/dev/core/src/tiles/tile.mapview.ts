@@ -356,10 +356,11 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
         let seTileXY = this.metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
 
-        const x0 = nwTileXY.x;
-        const y0 = nwTileXY.y;
-        const x1 = seTileXY.x;
-        const y1 = seTileXY.y;
+        const maxIndex = this.metrics.mapSize(lod) / this.metrics.tileSize - 1;
+        const x0 = Math.max(0, nwTileXY.x);
+        const y0 = Math.max(0, nwTileXY.y);
+        const x1 = Math.min(maxIndex, seTileXY.x);
+        const y1 = Math.min(maxIndex, seTileXY.y);
 
         const remains = new Array<ITile<T>>();
         let added = new Array<ITile<T>>();

@@ -2129,6 +2129,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "AxialTilt": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.AxialTilt),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.BlobTileCodec),
 /* harmony export */   "Box": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Box),
+/* harmony export */   "BufferView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.BufferView),
 /* harmony export */   "CacheEntry": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntry),
 /* harmony export */   "CacheEntryOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntryOptions),
 /* harmony export */   "CacheEntryOptionsBuilder": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntryOptionsBuilder),
@@ -4080,6 +4081,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AbstractTileMetrics": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.AbstractTileMetrics),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.BlobTileCodec),
+/* harmony export */   "BufferView": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_9__.BufferView),
 /* harmony export */   "CellCoordinateReference": () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.CellCoordinateReference),
 /* harmony export */   "DEMMetaData": () => (/* reexport safe */ _tiles_dem__WEBPACK_IMPORTED_MODULE_6__.DEMMetaData),
 /* harmony export */   "DEMTile": () => (/* reexport safe */ _tiles_dem__WEBPACK_IMPORTED_MODULE_6__.DEMTile),
@@ -5146,6 +5148,7 @@ class FetchResult {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BufferView": () => (/* binding */ BufferView),
 /* harmony export */   "Tile": () => (/* binding */ Tile),
 /* harmony export */   "TileBuilder": () => (/* binding */ TileBuilder)
 /* harmony export */ });
@@ -5179,6 +5182,15 @@ class TileBuilder {
             t.rect = Tile.BuildBounds(t.address, this._m);
         }
         return t;
+    }
+}
+class BufferView {
+    constructor(data, xoffset, yoffset, width, height) {
+        this.data = data;
+        this.xoffset = xoffset;
+        this.yoffset = yoffset;
+        this.width = width;
+        this.height = height;
     }
 }
 class Tile extends _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
@@ -6729,6 +6741,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "AxialTilt": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.AxialTilt),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.BlobTileCodec),
 /* harmony export */   "Box": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Box),
+/* harmony export */   "BufferView": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.BufferView),
 /* harmony export */   "CacheEntry": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CacheEntry),
 /* harmony export */   "CacheEntryOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CacheEntryOptions),
 /* harmony export */   "CacheEntryOptionsBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CacheEntryOptionsBuilder),

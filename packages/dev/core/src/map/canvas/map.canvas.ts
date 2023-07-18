@@ -56,7 +56,7 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
                 if (t.content && t.rect) {
                     const x = t.rect.x - center.x;
                     const y = t.rect.y - center.y;
-                    ctx.drawImage(t.content, x, y);
+                    ctx.drawImage(<HTMLImageElement>t.content, x, y);
                 }
             }
             ctx.restore();

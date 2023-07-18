@@ -153,14 +153,15 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
                 const old = this._activ.get(key);
                 if (old) {
                     const mustDelete = true;
-                    
+
                     // this is where we may guess the reason it being removed
                     if (args.previousInfos) {
                         const lod = args.previousInfos.lod;
                         if (old.address.levelOfDetail != lod) {
                             // we changed level. We may keep the tile arround in order to
                             // allow the UI make a smooth transition
-                        } 
+                            // Note the active tile are listening to the added and removed tile to update they neigbors, parent and child list.
+                        }
                     }
 
                     if (mustDelete) {

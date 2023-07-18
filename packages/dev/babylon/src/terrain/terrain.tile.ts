@@ -1,8 +1,7 @@
 import { AbstractMesh } from "@babylonjs/core";
 import { IEnvelope } from "core/geography";
 import { IRectangle } from "core/geometry";
-import { ITile, ITileAddress, ITileProxy } from "core/tiles/tiles.interfaces";
-import { Nullable } from "core/types";
+import { ITile, ITileAddress, ITileProxy, TileContent } from "core/tiles/tiles.interfaces";
 
 export class TerrainTile<V> implements ITile<V>, ITileProxy<V> {
     _delegate: ITile<V>;
@@ -27,7 +26,7 @@ export class TerrainTile<V> implements ITile<V>, ITileProxy<V> {
     public get key(): string {
         return this._delegate.key;
     }
-    public get content(): Nullable<V> | undefined {
+    public get content(): TileContent<V> | undefined {
         return this._delegate.content;
     }
     public get rect(): IRectangle | undefined {

@@ -6,11 +6,20 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
+export interface IBufferView<T> {
+    xoffset?: number;
+    yoffset?: number;
+    width?: number;
+    height?: number;
+    data?: T;
+}
+export type TileContent<T> = Nullable<Array<Nullable<T>> | T>;
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
-    content?: Nullable<T>;
+    content?: TileContent<T>;
     rect?: IRectangle;
     key: string;
+    neighborKeys?: string;
 }
 export interface ITileProxy<T> {
     delegate: ITile<T>;

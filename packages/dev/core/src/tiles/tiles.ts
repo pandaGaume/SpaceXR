@@ -2,15 +2,14 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
-import { Nullable } from "../types";
+import { IBufferView, ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
-    _d?: Nullable<T>;
+    _d?: TileContent<T>;
     _m?: ITileMetrics;
 
     public withAddress(a: ITileAddress): ITileBuilder<T> {
@@ -18,7 +17,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         return this;
     }
 
-    public withData(d: Nullable<T>): ITileBuilder<T> {
+    public withData(d: TileContent<T>): ITileBuilder<T> {
         this._d = d;
         return this;
     }
@@ -35,6 +34,10 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         }
         return t;
     }
+}
+
+export class BufferView<T> implements IBufferView<T> {
+    public constructor(public data?: T, public xoffset?: number, public yoffset?: number, public width?: number, public height?: number) {}
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {
@@ -61,11 +64,11 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    private _value?: Nullable<T>;
+    private _value?: TileContent<T>;
     private _env?: IEnvelope;
     private _rect?: IRectangle;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data?: Nullable<T>) {
+    public constructor(x: number, y: number, levelOfDetail: number, data?: TileContent<T>) {
         super(x, y, levelOfDetail);
         this._value = data;
     }
@@ -77,11 +80,11 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return this.address.quadkey;
     }
 
-    public get content(): Nullable<T> | undefined {
+    public get content(): TileContent<T> | undefined {
         return this._value;
     }
 
-    public set content(v: Nullable<T> | undefined) {
+    public set content(v: TileContent<T> | undefined) {
         this._value = v;
     }
 

@@ -1,5 +1,5 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { IBufferView, ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./tiles.address";
 export declare class TileBuilder<T> implements ITileBuilder<T> {
@@ -11,13 +11,10 @@ export declare class TileBuilder<T> implements ITileBuilder<T> {
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
-export declare class BufferView<T> implements IBufferView<T> {
-    data?: T | undefined;
-    xoffset?: number | undefined;
-    yoffset?: number | undefined;
-    width?: number | undefined;
-    height?: number | undefined;
-    constructor(data?: T | undefined, xoffset?: number | undefined, yoffset?: number | undefined, width?: number | undefined, height?: number | undefined);
+export declare class BufferView<T> implements ITileContentView<T, IRectangle> {
+    data: T;
+    options: IRectangle;
+    constructor(data: T, options: IRectangle);
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {
     static Builder<T>(): ITileBuilder<T>;

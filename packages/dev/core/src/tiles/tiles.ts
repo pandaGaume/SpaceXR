@@ -2,7 +2,7 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { IBufferView, ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
@@ -36,8 +36,8 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     }
 }
 
-export class BufferView<T> implements IBufferView<T> {
-    public constructor(public data?: T, public xoffset?: number, public yoffset?: number, public width?: number, public height?: number) {}
+export class BufferView<T> implements ITileContentView<T, IRectangle> {
+    public constructor(public data: T, public options: IRectangle) {}
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {

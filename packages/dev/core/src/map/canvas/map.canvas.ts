@@ -1,4 +1,4 @@
-import { ITile, ITileAddress, ITileDatasource } from "../../tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileContentView, ITileDatasource } from "../../tiles/tiles.interfaces";
 import { AbstractDisplayMap } from "../map";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { IRectangle } from "../../geometry/geometry.interfaces";
@@ -6,10 +6,12 @@ import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { CanvasDisplay } from "./map.canvas.display";
 
-export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HTMLImageElement>, CanvasDisplay> {
+type TileContentType = ITileContentView<HTMLImageElement, IRectangle> | HTMLImageElement;
+
+export class CanvasTileMap extends AbstractDisplayMap<TileContentType, ITile<TileContentType>, CanvasDisplay> {
     _observer: ResizeObserver;
 
-    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<HTMLImageElement, ITileAddress>, center?: IGeo2, lod?: number) {
+    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<TileContentType, ITileAddress>, center?: IGeo2, lod?: number) {
         super(new CanvasDisplay(canvas), datasource, center, lod);
         this._observer = new ResizeObserver(() => {
             this.invalidateSize(canvas.width, canvas.height);
@@ -17,10 +19,10 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
         this._observer.observe(canvas);
     }
 
-    protected onDeleted(key: string, tile: ITile<HTMLImageElement>): void {}
-    protected onAdded(key: string, tile: ITile<HTMLImageElement>): void {}
+    protected onDeleted(key: string, tile: ITile<TileContentType>): void {}
+    protected onAdded(key: string, tile: ITile<TileContentType>): void {}
 
-    protected invalidateTiles(added: ITile<HTMLImageElement>[] | undefined, removed: ITile<HTMLImageElement>[] | undefined): void {
+    protected invalidateTiles(added: ITile<TileContentType>[] | undefined, removed: ITile<TileContentType>[] | undefined): void {
         if (added) {
             const ctx = this._display.getContext();
             if (ctx) {
@@ -39,7 +41,7 @@ export class CanvasTileMap extends AbstractDisplayMap<HTMLImageElement, ITile<HT
         }
     }
 
-    private invalidate(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<HTMLImageElement>> | Array<ITile<HTMLImageElement>>) {
+    private invalidate(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<TileContentType>> | Array<ITile<TileContentType>>) {
         if (ctx) {
             const scale = this._scale;
             const center = this._center;

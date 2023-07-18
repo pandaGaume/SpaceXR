@@ -12,12 +12,14 @@ export interface ITileAddress extends ICartesian2 {
     quadkey: string;
 }
 
-export interface IBufferView<T> {
-    xoffset?: number;
-    yoffset?: number;
-    width?: number;
-    height?: number;
-    data?: T;
+export interface ITileContentView<T,O> {
+    options:O;
+    data: Nullable<T>;
+}
+
+export function isContentView<T,O>(b: unknown): b is ITileContentView<T,O> {
+    if (typeof b !== "object" || b === null) return false;
+    return (<any>b).options !== undefined && (<any>b).data !== undefined;
 }
 
 export type TileContent<T> = Nullable<Array<Nullable<T>> | T>;

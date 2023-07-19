@@ -1,6 +1,6 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference, ITileSection } from "./tiles.interfaces";
 import { Nullable } from "../types";
 export declare class TileMetricsOptions implements ITileMetricsOptions {
     static DefaultTileSize: number;
@@ -53,6 +53,7 @@ export declare class TileMetricsOptionsBuilder {
 export declare class TileMetrics {
     static GetLodScale(lod: number): number;
     static ToParentKey(key: string): string;
+    static ToSection(key: string, size?: number): Nullable<ITileSection>;
     static ToChildsKey(key: string): string[];
     static ToNeigborsKey(key: string): Nullable<string>[];
     static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[];

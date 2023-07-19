@@ -23,7 +23,7 @@ export declare class TileView<T> implements ITileContentView<T> {
     data: T;
     source: Nullable<ITileSection>;
     target: Nullable<ITileSection>;
-    constructor(data: T, source: Nullable<ITileSection>, target: Nullable<ITileSection>);
+    constructor(data: T, source?: Nullable<ITileSection>, target?: Nullable<ITileSection>);
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {
     static Builder<T>(): ITileBuilder<T>;

@@ -20,7 +20,7 @@ export interface ITileContentView<T> {
     data: Nullable<T>;
 }
 
-export function isTileContentView<T>(b: unknown): b is ITileContentView<T> {
+export function IsTileContentView<T>(b: unknown): b is ITileContentView<T> {
     if (typeof b !== "object" || b === null) return false;
     return (<any>b).source !== undefined && (<any>b).target !== undefined && (<any>b).data !== undefined;
 }

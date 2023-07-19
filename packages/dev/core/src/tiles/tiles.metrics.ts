@@ -1,6 +1,6 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference, ITileSection } from "./tiles.interfaces";
 import { TileAddress } from "./tiles.address";
 import { Nullable } from "../types";
 
@@ -129,6 +129,29 @@ export class TileMetrics {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
 
+    public static ToSection(key: string, size?: number): Nullable<ITileSection> {
+        if (key === null || key === undefined || key.length <= 1) {
+            return null;
+        }
+        const c = key.charAt(key.length - 1);
+        const ts = (size ?? TileMetricsOptions.DefaultTileSize) / 2;
+        let s: ITileSection = { x: 0, y: 0, width: ts, height: ts };
+        switch (c) {
+            case "1": {
+                s.x = ts;
+                break;
+            }
+            case "2": {
+                s.y = ts;
+                break;
+            }
+            case "3": {
+                s.x = s.y = ts;
+                break;
+            }
+        }
+        return s;
+    }
     public static ToChildsKey(key: string): string[] {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];

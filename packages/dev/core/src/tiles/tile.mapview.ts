@@ -1,6 +1,6 @@
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult } from "./tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult, IsTileContentView } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
 import { IValidable, Nullable } from "../types";
@@ -10,7 +10,7 @@ import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
-import { TileBuilder } from "./tiles";
+import { TileBuilder, TileView } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
 import { Cartesian2, Envelope } from "..";
 
@@ -396,6 +396,40 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 // we need to create the tile.
                 t = builder.withAddress(a).build();
                 this._cache.set(key, t);
+                // set the temporary tile view
+                // 1 - zoom in : use the parent and tile section
+                // 2 - zoom out : use the childrens
+                // 3 - empty tile - see options
+                if (this._oldInfos && this._oldInfos.lod != lod) {
+                    if (this._oldInfos.lod < lod) {
+                        // zoom in
+                        const parentKey = TileMetrics.ToParentKey(key);
+                        const parent = this._cache.get(parentKey);
+                        if (parent && parent.content) {
+                            const section = TileMetrics.ToSection(key, this.metrics.tileSize);
+                            t.content = [new TileView<T>(<T>parent.content[0], section)];
+                            added.push(t);
+                        }
+                    } else {
+                        // zoom out
+                        const childKeys = TileMetrics.ToChildsKey(key);
+                        t.content = childKeys.map((k) => {
+                            const child = this._cache.get(k);
+                            // TODO : filter the tile with the actual rectangle.
+                            if (!child || !child.content) {
+                                return null;
+                            }
+                            const section = TileMetrics.ToSection(k, this.metrics.tileSize);
+                            const content = child.content[0];
+                            if (IsTileContentView(content)) {
+                                return null;
+                            }
+                            return new TileView<T>(<T>content, null, section);
+                        });
+                        added.push(t);
+                    }
+                }
+
                 // and retreive the content.
                 this._datasource
                     .fetchAsync(a, this, t)

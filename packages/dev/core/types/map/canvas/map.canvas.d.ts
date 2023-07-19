@@ -1,15 +1,15 @@
-import { ITile, ITileAddress, ITileContentView, ITileDatasource } from "../../tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource } from "../../tiles/tiles.interfaces";
 import { AbstractDisplayMap } from "../map";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { IRectangle } from "../../geometry/geometry.interfaces";
 import { CanvasDisplay } from "./map.canvas.display";
-type TileContentType = ITileContentView<HTMLImageElement, IRectangle> | HTMLImageElement;
-export declare class CanvasTileMap extends AbstractDisplayMap<TileContentType, ITile<TileContentType>, CanvasDisplay> {
+type CanvasTileContentType = HTMLImageElement;
+export declare class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITile<CanvasTileContentType>, CanvasDisplay> {
     _observer: ResizeObserver;
-    constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<TileContentType, ITileAddress>, center?: IGeo2, lod?: number);
-    protected onDeleted(key: string, tile: ITile<TileContentType>): void;
-    protected onAdded(key: string, tile: ITile<TileContentType>): void;
-    protected invalidateTiles(added: ITile<TileContentType>[] | undefined, removed: ITile<TileContentType>[] | undefined): void;
+    constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number);
+    protected onDeleted(key: string, tile: ITile<CanvasTileContentType>): void;
+    protected onAdded(key: string, tile: ITile<CanvasTileContentType>): void;
+    protected invalidateTiles(added: ITile<CanvasTileContentType>[] | undefined, removed: ITile<CanvasTileContentType>[] | undefined): void;
     protected invalidateDisplay(rect?: IRectangle): void;
     private invalidate;
 }

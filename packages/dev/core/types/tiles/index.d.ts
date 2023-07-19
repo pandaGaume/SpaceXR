@@ -4,7 +4,6 @@ export * from "./tiles.metrics";
 export * from "./tiles.client";
 export * from "./tiles.codecs.image";
 export * from "./tiles.codecs";
-export * from "./tiles.dem";
 export * from "./tiles.geography";
 export * from "./vendors/index";
 export * from "./tiles";

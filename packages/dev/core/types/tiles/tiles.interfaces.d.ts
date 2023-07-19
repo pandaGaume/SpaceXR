@@ -1,20 +1,23 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export interface ITileContentView<T, O> {
-    options: O;
+export interface ITileSection extends ICartesian2, ISize2 {
+}
+export interface ITileContentView<T> {
+    source: Nullable<ITileSection>;
+    target: Nullable<ITileSection>;
     data: Nullable<T>;
 }
-export declare function isContentView<T, O>(b: unknown): b is ITileContentView<T, O>;
-export type TileContent<T> = Nullable<Array<Nullable<T>> | T>;
+export declare function isTileContentView<T>(b: unknown): b is ITileContentView<T>;
+export type TileContent<T> = Nullable<Array<Nullable<T | ITileContentView<T>>>>;
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
-    content?: TileContent<T>;
+    content: TileContent<T>;
     rect?: IRectangle;
     key: string;
     neighborKeys?: string;
@@ -24,7 +27,7 @@ export interface ITileProxy<T> {
 }
 export interface ITileBuilder<T> {
     withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: Nullable<T>): ITileBuilder<T>;
+    withData(d: TileContent<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }

@@ -404,7 +404,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                         const t = <ITile<T>>result.userArgs[1];
                         if (result.content) {
                             // we have the content of the tile.
-                            t.content = result.content;
+                            t.content = [result.content];
                             view.onTileReady(t);
                             return;
                         }

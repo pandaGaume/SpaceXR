@@ -423,6 +423,12 @@
                     }
                 };
 
+                var getAngle = function (x, y) {
+                    var angle = Math.atan2(y, x);
+                    var degrees = (180 * angle) / Math.PI;
+                    return (360 + Math.round(degrees)) % 360;
+                };
+
                 var pointerMove = function (pointerInfo) {
                     if (startingPixel) {
                         const current = getDisplayPosition();
@@ -438,7 +444,8 @@
                                     break;
                                 }
                                 case 2: {
-                                    map.rotate(diff.x);
+                                    const l = diff.x;
+                                    map.rotate(l);
                                     updateCompassRotation(map.azimuth);
                                     break;
                                 }

@@ -52,7 +52,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _datasource: ITileDatasource<T, ITileAddress>;
     _w: number;
     _h: number;
-    _lod: number;
+    _lodf: number;
     _bounds?: IEnvelope;
     _center: IGeo2;
     _context: TileMapContext<T>;
@@ -75,7 +75,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get bounds(): IEnvelope | undefined;
     get datasource(): ITileDatasource<T, ITileAddress>;
     get context(): TileMapContext<T>;
-    get levelOfDetail(): number;
+    get levelOfDetailF(): number;
     get center(): IGeo2;
     get azimuth(): number;
     get metrics(): ITileMetrics;

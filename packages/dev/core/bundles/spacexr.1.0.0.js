@@ -3564,7 +3564,7 @@ class TileMapView {
     constructor(datasource, width, height, center, lod, cache) {
         this._w = 0;
         this._h = 0;
-        this._lod = 0;
+        this._lodf = 0;
         this._center = _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero();
         this._valid = false;
         this._cartesianCache = ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
@@ -3602,8 +3602,8 @@ class TileMapView {
     get context() {
         return this._context;
     }
-    get levelOfDetail() {
-        return this._lod;
+    get levelOfDetailF() {
+        return this._lodf;
     }
     get center() {
         return this._center;
@@ -3663,15 +3663,15 @@ class TileMapView {
     }
     setZoom(zoom) {
         const lod = _math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this._lod != lod) {
+        if (this._lodf != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lod;
-                this._lod = lod;
+                const old = this._lodf;
+                this._lodf = lod;
                 const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
             }
             else {
-                this._lod = lod;
+                this._lodf = lod;
             }
             this.invalidate();
         }
@@ -3686,10 +3686,10 @@ class TileMapView {
         return this;
     }
     zoomIn(delta) {
-        return this.setZoom(this._lod + Math.abs(delta));
+        return this.setZoom(this._lodf + Math.abs(delta));
     }
     zoomOut(delta) {
-        return this.setZoom(this._lod - Math.abs(delta));
+        return this.setZoom(this._lodf - Math.abs(delta));
     }
     translate(tx, ty) {
         if (this._azimuth) {
@@ -3697,7 +3697,7 @@ class TileMapView {
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this._lod);
+        const lod = Math.round(this._lodf);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -3738,12 +3738,12 @@ class TileMapView {
     onCenterObserverAdded(observer) { }
     onUpdateObserverAdded(observer) { }
     doValidate() {
-        this._context._lod = Math.round(this.levelOfDetail);
+        this._context._lod = Math.round(this.levelOfDetailF);
         this.doValidateContext(this._context);
     }
     doValidateContext(level) {
         const lod = level.lod;
-        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.GetLodScale(this.levelOfDetail);
+        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.GetLodScale(this.levelOfDetailF);
         this._context._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         this._context._center = pixelCenterXY;

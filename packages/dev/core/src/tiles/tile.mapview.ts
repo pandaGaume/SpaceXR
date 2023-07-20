@@ -125,7 +125,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // current navigation parameters
     _w: number = 0;
     _h: number = 0;
-    _lod: number = 0;
+    _lodf: number = 0;
     _bounds?: IEnvelope;
     _center: IGeo2 = Geo2.Zero();
     _context: TileMapContext<T>;
@@ -187,8 +187,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._context;
     }
 
-    public get levelOfDetail(): number {
-        return this._lod;
+    public get levelOfDetailF(): number {
+        return this._lodf;
     }
 
     public get center(): IGeo2 {
@@ -259,14 +259,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public setZoom(zoom: number): ITileMapApi {
         const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this._lod != lod) {
+        if (this._lodf != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lod;
-                this._lod = lod;
+                const old = this._lodf;
+                this._lodf = lod;
                 const e = new PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
             } else {
-                this._lod = lod;
+                this._lodf = lod;
             }
             this.invalidate();
         }
@@ -284,12 +284,12 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public zoomIn(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this._lod + Math.abs(delta));
+        return this.setZoom(this._lodf + Math.abs(delta));
     }
 
     public zoomOut(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this._lod - Math.abs(delta));
+        return this.setZoom(this._lodf - Math.abs(delta));
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
@@ -298,7 +298,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this._lod);
+        const lod = Math.round(this._lodf);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -353,7 +353,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // VIRTUALS
     protected doValidate() {
-        this._context._lod = Math.round(this.levelOfDetail);
+        this._context._lod = Math.round(this.levelOfDetailF);
         this.doValidateContext(this._context);
     }
 
@@ -361,7 +361,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // current level of detail
         const lod = level.lod;
         // scale corresponding to the decimal part
-        let scale = TileMetrics.GetLodScale(this.levelOfDetail);
+        let scale = TileMetrics.GetLodScale(this.levelOfDetailF);
         this._context._scale = scale;
 
         // compute the pixel bounds

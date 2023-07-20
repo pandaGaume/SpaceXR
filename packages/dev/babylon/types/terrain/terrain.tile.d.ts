@@ -11,7 +11,7 @@ export declare class TerrainTile<V> implements ITile<V>, ITileProxy<V> {
     set surface(v: AbstractMesh | undefined);
     get address(): ITileAddress;
     get key(): string;
-    get content(): TileContent<V> | undefined;
+    get content(): TileContent<V>;
     get rect(): IRectangle | undefined;
     get bounds(): IEnvelope | undefined;
     dispose(): TerrainTile<V>;

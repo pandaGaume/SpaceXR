@@ -59,7 +59,7 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
                     const x = t.rect.x - center.x;
                     const y = t.rect.y - center.y;
                     const contents = t.content;
-                    if (contents.length) {
+                    if (contents?.length) {
                         for (const item of contents) {
                             if (item) {
                                 if (item instanceof HTMLImageElement) {

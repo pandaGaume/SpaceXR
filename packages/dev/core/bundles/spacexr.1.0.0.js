@@ -1765,7 +1765,7 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_0__.AbstractDisplayMap
                     const x = t.rect.x - center.x;
                     const y = t.rect.y - center.y;
                     const contents = t.content;
-                    if (contents.length) {
+                    if (contents?.length) {
                         for (const item of contents) {
                             if (item) {
                                 if (item instanceof HTMLImageElement) {
@@ -3451,6 +3451,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "LODTransitionMode": () => (/* binding */ LODTransitionMode),
 /* harmony export */   "TileMapContext": () => (/* binding */ TileMapContext),
 /* harmony export */   "TileMapView": () => (/* binding */ TileMapView),
 /* harmony export */   "UpdateEventArgs": () => (/* binding */ UpdateEventArgs),
@@ -3551,6 +3552,11 @@ class UpdateEventArgs extends _events_events_args__WEBPACK_IMPORTED_MODULE_1__.E
         return this._infos.center;
     }
 }
+var LODTransitionMode;
+(function (LODTransitionMode) {
+    LODTransitionMode[LODTransitionMode["OFF"] = 0] = "OFF";
+    LODTransitionMode[LODTransitionMode["LINEAR"] = 1] = "LINEAR";
+})(LODTransitionMode || (LODTransitionMode = {}));
 class TileMapView {
     static ClampAzimuth(a) {
         return ((a % 360) + 360) % 360;
@@ -3562,6 +3568,7 @@ class TileMapView {
         this._center = _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero();
         this._valid = false;
         this._cartesianCache = ___WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
+        this._lodTransition = LODTransitionMode.LINEAR;
         this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_3__.MemoryCache();
         this._datasource = datasource;
         this.invalidateSize(width, height).setView(center, lod);
@@ -3768,7 +3775,7 @@ class TileMapView {
                 }
                 t = builder.withAddress(a).build();
                 this._cache.set(key, t);
-                if (this._oldInfos && this._oldInfos.lod != lod) {
+                if (this._lodTransition == LODTransitionMode.LINEAR && this._oldInfos && this._oldInfos.lod != lod) {
                     if (this._oldInfos.lod < lod) {
                         const parentKey = _tiles_metrics__WEBPACK_IMPORTED_MODULE_8__.TileMetrics.ToParentKey(key);
                         const parent = this._cache.get(parentKey);

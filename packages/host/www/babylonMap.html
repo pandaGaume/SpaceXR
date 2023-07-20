@@ -293,7 +293,7 @@
                         m.instancedBuffers.layerIds = new BABYLON.Vector4(0, -1, -1, -1);
                         loadLayer(t, layerClient, map);
 
-                        const c = t.content;
+                        const c = t.content[0];
                         // add instance attributes
                         m.instancedBuffers.demInfos = new BABYLON.Vector4(c.min.z, c.max.z, c.delta, c.mean);
                         const elevationArea = elevationSampler.reserveArea();

@@ -3,7 +3,7 @@ import { AbstractMesh, Material, Mesh, Nullable, Scene, Tools, Vector3, VertexDa
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
-import { ITile, ITileAddress, ITileDatasource } from "core/tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
 import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { Cartesian3 } from "core/geometry/geometry.cartesian";
@@ -11,6 +11,7 @@ import { Cartesian3 } from "core/geometry/geometry.cartesian";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
+import { LODTransitionMode } from "core/tiles/tile.mapview";
 
 export class SurfaceTileMapOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -90,6 +91,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(scene);
+        this._view._lodTransition = LODTransitionMode.OFF;
     }
 
     public get template(): Mesh {
@@ -197,12 +199,25 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
         const offset = this._offset || Vector3.Zero();
         for (const t of tiles) {
-            if (t.content && t.rect && t.surface) {
-                // this is the rect expressed in "texel" or "pixel"
-                const c = t.rect.center;
-                t.surface.position.x = c.x - center.x + offset.x;
-                t.surface.position.y = c.y - center.y + offset.y;
-                t.surface.position.z = offset.z;
+            const contents = t.content;
+            if (contents?.length) {
+                if (t.rect && t.surface) {
+                    for (const item of contents) {
+                        if (item) {
+                            if (IsTileContentView<V>(item)) {
+                                // never happen while Transition mode is OFF
+                                continue;
+                            }
+                            // this is the rect expressed in "texel" or "pixel"
+                            const c = t.rect.center;
+                            const x = c.x - center.x + offset.x;
+                            const y = c.y - center.y + offset.y;
+                            t.surface.position.x = x;
+                            t.surface.position.y = y;
+                            t.surface.position.z = offset.z;
+                        }
+                    }
+                }
             }
         }
     }

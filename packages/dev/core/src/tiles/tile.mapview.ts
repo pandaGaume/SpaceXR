@@ -97,6 +97,11 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     }
 }
 
+export enum LODTransitionMode {
+    OFF = 0,
+    LINEAR = 1,
+}
+
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
@@ -132,6 +137,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _oldInfos?: UpdateInfos;
     _valid: boolean = false;
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
+    _lodTransition: LODTransitionMode = LODTransitionMode.LINEAR;
 
     // event
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
@@ -396,11 +402,12 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 // we need to create the tile.
                 t = builder.withAddress(a).build();
                 this._cache.set(key, t);
+
                 // set the temporary tile view
                 // 1 - zoom in : use the parent and tile section
                 // 2 - zoom out : use the childrens
                 // 3 - empty tile - see options
-                if (this._oldInfos && this._oldInfos.lod != lod) {
+                if (this._lodTransition == LODTransitionMode.LINEAR && this._oldInfos && this._oldInfos.lod != lod) {
                     if (this._oldInfos.lod < lod) {
                         // zoom in
                         const parentKey = TileMetrics.ToParentKey(key);
@@ -422,6 +429,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                             const section = TileMetrics.ToSection(k, this.metrics.tileSize);
                             const content = child.content[0];
                             if (IsTileContentView(content)) {
+                                // allow only one level of transition for now.
                                 return null;
                             }
                             return new TileView<T>(<T>content, null, section);
@@ -429,6 +437,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                         added.push(t);
                     }
                 }
+
+                // set empty tile
 
                 // and retreive the content.
                 this._datasource

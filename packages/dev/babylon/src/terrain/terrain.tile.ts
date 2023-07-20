@@ -26,7 +26,7 @@ export class TerrainTile<V> implements ITile<V>, ITileProxy<V> {
     public get key(): string {
         return this._delegate.key;
     }
-    public get content(): TileContent<V> | undefined {
+    public get content(): TileContent<V>  {
         return this._delegate.content;
     }
     public get rect(): IRectangle | undefined {

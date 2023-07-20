@@ -13,6 +13,10 @@ export declare class TileWebClientOptionsBuilder {
     withInitialDelay(v: number): TileWebClientOptionsBuilder;
     build(): TileWebClientOptions;
 }
+export declare class FetchError extends Error {
+    userArgs?: Array<unknown>;
+    constructor(message?: string, ...userArgs: Array<unknown>);
+}
 export declare class TileWebClient<T> implements ITileClient<T> {
     _o: TileWebClientOptions;
     _urlFactory: ITileUrlBuilder;

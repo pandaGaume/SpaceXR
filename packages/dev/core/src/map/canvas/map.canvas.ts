@@ -5,14 +5,56 @@ import { IRectangle } from "../../geometry/geometry.interfaces";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { CanvasDisplay } from "./map.canvas.display";
+import { RGBAColor } from "../../math/math.color";
 
 type CanvasTileContentType = HTMLImageElement;
+type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
+export class CanvasTileMapOptions {
+    public static DefaultBackColor = RGBAColor.LightGray();
+    public static DefaultForeColor = RGBAColor.Gray();
+    public static Default = new CanvasTileMapOptions({ backColor: CanvasTileMapOptions.DefaultBackColor, foreColor: CanvasTileMapOptions.DefaultForeColor });
+
+    public backColor?: RGBAColor;
+    public foreColor?: RGBAColor;
+    public fillEmpty?: FillRectFn;
+
+    public constructor(p: Partial<CanvasTileMapOptions>) {
+        Object.assign(this, p);
+    }
+}
+
+export class CanvasTileMapOptionsBuilder {
+    private _backColor?: RGBAColor;
+    private _foreColor?: RGBAColor;
+    public _fillEmpty?: FillRectFn;
+
+    public withBackColor(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
+        this._backColor = v instanceof RGBAColor ? v : new RGBAColor(v, g ?? 0, b ?? 0);
+        return this;
+    }
+
+    public withForeColor(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
+        this._foreColor = v instanceof RGBAColor ? v : new RGBAColor(v, g ?? 0, b ?? 0);
+        return this;
+    }
+
+    public withFillEmptyFn(v: FillRectFn): CanvasTileMapOptionsBuilder {
+        this._fillEmpty = v;
+        return this;
+    }
+
+    public build(): CanvasTileMapOptions {
+        return new CanvasTileMapOptions({ backColor: this._backColor, foreColor: this._foreColor, fillEmpty: this._fillEmpty });
+    }
+}
 
 export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITile<CanvasTileContentType>, CanvasDisplay> {
     _observer: ResizeObserver;
+    _options: CanvasTileMapOptions;
 
-    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number) {
+    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number, options?: CanvasTileMapOptions) {
         super(new CanvasDisplay(canvas), datasource, center, lod);
+        this._options = { ...CanvasTileMapOptions.Default, ...options };
         this._observer = new ResizeObserver(() => {
             this.invalidateSize(canvas.width, canvas.height);
         });
@@ -21,12 +63,16 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
 
     protected onDeleted(key: string, tile: ITile<CanvasTileContentType>): void {}
     protected onAdded(key: string, tile: ITile<CanvasTileContentType>): void {}
+    protected onUpdated(key: string, tile: ITile<CanvasTileContentType>): void {}
 
     protected invalidateTiles(added: ITile<CanvasTileContentType>[] | undefined, removed: ITile<CanvasTileContentType>[] | undefined): void {
         if (added) {
             const ctx = this._display.getContext();
             if (ctx) {
+                ctx.save();
+                ctx.strokeStyle = this._options?.foreColor?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
                 this.invalidate(ctx, added);
+                ctx.restore();
             }
         }
     }
@@ -34,10 +80,14 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
     protected invalidateDisplay(rect?: IRectangle) {
         const ctx = this._display.getContext();
         if (ctx) {
+            ctx.save();
             const res = this._display.resolution;
             rect = rect || new Rectangle(0, 0, res.width, res.height);
-            ctx.clearRect(rect.x, rect.y, rect.width, rect.height);
+            ctx.fillStyle = this._options?.backColor?.toString() ?? CanvasTileMapOptions.DefaultBackColor.toString();
+            ctx.strokeStyle = this._options?.foreColor?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
             this.invalidate(ctx, this._activ.values());
+            ctx.restore();
         }
     }
 
@@ -45,7 +95,6 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
         if (ctx) {
             const scale = this._scale;
             const center = this._center;
-            ctx.save();
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
@@ -54,36 +103,42 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
                 const angle = this.azimuth * Scalar.DEG2RAD;
                 ctx.rotate(angle);
             }
+            const tileSize = this.metrics.tileSize;
             for (const t of tiles) {
-                if (t.content && t.rect) {
+                if (t.rect) {
                     const x = t.rect.x - center.x;
                     const y = t.rect.y - center.y;
-                    const contents = t.content;
-                    if (contents?.length) {
-                        for (const item of contents) {
-                            if (item) {
-                                if (item instanceof HTMLImageElement) {
-                                    ctx.drawImage(item, x, y);
-                                    continue;
-                                }
-                                // this is a view
-                                if (item.data instanceof HTMLImageElement) {
-                                    const w = item.target?.width ?? item.data.width;
-                                    const h = item.target?.height ?? item.data.height;
-                                    const sx = item.source?.x ?? 0;
-                                    const sy = item.source?.y ?? 0;
-                                    const sw = item.source?.width ?? item.data.width;
-                                    const sh = item.source?.height ?? item.data.height;
-                                    const tx = item.target?.x ?? 0;
-                                    const ty = item.target?.y ?? 0;
-                                    ctx.drawImage(item.data, sx, sy, sw, sh, x + tx, y + ty, w, h);
-                                }
+                    const contents = t.content ?? [null]; // trick to address erroness tile.
+                    for (const item of contents) {
+                        if (item) {
+                            if (item instanceof HTMLImageElement) {
+                                ctx.drawImage(item, x, y);
+                                continue;
                             }
+                            // this is a view
+                            if (item.data instanceof HTMLImageElement) {
+                                const w = item.target?.width ?? item.data.width;
+                                const h = item.target?.height ?? item.data.height;
+                                const sx = item.source?.x ?? 0;
+                                const sy = item.source?.y ?? 0;
+                                const sw = item.source?.width ?? item.data.width;
+                                const sh = item.source?.height ?? item.data.height;
+                                const tx = item.target?.x ?? 0;
+                                const ty = item.target?.y ?? 0;
+                                ctx.drawImage(item.data, sx, sy, sw, sh, x + tx, y + ty, w, h);
+                            }
+                        } else {
+                            // this is where we fill the empty tile
+                            if (this._options?.fillEmpty) {
+                                this._options?.fillEmpty(ctx, x, y, tileSize, tileSize);
+                                continue;
+                            }
+                            let s = tileSize;
+                            ctx.strokeRect(x, y, s, s);
                         }
                     }
                 }
             }
-            ctx.restore();
         }
     }
 }

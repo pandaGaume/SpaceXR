@@ -21,6 +21,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
 
     _addedObservable?: Observable<T>;
     _removedObservable?: Observable<T>;
+    _updatedObservable?: Observable<T>;
 
     public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number) {
         this._display = display;
@@ -37,6 +38,11 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     public get removedObservable(): Observable<T> {
         this._removedObservable = this._removedObservable || new Observable<T>(this.onRemovedObserverAdded.bind(this));
         return this._removedObservable!;
+    }
+
+    public get updatedObservable(): Observable<T> {
+        this._updatedObservable = this._updatedObservable || new Observable<T>(this.onUpdatedObserverAdded.bind(this));
+        return this._updatedObservable!;
     }
 
     public hasTile(key: string): boolean {
@@ -178,20 +184,29 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
 
     private processAdded(args: UpdateEventArgs<V>): Array<T> | undefined {
         if (args.added && args.added.length != 0) {
-            const allocated: Array<T> = [];
+            const toDisplay: Array<T> = [];
             for (const t of args.added) {
                 const key = t.address.quadkey;
-                if (!this._activ.has(key)) {
-                    const t1 = this.buildMapTile(t);
-                    allocated.push(t1);
-                    this._activ.set(key, t1);
-                    this.onAdded(key, t1);
-                    if (this._addedObservable && this._addedObservable.hasObservers()) {
-                        this._addedObservable.notifyObservers(t1);
+                let t1 = this._activ.get(key);
+                if (t1) {
+                    // we update the tile
+                    toDisplay.push(t1);
+                    this.onUpdated(key, t1);
+                    if (this._updatedObservable && this._updatedObservable.hasObservers()) {
+                        this._updatedObservable.notifyObservers(t1);
                     }
+                    continue;
+                }
+                // we build and add a new map tile
+                t1 = this.buildMapTile(t);
+                toDisplay.push(t1);
+                this._activ.set(key, t1);
+                this.onAdded(key, t1);
+                if (this._addedObservable && this._addedObservable.hasObservers()) {
+                    this._addedObservable.notifyObservers(t1);
                 }
             }
-            return allocated;
+            return toDisplay;
         }
         return undefined;
     }
@@ -202,9 +217,11 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
 
     protected onAddedObserverAdded(observer: Observer<T>): void {}
     protected onRemovedObserverAdded(observer: Observer<T>): void {}
+    protected onUpdatedObserverAdded(observer: Observer<T>): void {}
 
     protected abstract onDeleted(key: string, tile: T): void;
     protected abstract onAdded(key: string, tile: T): void;
+    protected abstract onUpdated(key: string, tile: T): void;
     protected abstract invalidateDisplay(): void;
     protected abstract invalidateTiles(added: Array<T> | undefined, removed: Array<ITile<V>> | undefined): void;
 }

@@ -12,7 +12,7 @@ import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { TileBuilder, TileView } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
-import { Cartesian2, Envelope } from "..";
+import { Cartesian2, Envelope, FetchError } from "..";
 
 export class TileMapContext<T> {
     _lod: number = 0;
@@ -395,51 +395,46 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 }
                 // first have a look in cache
                 t = this._cache.get(key);
-                if (t) {
-                    added.push(t);
-                    continue;
-                }
-                // we need to create the tile.
-                t = builder.withAddress(a).build();
-                this._cache.set(key, t);
+                if (!t) {
+                    // we need to create the tile.
+                    t = builder.withAddress(a).withData(null).build();
+                    this._cache.set(key, t);
 
-                // set the temporary tile view
-                // 1 - zoom in : use the parent and tile section
-                // 2 - zoom out : use the childrens
-                // 3 - empty tile - see options
-                if (this._lodTransition == LODTransitionMode.LINEAR && this._oldInfos && this._oldInfos.lod != lod) {
-                    if (this._oldInfos.lod < lod) {
-                        // zoom in
-                        const parentKey = TileMetrics.ToParentKey(key);
-                        const parent = this._cache.get(parentKey);
-                        if (parent && parent.content) {
-                            const section = TileMetrics.ToSection(key, this.metrics.tileSize);
-                            t.content = [new TileView<T>(<T>parent.content[0], section)];
-                            added.push(t);
+                    // set the temporary tile view
+                    // 1 - zoom in : use the parent and tile section
+                    // 2 - zoom out : use the childrens
+                    // 3 - empty tile - see options
+
+                    if (this._lodTransition == LODTransitionMode.LINEAR && this._oldInfos && this._oldInfos.lod != lod) {
+                        if (this._oldInfos.lod < lod) {
+                            // zoom in
+                            const parentKey = TileMetrics.ToParentKey(key);
+                            const parent = this._cache.get(parentKey);
+                            if (parent && parent.content) {
+                                const section = TileMetrics.ToSection(key, this.metrics.tileSize);
+                                t.content = [new TileView<T>(<T>parent.content[0], section)];
+                            }
+                        } else {
+                            // zoom out
+                            const childKeys = TileMetrics.ToChildsKey(key);
+                            t.content = childKeys.map((k) => {
+                                const child = this._cache.get(k);
+                                // TODO : filter the tile with the actual rectangle.
+                                if (!child || !child.content) {
+                                    return null;
+                                }
+                                const section = TileMetrics.ToSection(k, this.metrics.tileSize);
+                                const content = child.content[0];
+                                if (IsTileContentView(content)) {
+                                    // allow only one level of transition for now.
+                                    return null;
+                                }
+                                return new TileView<T>(<T>content, null, section);
+                            });
                         }
-                    } else {
-                        // zoom out
-                        const childKeys = TileMetrics.ToChildsKey(key);
-                        t.content = childKeys.map((k) => {
-                            const child = this._cache.get(k);
-                            // TODO : filter the tile with the actual rectangle.
-                            if (!child || !child.content) {
-                                return null;
-                            }
-                            const section = TileMetrics.ToSection(k, this.metrics.tileSize);
-                            const content = child.content[0];
-                            if (IsTileContentView(content)) {
-                                // allow only one level of transition for now.
-                                return null;
-                            }
-                            return new TileView<T>(<T>content, null, section);
-                        });
-                        added.push(t);
                     }
                 }
-
-                // set empty tile
-
+                added.push(t);
                 // and retreive the content.
                 this._datasource
                     .fetchAsync(a, this, t)
@@ -455,9 +450,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                         // the content is not defined.
                         view.onTileNotFound(t);
                     })
-                    .catch((reason: any) => {
-                        // the lookup operation has failed - TODO describe a strategy
-                        console.log(`the lookup operation has failed because of ${reason}`);
+                    .catch((error: FetchError) => {
+                        // the lookup operation has failed
+                        if (error.userArgs) {
+                            const view = <TileMapView<T>>error.userArgs[0];
+                            const t = <ITile<T>>error?.userArgs[1];
+                            // the content is not defined.
+                            view.onTileNotFound(t);
+                        }
                     });
             }
         }
@@ -472,9 +472,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             level.tiles.set(t.address.quadkey, t);
         }
 
-        // filter the tile, selecting only one with content.
-        added = added.filter((t) => t.content !== undefined && t.content !== null);
-        deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
+        // filter the tile, selecting only one with content NULL is considered as content.
+        added = added.filter((t) => t.content !== undefined);
+        deleted = deleted.filter((t) => t.content !== undefined);
         const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
 
         const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newInfos, this._oldInfos, added.length ? added : undefined, deleted.length ? deleted : undefined);
@@ -498,7 +498,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     protected onTileNotFound(t: ITile<T>) {
-        console.log("tile not found", t.address);
+        console.log("tile not found", t.address.toString());
         t.content = null;
     }
 

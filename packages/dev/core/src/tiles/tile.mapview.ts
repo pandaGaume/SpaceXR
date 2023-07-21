@@ -12,7 +12,7 @@ import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { TileBuilder, TileView } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
-import { Cartesian2, Envelope, FetchError } from "..";
+import { Cartesian2, Envelope } from "..";
 
 export class TileMapContext<T> {
     _lod: number = 0;
@@ -125,7 +125,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // current navigation parameters
     _w: number = 0;
     _h: number = 0;
-    _lodf: number = 0;
+    _lod: number = 0;
     _bounds?: IEnvelope;
     _center: IGeo2 = Geo2.Zero();
     _context: TileMapContext<T>;
@@ -187,8 +187,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._context;
     }
 
-    public get levelOfDetailF(): number {
-        return this._lodf;
+    public get levelOfDetail(): number {
+        return this._lod;
     }
 
     public get center(): IGeo2 {
@@ -259,14 +259,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public setZoom(zoom: number): ITileMapApi {
         const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this._lodf != lod) {
+        if (this._lod != lod) {
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lodf;
-                this._lodf = lod;
+                const old = this._lod;
+                this._lod = lod;
                 const e = new PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
             } else {
-                this._lodf = lod;
+                this._lod = lod;
             }
             this.invalidate();
         }
@@ -284,12 +284,12 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public zoomIn(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this._lodf + Math.abs(delta));
+        return this.setZoom(this._lod + Math.abs(delta));
     }
 
     public zoomOut(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this._lodf - Math.abs(delta));
+        return this.setZoom(this._lod - Math.abs(delta));
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
@@ -298,7 +298,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this._lodf);
+        const lod = Math.round(this._lod);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -353,7 +353,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // VIRTUALS
     protected doValidate() {
-        this._context._lod = Math.round(this.levelOfDetailF);
+        this._context._lod = Math.round(this.levelOfDetail);
         this.doValidateContext(this._context);
     }
 
@@ -361,7 +361,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // current level of detail
         const lod = level.lod;
         // scale corresponding to the decimal part
-        let scale = TileMetrics.GetLodScale(this.levelOfDetailF);
+        let scale = TileMetrics.GetLodScale(this.levelOfDetail);
         this._context._scale = scale;
 
         // compute the pixel bounds
@@ -395,10 +395,13 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 }
                 // first have a look in cache
                 t = this._cache.get(key);
-                if (!t) {
-                    // we need to create the tile.
-                    t = builder.withAddress(a).withData(null).build();
-                    this._cache.set(key, t);
+                if (t) {
+                    added.push(t);
+                    continue;
+                }
+                // we need to create the tile.
+                t = builder.withAddress(a).build();
+                this._cache.set(key, t);
 
                 // set the temporary tile view
                 // 1 - zoom in : use the parent and tile section
@@ -450,14 +453,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                         // the content is not defined.
                         view.onTileNotFound(t);
                     })
-                    .catch((error: FetchError) => {
-                        // the lookup operation has failed
-                        if (error.userArgs) {
-                            const view = <TileMapView<T>>error.userArgs[0];
-                            const t = <ITile<T>>error?.userArgs[1];
-                            // the content is not defined.
-                            view.onTileNotFound(t);
-                        }
+                    .catch((reason: any) => {
+                        // the lookup operation has failed - TODO describe a strategy
+                        console.log(`the lookup operation has failed because of ${reason}`);
                     });
             }
         }
@@ -472,7 +470,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             level.tiles.set(t.address.quadkey, t);
         }
 
-        // filter the tile, selecting only one with content NULL is considered as content.
+        // filter the tile, selecting only one with content.
         added = added.filter((t) => t.content !== undefined);
         deleted = deleted.filter((t) => t.content !== undefined);
         const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
@@ -498,7 +496,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     protected onTileNotFound(t: ITile<T>) {
-        console.log("tile not found", t.address.toString());
+        console.log("tile not found", t.address);
         t.content = null;
     }
 

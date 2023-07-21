@@ -134,16 +134,16 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         return mesh;
     }
 
-    protected buildInstance(name: string, tile: TerrainTile<V>): Nullable<AbstractMesh> {
+    protected buildInstance(name: string, tile: TerrainTile<V>): AbstractMesh {
         // fill instanced properties - which are declared into buildTemplate - with instance.instancedBuffers
         //const a = tile.address;
         //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);$
-        const infos = tile.content;
-        if (infos) {
-            const instance = this._template.createInstance(name);
-            return instance;
-        }
-        return null;
+        const instance = this._template.createInstance(name);
+        instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
+        instance.scaling.z = this._options.exageration ?? 1.0;
+        instance.parent = this.display.context;
+        tile.surface = instance;
+        return instance;
     }
 
     protected buildMapTile(t: ITile<V>): TerrainTile<V> {
@@ -155,15 +155,23 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         tile.dispose();
     }
 
+    protected onUpdated(key: string, tile: TerrainTile<V>): void {
+        if (!tile.surface) {
+            if (tile.content && tile.content[0]) {
+                this.buildInstance(key, tile);
+            }
+        } else {
+            if (!tile.content || !tile.content[0]) {
+                tile.dispose();
+            }
+        }
+    }
+
     // TODO,introduce metrics overlaps
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
-        const instance = this.buildInstance(key, tile);
-        if (instance) {
-            instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
-            instance.scaling.z = this._options.exageration ?? 1.0;
-            instance.parent = this.display.context;
-            tile.surface = instance;
+        if (tile.content && tile.content[0]) {
+            this.buildInstance(key, tile);
         }
     }
 

@@ -37,6 +37,9 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     protected onUpdate(args: UpdateEventArgs<V>): void;
     protected onUpdateTiles(args: UpdateEventArgs<V>): void;
     protected onUpdateView(args: UpdateEventArgs<V>): void;
+    notifyRemovedObserver(tile: T): void;
+    notifyUpdatedObserver(tile: T): void;
+    notifyAddedObserver(tile: T): void;
     private processRemoved;
     private processAdded;
     protected buildMapTile(t: ITile<V>): T;

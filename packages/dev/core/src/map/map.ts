@@ -151,6 +151,21 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
         this.invalidateDisplay();
     }
 
+    public notifyRemovedObserver(tile: T) {
+        if (this._removedObservable && this._removedObservable.hasObservers()) {
+            this._removedObservable.notifyObservers(tile);
+        }
+    }
+    public notifyUpdatedObserver(tile: T) {
+        if (this._updatedObservable && this._updatedObservable.hasObservers()) {
+            this._updatedObservable.notifyObservers(tile);
+        }
+    }
+    public notifyAddedObserver(tile: T) {
+        if (this._addedObservable && this._addedObservable.hasObservers()) {
+            this._addedObservable.notifyObservers(tile);
+        }
+    }
     private processRemoved(args: UpdateEventArgs<V>): void {
         if (args.removed && args.removed.length != 0) {
             // this is the place to clean unactive tile
@@ -173,9 +188,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
                     if (mustDelete) {
                         this._activ.delete(key);
                         this.onDeleted(key, old);
-                        if (this._removedObservable && this._removedObservable.hasObservers()) {
-                            this._removedObservable.notifyObservers(old);
-                        }
+                        this.notifyRemovedObserver(old);
                     }
                 }
             }
@@ -192,9 +205,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
                     // we update the tile
                     toDisplay.push(t1);
                     this.onUpdated(key, t1);
-                    if (this._updatedObservable && this._updatedObservable.hasObservers()) {
-                        this._updatedObservable.notifyObservers(t1);
-                    }
+                    this.notifyUpdatedObserver(t1);
                     continue;
                 }
                 // we build and add a new map tile
@@ -202,9 +213,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
                 toDisplay.push(t1);
                 this._activ.set(key, t1);
                 this.onAdded(key, t1);
-                if (this._addedObservable && this._addedObservable.hasObservers()) {
-                    this._addedObservable.notifyObservers(t1);
-                }
+                this.notifyAddedObserver(t1);
             }
             return toDisplay;
         }

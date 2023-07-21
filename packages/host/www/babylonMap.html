@@ -286,13 +286,8 @@
                         });
                 };
 
-                map.addedObservable.add((t) => {
-                    const m = t.surface;
-                    if (m) {
-                        // load layer
-                        m.instancedBuffers.layerIds = new BABYLON.Vector4(0, -1, -1, -1);
-                        loadLayer(t, layerClient, map);
-
+                const updateContent = function (m, t) {
+                    if (t.content && t.content[0]) {
                         const c = t.content[0];
                         // add instance attributes
                         m.instancedBuffers.demInfos = new BABYLON.Vector4(c.min.z, c.max.z, c.delta, c.mean);
@@ -363,6 +358,25 @@
                         } else {
                             console.log(`Warning ! unable to allocate area  ${elevationSampler.usedAreaCount}/${elevationSampler.areaCount}`);
                         }
+                    }
+                };
+
+                map.addedObservable.add((t) => {
+                    const m = t.surface;
+                    if (m) {
+                        // load layer
+                        m.instancedBuffers.layerIds = new BABYLON.Vector4(0, -1, -1, -1);
+                        loadLayer(t, layerClient, map);
+                        updateContent(m, t);
+                    }
+                });
+
+                map.updatedObservable.add((t) => {
+                    const m = t.surface;
+                    if (m) {
+                        m.instancedBuffers.layerIds = new BABYLON.Vector4(0, -1, -1, -1);
+                        loadLayer(t, layerClient, map);
+                        updateContent(m, t);
                     }
                 });
 

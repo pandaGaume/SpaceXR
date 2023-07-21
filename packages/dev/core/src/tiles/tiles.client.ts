@@ -30,6 +30,15 @@ export class TileWebClientOptionsBuilder {
     }
 }
 
+export class FetchError extends Error {
+    userArgs?: Array<unknown>;
+
+    public constructor(message?: string, ...userArgs: Array<unknown>) {
+        super(message);
+        this.userArgs = userArgs;
+    }
+}
+
 export class TileWebClient<T> implements ITileClient<T> {
     _o: TileWebClientOptions;
     _urlFactory: ITileUrlBuilder;
@@ -55,11 +64,11 @@ export class TileWebClient<T> implements ITileClient<T> {
 
     public async fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
         if (!request) {
-            throw new Error(`invalid request parameter ${request}`);
+            throw new FetchError(`invalid request parameter ${request}`, ...userArgs);
         }
         const url = this._urlFactory.buildUrl(request, ...userArgs);
         if (!url) {
-            throw new Error(`Builded url of ${request.toString()} can not be null`);
+            throw new FetchError(`Builded url of ${request.toString()} can not be null`, ...userArgs);
         }
 
         const maxRetry = this._o.maxRetry || 1;
@@ -86,6 +95,6 @@ export class TileWebClient<T> implements ITileClient<T> {
             retryCount++;
         } while (retryCount < maxRetry);
 
-        throw new Error(`Exceeded maximum retries for URL: ${url}`);
+        throw new FetchError(`Exceeded maximum retries for URL: ${url}`, ...userArgs);
     }
 }

@@ -415,7 +415,6 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                         if (parent && parent.content) {
                             const section = TileMetrics.ToSection(key, this.metrics.tileSize);
                             t.content = [new TileView<T>(<T>parent.content[0], section)];
-                            added.push(t);
                         }
                     } else {
                         // zoom out
@@ -434,11 +433,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                             }
                             return new TileView<T>(<T>content, null, section);
                         });
-                        added.push(t);
                     }
                 }
-
                 // set empty tile
+                added.push(t);
 
                 // and retreive the content.
                 this._datasource
@@ -473,8 +471,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         }
 
         // filter the tile, selecting only one with content.
-        added = added.filter((t) => t.content !== undefined && t.content !== null);
-        deleted = deleted.filter((t) => t.content !== undefined && t.content !== null);
+        added = added.filter((t) => t.content !== undefined);
+        deleted = deleted.filter((t) => t.content !== undefined);
         const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
 
         const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newInfos, this._oldInfos, added.length ? added : undefined, deleted.length ? deleted : undefined);

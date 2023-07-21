@@ -41,9 +41,10 @@ export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDis
     hasMesh(mesh: Mesh): boolean;
     protected buildGrid(): VertexData;
     protected buildMesh(name: string, scene?: Nullable<Scene>): Mesh;
-    protected buildInstance(name: string, tile: TerrainTile<V>): Nullable<AbstractMesh>;
+    protected buildInstance(name: string, tile: TerrainTile<V>): AbstractMesh;
     protected buildMapTile(t: ITile<V>): TerrainTile<V>;
     protected onDeleted(key: string, tile: TerrainTile<V>): void;
+    protected onUpdated(key: string, tile: TerrainTile<V>): void;
     protected onAdded(key: string, tile: TerrainTile<V>): void;
     protected invalidateDisplay(rect?: IRectangle): void;
     protected invalidateTiles(added: TerrainTile<V>[] | undefined, removed: TerrainTile<V>[] | undefined): void;

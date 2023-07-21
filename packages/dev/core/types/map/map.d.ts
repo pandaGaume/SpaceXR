@@ -15,9 +15,11 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     _center: ICartesian2;
     _addedObservable?: Observable<T>;
     _removedObservable?: Observable<T>;
+    _updatedObservable?: Observable<T>;
     constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number);
     get addedObservable(): Observable<T>;
     get removedObservable(): Observable<T>;
+    get updatedObservable(): Observable<T>;
     hasTile(key: string): boolean;
     getTile(key: string): T | undefined;
     invalidateSize(w: number, h: number): ITileMapApi;
@@ -35,13 +37,18 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     protected onUpdate(args: UpdateEventArgs<V>): void;
     protected onUpdateTiles(args: UpdateEventArgs<V>): void;
     protected onUpdateView(args: UpdateEventArgs<V>): void;
+    notifyRemovedObserver(tile: T): void;
+    notifyUpdatedObserver(tile: T): void;
+    notifyAddedObserver(tile: T): void;
     private processRemoved;
     private processAdded;
     protected buildMapTile(t: ITile<V>): T;
     protected onAddedObserverAdded(observer: Observer<T>): void;
     protected onRemovedObserverAdded(observer: Observer<T>): void;
+    protected onUpdatedObserverAdded(observer: Observer<T>): void;
     protected abstract onDeleted(key: string, tile: T): void;
     protected abstract onAdded(key: string, tile: T): void;
+    protected abstract onUpdated(key: string, tile: T): void;
     protected abstract invalidateDisplay(): void;
     protected abstract invalidateTiles(added: Array<T> | undefined, removed: Array<ITile<V>> | undefined): void;
 }

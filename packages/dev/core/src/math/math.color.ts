@@ -13,6 +13,14 @@ export class RGBAColor {
         return new RGBAColor(77, 77, 255);
     }
 
+    public static LightGray() {
+        return new RGBAColor(211, 211, 211);
+    }
+
+    public static Gray() {
+        return new RGBAColor(128, 128, 128);
+    }
+
     public constructor(public r: number, public g: number, public b: number, public a: number = 1) {}
 
     public toHSL(): HSLColor {
@@ -67,6 +75,10 @@ export class RGBAColor {
         this.b = Math.round(this.b + t * (color.b - this.b));
         this.a = keepAlpha ? this.a : Math.round(this.a + t * (color.a - this.a));
         return this;
+    }
+
+    public toString(): string {
+        return `rgb(${this.r},${this.g},${this.b})`;
     }
 }
 

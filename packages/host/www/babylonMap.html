@@ -73,7 +73,7 @@
             </div>
         </div>
         <script>
-            function createScene(canvas, engine) {
+            async function createScene(canvas, engine) {
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
@@ -125,9 +125,10 @@
                 const chamonix = SPACEXR.KnownPlaces.Locations.Chamonix;
                 const mountRenier = SPACEXR.KnownPlaces.Locations.MountRainier;
                 const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
+                const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
 
                 const surfaceOptions = {
-                    center: corsica,
+                    center: aydarkul,
                     levelOfDetail: 12,
                     exageration: 1.5,
                 };
@@ -516,13 +517,15 @@
                 // screenAxes.yAxis.parent = ctx;
                 // screenAxes.zAxis.parent = ctx;
                 // scene.debugLayer.show();
+                // here we add XR support
+                // const xr = await scene.createDefaultXRExperienceAsync();
                 return scene;
             }
 
-            window.onload = () => {
+            window.onload = async () => {
                 const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-                const scene = createScene(canvas, engine); //Call the createScene function
+                const scene = await createScene(canvas, engine); //Call the createScene function
                 // scene.debugLayer.show();
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {

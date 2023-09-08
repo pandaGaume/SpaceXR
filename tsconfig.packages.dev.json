@@ -8,9 +8,6 @@
 
     "references": [
         {
-            "path": "packages/dev/shelly/tsconfig.json"
-        },
-        {
             "path": "packages/dev/core/tsconfig.json"
         },
         {

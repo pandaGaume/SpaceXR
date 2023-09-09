@@ -47,6 +47,8 @@ export declare enum LODTransitionMode {
     LINEAR = 1
 }
 export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
+    addedObservable: any;
+    removedObservable: any;
     static ClampAzimuth(a: number): number;
     _cache: IMemoryCache<string, ITile<T>>;
     _datasource: ITileDatasource<T, ITileAddress>;

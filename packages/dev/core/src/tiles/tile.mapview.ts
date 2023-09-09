@@ -103,6 +103,8 @@ export enum LODTransitionMode {
 }
 
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
+    addedObservable: any;
+    removedObservable: any;
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
      * @param a the azimuth value

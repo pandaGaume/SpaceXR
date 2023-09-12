@@ -81,6 +81,7 @@ export class Observer<T> {
      * @param scope defines the current scope used to restore the JS context
      */
     constructor(
+        public source: Observable<T>,
         /**
          * Defines the callback to call when the observer is notified
          */
@@ -94,6 +95,10 @@ export class Observer<T> {
          */
         public scope: any = null
     ) {}
+
+    public dispose(): void {
+        this.source.remove(this);
+    }
 }
 
 /**
@@ -177,7 +182,7 @@ export class Observable<T> {
             return null;
         }
 
-        const observer = new Observer(callback, mask, scope);
+        const observer = new Observer(this, callback, mask, scope);
         observer.unregisterOnNextCall = unregisterOnFirstCall;
 
         if (insertFirst) {

@@ -10,12 +10,14 @@ export declare class EventState {
     userInfo?: any;
 }
 export declare class Observer<T> {
+    source: Observable<T>;
     callback: (eventData: T, eventState: EventState) => void;
     mask: number;
     scope: any;
     _willBeUnregistered: boolean;
     unregisterOnNextCall: boolean;
-    constructor(callback: (eventData: T, eventState: EventState) => void, mask: number, scope?: any);
+    constructor(source: Observable<T>, callback: (eventData: T, eventState: EventState) => void, mask: number, scope?: any);
+    dispose(): void;
 }
 export declare class Observable<T> {
     private _observers;

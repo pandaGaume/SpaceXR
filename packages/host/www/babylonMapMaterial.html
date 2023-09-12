@@ -128,19 +128,15 @@
                 const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
                 const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
 
-                const surfaceOptions = {
+                const mapOptions = {
                     center: corsica,
                     levelOfDetail: 12,
-                };
-
-                // construire la carte.
-                const map = new SPACEXR.SurfaceTileMap("map", display, demClient, surfaceOptions, scene);
-
-                const surfaceMaterialOptions = {
                     layerClient: layerClient,
                     exageration: 1.5,
                 };
-                map.material = new SPACEXR.TerrainHologramMaterial("terrain", map, surfaceMaterialOptions, scene);
+
+                // construire la carte.
+                const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
 
                 // valider la vue pour commencer le chargement des tuiles
                 map.view.validate();

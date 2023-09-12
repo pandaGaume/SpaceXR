@@ -835,13 +835,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
-/* harmony import */ var core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles/tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
-/* harmony import */ var core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../terrain.tile */ "./dist/terrain/terrain.tile.js");
-/* harmony import */ var core_tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles/tile.mapview */ "../core/dist/tiles/tile.mapview.js");
+/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/map */ "../core/dist/map/map.js");
+/* harmony import */ var core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/tiles/tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/meshes/terrain.grid */ "../core/dist/meshes/terrain.grid.js");
+/* harmony import */ var core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _terrain_tile__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../terrain.tile */ "./dist/terrain/terrain.tile.js");
+/* harmony import */ var core_tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles/tile.mapview */ "../core/dist/tiles/tile.mapview.js");
+/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../materials */ "./dist/materials/terrain.material.hologram.js");
 
 
 
@@ -850,16 +851,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class SurfaceTileMapOptions {
+
+class SurfaceTileMapOptions extends _materials__WEBPACK_IMPORTED_MODULE_1__.TerrainHologramMaterialOptions {
     constructor(p) {
+        super();
         Object.assign(this, p);
     }
 }
 SurfaceTileMapOptions.Default = new SurfaceTileMapOptions({
-    center: core_geography_geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.Zero(),
+    center: core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(),
     levelOfDetail: 10,
-    gridOptions: core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptions.Shared,
-    insets: core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero(),
+    gridOptions: core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainGridOptions.Shared,
+    insets: core_geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_4__.Cartesian3.Zero(),
     exageration: 1.0,
 });
 
@@ -884,11 +887,22 @@ class SurfaceTileMapOptionsBuilder {
         this._exageration = v;
         return this;
     }
+    withLayer(v) {
+        this._layerClient = v;
+        return this;
+    }
     build() {
-        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets, exageration: this._exageration });
+        return new SurfaceTileMapOptions({
+            center: this._center,
+            levelOfDetail: this._lod,
+            gridOptions: this._gridOptions,
+            insets: this._insets,
+            exageration: this._exageration,
+            layerClient: this._layerClient,
+        });
     }
 }
-class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDisplayMap {
+class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDisplayMap {
     static InitZ(column, row, w, h) {
         let i = column == w - 1 ? 1 : 0;
         let j = row == h - 1 ? 2 : 0;
@@ -905,8 +919,8 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        this._template.material = this.buildMaterial(scene);
-        this._view._lodTransition = core_tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_5__.LODTransitionMode.OFF;
+        this._template.material = this.buildMaterial(name, scene);
+        this._view._lodTransition = core_tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_6__.LODTransitionMode.OFF;
     }
     set material(m) {
         this._template.material = m;
@@ -922,7 +936,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
     }
     buildGrid() {
         const s = this.metrics?.tileSize;
-        const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainGridOptionsBuilder()
+        const o = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainGridOptionsBuilder()
             .withColumns(s + 1)
             .withRows(s + 1)
             .withScale(1, -1)
@@ -931,7 +945,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
             .withUvs(true)
             .withUVInitializer(SurfaceTileMap.InitUV)
             .build();
-        const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_2__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
+        const data = new core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
         return data;
     }
     buildMesh(name, scene) {
@@ -949,7 +963,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         return instance;
     }
     buildMapTile(t) {
-        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_6__.TerrainTile(t);
+        return new _terrain_tile__WEBPACK_IMPORTED_MODULE_7__.TerrainTile(t);
     }
     onDeleted(key, tile) {
         tile.dispose();
@@ -979,11 +993,11 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
             this.invalidate(added);
         }
     }
-    buildMaterial(scene) {
+    buildMaterial(name, scene) {
         if (!scene) {
             return null;
         }
-        return null;
+        return new _materials__WEBPACK_IMPORTED_MODULE_1__.TerrainHologramMaterial(`${name}.material`, this, this._options, scene);
     }
     invalidate(tiles) {
         const scale = Math.abs(this._scale);
@@ -1000,7 +1014,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
                 if (t.rect && t.surface) {
                     for (const item of contents) {
                         if (item) {
-                            if ((0,core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_7__.IsTileContentView)(item)) {
+                            if ((0,core_tiles_tiles_interfaces__WEBPACK_IMPORTED_MODULE_8__.IsTileContentView)(item)) {
                                 continue;
                             }
                             const c = t.rect.center;

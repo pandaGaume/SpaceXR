@@ -11,3 +11,5 @@ dist
 typings
 lib/*.js
 *.map
+packages/dev/babylon/tsconfig.tsbuildinfo
+packages/dev/core/tsconfig.tsbuildinfo

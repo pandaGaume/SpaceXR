@@ -138,9 +138,6 @@
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
 
-                // valider la vue pour commencer le chargement des tuiles
-                map.view.validate();
-
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere
                 let startingPixel;

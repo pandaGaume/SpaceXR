@@ -14,7 +14,7 @@ import { IDemInfos } from "core/dem/dem.interfaces";
 import { LODTransitionMode } from "core/tiles/tile.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
 
-export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions{
+export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
         center: Geo2.Zero(),
         levelOfDetail: 10,
@@ -105,6 +105,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
         this._view._lodTransition = LODTransitionMode.OFF;
+        this._view.validate();
     }
 
     public set material(m: Nullable<Material>) {
@@ -206,7 +207,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         }
     }
 
-    protected buildMaterial(name:string, scene?: Nullable<Scene>): Nullable<Material> {
+    protected buildMaterial(name: string, scene?: Nullable<Scene>): Nullable<Material> {
         if (!scene) {
             return null;
         }

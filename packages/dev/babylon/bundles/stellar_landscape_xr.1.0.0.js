@@ -921,6 +921,7 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_5__.AbstractDispl
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
         this._view._lodTransition = core_tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_6__.LODTransitionMode.OFF;
+        this._view.validate();
     }
     set material(m) {
         this._template.material = m;

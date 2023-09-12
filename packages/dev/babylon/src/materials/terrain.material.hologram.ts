@@ -44,6 +44,7 @@ class SurfaceDefinition {
 
 class TerrainHologramMaterialDefines extends MaterialDefines {
     public WIREFRAME = false;
+    public INSTANCES = true;
 
     constructor() {
         super();
@@ -205,7 +206,21 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             TerrainHologramMaterialAtt.DemIdsKind,
             TerrainHologramMaterialAtt.LayerIdsKind,
         ];
-        const uniforms = ["world", "viewProjection", "mapscale", "exageration", "northClip", "southClip", "westClip", "eastClip", "minAlt"];
+        const uniforms = [
+            "world",
+            "viewProjection",
+            "mapscale",
+            "exageration",
+            "northClip.point",
+            "northClip.normal",
+            "southClip.point",
+            "southClip.normal",
+            "westClip.point",
+            "westClip.normal",
+            "eastClip.point",
+            "eastClip.normal",
+            "minAlt",
+        ];
         const samplers = [TerrainHologramMaterialSampler.ElevationKind, TerrainHologramMaterialSampler.NormalKind, TerrainHologramMaterialSampler.LayerKind];
         const uniformBuffers = new Array<string>();
         const fallbacks = new EffectFallbacks();
@@ -213,7 +228,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
         // we heavily rely on instances
         if (useInstances) {
-            defines.push("#define INSTANCES");
+            defines.INSTANCES = true;
             MaterialHelper.PushAttributesForInstances(attribs);
         }
 
@@ -249,7 +264,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
     public bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void {
         const scene = this.getScene();
-
         const defines = <TerrainHologramMaterialDefines>subMesh.materialDefines;
         if (!defines) {
             return;
@@ -301,8 +315,8 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     }
 
     private _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
-        this._activeEffect?.setMatrix("world", world);
-        this._activeEffect?.setMatrix("viewProjection", scene.getTransformMatrix());
+        effect.setMatrix("world", world);
+        effect.setMatrix("viewProjection", scene.getTransformMatrix());
     }
 
     private _bindClipPlane(effect: Effect): void {
@@ -338,9 +352,9 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const mesh = eventData.surface;
         if (mesh) {
             // setup the layer
-            mesh.instancedBuffers.layerIds = new Vector4(0, -1, -1, -1);
             this._loadLayer(eventData);
-            // setup the tile, based on content. Remember that the content may be undefined at this stage, due to the network latency
+            // The update event is raised when the data become available, so we may update the content of
+            // the tile pool textures and other attributes
             this._updateTileContent(eventData);
         }
     }
@@ -350,9 +364,9 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const mesh = eventData.surface;
         if (mesh) {
             // setup the layer
-            mesh.instancedBuffers.layerIds = new Vector4(0, -1, -1, -1);
             this._loadLayer(eventData);
-            // The update event is raised when the data become available.
+            // The update event is raised when the data become available, so we may update the content of
+            // the tile pool textures and other attributes
             this._updateTileContent(eventData);
         }
     }
@@ -451,6 +465,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
+        console.log(this._clipSurfaces);
     }
 
     // update the tile content. This methods is called when the tile is added or updated.
@@ -473,13 +488,13 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
             // remember that the TileContentView is used to keep the information of the tile while zooming in when
             // target data are not yet ready. Min and Max are corrsponding to specific section of the tile.
-            let data = IsTileContentView<V>(content) ? content.data : content;
-            if (!data) {
+            let tileContent = IsTileContentView<V>(content) ? content.data : content;
+            if (!tileContent) {
                 return;
             }
-            m.instancedBuffers.demInfos = new Vector4(data.min.z, data.max.z, data.delta, data.mean);
-            min = data.min.z;
-            max = data.max.z;
+            m.instancedBuffers.demInfos = new Vector4(tileContent.min.z, tileContent.max.z, tileContent.delta, tileContent.mean);
+            min = tileContent.min.z;
+            max = tileContent.max.z;
 
             if (min < this._elevationRange.min) {
                 this._elevationRange.min = min;
@@ -492,6 +507,8 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             const elevationArea = this._elevationSampler?.reserveArea();
             const normalArea = this._normalSampler?.reserveArea();
             if (elevationArea && normalArea) {
+                elevationArea.update(tileContent.elevations);
+                normalArea.update(tileContent.normals);
                 bag.elevationArea = elevationArea;
                 bag.normalArea = normalArea;
 
@@ -561,33 +578,34 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
     // load the layer content. It is questionable to let this method here, but it is the simplest way to do it.
     private _loadLayer(tile: TerrainTile<V>): void {
-        var client = this._layerClient;
-        if (client) {
-            client
-                .fetchAsync(tile.address)
-                .then((result) => {
-                    if (client === this._layerClient && result.content) {
-                        // retreive the bag
-                        let bag = this._tileBags.get(tile.address.quadkey);
-                        if (bag) {
-                            const layerArea = this._layerSampler?.reserveArea();
-                            if (layerArea && result.content) {
-                                layerArea.update(result.content);
-                                bag.layerArea = layerArea;
-                                const m = tile.surface;
-                                if (m) {
+        const m = tile.surface;
+        if (m && !m.instancedBuffers.layerIds) {
+            m.instancedBuffers.layerIds = new Vector4(0, -1, -1, -1);
+            var client = this._layerClient;
+            if (client) {
+                client
+                    .fetchAsync(tile.address)
+                    .then((result) => {
+                        if (client === this._layerClient && result.content) {
+                            // retreive the bag
+                            let bag = this._tileBags.get(tile.address.quadkey);
+                            if (bag) {
+                                const layerArea = this._layerSampler?.reserveArea();
+                                if (layerArea && result.content) {
+                                    layerArea.update(result.content);
+                                    bag.layerArea = layerArea;
                                     m.instancedBuffers.layerIds.x = layerArea.id;
                                 }
+                                return;
                             }
-                            return;
+                            // the bag is not defined, due certainly to a change of view during the loading process.
                         }
-                        // the bag is not defined, due certainly to a change of view during the loading process.
-                    }
-                })
-                .catch((reason) => {
-                    // the lookup operation has failed - TODO describe a strategy
-                    console.log(reason);
-                });
+                    })
+                    .catch((reason) => {
+                        // the lookup operation has failed - TODO describe a strategy
+                        console.log(reason);
+                    });
+            }
         }
     }
 }

@@ -172,6 +172,7 @@ class TerrainHologramMaterialDefines extends _babylonjs_core__WEBPACK_IMPORTED_M
     constructor() {
         super();
         this.WIREFRAME = false;
+        this.INSTANCES = true;
         this.rebuild();
     }
 }
@@ -274,13 +275,27 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             TerrainHologramMaterialAtt.DemIdsKind,
             TerrainHologramMaterialAtt.LayerIdsKind,
         ];
-        const uniforms = ["world", "viewProjection", "mapscale", "exageration", "northClip", "southClip", "westClip", "eastClip", "minAlt"];
+        const uniforms = [
+            "world",
+            "viewProjection",
+            "mapscale",
+            "exageration",
+            "northClip.point",
+            "northClip.normal",
+            "southClip.point",
+            "southClip.normal",
+            "westClip.point",
+            "westClip.normal",
+            "eastClip.point",
+            "eastClip.normal",
+            "minAlt",
+        ];
         const samplers = [TerrainHologramMaterialSampler.ElevationKind, TerrainHologramMaterialSampler.NormalKind, TerrainHologramMaterialSampler.LayerKind];
         const uniformBuffers = new Array();
         const fallbacks = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.EffectFallbacks();
         const engine = scene.getEngine();
         if (useInstances) {
-            defines.push("#define INSTANCES");
+            defines.INSTANCES = true;
             _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialHelper.PushAttributesForInstances(attribs);
         }
         subMesh.setEffect(engine.createEffect(shaderName, {
@@ -338,8 +353,8 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         return new TerrainHologramMaterial(name, this._map, options, this.getScene());
     }
     _bindMatrix(effect, world, scene) {
-        this._activeEffect?.setMatrix("world", world);
-        this._activeEffect?.setMatrix("viewProjection", scene.getTransformMatrix());
+        effect.setMatrix("world", world);
+        effect.setMatrix("viewProjection", scene.getTransformMatrix());
     }
     _bindClipPlane(effect) {
         effect.setVector3("northClip.point", this._clipSurfaces[ClipIndex.North].point);
@@ -369,7 +384,6 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
     _onTileAdded(eventData, eventState) {
         const mesh = eventData.surface;
         if (mesh) {
-            mesh.instancedBuffers.layerIds = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(0, -1, -1, -1);
             this._loadLayer(eventData);
             this._updateTileContent(eventData);
         }
@@ -377,7 +391,6 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
     _onTileUpdated(eventData, eventState) {
         const mesh = eventData.surface;
         if (mesh) {
-            mesh.instancedBuffers.layerIds = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(0, -1, -1, -1);
             this._loadLayer(eventData);
             this._updateTileContent(eventData);
         }
@@ -455,6 +468,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
+        console.log(this._clipSurfaces);
     }
     _updateTileContent(tile) {
         const key = tile.address.quadkey;
@@ -468,13 +482,13 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             const content = tile.content[0];
             let min = this._elevationRange.min;
             let max = this._elevationRange.max || Number.MIN_VALUE;
-            let data = (0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileContentView)(content) ? content.data : content;
-            if (!data) {
+            let tileContent = (0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileContentView)(content) ? content.data : content;
+            if (!tileContent) {
                 return;
             }
-            m.instancedBuffers.demInfos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(data.min.z, data.max.z, data.delta, data.mean);
-            min = data.min.z;
-            max = data.max.z;
+            m.instancedBuffers.demInfos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(tileContent.min.z, tileContent.max.z, tileContent.delta, tileContent.mean);
+            min = tileContent.min.z;
+            max = tileContent.max.z;
             if (min < this._elevationRange.min) {
                 this._elevationRange.min = min;
             }
@@ -484,6 +498,8 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             const elevationArea = this._elevationSampler?.reserveArea();
             const normalArea = this._normalSampler?.reserveArea();
             if (elevationArea && normalArea) {
+                elevationArea.update(tileContent.elevations);
+                normalArea.update(tileContent.normals);
                 bag.elevationArea = elevationArea;
                 bag.normalArea = normalArea;
                 const neigbors = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileMetrics.ToNeigborsXY(tile.address);
@@ -548,30 +564,31 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         }
     }
     _loadLayer(tile) {
-        var client = this._layerClient;
-        if (client) {
-            client
-                .fetchAsync(tile.address)
-                .then((result) => {
-                if (client === this._layerClient && result.content) {
-                    let bag = this._tileBags.get(tile.address.quadkey);
-                    if (bag) {
-                        const layerArea = this._layerSampler?.reserveArea();
-                        if (layerArea && result.content) {
-                            layerArea.update(result.content);
-                            bag.layerArea = layerArea;
-                            const m = tile.surface;
-                            if (m) {
+        const m = tile.surface;
+        if (m && !m.instancedBuffers.layerIds) {
+            m.instancedBuffers.layerIds = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(0, -1, -1, -1);
+            var client = this._layerClient;
+            if (client) {
+                client
+                    .fetchAsync(tile.address)
+                    .then((result) => {
+                    if (client === this._layerClient && result.content) {
+                        let bag = this._tileBags.get(tile.address.quadkey);
+                        if (bag) {
+                            const layerArea = this._layerSampler?.reserveArea();
+                            if (layerArea && result.content) {
+                                layerArea.update(result.content);
+                                bag.layerArea = layerArea;
                                 m.instancedBuffers.layerIds.x = layerArea.id;
                             }
+                            return;
                         }
-                        return;
                     }
-                }
-            })
-                .catch((reason) => {
-                console.log(reason);
-            });
+                })
+                    .catch((reason) => {
+                    console.log(reason);
+                });
+            }
         }
     }
 }
@@ -890,6 +907,12 @@ class SurfaceTileMap extends core_map__WEBPACK_IMPORTED_MODULE_4__.AbstractDispl
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(scene);
         this._view._lodTransition = core_tiles_tile_mapview__WEBPACK_IMPORTED_MODULE_5__.LODTransitionMode.OFF;
+    }
+    set material(m) {
+        this._template.material = m;
+    }
+    get material() {
+        return this._template.material;
     }
     get template() {
         return this._template;

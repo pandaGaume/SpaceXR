@@ -37,6 +37,8 @@ export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDis
     _options: SurfaceTileMapOptions;
     _offset?: Vector3;
     constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>);
+    set material(m: Nullable<Material>);
+    get material(): Nullable<Material>;
     get template(): Mesh;
     hasMesh(mesh: Mesh): boolean;
     protected buildGrid(): VertexData;

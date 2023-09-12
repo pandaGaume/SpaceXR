@@ -94,6 +94,14 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._view._lodTransition = LODTransitionMode.OFF;
     }
 
+    public set material(m: Nullable<Material>) {
+        this._template.material = m;
+    }
+
+    public get material(): Nullable<Material> {
+        return this._template.material;
+    }
+
     public get template(): Mesh {
         return this._template;
     }

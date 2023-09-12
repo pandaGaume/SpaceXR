@@ -26,7 +26,19 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Babylon Map on chrome",
+            "name": "Map on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylonmap.html",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "pathMapping": {
+                "/core": "${workspaceFolder}/packages/dev/core/",
+                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
+            }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "MapMaterial on chrome",
             "url": "http://localhost:1338/packages/host/www/babylonmapmaterial.html",
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,

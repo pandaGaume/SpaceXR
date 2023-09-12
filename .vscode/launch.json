@@ -27,7 +27,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Babylon Map on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylonmap.html",
+            "url": "http://localhost:1338/packages/host/www/babylonmapmaterial.html",
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "pathMapping": {
@@ -39,7 +39,7 @@
             "type": "msedge",
             "request": "launch",
             "name": "Launch Babylon Map on ms edge",
-            "url": "http://localhost:1338/packages/host/www/babylonmap.html",
+            "url": "http://localhost:1338/packages/host/www/babylonmapmaterial.html",
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "pathMapping": {

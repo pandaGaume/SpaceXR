@@ -1,6 +1,7 @@
 import { IDemInfos } from "./dem.interfaces";
 import { Nullable } from "../types";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
+import { ITileSection } from "..";
 export declare class DemInfos implements IDemInfos {
     private static GetVector;
     _max: ICartesian3;
@@ -9,7 +10,8 @@ export declare class DemInfos implements IDemInfos {
     _mean: number;
     _elevations: Nullable<Float32Array>;
     _normals: Nullable<Uint8ClampedArray | HTMLImageElement>;
-    constructor(elevations: Nullable<Float32Array>, normals?: Nullable<Uint8ClampedArray | HTMLImageElement>, stride?: number);
+    _stride: number;
+    constructor(elevations: Nullable<Float32Array>, normals?: Nullable<Uint8ClampedArray | HTMLImageElement>, stride?: number, section?: ITileSection);
     get max(): ICartesian3;
     get min(): ICartesian3;
     get delta(): number;
@@ -17,4 +19,5 @@ export declare class DemInfos implements IDemInfos {
     get elevations(): Nullable<Float32Array>;
     get normals(): Nullable<Uint8ClampedArray | HTMLImageElement>;
     toString(): string;
+    getDemInfoView(section: ITileSection): IDemInfos;
 }

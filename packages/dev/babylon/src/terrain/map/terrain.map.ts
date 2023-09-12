@@ -140,7 +140,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);$
         const instance = this._template.createInstance(name);
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
-        instance.scaling.z = this._options.exageration ?? 1.0;
+        instance.scaling.z = 1.0;
         instance.parent = this.display.context;
         tile.surface = instance;
         return instance;
@@ -187,7 +187,6 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     protected buildMaterial(scene?: Nullable<Scene>): Nullable<Material> {
         if (!scene) {
-            // shader material need scene to access engine..
             return null;
         }
         return null;

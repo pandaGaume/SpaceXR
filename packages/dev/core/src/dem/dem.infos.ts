@@ -2,6 +2,7 @@ import { IDemInfos } from "./dem.interfaces";
 import { Nullable } from "../types";
 import { Cartesian3 } from "../geometry/geometry.cartesian";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
+import { ITileSection } from "..";
 
 export class DemInfos implements IDemInfos {
     private static GetVector(z: number, i: number, stride: number): ICartesian3 {
@@ -15,33 +16,43 @@ export class DemInfos implements IDemInfos {
     _mean: number = 0;
     _elevations: Nullable<Float32Array> = null;
     _normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null;
+    _stride: number = 0;
 
-    public constructor(elevations: Nullable<Float32Array>, normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null, stride?: number) {
+    public constructor(elevations: Nullable<Float32Array>, normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null, stride?: number, section?: ITileSection) {
         this._elevations = elevations;
         this._normals = normals;
 
         if (this._elevations) {
             const size = this._elevations?.length;
-            stride = stride || Math.sqrt(size);
+            this._stride = stride || Math.sqrt(size);
             let min = Number.MAX_SAFE_INTEGER;
             let max = Number.MIN_SAFE_INTEGER;
             let mean = -this._elevations[0] / size;
             let mini = 0;
             let maxi = 0;
-            for (let i = 0; i != size; i++) {
-                const z = this._elevations[i];
-                if (z < min) {
-                    min = z;
-                    mini = i;
-                } else if (z > max) {
-                    max = z;
-                    maxi = i;
+            const x0 = section?.x || 0;
+            const x1 = x0 + (section?.width || this._stride);
+            const y0 = section?.y || 0;
+            const y1 = y0 + (section?.height || this._stride);
+
+            for (let y = y0; y < y1; y++) {
+                const j = y * this._stride;
+                for (let x = x0; x < x1; x++) {
+                    const i = j + x;
+                    const z = this._elevations[i];
+                    if (z < min) {
+                        min = z;
+                        mini = i;
+                    } else if (z > max) {
+                        max = z;
+                        maxi = i;
+                    }
+                    mean += z / size;
                 }
-                mean += z / size;
             }
 
-            this._max = DemInfos.GetVector(max, maxi, stride);
-            this._min = DemInfos.GetVector(min, mini, stride);
+            this._max = DemInfos.GetVector(max, maxi, this._stride);
+            this._min = DemInfos.GetVector(min, mini, this._stride);
             this._delta = this._max.z - this._min.z;
             this._mean = mean;
         }
@@ -69,5 +80,9 @@ export class DemInfos implements IDemInfos {
 
     public toString(): string {
         return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean}}`;
+    }
+
+    public getDemInfoView(section: ITileSection): IDemInfos {
+        return new DemInfos(this._elevations, this._normals, this._stride, section);
     }
 }

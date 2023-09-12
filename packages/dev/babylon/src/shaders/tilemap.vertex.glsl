@@ -17,6 +17,7 @@ uniform highp sampler2DArray altitudes;
 uniform highp sampler2DArray normals;
 uniform highp float minAlt;
 uniform highp float mapscale;
+uniform highp float exageration;
 
 // Varying
 out vec4 vPosition;
@@ -39,7 +40,7 @@ void main(void) {
     } 
 
     float alt = float(texture(altitudes, v)) ;
-    alt = (alt - minAlt) * mapscale;
+    alt = (alt - minAlt) * mapscale * exageration;
 
     vPosition = vec4(position.xy, alt ,1.0) ;
     vec4 worldPos = finalWorld * vPosition;

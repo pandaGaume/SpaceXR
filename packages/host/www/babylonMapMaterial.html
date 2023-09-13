@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Exemple de dessin de tuiles sur canvas</title>
+        <title>Exemple de dessin de tuiles holographique</title>
         <script src="./libs/babylon.js"></script>
         <script src="./libs/babylonjs.loaders.js"></script>
         <script src="./libs/babylon.glTF2FileLoader.js"></script>
@@ -110,7 +110,7 @@
                 display.rotation.z = -Math.PI / 2;
                 const displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
                 displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-                displayMaterial.alpha = 0.1;
+                displayMaterial.alpha = 0.5;
                 display.material = displayMaterial;
                 display.freezeWorldMatrix();
 

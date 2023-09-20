@@ -16,7 +16,7 @@ declare module "@babylonjs/core/Engines/thinEngine" {
             width: number,
             height: number,
             depth: number,
-            data: Nullable<ArrayBufferView>,
+            data: TilePoolData,
             format: number,
             textureType: number
         ): void;
@@ -44,7 +44,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         width: number,
         height: number,
         depth: number,
-        data: Nullable<ArrayBufferView>,
+        data: TilePoolData,
         format: number = Constants.TEXTUREFORMAT_RGBA,
         textureType: number = Constants.TEXTURETYPE_UNSIGNED_INT
     ): void {
@@ -52,7 +52,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         const internalType = this._getWebGLTextureType(textureType);
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
-        this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, data);
+        this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, <any>data);
         let err = this._gl.getError();
         if (err) {
             console.log("Error in sub image", err);
@@ -114,9 +114,11 @@ ThinEngine.prototype.__SpaceXR___createRawTexture2DArray = _makeCreateRawTexture
 // End Thin Engine Extension //
 ///////////////////////////////
 
+export type TilePoolData = Nullable<ArrayBufferView> | TexImageSource;
+
 export interface ITilePoolTextureArea {
     id: number;
-    update(data: Nullable<ArrayBufferView>): void;
+    update(data: TilePoolData): void;
     release(): void;
 }
 
@@ -124,13 +126,13 @@ export interface ITilePoolTexture {
     areaCount: number;
     freeAreaCount: number;
     usedAreaCount: number;
-    reserveArea(): Nullable<ITilePoolTextureArea>;
+    reserveArea(): Nullable<TilePoolTextureArea>;
 }
 
 export class TilePoolTextureOptions {
     static Default = new TilePoolTextureOptions();
 
-    data: Nullable<ArrayBufferView> = null;
+    data: TilePoolData = null;
     metrics: ITileMetrics = EPSG3857.Shared;
     count: number = 1;
     format: number = Constants.TEXTUREFORMAT_RGBA;
@@ -158,7 +160,7 @@ class TilePoolTextureArea implements ITilePoolTextureArea {
         this._released = false;
     }
 
-    public update(data: Nullable<ArrayBufferView>): void {
+    public update(data: TilePoolData): void {
         if (this._released) {
             throw new Error("Invalid state, area has been released.");
         }
@@ -175,12 +177,11 @@ class TilePoolTextureArea implements ITilePoolTextureArea {
     public get id(): number {
         return this._id;
     }
-
 }
 
 export class TilePoolTexture extends Texture implements ITilePoolTexture {
     _o: TilePoolTextureOptions;
-    _areas: Array<Nullable<ITilePoolTextureArea>>;
+    _areas: Array<Nullable<TilePoolTextureArea>>;
     _used: number;
 
     public constructor(name: string, options: TilePoolTextureOptions, scene: Scene) {
@@ -189,7 +190,7 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
         this.name = name;
 
         this._o = o;
-        this._areas = new Array<Nullable<ITilePoolTextureArea>>(this.areaCount).fill(null);
+        this._areas = new Array<Nullable<TilePoolTextureArea>>(this.areaCount).fill(null);
         this._used = 0;
 
         const s = this._o.metrics.tileSize;
@@ -201,7 +202,7 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
         this.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
     }
 
-    public reserveArea(): Nullable<ITilePoolTextureArea> {
+    public reserveArea(): Nullable<TilePoolTextureArea> {
         if (this.freeAreaCount) {
             for (let i = 0; i != this._areas.length; i++) {
                 if (this._areas[i] === null) {
@@ -234,7 +235,7 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
         }
     }
 
-    _updateArea(i: number, data: Nullable<ArrayBufferView>): void {
+    _updateArea(i: number, data: TilePoolData): void {
         const engine = this._getEngine();
         if (engine && this._texture) {
             const s = this._o.metrics!.tileSize;

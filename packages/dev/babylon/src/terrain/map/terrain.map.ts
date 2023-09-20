@@ -3,7 +3,7 @@ import { AbstractMesh, Material, Mesh, Nullable, Scene, Tools, Vector3, VertexDa
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
-import { ITile, ITileAddress, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
+import { ITile, ITileAddress, ITileClient, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
 import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { Cartesian3 } from "core/geometry/geometry.cartesian";
@@ -12,8 +12,9 @@ import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { LODTransitionMode } from "core/tiles/tile.mapview";
+import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
 
-export class SurfaceTileMapOptions {
+export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
         center: Geo2.Zero(),
         levelOfDetail: 10,
@@ -22,13 +23,13 @@ export class SurfaceTileMapOptions {
         exageration: 1.0,
     });
 
-    center?: IGeo2;
-    levelOfDetail?: number;
-    gridOptions?: TerrainGridOptions;
-    insets?: ICartesian3;
-    exageration?: number;
+    public center?: IGeo2;
+    public levelOfDetail?: number;
+    public gridOptions?: TerrainGridOptions;
+    public insets?: ICartesian3;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
+        super();
         Object.assign(this, p);
     }
 }
@@ -39,6 +40,7 @@ export class SurfaceTileMapOptionsBuilder {
     _gridOptions?: TerrainGridOptions;
     _insets?: ICartesian3;
     _exageration?: number;
+    _layerClient?: ITileClient<HTMLImageElement>;
 
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
@@ -60,8 +62,19 @@ export class SurfaceTileMapOptionsBuilder {
         this._exageration = v;
         return this;
     }
+    public withLayer(v: ITileClient<HTMLImageElement>): SurfaceTileMapOptionsBuilder {
+        this._layerClient = v;
+        return this;
+    }
     public build(): SurfaceTileMapOptions {
-        return new SurfaceTileMapOptions({ center: this._center, levelOfDetail: this._lod, gridOptions: this._gridOptions, insets: this._insets, exageration: this._exageration });
+        return new SurfaceTileMapOptions({
+            center: this._center,
+            levelOfDetail: this._lod,
+            gridOptions: this._gridOptions,
+            insets: this._insets,
+            exageration: this._exageration,
+            layerClient: this._layerClient,
+        });
     }
 }
 
@@ -90,8 +103,17 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
-        this._template.material = this.buildMaterial(scene);
+        this._template.material = this.buildMaterial(name, scene);
         this._view._lodTransition = LODTransitionMode.OFF;
+        this._view.validate();
+    }
+
+    public set material(m: Nullable<Material>) {
+        this._template.material = m;
+    }
+
+    public get material(): Nullable<Material> {
+        return this._template.material;
     }
 
     public get template(): Mesh {
@@ -140,7 +162,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         //instance.instancedBuffers.address = new Vector3(a.x, a.y, a.levelOfDetail);$
         const instance = this._template.createInstance(name);
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
-        instance.scaling.z = this._options.exageration ?? 1.0;
+        instance.scaling.z = 1.0;
         instance.parent = this.display.context;
         tile.surface = instance;
         return instance;
@@ -185,12 +207,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         }
     }
 
-    protected buildMaterial(scene?: Nullable<Scene>): Nullable<Material> {
+    protected buildMaterial(name: string, scene?: Nullable<Scene>): Nullable<Material> {
         if (!scene) {
-            // shader material need scene to access engine..
             return null;
         }
-        return null;
+        return new TerrainHologramMaterial(`${name}.material`, this, this._options, scene);
     }
 
     private invalidate(tiles: IterableIterator<TerrainTile<V>> | Array<TerrainTile<V>>) {

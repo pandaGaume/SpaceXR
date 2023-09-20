@@ -128,7 +128,7 @@
                 const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
 
                 const surfaceOptions = {
-                    center: aydarkul,
+                    center: corsica,
                     levelOfDetail: 12,
                     exageration: 1.5,
                 };
@@ -150,6 +150,7 @@
                         "viewProjection",
                         "altitudes",
                         "mapscale",
+                        "exageration",
                         "normals",
                         "layer",
                         "light",
@@ -171,6 +172,7 @@
                     },
                     shaderOptions
                 );
+                mat.setFloat("exageration", surfaceOptions?.exageration ?? 1.0);
 
                 mat.setVector3("light.ambient", new BABYLON.Vector3(0.2, 0.2, 0.2));
                 mat.setVector3("material.ambient", new BABYLON.Vector3(0.1, 0.5, 0.8));

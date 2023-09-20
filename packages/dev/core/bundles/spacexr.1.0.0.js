@@ -21,37 +21,46 @@ class DemInfos {
         const x = i - y * stride;
         return new _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x, y, z);
     }
-    constructor(elevations, normals = null, stride) {
+    constructor(elevations, normals = null, stride, section) {
         this._max = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Zero();
         this._min = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Zero();
         this._delta = 0;
         this._mean = 0;
         this._elevations = null;
         this._normals = null;
+        this._stride = 0;
         this._elevations = elevations;
         this._normals = normals;
         if (this._elevations) {
             const size = this._elevations?.length;
-            stride = stride || Math.sqrt(size);
+            this._stride = stride || Math.sqrt(size);
             let min = Number.MAX_SAFE_INTEGER;
             let max = Number.MIN_SAFE_INTEGER;
             let mean = -this._elevations[0] / size;
             let mini = 0;
             let maxi = 0;
-            for (let i = 0; i != size; i++) {
-                const z = this._elevations[i];
-                if (z < min) {
-                    min = z;
-                    mini = i;
+            const x0 = section?.x || 0;
+            const x1 = x0 + (section?.width || this._stride);
+            const y0 = section?.y || 0;
+            const y1 = y0 + (section?.height || this._stride);
+            for (let y = y0; y < y1; y++) {
+                const j = y * this._stride;
+                for (let x = x0; x < x1; x++) {
+                    const i = j + x;
+                    const z = this._elevations[i];
+                    if (z < min) {
+                        min = z;
+                        mini = i;
+                    }
+                    else if (z > max) {
+                        max = z;
+                        maxi = i;
+                    }
+                    mean += z / size;
                 }
-                else if (z > max) {
-                    max = z;
-                    maxi = i;
-                }
-                mean += z / size;
             }
-            this._max = DemInfos.GetVector(max, maxi, stride);
-            this._min = DemInfos.GetVector(min, mini, stride);
+            this._max = DemInfos.GetVector(max, maxi, this._stride);
+            this._min = DemInfos.GetVector(min, mini, this._stride);
             this._delta = this._max.z - this._min.z;
             this._mean = mean;
         }
@@ -76,6 +85,9 @@ class DemInfos {
     }
     toString() {
         return `elevations count:${this._elevations?.length || 0}, min:{${this._min.toString()}}, max:{${this._max.toString()}}, delta:${this._delta}, mean:${this._mean}}`;
+    }
+    getDemInfoView(section) {
+        return new DemInfos(this._elevations, this._normals, this._stride, section);
     }
 }
 //# sourceMappingURL=dem.infos.js.map
@@ -395,12 +407,16 @@ class EventState {
     }
 }
 class Observer {
-    constructor(callback, mask, scope = null) {
+    constructor(source, callback, mask, scope = null) {
+        this.source = source;
         this.callback = callback;
         this.mask = mask;
         this.scope = scope;
         this._willBeUnregistered = false;
         this.unregisterOnNextCall = false;
+    }
+    dispose() {
+        this.source.remove(this);
     }
 }
 class Observable {
@@ -434,7 +450,7 @@ class Observable {
         if (!callback) {
             return null;
         }
-        const observer = new Observer(callback, mask, scope);
+        const observer = new Observer(this, callback, mask, scope);
         observer.unregisterOnNextCall = unregisterOnFirstCall;
         if (insertFirst) {
             this._observers.unshift(observer);

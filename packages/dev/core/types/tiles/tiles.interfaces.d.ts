@@ -13,6 +13,10 @@ export interface ITileContentView<T> {
     target: Nullable<ITileSection>;
     data: Nullable<T>;
 }
+export interface ITileCruncher<T> {
+    Donwsampling(childs: T[], sections?: ITileSection[]): Nullable<T>;
+    Upsampling(parent: T, section: ITileSection | number): Nullable<T>;
+}
 export declare function IsTileContentView<T>(b: unknown): b is ITileContentView<T>;
 export type TileContent<T> = Nullable<Array<Nullable<T | ITileContentView<T>>>>;
 export interface ITile<T> extends IGeoBounded {

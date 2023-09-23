@@ -20,6 +20,11 @@ export interface ITileContentView<T> {
     data: Nullable<T>;
 }
 
+export interface ITileCruncher<T> {
+    Downsampling(childs: T[], sections?: ITileSection[]): Nullable<T>;
+    Upsampling(parent: T, section: ITileSection | number): Nullable<T>;
+}
+
 export function IsTileContentView<T>(b: unknown): b is ITileContentView<T> {
     if (typeof b !== "object" || b === null) return false;
     return (<any>b).source !== undefined && (<any>b).target !== undefined && (<any>b).data !== undefined;

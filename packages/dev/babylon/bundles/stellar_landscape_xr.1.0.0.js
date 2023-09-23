@@ -2720,6 +2720,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   "ImageDataTileCruncher": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCruncher),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
 /* harmony export */   "IsTileContentView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.IsTileContentView),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
@@ -4742,6 +4743,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   "ImageDataTileCruncher": () => (/* reexport safe */ _tiles_image_cruncher__WEBPACK_IMPORTED_MODULE_10__.ImageDataTileCruncher),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_4__.ImageTileCodec),
 /* harmony export */   "IsTileContentView": () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileContentView),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.JsonTileCodec),
@@ -4779,6 +4781,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vendors_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./vendors/index */ "../core/dist/tiles/vendors/index.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
 /* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles.urlBuilder */ "../core/dist/tiles/tiles.urlBuilder.js");
+/* harmony import */ var _tiles_image_cruncher__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.image.cruncher */ "../core/dist/tiles/tiles.image.cruncher.js");
+
 
 
 
@@ -5695,6 +5699,74 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
 EPSG3857.Shared = new EPSG3857();
 
 //# sourceMappingURL=tiles.geography.js.map
+
+/***/ }),
+
+/***/ "../core/dist/tiles/tiles.image.cruncher.js":
+/*!**************************************************!*\
+  !*** ../core/dist/tiles/tiles.image.cruncher.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ImageDataTileCruncher": () => (/* binding */ ImageDataTileCruncher)
+/* harmony export */ });
+class ImageDataTileCruncher {
+    static CreateCanvas(width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+    constructor(metrics) {
+        this._sections = [];
+        if (metrics === undefined)
+            throw new Error("metrics cannot be undefined");
+        this._metrics = metrics;
+        const s = metrics.tileSize;
+        this._source = ImageDataTileCruncher.CreateCanvas(s, s);
+        this._target = ImageDataTileCruncher.CreateCanvas(s, s);
+        this._buildSections();
+    }
+    Donwsampling(childs, sections) {
+        const sourceCtx = this._source.getContext("2d");
+        const targetCtx = this._target.getContext("2d");
+        sections = sections || this._sections;
+        if (sourceCtx && targetCtx) {
+            for (let i = 0; i != 4; i++) {
+                const c = childs[i];
+                sourceCtx.putImageData(c, 0, 0);
+                const section = sections[i];
+                targetCtx.drawImage(this._source, section.x, section.y, section.width, section.height);
+            }
+            const size = this._metrics.tileSize;
+            return targetCtx.getImageData(0, 0, size, size);
+        }
+        return null;
+    }
+    Upsampling(parent, section) {
+        const sourceCtx = this._source.getContext("2d");
+        const targetCtx = this._target.getContext("2d");
+        section = typeof section === "number" ? this._sections[section] : section;
+        if (sourceCtx && targetCtx) {
+            sourceCtx.putImageData(parent, 0, 0);
+            const size = this._metrics.tileSize;
+            targetCtx.imageSmoothingEnabled = true;
+            targetCtx.drawImage(this._source, section.x, section.y, section.width, section.height, 0, 0, size, size);
+            return targetCtx.getImageData(0, 0, size, size);
+        }
+        return null;
+    }
+    _buildSections() {
+        const s = this._metrics.tileSize / 2;
+        this._sections.push({ x: 0, y: 0, width: s, height: s });
+        this._sections.push({ x: s, y: 0, width: s, height: s });
+        this._sections.push({ x: 0, y: s, width: s, height: s });
+        this._sections.push({ x: s, y: s, width: s, height: s });
+    }
+}
+//# sourceMappingURL=tiles.image.cruncher.js.map
 
 /***/ }),
 
@@ -7417,6 +7489,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   "ImageDataTileCruncher": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCruncher),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec),
 /* harmony export */   "IsTileContentView": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.IsTileContentView),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.JsonTileCodec),

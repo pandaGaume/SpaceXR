@@ -8,3 +8,4 @@ export * from "./tiles.geography";
 export * from "./vendors/index";
 export * from "./tiles";
 export * from "./tiles.urlBuilder";
+export * from "./tiles.image.cruncher";

@@ -21,12 +21,14 @@ export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
         gridOptions: TerrainGridOptions.Shared,
         insets: Cartesian3.Zero(),
         exageration: 1.0,
+        lodTransition: LODTransitionMode.LINEAR,
     });
 
     public center?: IGeo2;
     public levelOfDetail?: number;
     public gridOptions?: TerrainGridOptions;
     public insets?: ICartesian3;
+    public lodTransition?: LODTransitionMode;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
         super();
@@ -104,7 +106,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
-        this._view._lodTransition = LODTransitionMode.OFF;
+        this._view._lodTransition = o.lodTransition!;
         this._view.validate();
     }
 

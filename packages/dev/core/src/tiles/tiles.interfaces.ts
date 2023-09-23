@@ -21,8 +21,8 @@ export interface ITileContentView<T> {
 }
 
 export interface ITileCruncher<T> {
-    Downsampling(childs: T[], sections?: ITileSection[]): Nullable<T>;
-    Upsampling(parent: T, section: ITileSection | number): Nullable<T>;
+    Downsampling(childs: T[]): Nullable<T>;
+    Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
 
 export function IsTileContentView<T>(b: unknown): b is ITileContentView<T> {

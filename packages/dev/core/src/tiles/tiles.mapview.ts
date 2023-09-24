@@ -152,7 +152,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     public constructor(datasource: ITileDatasource<T, ITileAddress>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
         this._manager = new TileContentManager<T>(datasource);
-        this._manager.contentUpdateObservable.add(this.onUpdate.bind(this));
+        this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this.invalidateSize(width, height).setView(center, lod);
         this._context = new TileMapContext<T>();
         this._azimuth = 0;
@@ -412,6 +412,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 this._cache.set(key, t);
 
                 // and retreive the content.
+                // underlying operation will trigger the event to update observer
                 const c = this._manager.getTileContent(a);
                 if (c) {
                     t.content = [c];
@@ -440,7 +441,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this.updateObservable.notifyObservers(updateEvent);
     }
 
-    protected onUpdate(args: ContentUpdateEventArgs<T>): void {
+    protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void {
         let t: ITile<T> | undefined;
         t = this._cache.get(args.address.quadkey);
         if (t) {

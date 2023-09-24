@@ -103,7 +103,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onUpdateObserverAdded;
     protected doValidate(): void;
     protected doValidateContext(level: TileMapContext<T>): void;
-    protected onUpdate(args: ContentUpdateEventArgs<T>): void;
+    protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;
     private rotatePointsArround;

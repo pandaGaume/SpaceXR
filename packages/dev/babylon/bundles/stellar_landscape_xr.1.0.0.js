@@ -5250,7 +5250,7 @@ class TileContentManager {
         if (this._cache.contains(key)) {
             return this._cache.get(key);
         }
-        let c = this._buildTileContent(address);
+        let c = this.buildAlternativeTileContent(address);
         this._cache.set(key, c);
         this._datasource
             .fetchAsync(address, this)
@@ -5271,10 +5271,10 @@ class TileContentManager {
         });
         return c;
     }
-    onContentObserverAdded(observer) { }
-    _buildTileContent(address) {
+    buildAlternativeTileContent(address) {
         return null;
     }
+    onContentObserverAdded(observer) { }
 }
 //# sourceMappingURL=tiles.content.manager.js.map
 
@@ -5867,7 +5867,7 @@ class TileMapView {
         this._lodTransition = LODTransitionMode.LINEAR;
         this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_3__.MemoryCache();
         this._manager = new _tiles_content_manager__WEBPACK_IMPORTED_MODULE_4__.TileContentManager(datasource);
-        this._manager.contentUpdateObservable.add(this.onUpdate.bind(this));
+        this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this.invalidateSize(width, height).setView(center, lod);
         this._context = new TileMapContext();
         this._azimuth = 0;
@@ -6094,7 +6094,7 @@ class TileMapView {
         this._oldInfos = newInfos;
         this.updateObservable.notifyObservers(updateEvent);
     }
-    onUpdate(args) {
+    onTileContentUpdate(args) {
         let t;
         t = this._cache.get(args.address.quadkey);
         if (t) {

@@ -55,8 +55,9 @@ export class TileContentManager<T> {
         if (this._cache.contains(key)) {
             return this._cache.get(key);
         }
-        // then try to build it using parent or childs
-        let c = this._buildTileContent(address);
+        // then try to build the content using alternative method
+        let c = this.buildAlternativeTileContent(address);
+
         // store the content, either null or not. This flag the address as beeing processed.
         this._cache.set(key, c);
 
@@ -86,10 +87,10 @@ export class TileContentManager<T> {
         return c;
     }
 
-    // INTERNALS
-    private onContentObserverAdded(observer: Observer<ContentUpdateEventArgs<T>>): void {}
-
-    private _buildTileContent(address: ITileAddress): Nullable<T> {
+    protected buildAlternativeTileContent(address: ITileAddress): Nullable<T> {
         return null;
     }
+
+    // INTERNALS
+    private onContentObserverAdded(observer: Observer<ContentUpdateEventArgs<T>>): void {}
 }

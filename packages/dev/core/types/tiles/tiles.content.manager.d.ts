@@ -19,6 +19,6 @@ export declare class TileContentManager<T> {
     get datasource(): ITileDatasource<T, ITileAddress>;
     get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>>;
     getTileContent(address: ITileAddress): Nullable<T> | undefined;
+    protected buildAlternativeTileContent(address: ITileAddress): Nullable<T>;
     private onContentObserverAdded;
-    private _buildTileContent;
 }

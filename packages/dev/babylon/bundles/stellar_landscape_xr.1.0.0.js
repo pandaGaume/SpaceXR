@@ -5265,7 +5265,7 @@ class TileContentManager {
             if (result.content) {
                 const manager = result.userArgs[0];
                 const address = result.address;
-                const content = result.content;
+                const content = [result.content];
                 manager._cache.set(address.quadkey, content);
                 if (this._contentUpdateObservable) {
                     const e = new ContentUpdateEventArgs(address, content, manager);
@@ -6077,10 +6077,7 @@ class TileMapView {
                 }
                 t = builder.withAddress(a).build();
                 this._cache.set(key, t);
-                const c = this._manager.getTileContent(a);
-                if (c) {
-                    t.content = [c];
-                }
+                t.content = this._manager.getTileContent(a);
                 added.push(t);
             }
         }
@@ -6104,7 +6101,7 @@ class TileMapView {
         t = this._cache.get(args.address.quadkey);
         if (t) {
             if (args.content) {
-                t.content = [args.content];
+                t.content = args.content;
                 this.onTileReady(t);
                 return;
             }

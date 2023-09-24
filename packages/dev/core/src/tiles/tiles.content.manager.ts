@@ -1,14 +1,14 @@
 import { IMemoryCache, MemoryCache } from "core/utils/cache";
-import { FetchResult, ITileAddress, ITileDatasource, ITileMetrics } from "./tiles.interfaces";
+import { FetchResult, ITileAddress, ITileDatasource, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { Nullable } from "core/types";
 import { Observable, Observer } from "core/events/events.observable";
 import { EventArgs } from "core/events/events.args";
 
 export class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> {
     _address: ITileAddress;
-    _content: Nullable<T>;
+    _content: TileContent<T>;
 
-    public constructor(address: ITileAddress, content: Nullable<T>, sender: TileContentManager<T>) {
+    public constructor(address: ITileAddress, content: TileContent<T>, sender: TileContentManager<T>) {
         super(sender);
         this._address = address;
         this._content = content;
@@ -18,25 +18,25 @@ export class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> 
         return this._address;
     }
 
-    public get content(): Nullable<T> {
+    public get content(): TileContent<T> {
         return this._content;
     }
 }
 
 export class TileContentManager<T> {
     // cache
-    private _cache: IMemoryCache<string, Nullable<T>>;
+    private _cache: IMemoryCache<string, TileContent<T>>;
     // data source
     private _datasource: ITileDatasource<T, ITileAddress>;
     // observable
     _contentUpdateObservable?: Observable<ContentUpdateEventArgs<T>>;
 
-    public constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, T>) {
-        this._cache = cache || new MemoryCache<string, T>();
+    public constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>) {
+        this._cache = cache || new MemoryCache<string, TileContent<T>>();
         this._datasource = datasource;
     }
 
-    public get cache(): IMemoryCache<string, Nullable<T>> {
+    public get cache(): IMemoryCache<string, TileContent<T>> {
         return this._cache;
     }
 
@@ -52,11 +52,11 @@ export class TileContentManager<T> {
         return this._contentUpdateObservable!;
     }
 
-    public getTileContent(address: ITileAddress): Nullable<T> | undefined {
+    public getTileContent(address: ITileAddress): TileContent<T> {
         const key = address.quadkey;
         // first have a look in cache
         if (this._cache.contains(key)) {
-            return this._cache.get(key);
+            return this._cache.get(key)!;
         }
         // then try to build the content using alternative method
         let c = this.buildAlternativeTileContent(address);
@@ -72,7 +72,7 @@ export class TileContentManager<T> {
                     const manager = <TileContentManager<T>>result.userArgs[0];
                     const address = result.address;
                     // we have the content of the tile.
-                    const content = result.content;
+                    const content = [result.content];
                     // we store the value in cache
                     manager._cache.set(address.quadkey, content);
                     // we notify the observers
@@ -90,7 +90,7 @@ export class TileContentManager<T> {
         return c;
     }
 
-    protected buildAlternativeTileContent(address: ITileAddress): Nullable<T> {
+    protected buildAlternativeTileContent(address: ITileAddress): TileContent<T> {
         return null;
     }
 

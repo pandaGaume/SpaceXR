@@ -413,10 +413,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
                 // and retreive the content.
                 // underlying operation will trigger the event to update observer
-                const c = this._manager.getTileContent(a);
-                if (c) {
-                    t.content = [c];
-                }
+                t.content = this._manager.getTileContent(a);
                 added.push(t);
             }
         }
@@ -446,7 +443,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         t = this._cache.get(args.address.quadkey);
         if (t) {
             if (args.content) {
-                t.content = [args.content];
+                t.content = args.content;
                 // we have the content of the tile.
                 this.onTileReady(t);
                 return;

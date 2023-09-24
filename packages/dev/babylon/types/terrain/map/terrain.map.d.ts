@@ -7,7 +7,7 @@ import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tile.mapview";
+import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterialOptions } from "../../materials";
 export declare class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     static Default: SurfaceTileMapOptions;

@@ -11,7 +11,7 @@ import { Cartesian3 } from "core/geometry/geometry.cartesian";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tile.mapview";
+import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {

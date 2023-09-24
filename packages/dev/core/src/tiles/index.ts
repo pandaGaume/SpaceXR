@@ -11,3 +11,5 @@ export * from "./tiles.urlBuilder";
 export * from "./tiles.crunchers";
 export * from "./tiles.crunchers.image";
 export * from "./tiles.crunchers.float32";
+export * from "./tiles.mapview";
+export * from "./tiles.content.manager";

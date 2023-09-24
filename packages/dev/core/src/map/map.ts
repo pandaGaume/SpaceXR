@@ -1,4 +1,4 @@
-import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tile.mapview";
+import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tiles.mapview";
 import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";

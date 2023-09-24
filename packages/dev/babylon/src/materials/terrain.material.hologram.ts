@@ -22,7 +22,7 @@ import { Nullable } from "core/types";
 import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
 import { ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
 import { Range } from "core/math";
-import { UpdateEventArgs, UpdateReason } from "core/tiles/tile.mapview";
+import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 
 // internal class used to hold the tile pool texture areas
 class TileBag {

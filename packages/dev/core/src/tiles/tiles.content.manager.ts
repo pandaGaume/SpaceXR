@@ -14,11 +14,11 @@ export class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> 
         this._content = content;
     }
 
-    public get Address(): ITileAddress {
+    public get address(): ITileAddress {
         return this._address;
     }
 
-    public get Content(): Nullable<T> {
+    public get content(): Nullable<T> {
         return this._content;
     }
 }
@@ -36,29 +36,29 @@ export class TileContentManager<T> {
         this._datasource = datasource;
     }
 
-    public get Cache(): IMemoryCache<string, Nullable<T>> {
+    public get cache(): IMemoryCache<string, Nullable<T>> {
         return this._cache;
     }
 
-    public get Datasource(): ITileDatasource<T, ITileAddress> {
+    public get datasource(): ITileDatasource<T, ITileAddress> {
         return this._datasource;
     }
 
-    public get ContentUpdateObservable(): Observable<ContentUpdateEventArgs<T>> {
+    public get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>> {
         this._contentUpdateObservable = this._contentUpdateObservable || new Observable<ContentUpdateEventArgs<T>>(this.onContentObserverAdded.bind(this));
         return this._contentUpdateObservable!;
     }
 
-    public GetTileContent(address: ITileAddress): Nullable<T> | undefined {
+    public getTileContent(address: ITileAddress): Nullable<T> | undefined {
         const key = address.quadkey;
         // first have a look in cache
         if (this._cache.contains(key)) {
             return this._cache.get(key);
         }
         // then try to build it using parent or childs
-        let t = this._buildTileContent(address);
+        let c = this._buildTileContent(address);
         // store the content, either null or not. This flag the address as beeing processed.
-        this._cache.set(key, t);
+        this._cache.set(key, c);
 
         // then try to get it from the datasource
         this._datasource
@@ -66,11 +66,11 @@ export class TileContentManager<T> {
             .then((result: FetchResult<Nullable<T>>) => {
                 if (result.content) {
                     const manager = <TileContentManager<T>>result.userArgs[0];
-                    const address = <ITileAddress>result.userArgs[1];
+                    const address = result.address;
                     // we have the content of the tile.
                     const content = result.content;
                     // we store the value in cache
-                    manager._cache.set(result.address.quadkey, content);
+                    manager._cache.set(address.quadkey, content);
                     // we notify the observers
                     if (this._contentUpdateObservable) {
                         const e = new ContentUpdateEventArgs<T>(address, content, manager);
@@ -83,7 +83,7 @@ export class TileContentManager<T> {
                 console.log(`the lookup operation has failed because of ${reason}`);
             });
 
-        return null;
+        return c;
     }
 
     // INTERNALS

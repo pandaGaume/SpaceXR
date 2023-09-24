@@ -5,6 +5,7 @@ import { Observable } from "../events/events.observable";
 import { IValidable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
+import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 export declare class TileMapContext<T> {
     _lod: number;
     _scale: number;
@@ -51,7 +52,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     removedObservable: any;
     static ClampAzimuth(a: number): number;
     _cache: IMemoryCache<string, ITile<T>>;
-    _datasource: ITileDatasource<T, ITileAddress>;
+    _manager: TileContentManager<T>;
     _w: number;
     _h: number;
     _lod: number;
@@ -102,6 +103,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onUpdateObserverAdded;
     protected doValidate(): void;
     protected doValidateContext(level: TileMapContext<T>): void;
+    protected onUpdate(args: ContentUpdateEventArgs<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;
     private rotatePointsArround;

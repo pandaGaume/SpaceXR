@@ -1,18 +1,20 @@
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress, FetchResult, IsTileContentView } from "./tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
-import { IValidable, Nullable } from "../types";
+import { IValidable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
-import { TileBuilder, TileView } from "./tiles";
+import { TileBuilder } from "./tiles";
 import { TileMetrics } from "./tiles.metrics";
-import { Cartesian2, Envelope } from "..";
+import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
+import { Cartesian2 } from "../geometry/geometry.cartesian";
+import { Envelope } from "../geography/geography.envelope";
 
 export class TileMapContext<T> {
     _lod: number = 0;
@@ -122,7 +124,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _cache: IMemoryCache<string, ITile<T>>;
 
     // data source
-    _datasource: ITileDatasource<T, ITileAddress>;
+    _manager: TileContentManager<T>;
 
     // current navigation parameters
     _w: number = 0;
@@ -149,7 +151,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public constructor(datasource: ITileDatasource<T, ITileAddress>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
-        this._datasource = datasource;
+        this._manager = new TileContentManager<T>(datasource);
+        this._manager.contentUpdateObservable.add(this.onUpdate.bind(this));
         this.invalidateSize(width, height).setView(center, lod);
         this._context = new TileMapContext<T>();
         this._azimuth = 0;
@@ -182,7 +185,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     public get datasource(): ITileDatasource<T, ITileAddress> {
-        return this._datasource;
+        return this._manager.datasource;
     }
 
     public get context(): TileMapContext<T> {
@@ -203,7 +206,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
-        return this._datasource.metrics;
+        return this.datasource.metrics;
     }
 
     // SIZE
@@ -392,6 +395,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 let t = level.tiles.get(key);
                 if (t) {
                     remains.push(t);
+                    // we delete to create the differential between remain, deleted and added.
                     level.tiles.delete(key);
                     continue;
                 }
@@ -401,64 +405,18 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                     added.push(t);
                     continue;
                 }
+
                 // we need to create the tile.
                 t = builder.withAddress(a).build();
+                // set empty tile
                 this._cache.set(key, t);
 
-                // set the temporary tile view
-                // 1 - zoom in : use the parent and tile section
-                // 2 - zoom out : use the childrens
-                // 3 - empty tile - see options
-                if (this._lodTransition == LODTransitionMode.LINEAR && this._oldInfos && this._oldInfos.lod != lod) {
-                    if (this._oldInfos.lod < lod) {
-                        // zoom in
-                        const parentKey = TileMetrics.ToParentKey(key);
-                        const parent = this._cache.get(parentKey);
-                        if (parent && parent.content) {
-                            const section = TileMetrics.ToSection(key, this.metrics.tileSize);
-                            t.content = [new TileView<T>(<T>parent.content[0], section)];
-                        }
-                    } else {
-                        // zoom out
-                        const childKeys = TileMetrics.ToChildsKey(key);
-                        t.content = childKeys.map((k) => {
-                            const child = this._cache.get(k);
-                            // TODO : filter the tile with the actual rectangle.
-                            if (!child || !child.content) {
-                                return null;
-                            }
-                            const section = TileMetrics.ToSection(k, this.metrics.tileSize);
-                            const content = child.content[0];
-                            if (IsTileContentView(content)) {
-                                // allow only one level of transition for now.
-                                return null;
-                            }
-                            return new TileView<T>(<T>content, null, section);
-                        });
-                    }
-                }
-                // set empty tile
-                added.push(t);
-
                 // and retreive the content.
-                this._datasource
-                    .fetchAsync(a, this, t)
-                    .then((result: FetchResult<Nullable<T>>) => {
-                        const view = <TileMapView<T>>result.userArgs[0];
-                        const t = <ITile<T>>result.userArgs[1];
-                        if (result.content) {
-                            // we have the content of the tile.
-                            t.content = [result.content];
-                            view.onTileReady(t);
-                            return;
-                        }
-                        // the content is not defined.
-                        view.onTileNotFound(t);
-                    })
-                    .catch((reason: any) => {
-                        // the lookup operation has failed - TODO describe a strategy
-                        console.log(`the lookup operation has failed because of ${reason}`);
-                    });
+                const c = this._manager.getTileContent(a);
+                if (c) {
+                    t.content = [c];
+                }
+                added.push(t);
             }
         }
 
@@ -480,6 +438,21 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newInfos, this._oldInfos, added.length ? added : undefined, deleted.length ? deleted : undefined);
         this._oldInfos = newInfos;
         this.updateObservable.notifyObservers(updateEvent);
+    }
+
+    protected onUpdate(args: ContentUpdateEventArgs<T>): void {
+        let t: ITile<T> | undefined;
+        t = this._cache.get(args.address.quadkey);
+        if (t) {
+            if (args.content) {
+                t.content = [args.content];
+                // we have the content of the tile.
+                this.onTileReady(t);
+                return;
+            }
+            // the content is not defined.
+            this.onTileNotFound(t);
+        }
     }
 
     /**

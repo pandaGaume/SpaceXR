@@ -1,5 +1,5 @@
 import { IMemoryCache, MemoryCache } from "core/utils/cache";
-import { FetchResult, ITileAddress, ITileDatasource } from "./tiles.interfaces";
+import { FetchResult, ITileAddress, ITileDatasource, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "core/types";
 import { Observable, Observer } from "core/events/events.observable";
 import { EventArgs } from "core/events/events.args";
@@ -42,6 +42,9 @@ export class TileContentManager<T> {
 
     public get datasource(): ITileDatasource<T, ITileAddress> {
         return this._datasource;
+    }
+    public get metrics(): ITileMetrics {
+        return this._datasource.metrics;
     }
 
     public get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>> {

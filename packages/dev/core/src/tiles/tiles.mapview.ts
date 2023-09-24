@@ -149,9 +149,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
-    public constructor(datasource: ITileDatasource<T, ITileAddress>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
+    public constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
-        this._manager = new TileContentManager<T>(datasource);
+        this._manager = manager;
         this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this.invalidateSize(width, height).setView(center, lod);
         this._context = new TileMapContext<T>();

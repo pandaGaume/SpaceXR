@@ -13,6 +13,7 @@ import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
+import { TileContentManager } from "core/tiles/tiles.content.manager";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -101,7 +102,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, datasource, o.center, o.levelOfDetail);
+        super(display, new TileContentManager<V>(datasource), o.center, o.levelOfDetail);
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);

@@ -6,6 +6,7 @@ import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { CanvasDisplay } from "./map.canvas.display";
 import { RGBAColor } from "../../math/math.color";
+import { TileContentManager } from "core/tiles";
 
 type CanvasTileContentType = HTMLImageElement;
 type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
@@ -53,7 +54,7 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
     _options: CanvasTileMapOptions;
 
     public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number, options?: CanvasTileMapOptions) {
-        super(new CanvasDisplay(canvas), datasource, center, lod);
+        super(new CanvasDisplay(canvas), new TileContentManager<CanvasTileContentType>(datasource), center, lod);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
         this._observer = new ResizeObserver(() => {
             this.invalidateSize(canvas.width, canvas.height);

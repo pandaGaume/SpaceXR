@@ -1,10 +1,11 @@
 import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tiles.mapview";
-import { ITile, ITileAddress, ITileDatasource, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Observable, Observer } from "../events/events.observable";
+import { TileContentManager } from "core/tiles/tiles.content.manager";
 
 export interface IMapDisplay {
     resolution: ISize3;
@@ -23,9 +24,9 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     _removedObservable?: Observable<T>;
     _updatedObservable?: Observable<T>;
 
-    public constructor(display: D, datasource: ITileDatasource<V, ITileAddress>, center?: IGeo2, lod?: number) {
+    public constructor(display: D, manager: TileContentManager<V>, center?: IGeo2, lod?: number) {
         this._display = display;
-        this._view = new TileMapView(datasource, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || datasource.metrics.minLOD);
+        this._view = new TileMapView(manager, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
         this._view.updateObservable.add(this.onUpdate.bind(this));
         this._activ = new Map<string, T>();
     }

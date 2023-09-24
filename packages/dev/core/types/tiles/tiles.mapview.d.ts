@@ -70,7 +70,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
-    constructor(datasource: ITileDatasource<T, ITileAddress>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
+    constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
     get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;

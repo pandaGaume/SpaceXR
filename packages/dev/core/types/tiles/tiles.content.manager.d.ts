@@ -1,5 +1,5 @@
 import { IMemoryCache } from "core/utils/cache";
-import { ITileAddress, ITileDatasource } from "./tiles.interfaces";
+import { ITileAddress, ITileDatasource, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "core/types";
 import { Observable } from "core/events/events.observable";
 import { EventArgs } from "core/events/events.args";
@@ -17,6 +17,7 @@ export declare class TileContentManager<T> {
     constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, T>);
     get cache(): IMemoryCache<string, Nullable<T>>;
     get datasource(): ITileDatasource<T, ITileAddress>;
+    get metrics(): ITileMetrics;
     get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>>;
     getTileContent(address: ITileAddress): Nullable<T> | undefined;
     protected buildAlternativeTileContent(address: ITileAddress): Nullable<T>;

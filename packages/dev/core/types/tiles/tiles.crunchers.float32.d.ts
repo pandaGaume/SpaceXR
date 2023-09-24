@@ -8,5 +8,7 @@ export declare class Float32ArrayTileCruncher extends AbstractTileCruncher<Float
     set smoothingEnabled(value: boolean);
     Downsampling(childs: Float32Array[]): Nullable<Float32Array>;
     Upsampling(parent: Float32Array, sectionIndex: number): Nullable<Float32Array>;
+    private _upsampling;
+    private _upsamplingBilinear;
     private _bilinearInterpolation;
 }

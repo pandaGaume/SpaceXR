@@ -80,6 +80,8 @@ export class TileWebClient<T> implements ITileClient<T> {
                 let content = null;
                 if (response.ok) {
                     content = await this._codec.decodeAsync(response);
+                } else {
+                    console.log(`Failed ${url}: ${response.status}`);
                 }
                 const r = new FetchResult<Nullable<T>>(request, content, userArgs);
                 r.status = response.status;
@@ -87,6 +89,7 @@ export class TileWebClient<T> implements ITileClient<T> {
                 return r;
             } catch (error: any) {
                 // Handle the error here. We have ONLY error.message and error.name
+                console.log(`Error fetching ${url}: ${error}`);
             }
             // Retry after delay using exponential backoff
             const jitter = Scalar.GetRandomInt(0, this._o.initialDelay || 1000); // Random number between 0 and 1000 (milliseconds)

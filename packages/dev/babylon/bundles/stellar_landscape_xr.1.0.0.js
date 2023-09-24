@@ -4935,12 +4935,16 @@ class TileWebClient {
                 if (response.ok) {
                     content = await this._codec.decodeAsync(response);
                 }
+                else {
+                    console.log(`Failed ${url}: ${response.status}`);
+                }
                 const r = new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, content, userArgs);
                 r.status = response.status;
                 r.statusText = response.statusText;
                 return r;
             }
             catch (error) {
+                console.log(`Error fetching ${url}: ${error}`);
             }
             const jitter = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.GetRandomInt(0, this._o.initialDelay || 1000);
             await new Promise((resolve) => setTimeout(resolve, delay + jitter));

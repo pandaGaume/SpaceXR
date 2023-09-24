@@ -17,7 +17,7 @@ export interface ITileSection extends ICartesian2, ISize2 {}
 export interface ITileContentView<T> {
     source: Nullable<ITileSection>;
     target: Nullable<ITileSection>;
-    data: Nullable<T>;
+    delegate: ITile<T>;
 }
 
 export interface ITileCruncher<T> {

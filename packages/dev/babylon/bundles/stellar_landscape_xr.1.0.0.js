@@ -479,13 +479,18 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         }
         const m = tile.surface;
         if (m && tile.content && tile.content[0]) {
-            const content = tile.content[0];
+            let tileContent = tile.content[0];
+            if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileContentView)(tileContent)) {
+                do {
+                    if (tileContent.delegate.content && tileContent.delegate.content[0]) {
+                        tileContent = tileContent.delegate.content[0];
+                        continue;
+                    }
+                    return;
+                } while ((0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileContentView)(tileContent));
+            }
             let min = this._elevationRange.min;
             let max = this._elevationRange.max || Number.MIN_VALUE;
-            let tileContent = (0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileContentView)(content) ? content.data : content;
-            if (!tileContent) {
-                return;
-            }
             m.instancedBuffers.demInfos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(tileContent.min.z, tileContent.max.z, tileContent.delta, tileContent.mean);
             min = tileContent.min.z;
             max = tileContent.max.z;
@@ -3099,16 +3104,16 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
                                 ctx.drawImage(item, x, y);
                                 continue;
                             }
-                            if (item.data instanceof HTMLImageElement) {
-                                const w = item.target?.width ?? item.data.width;
-                                const h = item.target?.height ?? item.data.height;
+                            if (item.delegate instanceof HTMLImageElement) {
+                                const w = item.target?.width ?? item.delegate.width;
+                                const h = item.target?.height ?? item.delegate.height;
                                 const sx = item.source?.x ?? 0;
                                 const sy = item.source?.y ?? 0;
-                                const sw = item.source?.width ?? item.data.width;
-                                const sh = item.source?.height ?? item.data.height;
+                                const sw = item.source?.width ?? item.delegate.width;
+                                const sh = item.source?.height ?? item.delegate.height;
                                 const tx = item.target?.x ?? 0;
                                 const ty = item.target?.y ?? 0;
-                                ctx.drawImage(item.data, sx, sy, sw, sh, x + tx, y + ty, w, h);
+                                ctx.drawImage(item.delegate, sx, sy, sw, sh, x + tx, y + ty, w, h);
                             }
                         }
                         else {
@@ -5685,8 +5690,8 @@ class TileSection {
     }
 }
 class TileView {
-    constructor(data, source = null, target = null) {
-        this.data = data;
+    constructor(delegate, source = null, target = null) {
+        this.delegate = delegate;
         this.source = source;
         this.target = target;
     }

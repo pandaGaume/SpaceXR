@@ -481,17 +481,23 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
         const m = tile.surface;
         if (m && tile.content && tile.content[0]) {
-            const content = tile.content[0];
+            let tileContent = tile.content[0];
+            if (IsTileContentView<V>(tileContent)) {
+                do {
+                    if (tileContent.delegate.content && tileContent.delegate.content[0]) {
+                        tileContent = tileContent.delegate.content[0];
+                        continue;
+                    }
+                    return;
+                } while (IsTileContentView<V>(tileContent));
+            }
+
             // update the elevation range.
             let min = this._elevationRange.min;
             let max = this._elevationRange.max || Number.MIN_VALUE;
 
             // remember that the TileContentView is used to keep the information of the tile while zooming in when
             // target data are not yet ready. Min and Max are corrsponding to specific section of the tile.
-            let tileContent = IsTileContentView<V>(content) ? content.data : content;
-            if (!tileContent) {
-                return;
-            }
             m.instancedBuffers.demInfos = new Vector4(tileContent.min.z, tileContent.max.z, tileContent.delta, tileContent.mean);
             min = tileContent.min.z;
             max = tileContent.max.z;

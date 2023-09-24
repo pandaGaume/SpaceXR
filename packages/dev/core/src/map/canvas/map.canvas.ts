@@ -117,16 +117,16 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
                                 continue;
                             }
                             // this is a view
-                            if (item.data instanceof HTMLImageElement) {
-                                const w = item.target?.width ?? item.data.width;
-                                const h = item.target?.height ?? item.data.height;
+                            if (item.delegate instanceof HTMLImageElement) {
+                                const w = item.target?.width ?? item.delegate.width;
+                                const h = item.target?.height ?? item.delegate.height;
                                 const sx = item.source?.x ?? 0;
                                 const sy = item.source?.y ?? 0;
-                                const sw = item.source?.width ?? item.data.width;
-                                const sh = item.source?.height ?? item.data.height;
+                                const sw = item.source?.width ?? item.delegate.width;
+                                const sh = item.source?.height ?? item.delegate.height;
                                 const tx = item.target?.x ?? 0;
                                 const ty = item.target?.y ?? 0;
-                                ctx.drawImage(item.data, sx, sy, sw, sh, x + tx, y + ty, w, h);
+                                ctx.drawImage(item.delegate, sx, sy, sw, sh, x + tx, y + ty, w, h);
                             }
                         } else {
                             // this is where we fill the empty tile

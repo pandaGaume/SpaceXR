@@ -91,6 +91,17 @@ export class TileContentManager<T> {
     }
 
     protected buildAlternativeTileContent(address: ITileAddress): TileContent<T> {
+        /*const key = address.quadkey;
+        const parentKey = TileMetrics.ToParentKey(key);
+        const content = this._cache.get(parentKey);
+        if (content) {
+            const section = TileMetrics.ToSection(key, this.metrics.tileSize);
+            return null
+        }
+        const childKeys = TileMetrics.ToChildsKey(key);
+        return childKeys.map((k) => {
+            const content = this._cache.get(k);
+        });*/
         return null;
     }
 

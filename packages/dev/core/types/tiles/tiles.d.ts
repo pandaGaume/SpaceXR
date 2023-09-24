@@ -20,10 +20,10 @@ export declare class TileSection implements ITileSection {
     constructor(x: number, y: number, width: number, height: number);
 }
 export declare class TileView<T> implements ITileContentView<T> {
-    data: T;
+    delegate: ITile<T>;
     source: Nullable<ITileSection>;
     target: Nullable<ITileSection>;
-    constructor(data: T, source?: Nullable<ITileSection>, target?: Nullable<ITileSection>);
+    constructor(delegate: ITile<T>, source?: Nullable<ITileSection>, target?: Nullable<ITileSection>);
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {
     static Builder<T>(): ITileBuilder<T>;

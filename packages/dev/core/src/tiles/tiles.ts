@@ -42,7 +42,7 @@ export class TileSection implements ITileSection {
 }
 
 export class TileView<T> implements ITileContentView<T> {
-    public constructor(public delegate: ITile<T>, public source: Nullable<ITileSection> = null, public target: Nullable<ITileSection> = null) {}
+    public constructor(public delegate: T, public source: Nullable<ITileSection> = null, public target: Nullable<ITileSection> = null) {}
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {

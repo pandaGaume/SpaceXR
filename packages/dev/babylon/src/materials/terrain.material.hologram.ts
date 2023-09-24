@@ -483,13 +483,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         if (m && tile.content && tile.content[0]) {
             let tileContent = tile.content[0];
             if (IsTileContentView<V>(tileContent)) {
-                do {
-                    if (tileContent.delegate.content && tileContent.delegate.content[0]) {
-                        tileContent = tileContent.delegate.content[0];
-                        continue;
-                    }
-                    return;
-                } while (IsTileContentView<V>(tileContent));
+                tileContent = tileContent.delegate;
             }
 
             // update the elevation range.

@@ -3,10 +3,9 @@ import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, ITileSection, TileContent } from "./tiles.interfaces";
-import { IRectangle } from "../geometry/geometry.interfaces";
+import { ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
-import { Nullable } from "../types";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
@@ -27,6 +26,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         this._m = metrics;
         return this;
     }
+
     public build(): ITile<T> {
         const t = new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
@@ -41,8 +41,8 @@ export class TileSection implements ITileSection {
     public constructor(public x: number, public y: number, public width: number, public height: number) {}
 }
 
-export class TileView<T> implements ITileContentView<T> {
-    public constructor(public delegate: T, public source: Nullable<ITileSection> = null, public target: Nullable<ITileSection> = null) {}
+export class TileContentView<T> implements ITileContentView<T> {
+    public constructor(public delegate: T, public address: ITileAddress, public source: ICartesian3, public target?: ICartesian3) {}
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {

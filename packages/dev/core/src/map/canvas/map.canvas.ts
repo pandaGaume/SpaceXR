@@ -118,14 +118,15 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
                             }
                             // this is a view
                             if (item.delegate instanceof HTMLImageElement) {
-                                const w = item.target?.width ?? item.delegate.width;
-                                const h = item.target?.height ?? item.delegate.height;
-                                const sx = item.source?.x ?? 0;
-                                const sy = item.source?.y ?? 0;
-                                const sw = item.source?.width ?? item.delegate.width;
-                                const sh = item.source?.height ?? item.delegate.height;
+                                const w = (item.target?.z ?? 1) * tileSize;
+                                const h = w;
                                 const tx = item.target?.x ?? 0;
                                 const ty = item.target?.y ?? 0;
+
+                                const sx = item.source?.x ?? 0;
+                                const sy = item.source?.y ?? 0;
+                                const sw = (item.source?.z ?? 1) * tileSize;
+                                const sh = sw;
                                 ctx.drawImage(item.delegate, sx, sy, sw, sh, x + tx, y + ty, w, h);
                             }
                         } else {

@@ -4,6 +4,7 @@ export declare enum EvictionReason {
 }
 export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>, reason: EvictionReason) => void;
 export interface IMemoryCache<K, V> {
+    contains(key: K): boolean;
     get(key: K): V | undefined;
     set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
     delete(key: K): void;
@@ -65,6 +66,7 @@ export declare class MemoryCache<K, V> implements IMemoryCache<K, V> {
     _timer?: ReturnType<typeof setTimeout>;
     _gc: () => void;
     constructor(policy?: CachePolicy);
+    contains(key: K): boolean;
     get(key: K): V | undefined;
     set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
     delete(key: K): void;

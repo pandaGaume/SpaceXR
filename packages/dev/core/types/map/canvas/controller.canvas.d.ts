@@ -1,6 +1,6 @@
 import { Nullable } from "../../types";
 import { Observer } from "../../events/events.observable";
-import { TileMapView, UpdateEventArgs } from "../../tiles/tile.mapview";
+import { TileMapView, UpdateEventArgs } from "../../tiles/tiles.mapview";
 import { ICartesian2, IRectangle } from "../../geometry/geometry.interfaces";
 export interface ICanvasView {
     invalidateContent<V>(ctx: CanvasRenderingContext2D, rect: IRectangle, src: CanvasController<V>): void;

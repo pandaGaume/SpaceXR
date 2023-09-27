@@ -11,8 +11,9 @@ import { Cartesian3 } from "core/geometry/geometry.cartesian";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tile.mapview";
+import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
+import { TileContentManager } from "core/tiles/tiles.content.manager";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -21,12 +22,14 @@ export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
         gridOptions: TerrainGridOptions.Shared,
         insets: Cartesian3.Zero(),
         exageration: 1.0,
+        lodTransition: LODTransitionMode.LINEAR,
     });
 
     public center?: IGeo2;
     public levelOfDetail?: number;
     public gridOptions?: TerrainGridOptions;
     public insets?: ICartesian3;
+    public lodTransition?: LODTransitionMode;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
         super();
@@ -99,12 +102,12 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, datasource, o.center, o.levelOfDetail);
+        super(display, new TileContentManager<V>(datasource), o.center, o.levelOfDetail);
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
-        this._view._lodTransition = LODTransitionMode.OFF;
+        this._view._lodTransition = o.lodTransition!;
         this._view.validate();
     }
 

@@ -6,6 +6,7 @@ export enum EvictionReason {
 export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>, reason: EvictionReason) => void;
 
 export interface IMemoryCache<K, V> {
+    contains(key: K): boolean;
     get(key: K): V | undefined;
     set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
     delete(key: K): void;
@@ -155,6 +156,10 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
         this._policy = { ...CachePolicy.Default, ...policy };
         this._cache = new Map<K, CacheEntry<K, V>>();
         this._gc = this.gc.bind(this);
+    }
+
+    public contains(key: K): boolean {
+        return this._cache.has(key);
     }
 
     public get(key: K): V | undefined {

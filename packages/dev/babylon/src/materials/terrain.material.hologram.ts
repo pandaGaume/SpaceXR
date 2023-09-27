@@ -22,7 +22,7 @@ import { Nullable } from "core/types";
 import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
 import { ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
 import { Range } from "core/math";
-import { UpdateEventArgs, UpdateReason } from "core/tiles/tile.mapview";
+import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 
 // internal class used to hold the tile pool texture areas
 class TileBag {
@@ -481,17 +481,17 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
         const m = tile.surface;
         if (m && tile.content && tile.content[0]) {
-            const content = tile.content[0];
+            let tileContent = tile.content[0];
+            if (IsTileContentView<V>(tileContent)) {
+                tileContent = tileContent.delegate;
+            }
+
             // update the elevation range.
             let min = this._elevationRange.min;
             let max = this._elevationRange.max || Number.MIN_VALUE;
 
             // remember that the TileContentView is used to keep the information of the tile while zooming in when
             // target data are not yet ready. Min and Max are corrsponding to specific section of the tile.
-            let tileContent = IsTileContentView<V>(content) ? content.data : content;
-            if (!tileContent) {
-                return;
-            }
             m.instancedBuffers.demInfos = new Vector4(tileContent.min.z, tileContent.max.z, tileContent.delta, tileContent.mean);
             min = tileContent.min.z;
             max = tileContent.max.z;

@@ -6,6 +6,7 @@ import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { CanvasDisplay } from "./map.canvas.display";
 import { RGBAColor } from "../../math/math.color";
+import { TileContentManager } from "core/tiles";
 
 type CanvasTileContentType = HTMLImageElement;
 type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
@@ -53,7 +54,7 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
     _options: CanvasTileMapOptions;
 
     public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number, options?: CanvasTileMapOptions) {
-        super(new CanvasDisplay(canvas), datasource, center, lod);
+        super(new CanvasDisplay(canvas), new TileContentManager<CanvasTileContentType>(datasource), center, lod);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
         this._observer = new ResizeObserver(() => {
             this.invalidateSize(canvas.width, canvas.height);
@@ -116,16 +117,17 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
                                 continue;
                             }
                             // this is a view
-                            if (item.data instanceof HTMLImageElement) {
-                                const w = item.target?.width ?? item.data.width;
-                                const h = item.target?.height ?? item.data.height;
-                                const sx = item.source?.x ?? 0;
-                                const sy = item.source?.y ?? 0;
-                                const sw = item.source?.width ?? item.data.width;
-                                const sh = item.source?.height ?? item.data.height;
+                            if (item.delegate instanceof HTMLImageElement) {
+                                const w = (item.target?.z ?? 1) * tileSize;
+                                const h = w;
                                 const tx = item.target?.x ?? 0;
                                 const ty = item.target?.y ?? 0;
-                                ctx.drawImage(item.data, sx, sy, sw, sh, x + tx, y + ty, w, h);
+
+                                const sx = item.source?.x ?? 0;
+                                const sy = item.source?.y ?? 0;
+                                const sw = (item.source?.z ?? 1) * tileSize;
+                                const sh = sw;
+                                ctx.drawImage(item.delegate, sx, sy, sw, sh, x + tx, y + ty, w, h);
                             }
                         } else {
                             // this is where we fill the empty tile

@@ -2,61 +2,21 @@
 <html>
     <head>
         <title>Exemple de dessin de tuiles holographique</title>
+        <link rel="stylesheet" href="./css/styles.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+
+        <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
+
         <script src="./libs/babylon.js"></script>
         <script src="./libs/babylonjs.loaders.js"></script>
         <script src="./libs/babylon.glTF2FileLoader.js"></script>
         <script src="./libs/babylon.inspector.bundle.js"></script>
 
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
-        <style>
-            #mapcanvas3d {
-                width: 100%;
-                height: 100%;
-            }
-            #compass {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                width: 200px;
-                height: 200px;
-                transform-origin: center;
-            }
 
-            #compassImage {
-                width: 100%;
-                height: 100%;
-            }
-
-            #zoomin {
-                position: absolute;
-                top: 250px;
-                right: 90px;
-                width: 64px;
-                height: 64px;
-                transform-origin: center;
-            }
-
-            #zoominImage {
-                width: 100%;
-                height: 100%;
-            }
-
-            #zoomout {
-                position: absolute;
-                top: 340px;
-                right: 74px;
-                width: 64px;
-                height: 64px;
-                transform-origin: center;
-            }
-
-            #zoomoutImage {
-                width: 100%;
-                height: 100%;
-                -webkit-transform: scaleX(-1);
-                transform: scaleX(-1);
-            }
-        </style>
+        <script src="./scripts/search.js"></script>
     </head>
     <body>
         <div id="mapcontainer">
@@ -70,6 +30,15 @@
             <div id="zoomout">
                 <img id="zoomoutImage" src="./images/zoom_out.png" alt="Zoom_out" />
             </div>
+            <div id="search-block">
+                <div id="search-input-wrapper">
+                    <ion-icon name="search-sharp"></ion-icon>
+                    <input id="search-input" type="text" />
+                </div>
+                <div id="results-container">
+                </div>
+            </div>
+
         </div>
         <script>
             async function createScene(canvas, engine) {
@@ -253,13 +222,13 @@
                 // scene.debugLayer.show();
                 // here we add XR support
                 // const xr = await scene.createDefaultXRExperienceAsync();
-                return scene;
+                return { scene, map };
             }
 
             window.onload = async () => {
                 const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-                const scene = await createScene(canvas, engine); //Call the createScene function
+                const { scene, map } = await createScene(canvas, engine); //Call the createScene function
                 // scene.debugLayer.show();
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {
@@ -270,7 +239,19 @@
                 window.addEventListener("resize", function () {
                     engine.resize();
                 });
+
+                const searchController = new SearchController();
+                searchController.setUp();
+                searchController.delegate = {
+                    onSearchResultSelected(place) {
+                        const location = new SPACEXR.Geo2(place.center[1], place.center[0]);
+                        map.setView(location, 13, 0);
+                    }
+                };
             };
         </script>
+
+        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     </body>
 </html>

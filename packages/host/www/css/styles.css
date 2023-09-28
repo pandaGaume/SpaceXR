@@ -1,0 +1,108 @@
+:root {
+    box-sizing: border-box;
+}
+
+* {
+    box-sizing: inherit;
+    font-family: inherit;
+}
+
+body {
+    font-family: 'Titillium Web', sans-serif;
+    color: #1c213b;
+    font-size: 14px;
+}
+
+#mapcanvas3d {
+    width: 100%;
+    height: 100%;
+}
+
+#compass {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    height: 200px;
+    transform-origin: center;
+}
+
+#compassImage {
+    width: 100%;
+    height: 100%;
+}
+
+#zoomin {
+    position: absolute;
+    top: 250px;
+    right: 90px;
+    width: 64px;
+    height: 64px;
+    transform-origin: center;
+}
+
+#zoominImage {
+    width: 100%;
+    height: 100%;
+}
+
+#zoomout {
+    position: absolute;
+    top: 340px;
+    right: 74px;
+    width: 64px;
+    height: 64px;
+    transform-origin: center;
+}
+
+#zoomoutImage {
+    width: 100%;
+    height: 100%;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+
+#search-block {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 250px;
+}
+
+#search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: white;
+    border: 1px solid #cacaca;
+    border-radius: 2px;
+    padding: 5px 10px;
+    box-shadow: 2px 2px 15px 0 rgba(0, 0, 0, 0.2);
+}
+
+#search-input {
+    flex: 1;
+    outline: none;
+    margin-left: 10px;
+    outline: none;
+    border: none;
+}
+
+#results-container {
+    display: none;
+    margin: -15px 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px;
+    border-radius: 0 0 2px 2px;
+}
+
+.search-result {
+    margin: 15px 0;
+    cursor: pointer;
+}
+
+.search-result:hover {
+    font-weight: 600;
+}

@@ -1,6 +1,6 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, ICartesian3, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, ICartesian3, IRectangle} from "../geometry/geometry.interfaces";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -11,8 +11,6 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-
-export interface ITileSection extends ICartesian2, ISize2 {}
 
 export interface ITileContentView<T> {
     address: ITileAddress;

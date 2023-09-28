@@ -1,6 +1,6 @@
-import { ICartesian2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, ICartesian3 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference, ITileSection } from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference} from "./tiles.interfaces";
 import { TileAddress } from "./tiles.address";
 import { Nullable } from "../types";
 
@@ -129,24 +129,23 @@ export class TileMetrics {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
 
-    public static ToSection(key: string, size?: number): Nullable<ITileSection> {
+    public static ToNormalizedSection(key: string): Nullable<ICartesian3> {
         if (key === null || key === undefined || key.length <= 1) {
             return null;
         }
         const c = key.charAt(key.length - 1);
-        const ts = (size ?? TileMetricsOptions.DefaultTileSize) / 2;
-        let s: ITileSection = { x: 0, y: 0, width: ts, height: ts };
+        let s: ICartesian3 = { x: 0, y: 0, z: 0.5 };
         switch (c) {
             case "1": {
-                s.x = ts;
+                s.x = s.z;
                 break;
             }
             case "2": {
-                s.y = ts;
+                s.y = s.z;
                 break;
             }
             case "3": {
-                s.x = s.y = ts;
+                s.x = s.y = s.z;
                 break;
             }
         }

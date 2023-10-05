@@ -1,257 +1,305 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Exemple de dessin de tuiles holographique</title>
-        <link rel="stylesheet" href="./css/styles.css" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
 
-        <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
+<head>
+    <title>Exemple de dessin de tuiles holographique</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
 
-        <script src="./libs/babylon.js"></script>
-        <script src="./libs/babylonjs.loaders.js"></script>
-        <script src="./libs/babylon.glTF2FileLoader.js"></script>
-        <script src="./libs/babylon.inspector.bundle.js"></script>
+    <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
 
-        <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+    <script src="./libs/babylon.js"></script>
+    <script src="./libs/babylonjs.loaders.js"></script>
+    <script src="./libs/babylon.glTF2FileLoader.js"></script>
+    <script src="./libs/babylon.inspector.bundle.js"></script>
 
-        <script src="./scripts/search.js"></script>
-    </head>
-    <body>
-        <div id="mapcontainer">
-            <canvas id="mapcanvas3d"></canvas>
-            <div id="compass">
-                <img id="compassImage" src="./images/compass.png" alt="Compass" />
-            </div>
-            <div id="zoomin">
-                <img id="zoominImage" src="./images/zoom_in.png" alt="Zoom_in" />
-            </div>
-            <div id="zoomout">
-                <img id="zoomoutImage" src="./images/zoom_out.png" alt="Zoom_out" />
-            </div>
-            <div id="search-block">
-                <div id="search-input-wrapper">
-                    <ion-icon name="search-sharp"></ion-icon>
-                    <input id="search-input" type="text" />
-                </div>
-                <div id="results-container">
-                </div>
-            </div>
+    <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
 
+    <script src="./scripts/search.js"></script>
+    <script src="./scripts/layers-control.js"></script>
+</head>
+
+<body>
+    <div id="mapcontainer">
+        <canvas id="mapcanvas3d"></canvas>
+        <div id="compass">
+            <img id="compassImage" src="./images/compass.png" alt="Compass" />
         </div>
-        <script>
-            async function createScene(canvas, engine) {
-                // This creates a basic Babylon Scene object (non-mesh)
-                const scene = new BABYLON.Scene(engine);
-                // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
-                camera.setTarget(new BABYLON.Vector3(0, 50, 0));
-                camera.wheelPrecision = 20;
-                camera.minZ = 0;
-                // This attaches the camera to the canvas
-                camera.attachControl(canvas, true);
-                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-                // Default intensity is 1. Let's dim the light a small amount
-                light.intensity = 0.7;
+        <div id="zoomin">
+            <img id="zoominImage" src="./images/zoom_in.png" alt="Zoom_in" />
+        </div>
+        <div id="zoomout">
+            <img id="zoomoutImage" src="./images/zoom_out.png" alt="Zoom_out" />
+        </div>
+        <div id="search-block">
+            <div id="search-input-wrapper">
+                <ion-icon name="search-sharp"></ion-icon>
+                <input id="search-input" type="text" />
+            </div>
+            <div id="results-container">
+            </div>
+        </div>
 
-                BABYLON.SceneLoader.ImportMesh(null, "./models/", "holographic_table.glb", scene, function (meshes) {
-                    meshes[0].position = new BABYLON.Vector3(-25, 0, -10);
-                    meshes[0].scaling = new BABYLON.Vector3(-100, 100, 100);
+        <div id="layers-control">
+            <ion-icon name="layers-sharp"></ion-icon>
+        </div>
+
+        <div id="layers-list" class="collapsed">
+            <!-- <div class="layers-list-item">
+                <img src="https://www.thunderforest.com/images/sets/atlas-berlin-636.png" />
+                <div class="colored-overlay"></div>
+                <span id="top-neon" class="neon"></span>
+                <span id="right-neon" class="neon"></span>
+                <span id="bottom-neon" class="neon"></span>
+                <span id="left-neon" class="neon"></span>
+            </div> -->
+        </div>
+
+    </div>
+    <script>
+        async function createScene(canvas, engine) {
+            // This creates a basic Babylon Scene object (non-mesh)
+            const scene = new BABYLON.Scene(engine);
+            // Parameters: name, alpha, beta, radius, target position, scene
+            const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
+            camera.setTarget(new BABYLON.Vector3(0, 50, 0));
+            camera.wheelPrecision = 20;
+            camera.minZ = 0;
+            // This attaches the camera to the canvas
+            camera.attachControl(canvas, true);
+            // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+            // Default intensity is 1. Let's dim the light a small amount
+            light.intensity = 0.7;
+
+            BABYLON.SceneLoader.ImportMesh(null, "./models/", "holographic_table.glb", scene, function (meshes) {
+                meshes[0].position = new BABYLON.Vector3(-25, 0, -10);
+                meshes[0].scaling = new BABYLON.Vector3(-100, 100, 100);
+            });
+
+            // create a basic table (in centimeter)
+            const h = 170;
+            const w = 270;
+            const t = 100;
+
+            // create an hologram display reference with a 96 dpi
+            const display = new SPACEXR.SurfaceMapDisplay(
+                "display",
+                { height: h, width: w, thickness: t },
+                { width: 1280, height: 720, thickness: 720 }, // in 'pixel', ratio of 16/9
+                scene
+            );
+            display.position.y = 90;
+            display.rotation.x = -Math.PI / 2;
+            display.rotation.z = -Math.PI / 2;
+            const displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
+            displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            displayMaterial.alpha = 0.5;
+            display.material = displayMaterial;
+            display.freezeWorldMatrix();
+
+            camera.setTarget(display);
+
+            // definir la source de donnée.
+            const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
+            const layerClient = SPACEXR.Google.SatelliteClient2d();
+
+            // some locations
+            const mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
+            const everest = SPACEXR.KnownPlaces.Locations.Everest;
+            const chamonix = SPACEXR.KnownPlaces.Locations.Chamonix;
+            const mountRenier = SPACEXR.KnownPlaces.Locations.MountRainier;
+            const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
+            const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
+
+            const mapOptions = {
+                center: corsica,
+                levelOfDetail: 12,
+                layerClient: layerClient,
+                exageration: 1.5,
+                lodTransition: 0,
+            };
+
+            // construire la carte.
+            const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
+
+            // interaction avec la carte
+            // Warning !! this MUST be include into a Manager somewhere
+            let startingPixel;
+
+            var getDisplayPosition = function () {
+                var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) {
+                    return mesh == display;
                 });
+                if (pickinfo.hit) {
+                    return pickinfo.pickedPoint;
+                }
 
-                // create a basic table (in centimeter)
-                const h = 170;
-                const w = 270;
-                const t = 100;
+                return null;
+            };
 
-                // create an hologram display reference with a 96 dpi
-                const display = new SPACEXR.SurfaceMapDisplay(
-                    "display",
-                    { height: h, width: w, thickness: t },
-                    { width: 1280, height: 720, thickness: 720 }, // in 'pixel', ratio of 16/9
-                    scene
-                );
-                display.position.y = 90;
-                display.rotation.x = -Math.PI / 2;
-                display.rotation.z = -Math.PI / 2;
-                const displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
-                displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-                displayMaterial.alpha = 0.5;
-                display.material = displayMaterial;
-                display.freezeWorldMatrix();
+            var pointerDown = function (mesh) {
+                const current = getDisplayPosition();
+                if (current) {
+                    startingPixel = map.display.getPixelToRef(current);
+                    // we need to disconnect camera from canvas
+                    setTimeout(function () {
+                        camera.detachControl(canvas);
+                    }, 0);
+                }
+            };
 
-                camera.setTarget(display);
+            var pointerUp = function () {
+                if (startingPixel) {
+                    camera.attachControl(canvas, true);
+                    startingPixel = null;
+                    return;
+                }
+            };
 
-                // definir la source de donnée.
-                const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
-                const layerClient = SPACEXR.Google.SatelliteClient2d();
+            var getAngle = function (x, y) {
+                var angle = Math.atan2(y, x);
+                var degrees = (180 * angle) / Math.PI;
+                return (360 + Math.round(degrees)) % 360;
+            };
 
-                // some locations
-                const mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
-                const everest = SPACEXR.KnownPlaces.Locations.Everest;
-                const chamonix = SPACEXR.KnownPlaces.Locations.Chamonix;
-                const mountRenier = SPACEXR.KnownPlaces.Locations.MountRainier;
-                const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
-                const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
-
-                const mapOptions = {
-                    center: corsica,
-                    levelOfDetail: 12,
-                    layerClient: layerClient,
-                    exageration: 1.5,
-                    lodTransition: 0,
-                };
-
-                // construire la carte.
-                const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
-
-                // interaction avec la carte
-                // Warning !! this MUST be include into a Manager somewhere
-                let startingPixel;
-
-                var getDisplayPosition = function () {
-                    var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) {
-                        return mesh == display;
-                    });
-                    if (pickinfo.hit) {
-                        return pickinfo.pickedPoint;
-                    }
-
-                    return null;
-                };
-
-                var pointerDown = function (mesh) {
+            var pointerMove = function (pointerInfo) {
+                if (startingPixel) {
                     const current = getDisplayPosition();
                     if (current) {
-                        startingPixel = map.display.getPixelToRef(current);
-                        // we need to disconnect camera from canvas
-                        setTimeout(function () {
-                            camera.detachControl(canvas);
-                        }, 0);
-                    }
-                };
-
-                var pointerUp = function () {
-                    if (startingPixel) {
-                        camera.attachControl(canvas, true);
-                        startingPixel = null;
-                        return;
-                    }
-                };
-
-                var getAngle = function (x, y) {
-                    var angle = Math.atan2(y, x);
-                    var degrees = (180 * angle) / Math.PI;
-                    return (360 + Math.round(degrees)) % 360;
-                };
-
-                var pointerMove = function (pointerInfo) {
-                    if (startingPixel) {
-                        const current = getDisplayPosition();
-                        if (current) {
-                            const pixelXY = map.display.getPixelToRef(current);
-                            const diff = pixelXY.subtract(startingPixel);
-                            if (diff.x == 0 && diff.y == 0) {
-                                return;
-                            }
-                            switch (pointerInfo.event.buttons) {
-                                case 1: {
-                                    map.translate(diff.x, diff.y);
-                                    break;
-                                }
-                                case 2: {
-                                    const l = diff.x;
-                                    map.rotate(l);
-                                    updateCompassRotation(map.azimuth);
-                                    break;
-                                }
-                            }
-                            startingPixel = pixelXY;
+                        const pixelXY = map.display.getPixelToRef(current);
+                        const diff = pixelXY.subtract(startingPixel);
+                        if (diff.x == 0 && diff.y == 0) {
+                            return;
                         }
-                    }
-                };
-
-                scene.onPointerObservable.add((pointerInfo) => {
-                    switch (pointerInfo.type) {
-                        case BABYLON.PointerEventTypes.POINTERDOWN:
-                            if (pointerInfo.pickInfo.hit) {
-                                pointerDown(pointerInfo.pickInfo.pickedMesh);
+                        switch (pointerInfo.event.buttons) {
+                            case 1: {
+                                map.translate(diff.x, diff.y);
+                                break;
                             }
-                            break;
-                        case BABYLON.PointerEventTypes.POINTERUP:
-                            pointerUp();
-                            break;
-                        case BABYLON.PointerEventTypes.POINTERMOVE:
-                            pointerMove(pointerInfo);
-                            break;
+                            case 2: {
+                                const l = diff.x;
+                                map.rotate(l);
+                                updateCompassRotation(map.azimuth);
+                                break;
+                            }
+                        }
+                        startingPixel = pixelXY;
                     }
-                });
-
-                updateCompassRotation = function (rotation) {
-                    var compass = document.getElementById("compass");
-                    compass.style.transform = "rotate(" + rotation + "deg)";
-                };
-
-                // Function to handle the compass click event
-                handleCompassClick = function (event) {
-                    map.setAzimuth(0);
-                    updateCompassRotation(0);
-                };
-
-                // Add a click event listener to the compass
-                var compass = document.getElementById("compass");
-                compass.addEventListener("click", handleCompassClick);
-
-                // Add a click event listener to the zoom in button
-                var zoomInBt = document.getElementById("zoomin");
-                zoomInBt.addEventListener("click", () => map.zoomIn(0.1));
-
-                // Add a click event listener to the zoom out button
-                var zoomOutBt = document.getElementById("zoomout");
-                zoomOutBt.addEventListener("click", () => map.zoomOut(0.1));
-
-                // const mainAxes = new BABYLON.AxesViewer(scene, 20);
-                // const screenAxes = new BABYLON.AxesViewer(scene, 20);
-
-                // const ctx = display.context;
-                // screenAxes.xAxis.parent = ctx;
-                // screenAxes.yAxis.parent = ctx;
-                // screenAxes.zAxis.parent = ctx;
-                // scene.debugLayer.show();
-                // here we add XR support
-                // const xr = await scene.createDefaultXRExperienceAsync();
-                return { scene, map };
-            }
-
-            window.onload = async () => {
-                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
-                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-                const { scene, map } = await createScene(canvas, engine); //Call the createScene function
-                // scene.debugLayer.show();
-                // Register a render loop to repeatedly render the scene
-                engine.runRenderLoop(function () {
-                    scene.render();
-                });
-
-                // Watch for browser/canvas resize events
-                window.addEventListener("resize", function () {
-                    engine.resize();
-                });
-
-                const searchController = new SearchController();
-                searchController.setUp();
-                searchController.delegate = {
-                    onSearchResultSelected(place) {
-                        const location = new SPACEXR.Geo2(place.center[1], place.center[0]);
-                        map.setView(location, 13, 0);
-                    }
-                };
+                }
             };
-        </script>
 
-        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    </body>
+            scene.onPointerObservable.add((pointerInfo) => {
+                switch (pointerInfo.type) {
+                    case BABYLON.PointerEventTypes.POINTERDOWN:
+                        if (pointerInfo.pickInfo.hit) {
+                            pointerDown(pointerInfo.pickInfo.pickedMesh);
+                        }
+                        break;
+                    case BABYLON.PointerEventTypes.POINTERUP:
+                        pointerUp();
+                        break;
+                    case BABYLON.PointerEventTypes.POINTERMOVE:
+                        pointerMove(pointerInfo);
+                        break;
+                }
+            });
+
+            updateCompassRotation = function (rotation) {
+                var compass = document.getElementById("compass");
+                compass.style.transform = "rotate(" + rotation + "deg)";
+            };
+
+            // Function to handle the compass click event
+            handleCompassClick = function (event) {
+                map.setAzimuth(0);
+                updateCompassRotation(0);
+            };
+
+            // Add a click event listener to the compass
+            var compass = document.getElementById("compass");
+            compass.addEventListener("click", handleCompassClick);
+
+            // Add a click event listener to the zoom in button
+            var zoomInBt = document.getElementById("zoomin");
+            zoomInBt.addEventListener("click", () => map.zoomIn(0.1));
+
+            // Add a click event listener to the zoom out button
+            var zoomOutBt = document.getElementById("zoomout");
+            zoomOutBt.addEventListener("click", () => map.zoomOut(0.1));
+
+            // const mainAxes = new BABYLON.AxesViewer(scene, 20);
+            // const screenAxes = new BABYLON.AxesViewer(scene, 20);
+
+            // const ctx = display.context;
+            // screenAxes.xAxis.parent = ctx;
+            // screenAxes.yAxis.parent = ctx;
+            // screenAxes.zAxis.parent = ctx;
+            // scene.debugLayer.show();
+            // here we add XR support
+            // const xr = await scene.createDefaultXRExperienceAsync();
+            return { scene, map };
+        }
+
+        window.onload = async () => {
+            const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
+            const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+            const { scene, map } = await createScene(canvas, engine); //Call the createScene function
+            // scene.debugLayer.show();
+            // Register a render loop to repeatedly render the scene
+            engine.runRenderLoop(function () {
+                scene.render();
+            });
+
+            // Watch for browser/canvas resize events
+            window.addEventListener("resize", function () {
+                engine.resize();
+            });
+
+            const searchController = new SearchController();
+            searchController.setUp();
+            searchController.delegate = {
+                onSearchResultSelected(place) {
+                    const location = new SPACEXR.Geo2(place.center[1], place.center[0]);
+                    map.setView(location, 13, 0);
+                }
+            };
+
+            const layerControl = new LayerControl();
+            layerControl.init();
+            layerControl.delegate = {
+                onTileLayerChange(layer) {
+                    console.log(layer);
+                    let layerClient;
+                    switch (layer.id) {
+                        case 'google-streets':
+                            layerClient = SPACEXR.Google.StreetClient2d();
+                            break;
+                        case 'google-sat': 
+                            layerClient = SPACEXR.Google.SatelliteClient2d();
+                            break;
+                        case 'google-hybrid':
+                            layerClient = SPACEXR.Google.HybridClient2d();
+                            break;
+                        case 'google-terrain':
+                            layerClient = SPACEXR.Google.TerrainClient2d();
+                            break;
+                        default:
+                            layerClient = SPACEXR.Google.SatelliteClient2d();
+                    }
+                    map.material.LayerClient = layerClient;
+                    // map.invalidateTiles();
+                    map.invalidateDisplay();
+                    map._view.validate();
+                }
+            }
+        };
+    </script>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+
 </html>

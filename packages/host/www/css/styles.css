@@ -1,5 +1,6 @@
 :root {
     box-sizing: border-box;
+    --neon-size: 2px;
 }
 
 * {
@@ -11,6 +12,7 @@ body {
     font-family: 'Titillium Web', sans-serif;
     color: #1c213b;
     font-size: 14px;
+    margin: 0;
 }
 
 #mapcanvas3d {
@@ -105,4 +107,260 @@ body {
 
 .search-result:hover {
     font-weight: 600;
+}
+
+#layers-control {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    background-color: white;
+    border-radius: 2px;
+    box-shadow: 2px 2px 15px 0 rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding: 7.5px 10px;
+    cursor: pointer;
+    transition: all 0.5s linear(0 0%, 0.22 2.1%, 0.86 6.5%, 1.11 8.6%, 1.3 10.7%, 1.35 11.8%, 1.37 12.9%, 1.37 13.7%, 1.36 14.5%, 1.32 16.2%, 1.03 21.8%, 0.94 24%, 0.89 25.9%, 0.88 26.85%, 0.87 27.8%, 0.87 29.25%, 0.88 30.7%, 0.91 32.4%, 0.98 36.4%, 1.01 38.3%, 1.04 40.5%, 1.05 42.7%, 1.05 44.1%, 1.04 45.7%, 1 53.3%, 0.99 55.4%, 0.98 57.5%, 0.99 60.7%, 1 68.1%, 1.01 72.2%, 1 86.7%, 1 100%);
+}
+
+#layers-control:hover {
+    transform: scale(1.25);
+}
+
+#layers-control ion-icon {
+    font-size: 24px;
+}
+
+#layers-list {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* background-color: darkgray; */
+    padding: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-out;
+    /* background-image: url("../images/brushed-alum.png"); */
+    /* background-repeat: repeat; */
+    pointer-events: none;
+}
+
+#layers-list.collapsed {
+    bottom: -400px;
+}
+
+.layers-list-item {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    margin: 20px;
+    border-radius: 3px;
+    transition: all 0.4s linear(0 0%, 0 1.8%, 0.01 3.6%, 0.03 6.35%, 0.07 9.1%, 0.13 11.4%, 0.19 13.4%, 0.27 15%, 0.34 16.1%, 0.54 18.35%, 0.66 20.6%, 0.72 22.4%, 0.77 24.6%, 0.81 27.3%, 0.85 30.4%, 0.88 35.1%, 0.92 40.6%, 0.94 47.2%, 0.96 55%, 0.98 64%, 0.99 74.4%, 1 86.4%, 1 100%);
+    cursor: pointer;
+    overflow: hidden;
+    pointer-events: auto;
+    box-shadow: 0 0 30px 0px rgb(181 187 255);
+}
+
+.layers-list-item>img {
+    position: absolute;
+    /* width: calc(100% - 4*var(--neon-size));
+    height: calc(100% - 4*var(--neon-size)); */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* filter: grayscale(80%); */
+    /* margin: calc(2*var(--neon-size)); */
+    z-index: 1;
+}
+
+.layers-list-item:hover {
+    transform: scale(1.05);
+}
+
+.layers-list-item .colored-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: rgb(52, 52, 109);
+    opacity: 0.5;
+}
+
+.layers-list-item .neon {
+    position: absolute;
+    display: block;
+    animation-duration: 1.6s;
+    animation-timing-function: cubic-bezier(0.54, 0.56, 1, -0.1);
+    animation-iteration-count: infinite;
+    box-shadow: 0 0 20px 5px #2196f3;
+    /* border-radius: 2px; */
+    background-color: #2196f3;
+}
+
+#top-neon {
+    top: 0px;
+    left: -50%;
+    width: 50%;
+    height: var(--neon-size);
+    margin-top: var(--neon-size);
+    /* background: linear-gradient(90deg, transparent 0%, #2196f3 50%); */
+    /* animation-name: top-neon; */
+}
+.layers-list-item:hover #top-neon {
+    animation-name: top-neon;
+}
+
+#right-neon {
+    /* margin-top: -var(--neon-size); */
+    top: -50%;
+    right: 0px;
+    width: var(--neon-size);
+    height: 50%;
+    margin-right: var(--neon-size);
+    /* background: linear-gradient(180deg, transparent 0%, #2196f3 50%); */
+}
+.layers-list-item:hover #right-neon {
+    animation-name: right-neon;
+}
+
+#bottom-neon {
+    /* margin-right: -var(--neon-size); */
+    right: -50%;
+    bottom: 0px;
+    height: var(--neon-size);
+    width: 50%;
+    margin-bottom: var(--neon-size);
+    /* background: linear-gradient(270deg, transparent 0%, #2196f3 50%); */
+}
+.layers-list-item:hover #bottom-neon {
+    animation-name: bottom-neon;
+}
+
+#left-neon {
+    bottom: -50%;
+    left: 0px;
+    width: var(--neon-size);
+    height: 50%;
+    margin-left: var(--neon-size);
+    /* background: linear-gradient(0deg, transparent 0%, #2196f3 50%); */
+}
+
+.layers-list-item:hover #left-neon {
+    animation-name: left-neon;
+}
+
+/* #top-right-mask {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--neon-size);
+    height: var(--neon-size);
+    z-index: 1;
+    background-color: black;
+} */
+/* 
+.neon-square {
+    position: absolute;
+    width: calc(100% - var(--neon-size));
+    height: calc(100% - var(--neon-size));
+    box-shadow: 0 0 30px #2196f3;
+    animation-name: heartBeat;
+    animation-iteration-count: infinite;
+    animation-duration: 2s;
+} */
+
+@keyframes moving-square {
+    0% {
+        top: var(--neon-size);
+        left: var(--neon-size);
+    }
+    25% {
+        top: var(--neon-size);
+        left: 15px;
+    }
+    50% {
+        top: 15px;
+        left: 15px;
+    }
+    75% {
+        top: 15px;
+        left: var(--neon-size);
+    }
+    100% {
+        top: var(--neon-size);
+        left: var(--neon-size);
+    }
+}
+
+@keyframes top-neon {
+    0% {
+        left: -50%;
+    }
+
+    25% {
+        left: 50%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes right-neon {
+    0% {
+        top: -50%;
+    }
+    25% {
+        top: -50%;
+    }
+    50% {
+        top: 0%;
+    }
+    100% {
+        top: 100%;
+    }
+}
+
+@keyframes bottom-neon {
+    0% {
+        right: -50%;
+    }
+
+    25% {
+        right: 50%;
+    }
+
+    50% {
+        right: 100%;
+    }
+
+    100% {
+        right: 100%;
+    }
+}
+
+@keyframes left-neon {
+    0% {
+        bottom: -50%;
+    }
+
+    25% {
+        bottom: -50%;
+    }
+
+    50% {
+        bottom: 0%;
+    }
+
+    100% {
+        bottom: 100%;
+    }
 }

@@ -39,7 +39,7 @@ export enum ClipIndex {
 }
 
 class SurfaceDefinition {
-    public constructor(public point: Vector3, public normal: Vector3) {}
+    public constructor(public point: Vector3, public normal: Vector3) { }
 }
 
 class TerrainHologramMaterialDefines extends MaterialDefines {
@@ -136,8 +136,17 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             this._layerClient = v;
             if (v) {
                 // Todo, reset the layer sampler
+                for (var bag of this._tileBags.values()) {
+                    // bag.elevationArea?.release();
+                    // bag.normalArea?.release();
+                    bag.layerArea?.release();
+                }
+                this._tileBags.clear();
+                this._layerSampler?._areas.forEach(area => {
+                    area?.release();
+                });
             }
-            //this.markAsDirty(Material.MiscDirtyFlag);
+            // this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 

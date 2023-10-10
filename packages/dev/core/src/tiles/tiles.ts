@@ -2,7 +2,7 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, ITileSection, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
@@ -37,12 +37,8 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     }
 }
 
-export class TileSection implements ITileSection {
-    public constructor(public x: number, public y: number, public width: number, public height: number) {}
-}
-
 export class TileContentView<T> implements ITileContentView<T> {
-    public constructor(public delegate: T, public address: ITileAddress, public source: ICartesian3, public target?: ICartesian3) {}
+    public constructor(public delegate: T, public address: ITileAddress, public source?: ICartesian3, public target?: ICartesian3) {}
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {

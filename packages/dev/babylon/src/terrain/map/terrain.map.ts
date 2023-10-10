@@ -1,7 +1,7 @@
 import { AbstractMesh, Material, Mesh, Nullable, Scene, Tools, Vector3, VertexData } from "@babylonjs/core";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
-import { Geo2 } from "core/geography/geography.position";
+import { Geo2, Geo3 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileClient, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
@@ -13,7 +13,7 @@ import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { DemInfosManager } from "../..";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -44,6 +44,7 @@ export class SurfaceTileMapOptionsBuilder {
     _insets?: ICartesian3;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
+    _lodTransition?: LODTransitionMode;
 
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
@@ -65,18 +66,23 @@ export class SurfaceTileMapOptionsBuilder {
         this._exageration = v;
         return this;
     }
+    public withLodTransition(v?: LODTransitionMode): SurfaceTileMapOptionsBuilder {
+        this._lodTransition = v;
+        return this;
+    }
     public withLayer(v: ITileClient<HTMLImageElement>): SurfaceTileMapOptionsBuilder {
         this._layerClient = v;
         return this;
     }
     public build(): SurfaceTileMapOptions {
         return new SurfaceTileMapOptions({
-            center: this._center,
-            levelOfDetail: this._lod,
+            center: this._center ?? Geo3.Zero(),
+            levelOfDetail: this._lod ?? 10,
             gridOptions: this._gridOptions,
             insets: this._insets,
-            exageration: this._exageration,
+            exageration: this._exageration ?? 1.0,
             layerClient: this._layerClient,
+            lodTransition: this._lodTransition ?? LODTransitionMode.LINEAR,
         });
     }
 }
@@ -102,12 +108,12 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, new TileContentManager<V>(datasource), o.center, o.levelOfDetail);
+        super(display, new DemInfosManager(datasource), o.center, o.levelOfDetail);
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
-        this._view._lodTransition = o.lodTransition!;
+        this._view._lodTransition = o.lodTransition ?? LODTransitionMode.LINEAR;
         this._view.validate();
     }
 

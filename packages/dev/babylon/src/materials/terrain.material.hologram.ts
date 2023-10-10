@@ -147,7 +147,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             this._layerClient = v;
             if (v) {
                 this._updateLayer();
-                this.markAsDirty(Material.MiscDirtyFlag);
+                //this.markAsDirty(Material.MiscDirtyFlag);
             }
         }
     }
@@ -594,7 +594,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const m = tile.surface;
         if (m && !m.instancedBuffers.layerIds) {
             m.instancedBuffers.layerIds = new Vector4(-1, -1, -1, -1);
-            this._loadLayerAsync(tile.address)
+            this._loadLayerAreaAsync(tile.address)
                 .then((id) => {
                     m.instancedBuffers.layerIds.x = id;
                 })
@@ -606,14 +606,14 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     }
 
     private _updateLayer(): void {
-        Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAsync(bag.address)))
+        Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAreaAsync(bag.address)))
             .then((ids) => {})
             .catch((reason) => {})
             .finally(() => {});
     }
 
     // TODO : move back the bag process to _loadLayer and _updateLayer
-    private async _loadLayerAsync(address: ITileAddress): Promise<number> {
+    private async _loadLayerAreaAsync(address: ITileAddress): Promise<number> {
         var client = this._layerClient;
         if (client) {
             var result = await client.fetchAsync(address);

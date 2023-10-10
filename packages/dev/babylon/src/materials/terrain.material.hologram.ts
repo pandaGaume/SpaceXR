@@ -15,13 +15,14 @@ import {
     EffectFallbacks,
     MaterialHelper,
     Color4,
+    Material,
 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";
 import { EventState, Observer } from "core/events";
 import { Nullable } from "core/types";
 import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
-import { ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
+import { ITileAddress, ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
 import { Range } from "core/math";
 import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 
@@ -30,6 +31,8 @@ class TileBag {
     public elevationArea: Nullable<ITilePoolTextureArea> = null;
     public normalArea: Nullable<ITilePoolTextureArea> = null;
     public layerArea: Nullable<ITilePoolTextureArea> = null;
+
+    public constructor(public address: ITileAddress) {}
 }
 
 export enum ClipIndex {
@@ -121,7 +124,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         this._elevationSampler = null;
         this._normalSampler = null;
         this._layerSampler = null;
-        // the layer client to use. Should ne null if no layer is used.
+        // the layer client to use. Should be null if no layer is used.
         this._layerClient = options?.layerClient;
         // the attributes
         this._elevationRange = new Range(Number.MAX_VALUE);
@@ -143,9 +146,9 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         if (this._layerClient !== v) {
             this._layerClient = v;
             if (v) {
-                // Todo, reset the layer sampler
+                this._updateLayer();
+                this.markAsDirty(Material.MiscDirtyFlag);
             }
-            //this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 
@@ -485,7 +488,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const key = tile.address.quadkey;
         let bag = this._tileBags.get(key);
         if (!bag) {
-            bag = new TileBag();
+            bag = new TileBag(tile.address);
             this._tileBags.set(key, bag);
         }
 
@@ -591,31 +594,45 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const m = tile.surface;
         if (m && !m.instancedBuffers.layerIds) {
             m.instancedBuffers.layerIds = new Vector4(-1, -1, -1, -1);
-            var client = this._layerClient;
-            if (client) {
-                client
-                    .fetchAsync(tile.address)
-                    .then((result) => {
-                        if (client === this._layerClient && result.content) {
-                            // retreive the bag
-                            let bag = this._tileBags.get(tile.address.quadkey);
-                            if (bag) {
-                                const layerArea = this._layerSampler?.reserveArea();
-                                if (layerArea && result.content) {
-                                    layerArea.update(result.content);
-                                    bag.layerArea = layerArea;
-                                    m.instancedBuffers.layerIds.x = layerArea.id;
-                                }
-                                return;
-                            }
-                            // the bag is not defined, due certainly to a change of view during the loading process.
-                        }
-                    })
-                    .catch((reason) => {
-                        // the lookup operation has failed - TODO describe a strategy
-                        console.log(reason);
-                    });
+            this._loadLayerAsync(tile.address)
+                .then((id) => {
+                    m.instancedBuffers.layerIds.x = id;
+                })
+                .catch((reason) => {
+                    // the lookup operation has failed - TODO describe a strategy
+                    console.log(reason);
+                });
+        }
+    }
+
+    private _updateLayer(): void {
+        Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAsync(bag.address)))
+            .then((ids) => {})
+            .catch((reason) => {})
+            .finally(() => {});
+    }
+
+    // TODO : move back the bag process to _loadLayer and _updateLayer
+    private async _loadLayerAsync(address: ITileAddress): Promise<number> {
+        var client = this._layerClient;
+        if (client) {
+            var result = await client.fetchAsync(address);
+
+            // the client has not changed in the mean time.
+            if (client === this._layerClient && result.content) {
+                // retreive the bag
+                let bag = this._tileBags.get(address.quadkey);
+                if (bag) {
+                    const layerArea = bag.layerArea ?? this._layerSampler?.reserveArea();
+                    if (layerArea && result.content) {
+                        layerArea.update(result.content);
+                        bag.layerArea = layerArea;
+                        return layerArea.id;
+                    }
+                }
+                // the bag is not defined, due certainly to a change of view during the loading process.
             }
         }
+        return -1;
     }
 }

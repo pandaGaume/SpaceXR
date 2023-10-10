@@ -149,7 +149,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class TileBag {
-    constructor() {
+    constructor(address) {
+        this.address = address;
         this.elevationArea = null;
         this.normalArea = null;
         this.layerArea = null;
@@ -222,6 +223,8 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         if (this._layerClient !== v) {
             this._layerClient = v;
             if (v) {
+                this._updateLayer();
+                this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.MiscDirtyFlag);
             }
         }
     }
@@ -477,7 +480,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         const key = tile.address.quadkey;
         let bag = this._tileBags.get(key);
         if (!bag) {
-            bag = new TileBag();
+            bag = new TileBag(tile.address);
             this._tileBags.set(key, bag);
         }
         const m = tile.surface;
@@ -569,29 +572,38 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         const m = tile.surface;
         if (m && !m.instancedBuffers.layerIds) {
             m.instancedBuffers.layerIds = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(-1, -1, -1, -1);
-            var client = this._layerClient;
-            if (client) {
-                client
-                    .fetchAsync(tile.address)
-                    .then((result) => {
-                    if (client === this._layerClient && result.content) {
-                        let bag = this._tileBags.get(tile.address.quadkey);
-                        if (bag) {
-                            const layerArea = this._layerSampler?.reserveArea();
-                            if (layerArea && result.content) {
-                                layerArea.update(result.content);
-                                bag.layerArea = layerArea;
-                                m.instancedBuffers.layerIds.x = layerArea.id;
-                            }
-                            return;
-                        }
+            this._loadLayerAsync(tile.address)
+                .then((id) => {
+                m.instancedBuffers.layerIds.x = id;
+            })
+                .catch((reason) => {
+                console.log(reason);
+            });
+        }
+    }
+    _updateLayer() {
+        Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAsync(bag.address)))
+            .then((ids) => { })
+            .catch((reason) => { })
+            .finally(() => { });
+    }
+    async _loadLayerAsync(address) {
+        var client = this._layerClient;
+        if (client) {
+            var result = await client.fetchAsync(address);
+            if (client === this._layerClient && result.content) {
+                let bag = this._tileBags.get(address.quadkey);
+                if (bag) {
+                    const layerArea = bag.layerArea ?? this._layerSampler?.reserveArea();
+                    if (layerArea && result.content) {
+                        layerArea.update(result.content);
+                        bag.layerArea = layerArea;
+                        return layerArea.id;
                     }
-                })
-                    .catch((reason) => {
-                    console.log(reason);
-                });
+                }
             }
         }
+        return -1;
     }
 }
 TerrainHologramMaterial.ClassName = "TerrainHologramMaterial";

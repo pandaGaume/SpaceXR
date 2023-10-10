@@ -77,5 +77,7 @@ export declare class TerrainHologramMaterial<V extends IDemInfos, H extends Surf
     private _buildClipSurfaces;
     private _updateTileContent;
     private _loadLayer;
+    private _updateLayer;
+    private _loadLayerAsync;
 }
 export {};

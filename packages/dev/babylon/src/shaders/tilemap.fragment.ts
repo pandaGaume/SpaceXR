@@ -6,7 +6,7 @@ const name = "tilemapFragmentShader";
 const shader = `precision highp float;#include<lightFragmentDeclaration>
 #include<materialFragmentDeclaration>
 #include<clipFragmentDeclaration>
-in vec3 vNormal;in vec3 vUvs;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;void main(void) {#include<clipFragment>
-glFragColor=texture(layer,vUvs) ;}`;
+in vec3 vNormal;in vec3 vUvs;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;uniform vec4 backColor;void main(void) {#include<clipFragment>
+if(vUvs.z<0.0 ){glFragColor=backColor ;return ;}glFragColor=texture(layer,vUvs) ;}`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const tilemapFragmentShader = { name, shader };

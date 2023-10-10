@@ -1,5 +1,4 @@
-import { ITileSection } from "core/tiles";
-import { ICartesian3 } from "../geometry/geometry.interfaces";
+import { ICartesian2, ICartesian3, ISize2 } from "../geometry/geometry.interfaces";
 import { Nullable } from "../types";
 
 export interface IDemInfos {
@@ -12,5 +11,5 @@ export interface IDemInfos {
     normals: Nullable<Uint8ClampedArray | HTMLImageElement>;
 
     toString(): string;
-    getDemInfoView(section: ITileSection): IDemInfos;
+    getDemInfoView(pos: ICartesian2, size: ISize2): IDemInfos;
 }

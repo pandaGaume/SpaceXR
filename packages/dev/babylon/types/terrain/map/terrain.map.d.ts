@@ -25,11 +25,13 @@ export declare class SurfaceTileMapOptionsBuilder {
     _insets?: ICartesian3;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
+    _lodTransition?: LODTransitionMode;
     withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder;
     withLeveOfDetail(v?: number): SurfaceTileMapOptionsBuilder;
     withGridOptions(v?: TerrainGridOptions): SurfaceTileMapOptionsBuilder;
     withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder;
     withExageration(v?: number): SurfaceTileMapOptionsBuilder;
+    withLodTransition(v?: LODTransitionMode): SurfaceTileMapOptionsBuilder;
     withLayer(v: ITileClient<HTMLImageElement>): SurfaceTileMapOptionsBuilder;
     build(): SurfaceTileMapOptions;
 }

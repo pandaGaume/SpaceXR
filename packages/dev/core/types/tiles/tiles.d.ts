@@ -1,5 +1,5 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, ITileSection, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./tiles.address";
 export declare class TileBuilder<T> implements ITileBuilder<T> {
@@ -11,19 +11,12 @@ export declare class TileBuilder<T> implements ITileBuilder<T> {
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
-export declare class TileSection implements ITileSection {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    constructor(x: number, y: number, width: number, height: number);
-}
 export declare class TileContentView<T> implements ITileContentView<T> {
     delegate: T;
     address: ITileAddress;
-    source: ICartesian3;
+    source?: ICartesian3 | undefined;
     target?: ICartesian3 | undefined;
-    constructor(delegate: T, address: ITileAddress, source: ICartesian3, target?: ICartesian3 | undefined);
+    constructor(delegate: T, address: ITileAddress, source?: ICartesian3 | undefined, target?: ICartesian3 | undefined);
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {
     static Builder<T>(): ITileBuilder<T>;

@@ -13,6 +13,7 @@ in vec3 vUvs;
 uniform DirLight light;
 uniform Material material;
 uniform highp sampler2DArray layer;
+uniform vec4 backColor;
 
 void main(void) {
 
@@ -28,8 +29,9 @@ void main(void) {
        
     // vec3 result = ambient + diffuse ;
     // glFragColor = vec4(result,1.0) ;
-    
-    
+    if(vUvs.z < 0.0 ){
+        glFragColor = backColor ;
+        return ;
+    }
     glFragColor = texture(layer, vUvs) ;
-
 }

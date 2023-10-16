@@ -47,6 +47,9 @@
         </div>
 
         <div id="layers-list" class="collapsed">
+            <div class="beveled-border"></div>
+            <div class="dark-bg"></div>
+            <div class="grid-bg"></div>
             <!-- <div class="layers-list-item">
                 <img src="https://www.thunderforest.com/images/sets/atlas-berlin-636.png" />
                 <div class="colored-overlay"></div>
@@ -274,25 +277,22 @@
                     console.log(layer);
                     let layerClient;
                     switch (layer.id) {
-                        case 'google-streets':
-                            layerClient = SPACEXR.Google.StreetClient2d();
-                            break;
                         case 'google-sat': 
                             layerClient = SPACEXR.Google.SatelliteClient2d();
                             break;
-                        case 'google-hybrid':
-                            layerClient = SPACEXR.Google.HybridClient2d();
-                            break;
                         case 'google-terrain':
                             layerClient = SPACEXR.Google.TerrainClient2d();
+                            break;
+                        case 'mapbox-vintage':
+                            layerClient = SPACEXR.MapBox.VintageClient();
+                            break;
+                        case 'mapbox-hillshading':
+                            layerClient = SPACEXR.MapBox.HillShadingClient();
                             break;
                         default:
                             layerClient = SPACEXR.Google.SatelliteClient2d();
                     }
                     map.material.LayerClient = layerClient;
-                    // map.invalidateTiles();
-                    map.invalidateDisplay();
-                    map._view.validate();
                 }
             }
         };

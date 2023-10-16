@@ -1,6 +1,6 @@
 {
     "liveServer.settings.port": 1338,
     "files.exclude": {
-        "**/packages/dev/**/shaders/**/*.ts": true
+        "**/packages/dev/**/shaders/**/*.ts": false
     }
 }

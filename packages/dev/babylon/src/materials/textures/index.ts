@@ -1,1 +1,1 @@
-export * from "./tilePoolTexture";
+export * from "./TilePoolTexture";

@@ -21,6 +21,6 @@
     },
     "sideEffects": false,
     "devDependencies": {
-        "@dev/build-tools": "^1.0.0"
+        "@dev/build-tools": "file:../buildTools"
     }
 }

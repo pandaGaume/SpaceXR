@@ -1,7 +1,7 @@
 import { Side } from "../../geometry/geometry.interfaces";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
-import { Float32TileCodec, Float32TileCodecOptionsBuilder } from "../tiles.codecs.image";
+import { Float32TileCodec, Float32TileCodecOptionsBuilder, ImageTileCodec } from "../tiles.codecs.image";
 import { EPSG3857 } from "../tiles.geography";
 import { IPixelDecoder } from "../tiles.interfaces";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
@@ -16,6 +16,16 @@ export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
             .withQuery(`access_token=${token}`)
             .withPath(`raster/v1/mapbox.mapbox-terrain-dem-v1/{z}/{x}/{y}.{extension}`)
             .withExtension(extension);
+    }
+}
+
+export class MapBoxStaticTilesUrlBuilder extends WebTileUrlBuilder {
+    public constructor(username: string, styleId: string, token: string, tileSize = 256) {
+        super();
+        this.withHost("api.mapbox.com")
+            .withSecure(true)
+            .withQuery(`access_token=${token}`)
+            .withPath(`styles/v1/${username}/${styleId}/tiles/${tileSize}/{z}/{x}/{y}`);
     }
 }
 
@@ -34,6 +44,8 @@ export class MapboxAltitudeDecoder implements IPixelDecoder {
 
 export class MapBox {
     public static MaxLevelOfDetail = 14;
+    public static MetricsOptions = new TileMetricsOptionsBuilder().withTileSize(256).withMaxLOD(19).build();
+    public static Metrics = new EPSG3857(MapBox.MetricsOptions);
 
     public static TerrainDemV1Client(token: string, options?: TileWebClientOptions) {
         let mo = new TileMetricsOptionsBuilder().withTileSize(512).withMaxLOD(MapBox.MaxLevelOfDetail);
@@ -41,5 +53,25 @@ export class MapBox {
         const codecOptions = new Float32TileCodecOptionsBuilder().withInsets(1, Side.top).withInsets(1, Side.left).withInsets(1, Side.bottom).withInsets(1, Side.right).build();
         const elevationClient = new TileWebClient(new MapBoxTerrainDemV1UrlBuilder(token), new Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
         return new DemTileWebClient(elevationClient);
+    }
+
+    private static StaticTilesClient2d(styleId: string, options?: TileWebClientOptions) {
+        const urlBuilder = new MapBoxStaticTilesUrlBuilder('clongeanie',
+            styleId,
+            'pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q',
+            MapBox.MetricsOptions.tileSize);
+        return new TileWebClient(urlBuilder, new ImageTileCodec(), MapBox.Metrics, options);
+    }
+
+    public static BlueMonoClient(options?: TileWebClientOptions) {
+        return this.StaticTilesClient2d('ck17rscm7076b1cqp29yhd8y6', options);
+    }
+
+    public static VintageClient(options?: TileWebClientOptions) {
+        return this.StaticTilesClient2d('cjajv9mklb5xe2smu9t3wgk3c', options);
+    }
+
+    public static HillShadingClient(options?: TileWebClientOptions) {
+        return this.StaticTilesClient2d('cjftsbqly37892so0h4mcnvik', options);
     }
 }

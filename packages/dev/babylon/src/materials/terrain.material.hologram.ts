@@ -14,14 +14,13 @@ import {
     IEffectCreationOptions,
     EffectFallbacks,
     MaterialHelper,
-    Color4,
-    Material,
+    Color4
 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";
 import { EventState, Observer } from "core/events";
 import { Nullable } from "core/types";
-import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
+import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures";
 import { ITileAddress, ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
 import { Range } from "core/math";
 import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
@@ -32,7 +31,7 @@ class TileBag {
     public normalArea: Nullable<ITilePoolTextureArea> = null;
     public layerArea: Nullable<ITilePoolTextureArea> = null;
 
-    public constructor(public address: ITileAddress) {}
+    public constructor(public address: ITileAddress) { }
 }
 
 export enum ClipIndex {
@@ -607,9 +606,9 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
     private _updateLayer(): void {
         Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAreaAsync(bag.address)))
-            .then((ids) => {})
-            .catch((reason) => {})
-            .finally(() => {});
+            .then((ids) => { })
+            .catch((reason) => { })
+            .finally(() => { });
     }
 
     // TODO : move back the bag process to _loadLayer and _updateLayer

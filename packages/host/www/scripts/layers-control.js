@@ -1,33 +1,24 @@
 const TileLayers = [
     {
-        id: "google-streets",
-        displayName: "Google Streets",
-        previewPictureUrl: "https://www.thunderforest.com/images/sets/atlas-berlin-636.png",
-    },
-    {
         id: "google-sat",
         displayName: "Google Satellite",
-        previewPictureUrl: "https://www.thunderforest.com/images/sets/landscape-snowdon-636.png",
-    },
-    {
-        id: "google-hybrid",
-        displayName: "Google Hybrid",
-        previewPictureUrl: "https://www.thunderforest.com/images/sets/outdoors-seattle-636.png",
+        previewPictureUrl: "images/tile-layers/google-sat.png",
     },
     {
         id: "google-terrain",
         displayName: "Google Terrain",
-        previewPictureUrl: "https://www.thunderforest.com/images/sets/transport-jfk-636.png",
+        previewPictureUrl: "images/tile-layers/google-terrain.png",
     },
-    // {
-    //     displayName: "Mapbox Terrain V1",
-    // },
-    // {
-    //     displayName: "Mapzen Normal",
-    // },
-    // {
-    //     displayName: "Mapzen Terrarium",
-    // },
+    {
+        id: "mapbox-vintage",
+        displayName: "Vintage",
+        previewPictureUrl: "images/tile-layers/mapbox-vintage.png",
+    },
+    {
+        id: "mapbox-hillshading",
+        displayName: "Hill shading",
+        previewPictureUrl: "images/tile-layers/mapbox-hill-shading.png",
+    },
 ];
 
 class LayerControl {
@@ -42,7 +33,8 @@ class LayerControl {
         for (const layer of TileLayers) {
             const layerItem = document.createElement("div");
             layerItem.classList.add("layers-list-item");
-            layerItem.innerHTML = `<img src="${layer.previewPictureUrl}" />`;
+            layerItem.innerHTML = `<img src="${layer.previewPictureUrl}" />
+            <div class="colored-overlay"></div>`;
             layerItem.addEventListener("click", () => {
                 this.onLayerSelected(layer);
             });

@@ -58,23 +58,27 @@ export class TileContentManager<T> {
         return this._contentUpdateObservable!;
     }
 
+    private buildCacheKey(key: string): string {
+        return `${this._datasource.name}_${key}`;
+    }
+
     public getTileContent(address: ITileAddress): TileContent<T> {
-        const key = address.quadkey;
+        const cacheKey = this.buildCacheKey(address.quadkey);
 
         // first have a look in cache
-        if (this._cache.contains(key)) {
-            return this._cache.get(key)!;
+        if (this._cache.contains(cacheKey)) {
+            return this._cache.get(cacheKey)!;
         }
 
         // then try to build the content using alternative method
         let c = this._smoothingZomm ? this.buildAlternativeTileContent(address) : null;
 
         // store the content, either null or not. This flag the address as beeing processed.
-        this._cache.set(key, c);
+        this._cache.set(cacheKey, c);
 
         // then try to get it from the datasource
         this._datasource
-            .fetchAsync(address, this)
+            .fetchAsync(address, this) // we pass this as context
             .then((result: FetchResult<Nullable<T>>) => {
                 if (result.content) {
                     const manager = <TileContentManager<T>>result.userArgs[0];
@@ -82,7 +86,7 @@ export class TileContentManager<T> {
                     // we have the content of the tile.
                     const content = result.content;
                     // we store the value in cache
-                    manager._cache.set(address.quadkey, content);
+                    manager._cache.set(this.buildCacheKey(address.quadkey), content);
                     // we notify the observers
                     if (this._contentUpdateObservable) {
                         const e = new ContentUpdateEventArgs<T>(address, content, manager);
@@ -99,20 +103,20 @@ export class TileContentManager<T> {
     }
 
     protected buildTileContentView(address: ITileAddress, source?: TileSection, target?: TileSection): TileContent<T> | undefined {
-        let key = TileContentView.BuildKey(address, source, target);
-        if (this._cache.contains(key)) {
-            const view = this._cache.get(key);
+        let cacheKey = this.buildCacheKey(TileContentView.BuildKey(address, source, target));
+        if (this._cache.contains(cacheKey)) {
+            const view = this._cache.get(cacheKey);
             return view;
         }
         const view = new TileContentView(address, source, target);
-        this._cache.set(key, view);
+        this._cache.set(cacheKey, view);
         return view;
     }
 
     protected buildAlternativeTileContent(address: ITileAddress): TileContent<T> {
         let key = address.quadkey;
-        const parentKey = TileMetrics.ToParentKey(key);
-        const content = this._cache.get(parentKey);
+        const parentCacheKey = this.buildCacheKey(TileMetrics.ToParentKey(key));
+        const content = this._cache.get(parentCacheKey);
         if (content) {
             if (IsTileContentView(content)) {
                 return null;

@@ -3975,13 +3975,16 @@ class TileContentManager {
         this._contentUpdateObservable = this._contentUpdateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable(this.onContentObserverAdded.bind(this));
         return this._contentUpdateObservable;
     }
+    buildCacheKey(key) {
+        return `${this._datasource.name}_${key}`;
+    }
     getTileContent(address) {
-        const key = address.quadkey;
-        if (this._cache.contains(key)) {
-            return this._cache.get(key);
+        const cacheKey = this.buildCacheKey(address.quadkey);
+        if (this._cache.contains(cacheKey)) {
+            return this._cache.get(cacheKey);
         }
         let c = this._smoothingZomm ? this.buildAlternativeTileContent(address) : null;
-        this._cache.set(key, c);
+        this._cache.set(cacheKey, c);
         this._datasource
             .fetchAsync(address, this)
             .then((result) => {
@@ -3989,7 +3992,7 @@ class TileContentManager {
                 const manager = result.userArgs[0];
                 const address = result.address;
                 const content = result.content;
-                manager._cache.set(address.quadkey, content);
+                manager._cache.set(this.buildCacheKey(address.quadkey), content);
                 if (this._contentUpdateObservable) {
                     const e = new ContentUpdateEventArgs(address, content, manager);
                     this._contentUpdateObservable.notifyObservers(e);
@@ -4002,19 +4005,19 @@ class TileContentManager {
         return c;
     }
     buildTileContentView(address, source, target) {
-        let key = _tiles__WEBPACK_IMPORTED_MODULE_3__.TileContentView.BuildKey(address, source, target);
-        if (this._cache.contains(key)) {
-            const view = this._cache.get(key);
+        let cacheKey = this.buildCacheKey(_tiles__WEBPACK_IMPORTED_MODULE_3__.TileContentView.BuildKey(address, source, target));
+        if (this._cache.contains(cacheKey)) {
+            const view = this._cache.get(cacheKey);
             return view;
         }
         const view = new _tiles__WEBPACK_IMPORTED_MODULE_3__.TileContentView(address, source, target);
-        this._cache.set(key, view);
+        this._cache.set(cacheKey, view);
         return view;
     }
     buildAlternativeTileContent(address) {
         let key = address.quadkey;
-        const parentKey = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToParentKey(key);
-        const content = this._cache.get(parentKey);
+        const parentCacheKey = this.buildCacheKey(_tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToParentKey(key));
+        const content = this._cache.get(parentCacheKey);
         if (content) {
             if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.IsTileContentView)(content)) {
                 return null;

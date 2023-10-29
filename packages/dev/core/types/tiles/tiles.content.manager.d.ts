@@ -19,6 +19,7 @@ export declare class TileContentManager<T> {
     get datasource(): ITileDatasource<T, ITileAddress>;
     get metrics(): ITileMetrics;
     get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>>;
+    private buildCacheKey;
     getTileContent(address: ITileAddress): TileContent<T>;
     protected buildTileContentView(address: ITileAddress, source?: TileSection, target?: TileSection): TileContent<T> | undefined;
     protected buildAlternativeTileContent(address: ITileAddress): TileContent<T>;

@@ -33,13 +33,20 @@ export class MapboxAltitudeDecoder implements IPixelDecoder {
 }
 
 export class MapBox {
+    private static readonly KEY = "mapbox";
     public static MaxLevelOfDetail = 14;
 
     public static TerrainDemV1Client(token: string, options?: TileWebClientOptions) {
         let mo = new TileMetricsOptionsBuilder().withTileSize(512).withMaxLOD(MapBox.MaxLevelOfDetail);
         const metrics = new EPSG3857(mo.build());
         const codecOptions = new Float32TileCodecOptionsBuilder().withInsets(1, Side.top).withInsets(1, Side.left).withInsets(1, Side.bottom).withInsets(1, Side.right).build();
-        const elevationClient = new TileWebClient(new MapBoxTerrainDemV1UrlBuilder(token), new Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
-        return new DemTileWebClient(elevationClient);
+        const elevationClient = new TileWebClient(
+            `${MapBox.KEY}_elevation`,
+            new MapBoxTerrainDemV1UrlBuilder(token),
+            new Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions),
+            metrics,
+            options
+        );
+        return new DemTileWebClient(`${MapBox.KEY}_dem`, elevationClient);
     }
 }

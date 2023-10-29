@@ -15,6 +15,7 @@ export declare class GoogleMap2DUrlBuilder extends WebTileUrlBuilder {
     constructor(...types: (GoogleMap2DLayerCode | string)[]);
 }
 export declare class Google {
+    private static readonly KEY;
     static MaxLevelOfDetail: number;
     static MetricsOptions: import("..").ITileMetricsOptions;
     static Metrics: EPSG3857;

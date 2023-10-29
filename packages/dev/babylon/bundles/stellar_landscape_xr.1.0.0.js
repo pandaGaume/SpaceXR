@@ -1234,9 +1234,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class DemTileWebClient {
-    constructor(elevationSrc, normalSrc) {
+    constructor(name, elevationSrc, normalSrc) {
+        this._name = name;
         this._elevationsDataSource = elevationSrc;
         this._normalsDataSource = normalSrc;
+    }
+    get name() {
+        return this._name;
     }
     get metrics() {
         return this._elevationsDataSource.metrics;
@@ -4899,17 +4903,21 @@ class FetchError extends Error {
     }
 }
 class TileWebClient {
-    constructor(urlFactory, codec, metrics, options) {
+    constructor(name, urlFactory, codec, metrics, options) {
         if (!urlFactory) {
             throw new Error(`invalid url factory parameter ${urlFactory}`);
         }
         if (!codec) {
             throw new Error(`invalid codec parameter ${codec}`);
         }
+        this._name = name;
         this._urlFactory = urlFactory;
         this._codec = codec;
         this._metrics = metrics;
         this._o = { ...TileWebClientOptions.Default, ...options };
+    }
+    get name() {
+        return this._name;
     }
     get metrics() {
         return this._metrics;
@@ -6386,21 +6394,22 @@ GoogleMap2DUrlBuilder.Terrain = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.t
 
 class Google {
     static Client2d(urlBuilder, options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(urlBuilder, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_2d`, urlBuilder, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
     }
     static StreetClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Street, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_street2d`, GoogleMap2DUrlBuilder.Street, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
     }
     static SatelliteClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Satellite, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_sat2d`, GoogleMap2DUrlBuilder.Satellite, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
     }
     static HybridClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Hybrid, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_hybrid2d`, GoogleMap2DUrlBuilder.Hybrid, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
     }
     static TerrainClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(GoogleMap2DUrlBuilder.Terrain, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_terrain2d`, GoogleMap2DUrlBuilder.Terrain, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
     }
 }
+Google.KEY = "google";
 Google.MaxLevelOfDetail = 20;
 Google.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder().withMaxLOD(Google.MaxLevelOfDetail).build();
 Google.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857(Google.MetricsOptions);
@@ -6461,10 +6470,11 @@ class MapBox {
         let mo = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_1__.TileMetricsOptionsBuilder().withTileSize(512).withMaxLOD(MapBox.MaxLevelOfDetail);
         const metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_2__.EPSG3857(mo.build());
         const codecOptions = new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodecOptionsBuilder().withInsets(1, _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_4__.Side.top).withInsets(1, _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_4__.Side.left).withInsets(1, _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_4__.Side.bottom).withInsets(1, _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_4__.Side.right).build();
-        const elevationClient = new _tiles_client__WEBPACK_IMPORTED_MODULE_5__.TileWebClient(new MapBoxTerrainDemV1UrlBuilder(token), new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__.DemTileWebClient(elevationClient);
+        const elevationClient = new _tiles_client__WEBPACK_IMPORTED_MODULE_5__.TileWebClient(`${MapBox.KEY}_elevation`, new MapBoxTerrainDemV1UrlBuilder(token), new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__.DemTileWebClient(`${MapBox.KEY}_dem`, elevationClient);
     }
 }
+MapBox.KEY = "mapbox";
 MapBox.MaxLevelOfDetail = 14;
 
 //# sourceMappingURL=tiles.vendors.mapbox.js.map
@@ -6517,21 +6527,22 @@ MapzenAltitudeDecoder.Shared = new MapzenAltitudeDecoder();
 
 class MapZen {
     static ElevationsImagesClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static ElevationsClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
     }
     static NormalsImagesClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static NormalsClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${MapZen.KEY}_normal_float`, MapZenDemUrlBuilder.Normal, new _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec(), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_3__.DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
     }
 }
+MapZen.KEY = "mapzen";
 MapZen.MaxLevelOfDetail = 15;
 MapZen.MetricsOptions = new _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
 MapZen.Metrics = new _tiles_geography__WEBPACK_IMPORTED_MODULE_5__.EPSG3857(MapZen.MetricsOptions);

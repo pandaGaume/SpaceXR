@@ -116,7 +116,7 @@
                 camera.setTarget(display);
 
                 // definir la source de donnée.
-                const demClient = new SPACEXR.DemTileWebClient(SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsImagesClient());
+                const demClient = SPACEXR.MapZen.DemClient();
                 const layerClient = SPACEXR.Google.SatelliteClient2d();
 
                 // some locations

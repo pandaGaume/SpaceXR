@@ -112,6 +112,7 @@ export class FetchResult<T> {
 }
 
 export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {
+    name: string;
     fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 

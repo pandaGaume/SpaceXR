@@ -1,8 +1,7 @@
-import { IMemoryCache } from "core/utils/cache";
-import { ITileAddress, ITileContentView, ITileDatasource, ITileMetrics, TileContent } from "./tiles.interfaces";
-import { Observable } from "core/events/events.observable";
-import { EventArgs } from "core/events/events.args";
-import { ICartesian3 } from "..";
+import { IMemoryCache } from "../utils/cache";
+import { ITileAddress, TileSection, ITileDatasource, ITileMetrics, TileContent } from "./tiles.interfaces";
+import { Observable } from "../events/events.observable";
+import { EventArgs } from "../events/events.args";
 export declare class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> {
     _address: ITileAddress;
     _content: TileContent<T>;
@@ -21,7 +20,7 @@ export declare class TileContentManager<T> {
     get metrics(): ITileMetrics;
     get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>>;
     getTileContent(address: ITileAddress): TileContent<T>;
-    protected buildTileContentView(content: T, address: ITileAddress, source?: ICartesian3, target?: ICartesian3): ITileContentView<T>;
+    protected buildTileContentView(address: ITileAddress, source?: TileSection, target?: TileSection): TileContent<T> | undefined;
     protected buildAlternativeTileContent(address: ITileAddress): TileContent<T>;
     private onContentObserverAdded;
 }

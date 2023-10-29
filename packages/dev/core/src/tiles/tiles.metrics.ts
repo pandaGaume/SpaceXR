@@ -1,6 +1,6 @@
 import { ICartesian2, ICartesian3 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference} from "./tiles.interfaces";
+import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
 import { TileAddress } from "./tiles.address";
 import { Nullable } from "../types";
 
@@ -129,6 +129,10 @@ export class TileMetrics {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
 
+    /// <summary>
+    /// Returns the normalized section of the quadkey in the form of Vector3(x,y,z) where x,y,z are in [0,1] range
+    /// and define the upper left corner of the section.
+    /// </summary>
     public static ToNormalizedSection(key: string): Nullable<ICartesian3> {
         if (key === null || key === undefined || key.length <= 1) {
             return null;

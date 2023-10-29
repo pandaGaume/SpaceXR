@@ -1,11 +1,10 @@
-import { IMemoryCache, MemoryCache } from "core/utils/cache";
-import { FetchResult, ITileAddress, ITileContentView, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "./tiles.interfaces";
-import { Nullable } from "core/types";
-import { Observable, Observer } from "core/events/events.observable";
-import { EventArgs } from "core/events/events.args";
+import { IMemoryCache, MemoryCache } from "../utils/cache";
+import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "./tiles.interfaces";
+import { Nullable } from "../types";
+import { Observable, Observer } from "../events/events.observable";
+import { EventArgs } from "../events/events.args";
 import { TileMetrics } from "./tiles.metrics";
 import { TileContentView } from "./tiles";
-import { ICartesian3 } from "..";
 
 export class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> {
     _address: ITileAddress;
@@ -33,7 +32,8 @@ export class TileContentManager<T> {
     private _datasource: ITileDatasource<T, ITileAddress>;
     // observable
     _contentUpdateObservable?: Observable<ContentUpdateEventArgs<T>>;
-    // options
+
+    // options to enable/disable transition between levels of details
     _smoothingZomm: boolean;
 
     public constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>) {
@@ -60,10 +60,12 @@ export class TileContentManager<T> {
 
     public getTileContent(address: ITileAddress): TileContent<T> {
         const key = address.quadkey;
+
         // first have a look in cache
         if (this._cache.contains(key)) {
             return this._cache.get(key)!;
         }
+
         // then try to build the content using alternative method
         let c = this._smoothingZomm ? this.buildAlternativeTileContent(address) : null;
 
@@ -78,7 +80,7 @@ export class TileContentManager<T> {
                     const manager = <TileContentManager<T>>result.userArgs[0];
                     const address = result.address;
                     // we have the content of the tile.
-                    const content = [result.content];
+                    const content = result.content;
                     // we store the value in cache
                     manager._cache.set(address.quadkey, content);
                     // we notify the observers
@@ -96,43 +98,38 @@ export class TileContentManager<T> {
         return c;
     }
 
-    protected buildTileContentView(content: T, address: ITileAddress, source?: ICartesian3, target?: ICartesian3): ITileContentView<T> {
-        return new TileContentView<T>(content, address, source, target);
+    protected buildTileContentView(address: ITileAddress, source?: TileSection, target?: TileSection): TileContent<T> | undefined {
+        let key = TileContentView.BuildKey(address, source, target);
+        if (this._cache.contains(key)) {
+            const view = this._cache.get(key);
+            return view;
+        }
+        const view = new TileContentView(address, source, target);
+        this._cache.set(key, view);
+        return view;
     }
 
     protected buildAlternativeTileContent(address: ITileAddress): TileContent<T> {
         let key = address.quadkey;
         const parentKey = TileMetrics.ToParentKey(key);
         const content = this._cache.get(parentKey);
-        if (content && content[0]) {
-            if (IsTileContentView(content[0])) {
+        if (content) {
+            if (IsTileContentView(content)) {
                 return null;
             }
+            // get the corresponding upper left corner of the parent source tile
             const source = TileMetrics.ToNormalizedSection(key);
             if (source) {
-                return [this.buildTileContentView(content[0], address, source)];
+                return this.buildTileContentView(address, source) ?? null;
             }
         }
+
+        // try to get the content from the childs
         const childKeys = TileMetrics.ToChildsKey(key);
-        let hasNull = false;
-        const contents = childKeys.map((k) => {
-            if (!hasNull) {
-                const content = this._cache.get(k);
-                if (content && content[0]) {
-                    if (IsTileContentView(content[0])) {
-                        hasNull = true;
-                        return null;
-                    }
-                    const target = TileMetrics.ToNormalizedSection(k);
-                    if (target) {
-                        return this.buildTileContentView(content[0], address, undefined, target);
-                    }
-                }
-                hasNull = true;
-            }
-            return null;
+        const targets = childKeys.map((k) => {
+            return TileMetrics.ToNormalizedSection(k);
         });
-        return hasNull ? null : contents;
+        return this.buildTileContentView(address, null, targets) ?? null;
     }
 
     // INTERNALS

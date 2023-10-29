@@ -492,10 +492,11 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         }
 
         const m = tile.surface;
-        if (m && tile.content && tile.content[0]) {
-            let tileContent = tile.content[0];
+        if (m && tile.content) {
+            let tileContent = tile.content;
             if (IsTileContentView<V>(tileContent)) {
-                tileContent = tileContent.delegate;
+                console.log("Warning ! Tile content view is not supported yet.");
+                return;
             }
 
             // update the elevation range.

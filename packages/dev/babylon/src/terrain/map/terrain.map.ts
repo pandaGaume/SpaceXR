@@ -6,13 +6,13 @@ import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileClient, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
 import { IRectangle } from "core/geometry/geometry.interfaces";
-
+import { Size3 } from "core/geometry/geometry.size";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
-import { DemInfosManager, Size3 } from "../..";
+import { TileContentManager } from "../..";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
@@ -97,7 +97,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, new DemInfosManager(datasource), o.center, o.levelOfDetail);
+        super(display, new TileContentManager(datasource), o.center, o.levelOfDetail);
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
@@ -177,11 +177,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     protected onUpdated(key: string, tile: TerrainTile<V>): void {
         if (!tile.surface) {
-            if (tile.content && tile.content[0]) {
+            if (tile.content) {
                 this.buildInstance(key, tile);
             }
         } else {
-            if (!tile.content || !tile.content[0]) {
+            if (!tile.content) {
                 tile.dispose();
             }
         }
@@ -190,7 +190,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     // TODO,introduce metrics overlaps
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
-        if (tile.content && tile.content[0]) {
+        if (tile.content) {
             this.buildInstance(key, tile);
         }
     }
@@ -226,24 +226,20 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
         const offset = this.display.insets ?? Size3.Zero();
         for (const t of tiles) {
-            const contents = t.content;
-            if (contents?.length) {
-                if (t.rect && t.surface) {
-                    for (const item of contents) {
-                        if (item) {
-                            if (IsTileContentView<V>(item)) {
-                                // never happen while Transition mode is OFF
-                                continue;
-                            }
-                            // this is the rect expressed in "texel" or "pixel"
-                            const c = t.rect.center;
-                            const x = c.x - center.x + offset.width;
-                            const y = c.y - center.y + offset.height;
-                            t.surface.position.x = x;
-                            t.surface.position.y = y;
-                            t.surface.position.z = offset.thickness;
-                        }
+            const item = t.content;
+            if (t.rect && t.surface) {
+                if (item) {
+                    if (IsTileContentView<V>(item)) {
+                        // never happen while Transition mode is OFF
+                        continue;
                     }
+                    // this is the rect expressed in "texel" or "pixel"
+                    const c = t.rect.center;
+                    const x = c.x - center.x + offset.width;
+                    const y = c.y - center.y + offset.height;
+                    t.surface.position.x = x;
+                    t.surface.position.y = y;
+                    t.surface.position.z = offset.thickness;
                 }
             }
         }

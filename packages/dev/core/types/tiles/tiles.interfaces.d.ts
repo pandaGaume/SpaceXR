@@ -6,18 +6,18 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export interface ITileContentView<T> {
+export type TileSection = Nullable<ICartesian3 | Nullable<ICartesian3>[]>;
+export interface ITileContentView {
     address: ITileAddress;
-    source?: ICartesian3;
-    target?: ICartesian3;
-    delegate: T;
+    source?: TileSection;
+    target?: TileSection;
 }
 export interface ITileCruncher<T> {
     Downsampling(childs: T[]): Nullable<T>;
     Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
-export declare function IsTileContentView<T>(b: unknown): b is ITileContentView<T>;
-export type TileContent<T> = Nullable<Array<Nullable<T | ITileContentView<T>>>>;
+export declare function IsTileContentView<T>(b: unknown): b is ITileContentView;
+export type TileContent<T> = Nullable<T | ITileContentView>;
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
     content: TileContent<T>;

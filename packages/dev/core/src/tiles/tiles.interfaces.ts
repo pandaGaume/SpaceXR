@@ -1,6 +1,6 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, ICartesian3, IRectangle} from "../geometry/geometry.interfaces";
+import { ICartesian2, ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -12,11 +12,12 @@ export interface ITileAddress extends ICartesian2 {
     quadkey: string;
 }
 
-export interface ITileContentView<T> {
+export type TileSection = Nullable<ICartesian3 | Nullable<ICartesian3>[]>;
+
+export interface ITileContentView {
     address: ITileAddress;
-    source?: ICartesian3;
-    target?: ICartesian3;
-    delegate: T;
+    source?: TileSection;
+    target?: TileSection;
 }
 
 export interface ITileCruncher<T> {
@@ -24,12 +25,12 @@ export interface ITileCruncher<T> {
     Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
 
-export function IsTileContentView<T>(b: unknown): b is ITileContentView<T> {
+export function IsTileContentView<T>(b: unknown): b is ITileContentView {
     if (typeof b !== "object" || b === null) return false;
-    return (<any>b).source !== undefined && (<any>b).target !== undefined && (<any>b).data !== undefined;
+    return (<any>b).source !== undefined && (<any>b).target !== undefined;
 }
 
-export type TileContent<T> = Nullable<Array<Nullable<T | ITileContentView<T>>>>;
+export type TileContent<T> = Nullable<T | ITileContentView>;
 
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;

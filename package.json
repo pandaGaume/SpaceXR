@@ -22,5 +22,8 @@
         "build:dev": "npm run compile:dev",
         "compile:dev": "tsc -b ./tsconfig.packages.dev.json",
         "test": "jest"
+    },
+    "dependencies": {
+        "@babylonjs/gui": "^6.24.0"
     }
 }

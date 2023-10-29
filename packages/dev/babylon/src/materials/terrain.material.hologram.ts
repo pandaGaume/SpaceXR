@@ -14,7 +14,7 @@ import {
     IEffectCreationOptions,
     EffectFallbacks,
     MaterialHelper,
-    Color4
+    Color4,
 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";

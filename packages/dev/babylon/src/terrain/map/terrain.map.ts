@@ -5,22 +5,20 @@ import { Geo2, Geo3 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileClient, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
-import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
-import { Cartesian3 } from "core/geometry/geometry.cartesian";
+import { IRectangle } from "core/geometry/geometry.interfaces";
 
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
-import { DemInfosManager } from "../..";
+import { DemInfosManager, Size3 } from "../..";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
         center: Geo2.Zero(),
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
-        insets: Cartesian3.Zero(),
         exageration: 1.0,
         lodTransition: LODTransitionMode.LINEAR,
     });
@@ -28,7 +26,6 @@ export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public center?: IGeo2;
     public levelOfDetail?: number;
     public gridOptions?: TerrainGridOptions;
-    public insets?: ICartesian3;
     public lodTransition?: LODTransitionMode;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
@@ -41,7 +38,6 @@ export class SurfaceTileMapOptionsBuilder {
     _center?: IGeo2;
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
-    _insets?: ICartesian3;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
     _lodTransition?: LODTransitionMode;
@@ -56,10 +52,6 @@ export class SurfaceTileMapOptionsBuilder {
     }
     public withGridOptions(v?: TerrainGridOptions): SurfaceTileMapOptionsBuilder {
         this._gridOptions = v;
-        return this;
-    }
-    public withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder {
-        this._insets = v;
         return this;
     }
     public withExageration(v?: number): SurfaceTileMapOptionsBuilder {
@@ -79,7 +71,6 @@ export class SurfaceTileMapOptionsBuilder {
             center: this._center ?? Geo3.Zero(),
             levelOfDetail: this._lod ?? 10,
             gridOptions: this._gridOptions,
-            insets: this._insets,
             exageration: this._exageration ?? 1.0,
             layerClient: this._layerClient,
             lodTransition: this._lodTransition ?? LODTransitionMode.LINEAR,
@@ -103,8 +94,6 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
-
-    _offset?: Vector3;
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
@@ -235,7 +224,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
             context.rotation.z = Tools.ToRadians(this.azimuth);
         }
 
-        const offset = this._offset || Vector3.Zero();
+        const offset = this.display.insets ?? Size3.Zero();
         for (const t of tiles) {
             const contents = t.content;
             if (contents?.length) {
@@ -248,11 +237,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
                             }
                             // this is the rect expressed in "texel" or "pixel"
                             const c = t.rect.center;
-                            const x = c.x - center.x + offset.x;
-                            const y = c.y - center.y + offset.y;
+                            const x = c.x - center.x + offset.width;
+                            const y = c.y - center.y + offset.height;
                             t.surface.position.x = x;
                             t.surface.position.y = y;
-                            t.surface.position.z = offset.z;
+                            t.surface.position.z = offset.thickness;
                         }
                     }
                 }

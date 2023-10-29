@@ -36,7 +36,7 @@ void main(void) {
     if( depth < 0.0) {
         v.x = v.x == 0.0 ? 1.0 : v.x;
         v.y = v.y == 0.0 ? 1.0 : v.y;   
-        v.z = 0.0;
+        v.z = demIds[0];
     } 
 
     float alt = float(texture(altitudes, v)) ;

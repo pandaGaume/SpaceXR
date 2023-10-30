@@ -67,6 +67,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     mapSize(levelOfDetail: number): number;
     get minLOD(): number;
     get maxLOD(): number;
+    get lodCount(): number;
     get minLatitude(): number;
     get maxLatitude(): number;
     get minLongitude(): number;
@@ -75,6 +76,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     get cellSize(): number;
     get cellCoordinateReference(): CellCoordinateReference;
     get overlap(): number;
+    clampLevelOfDetail(levelOfDetail: number): number;
     isValidAddress(a: ITileAddress): boolean;
     assertValidAddress(a: ITileAddress): void;
     mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number;

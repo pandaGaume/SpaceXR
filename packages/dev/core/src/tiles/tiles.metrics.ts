@@ -3,6 +3,7 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
 import { TileAddress } from "./tiles.address";
 import { Nullable } from "../types";
+import { Scalar } from "../math/math";
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
@@ -249,6 +250,9 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
     public get maxLOD(): number {
         return this._o.maxLOD || TileMetricsOptions.DefaultMaxLOD;
     }
+    public get lodCount(): number {
+        return this.maxLOD - this.minLOD + 1;
+    }
     public get minLatitude(): number {
         return this._o.minLatitude || TileMetricsOptions.DefaultMinLatitude;
     }
@@ -273,6 +277,10 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
     }
     public get overlap(): number {
         return this._o.overlap || TileMetricsOptions.DefaultOverlap;
+    }
+
+    public clampLevelOfDetail(levelOfDetail: number): number {
+        return Scalar.Clamp(levelOfDetail, this.minLOD, this.maxLOD);
     }
 
     public isValidAddress(a: ITileAddress): boolean {

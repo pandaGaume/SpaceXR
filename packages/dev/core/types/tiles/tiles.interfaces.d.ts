@@ -56,6 +56,7 @@ export interface ITileMetricsOptions {
 export interface ITileMetrics {
     minLOD: number;
     maxLOD: number;
+    lodCount: number;
     minLatitude: number;
     maxLatitude: number;
     minLongitude: number;
@@ -75,6 +76,7 @@ export interface ITileMetrics {
     getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
     assertValidAddress(a: ITileAddress): void;
     isValidAddress(a: ITileAddress): boolean;
+    clampLevelOfDetail(levelOfDetail: number): number;
 }
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;

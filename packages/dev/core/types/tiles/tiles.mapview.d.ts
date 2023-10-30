@@ -6,39 +6,40 @@ import { IValidable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
 import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
-export declare class TileMapContext<T> {
+export interface IContextMetrics {
+    lod: number;
+    scale: number;
+    center: ICartesian2;
+}
+export declare class TileMapContext<T> implements IContextMetrics {
     _lod: number;
     _scale: number;
     _center: ICartesian2;
     _tiles: Map<string, ITile<T>>;
+    constructor(lod?: number);
     get lod(): number;
     get scale(): number;
     get tiles(): Map<string, ITile<T>>;
     get size(): number;
     get center(): ICartesian2;
+    clear(): void;
 }
 export declare enum UpdateReason {
     viewChanged = 0,
     tileReady = 1
 }
-export declare class UpdateInfos {
-    lod: number;
-    scale: number;
-    center: ICartesian2;
-    constructor(lod: number, scale: number, center: ICartesian2);
-}
 export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     _reason: UpdateReason;
     _added?: Array<ITile<T>>;
     _removed?: Array<ITile<T>>;
-    _previousInfos?: UpdateInfos;
-    _infos: UpdateInfos;
-    constructor(source: TileMapView<T>, reason: UpdateReason, infos: UpdateInfos, oldInfos?: UpdateInfos, added?: Array<ITile<T>>, removed?: Array<ITile<T>>);
+    _previousInfos?: IContextMetrics;
+    _infos: IContextMetrics;
+    constructor(source: TileMapView<T>, reason: UpdateReason, infos: IContextMetrics, oldInfos?: IContextMetrics, added?: Array<ITile<T>>, removed?: Array<ITile<T>>);
     get reason(): UpdateReason;
     get added(): Array<ITile<T>> | undefined;
     get removed(): Array<ITile<T>> | undefined;
-    get infos(): UpdateInfos;
-    get previousInfos(): UpdateInfos | undefined;
+    get infos(): IContextMetrics;
+    get previousInfos(): IContextMetrics | undefined;
     get lod(): number;
     get scale(): number;
     get center(): ICartesian2;
@@ -55,14 +56,15 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _manager: TileContentManager<T>;
     _w: number;
     _h: number;
+    _lodf: number;
     _lod: number;
     _bounds?: IEnvelope;
     _center: IGeo2;
-    _context: TileMapContext<T>;
+    _contexts: Array<TileMapContext<T>>;
+    _currentContext: TileMapContext<T>;
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
-    _oldInfos?: UpdateInfos;
     _valid: boolean;
     _cartesianCache: ICartesian2;
     _lodTransition: LODTransitionMode;
@@ -97,12 +99,14 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     invalidate(): TileMapView<T>;
     validate(): TileMapView<T>;
     revalidate(): TileMapView<T>;
+    private _getContext;
     private onResizeObserverAdded;
     private onZoomObserverAdded;
     private onCenterObserverAdded;
     private onUpdateObserverAdded;
     protected doValidate(): void;
-    protected doValidateContext(level: TileMapContext<T>): void;
+    protected doClearContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void;
+    protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void;
     protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;

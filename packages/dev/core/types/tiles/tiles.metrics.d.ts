@@ -53,7 +53,7 @@ export declare class TileMetricsOptionsBuilder {
 export declare class TileMetrics {
     static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean;
     static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void;
-    static IsLodInRange(lod: number, metrics: ITileMetrics): boolean;
+    static IsValidLod(lod: number, metrics: ITileMetrics): boolean;
     static ClampLod(levelOfDetail: number, metrics: ITileMetrics): number;
     static GetLodScale(lod: number): number;
     static ToParentKey(key: string): string;

@@ -5847,7 +5847,10 @@ class TileMapView {
         return this.invalidate().validate();
     }
     _getContext(lod) {
-        return this._contexts[lod - this.metrics.minLOD];
+        if (_tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.IsValidLod(lod, this.metrics)) {
+            return this._contexts[lod - this.metrics.minLOD];
+        }
+        return null;
     }
     onResizeObserverAdded(observer) { }
     onZoomObserverAdded(observer) { }
@@ -5871,7 +5874,10 @@ class TileMapView {
         const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, undefined, deleted.length ? deleted : undefined);
         this.updateObservable.notifyObservers(updateEvent);
     }
-    doValidateContext(oldLevel, newLevel) {
+    doValidateContext(oldLevel, newLevel, dispatchEvent = true) {
+        if (newLevel == null) {
+            return;
+        }
         const contextLod = newLevel._lod;
         let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.GetLodScale(this._lodf);
         newLevel._scale = scale;
@@ -5917,10 +5923,12 @@ class TileMapView {
         for (const t of added) {
             newLevel.tiles.set(t.address.quadkey, t);
         }
-        added = added.filter((t) => t.content !== undefined);
-        deleted = deleted.filter((t) => t.content !== undefined);
-        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, added.length ? added : undefined, deleted.length ? deleted : undefined);
-        this.updateObservable.notifyObservers(updateEvent);
+        if (dispatchEvent) {
+            added = added.filter((t) => t.content !== undefined);
+            deleted = deleted.filter((t) => t.content !== undefined);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, added.length ? added : undefined, deleted.length ? deleted : undefined);
+            this.updateObservable.notifyObservers(updateEvent);
+        }
     }
     onTileContentUpdate(args) {
         let t;
@@ -6090,7 +6098,7 @@ class TileMetricsOptionsBuilder {
 }
 class TileMetrics {
     static IsValidAddress(a, metrics) {
-        if (!TileMetrics.IsLodInRange(a.levelOfDetail, metrics)) {
+        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
             return false;
         }
         const s = (0x01 << a.levelOfDetail) - 1;
@@ -6103,7 +6111,7 @@ class TileMetrics {
         return true;
     }
     static AssertValidAddress(a, metrics) {
-        if (!TileMetrics.IsLodInRange(a.levelOfDetail, metrics)) {
+        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
             throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
         }
         const s = (0x01 << a.levelOfDetail) - 1;
@@ -6114,7 +6122,7 @@ class TileMetrics {
             throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
         }
     }
-    static IsLodInRange(lod, metrics) {
+    static IsValidLod(lod, metrics) {
         return lod >= metrics.minLOD && lod <= metrics.maxLOD;
     }
     static ClampLod(levelOfDetail, metrics) {

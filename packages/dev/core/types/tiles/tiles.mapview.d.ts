@@ -2,7 +2,7 @@ import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
 import { Observable } from "../events/events.observable";
-import { IValidable } from "../types";
+import { IValidable, Nullable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
 import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
@@ -103,7 +103,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onUpdateObserverAdded;
     protected doValidate(): void;
     protected doClearContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void;
-    protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void;
+    protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: Nullable<TileMapContext<T>>, dispatchEvent?: boolean): void;
     protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void;
     private onTileReady;
     protected onTileNotFound(t: ITile<T>): void;

@@ -120,7 +120,7 @@ export class TileMetricsOptionsBuilder {
 
 export class TileMetrics {
     public static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean {
-        if (!TileMetrics.IsLodInRange(a.levelOfDetail, metrics)) {
+        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
             return false;
         }
         const s = (0x01 << a.levelOfDetail) - 1;
@@ -134,7 +134,7 @@ export class TileMetrics {
     }
 
     public static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void {
-        if (!TileMetrics.IsLodInRange(a.levelOfDetail, metrics)) {
+        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
             throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
         }
         const s = (0x01 << a.levelOfDetail) - 1;
@@ -146,7 +146,7 @@ export class TileMetrics {
         }
     }
 
-    public static IsLodInRange(lod: number, metrics: ITileMetrics): boolean {
+    public static IsValidLod(lod: number, metrics: ITileMetrics): boolean {
         return lod >= metrics.minLOD && lod <= metrics.maxLOD;
     }
 

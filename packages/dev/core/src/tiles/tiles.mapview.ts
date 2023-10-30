@@ -3,7 +3,7 @@ import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
-import { IValidable } from "../types";
+import { IValidable, Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
@@ -145,7 +145,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // the list of context will may serve as cache, and prepare transition between LOD.
     _contexts: Array<TileMapContext<T>>;
     _currentContext: TileMapContext<T>;
-    // fixed for the moment
+    // not used yet.
     _cacheUpperLOD: boolean = false;
     _cacheLowerLOD: boolean = false;
 
@@ -370,8 +370,11 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     // INTERNALS
-    private _getContext(lod: number): TileMapContext<T> {
-        return this._contexts[lod - this.metrics.minLOD];
+    private _getContext(lod: number): Nullable<TileMapContext<T>> {
+        if (TileMetrics.IsValidLod(lod, this.metrics)) {
+            return this._contexts[lod - this.metrics.minLOD];
+        }
+        return null;
     }
 
     private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
@@ -388,10 +391,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // so if the current level of detail is different from the current context level of detail, we have to change the context.
         // Additionally, we may clean the previous context, or may prepare the next context if we decide to cache the upper and/or lower level of detail.
         if (this._lod != this._currentContext._lod) {
-            // we have to switch context
-            const newContext = this._getContext(this._lod);
+            // we have to switch context. Note that reach this point, the lod is already in range and valid.
+            const newContext = this._getContext(this._lod)!;
             const oldContext = this._currentContext;
-            // we clear the previous context and tell the observable to do so
+            // we may clear the previous context if we do not cache the upper or lower level of detail.
             this.doClearContext(oldContext, newContext);
             // we assign the new context
             this._currentContext = newContext;
@@ -412,7 +415,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this.updateObservable.notifyObservers(updateEvent);
     }
 
-    protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>) {
+    protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: Nullable<TileMapContext<T>>, dispatchEvent: boolean = true) {
+        if (newLevel == null) {
+            return;
+        }
         // current level of detail
         const contextLod = newLevel._lod;
 
@@ -479,11 +485,13 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             newLevel.tiles.set(t.address.quadkey, t);
         }
 
-        // filter the tile, selecting only ones with content.
-        added = added.filter((t) => t.content !== undefined);
-        deleted = deleted.filter((t) => t.content !== undefined);
-        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, added.length ? added : undefined, deleted.length ? deleted : undefined);
-        this.updateObservable.notifyObservers(updateEvent);
+        if (dispatchEvent) {
+            // filter the tile, selecting only ones with content.
+            added = added.filter((t) => t.content !== undefined);
+            deleted = deleted.filter((t) => t.content !== undefined);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, added.length ? added : undefined, deleted.length ? deleted : undefined);
+            this.updateObservable.notifyObservers(updateEvent);
+        }
     }
 
     protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void {

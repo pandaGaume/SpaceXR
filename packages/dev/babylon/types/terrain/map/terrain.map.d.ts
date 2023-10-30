@@ -7,14 +7,12 @@ import { IRectangle } from "core/geometry/geometry.interfaces";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterialOptions } from "../../materials";
 export declare class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     static Default: SurfaceTileMapOptions;
     center?: IGeo2;
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
-    lodTransition?: LODTransitionMode;
     constructor(p: Partial<SurfaceTileMapOptions>);
 }
 export declare class SurfaceTileMapOptionsBuilder {
@@ -23,12 +21,10 @@ export declare class SurfaceTileMapOptionsBuilder {
     _gridOptions?: TerrainGridOptions;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
-    _lodTransition?: LODTransitionMode;
     withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder;
     withLeveOfDetail(v?: number): SurfaceTileMapOptionsBuilder;
     withGridOptions(v?: TerrainGridOptions): SurfaceTileMapOptionsBuilder;
     withExageration(v?: number): SurfaceTileMapOptionsBuilder;
-    withLodTransition(v?: LODTransitionMode): SurfaceTileMapOptionsBuilder;
     withLayer(v: ITileClient<HTMLImageElement>): SurfaceTileMapOptionsBuilder;
     build(): SurfaceTileMapOptions;
 }

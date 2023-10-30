@@ -97,10 +97,6 @@ export interface ITileMetrics {
     getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
     getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
     getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
-
-    assertValidAddress(a: ITileAddress): void;
-    isValidAddress(a: ITileAddress): boolean;
-    clampLevelOfDetail(levelOfDetail: number): number;
 }
 
 export interface ITileMetricsProvider {

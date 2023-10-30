@@ -44,10 +44,6 @@ export declare class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     get scale(): number;
     get center(): ICartesian2;
 }
-export declare enum LODTransitionMode {
-    OFF = 0,
-    LINEAR = 1
-}
 export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
     addedObservable: any;
     removedObservable: any;
@@ -62,12 +58,13 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _center: IGeo2;
     _contexts: Array<TileMapContext<T>>;
     _currentContext: TileMapContext<T>;
+    _cacheUpperLOD: boolean;
+    _cacheLowerLOD: boolean;
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
     _valid: boolean;
     _cartesianCache: ICartesian2;
-    _lodTransition: LODTransitionMode;
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;

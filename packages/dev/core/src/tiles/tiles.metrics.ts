@@ -119,6 +119,41 @@ export class TileMetricsOptionsBuilder {
 }
 
 export class TileMetrics {
+    public static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean {
+        if (!TileMetrics.IsLodInRange(a.levelOfDetail, metrics)) {
+            return false;
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            return false;
+        }
+        if (a.y < 0 || a.y > s) {
+            return false;
+        }
+        return true;
+    }
+
+    public static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void {
+        if (!TileMetrics.IsLodInRange(a.levelOfDetail, metrics)) {
+            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
+        }
+        if (a.y < 0 || a.y > s) {
+            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
+        }
+    }
+
+    public static IsLodInRange(lod: number, metrics: ITileMetrics): boolean {
+        return lod >= metrics.minLOD && lod <= metrics.maxLOD;
+    }
+
+    public static ClampLod(levelOfDetail: number, metrics: ITileMetrics): number {
+        return Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
+    }
+
     public static GetLodScale(lod: number): number {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
         // scale corresponding to the decimal part
@@ -277,37 +312,6 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
     }
     public get overlap(): number {
         return this._o.overlap || TileMetricsOptions.DefaultOverlap;
-    }
-
-    public clampLevelOfDetail(levelOfDetail: number): number {
-        return Scalar.Clamp(levelOfDetail, this.minLOD, this.maxLOD);
-    }
-
-    public isValidAddress(a: ITileAddress): boolean {
-        if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
-            return false;
-        }
-        const s = (0x01 << a.levelOfDetail) - 1;
-        if (a.x < 0 || a.x > s) {
-            return false;
-        }
-        if (a.y < 0 || a.y > s) {
-            return false;
-        }
-        return true;
-    }
-
-    public assertValidAddress(a: ITileAddress): void {
-        if (a.levelOfDetail < 0 || a.levelOfDetail > this.maxLOD) {
-            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
-        }
-        const s = (0x01 << a.levelOfDetail) - 1;
-        if (a.x < 0 || a.x > s) {
-            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
-        }
-        if (a.y < 0 || a.y > s) {
-            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
-        }
     }
 
     public mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number {

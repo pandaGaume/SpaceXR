@@ -51,6 +51,10 @@ export declare class TileMetricsOptionsBuilder {
     build(): ITileMetricsOptions;
 }
 export declare class TileMetrics {
+    static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean;
+    static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void;
+    static IsLodInRange(lod: number, metrics: ITileMetrics): boolean;
+    static ClampLod(levelOfDetail: number, metrics: ITileMetrics): number;
     static GetLodScale(lod: number): number;
     static ToParentKey(key: string): string;
     static ToNormalizedSection(key: string): Nullable<ICartesian3>;
@@ -76,9 +80,6 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     get cellSize(): number;
     get cellCoordinateReference(): CellCoordinateReference;
     get overlap(): number;
-    clampLevelOfDetail(levelOfDetail: number): number;
-    isValidAddress(a: ITileAddress): boolean;
-    assertValidAddress(a: ITileAddress): void;
     mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number;
     abstract groundResolution(latitude: number, levelOfDetail: number): number;
     abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;

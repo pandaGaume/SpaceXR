@@ -10,7 +10,6 @@ import { Size3 } from "core/geometry/geometry.size";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
 import { TileContentManager } from "../..";
 
@@ -19,14 +18,12 @@ export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
         center: Geo2.Zero(),
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
-        exageration: 1.0,
-        lodTransition: LODTransitionMode.LINEAR,
+        exageration: 1.0
     });
 
     public center?: IGeo2;
     public levelOfDetail?: number;
     public gridOptions?: TerrainGridOptions;
-    public lodTransition?: LODTransitionMode;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
         super();
@@ -40,8 +37,7 @@ export class SurfaceTileMapOptionsBuilder {
     _gridOptions?: TerrainGridOptions;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
-    _lodTransition?: LODTransitionMode;
-
+ 
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
         return this;
@@ -58,10 +54,6 @@ export class SurfaceTileMapOptionsBuilder {
         this._exageration = v;
         return this;
     }
-    public withLodTransition(v?: LODTransitionMode): SurfaceTileMapOptionsBuilder {
-        this._lodTransition = v;
-        return this;
-    }
     public withLayer(v: ITileClient<HTMLImageElement>): SurfaceTileMapOptionsBuilder {
         this._layerClient = v;
         return this;
@@ -73,7 +65,6 @@ export class SurfaceTileMapOptionsBuilder {
             gridOptions: this._gridOptions,
             exageration: this._exageration ?? 1.0,
             layerClient: this._layerClient,
-            lodTransition: this._lodTransition ?? LODTransitionMode.LINEAR,
         });
     }
 }
@@ -102,7 +93,6 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
-        this._view._lodTransition = o.lodTransition ?? LODTransitionMode.LINEAR;
         this._view.validate();
     }
 

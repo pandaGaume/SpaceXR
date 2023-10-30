@@ -112,11 +112,6 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     }
 }
 
-export enum LODTransitionMode {
-    OFF = 0,
-    LINEAR = 1,
-}
-
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
     addedObservable: any;
     removedObservable: any;
@@ -150,6 +145,9 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // the list of context will may serve as cache, and prepare transition between LOD.
     _contexts: Array<TileMapContext<T>>;
     _currentContext: TileMapContext<T>;
+    // fixed for the moment
+    _cacheUpperLOD: boolean = false;
+    _cacheLowerLOD: boolean = false;
 
     _azimuth: number;
     _cosangle: number;
@@ -158,7 +156,6 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // interns
     _valid: boolean = false;
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
-    _lodTransition: LODTransitionMode = LODTransitionMode.LINEAR;
 
     // event
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
@@ -174,7 +171,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // note : The map method alone will not iterate over the holes created by the arry constructor.
         // So we use the spread operator to first convert these holes into undefined values, and then use map.
         this._contexts = [...new Array<TileMapContext<T>>(this.metrics.lodCount)].map((o, i) => new TileMapContext<T>(i + this.metrics.minLOD));
-        this.invalidateSize(width, height).setView(center, this.metrics.clampLevelOfDetail(lod));
+        this.invalidateSize(width, height).setView(center, TileMetrics.ClampLod(lod, this.metrics));
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;

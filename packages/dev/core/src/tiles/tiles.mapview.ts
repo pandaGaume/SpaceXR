@@ -384,12 +384,15 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // VIRTUALS
     protected doValidate() {
+        if (this._cacheLowerLOD || this._cacheUpperLOD) {
+            return this.doValidateWithCache();
+        }
         // we have this._lod which is the current level of detail
         // we have this._lodf which is the current level of detail with decimal part
         // we have this._currentContext which is the current context
         // we have this._currentContext._lod which is the current level of detail of the current context
         // so if the current level of detail is different from the current context level of detail, we have to change the context.
-        // Additionally, we may clean the previous context, or may prepare the next context if we decide to cache the upper and/or lower level of detail.
+        // Additionally, we may clean the previous context.
         if (this._lod != this._currentContext._lod) {
             // we have to switch context. Note that reach this point, the lod is already in range and valid.
             const newContext = this._getContext(this._lod)!;
@@ -403,6 +406,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             return;
         }
         this.doValidateContext(this._currentContext, this._currentContext);
+    }
+
+    protected doValidateWithCache() {
+        // not implemented yet.
     }
 
     protected doClearContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void {

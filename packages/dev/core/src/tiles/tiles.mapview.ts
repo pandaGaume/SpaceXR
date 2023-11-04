@@ -11,7 +11,6 @@ import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { TileBuilder } from "./tiles";
-import { TileMetrics } from "./tiles.metrics";
 import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Envelope } from "../geography/geography.envelope";
@@ -171,7 +170,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         // note : The map method alone will not iterate over the holes created by the arry constructor.
         // So we use the spread operator to first convert these holes into undefined values, and then use map.
         this._contexts = [...new Array<TileMapContext<T>>(this.metrics.lodCount)].map((o, i) => new TileMapContext<T>(i + this.metrics.minLOD));
-        this.invalidateSize(width, height).setView(center, TileMetrics.ClampLod(lod, this.metrics));
+        this.invalidateSize(width, height).setView(center, TileAddress.ClampLod(lod, this.metrics));
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
@@ -371,7 +370,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // INTERNALS
     private _getContext(lod: number): Nullable<TileMapContext<T>> {
-        if (TileMetrics.IsValidLod(lod, this.metrics)) {
+        if (TileAddress.IsValidLod(lod, this.metrics)) {
             return this._contexts[lod - this.metrics.minLOD];
         }
         return null;
@@ -430,7 +429,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const contextLod = newLevel._lod;
 
         // scale corresponding to the decimal part
-        let scale = TileMetrics.GetLodScale(this._lodf);
+        let scale = TileAddress.GetLodScale(this._lodf);
         newLevel._scale = scale;
 
         // compute the pixel bounds

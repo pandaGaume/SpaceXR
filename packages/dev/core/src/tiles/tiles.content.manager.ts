@@ -3,8 +3,8 @@ import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, 
 import { Nullable } from "../types";
 import { Observable, Observer } from "../events/events.observable";
 import { EventArgs } from "../events/events.args";
-import { TileMetrics } from "./tiles.metrics";
 import { TileContentView } from "./tiles";
+import { TileAddress } from "./tiles.address";
 
 export class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> {
     _address: ITileAddress;
@@ -115,23 +115,23 @@ export class TileContentManager<T> {
 
     protected buildAlternativeTileContent(address: ITileAddress): TileContent<T> {
         let key = address.quadkey;
-        const parentCacheKey = this.buildCacheKey(TileMetrics.ToParentKey(key));
+        const parentCacheKey = this.buildCacheKey(TileAddress.ToParentKey(key));
         const content = this._cache.get(parentCacheKey);
         if (content) {
             if (IsTileContentView(content)) {
                 return null;
             }
             // get the corresponding upper left corner of the parent source tile
-            const source = TileMetrics.ToNormalizedSection(key);
+            const source = TileAddress.ToNormalizedSection(key);
             if (source) {
                 return this.buildTileContentView(address, source) ?? null;
             }
         }
 
         // try to get the content from the childs
-        const childKeys = TileMetrics.ToChildsKey(key);
+        const childKeys = TileAddress.ToChildsKey(key);
         const targets = childKeys.map((k) => {
-            return TileMetrics.ToNormalizedSection(k);
+            return TileAddress.ToNormalizedSection(k);
         });
         return this.buildTileContentView(address, null, targets) ?? null;
     }

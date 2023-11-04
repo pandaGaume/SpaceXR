@@ -102,6 +102,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onCenterObserverAdded;
     private onUpdateObserverAdded;
     protected doValidate(): void;
+    protected doValidateWithCache(): void;
     protected doClearContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void;
     protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: Nullable<TileMapContext<T>>, dispatchEvent?: boolean): void;
     protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void;

@@ -140,7 +140,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./textures/tilePoolTexture */ "./dist/materials/textures/tilePoolTexture.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.address.js");
 /* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
 /* harmony import */ var core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles/tiles.mapview */ "../core/dist/tiles/tiles.mapview.js");
 
@@ -507,7 +507,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
                 normalArea.update(tileContent.normals);
                 bag.elevationArea = elevationArea;
                 bag.normalArea = normalArea;
-                const neigbors = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileMetrics.ToNeigborsXY(tile.address);
+                const neigbors = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileAddress.ToNeigborsXY(tile.address);
                 let ids = [5, 7, 8];
                 m.instancedBuffers.demIds = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(elevationArea.id, -1, -1, -1);
                 for (let i = 0; i != ids.length; i++) {
@@ -515,7 +515,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
                     if (!a) {
                         continue;
                     }
-                    const keyOfInterest = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileMetrics.TileXYToQuadKey(a);
+                    const keyOfInterest = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileAddress.TileXYToQuadKey(a);
                     bag = this._tileBags.get(keyOfInterest);
                     if (bag?.elevationArea) {
                         const id = bag.elevationArea.id;
@@ -541,7 +541,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
                     if (!a) {
                         continue;
                     }
-                    const keyOfInterest = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileMetrics.TileXYToQuadKey(a);
+                    const keyOfInterest = core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileAddress.TileXYToQuadKey(a);
                     bag = this._tileBags.get(keyOfInterest);
                     const tileOfInterest = this._map.getTile(keyOfInterest);
                     if (bag?.elevationArea && tileOfInterest?.surface) {
@@ -2786,7 +2786,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileContentView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMapContext),
 /* harmony export */   "TileMapView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMapView),
-/* harmony export */   "TileMetrics": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMetricsOptionsBuilder),
 /* harmony export */   "TileWebClient": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileWebClient),
@@ -4774,7 +4773,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileContentView": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ _tiles_mapview__WEBPACK_IMPORTED_MODULE_10__.TileMapContext),
 /* harmony export */   "TileMapView": () => (/* reexport safe */ _tiles_mapview__WEBPACK_IMPORTED_MODULE_10__.TileMapView),
-/* harmony export */   "TileMetrics": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetricsOptionsBuilder),
 /* harmony export */   "TileWebClient": () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_3__.TileWebClient),
@@ -4824,9 +4822,133 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "TileAddress": () => (/* binding */ TileAddress)
 /* harmony export */ });
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
 
 class TileAddress {
+    static IsValidAddress(a, metrics) {
+        if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
+            return false;
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            return false;
+        }
+        if (a.y < 0 || a.y > s) {
+            return false;
+        }
+        return true;
+    }
+    static AssertValidAddress(a, metrics) {
+        if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
+            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
+        }
+        if (a.y < 0 || a.y > s) {
+            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
+        }
+    }
+    static IsValidLod(lod, metrics) {
+        return lod >= metrics.minLOD && lod <= metrics.maxLOD;
+    }
+    static ClampLod(levelOfDetail, metrics) {
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
+    }
+    static GetLodScale(lod) {
+        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
+        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
+        return scale;
+    }
+    static ToParentKey(key) {
+        return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
+    }
+    static ToNormalizedSection(key) {
+        if (key === null || key === undefined || key.length <= 1) {
+            return null;
+        }
+        const c = key.charAt(key.length - 1);
+        let s = { x: 0, y: 0, z: 0.5 };
+        switch (c) {
+            case "1": {
+                s.x = s.z;
+                break;
+            }
+            case "2": {
+                s.y = s.z;
+                break;
+            }
+            case "3": {
+                s.x = s.y = s.z;
+                break;
+            }
+        }
+        return s;
+    }
+    static ToChildsKey(key) {
+        key = key || "";
+        return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
+    }
+    static ToNeigborsKey(key) {
+        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a) : null));
+    }
+    static ToNeigborsXY(a) {
+        const max = Math.pow(2, a.levelOfDetail);
+        const n = [
+            new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x - 1, a.y, a.levelOfDetail),
+            a,
+            new TileAddress(a.x + 1, a.y, a.levelOfDetail),
+            new TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
+            new TileAddress(a.x, a.y + 1, a.levelOfDetail),
+            new TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
+        ];
+        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
+    }
+    static TileXYToQuadKey(a) {
+        let quadKey = "";
+        for (let i = a.levelOfDetail; i > 0; i--) {
+            let digit = 0;
+            const mask = 1 << (i - 1);
+            if ((a.x & mask) != 0) {
+                digit++;
+            }
+            if ((a.y & mask) != 0) {
+                digit++;
+                digit++;
+            }
+            quadKey = quadKey + digit;
+        }
+        return quadKey;
+    }
+    static QuadKeyToTileXY(quadKey) {
+        let tileX = 0;
+        let tileY = 0;
+        const levelOfDetail = quadKey.length;
+        for (let i = levelOfDetail; i > 0; i--) {
+            const mask = 1 << (i - 1);
+            switch (quadKey[levelOfDetail - i]) {
+                case "0":
+                    break;
+                case "1":
+                    tileX |= mask;
+                    break;
+                case "2":
+                    tileY |= mask;
+                    break;
+                case "3":
+                    tileX |= mask;
+                    tileY |= mask;
+                    break;
+                default:
+                    throw new Error("Invalid QuadKey digit sequence.");
+            }
+        }
+        return { x: tileX, y: tileY, levelOfDetail: levelOfDetail };
+    }
     constructor(x, y, levelOfDetail) {
         this.x = x;
         this.y = y;
@@ -4834,7 +4956,7 @@ class TileAddress {
     }
     get quadkey() {
         if (!this._k) {
-            this._k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(this);
+            this._k = TileAddress.TileXYToQuadKey(this);
         }
         return this._k;
     }
@@ -5207,8 +5329,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
 /* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/events.args */ "../core/dist/events/events.args.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
 
 
 
@@ -5288,20 +5410,20 @@ class TileContentManager {
     }
     buildAlternativeTileContent(address) {
         let key = address.quadkey;
-        const parentCacheKey = this.buildCacheKey(_tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToParentKey(key));
+        const parentCacheKey = this.buildCacheKey(_tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToParentKey(key));
         const content = this._cache.get(parentCacheKey);
         if (content) {
             if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.IsTileContentView)(content)) {
                 return null;
             }
-            const source = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToNormalizedSection(key);
+            const source = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToNormalizedSection(key);
             if (source) {
                 return this.buildTileContentView(address, source) ?? null;
             }
         }
-        const childKeys = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToChildsKey(key);
+        const childKeys = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToChildsKey(key);
         const targets = childKeys.map((k) => {
-            return _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToNormalizedSection(k);
+            return _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToNormalizedSection(k);
         });
         return this.buildTileContentView(address, null, targets) ?? null;
     }
@@ -5579,13 +5701,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
 /* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/events.args */ "../core/dist/events/events.args.js");
 /* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/cache */ "../core/dist/utils/cache.js");
-/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "../core/dist/geometry/geometry.rectangle.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
+/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "../core/dist/geometry/geometry.rectangle.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
 /* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../geography/geography.envelope */ "../core/dist/geography/geography.envelope.js");
-
 
 
 
@@ -5683,7 +5803,7 @@ class TileMapView {
         this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this._currentContext = new TileMapContext(-1);
         this._contexts = [...new Array(this.metrics.lodCount)].map((o, i) => new TileMapContext(i + this.metrics.minLOD));
-        this.invalidateSize(width, height).setView(center, _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ClampLod(lod, this.metrics));
+        this.invalidateSize(width, height).setView(center, _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ClampLod(lod, this.metrics));
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
@@ -5847,7 +5967,7 @@ class TileMapView {
         return this.invalidate().validate();
     }
     _getContext(lod) {
-        if (_tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.IsValidLod(lod, this.metrics)) {
+        if (_tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.IsValidLod(lod, this.metrics)) {
             return this._contexts[lod - this.metrics.minLOD];
         }
         return null;
@@ -5857,6 +5977,9 @@ class TileMapView {
     onCenterObserverAdded(observer) { }
     onUpdateObserverAdded(observer) { }
     doValidate() {
+        if (this._cacheLowerLOD || this._cacheUpperLOD) {
+            return this.doValidateWithCache();
+        }
         if (this._lod != this._currentContext._lod) {
             const newContext = this._getContext(this._lod);
             const oldContext = this._currentContext;
@@ -5866,6 +5989,8 @@ class TileMapView {
             return;
         }
         this.doValidateContext(this._currentContext, this._currentContext);
+    }
+    doValidateWithCache() {
     }
     doClearContext(oldLevel, newLevel) {
         let deleted = Array.from(oldLevel.tiles.values());
@@ -5879,7 +6004,7 @@ class TileMapView {
             return;
         }
         const contextLod = newLevel._lod;
-        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.GetLodScale(this._lodf);
+        let scale = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.GetLodScale(this._lodf);
         newLevel._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, contextLod);
         newLevel._center = pixelCenterXY;
@@ -5896,7 +6021,7 @@ class TileMapView {
         const builder = new _tiles__WEBPACK_IMPORTED_MODULE_9__.TileBuilder().withMetrics(this.metrics);
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
-                const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_10__.TileAddress(x, y, contextLod);
+                const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress(x, y, contextLod);
                 const key = a.quadkey;
                 let t = newLevel.tiles.get(key);
                 if (t) {
@@ -5978,11 +6103,11 @@ class TileMapView {
         const h = this.height / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__.Rectangle(x0, y0, w, h);
+        let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_10__.Rectangle(x0, y0, w, h);
         if (this._azimuth) {
             const corners = bounds.points();
             const rotated = Array.from(this.rotatePointsArround(center, ...corners));
-            bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__.Rectangle.FromPoints(...rotated);
+            bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_10__.Rectangle.FromPoints(...rotated);
             return bounds;
         }
         return bounds;
@@ -6001,15 +6126,10 @@ class TileMapView {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AbstractTileMetrics": () => (/* binding */ AbstractTileMetrics),
-/* harmony export */   "TileMetrics": () => (/* binding */ TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* binding */ TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* binding */ TileMetricsOptionsBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/tiles.address.js");
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
-
-
 
 class TileMetricsOptions {
     constructor(p) {
@@ -6094,132 +6214,6 @@ class TileMetricsOptionsBuilder {
             cellCoordinateReference: this._cellCoordinateReference,
             overlap: this._overlap,
         });
-    }
-}
-class TileMetrics {
-    static IsValidAddress(a, metrics) {
-        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
-            return false;
-        }
-        const s = (0x01 << a.levelOfDetail) - 1;
-        if (a.x < 0 || a.x > s) {
-            return false;
-        }
-        if (a.y < 0 || a.y > s) {
-            return false;
-        }
-        return true;
-    }
-    static AssertValidAddress(a, metrics) {
-        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
-            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
-        }
-        const s = (0x01 << a.levelOfDetail) - 1;
-        if (a.x < 0 || a.x > s) {
-            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
-        }
-        if (a.y < 0 || a.y > s) {
-            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
-        }
-    }
-    static IsValidLod(lod, metrics) {
-        return lod >= metrics.minLOD && lod <= metrics.maxLOD;
-    }
-    static ClampLod(levelOfDetail, metrics) {
-        return _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
-    }
-    static GetLodScale(lod) {
-        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
-        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
-        return scale;
-    }
-    static ToParentKey(key) {
-        return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
-    }
-    static ToNormalizedSection(key) {
-        if (key === null || key === undefined || key.length <= 1) {
-            return null;
-        }
-        const c = key.charAt(key.length - 1);
-        let s = { x: 0, y: 0, z: 0.5 };
-        switch (c) {
-            case "1": {
-                s.x = s.z;
-                break;
-            }
-            case "2": {
-                s.y = s.z;
-                break;
-            }
-            case "3": {
-                s.x = s.y = s.z;
-                break;
-            }
-        }
-        return s;
-    }
-    static ToChildsKey(key) {
-        key = key || "";
-        return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
-    }
-    static ToNeigborsKey(key) {
-        return TileMetrics.ToNeigborsXY(TileMetrics.QuadKeyToTileXY(key)).map((a) => (a ? TileMetrics.TileXYToQuadKey(a) : null));
-    }
-    static ToNeigborsXY(a) {
-        const max = Math.pow(2, a.levelOfDetail);
-        const n = [
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x, a.y - 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x - 1, a.y, a.levelOfDetail),
-            a,
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x + 1, a.y, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x, a.y + 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
-        ];
-        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
-    }
-    static TileXYToQuadKey(a) {
-        let quadKey = "";
-        for (let i = a.levelOfDetail; i > 0; i--) {
-            let digit = 0;
-            const mask = 1 << (i - 1);
-            if ((a.x & mask) != 0) {
-                digit++;
-            }
-            if ((a.y & mask) != 0) {
-                digit++;
-                digit++;
-            }
-            quadKey = quadKey + digit;
-        }
-        return quadKey;
-    }
-    static QuadKeyToTileXY(quadKey) {
-        let tileX = 0;
-        let tileY = 0;
-        const levelOfDetail = quadKey.length;
-        for (let i = levelOfDetail; i > 0; i--) {
-            const mask = 1 << (i - 1);
-            switch (quadKey[levelOfDetail - i]) {
-                case "0":
-                    break;
-                case "1":
-                    tileX |= mask;
-                    break;
-                case "2":
-                    tileY |= mask;
-                    break;
-                case "3":
-                    tileX |= mask;
-                    tileY |= mask;
-                    break;
-                default:
-                    throw new Error("Invalid QuadKey digit sequence.");
-            }
-        }
-        return { x: tileX, y: tileY, levelOfDetail: levelOfDetail };
     }
 }
 class AbstractTileMetrics {
@@ -7628,7 +7622,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileContentView": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.TileMapContext),
 /* harmony export */   "TileMapView": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.TileMapView),
-/* harmony export */   "TileMetrics": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.TileMetricsOptionsBuilder),
 /* harmony export */   "TilePoolTexture": () => (/* reexport safe */ _materials_index__WEBPACK_IMPORTED_MODULE_2__.TilePoolTexture),

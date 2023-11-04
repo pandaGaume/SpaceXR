@@ -21,7 +21,7 @@ import { IDemInfos } from "core/dem";
 import { EventState, Observer } from "core/events";
 import { Nullable } from "core/types";
 import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
-import { ITileAddress, ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
+import { ITileAddress, ITileClient, IsTileContentView, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 
@@ -526,7 +526,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
                 bag.normalArea = normalArea;
 
                 // register neighbor ids
-                const neigbors = TileMetrics.ToNeigborsXY(tile.address);
+                const neigbors = TileAddress.ToNeigborsXY(tile.address);
                 let ids = [5, 7, 8];
                 m.instancedBuffers.demIds = new Vector4(elevationArea.id, -1, -1, -1);
                 for (let i = 0; i != ids.length; i++) {
@@ -534,7 +534,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
                     if (!a) {
                         continue;
                     }
-                    const keyOfInterest = TileMetrics.TileXYToQuadKey(a);
+                    const keyOfInterest = TileAddress.TileXYToQuadKey(a);
                     bag = this._tileBags.get(keyOfInterest);
                     if (bag?.elevationArea) {
                         const id = bag.elevationArea.id;
@@ -562,7 +562,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
                     if (!a) {
                         continue;
                     }
-                    const keyOfInterest = TileMetrics.TileXYToQuadKey(a);
+                    const keyOfInterest = TileAddress.TileXYToQuadKey(a);
                     bag = this._tileBags.get(keyOfInterest);
                     const tileOfInterest = this._map.getTile(keyOfInterest);
                     if (bag?.elevationArea && tileOfInterest?.surface) {

@@ -19,6 +19,7 @@
         "packages/**/*"
     ],
     "scripts": {
+        "start": "node -r @dev/build-tools",
         "build:dev": "npm run compile:dev",
         "compile:dev": "tsc -b ./tsconfig.packages.dev.json",
         "test": "jest"

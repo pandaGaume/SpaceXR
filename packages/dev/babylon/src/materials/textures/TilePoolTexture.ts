@@ -33,6 +33,8 @@ declare module "@babylonjs/core/Engines/thinEngine" {
     }
 }
 
+const tuile = []
+
 function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
     return function (
         this: ThinEngine,
@@ -59,6 +61,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         }
         this._bindTextureDirectly(target, null);
         texture.isReady = true;
+        tuile.push(texture);
     };
 }
 

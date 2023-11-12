@@ -4,6 +4,9 @@ export declare class Scalar {
     static DEG2RAD: number;
     static INCH2METER: number;
     static METER2INCH: number;
+    static PI: number;
+    static PI_2: number;
+    static PI_4: number;
     static WithinEpsilon(a: number, b: number, epsilon?: number): boolean;
     static Sign: (value: number) => 1 | -1;
     static Clamp: (value: number, min: number, max: number) => number;

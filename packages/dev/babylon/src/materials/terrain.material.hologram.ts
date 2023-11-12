@@ -422,7 +422,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             count: depth,
             format: Constants.TEXTUREFORMAT_R,
             textureType: Constants.TEXTURETYPE_FLOAT,
-            samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
+            samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
             internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
         });
         this._elevationSampler = new TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
@@ -477,7 +477,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
-        console.log(this._clipSurfaces);
     }
 
     // update the tile content. This methods is called when the tile is added or updated.

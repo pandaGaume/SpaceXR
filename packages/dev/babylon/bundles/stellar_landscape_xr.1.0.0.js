@@ -429,7 +429,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             count: depth,
             format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_R,
             textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT,
-            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_NEAREST_NEAREST,
+            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
             internalFormat: scene.getEngine()._gl.R16F,
         });
         this._elevationSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
@@ -750,7 +750,6 @@ class TilePoolTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Textu
             .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
         this.wrapV = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
-        this.updateSamplingMode(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.NEAREST_SAMPLINGMODE);
     }
     reserveArea() {
         if (this.freeAreaCount) {
@@ -2159,13 +2158,45 @@ __webpack_require__.r(__webpack_exports__);
 
 class KnownPlaces {
 }
-KnownPlaces.Locations = {
-    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.98817689833976, 86.92491071824738),
-    Chamonix: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.923351087244384, 6.871072898119941),
-    MountRainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.8523798847489, -121.76034290971147),
-    Haleakala: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.714420811112593, -156.25254225132156),
-    DiamondHead: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(21.26226248048085, -157.80602016703813),
-    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.1019466866649115, 105.42296583233852),
+KnownPlaces.Mountains = {
+    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925),
+    K2: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.8808, 76.5155),
+    Kangchenjunga: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.7025, 88.1475),
+    Lhotse: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9617, 86.9333),
+    Makalu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.8897, 87.0889),
+    ChoOyu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.0942, 86.6608),
+    Dhaulagiri: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.6967, 83.4872),
+    Manaslu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5494, 84.5599),
+    NangaParbat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.237, 74.5892),
+    Annapurna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5961, 83.8203),
+    Matterhorn: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.9763, 7.6586),
+    MontBlanc: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.8326, 6.8652),
+    Denali: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.0695, -151.0074),
+    Aconcagua: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-32.6532, -70.0109),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.0674, 37.3556),
+    Elbrus: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(43.3499, 42.4375),
+    VinsonMassif: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-78.5258, -85.6167),
+    PuncakJaya: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-4.0751, 137.1889),
+};
+KnownPlaces.Volcanoes = {
+    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.102, 105.423),
+    Vesuvius: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(40.821, 14.426),
+    Etna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.751, 14.993),
+    MaunaLoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.475, -155.608),
+    Kilauea: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.421, -155.287),
+    Fuji: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.3606, 138.7274),
+    StHelens: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.1912, -122.1944),
+    Pinatubo: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(15.142, 120.35),
+    Rainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.853, -121.76),
+    Cotopaxi: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.679, -78.438),
+    Popocatepetl: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.023, -98.622),
+    Eyjafjallajokull: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.633, -19.621),
+    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.404, 25.396),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.067, 37.355),
+    Arenal: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(10.463, -84.703),
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.588),
+    Tambora: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-8.25, 118.0),
+    Sakurajima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(31.593, 130.657),
 };
 
 //# sourceMappingURL=geography.knownPlaces.js.map
@@ -2240,6 +2271,42 @@ class Geo3 extends Geo2 {
 
 /***/ }),
 
+/***/ "../core/dist/geography/geography.projections.js":
+/*!*******************************************************!*\
+  !*** ../core/dist/geography/geography.projections.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Projections": () => (/* binding */ Projections)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+
+
+
+class Projections {
+    static LatLonToWebMercator(lat, lon, ellipsoid) {
+        return Projections.LatLonToWebMercatorToRef(lat, lon, _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero(), ellipsoid);
+    }
+    static LatLonToWebMercatorToRef(lat, lon, ref, ellipsoid) {
+        ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
+        ref.x = lon * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD * ellipsoid.semiMajorAxis;
+        lat = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(lat, Projections.WebMercatorMinLatitude, Projections.WebMercatorMaxLatitude);
+        let rad = lat * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
+        ref.y = ellipsoid.semiMajorAxis * Math.log(Math.tan(_math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.PI_4 + rad / 2));
+        return ref;
+    }
+}
+Projections.WebMercatorMaxLatitude = 85.05112878;
+Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
+
+//# sourceMappingURL=geography.projections.js.map
+
+/***/ }),
+
 /***/ "../core/dist/geography/index.js":
 /*!***************************************!*\
   !*** ../core/dist/geography/index.js ***!
@@ -2252,6 +2319,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
+/* harmony export */   "Projections": () => (/* reexport safe */ _geography_projections__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isEnvelope),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)
 /* harmony export */ });
@@ -2259,6 +2327,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.envelope */ "../core/dist/geography/geography.envelope.js");
 /* harmony import */ var _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.knownPlaces */ "../core/dist/geography/geography.knownPlaces.js");
+/* harmony import */ var _geography_projections__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography.projections */ "../core/dist/geography/geography.projections.js");
+
 
 
 
@@ -2759,6 +2829,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
 /* harmony export */   "Power": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Power),
+/* harmony export */   "Projections": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Projections),
 /* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.PropertyChangedEventArgs),
 /* harmony export */   "Quantity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Quantity),
 /* harmony export */   "QuantityRange": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.QuantityRange),
@@ -3576,6 +3647,9 @@ Scalar.EPSILON = 1.401298e-45;
 Scalar.DEG2RAD = Math.PI / 180;
 Scalar.INCH2METER = 0.0254;
 Scalar.METER2INCH = 39.3701;
+Scalar.PI = Math.PI;
+Scalar.PI_2 = Math.PI / 2;
+Scalar.PI_4 = Math.PI / 4;
 Scalar.Sign = function (value) {
     return value > 0 ? 1 : -1;
 };
@@ -6129,7 +6203,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileMetricsOptions": () => (/* binding */ TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* binding */ TileMetricsOptionsBuilder)
 /* harmony export */ });
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography/geography.projections */ "../core/dist/geography/geography.projections.js");
+
 
 class TileMetricsOptions {
     constructor(p) {
@@ -6140,12 +6216,12 @@ TileMetricsOptions.DefaultTileSize = 256;
 TileMetricsOptions.DefaultLOD = 0;
 TileMetricsOptions.DefaultMinLOD = 0;
 TileMetricsOptions.DefaultMaxLOD = 23;
-TileMetricsOptions.DefaultMinLatitude = -85.05112878;
-TileMetricsOptions.DefaultMaxLatitude = 85.05112878;
+TileMetricsOptions.DefaultMinLatitude = _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMinLatitude;
+TileMetricsOptions.DefaultMaxLatitude = _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMaxLatitude;
 TileMetricsOptions.DefaultMinLongitude = -180;
 TileMetricsOptions.DefaultMaxLongitude = 180;
 TileMetricsOptions.DefaultCellSize = 1;
-TileMetricsOptions.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.CellCoordinateReference.center;
+TileMetricsOptions.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.CellCoordinateReference.center;
 TileMetricsOptions.DefaultOverlap = 0;
 TileMetricsOptions.Shared = {
     tileSize: TileMetricsOptions.DefaultTileSize,
@@ -7474,8 +7550,8 @@ const name = "tilemapFragmentShader";
 const shader = `precision highp float;#include<lightFragmentDeclaration>
 #include<materialFragmentDeclaration>
 #include<clipFragmentDeclaration>
-in vec3 vNormal;in vec3 vUvs;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;uniform vec4 backColor;void main(void) {#include<clipFragment>
-if(vUvs.z<0.0 ){glFragColor=backColor ;return ;}glFragColor=texture(layer,vUvs) ;}`;
+in vec3 vNormal;in vec3 vUvs;in vec3 vUvsElevation;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;uniform highp sampler2DArray altitudes;uniform vec4 backColor;void main(void) {#include<clipFragment>
+if(vUvs.z<0.0 ) {/*float alt0=float(texture(altitudes,vUvsElevation)) ;float minorInterval=100.0;float tolerance=2.0;float minorLines=mod(alt0,minorInterval);if (minorLines<tolerance) {vec3 contourColor=vec3(0.11,0.75,0.81); glFragColor=vec4(contourColor,1.0);} else {vec3 black=vec3(0.0,0.0,0.0); glFragColor=vec4(black,1.0);}*/glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapFragmentShader = { name, shader };
 //# sourceMappingURL=tilemap.fragment.js.map
@@ -7497,8 +7573,8 @@ __webpack_require__.r(__webpack_exports__);
 const name = "tilemapVertexShader";
 const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 demIds; in vec4 layerIds; #include<instancesDeclaration>
 #include<clipVertexDeclaration>
-uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;void main(void) {#include<instancesVertex>
-float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt=float(texture(altitudes,v)) ;alt=(alt-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);#include<clipVertex>
+uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;out vec3 vUvsElevation;void main(void) {#include<instancesVertex>
+float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(altitudes,v)) ;float alt=(alt0-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);vUvsElevation=v,#include<clipVertex>
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapVertexShader = { name, shader };
@@ -7586,6 +7662,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Observable": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Observer),
 /* harmony export */   "Power": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Power),
+/* harmony export */   "Projections": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Projections),
 /* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs),
 /* harmony export */   "Quantity": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Quantity),
 /* harmony export */   "QuantityRange": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.QuantityRange),

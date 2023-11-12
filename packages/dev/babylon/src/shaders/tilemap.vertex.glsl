@@ -23,6 +23,7 @@ uniform highp float exageration;
 out vec4 vPosition;
 out vec3 vNormal;
 out vec3 vUvs;
+out vec3 vUvsElevation;
 
 void main(void) {
     
@@ -39,8 +40,8 @@ void main(void) {
         v.z = demIds[0];
     } 
 
-    float alt = float(texture(altitudes, v)) ;
-    alt = (alt - minAlt) * mapscale * exageration;
+    float alt0 = float(texture(altitudes, v))  ;
+    float alt = (alt0 - minAlt) * mapscale * exageration;
 
     vPosition = vec4(position.xy, alt ,1.0) ;
     vec4 worldPos = finalWorld * vPosition;
@@ -64,9 +65,10 @@ void main(void) {
     float y = (2.0 * pixel.g) - 1.0;
     float z = (pixel.b * 255.0 - 128.0) / 127.0;
     vNormal = vec3(x,z,y);
-
+ 
     depth = layerIds[0] ;
     vUvs = vec3(position.xy + 0.5, depth);
+    vUvsElevation = v,
 
     #include<clipVertex>
 }

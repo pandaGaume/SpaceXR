@@ -119,16 +119,8 @@
                 const demClient = SPACEXR.MapZen.DemClient();
                 const layerClient = SPACEXR.Google.SatelliteClient2d();
 
-                // some locations
-                const mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
-                const everest = SPACEXR.KnownPlaces.Locations.Everest;
-                const chamonix = SPACEXR.KnownPlaces.Locations.Chamonix;
-                const mountRenier = SPACEXR.KnownPlaces.Locations.MountRainier;
-                const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
-                const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
-
                 const mapOptions = {
-                    center: chamonix,
+                    center: SPACEXR.KnownPlaces.Mountains.Matterhorn,
                     levelOfDetail: 12,
                     layerClient: layerClient,
                     exageration: 1.5,

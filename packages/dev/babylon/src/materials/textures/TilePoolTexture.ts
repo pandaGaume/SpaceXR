@@ -199,7 +199,7 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
             .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = Texture.CLAMP_ADDRESSMODE;
         this.wrapV = Texture.CLAMP_ADDRESSMODE;
-        this.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
+        //this.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
     }
 
     public reserveArea(): Nullable<TilePoolTextureArea> {

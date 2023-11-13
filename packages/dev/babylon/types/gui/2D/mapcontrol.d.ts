@@ -1,12 +1,13 @@
 import { ICanvasRenderingContext } from "@babylonjs/core";
-import { Container } from "@babylonjs/gui";
+import { Measure } from "@babylonjs/gui/2D/measure";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { ISize3 } from "core/geometry/geometry.interfaces";
 import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { TileContentManager } from "core/tiles/tiles.content.manager";
 import { TileMapView, UpdateEventArgs } from "core/tiles/tiles.mapview";
-export declare class MapControl extends Container implements ITileMapApi {
-    _view: TileMapView<HTMLImageElement>;
+import { View } from "./view";
+import { IViewSkin } from "../skin";
+export declare class MapControl extends View<TileMapView<HTMLImageElement>, IViewSkin> implements ITileMapApi {
     _activ: Map<string, ITile<HTMLImageElement>>;
     constructor(name: string, manager: TileContentManager<HTMLImageElement>, center?: IGeo2, lod?: number);
     hasTile(key: string): boolean;
@@ -21,10 +22,11 @@ export declare class MapControl extends Container implements ITileMapApi {
     rotate(r: number): ITileMapApi;
     getContext(options?: CanvasRenderingContext2DSettings | undefined): ICanvasRenderingContext;
     get resolution(): ISize3;
-    get view(): TileMapView<HTMLImageElement>;
     get metrics(): ITileMetrics;
-    get azimuth(): number;
+    get azimuth(): number | undefined;
     protected onUpdate(args: UpdateEventArgs<HTMLImageElement>): void;
     protected onUpdateTiles(args: UpdateEventArgs<HTMLImageElement>): void;
     protected onUpdateView(args: UpdateEventArgs<HTMLImageElement>): void;
+    protected _additionalProcessing(parentMeasure: Measure, context: ICanvasRenderingContext): void;
+    protected _localDraw(ctx: ICanvasRenderingContext): void;
 }

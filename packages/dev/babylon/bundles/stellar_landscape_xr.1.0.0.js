@@ -652,6 +652,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
         this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
+        this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
         this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, data);
         let err = this._gl.getError();
         if (err) {
@@ -687,6 +688,8 @@ function _makeCreateRawTextureFunction(is3D) {
         }
         const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
         this._bindTextureDirectly(target, texture, true);
+        this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
+        this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
         if (err) {

@@ -56,6 +56,12 @@ module.exports = [
                 }
                 callback();
             },
+            ({ request }, callback) => {
+                if (request.match("^@babylonjs/gui")) {
+                    return callback(null, "BABYLON.GUI");
+                }
+                callback();
+            },
         ],
     },
 ];

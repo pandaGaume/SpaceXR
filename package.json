@@ -24,6 +24,6 @@
         "test": "jest"
     },
     "dependencies": {
-        "@babylonjs/gui": "^6.24.0"
+        "@babylonjs/gui": "^6.29.1"
     }
 }

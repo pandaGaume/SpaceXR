@@ -1,35 +1,37 @@
 import { ICanvasRenderingContext } from "@babylonjs/core";
-import { Measure } from "@babylonjs/gui/2D/measure";
+import { Control, Measure } from "@babylonjs/gui";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
-import { Cartesian3, Size3 } from "core/geometry";
-import { ISize3 } from "core/geometry/geometry.interfaces";
+import { Cartesian3, ISize2, Size2 } from "core/geometry";
 import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { TileContentManager } from "core/tiles/tiles.content.manager";
 import { TileMapView, UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
-import { Scalar } from "core/math/math";
 import { EPSG3857 } from "core/tiles/tiles.geography";
+import { Scalar } from "core/math/math";
 
-import { View } from "./view";
-import { IViewSkin } from "../skin";
+//import { View } from "./view";
+//import { IViewSkin } from "../skin";
 
-export class MapControl extends View<TileMapView<HTMLImageElement>, IViewSkin> implements ITileMapApi {
-    _activ: Map<string, ITile<HTMLImageElement>>; // the list of activ tiles
+export class MapControl extends Control implements ITileMapApi {
+    private _resolution?: ISize2;
+    private model: TileMapView<HTMLImageElement>;
 
-    public constructor(name: string, manager: TileContentManager<HTMLImageElement>, center?: IGeo2, lod?: number) {
+    public constructor(name: string, manager: TileContentManager<HTMLImageElement>, center?: IGeo2, lod?: number, resolution?: ISize2) {
         super(name);
-        this.model = new TileMapView(manager, this.resolution.width, this.resolution.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
+        this._resolution = resolution;
+        const tmp = this._resolution ?? Size2.Zero();
+        this.model = new TileMapView(manager, tmp.width, tmp.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
         this.model.updateObservable.add(this.onUpdate.bind(this));
-        this._activ = new Map<string, ITile<HTMLImageElement>>();
+        this.model.validate();
     }
 
     public hasTile(key: string): boolean {
-        return this._activ.has(key);
+        return this.model?.context.tiles.has(key) ?? false;
     }
 
     public getTile(key: string): ITile<HTMLImageElement> | undefined {
-        return this._activ.get(key);
+        return this.model?.context.tiles.get(key);
     }
 
     public invalidateSize(w: number, h: number): ITileMapApi {
@@ -76,8 +78,15 @@ export class MapControl extends View<TileMapView<HTMLImageElement>, IViewSkin> i
         return this._host.getContext();
     }
 
-    public get resolution(): ISize3 {
-        return new Size3(this.widthInPixels, this.heightInPixels, 0);
+    public get resolution(): ISize2 {
+        return this._resolution ?? new Size2(this.widthInPixels, this.heightInPixels);
+    }
+
+    public set resolution(v: ISize2) {
+        if (v != this._resolution) {
+            this._resolution = v;
+            this.invalidateSize(this._resolution.width, this._resolution.height);
+        }
     }
 
     public get metrics(): ITileMetrics {
@@ -106,6 +115,19 @@ export class MapControl extends View<TileMapView<HTMLImageElement>, IViewSkin> i
         }
     }
 
+    public _markAsDirty(force = false): void {
+        if (!(<any>this)._isVisible && !force) {
+            return;
+        }
+
+        this._isDirty = true;
+
+        // Redraw only this rectangle
+        if (this._host) {
+            this._host.markAsDirty();
+        }
+    }
+
     protected onUpdateTiles(args: UpdateEventArgs<HTMLImageElement>): void {
         this._markAsDirty();
     }
@@ -115,25 +137,31 @@ export class MapControl extends View<TileMapView<HTMLImageElement>, IViewSkin> i
     }
 
     protected _additionalProcessing(parentMeasure: Measure, context: ICanvasRenderingContext): void {
-        this.model?.invalidateSize(parentMeasure.width, parentMeasure.height);
+        super._additionalProcessing(parentMeasure, context);
+        if (!this._resolution) {
+            this.invalidateSize(this.widthInPixels, this.heightInPixels);
+        }
     }
 
     // this is the place we draw the tiles
-    protected _localDraw(ctx: ICanvasRenderingContext): void {
-        if (ctx) {
-            ctx.save();
+    //protected _localDraw(context: ICanvasRenderingContext): void {
+    public _draw(context: ICanvasRenderingContext, invalidatedRectangle?: Measure): void {
+        if (context) {
+            context.save();
             const scale = this.model?.context.scale ?? 1;
             const center = this.model?.context.center ?? Cartesian3.Zero();
             const res = this.resolution;
-            ctx.translate(res.width / 2, res.height / 2);
-            ctx.scale(scale, scale);
+            const sw = res ? this.widthInPixels / this.resolution.width : 1.0;
+            const sh = res ? this.heightInPixels / this.resolution.height : 1.0;
+            context.translate((this.widthInPixels * sw) / 2, (this.heightInPixels * sh) / 2);
+            context.scale(scale * sw, scale * sh);
             if (this.azimuth) {
                 // convert azimuth to canvas rotation, which is clockwize, and cartesian
                 const angle = this.azimuth * Scalar.DEG2RAD;
-                ctx.rotate(angle);
+                context.rotate(angle);
             }
             const tileSize = this.metrics.tileSize;
-            const tiles = this.model?.context.tiles.values() ?? [];
+            const tiles = Array.from(this.model?.context.tiles.values() ?? []);
             for (const t of tiles) {
                 if (t.rect) {
                     const x = t.rect.x - center.x;
@@ -141,18 +169,18 @@ export class MapControl extends View<TileMapView<HTMLImageElement>, IViewSkin> i
                     const item = t.content ?? null; // trick to address erroness tile.
                     if (item) {
                         if (item instanceof HTMLImageElement) {
-                            ctx.drawImage(item, x, y);
+                            context.drawImage(item, x, y);
                             continue;
                         }
                         // this is a view...
                     } else {
                         // this is where we fill the empty tile
-                        ctx.fillStyle = this._getBackgroundColor(ctx);
-                        ctx.fillRect(x, y, tileSize, tileSize);
+                        context.fillStyle = "blue";
+                        context.fillRect(x, y, tileSize, tileSize);
                     }
                 }
             }
-            ctx.restore();
+            context.restore();
         }
     }
 }

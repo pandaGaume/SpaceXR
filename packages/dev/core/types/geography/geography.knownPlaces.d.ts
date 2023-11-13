@@ -17,7 +17,6 @@ export declare class KnownPlaces {
         Aconcagua: Geo2;
         Kilimanjaro: Geo2;
         Elbrus: Geo2;
-        VinsonMassif: Geo2;
         PuncakJaya: Geo2;
     };
     static Volcanoes: {

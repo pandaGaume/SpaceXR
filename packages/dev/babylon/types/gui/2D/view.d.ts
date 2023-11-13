@@ -1,7 +1,8 @@
 import { Observable } from "@babylonjs/core";
 import { Container, StackPanel } from "@babylonjs/gui";
-import { IModel, PropertyChangedEventArgs } from "../model";
+import { IModel } from "../model";
 import { IViewSkin } from "../skin";
+import { PropertyChangedEventArgs } from "core/events/events.args";
 export declare class View<T, S extends IViewSkin> extends Container implements IModel {
     static BuildPropertyBlock(name: string, iconUrl: string, value: string, key?: string, sep?: string): StackPanel;
     static UpdatePropertyBlock(block: StackPanel, name: string, iconUrl: string, value: string, key?: string, sep?: string): void;
@@ -12,7 +13,7 @@ export declare class View<T, S extends IViewSkin> extends Container implements I
     private _skin?;
     private _propertyChangedObservable?;
     constructor(name?: string, model?: T, skin?: S);
-    get propertyChangedObservable(): Observable<PropertyChangedEventArgs>;
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<IModel, any>>;
     get model(): T | undefined;
     set model(value: T | undefined);
     get skin(): S | undefined;

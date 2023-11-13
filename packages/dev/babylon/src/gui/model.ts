@@ -1,43 +1,14 @@
 import { Observable } from "@babylonjs/core";
-
-export class PropertyChangedEventArgs {
-    private _propertyName: string;
-    private _oldValue?: any;
-    private _newValue?: any;
-    private _source: any;
-
-    public constructor(source: any, propertyName: string, oldValue?: any, newValue?: any) {
-        this._propertyName = propertyName;
-        this._oldValue = oldValue;
-        this._newValue = newValue;
-        this._source = source;
-    }
-
-    public get propertyName(): string {
-        return this._propertyName;
-    }
-
-    public get oldValue(): any {
-        return this._oldValue;
-    }
-
-    public get newValue(): any {
-        return this._newValue;
-    }
-
-    public get source(): any {
-        return this._source;
-    }
-}
+import { PropertyChangedEventArgs } from "core/events/events.args";
 
 export interface IModel {
     name?: string;
-    propertyChangedObservable: Observable<PropertyChangedEventArgs>;
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<IModel, any>>;
 }
 
 export class Model {
     private _name: string;
-    private _propertyChangedObservable?: Observable<PropertyChangedEventArgs>;
+    private _propertyChangedObservable?: Observable<PropertyChangedEventArgs<Model, any>>;
 
     public constructor(name?: string) {
         this._name = name || this.constructor.name;
@@ -47,16 +18,16 @@ export class Model {
         return this._name;
     }
 
-    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs> {
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<Model, any>> {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs>();
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<Model, any>>();
         }
         return this._propertyChangedObservable;
     }
 
     protected _firePropertyChanged(propertyName: string, oldValue?: any, newValue?: any): void {
         if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-            this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, propertyName, oldValue, newValue));
+            this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, oldValue, newValue, propertyName));
         }
     }
 }

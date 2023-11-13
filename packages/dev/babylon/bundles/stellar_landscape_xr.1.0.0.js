@@ -473,7 +473,6 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
-        console.log(this._clipSurfaces);
     }
     _updateTileContent(tile) {
         const key = tile.address.quadkey;
@@ -652,6 +651,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
         const internalType = this._getWebGLTextureType(textureType);
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
+        this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
         this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, data);
         let err = this._gl.getError();
         if (err) {

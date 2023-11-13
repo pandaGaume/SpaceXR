@@ -52,6 +52,10 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         const internalType = this._getWebGLTextureType(textureType);
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
+
+        this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0); // Texture 3D does NOT support FLIP_Y
+        this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // Texture 3D does NOT support PREMULTIPLY_ALPHA
+
         this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, <any>data);
         let err = this._gl.getError();
         if (err) {
@@ -96,7 +100,12 @@ function _makeCreateRawTextureFunction(is3D: boolean) {
             this._gl.pixelStorei(this._gl.UNPACK_ALIGNMENT, 1);
         }
         const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
+
         this._bindTextureDirectly(target, texture, true);
+
+        this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0); // Texture 3D does NOT support FLIP_Y
+        this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // Texture 3D does NOT support PREMULTIPLY_ALPHA
+
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
         if (err) {
@@ -199,7 +208,6 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
             .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = Texture.CLAMP_ADDRESSMODE;
         this.wrapV = Texture.CLAMP_ADDRESSMODE;
-        //this.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
     }
 
     public reserveArea(): Nullable<TilePoolTextureArea> {

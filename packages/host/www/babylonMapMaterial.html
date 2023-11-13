@@ -236,16 +236,23 @@
                 var zoomOutBt = document.getElementById("zoomout");
                 zoomOutBt.addEventListener("click", () => map.zoomOut(0.1));
 
+                // Axes
                 // const mainAxes = new BABYLON.AxesViewer(scene, 20);
                 // const screenAxes = new BABYLON.AxesViewer(scene, 20);
-
                 // const ctx = display.context;
                 // screenAxes.xAxis.parent = ctx;
                 // screenAxes.yAxis.parent = ctx;
                 // screenAxes.zAxis.parent = ctx;
+
+                // debug panels
                 // scene.debugLayer.show();
-                // here we add XR support
-                const xr = await scene.createDefaultXRExperienceAsync();
+
+                // XR support
+                // WARNING : This might be the new mode for XR but did not work for non obvious reason...
+                // const xr = await scene.createDefaultXRExperienceAsync();
+                // So, add vr as old fashion and deprecated way
+                var helper = scene.createDefaultVRExperience({ createDeviceOrientationCamera: false });
+                helper.enableInteractions();
                 return scene;
             }
 

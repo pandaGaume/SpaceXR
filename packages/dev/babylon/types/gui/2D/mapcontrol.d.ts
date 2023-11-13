@@ -6,9 +6,13 @@ import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { TileContentManager } from "core/tiles/tiles.content.manager";
 import { UpdateEventArgs } from "core/tiles/tiles.mapview";
 export declare class MapControl extends Control implements ITileMapApi {
+    static readonly DefaultColor = "white";
     private _resolution?;
-    private model;
+    private _model;
+    private _background?;
     constructor(name: string, manager: TileContentManager<HTMLImageElement>, center?: IGeo2, lod?: number, resolution?: ISize2);
+    get background(): string | undefined;
+    set background(v: string | undefined);
     hasTile(key: string): boolean;
     getTile(key: string): ITile<HTMLImageElement> | undefined;
     invalidateSize(w: number, h: number): ITileMapApi;
@@ -25,7 +29,6 @@ export declare class MapControl extends Control implements ITileMapApi {
     get metrics(): ITileMetrics;
     get azimuth(): number | undefined;
     protected onUpdate(args: UpdateEventArgs<HTMLImageElement>): void;
-    _markAsDirty(force?: boolean): void;
     protected onUpdateTiles(args: UpdateEventArgs<HTMLImageElement>): void;
     protected onUpdateView(args: UpdateEventArgs<HTMLImageElement>): void;
     protected _additionalProcessing(parentMeasure: Measure, context: ICanvasRenderingContext): void;

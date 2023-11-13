@@ -51,54 +51,63 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
         super(name);
         this._resolution = resolution;
         const tmp = this._resolution ?? core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size2.Zero();
-        this.model = new core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(manager, tmp.width, tmp.height, center || core_geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || manager.metrics.minLOD);
-        this.model.updateObservable.add(this.onUpdate.bind(this));
-        this.model.validate();
+        this._model = new core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(manager, tmp.width, tmp.height, center || core_geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || manager.metrics.minLOD);
+        this._model.updateObservable.add(this.onUpdate.bind(this));
+        this._model.validate();
+    }
+    get background() {
+        return this._background;
+    }
+    set background(v) {
+        if (this._background != v) {
+            this._background = v;
+            this._markAsDirty();
+        }
     }
     hasTile(key) {
-        return this.model?.context.tiles.has(key) ?? false;
+        return this._model?.context.tiles.has(key) ?? false;
     }
     getTile(key) {
-        return this.model?.context.tiles.get(key);
+        return this._model?.context.tiles.get(key);
     }
     invalidateSize(w, h) {
-        this.model?.invalidateSize(w, h);
-        this.model?.validate();
+        this._model?.invalidateSize(w, h);
+        this._model?.validate();
         return this;
     }
     setView(center, zoom, rotation) {
-        this.model?.setView(center, zoom, rotation);
-        this.model?.validate();
+        this._model?.setView(center, zoom, rotation);
+        this._model?.validate();
         return this;
     }
     setZoom(zoom) {
-        this.model?.setZoom(zoom);
-        this.model?.validate();
+        this._model?.setZoom(zoom);
+        this._model?.validate();
         return this;
     }
     setAzimuth(r) {
-        this.model?.setAzimuth(r);
-        this.model?.validate();
+        this._model?.setAzimuth(r);
+        this._model?.validate();
         return this;
     }
     zoomIn(delta) {
-        this.model?.zoomIn(delta ?? 1);
-        this.model?.validate();
+        this._model?.zoomIn(delta ?? 1);
+        this._model?.validate();
         return this;
     }
     zoomOut(delta) {
-        this.model?.zoomOut(delta ?? 1);
-        this.model?.validate();
+        this._model?.zoomOut(delta ?? 1);
+        this._model?.validate();
         return this;
     }
     translate(tx, ty) {
-        this.model?.translate(tx, ty);
-        this.model?.validate();
+        this._model?.translate(tx, ty);
+        this._model?.validate();
         return this;
     }
     rotate(r) {
-        this.model?.rotate(r);
-        this.model?.validate();
+        this._model?.rotate(r);
+        this._model?.validate();
         return this;
     }
     getContext(options) {
@@ -114,10 +123,10 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
         }
     }
     get metrics() {
-        return this.model?.metrics ?? core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857.Shared;
+        return this._model?.metrics ?? core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857.Shared;
     }
     get azimuth() {
-        return this.model?.azimuth;
+        return this._model?.azimuth;
     }
     onUpdate(args) {
         if (!args) {
@@ -135,15 +144,6 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
             }
         }
     }
-    _markAsDirty(force = false) {
-        if (!this._isVisible && !force) {
-            return;
-        }
-        this._isDirty = true;
-        if (this._host) {
-            this._host.markAsDirty();
-        }
-    }
     onUpdateTiles(args) {
         this._markAsDirty();
     }
@@ -159,19 +159,19 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
     _draw(context, invalidatedRectangle) {
         if (context) {
             context.save();
-            const scale = this.model?.context.scale ?? 1;
-            const center = this.model?.context.center ?? core_geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Zero();
+            const scale = this._model?.context.scale ?? 1;
+            const center = this._model?.context.center ?? core_geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Zero();
             const res = this.resolution;
-            const sw = res ? this.widthInPixels / this.resolution.width : 1.0;
-            const sh = res ? this.heightInPixels / this.resolution.height : 1.0;
-            context.translate((this.widthInPixels * sw) / 2, (this.heightInPixels * sh) / 2);
-            context.scale(scale * sw, scale * sh);
+            const ratioW = res ? this.widthInPixels / this.resolution.width : 1.0;
+            const ratioH = res ? this.heightInPixels / this.resolution.height : 1.0;
+            context.translate(this.widthInPixels / 2, this.heightInPixels / 2);
+            context.scale(scale * ratioW, scale * ratioH);
             if (this.azimuth) {
                 const angle = this.azimuth * core_math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.DEG2RAD;
                 context.rotate(angle);
             }
             const tileSize = this.metrics.tileSize;
-            const tiles = Array.from(this.model?.context.tiles.values() ?? []);
+            const tiles = Array.from(this._model?.context.tiles.values() ?? []);
             for (const t of tiles) {
                 if (t.rect) {
                     const x = t.rect.x - center.x;
@@ -184,7 +184,7 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
                         }
                     }
                     else {
-                        context.fillStyle = "blue";
+                        context.fillStyle = this._background ?? MapControl.DefaultColor;
                         context.fillRect(x, y, tileSize, tileSize);
                     }
                 }
@@ -193,6 +193,8 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
         }
     }
 }
+MapControl.DefaultColor = "white";
+
 //# sourceMappingURL=mapcontrol.js.map
 
 /***/ }),
@@ -6442,6 +6444,10 @@ class TileMapView {
         this._zoomObservable = this._zoomObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable;
     }
+    get azimuthObservable() {
+        this._azimuthObservable = this._azimuthObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onAzimuthObserverAdded.bind(this));
+        return this._azimuthObservable;
+    }
     get updateObservable() {
         this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onUpdateObserverAdded.bind(this));
         return this._updateObservable;
@@ -6517,27 +6523,31 @@ class TileMapView {
     setZoom(zoom) {
         const lodf = _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
         if (this._lodf != lodf) {
+            const old = this._lodf;
+            this._lodf = lodf;
+            this._lod = Math.round(this._lodf);
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lodf;
-                this._lodf = lodf;
-                this._lod = Math.round(this._lodf);
                 const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
-            }
-            else {
-                this._lodf = lodf;
-                this._lod = Math.round(this._lodf);
             }
             this.invalidate();
         }
         return this;
     }
     setAzimuth(r) {
-        this._azimuth = TileMapView.ClampAzimuth(r);
-        const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.DEG2RAD;
-        this._cosangle = Math.cos(rad);
-        this._sinangle = Math.sin(rad);
-        this.invalidate();
+        const clamped = TileMapView.ClampAzimuth(r);
+        if (this._azimuth != clamped) {
+            const old = this._azimuth;
+            this._azimuth = clamped;
+            const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.DEG2RAD;
+            this._cosangle = Math.cos(rad);
+            this._sinangle = Math.sin(rad);
+            if (this._azimuthObservable && this._azimuthObservable.hasObservers()) {
+                const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, clamped);
+                this._azimuthObservable.notifyObservers(e);
+            }
+            this.invalidate();
+        }
         return this;
     }
     zoomIn(delta) {
@@ -6597,6 +6607,7 @@ class TileMapView {
     onResizeObserverAdded(observer) { }
     onZoomObserverAdded(observer) { }
     onCenterObserverAdded(observer) { }
+    onAzimuthObserverAdded(observer) { }
     onUpdateObserverAdded(observer) { }
     doValidate() {
         if (this._cacheLowerLOD || this._cacheUpperLOD) {

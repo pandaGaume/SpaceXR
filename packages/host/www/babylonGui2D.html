@@ -77,7 +77,7 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
                 camera.setTarget(new BABYLON.Vector3(0, 50, 0));
                 camera.wheelPrecision = 20;
                 camera.minZ = 0;
@@ -134,22 +134,27 @@
 
                 // 2D UI support
                 const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-                const minimap2D = new SPACEXR.MapControl("minimap", new SPACEXR.TileContentManager(layerMinimapClient), mapOptions.center, mapOptions.levelOfDetail, {
-                    height: h,
-                    width: w,
-                });
+                const minimap2D = new SPACEXR.MapControl(
+                    "minimap",
+                    new SPACEXR.TileContentManager(layerMinimapClient),
+                    mapOptions.center,
+                    mapOptions.levelOfDetail,
+                    display.resolution
+                );
                 minimap2D.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
                 minimap2D.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
                 minimap2D.top = "10px";
                 minimap2D.left = "10px";
                 minimap2D.width = "640px";
                 minimap2D.height = "360px";
-                minimap2D.background = "blue";
+                minimap2D.background = SPACEXR.TerrainHologramMaterialOptions.DefaultBackgroundColor.toHexString();
+                minimap2D.alpha = 0.8;
 
                 advancedTexture.addControl(minimap2D);
 
                 map.view.centerObservable.add((arg) => minimap2D.setView(arg.newValue));
                 map.view.zoomObservable.add((arg) => minimap2D.setZoom(arg.newValue));
+                map.view.azimuthObservable.add((arg) => minimap2D.setAzimuth(arg.newValue));
 
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere

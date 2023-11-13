@@ -10,68 +10,81 @@ import { TileMapView, UpdateEventArgs, UpdateReason } from "core/tiles/tiles.map
 import { EPSG3857 } from "core/tiles/tiles.geography";
 import { Scalar } from "core/math/math";
 
-//import { View } from "./view";
-//import { IViewSkin } from "../skin";
-
 export class MapControl extends Control implements ITileMapApi {
+    public static readonly DefaultColor = "white";
+
     private _resolution?: ISize2;
-    private model: TileMapView<HTMLImageElement>;
+    private _model: TileMapView<HTMLImageElement>;
+    private _background?: string;
 
     public constructor(name: string, manager: TileContentManager<HTMLImageElement>, center?: IGeo2, lod?: number, resolution?: ISize2) {
         super(name);
         this._resolution = resolution;
         const tmp = this._resolution ?? Size2.Zero();
-        this.model = new TileMapView(manager, tmp.width, tmp.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
-        this.model.updateObservable.add(this.onUpdate.bind(this));
-        this.model.validate();
+        this._model = new TileMapView(manager, tmp.width, tmp.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
+        this._model.updateObservable.add(this.onUpdate.bind(this));
+        this._model.validate();
+    }
+
+    public get background(): string | undefined {
+        return this._background;
+    }
+
+    public set background(v: string | undefined) {
+        if (this._background != v) {
+            this._background = v;
+            this._markAsDirty();
+        }
     }
 
     public hasTile(key: string): boolean {
-        return this.model?.context.tiles.has(key) ?? false;
+        return this._model?.context.tiles.has(key) ?? false;
     }
 
     public getTile(key: string): ITile<HTMLImageElement> | undefined {
-        return this.model?.context.tiles.get(key);
+        return this._model?.context.tiles.get(key);
     }
 
     public invalidateSize(w: number, h: number): ITileMapApi {
-        this.model?.invalidateSize(w, h);
-        this.model?.validate();
+        this._model?.invalidateSize(w, h);
+        this._model?.validate();
         return this;
     }
+
     public setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi {
-        this.model?.setView(center, zoom, rotation);
-        this.model?.validate();
+        this._model?.setView(center, zoom, rotation);
+        this._model?.validate();
         return this;
     }
+
     public setZoom(zoom: number): ITileMapApi {
-        this.model?.setZoom(zoom);
-        this.model?.validate();
+        this._model?.setZoom(zoom);
+        this._model?.validate();
         return this;
     }
     public setAzimuth(r: number): ITileMapApi {
-        this.model?.setAzimuth(r);
-        this.model?.validate();
+        this._model?.setAzimuth(r);
+        this._model?.validate();
         return this;
     }
     public zoomIn(delta: number): ITileMapApi {
-        this.model?.zoomIn(delta ?? 1);
-        this.model?.validate();
+        this._model?.zoomIn(delta ?? 1);
+        this._model?.validate();
         return this;
     }
     public zoomOut(delta: number): ITileMapApi {
-        this.model?.zoomOut(delta ?? 1);
-        this.model?.validate();
+        this._model?.zoomOut(delta ?? 1);
+        this._model?.validate();
         return this;
     }
     public translate(tx: number, ty: number): ITileMapApi {
-        this.model?.translate(tx, ty);
-        this.model?.validate();
+        this._model?.translate(tx, ty);
+        this._model?.validate();
         return this;
     }
     public rotate(r: number): ITileMapApi {
-        this.model?.rotate(r);
-        this.model?.validate();
+        this._model?.rotate(r);
+        this._model?.validate();
         return this;
     }
     public getContext(options?: CanvasRenderingContext2DSettings | undefined): ICanvasRenderingContext {
@@ -90,11 +103,11 @@ export class MapControl extends Control implements ITileMapApi {
     }
 
     public get metrics(): ITileMetrics {
-        return this.model?.metrics ?? EPSG3857.Shared;
+        return this._model?.metrics ?? EPSG3857.Shared;
     }
 
     public get azimuth(): number | undefined {
-        return this.model?.azimuth;
+        return this._model?.azimuth;
     }
 
     protected onUpdate(args: UpdateEventArgs<HTMLImageElement>): void {
@@ -112,19 +125,6 @@ export class MapControl extends Control implements ITileMapApi {
                 this.onUpdateView(args);
                 break;
             }
-        }
-    }
-
-    public _markAsDirty(force = false): void {
-        if (!(<any>this)._isVisible && !force) {
-            return;
-        }
-
-        this._isDirty = true;
-
-        // Redraw only this rectangle
-        if (this._host) {
-            this._host.markAsDirty();
         }
     }
 
@@ -148,20 +148,20 @@ export class MapControl extends Control implements ITileMapApi {
     public _draw(context: ICanvasRenderingContext, invalidatedRectangle?: Measure): void {
         if (context) {
             context.save();
-            const scale = this.model?.context.scale ?? 1;
-            const center = this.model?.context.center ?? Cartesian3.Zero();
+            const scale = this._model?.context.scale ?? 1;
+            const center = this._model?.context.center ?? Cartesian3.Zero();
             const res = this.resolution;
-            const sw = res ? this.widthInPixels / this.resolution.width : 1.0;
-            const sh = res ? this.heightInPixels / this.resolution.height : 1.0;
-            context.translate((this.widthInPixels * sw) / 2, (this.heightInPixels * sh) / 2);
-            context.scale(scale * sw, scale * sh);
+            const ratioW = res ? this.widthInPixels / this.resolution.width : 1.0;
+            const ratioH = res ? this.heightInPixels / this.resolution.height : 1.0;
+            context.translate(this.widthInPixels / 2, this.heightInPixels / 2);
+            context.scale(scale * ratioW, scale * ratioH);
             if (this.azimuth) {
                 // convert azimuth to canvas rotation, which is clockwize, and cartesian
                 const angle = this.azimuth * Scalar.DEG2RAD;
                 context.rotate(angle);
             }
             const tileSize = this.metrics.tileSize;
-            const tiles = Array.from(this.model?.context.tiles.values() ?? []);
+            const tiles = Array.from(this._model?.context.tiles.values() ?? []);
             for (const t of tiles) {
                 if (t.rect) {
                     const x = t.rect.x - center.x;
@@ -175,7 +175,7 @@ export class MapControl extends Control implements ITileMapApi {
                         // this is a view...
                     } else {
                         // this is where we fill the empty tile
-                        context.fillStyle = "blue";
+                        context.fillStyle = this._background ?? MapControl.DefaultColor;
                         context.fillRect(x, y, tileSize, tileSize);
                     }
                 }

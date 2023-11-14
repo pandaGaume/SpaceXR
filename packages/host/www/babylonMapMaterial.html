@@ -265,7 +265,7 @@
             searchController.setUp();
             searchController.delegate = {
                 onSearchResultSelected(place) {
-                    const location = new SPACEXR.Geo2(place.center[1], place.center[0]);
+                    const location = new SPACEXR.Geo2(place.location.lat, place.location.lng);
                     map.setView(location, 13, 0);
                 }
             };

@@ -2,9 +2,57 @@ const { fromEvent, BehaviorSubject } = rxjs;
 const { debounceTime, distinctUntilChanged, switchMap, filter, tap } = rxjs.operators;
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q";
+const GOOGLE_API_KEY = "AIzaSyB1vqO-4pZqrRez4jGvuBJ7YVwQLmW5dXE";
 
 class SearchControllerDelegate {
     onSearchResultSelected(place) {}
+}
+
+class GeocodingAPI {
+    constructor(apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    async search(query) {
+        // To be implemented by subclasses
+    }
+}
+
+class MapboxGeocodingAPI extends GeocodingAPI {
+    constructor() {
+        super(MAPBOX_TOKEN);
+    }
+
+    async search(query) {
+        const featureTypes = ["country", "region", "place"];
+        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${this.apiKey}&language=fr&types=${featureTypes.join()}`);
+        const result = await response.json();
+        return result.features.map((feature) => ({
+            name: feature.place_name,
+            location: { lat: feature.center[1], lng: feature.center[0] },
+            types: feature.place_type,
+        }));
+    }
+}
+
+class GoogleGeocodingAPI extends GeocodingAPI {
+    constructor() {
+        super(GOOGLE_API_KEY);
+    }
+
+    async search(query) {
+        const response = await fetch(
+            `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(query)}&inputtype=textquery&fields=name,geometry,type&key=${
+                this.apiKey
+            }&language=fr`
+        );
+        const result = await response.json();
+        return result.candidates.map((item) => ({
+            name: item.name,
+            location: item.geometry.location,
+            types: item.types,
+        }));
+    }
 }
 
 class SearchController {
@@ -12,6 +60,8 @@ class SearchController {
     delegate;
 
     searchChange$ = new BehaviorSubject("");
+
+    geocodingApiClient = new GoogleGeocodingAPI();
 
     constructor() {}
 
@@ -30,7 +80,7 @@ class SearchController {
                 }),
                 distinctUntilChanged(),
                 switchMap((query) => {
-                    return this.fetchPlaces(query);
+                    return this.geocodingApiClient.search(query);
                 })
             );
             searchObservable.subscribe(
@@ -61,12 +111,6 @@ class SearchController {
         });
     }
 
-    async fetchPlaces(query) {
-        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${MAPBOX_TOKEN}&language=fr`);
-        const result = await response.json();
-        return result.features;
-    }
-
     setResults(results) {
         this.results = results;
         const container = document.getElementById("results-container");
@@ -79,7 +123,7 @@ class SearchController {
             for (const result of results) {
                 const resultItem = document.createElement("div");
                 resultItem.classList.add("search-result");
-                resultItem.textContent = result.place_name;
+                resultItem.textContent = result.name;
                 resultItem.addEventListener("click", () => {
                     this.onResultClick(result);
                 });

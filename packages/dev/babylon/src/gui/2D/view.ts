@@ -76,16 +76,15 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
     }
 
     private _model?: T;
-    private _modelChangedObservable?: Observable<View<T, S>>;
-    private _skinChangedObservable?: Observable<View<T, S>>;
+    private _modelChangedObservable?: Observable<PropertyChangedEventArgs<View<T, S>, T>>;
+    private _skinChangedObservable?: Observable<PropertyChangedEventArgs<View<T, S>, S>>;
     private _skin?: S;
     private _propertyChangedObservable?: Observable<PropertyChangedEventArgs<IModel, any>>;
 
-    public constructor(name?: string, model?: T, skin?: S) {
+    public constructor(name?: string, model?: T, skin?: S, options?: any) {
         super(name);
-        this._skin = skin;
-        this._createContent();
-        View.ApplyStyleSheet(this, this._skin?.styles);
+        this._createContent(model, skin, options);
+        this.skin = skin;
         this.model = model;
     }
 
@@ -107,7 +106,7 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
             this._updateContent(old, value);
             this._onModelChanged(old, value);
             if (this._modelChangedObservable && this._modelChangedObservable.hasObservers()) {
-                this._modelChangedObservable.notifyObservers(this);
+                this._modelChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, old, this._model));
             }
         }
     }
@@ -121,26 +120,26 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
         this._skin = value;
         this._updateSkin(old, value);
         this._onSkinChanged(old, value);
-        if (this.skinChangedObservable && this.skinChangedObservable.hasObservers()) {
-            this.skinChangedObservable.notifyObservers(this);
+        if (this._skinChangedObservable && this._skinChangedObservable.hasObservers()) {
+            this._skinChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, old, this._skin));
         }
     }
 
-    public get modelChangedObservable(): Observable<View<T, S>> {
+    public get modelChangedObservable(): Observable<PropertyChangedEventArgs<View<T, S>, T>> {
         if (!this._modelChangedObservable) {
-            this._modelChangedObservable = new Observable<View<T, S>>();
+            this._modelChangedObservable = new Observable<PropertyChangedEventArgs<View<T, S>, T>>();
         }
         return this._modelChangedObservable;
     }
 
-    public get skinChangedObservable(): Observable<View<T, S>> {
+    public get skinChangedObservable(): Observable<PropertyChangedEventArgs<View<T, S>, S>> {
         if (!this._skinChangedObservable) {
-            this._skinChangedObservable = new Observable<View<T, S>>();
+            this._skinChangedObservable = new Observable<PropertyChangedEventArgs<View<T, S>, S>>();
         }
         return this._skinChangedObservable;
     }
 
-    protected _createContent(options?: any): void {}
+    protected _createContent(model?: T, skin?: S, options?: any): void {}
 
     protected _updateContent(oldValue: T | undefined, newValue: T | undefined): void {
         // nothing to do so far while there is no content
@@ -157,7 +156,7 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
 
     protected _firePropertyChanged(propertyName: string, oldValue?: any, newValue?: any): void {
         if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-            this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, propertyName, oldValue, newValue));
+            this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, oldValue, newValue, propertyName));
         }
     }
 }

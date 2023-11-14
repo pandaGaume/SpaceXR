@@ -209,6 +209,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._manager.datasource;
     }
 
+    public get manager(): TileContentManager<T> {
+        return this._manager;
+    }
+
     public get context(): TileMapContext<T> {
         return this._currentContext;
     }

@@ -134,13 +134,11 @@
 
                 // 2D UI support
                 const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-                const minimap2D = new SPACEXR.MapControl(
-                    "minimap",
-                    new SPACEXR.TileContentManager(layerMinimapClient),
-                    mapOptions.center,
-                    mapOptions.levelOfDetail,
-                    display.resolution
-                );
+                const options = {
+                    manager: new SPACEXR.TileContentManager(layerMinimapClient),
+                    resolution: { width: display.resolution.width * 2, height: display.resolution.height * 2 },
+                };
+                const minimap2D = new SPACEXR.MiniMapControl("minimap", options, map.view);
                 minimap2D.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
                 minimap2D.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
                 minimap2D.top = "10px";
@@ -152,9 +150,9 @@
 
                 advancedTexture.addControl(minimap2D);
 
-                map.view.centerObservable.add((arg) => minimap2D.setView(arg.newValue));
-                map.view.zoomObservable.add((arg) => minimap2D.setZoom(arg.newValue));
-                map.view.azimuthObservable.add((arg) => minimap2D.setAzimuth(arg.newValue));
+                //map.view.centerObservable.add((arg) => minimap2D.setView(arg.newValue));
+                //map.view.zoomObservable.add((arg) => minimap2D.setZoom(arg.newValue));
+                //map.view.azimuthObservable.add((arg) => minimap2D.setAzimuth(arg.newValue));
 
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere

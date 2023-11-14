@@ -11,20 +11,24 @@ var SPACEXR;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "MapControl": () => (/* reexport safe */ _mapcontrol__WEBPACK_IMPORTED_MODULE_0__.MapControl),
-/* harmony export */   "View": () => (/* reexport safe */ _view__WEBPACK_IMPORTED_MODULE_1__.View)
+/* harmony export */   "MapControl": () => (/* reexport safe */ _mapControl__WEBPACK_IMPORTED_MODULE_0__.MapControl),
+/* harmony export */   "MiniMapControl": () => (/* reexport safe */ _miniMapControl__WEBPACK_IMPORTED_MODULE_1__.MiniMapControl),
+/* harmony export */   "MiniMapControlOptions": () => (/* reexport safe */ _miniMapControl__WEBPACK_IMPORTED_MODULE_1__.MiniMapControlOptions),
+/* harmony export */   "View": () => (/* reexport safe */ _view__WEBPACK_IMPORTED_MODULE_2__.View)
 /* harmony export */ });
-/* harmony import */ var _mapcontrol__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mapcontrol */ "./dist/gui/2D/mapcontrol.js");
-/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./view */ "./dist/gui/2D/view.js");
+/* harmony import */ var _mapControl__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mapControl */ "./dist/gui/2D/mapControl.js");
+/* harmony import */ var _miniMapControl__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./miniMapControl */ "./dist/gui/2D/miniMapControl.js");
+/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./view */ "./dist/gui/2D/view.js");
+
 
 
 //# sourceMappingURL=index.js.map
 
 /***/ }),
 
-/***/ "./dist/gui/2D/mapcontrol.js":
+/***/ "./dist/gui/2D/mapControl.js":
 /*!***********************************!*\
-  !*** ./dist/gui/2D/mapcontrol.js ***!
+  !*** ./dist/gui/2D/mapControl.js ***!
   \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -47,13 +51,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
-    constructor(name, manager, center, lod, resolution) {
+    constructor(name, manager, resolution, center, lod) {
         super(name);
         this._resolution = resolution;
         const tmp = this._resolution ?? core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size2.Zero();
         this._model = new core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(manager, tmp.width, tmp.height, center || core_geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || manager.metrics.minLOD);
         this._model.updateObservable.add(this.onUpdate.bind(this));
         this._model.validate();
+    }
+    get view() {
+        return this._model;
     }
     get background() {
         return this._background;
@@ -195,7 +202,136 @@ class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
 }
 MapControl.DefaultColor = "white";
 
-//# sourceMappingURL=mapcontrol.js.map
+//# sourceMappingURL=mapControl.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/2D/miniMapControl.js":
+/*!***************************************!*\
+  !*** ./dist/gui/2D/miniMapControl.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MiniMapControl": () => (/* binding */ MiniMapControl),
+/* harmony export */   "MiniMapControlOptions": () => (/* binding */ MiniMapControlOptions)
+/* harmony export */ });
+/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./view */ "./dist/gui/2D/view.js");
+/* harmony import */ var _mapControl__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./mapControl */ "./dist/gui/2D/mapControl.js");
+/* harmony import */ var core_tiles_tiles_content_manager__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles/tiles.content.manager */ "../core/dist/tiles/tiles.content.manager.js");
+/* harmony import */ var core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _materials_terrain_material_hologram__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../materials/terrain.material.hologram */ "./dist/materials/terrain.material.hologram.js");
+/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/gui */ "@babylonjs/gui");
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/math/math */ "../core/dist/math/math.js");
+
+
+
+
+
+
+
+
+class MiniMapControlOptions {
+}
+class MiniMapControl extends _view__WEBPACK_IMPORTED_MODULE_1__.View {
+    static CreateDefaultSkin() {
+        return {
+            styles: {
+                map: {
+                    background: _materials_terrain_material_hologram__WEBPACK_IMPORTED_MODULE_2__.TerrainHologramMaterialOptions.DefaultBackgroundColor.toHexString(),
+                    width: "100%",
+                    height: "100%",
+                    alpha: 0.8,
+                },
+                window: {
+                    background: "#44000011",
+                    color: "red",
+                    thickness: 2,
+                },
+            },
+        };
+    }
+    constructor(name, options, model, skin) {
+        if (!options?.manager && !options?.source)
+            throw new Error("manager or datasource must be provided");
+        super(name, model, skin ?? MiniMapControl.CreateDefaultSkin(), options);
+    }
+    _onModelChanged(oldValue, newValue) {
+        if (oldValue) {
+            if (this._centerObserver)
+                oldValue.centerObservable.remove(this._centerObserver);
+            if (this._zoomObserver)
+                oldValue.zoomObservable.remove(this._zoomObserver);
+            if (this._azimuthObserver)
+                oldValue.zoomObservable.remove(this._azimuthObserver);
+        }
+        this._centerObserver = null;
+        this._zoomObserver = null;
+        this._azimuthObserver = null;
+        if (newValue) {
+            this._centerObserver = newValue.centerObservable.add(this._onCenterChanged.bind(this));
+            this._zoomObserver = newValue.zoomObservable.add(this._onZoomChanged.bind(this));
+            this._azimuthObserver = newValue.azimuthObservable.add(this._onAzimuthChanged.bind(this));
+        }
+    }
+    _onCenterChanged(args) {
+        if (this._map && args.newValue) {
+            this._map.setView(args.newValue);
+        }
+    }
+    _onZoomChanged(args) {
+        if (this._map && args.newValue != undefined) {
+            this._map.setZoom(args.newValue);
+        }
+    }
+    _onAzimuthChanged(args) {
+        if (this._window && args.newValue != undefined) {
+            this._window.rotation = -args.newValue * core_math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
+        }
+    }
+    _createContent(model, skin, options) {
+        const o = options;
+        let manager = o.manager;
+        if (!manager && o.source) {
+            manager = new core_tiles_tiles_content_manager__WEBPACK_IMPORTED_MODULE_4__.TileContentManager(o.source, o.cache);
+        }
+        const resolution = o.resolution ?? new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_5__.Size2(model?.width ?? 0, model?.height ?? 0);
+        this._map = new _mapControl__WEBPACK_IMPORTED_MODULE_6__.MapControl(`map`, manager, resolution);
+        this.addControl(this._map);
+        this._window = new _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Rectangle(`window`);
+        this._window.verticalAlignment = _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control.VERTICAL_ALIGNMENT_CENTER;
+        this._window.horizontalAlignment = _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        this.addControl(this._window);
+    }
+    _updateContent(oldValue, newValue) {
+        if (this._map && newValue) {
+            this._map.setView(newValue?.center ?? core_geography_geography_position__WEBPACK_IMPORTED_MODULE_7__.Geo2.Zero(), newValue?.levelOfDetail ?? 0, newValue?.azimuth ?? 0);
+            this._updateWindowSize(this.model);
+            if (this._window) {
+                this._window.rotation = newValue.azimuth * core_math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
+            }
+        }
+    }
+    _additionalProcessing(parentMeasure, context) {
+        super._additionalProcessing(parentMeasure, context);
+        this._updateWindowSize(this.model);
+    }
+    _updateWindowSize(model) {
+        if (model) {
+            const v = this._map?.view;
+            if (this._window && v) {
+                const wratio = model.width / v.width;
+                const hratio = model.height / v.height;
+                this._window.widthInPixels = this.widthInPixels * wratio;
+                this._window.heightInPixels = this.heightInPixels * hratio;
+            }
+        }
+    }
+}
+//# sourceMappingURL=miniMapControl.js.map
 
 /***/ }),
 
@@ -281,11 +417,10 @@ class View extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container {
             }
         }
     }
-    constructor(name, model, skin) {
+    constructor(name, model, skin, options) {
         super(name);
-        this._skin = skin;
-        this._createContent();
-        View.ApplyStyleSheet(this, this._skin?.styles);
+        this._createContent(model, skin, options);
+        this.skin = skin;
         this.model = model;
     }
     get propertyChangedObservable() {
@@ -304,7 +439,7 @@ class View extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container {
             this._updateContent(old, value);
             this._onModelChanged(old, value);
             if (this._modelChangedObservable && this._modelChangedObservable.hasObservers()) {
-                this._modelChangedObservable.notifyObservers(this);
+                this._modelChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._model));
             }
         }
     }
@@ -316,8 +451,8 @@ class View extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container {
         this._skin = value;
         this._updateSkin(old, value);
         this._onSkinChanged(old, value);
-        if (this.skinChangedObservable && this.skinChangedObservable.hasObservers()) {
-            this.skinChangedObservable.notifyObservers(this);
+        if (this._skinChangedObservable && this._skinChangedObservable.hasObservers()) {
+            this._skinChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._skin));
         }
     }
     get modelChangedObservable() {
@@ -332,7 +467,7 @@ class View extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container {
         }
         return this._skinChangedObservable;
     }
-    _createContent(options) { }
+    _createContent(model, skin, options) { }
     _updateContent(oldValue, newValue) {
     }
     _updateSkin(oldValue, newValue) {
@@ -343,7 +478,7 @@ class View extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container {
     _onSkinChanged(oldValue, newValue) { }
     _firePropertyChanged(propertyName, oldValue, newValue) {
         if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-            this._propertyChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, propertyName, oldValue, newValue));
+            this._propertyChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, oldValue, newValue, propertyName));
         }
     }
 }
@@ -361,6 +496,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "LengthUnits": () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.LengthUnits),
 /* harmony export */   "MapControl": () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.MapControl),
+/* harmony export */   "MiniMapControl": () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.MiniMapControl),
+/* harmony export */   "MiniMapControlOptions": () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.MiniMapControlOptions),
 /* harmony export */   "Model": () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.Model),
 /* harmony export */   "Skin": () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.Skin),
 /* harmony export */   "SkinBuilder": () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.SkinBuilder),
@@ -6458,6 +6595,9 @@ class TileMapView {
     get datasource() {
         return this._manager.datasource;
     }
+    get manager() {
+        return this._manager;
+    }
     get context() {
         return this._currentContext;
     }
@@ -8227,6 +8367,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapzenAltitudeDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Mass),
 /* harmony export */   "MemoryCache": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MemoryCache),
+/* harmony export */   "MiniMapControl": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MiniMapControl),
+/* harmony export */   "MiniMapControlOptions": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MiniMapControlOptions),
 /* harmony export */   "Model": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.Model),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MorganKeenanClass),
 /* harmony export */   "ObjectPool": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ObjectPool),

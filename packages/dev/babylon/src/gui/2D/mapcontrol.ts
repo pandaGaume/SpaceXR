@@ -17,13 +17,17 @@ export class MapControl extends Control implements ITileMapApi {
     private _model: TileMapView<HTMLImageElement>;
     private _background?: string;
 
-    public constructor(name: string, manager: TileContentManager<HTMLImageElement>, center?: IGeo2, lod?: number, resolution?: ISize2) {
+    public constructor(name: string, manager: TileContentManager<HTMLImageElement>, resolution?: ISize2, center?: IGeo2, lod?: number) {
         super(name);
         this._resolution = resolution;
         const tmp = this._resolution ?? Size2.Zero();
         this._model = new TileMapView(manager, tmp.width, tmp.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
         this._model.updateObservable.add(this.onUpdate.bind(this));
         this._model.validate();
+    }
+
+    public get view(): TileMapView<HTMLImageElement> | undefined {
+        return this._model;
     }
 
     public get background(): string | undefined {

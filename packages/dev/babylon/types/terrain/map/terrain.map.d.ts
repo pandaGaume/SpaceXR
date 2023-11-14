@@ -1,34 +1,29 @@
-import { AbstractMesh, Material, Mesh, Nullable, Scene, Vector3, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Nullable, Scene, VertexData } from "@babylonjs/core";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileClient, ITileDatasource } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions } from "core/meshes/terrain.grid";
-import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
+import { IRectangle } from "core/geometry/geometry.interfaces";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterialOptions } from "../../materials";
 export declare class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     static Default: SurfaceTileMapOptions;
     center?: IGeo2;
     levelOfDetail?: number;
     gridOptions?: TerrainGridOptions;
-    insets?: ICartesian3;
-    lodTransition?: LODTransitionMode;
     constructor(p: Partial<SurfaceTileMapOptions>);
 }
 export declare class SurfaceTileMapOptionsBuilder {
     _center?: IGeo2;
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
-    _insets?: ICartesian3;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
     withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder;
     withLeveOfDetail(v?: number): SurfaceTileMapOptionsBuilder;
     withGridOptions(v?: TerrainGridOptions): SurfaceTileMapOptionsBuilder;
-    withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder;
     withExageration(v?: number): SurfaceTileMapOptionsBuilder;
     withLayer(v: ITileClient<HTMLImageElement>): SurfaceTileMapOptionsBuilder;
     build(): SurfaceTileMapOptions;
@@ -39,7 +34,6 @@ export declare class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDis
     _grid: VertexData;
     _template: Mesh;
     _options: SurfaceTileMapOptions;
-    _offset?: Vector3;
     constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>);
     set material(m: Nullable<Material>);
     get material(): Nullable<Material>;

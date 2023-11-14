@@ -4,12 +4,18 @@ import { IDemInfos } from "./dem.interfaces";
 import { DemInfos } from "./dem.infos";
 
 export class DemTileWebClient implements ITileClient<IDemInfos> {
+    _name: string;
     _elevationsDataSource: ITileClient<Float32Array>;
     _normalsDataSource?: ITileClient<Uint8ClampedArray | HTMLImageElement>;
 
-    public constructor(elevationSrc: ITileClient<Float32Array>, normalSrc?: ITileClient<Uint8ClampedArray | HTMLImageElement>) {
+    public constructor(name: string, elevationSrc: ITileClient<Float32Array>, normalSrc?: ITileClient<Uint8ClampedArray | HTMLImageElement>) {
+        this._name = name;
         this._elevationsDataSource = elevationSrc;
         this._normalsDataSource = normalSrc;
+    }
+
+    public get name(): string {
+        return this._name;
     }
 
     public get metrics(): ITileMetrics {

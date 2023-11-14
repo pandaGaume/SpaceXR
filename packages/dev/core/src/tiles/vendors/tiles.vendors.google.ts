@@ -26,24 +26,25 @@ export class GoogleMap2DUrlBuilder extends WebTileUrlBuilder {
 }
 
 export class Google {
+    private static readonly KEY = "google";
+
     public static MaxLevelOfDetail = 20;
     public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(Google.MaxLevelOfDetail).build();
     public static Metrics = new EPSG3857(Google.MetricsOptions);
 
     public static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: TileWebClientOptions) {
-        return new TileWebClient(urlBuilder, new ImageTileCodec(), Google.Metrics, options);
+        return new TileWebClient(`${Google.KEY}_2d`, urlBuilder, new ImageTileCodec(), Google.Metrics, options);
     }
-
     public static StreetClient2d(options?: TileWebClientOptions) {
-        return new TileWebClient(GoogleMap2DUrlBuilder.Street, new ImageTileCodec(), Google.Metrics, options);
+        return new TileWebClient(`${Google.KEY}_street2d`, GoogleMap2DUrlBuilder.Street, new ImageTileCodec(), Google.Metrics, options);
     }
     public static SatelliteClient2d(options?: TileWebClientOptions) {
-        return new TileWebClient(GoogleMap2DUrlBuilder.Satellite, new ImageTileCodec(), Google.Metrics, options);
+        return new TileWebClient(`${Google.KEY}_sat2d`, GoogleMap2DUrlBuilder.Satellite, new ImageTileCodec(), Google.Metrics, options);
     }
     public static HybridClient2d(options?: TileWebClientOptions) {
-        return new TileWebClient(GoogleMap2DUrlBuilder.Hybrid, new ImageTileCodec(), Google.Metrics, options);
+        return new TileWebClient(`${Google.KEY}_hybrid2d`, GoogleMap2DUrlBuilder.Hybrid, new ImageTileCodec(), Google.Metrics, options);
     }
     public static TerrainClient2d(options?: TileWebClientOptions) {
-        return new TileWebClient(GoogleMap2DUrlBuilder.Terrain, new ImageTileCodec(), Google.Metrics, options);
+        return new TileWebClient(`${Google.KEY}_terrain2d`, GoogleMap2DUrlBuilder.Terrain, new ImageTileCodec(), Google.Metrics, options);
     }
 }

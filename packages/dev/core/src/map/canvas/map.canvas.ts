@@ -6,7 +6,7 @@ import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { CanvasDisplay } from "./map.canvas.display";
 import { RGBAColor } from "../../math/math.color";
-import { TileContentManager } from "core/tiles";
+import { TileContentManager } from "../../tiles/tiles.content.manager";
 
 type CanvasTileContentType = HTMLImageElement;
 type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
@@ -109,35 +109,21 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
                 if (t.rect) {
                     const x = t.rect.x - center.x;
                     const y = t.rect.y - center.y;
-                    const contents = t.content ?? [null]; // trick to address erroness tile.
-                    for (const item of contents) {
-                        if (item) {
-                            if (item instanceof HTMLImageElement) {
-                                ctx.drawImage(item, x, y);
-                                continue;
-                            }
-                            // this is a view
-                            if (item.delegate instanceof HTMLImageElement) {
-                                const w = (item.target?.z ?? 1) * tileSize;
-                                const h = w;
-                                const tx = item.target?.x ?? 0;
-                                const ty = item.target?.y ?? 0;
-
-                                const sx = item.source?.x ?? 0;
-                                const sy = item.source?.y ?? 0;
-                                const sw = (item.source?.z ?? 1) * tileSize;
-                                const sh = sw;
-                                ctx.drawImage(item.delegate, sx, sy, sw, sh, x + tx, y + ty, w, h);
-                            }
-                        } else {
-                            // this is where we fill the empty tile
-                            if (this._options?.fillEmpty) {
-                                this._options?.fillEmpty(ctx, x, y, tileSize, tileSize);
-                                continue;
-                            }
-                            let s = tileSize;
-                            ctx.strokeRect(x, y, s, s);
+                    const item = t.content ?? null; // trick to address erroness tile.
+                    if (item) {
+                        if (item instanceof HTMLImageElement) {
+                            ctx.drawImage(item, x, y);
+                            continue;
                         }
+                        // this is a view...
+                    } else {
+                        // this is where we fill the empty tile
+                        if (this._options?.fillEmpty) {
+                            this._options?.fillEmpty(ctx, x, y, tileSize, tileSize);
+                            continue;
+                        }
+                        let s = tileSize;
+                        ctx.strokeRect(x, y, s, s);
                     }
                 }
             }

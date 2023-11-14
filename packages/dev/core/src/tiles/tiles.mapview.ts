@@ -3,7 +3,7 @@ import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces
 import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
-import { IValidable } from "../types";
+import { IValidable, Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { Size2 } from "../geometry/geometry.size";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
@@ -11,16 +11,28 @@ import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { TileBuilder } from "./tiles";
-import { TileMetrics } from "./tiles.metrics";
 import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Envelope } from "../geography/geography.envelope";
 
-export class TileMapContext<T> {
-    _lod: number = 0;
+export interface IContextMetrics {
+    lod: number;
+    scale: number;
+    center: ICartesian2;
+}
+
+export class TileMapContext<T> implements IContextMetrics {
+    _lod: number;
     _scale: number = 1;
     _center: ICartesian2 = Cartesian2.Zero();
-    _tiles: Map<string, ITile<T>> = new Map<string, ITile<T>>();
+    _tiles: Map<string, ITile<T>>;
+
+    public constructor(lod?: number) {
+        this._lod = lod || 0;
+        this._scale = 1;
+        this._center = Cartesian2.Zero();
+        this._tiles = new Map<string, ITile<T>>();
+    }
 
     public get lod(): number {
         return this._lod;
@@ -41,6 +53,10 @@ export class TileMapContext<T> {
     public get center(): ICartesian2 {
         return this._center;
     }
+
+    public clear(): void {
+        this._tiles.clear();
+    }
 }
 
 export enum UpdateReason {
@@ -48,18 +64,14 @@ export enum UpdateReason {
     tileReady,
 }
 
-export class UpdateInfos {
-    public constructor(public lod: number, public scale: number, public center: ICartesian2) {}
-}
-
 export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     _reason: UpdateReason;
     _added?: Array<ITile<T>>;
     _removed?: Array<ITile<T>>;
-    _previousInfos?: UpdateInfos;
-    _infos: UpdateInfos;
+    _previousInfos?: IContextMetrics;
+    _infos: IContextMetrics;
 
-    public constructor(source: TileMapView<T>, reason: UpdateReason, infos: UpdateInfos, oldInfos?: UpdateInfos, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
+    public constructor(source: TileMapView<T>, reason: UpdateReason, infos: IContextMetrics, oldInfos?: IContextMetrics, added?: Array<ITile<T>>, removed?: Array<ITile<T>>) {
         super(source);
         this._reason = reason;
         this._infos = infos;
@@ -80,11 +92,11 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
         return this._removed;
     }
 
-    public get infos(): UpdateInfos {
+    public get infos(): IContextMetrics {
         return this._infos;
     }
 
-    public get previousInfos(): UpdateInfos | undefined {
+    public get previousInfos(): IContextMetrics | undefined {
         return this._previousInfos;
     }
 
@@ -97,11 +109,6 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     public get center(): ICartesian2 {
         return this._infos.center;
     }
-}
-
-export enum LODTransitionMode {
-    OFF = 0,
-    LINEAR = 1,
 }
 
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
@@ -129,32 +136,42 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     // current navigation parameters
     _w: number = 0;
     _h: number = 0;
+    _lodf: number = 0;
     _lod: number = 0;
     _bounds?: IEnvelope;
     _center: IGeo2 = Geo2.Zero();
-    _context: TileMapContext<T>;
+
+    // the list of context will may serve as cache, and prepare transition between LOD.
+    _contexts: Array<TileMapContext<T>>;
+    _currentContext: TileMapContext<T>;
+    // not used yet.
+    _cacheUpperLOD: boolean = false;
+    _cacheLowerLOD: boolean = false;
+
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
 
     // interns
-    _oldInfos?: UpdateInfos;
     _valid: boolean = false;
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
-    _lodTransition: LODTransitionMode = LODTransitionMode.LINEAR;
 
     // event
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _azimuthObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
     public constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
         this._manager = manager;
         this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
-        this.invalidateSize(width, height).setView(center, lod);
-        this._context = new TileMapContext<T>();
+        this._currentContext = new TileMapContext<T>(-1); // initialize with -1 to force context switch
+        // note : The map method alone will not iterate over the holes created by the arry constructor.
+        // So we use the spread operator to first convert these holes into undefined values, and then use map.
+        this._contexts = [...new Array<TileMapContext<T>>(this.metrics.lodCount)].map((o, i) => new TileMapContext<T>(i + this.metrics.minLOD));
+        this.invalidateSize(width, height).setView(center, TileAddress.ClampLod(lod, this.metrics));
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
@@ -173,6 +190,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable!;
     }
+    public get azimuthObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>> {
+        this._azimuthObservable = this._azimuthObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onAzimuthObserverAdded.bind(this));
+        return this._azimuthObservable!;
+    }
 
     public get updateObservable(): Observable<UpdateEventArgs<T>> {
         this._updateObservable = this._updateObservable || new Observable<UpdateEventArgs<T>>(this.onUpdateObserverAdded.bind(this));
@@ -188,12 +209,16 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._manager.datasource;
     }
 
+    public get manager(): TileContentManager<T> {
+        return this._manager;
+    }
+
     public get context(): TileMapContext<T> {
-        return this._context;
+        return this._currentContext;
     }
 
     public get levelOfDetail(): number {
-        return this._lod;
+        return this._lodf;
     }
 
     public get center(): IGeo2 {
@@ -263,15 +288,14 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     public setZoom(zoom: number): ITileMapApi {
-        const lod = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
-        if (this._lod != lod) {
+        const lodf = Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
+        if (this._lodf != lodf) {
+            const old = this._lodf;
+            this._lodf = lodf;
+            this._lod = Math.round(this._lodf);
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lod;
-                this._lod = lod;
                 const e = new PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
-            } else {
-                this._lod = lod;
             }
             this.invalidate();
         }
@@ -279,22 +303,30 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     public setAzimuth(r: number): ITileMapApi {
-        this._azimuth = TileMapView.ClampAzimuth(r);
-        const rad = this._azimuth * Scalar.DEG2RAD;
-        this._cosangle = Math.cos(rad);
-        this._sinangle = Math.sin(rad);
-        this.invalidate();
+        const clamped = TileMapView.ClampAzimuth(r);
+        if (this._azimuth != clamped) {
+            const old = this._azimuth;
+            this._azimuth = clamped;
+            const rad = this._azimuth * Scalar.DEG2RAD;
+            this._cosangle = Math.cos(rad);
+            this._sinangle = Math.sin(rad);
+            if (this._azimuthObservable && this._azimuthObservable.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, old, clamped);
+                this._azimuthObservable.notifyObservers(e);
+            }
+            this.invalidate();
+        }
         return this;
     }
 
     public zoomIn(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this._lod + Math.abs(delta));
+        return this.setZoom(this._lodf + Math.abs(delta));
     }
 
     public zoomOut(delta: number): ITileMapApi {
         // ensure delta is positiv
-        return this.setZoom(this._lod - Math.abs(delta));
+        return this.setZoom(this._lodf - Math.abs(delta));
     }
 
     public translate(tx: number, ty: number): ITileMapApi {
@@ -303,7 +335,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this._lod);
+        const lod = Math.round(this._lodf);
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
@@ -317,11 +349,11 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     public validateBounds(): IEnvelope | undefined {
         if (!this._bounds) {
-            let rect = this.getRectangle(this._context._center, this._context._scale);
+            let rect = this.getRectangle(this._currentContext._center, this._currentContext._scale);
 
             // compute the bounds of tile xy
-            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._context._lod);
-            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._context._lod);
+            let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._currentContext._lod);
+            let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._currentContext._lod);
 
             this._bounds = Envelope.FromPoints(nw, se);
         }
@@ -351,34 +383,80 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     // INTERNALS
+    private _getContext(lod: number): Nullable<TileMapContext<T>> {
+        if (TileAddress.IsValidLod(lod, this.metrics)) {
+            return this._contexts[lod - this.metrics.minLOD];
+        }
+        return null;
+    }
+
     private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
     private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
     private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>): void {}
+    private onAzimuthObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
     private onUpdateObserverAdded(observer: Observer<UpdateEventArgs<T>>): void {}
 
     // VIRTUALS
     protected doValidate() {
-        this._context._lod = Math.round(this.levelOfDetail);
-        this.doValidateContext(this._context);
+        if (this._cacheLowerLOD || this._cacheUpperLOD) {
+            return this.doValidateWithCache();
+        }
+        // we have this._lod which is the current level of detail
+        // we have this._lodf which is the current level of detail with decimal part
+        // we have this._currentContext which is the current context
+        // we have this._currentContext._lod which is the current level of detail of the current context
+        // so if the current level of detail is different from the current context level of detail, we have to change the context.
+        // Additionally, we may clean the previous context.
+        if (this._lod != this._currentContext._lod) {
+            // we have to switch context. Note that reach this point, the lod is already in range and valid.
+            const newContext = this._getContext(this._lod)!;
+            const oldContext = this._currentContext;
+            // we may clear the previous context if we do not cache the upper or lower level of detail.
+            this.doClearContext(oldContext, newContext);
+            // we assign the new context
+            this._currentContext = newContext;
+            // we validate the new context
+            this.doValidateContext(oldContext, newContext);
+            return;
+        }
+        this.doValidateContext(this._currentContext, this._currentContext);
     }
 
-    protected doValidateContext(level: TileMapContext<T>) {
+    protected doValidateWithCache() {
+        // not implemented yet.
+    }
+
+    protected doClearContext(oldLevel: TileMapContext<T>, newLevel: TileMapContext<T>): void {
+        let deleted = Array.from(oldLevel.tiles.values());
+        oldLevel.tiles.clear();
+
+        // filter the tile, selecting only ones with content.
+        deleted = deleted.filter((t) => t.content !== undefined);
+        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, undefined, deleted.length ? deleted : undefined);
+        this.updateObservable.notifyObservers(updateEvent);
+    }
+
+    protected doValidateContext(oldLevel: TileMapContext<T>, newLevel: Nullable<TileMapContext<T>>, dispatchEvent: boolean = true) {
+        if (newLevel == null) {
+            return;
+        }
         // current level of detail
-        const lod = level.lod;
+        const contextLod = newLevel._lod;
+
         // scale corresponding to the decimal part
-        let scale = TileMetrics.GetLodScale(this.levelOfDetail);
-        this._context._scale = scale;
+        let scale = TileAddress.GetLodScale(this._lodf);
+        newLevel._scale = scale;
 
         // compute the pixel bounds
-        const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
-        this._context._center = pixelCenterXY;
+        const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, contextLod);
+        newLevel._center = pixelCenterXY;
         const rect = this.getRectangle(pixelCenterXY, scale);
 
         // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
         let seTileXY = this.metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
 
-        const maxIndex = this.metrics.mapSize(lod) / this.metrics.tileSize - 1;
+        const maxIndex = this.metrics.mapSize(contextLod) / this.metrics.tileSize - 1;
         const x0 = Math.max(0, nwTileXY.x);
         const y0 = Math.max(0, nwTileXY.y);
         const x1 = Math.min(maxIndex, seTileXY.x);
@@ -390,13 +468,13 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
-                const a = new TileAddress(x, y, lod);
+                const a = new TileAddress(x, y, contextLod);
                 const key = a.quadkey;
-                let t = level.tiles.get(key);
+                let t = newLevel.tiles.get(key);
                 if (t) {
                     remains.push(t);
                     // we delete to create the differential between remain, deleted and added.
-                    level.tiles.delete(key);
+                    newLevel.tiles.delete(key);
                     continue;
                 }
                 // first have a look in cache
@@ -418,24 +496,23 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
             }
         }
 
-        let deleted = Array.from(level.tiles.values());
-        level.tiles.clear();
+        let deleted = Array.from(newLevel.tiles.values());
+        newLevel.tiles.clear();
 
         for (const t of remains) {
-            level.tiles.set(t.address.quadkey, t);
+            newLevel.tiles.set(t.address.quadkey, t);
         }
         for (const t of added) {
-            level.tiles.set(t.address.quadkey, t);
+            newLevel.tiles.set(t.address.quadkey, t);
         }
 
-        // filter the tile, selecting only one with content.
-        added = added.filter((t) => t.content !== undefined);
-        deleted = deleted.filter((t) => t.content !== undefined);
-        const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
-
-        const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newInfos, this._oldInfos, added.length ? added : undefined, deleted.length ? deleted : undefined);
-        this._oldInfos = newInfos;
-        this.updateObservable.notifyObservers(updateEvent);
+        if (dispatchEvent) {
+            // filter the tile, selecting only ones with content.
+            added = added.filter((t) => t.content !== undefined);
+            deleted = deleted.filter((t) => t.content !== undefined);
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.viewChanged, newLevel, oldLevel, added.length ? added : undefined, deleted.length ? deleted : undefined);
+            this.updateObservable.notifyObservers(updateEvent);
+        }
     }
 
     protected onTileContentUpdate(args: ContentUpdateEventArgs<T>): void {
@@ -458,12 +535,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
      * @param t the new tile with a valid content
      */
     private onTileReady(t: ITile<T>) {
-        if (t.address.levelOfDetail == this._context.lod) {
-            this._context.tiles.set(t.address.quadkey, t);
+        if (t.address.levelOfDetail == this._currentContext.lod) {
+            this._currentContext.tiles.set(t.address.quadkey, t);
             const added = [t];
-            const newInfos = new UpdateInfos(this._context.lod, this._context.scale, this._context.center);
-            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, newInfos, this._oldInfos, added);
-            this._oldInfos = newInfos;
+            const updateEvent = new UpdateEventArgs(this, UpdateReason.tileReady, this._currentContext, this._currentContext, added);
             this.updateObservable.notifyObservers(updateEvent);
         }
     }

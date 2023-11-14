@@ -1,4 +1,4 @@
-import { PushMaterial, Scene, Mesh, Matrix, AbstractMesh, Vector3, SubMesh } from "@babylonjs/core";
+import { PushMaterial, Scene, Mesh, Matrix, AbstractMesh, Vector3, SubMesh, Color4 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap } from "../terrain";
 import { IDemInfos } from "core/dem";
 import { ITileClient } from "core/tiles";
@@ -15,8 +15,11 @@ declare class SurfaceDefinition {
     constructor(point: Vector3, normal: Vector3);
 }
 export declare class TerrainHologramMaterialOptions {
+    static DefaultBackgroundColor: Color4;
+    static DefaultExageration: number;
     layerClient?: ITileClient<HTMLImageElement>;
-    exageration: number;
+    exageration?: number;
+    backgroundColor?: Color4;
 }
 export declare class TerrainHologramMaterialAtt {
     static DemInfosKind: string;
@@ -45,6 +48,7 @@ export declare class TerrainHologramMaterial<V extends IDemInfos, H extends Surf
     private _elevationExageration;
     private _mapScale;
     private _clipSurfaces;
+    _backgroundColor: Color4;
     constructor(name: string, map: SurfaceTileMap<V, H>, options: TerrainHologramMaterialOptions, scene: Scene);
     get LayerClient(): ITileClient<HTMLImageElement> | undefined;
     set LayerClient(v: ITileClient<HTMLImageElement> | undefined);
@@ -73,5 +77,7 @@ export declare class TerrainHologramMaterial<V extends IDemInfos, H extends Surf
     private _buildClipSurfaces;
     private _updateTileContent;
     private _loadLayer;
+    private _updateLayer;
+    private _loadLayerAreaAsync;
 }
 export {};

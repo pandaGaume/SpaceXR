@@ -1,7 +1,6 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileAddress, ITileMetrics, ITileMetricsOptions, CellCoordinateReference, ITileSection } from "./tiles.interfaces";
-import { Nullable } from "../types";
+import { ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
 export declare class TileMetricsOptions implements ITileMetricsOptions {
     static DefaultTileSize: number;
     static DefaultLOD: number;
@@ -50,16 +49,6 @@ export declare class TileMetricsOptionsBuilder {
     withMaxLongitude(v?: number): TileMetricsOptionsBuilder;
     build(): ITileMetricsOptions;
 }
-export declare class TileMetrics {
-    static GetLodScale(lod: number): number;
-    static ToParentKey(key: string): string;
-    static ToSection(key: string, size?: number): Nullable<ITileSection>;
-    static ToChildsKey(key: string): string[];
-    static ToNeigborsKey(key: string): Nullable<string>[];
-    static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[];
-    static TileXYToQuadKey(a: ITileAddress): string;
-    static QuadKeyToTileXY(quadKey: string): ITileAddress;
-}
 export declare abstract class AbstractTileMetrics implements ITileMetrics {
     _o: TileMetricsOptions;
     constructor(options?: Partial<TileMetricsOptions>);
@@ -67,6 +56,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     mapSize(levelOfDetail: number): number;
     get minLOD(): number;
     get maxLOD(): number;
+    get lodCount(): number;
     get minLatitude(): number;
     get maxLatitude(): number;
     get minLongitude(): number;
@@ -75,8 +65,6 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     get cellSize(): number;
     get cellCoordinateReference(): CellCoordinateReference;
     get overlap(): number;
-    isValidAddress(a: ITileAddress): boolean;
-    assertValidAddress(a: ITileAddress): void;
     mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number;
     abstract groundResolution(latitude: number, levelOfDetail: number): number;
     abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;

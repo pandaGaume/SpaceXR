@@ -40,22 +40,28 @@ export class FetchError extends Error {
 }
 
 export class TileWebClient<T> implements ITileClient<T> {
+    _name: string;
     _o: TileWebClientOptions;
     _urlFactory: ITileUrlBuilder;
     _codec: ITileCodec<T>;
     _metrics: ITileMetrics;
 
-    public constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions) {
+    public constructor(name: string, urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions) {
         if (!urlFactory) {
             throw new Error(`invalid url factory parameter ${urlFactory}`);
         }
         if (!codec) {
             throw new Error(`invalid codec parameter ${codec}`);
         }
+        this._name = name;
         this._urlFactory = urlFactory;
         this._codec = codec;
         this._metrics = metrics;
         this._o = { ...TileWebClientOptions.Default, ...options };
+    }
+
+    public get name(): string {
+        return this._name;
     }
 
     public get metrics(): ITileMetrics {

@@ -30,23 +30,25 @@ export class MapzenAltitudeDecoder implements IPixelDecoder {
 }
 
 export class MapZen {
+    private static readonly KEY = "mapzen";
+
     public static MaxLevelOfDetail = 15;
     public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
     public static Metrics = new EPSG3857(MapZen.MetricsOptions);
 
     public static ElevationsImagesClient(options?: TileWebClientOptions) {
-        return new TileWebClient(MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);
+        return new TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);
     }
     public static ElevationsClient(options?: TileWebClientOptions) {
-        return new TileWebClient(MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
+        return new TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
     }
     public static NormalsImagesClient(options?: TileWebClientOptions) {
-        return new TileWebClient(MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);
+        return new TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);
     }
     public static NormalsClient(options?: TileWebClientOptions) {
-        return new TileWebClient(MapZenDemUrlBuilder.Normal, new RGBATileCodec(), MapZen.Metrics, options);
+        return new TileWebClient(`${MapZen.KEY}_normal_float`, MapZenDemUrlBuilder.Normal, new RGBATileCodec(), MapZen.Metrics, options);
     }
     public static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions) {
-        return new DemTileWebClient(MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
+        return new DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
     }
 }

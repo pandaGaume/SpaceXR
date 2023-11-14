@@ -10,6 +10,7 @@ export declare class MapboxAltitudeDecoder implements IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 export declare class MapBox {
+    private static readonly KEY;
     static MaxLevelOfDetail: number;
     static TerrainDemV1Client(token: string, options?: TileWebClientOptions): DemTileWebClient;
 }

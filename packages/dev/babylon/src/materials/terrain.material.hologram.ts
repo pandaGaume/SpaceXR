@@ -14,13 +14,14 @@ import {
     IEffectCreationOptions,
     EffectFallbacks,
     MaterialHelper,
+    Color4,
 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";
 import { EventState, Observer } from "core/events";
 import { Nullable } from "core/types";
 import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
-import { ITileClient, IsTileContentView, TileMetrics } from "core/tiles";
+import { ITileAddress, ITileClient, IsTileContentView, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 
@@ -29,6 +30,8 @@ class TileBag {
     public elevationArea: Nullable<ITilePoolTextureArea> = null;
     public normalArea: Nullable<ITilePoolTextureArea> = null;
     public layerArea: Nullable<ITilePoolTextureArea> = null;
+
+    public constructor(public address: ITileAddress) {}
 }
 
 export enum ClipIndex {
@@ -53,8 +56,12 @@ class TerrainHologramMaterialDefines extends MaterialDefines {
 }
 
 export class TerrainHologramMaterialOptions {
+    public static DefaultBackgroundColor: Color4 = new Color4(0.5, 0.5, 0.5, 1.0);
+    public static DefaultExageration: number = 1.0;
+
     public layerClient?: ITileClient<HTMLImageElement>;
-    public exageration: number = 1.0;
+    public exageration?: number;
+    public backgroundColor?: Color4;
 }
 
 export class TerrainHologramMaterialAtt {
@@ -68,6 +75,7 @@ export class TerrainHologramMaterialSampler {
     public static NormalKind: string = "normals";
     public static LayerKind: string = "layer";
 }
+
 /// <summary> TerrainHologramMaterial is to use in conjunction with the SurfaceTileMap Template property.
 /// Consequetly it has to listen to the underlying MapView to get the current tile and its properties.
 /// </summary>
@@ -93,11 +101,12 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     private _normalSampler: Nullable<TilePoolTexture>;
     private _layerSampler: Nullable<TilePoolTexture>;
 
-    // attributes
+    // uniforms
     private _elevationRange: Range;
     private _elevationExageration: number;
     private _mapScale: number;
     private _clipSurfaces: SurfaceDefinition[];
+    public _backgroundColor: Color4;
 
     constructor(name: string, map: SurfaceTileMap<V, H>, options: TerrainHologramMaterialOptions, scene: Scene) {
         super(name, scene);
@@ -114,11 +123,12 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         this._elevationSampler = null;
         this._normalSampler = null;
         this._layerSampler = null;
-        // the layer client to use. Should ne null if no layer is used.
+        // the layer client to use. Should be null if no layer is used.
         this._layerClient = options?.layerClient;
         // the attributes
         this._elevationRange = new Range(Number.MAX_VALUE);
-        this._elevationExageration = options?.exageration || 1.0;
+        this._elevationExageration = options?.exageration || TerrainHologramMaterialOptions.DefaultExageration;
+        this._backgroundColor = options?.backgroundColor || TerrainHologramMaterialOptions.DefaultBackgroundColor;
         this._mapScale = 1.0;
         this._clipSurfaces = [];
 
@@ -135,9 +145,9 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         if (this._layerClient !== v) {
             this._layerClient = v;
             if (v) {
-                // Todo, reset the layer sampler
+                this._updateLayer();
+                //this.markAsDirty(Material.MiscDirtyFlag);
             }
-            //this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 
@@ -220,6 +230,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             "eastClip.point",
             "eastClip.normal",
             "minAlt",
+            "backColor",
         ];
         const samplers = [TerrainHologramMaterialSampler.ElevationKind, TerrainHologramMaterialSampler.NormalKind, TerrainHologramMaterialSampler.LayerKind];
         const uniformBuffers = new Array<string>();
@@ -337,7 +348,8 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
     private _bindMisc(effect: Effect): void {
         effect.setFloat("mapscale", this._mapScale);
-        effect.setFloat("exageration", this._elevationExageration ?? 1.0);
+        effect.setFloat("exageration", this._elevationExageration);
+        effect.setDirectColor4("backColor", this._backgroundColor);
     }
 
     private _registerInstanceBuffer(): void {
@@ -410,7 +422,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             count: depth,
             format: Constants.TEXTUREFORMAT_R,
             textureType: Constants.TEXTURETYPE_FLOAT,
-            samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
+            samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
             internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
         });
         this._elevationSampler = new TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
@@ -465,7 +477,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
-        console.log(this._clipSurfaces);
     }
 
     // update the tile content. This methods is called when the tile is added or updated.
@@ -475,15 +486,16 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const key = tile.address.quadkey;
         let bag = this._tileBags.get(key);
         if (!bag) {
-            bag = new TileBag();
+            bag = new TileBag(tile.address);
             this._tileBags.set(key, bag);
         }
 
         const m = tile.surface;
-        if (m && tile.content && tile.content[0]) {
-            let tileContent = tile.content[0];
+        if (m && tile.content) {
+            let tileContent = tile.content;
             if (IsTileContentView<V>(tileContent)) {
-                tileContent = tileContent.delegate;
+                console.log("Warning ! Tile content view is not supported yet.");
+                return;
             }
 
             // update the elevation range.
@@ -513,7 +525,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
                 bag.normalArea = normalArea;
 
                 // register neighbor ids
-                const neigbors = TileMetrics.ToNeigborsXY(tile.address);
+                const neigbors = TileAddress.ToNeigborsXY(tile.address);
                 let ids = [5, 7, 8];
                 m.instancedBuffers.demIds = new Vector4(elevationArea.id, -1, -1, -1);
                 for (let i = 0; i != ids.length; i++) {
@@ -521,7 +533,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
                     if (!a) {
                         continue;
                     }
-                    const keyOfInterest = TileMetrics.TileXYToQuadKey(a);
+                    const keyOfInterest = TileAddress.TileXYToQuadKey(a);
                     bag = this._tileBags.get(keyOfInterest);
                     if (bag?.elevationArea) {
                         const id = bag.elevationArea.id;
@@ -549,7 +561,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
                     if (!a) {
                         continue;
                     }
-                    const keyOfInterest = TileMetrics.TileXYToQuadKey(a);
+                    const keyOfInterest = TileAddress.TileXYToQuadKey(a);
                     bag = this._tileBags.get(keyOfInterest);
                     const tileOfInterest = this._map.getTile(keyOfInterest);
                     if (bag?.elevationArea && tileOfInterest?.surface) {
@@ -580,32 +592,46 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     private _loadLayer(tile: TerrainTile<V>): void {
         const m = tile.surface;
         if (m && !m.instancedBuffers.layerIds) {
-            m.instancedBuffers.layerIds = new Vector4(0, -1, -1, -1);
-            var client = this._layerClient;
-            if (client) {
-                client
-                    .fetchAsync(tile.address)
-                    .then((result) => {
-                        if (client === this._layerClient && result.content) {
-                            // retreive the bag
-                            let bag = this._tileBags.get(tile.address.quadkey);
-                            if (bag) {
-                                const layerArea = this._layerSampler?.reserveArea();
-                                if (layerArea && result.content) {
-                                    layerArea.update(result.content);
-                                    bag.layerArea = layerArea;
-                                    m.instancedBuffers.layerIds.x = layerArea.id;
-                                }
-                                return;
-                            }
-                            // the bag is not defined, due certainly to a change of view during the loading process.
-                        }
-                    })
-                    .catch((reason) => {
-                        // the lookup operation has failed - TODO describe a strategy
-                        console.log(reason);
-                    });
+            m.instancedBuffers.layerIds = new Vector4(-1, -1, -1, -1);
+            this._loadLayerAreaAsync(tile.address)
+                .then((id) => {
+                    m.instancedBuffers.layerIds.x = id;
+                })
+                .catch((reason) => {
+                    // the lookup operation has failed - TODO describe a strategy
+                    console.log(reason);
+                });
+        }
+    }
+
+    private _updateLayer(): void {
+        Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAreaAsync(bag.address)))
+            .then((ids) => {})
+            .catch((reason) => {})
+            .finally(() => {});
+    }
+
+    // TODO : move back the bag process to _loadLayer and _updateLayer
+    private async _loadLayerAreaAsync(address: ITileAddress): Promise<number> {
+        var client = this._layerClient;
+        if (client) {
+            var result = await client.fetchAsync(address);
+
+            // the client has not changed in the mean time.
+            if (client === this._layerClient && result.content) {
+                // retreive the bag
+                let bag = this._tileBags.get(address.quadkey);
+                if (bag) {
+                    const layerArea = bag.layerArea ?? this._layerSampler?.reserveArea();
+                    if (layerArea && result.content) {
+                        layerArea.update(result.content);
+                        bag.layerArea = layerArea;
+                        return layerArea.id;
+                    }
+                }
+                // the bag is not defined, due certainly to a change of view during the loading process.
             }
         }
+        return -1;
     }
 }

@@ -18,11 +18,13 @@ export declare class FetchError extends Error {
     constructor(message?: string, ...userArgs: Array<unknown>);
 }
 export declare class TileWebClient<T> implements ITileClient<T> {
+    _name: string;
     _o: TileWebClientOptions;
     _urlFactory: ITileUrlBuilder;
     _codec: ITileCodec<T>;
     _metrics: ITileMetrics;
-    constructor(urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions);
+    constructor(name: string, urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions);
+    get name(): string;
     get metrics(): ITileMetrics;
     fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }

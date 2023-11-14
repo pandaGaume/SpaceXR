@@ -13,6 +13,7 @@ export declare class MapzenAltitudeDecoder implements IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }
 export declare class MapZen {
+    private static readonly KEY;
     static MaxLevelOfDetail: number;
     static MetricsOptions: import("../tiles.interfaces").ITileMetricsOptions;
     static Metrics: EPSG3857;

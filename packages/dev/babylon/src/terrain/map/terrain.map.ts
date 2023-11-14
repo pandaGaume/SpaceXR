@@ -1,35 +1,29 @@
 import { AbstractMesh, Material, Mesh, Nullable, Scene, Tools, Vector3, VertexData } from "@babylonjs/core";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
-import { Geo2 } from "core/geography/geography.position";
+import { Geo2, Geo3 } from "core/geography/geography.position";
 import { AbstractDisplayMap } from "core/map";
 import { ITile, ITileAddress, ITileClient, ITileDatasource, IsTileContentView } from "core/tiles/tiles.interfaces";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
-import { ICartesian3, IRectangle } from "core/geometry/geometry.interfaces";
-import { Cartesian3 } from "core/geometry/geometry.cartesian";
-
+import { IRectangle } from "core/geometry/geometry.interfaces";
+import { Size3 } from "core/geometry/geometry.size";
 import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
-import { LODTransitionMode } from "core/tiles/tiles.mapview";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileContentManager } from "../..";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
         center: Geo2.Zero(),
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
-        insets: Cartesian3.Zero(),
-        exageration: 1.0,
-        lodTransition: LODTransitionMode.LINEAR,
+        exageration: 1.0
     });
 
     public center?: IGeo2;
     public levelOfDetail?: number;
     public gridOptions?: TerrainGridOptions;
-    public insets?: ICartesian3;
-    public lodTransition?: LODTransitionMode;
 
     public constructor(p: Partial<SurfaceTileMapOptions>) {
         super();
@@ -41,10 +35,9 @@ export class SurfaceTileMapOptionsBuilder {
     _center?: IGeo2;
     _lod?: number;
     _gridOptions?: TerrainGridOptions;
-    _insets?: ICartesian3;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
-
+ 
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
         return this;
@@ -57,10 +50,6 @@ export class SurfaceTileMapOptionsBuilder {
         this._gridOptions = v;
         return this;
     }
-    public withInsets(v?: ICartesian3): SurfaceTileMapOptionsBuilder {
-        this._insets = v;
-        return this;
-    }
     public withExageration(v?: number): SurfaceTileMapOptionsBuilder {
         this._exageration = v;
         return this;
@@ -71,11 +60,10 @@ export class SurfaceTileMapOptionsBuilder {
     }
     public build(): SurfaceTileMapOptions {
         return new SurfaceTileMapOptions({
-            center: this._center,
-            levelOfDetail: this._lod,
+            center: this._center ?? Geo3.Zero(),
+            levelOfDetail: this._lod ?? 10,
             gridOptions: this._gridOptions,
-            insets: this._insets,
-            exageration: this._exageration,
+            exageration: this._exageration ?? 1.0,
             layerClient: this._layerClient,
         });
     }
@@ -98,16 +86,13 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     _template: Mesh;
     _options: SurfaceTileMapOptions;
 
-    _offset?: Vector3;
-
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, new TileContentManager<V>(datasource), o.center, o.levelOfDetail);
+        super(display, new TileContentManager(datasource), o.center, o.levelOfDetail);
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);
         this._template.material = this.buildMaterial(name, scene);
-        this._view._lodTransition = o.lodTransition!;
         this._view.validate();
     }
 
@@ -182,11 +167,11 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     protected onUpdated(key: string, tile: TerrainTile<V>): void {
         if (!tile.surface) {
-            if (tile.content && tile.content[0]) {
+            if (tile.content) {
                 this.buildInstance(key, tile);
             }
         } else {
-            if (!tile.content || !tile.content[0]) {
+            if (!tile.content) {
                 tile.dispose();
             }
         }
@@ -195,7 +180,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
     // TODO,introduce metrics overlaps
     protected onAdded(key: string, tile: TerrainTile<V>): void {
         // create the instance
-        if (tile.content && tile.content[0]) {
+        if (tile.content) {
             this.buildInstance(key, tile);
         }
     }
@@ -229,26 +214,22 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
             context.rotation.z = Tools.ToRadians(this.azimuth);
         }
 
-        const offset = this._offset || Vector3.Zero();
+        const offset = this.display.insets ?? Size3.Zero();
         for (const t of tiles) {
-            const contents = t.content;
-            if (contents?.length) {
-                if (t.rect && t.surface) {
-                    for (const item of contents) {
-                        if (item) {
-                            if (IsTileContentView<V>(item)) {
-                                // never happen while Transition mode is OFF
-                                continue;
-                            }
-                            // this is the rect expressed in "texel" or "pixel"
-                            const c = t.rect.center;
-                            const x = c.x - center.x + offset.x;
-                            const y = c.y - center.y + offset.y;
-                            t.surface.position.x = x;
-                            t.surface.position.y = y;
-                            t.surface.position.z = offset.z;
-                        }
+            const item = t.content;
+            if (t.rect && t.surface) {
+                if (item) {
+                    if (IsTileContentView<V>(item)) {
+                        // never happen while Transition mode is OFF
+                        continue;
                     }
+                    // this is the rect expressed in "texel" or "pixel"
+                    const c = t.rect.center;
+                    const x = c.x - center.x + offset.width;
+                    const y = c.y - center.y + offset.height;
+                    t.surface.position.x = x;
+                    t.surface.position.y = y;
+                    t.surface.position.z = offset.thickness;
                 }
             }
         }

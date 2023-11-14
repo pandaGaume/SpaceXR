@@ -2,8 +2,8 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, ITileSection, TileContent } from "./tiles.interfaces";
-import { ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent, TileSection } from "./tiles.interfaces";
+import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 
@@ -37,12 +37,21 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     }
 }
 
-export class TileSection implements ITileSection {
-    public constructor(public x: number, public y: number, public width: number, public height: number) {}
-}
+export class TileContentView implements ITileContentView {
+    public static BuildKey(address: ITileAddress, source?: TileSection, target?: TileSection) {
+        return `${address.quadkey}_${source?.toString() ?? "x"}_${target?.toString() ?? "x"}`;
+    }
 
-export class TileContentView<T> implements ITileContentView<T> {
-    public constructor(public delegate: T, public address: ITileAddress, public source: ICartesian3, public target?: ICartesian3) {}
+    private _key?: string;
+
+    public constructor(public address: ITileAddress, public source?: TileSection, public target?: TileSection) {}
+
+    public get key(): string {
+        if (!this._key) {
+            this._key = TileContentView.BuildKey(this.address, this.source, this.target);
+        }
+        return this._key;
+    }
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {

@@ -71,6 +71,18 @@
                 "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
             }
         },
+                {
+            "type": "chrome",
+            "request": "launch",
+            "name": "3D GUI on Chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon-3D-GUI.html",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "pathMapping": {
+                "/core": "${workspaceFolder}/packages/dev/core/",
+                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
+            }
+        },
         {
             "type": "chrome",
             "request": "launch",

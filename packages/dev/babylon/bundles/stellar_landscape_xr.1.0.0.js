@@ -834,6 +834,8 @@ class TerrainHologramMaterialDefines extends _babylonjs_core__WEBPACK_IMPORTED_M
 class TerrainHologramMaterialOptions {
 }
 TerrainHologramMaterialOptions.DefaultBackgroundColor = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color4(0.5, 0.5, 0.5, 1.0);
+TerrainHologramMaterialOptions.DefaultEdgeColor = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color4(0.9, 0.9, 0.9, 0.9);
+TerrainHologramMaterialOptions.DefaultEdgeThickness = 1.0;
 TerrainHologramMaterialOptions.DefaultExageration = 1.0;
 
 class TerrainHologramMaterialAtt {
@@ -864,6 +866,8 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         this._elevationRange = new core_math__WEBPACK_IMPORTED_MODULE_1__.Range(Number.MAX_VALUE);
         this._elevationExageration = options?.exageration || TerrainHologramMaterialOptions.DefaultExageration;
         this._backgroundColor = options?.backgroundColor || TerrainHologramMaterialOptions.DefaultBackgroundColor;
+        this._edgeColor = options?.edgeColor || TerrainHologramMaterialOptions.DefaultEdgeColor;
+        this._edgeThickness = options?.edgeThickness || TerrainHologramMaterialOptions.DefaultEdgeThickness;
         this._mapScale = 1.0;
         this._clipSurfaces = [];
         this._registerInstanceBuffer();
@@ -896,6 +900,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
     set elevationExageration(v) {
         if (this._elevationExageration !== v) {
             this._elevationExageration = v;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.MiscDirtyFlag);
         }
     }
     get mapScale() {
@@ -904,10 +909,29 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
     set mapScale(v) {
         if (this._mapScale != v) {
             this._mapScale = v;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.MiscDirtyFlag);
         }
     }
     get clipSurfaces() {
         return this._clipSurfaces;
+    }
+    get edgeColor() {
+        return this._edgeColor;
+    }
+    set edgeColor(v) {
+        if (this.edgeColor !== v) {
+            this._edgeColor = v;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.MiscDirtyFlag);
+        }
+    }
+    get edgeThickness() {
+        return this._edgeThickness;
+    }
+    set edgeThickness(v) {
+        if (this.edgeThickness !== v) {
+            this._edgeThickness = v;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.MiscDirtyFlag);
+        }
     }
     isReadyForSubMesh(mesh, subMesh, useInstances) {
         if (this.isFrozen) {
@@ -952,6 +976,11 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         const uniformBuffers = new Array();
         const fallbacks = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.EffectFallbacks();
         const engine = scene.getEngine();
+        defines.WIREFRAME = this.wireframe;
+        if (this.wireframe) {
+            uniforms.push("edgeThickness");
+            uniforms.push("edgeColor");
+        }
         if (useInstances) {
             defines.INSTANCES = true;
             _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialHelper.PushAttributesForInstances(attribs);
@@ -1033,6 +1062,10 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         effect.setFloat("mapscale", this._mapScale);
         effect.setFloat("exageration", this._elevationExageration);
         effect.setDirectColor4("backColor", this._backgroundColor);
+        if (this.wireframe) {
+            effect.setFloat("edgeThickness", this._edgeThickness);
+            effect.setDirectColor4("edgeColor", this._edgeColor);
+        }
     }
     _registerInstanceBuffer() {
         const template = this._map.template;
@@ -7959,6 +7992,26 @@ _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.ge
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
 (() => {
 var __webpack_exports__ = {};
+/*!*****************************************************!*\
+  !*** ./dist/shaders/includes/geodesyDeclaration.js ***!
+  \*****************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "geodesyDeclaration": () => (/* binding */ geodesyDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "geodesyDeclaration";
+const shader = `struct Ellipsoid {float _a;float _ee;float _p1mee;};vec4 toECEF(Ellipsoid ref,vec4 trigo,float alt) {float sin_lambda=trigo.x;float cos_lambda=trigo.y;float sin_phi=trigo.z;float cos_phi=trigo.w;float N=ref._a/sqrt(1.0-ref._ee*sin_lambda*sin_lambda);float tmp=(alt+N)*cos_lambda;float x=tmp*cos_phi;float y=tmp*sin_phi;float z=(alt+ref._p1mee*N)*sin_lambda;return vec4(x,y,z,1.0);}uniform Ellipsoid ellipsoid;uniform mat4 enuTransform;uniform sampler2D altitudes;uniform sampler2D lonLT;uniform sampler2D latLT;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const geodesyDeclaration = { name, shader };
+//# sourceMappingURL=geodesyDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
 /*!***********************************************!*\
   !*** ./dist/shaders/includes/geodesy_decl.js ***!
   \***********************************************/
@@ -8094,6 +8147,87 @@ const shader = `struct Material {vec3 ambient;vec3 diffuse;vec3 specular;flo
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore.mat_decl = shader;
 const mat_decl = { name, shader };
 //# sourceMappingURL=mat_decl.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!****************************************************!*\
+  !*** ./dist/shaders/includes/wireframeFragment.js ***!
+  \****************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "wireframeFragment": () => (/* binding */ wireframeFragment)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "wireframeFragment";
+const shader = `if( edgeThickness != 0.0 ) {gl_FragColor=mix(edgeColor,gl_FragColor,edgeFactor(vBarys,edgeThickness));}`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const wireframeFragment = { name, shader };
+//# sourceMappingURL=wireframeFragment.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!***************************************************************!*\
+  !*** ./dist/shaders/includes/wireframeFragmentDeclaration.js ***!
+  \***************************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "wireframeFragmentDeclaration": () => (/* binding */ wireframeFragmentDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "wireframeFragmentDeclaration";
+const shader = `#define Z_WEIGHT(b) 1.0
+float edgeFactor(vec2 w,float thickness){vec3 b=vec3(w,Z_WEIGHT(w));vec3 d=fwidth(b);vec3 a3=smoothstep(vec3(0.0),d*thickness,b);return min(min(a3.x,a3.y),a3.z);}uniform float edgeThickness;uniform vec4 edgeColor;varying float vEdgeWeight;varying vec2 vBarys;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const wireframeFragmentDeclaration = { name, shader };
+//# sourceMappingURL=wireframeFragmentDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!**************************************************!*\
+  !*** ./dist/shaders/includes/wireframeVertex.js ***!
+  \**************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "wireframeVertex": () => (/* binding */ wireframeVertex)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "wireframeVertex";
+const shader = `vec3 tmp=barycentricWeight(gl_VertexID,altitudesSize);vBarys=tmp.xy ;vEdgeWeight=tmp.z;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const wireframeVertex = { name, shader };
+//# sourceMappingURL=wireframeVertex.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!*************************************************************!*\
+  !*** ./dist/shaders/includes/wireframeVertexDeclaration.js ***!
+  \*************************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "wireframeVertexDeclaration": () => (/* binding */ wireframeVertexDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "wireframeVertexDeclaration";
+const shader = `const vec2 BARYCENTRIC_VALUES[3]=vec2[](vec2(1.0,0.0),vec2(0.0,1.0),vec2(0.0,0.0) );const int INDEX_PATTERN [4]=int[](1,2,2,0);vec3 barycentricWeight(int vertexId,ivec2 dim){float vertexIndex=float(vertexId);float w=float(dim.x);float line=floor(vertexIndex/w) ; float col=mod(vertexIndex,w);float lineoffset=mod(line,2.0) ; float offset=lineoffset*2.0;int j= int( offset+ mod(col,2.0) );int i=INDEX_PATTERN[ j ];return vec3(BARYCENTRIC_VALUES[i],mod(col+lineoffset,2.0) ) ;}varying vec2 vBarys;varying float vEdgeWeight;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const wireframeVertexDeclaration = { name, shader };
+//# sourceMappingURL=wireframeVertexDeclaration.js.map
 })();
 
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
@@ -8256,11 +8390,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "tilemapFragmentShader";
-const shader = `precision highp float;#include<lightFragmentDeclaration>
-#include<materialFragmentDeclaration>
-#include<clipFragmentDeclaration>
-in vec3 vNormal;in vec3 vUvs;in vec3 vUvsElevation;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;uniform highp sampler2DArray altitudes;uniform vec4 backColor;void main(void) {#include<clipFragment>
-if(vUvs.z<0.0 ) {/*float alt0=float(texture(altitudes,vUvsElevation)) ;float minorInterval=100.0;float tolerance=2.0;float minorLines=mod(alt0,minorInterval);if (minorLines<tolerance) {vec3 contourColor=vec3(0.11,0.75,0.81); glFragColor=vec4(contourColor,1.0);} else {vec3 black=vec3(0.0,0.0,0.0); glFragColor=vec4(black,1.0);}*/glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;}`;
+const shader = `precision highp float;#include<clipFragmentDeclaration>
+#if defined(WIREFRAME)
+#include<wireframeFragmentDeclaration>
+#endif
+in vec3 vNormal;in vec3 vUvs;uniform highp sampler2DArray layer;uniform highp sampler2DArray altitudes;uniform vec4 backColor;void main(void) {#include<clipFragment>
+if(vUvs.z<0.0 ) {glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;#if defined(WIREFRAME)
+#include<wireframeFragment>
+#endif 
+}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapFragmentShader = { name, shader };
 //# sourceMappingURL=tilemap.fragment.js.map
@@ -8280,10 +8418,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "tilemapVertexShader";
-const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 demIds; in vec4 layerIds; #include<instancesDeclaration>
+const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 demIds; in vec4 layerIds; #if defined(WIREFRAME)
+#include<wireframeVertexDeclaration>
+#endif
+#include<instancesDeclaration>
 #include<clipVertexDeclaration>
-uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;out vec3 vUvsElevation;void main(void) {#include<instancesVertex>
-float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(altitudes,v)) ;float alt=(alt0-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);vUvsElevation=v,#include<clipVertex>
+uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;void main(void) {#include<instancesVertex>
+float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(altitudes,v)) ;float alt=(alt0-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);#include<clipVertex>
+#if defined(WIREFRAME)
+#include<wireframeVertex>
+#endif
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapVertexShader = { name, shader };

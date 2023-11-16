@@ -15,6 +15,7 @@ import {
     EffectFallbacks,
     MaterialHelper,
     Color4,
+    Material,
 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";
@@ -57,11 +58,15 @@ class TerrainHologramMaterialDefines extends MaterialDefines {
 
 export class TerrainHologramMaterialOptions {
     public static DefaultBackgroundColor: Color4 = new Color4(0.5, 0.5, 0.5, 1.0);
+    public static DefaultEdgeColor: Color4 = new Color4(0.9, 0.9, 0.9, 0.9);
+    public static DefaultEdgeThickness: number = 1.0;
     public static DefaultExageration: number = 1.0;
 
     public layerClient?: ITileClient<HTMLImageElement>;
     public exageration?: number;
     public backgroundColor?: Color4;
+    public edgeColor?: Color4;
+    public edgeThickness?: number;
 }
 
 export class TerrainHologramMaterialAtt {
@@ -107,6 +112,8 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     private _mapScale: number;
     private _clipSurfaces: SurfaceDefinition[];
     public _backgroundColor: Color4;
+    public _edgeColor: Color4;
+    public _edgeThickness: number;
 
     constructor(name: string, map: SurfaceTileMap<V, H>, options: TerrainHologramMaterialOptions, scene: Scene) {
         super(name, scene);
@@ -129,6 +136,8 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         this._elevationRange = new Range(Number.MAX_VALUE);
         this._elevationExageration = options?.exageration || TerrainHologramMaterialOptions.DefaultExageration;
         this._backgroundColor = options?.backgroundColor || TerrainHologramMaterialOptions.DefaultBackgroundColor;
+        this._edgeColor = options?.edgeColor || TerrainHologramMaterialOptions.DefaultEdgeColor;
+        this._edgeThickness = options?.edgeThickness || TerrainHologramMaterialOptions.DefaultEdgeThickness;
         this._mapScale = 1.0;
         this._clipSurfaces = [];
 
@@ -170,7 +179,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     public set elevationExageration(v: number) {
         if (this._elevationExageration !== v) {
             this._elevationExageration = v;
-            //this.markAsDirty(Material.MiscDirtyFlag);
+            this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 
@@ -181,12 +190,34 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     private set mapScale(v: number) {
         if (this._mapScale != v) {
             this._mapScale = v;
-            //this.markAsDirty(Material.MiscDirtyFlag);
+            this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 
     public get clipSurfaces(): SurfaceDefinition[] {
         return this._clipSurfaces;
+    }
+
+    public get edgeColor(): Color4 {
+        return this._edgeColor;
+    }
+
+    public set edgeColor(v: Color4) {
+        if (this.edgeColor !== v) {
+            this._edgeColor = v;
+            this.markAsDirty(Material.MiscDirtyFlag);
+        }
+    }
+
+    public get edgeThickness(): number {
+        return this._edgeThickness;
+    }
+
+    public set edgeThickness(v: number) {
+        if (this.edgeThickness !== v) {
+            this._edgeThickness = v;
+            this.markAsDirty(Material.MiscDirtyFlag);
+        }
     }
 
     // Override the isReady method
@@ -236,6 +267,14 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const uniformBuffers = new Array<string>();
         const fallbacks = new EffectFallbacks();
         const engine = scene.getEngine();
+
+        // we set the wireframe define
+        defines.WIREFRAME = this.wireframe;
+        if (this.wireframe) {
+            // add specifics uniforms
+            uniforms.push("edgeThickness");
+            uniforms.push("edgeColor");
+        }
 
         // we heavily rely on instances
         if (useInstances) {
@@ -350,6 +389,10 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         effect.setFloat("mapscale", this._mapScale);
         effect.setFloat("exageration", this._elevationExageration);
         effect.setDirectColor4("backColor", this._backgroundColor);
+        if (this.wireframe) {
+            effect.setFloat("edgeThickness", this._edgeThickness);
+            effect.setDirectColor4("edgeColor", this._edgeColor);
+        }
     }
 
     private _registerInstanceBuffer(): void {

@@ -1,4 +1,3 @@
-    if( edgeThickness != 0.0 ) 
-    {
-        gl_FragColor = mix(edgeColor, gl_FragColor, edgeFactor(vBarys,edgeThickness));
-    }
+    float f = edgeFactor(vBarys,edgeThickness);
+    if( f > 0.0) discard;
+    gl_FragColor = mix(edgeColor, backColor, edgeFactor(vBarys,edgeThickness));

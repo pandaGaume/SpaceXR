@@ -17,15 +17,15 @@ uniform vec4 backColor;
 
 void main(void) {
 
-    #include<clipFragment>
-        
+   #include<clipFragment>
+
+   #if defined(WIREFRAME)
+    #include<wireframeFragment>
+   #else
     if(vUvs.z < 0.0 ) {
         glFragColor = backColor;
         return ;
     }
     glFragColor = texture(layer, vUvs) ;
-
-#if defined(WIREFRAME)
-    #include<wireframeFragment>
-#endif    
+   #endif        
 }

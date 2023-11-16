@@ -8,9 +8,10 @@ const shader = `precision highp float;#include<clipFragmentDeclaration>
 #include<wireframeFragmentDeclaration>
 #endif
 in vec3 vNormal;in vec3 vUvs;uniform highp sampler2DArray layer;uniform highp sampler2DArray altitudes;uniform vec4 backColor;void main(void) {#include<clipFragment>
-if(vUvs.z<0.0 ) {glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;#if defined(WIREFRAME)
+#if defined(WIREFRAME)
 #include<wireframeFragment>
-#endif 
+#else
+if(vUvs.z<0.0 ) {glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;#endif 
 }`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const tilemapFragmentShader = { name, shader };

@@ -8163,7 +8163,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "wireframeFragment";
-const shader = `if( edgeThickness != 0.0 ) {gl_FragColor=mix(edgeColor,gl_FragColor,edgeFactor(vBarys,edgeThickness));}`;
+const shader = `float f=edgeFactor(vBarys,edgeThickness);if( f>0.0) discard;gl_FragColor=mix(edgeColor,backColor,edgeFactor(vBarys,edgeThickness));`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
 const wireframeFragment = { name, shader };
 //# sourceMappingURL=wireframeFragment.js.map
@@ -8204,7 +8204,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "wireframeVertex";
-const shader = `vec3 tmp=barycentricWeight(gl_VertexID,altitudesSize);vBarys=tmp.xy ;vEdgeWeight=tmp.z;`;
+const shader = `ivec3 altitudesSize =textureSize(altitudes,0);vec3 tmp=barycentricWeight(gl_VertexID,ivec2(altitudesSize.x+1,altitudesSize.y+1));vBarys=tmp.xy ;vEdgeWeight=tmp.z;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
 const wireframeVertex = { name, shader };
 //# sourceMappingURL=wireframeVertex.js.map
@@ -8395,9 +8395,10 @@ const shader = `precision highp float;#include<clipFragmentDeclaration>
 #include<wireframeFragmentDeclaration>
 #endif
 in vec3 vNormal;in vec3 vUvs;uniform highp sampler2DArray layer;uniform highp sampler2DArray altitudes;uniform vec4 backColor;void main(void) {#include<clipFragment>
-if(vUvs.z<0.0 ) {glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;#if defined(WIREFRAME)
+#if defined(WIREFRAME)
 #include<wireframeFragment>
-#endif 
+#else
+if(vUvs.z<0.0 ) {glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;#endif 
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapFragmentShader = { name, shader };

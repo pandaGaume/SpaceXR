@@ -131,6 +131,8 @@
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
+                map.material.wireframe = true;
+                map.material.edgeColor = new BABYLON.Color4(255, 0, 0, 1);
 
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere

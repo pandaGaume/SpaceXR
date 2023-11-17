@@ -102,7 +102,7 @@
                 const display = new SPACEXR.SurfaceMapDisplay(
                     "display",
                     { height: h, width: w, thickness: t },
-                    { width: 1280, height: 720, thickness: 720 }, // in 'pixel', ratio of 16/9
+                    { width: 320, height: 180, thickness: 720 }, // in 'pixel', ratio of 16/9
                     scene
                 );
                 display.position.y = 90;
@@ -122,7 +122,7 @@
 
                 const mapOptions = {
                     center: SPACEXR.KnownPlaces.Mountains.Matterhorn,
-                    levelOfDetail: 12,
+                    levelOfDetail: 10,
                     layerClient: layerClient,
                     exageration: 1.5,
                     lodTransition: 0,
@@ -132,7 +132,7 @@
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
                 map.material.wireframe = true;
-                map.material.edgeColor = new BABYLON.Color4(255, 0, 0, 1);
+                map.material.edgeColor = new BABYLON.Color4(0, 0, 200, 1);
 
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere

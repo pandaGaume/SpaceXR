@@ -870,8 +870,12 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         this._edgeThickness = options?.edgeThickness || TerrainHologramMaterialOptions.DefaultEdgeThickness;
         this._mapScale = 1.0;
         this._clipSurfaces = [];
-        this._registerInstanceBuffer();
-        this._buildTextures(scene);
+        this._registerInstanceBuffer(TerrainHologramMaterialAtt.DemInfosKind);
+        this._registerInstanceBuffer(TerrainHologramMaterialAtt.DemIdsKind);
+        this._registerInstanceBuffer(TerrainHologramMaterialAtt.LayerIdsKind);
+        this._buildTextures(TerrainHologramMaterialSampler.ElevationKind, scene);
+        this._buildTextures(TerrainHologramMaterialSampler.NormalKind, scene);
+        this._buildTextures(TerrainHologramMaterialSampler.LayerKind, scene);
         this._buildClipSurfaces();
     }
     get LayerClient() {
@@ -882,6 +886,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             this._layerClient = v;
             if (v) {
                 this._updateLayer();
+                this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.MiscDirtyFlag);
             }
         }
     }
@@ -1067,11 +1072,22 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             effect.setDirectColor4("edgeColor", this._edgeColor);
         }
     }
-    _registerInstanceBuffer() {
+    _registerInstanceBuffer(kind) {
         const template = this._map.template;
-        template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemInfosKind, 4);
-        template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemIdsKind, 4);
-        template.registerInstancedBuffer(TerrainHologramMaterialAtt.LayerIdsKind, 4);
+        switch (kind) {
+            case TerrainHologramMaterialAtt.DemInfosKind: {
+                template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemInfosKind, 4);
+                break;
+            }
+            case TerrainHologramMaterialAtt.DemIdsKind: {
+                template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemIdsKind, 4);
+                break;
+            }
+            case TerrainHologramMaterialAtt.LayerIdsKind: {
+                template.registerInstancedBuffer(TerrainHologramMaterialAtt.LayerIdsKind, 4);
+                break;
+            }
+        }
     }
     _onTileAdded(eventData, eventState) {
         const mesh = eventData.surface;
@@ -1102,7 +1118,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             this.mapScale = view.metrics.mapScale(view.center.lat, view.levelOfDetail, this._map.display.pixelPerUnit.x);
         }
     }
-    _buildTextures(scene) {
+    _buildTextures(kind, scene) {
         var metrics = this._map.metrics;
         const s = metrics.tileSize;
         var display = this._map.display;
@@ -1111,33 +1127,47 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         const diag = Math.sqrt(resw * resw + resh * resh) * 1.5;
         const ntiles = Math.floor(diag / s) + 1;
         const depth = ntiles * ntiles;
-        const tilePoolElevationOptions = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTextureOptions({
-            metrics: metrics,
-            count: depth,
-            format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_R,
-            textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT,
-            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.R16F,
-        });
-        this._elevationSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
-        const tilePoolNormalOptions = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTextureOptions({
-            metrics: metrics,
-            count: depth,
-            format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGB,
-            textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_BYTE,
-            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.RGB8,
-        });
-        this._normalSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.NormalKind, tilePoolNormalOptions, scene);
-        const tilePoolLayerOptions = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTextureOptions({
-            metrics: metrics,
-            count: depth,
-            format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGB,
-            textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_BYTE,
-            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.RGB8,
-        });
-        this._layerSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.LayerKind, tilePoolLayerOptions, scene);
+        switch (kind) {
+            case TerrainHologramMaterialSampler.ElevationKind: {
+                const tilePoolElevationOptions = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTextureOptions({
+                    metrics: metrics,
+                    count: depth,
+                    format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_R,
+                    textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT,
+                    samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.R16F,
+                });
+                this._elevationSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
+                break;
+            }
+            case TerrainHologramMaterialSampler.NormalKind: {
+                const tilePoolNormalOptions = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTextureOptions({
+                    metrics: metrics,
+                    count: depth,
+                    format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGB,
+                    textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8,
+                });
+                this._normalSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.NormalKind, tilePoolNormalOptions, scene);
+                break;
+            }
+            case TerrainHologramMaterialSampler.LayerKind: {
+                const tilePoolLayerOptions = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTextureOptions({
+                    metrics: metrics,
+                    count: depth,
+                    format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGB,
+                    textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8,
+                });
+                this._layerSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.LayerKind, tilePoolLayerOptions, scene);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
     _buildClipSurfaces() {
         const display = this._map.display;

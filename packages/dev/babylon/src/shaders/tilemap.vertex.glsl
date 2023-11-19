@@ -7,7 +7,15 @@ in vec2 uv; // babylon build in
 in vec4 demIds; // the depth of the dem textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
 in vec4 layerIds; // the depth of the layer textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
 
+// wireframe support
+#if defined(WIREFRAME)
+    #include<wireframeVertexDeclaration>
+#endif
+
+// this is specific to Babylonjs
 #include<instancesDeclaration>
+
+// this is declaration to clip map along the hologram sides
 #include<clipVertexDeclaration>
 
 // Uniforms
@@ -39,8 +47,8 @@ void main(void) {
         v.z = demIds[0];
     } 
 
-    float alt = float(texture(altitudes, v)) ;
-    alt = (alt - minAlt) * mapscale * exageration;
+    float alt0 = float(texture(altitudes, v))  ;
+    float alt = (alt0 - minAlt) * mapscale * exageration;
 
     vPosition = vec4(position.xy, alt ,1.0) ;
     vec4 worldPos = finalWorld * vPosition;
@@ -64,9 +72,13 @@ void main(void) {
     float y = (2.0 * pixel.g) - 1.0;
     float z = (pixel.b * 255.0 - 128.0) / 127.0;
     vNormal = vec3(x,z,y);
-
+ 
     depth = layerIds[0] ;
     vUvs = vec3(position.xy + 0.5, depth);
 
     #include<clipVertex>
+
+#if defined(WIREFRAME)
+    #include<wireframeVertex>
+#endif
 }

@@ -1,14 +1,5 @@
 
-#if defined(WIREFRAME_SQUARE)
     #define Z_WEIGHT(b) 1.0
-    uniform vec2 edgeVisibilityRange ;
-    
-    #if defined(WIREFRAME_EDGE_WEIGHT)
-        varying float vEdgeWeight;
-    #endif    
-#else    
-    #define Z_WEIGHT(b) 1.0- b.x - b.y
-#endif 
     
     float edgeFactor(vec2 w, float thickness){
         vec3 b = vec3(w, Z_WEIGHT(w));
@@ -18,5 +9,7 @@
     }
 
     uniform float edgeThickness;
-
+    uniform vec4 edgeColor;
+    
+    varying float vEdgeWeight;
     varying vec2 vBarys;

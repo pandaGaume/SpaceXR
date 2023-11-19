@@ -3,6 +3,7 @@
     <head>
         <title>Exemple de dessin de tuiles holographique</title>
         <script src="./libs/babylon.js"></script>
+        <script src="./libs/babylon.gui.js"></script>
         <script src="./libs/babylonjs.loaders.js"></script>
         <script src="./libs/babylon.glTF2FileLoader.js"></script>
         <script src="./libs/babylon.inspector.bundle.js"></script>
@@ -101,7 +102,7 @@
                 const display = new SPACEXR.SurfaceMapDisplay(
                     "display",
                     { height: h, width: w, thickness: t },
-                    { width: 1280, height: 720, thickness: 720 }, // in 'pixel', ratio of 16/9
+                    { width: 320, height: 180, thickness: 720 }, // in 'pixel', ratio of 16/9
                     scene
                 );
                 display.position.y = 90;
@@ -119,17 +120,9 @@
                 const demClient = SPACEXR.MapZen.DemClient();
                 const layerClient = SPACEXR.Google.SatelliteClient2d();
 
-                // some locations
-                const mapboxDemoLocation = new SPACEXR.Geo2(32.7213, -114.26608);
-                const everest = SPACEXR.KnownPlaces.Locations.Everest;
-                const chamonix = SPACEXR.KnownPlaces.Locations.Chamonix;
-                const mountRenier = SPACEXR.KnownPlaces.Locations.MountRainier;
-                const corsica = new SPACEXR.Geo2(42.45082138532401, 8.833694458007812);
-                const aydarkul = new SPACEXR.Geo2(40.64904443644928, 66.5616682926476);
-
                 const mapOptions = {
-                    center: chamonix,
-                    levelOfDetail: 12,
+                    center: SPACEXR.KnownPlaces.Mountains.Matterhorn,
+                    levelOfDetail: 10,
                     layerClient: layerClient,
                     exageration: 1.5,
                     lodTransition: 0,
@@ -138,6 +131,8 @@
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
+                //map.material.wireframe = true;
+                map.material.edgeColor = new BABYLON.Color4(0, 0, 200, 1);
 
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere
@@ -244,16 +239,23 @@
                 var zoomOutBt = document.getElementById("zoomout");
                 zoomOutBt.addEventListener("click", () => map.zoomOut(0.1));
 
+                // Axes
                 // const mainAxes = new BABYLON.AxesViewer(scene, 20);
                 // const screenAxes = new BABYLON.AxesViewer(scene, 20);
-
                 // const ctx = display.context;
                 // screenAxes.xAxis.parent = ctx;
                 // screenAxes.yAxis.parent = ctx;
                 // screenAxes.zAxis.parent = ctx;
+
+                // debug panels
                 // scene.debugLayer.show();
-                // here we add XR support
+
+                // XR support
+                // WARNING : This might be the new mode for XR but did not work for non obvious reason...
                 // const xr = await scene.createDefaultXRExperienceAsync();
+                // So, add vr as old fashion and deprecated way
+                var helper = scene.createDefaultVRExperience({ createDeviceOrientationCamera: false });
+                helper.enableInteractions();
                 return scene;
             }
 

@@ -15,6 +15,7 @@ import {
     EffectFallbacks,
     MaterialHelper,
     Color4,
+    Material,
 } from "@babylonjs/core";
 import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";
@@ -57,11 +58,15 @@ class TerrainHologramMaterialDefines extends MaterialDefines {
 
 export class TerrainHologramMaterialOptions {
     public static DefaultBackgroundColor: Color4 = new Color4(0.5, 0.5, 0.5, 1.0);
+    public static DefaultEdgeColor: Color4 = new Color4(0.9, 0.9, 0.9, 0.9);
+    public static DefaultEdgeThickness: number = 1.0;
     public static DefaultExageration: number = 1.0;
 
     public layerClient?: ITileClient<HTMLImageElement>;
     public exageration?: number;
     public backgroundColor?: Color4;
+    public edgeColor?: Color4;
+    public edgeThickness?: number;
 }
 
 export class TerrainHologramMaterialAtt {
@@ -107,6 +112,8 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     private _mapScale: number;
     private _clipSurfaces: SurfaceDefinition[];
     public _backgroundColor: Color4;
+    public _edgeColor: Color4;
+    public _edgeThickness: number;
 
     constructor(name: string, map: SurfaceTileMap<V, H>, options: TerrainHologramMaterialOptions, scene: Scene) {
         super(name, scene);
@@ -129,11 +136,19 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         this._elevationRange = new Range(Number.MAX_VALUE);
         this._elevationExageration = options?.exageration || TerrainHologramMaterialOptions.DefaultExageration;
         this._backgroundColor = options?.backgroundColor || TerrainHologramMaterialOptions.DefaultBackgroundColor;
+        this._edgeColor = options?.edgeColor || TerrainHologramMaterialOptions.DefaultEdgeColor;
+        this._edgeThickness = options?.edgeThickness || TerrainHologramMaterialOptions.DefaultEdgeThickness;
         this._mapScale = 1.0;
         this._clipSurfaces = [];
 
-        this._registerInstanceBuffer();
-        this._buildTextures(scene);
+        this._registerInstanceBuffer(TerrainHologramMaterialAtt.DemInfosKind);
+        this._registerInstanceBuffer(TerrainHologramMaterialAtt.DemIdsKind);
+        this._registerInstanceBuffer(TerrainHologramMaterialAtt.LayerIdsKind);
+
+        this._buildTextures(TerrainHologramMaterialSampler.ElevationKind, scene);
+        this._buildTextures(TerrainHologramMaterialSampler.NormalKind, scene);
+        this._buildTextures(TerrainHologramMaterialSampler.LayerKind, scene);
+
         this._buildClipSurfaces();
     }
 
@@ -146,7 +161,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
             this._layerClient = v;
             if (v) {
                 this._updateLayer();
-                //this.markAsDirty(Material.MiscDirtyFlag);
+                this.markAsDirty(Material.MiscDirtyFlag);
             }
         }
     }
@@ -170,7 +185,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     public set elevationExageration(v: number) {
         if (this._elevationExageration !== v) {
             this._elevationExageration = v;
-            //this.markAsDirty(Material.MiscDirtyFlag);
+            this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 
@@ -181,12 +196,34 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     private set mapScale(v: number) {
         if (this._mapScale != v) {
             this._mapScale = v;
-            //this.markAsDirty(Material.MiscDirtyFlag);
+            this.markAsDirty(Material.MiscDirtyFlag);
         }
     }
 
     public get clipSurfaces(): SurfaceDefinition[] {
         return this._clipSurfaces;
+    }
+
+    public get edgeColor(): Color4 {
+        return this._edgeColor;
+    }
+
+    public set edgeColor(v: Color4) {
+        if (this.edgeColor !== v) {
+            this._edgeColor = v;
+            this.markAsDirty(Material.MiscDirtyFlag);
+        }
+    }
+
+    public get edgeThickness(): number {
+        return this._edgeThickness;
+    }
+
+    public set edgeThickness(v: number) {
+        if (this.edgeThickness !== v) {
+            this._edgeThickness = v;
+            this.markAsDirty(Material.MiscDirtyFlag);
+        }
     }
 
     // Override the isReady method
@@ -236,6 +273,15 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const uniformBuffers = new Array<string>();
         const fallbacks = new EffectFallbacks();
         const engine = scene.getEngine();
+
+        // we set the wireframe define
+        // while we relay to the Material wireframe property, the underlying fill mode is set by Babylon and the proper draw mode gl.LINES is used.
+        defines.WIREFRAME = this.wireframe;
+        if (this.wireframe) {
+            // add specifics uniforms
+            uniforms.push("edgeThickness");
+            uniforms.push("edgeColor");
+        }
 
         // we heavily rely on instances
         if (useInstances) {
@@ -350,13 +396,28 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         effect.setFloat("mapscale", this._mapScale);
         effect.setFloat("exageration", this._elevationExageration);
         effect.setDirectColor4("backColor", this._backgroundColor);
+        if (this.wireframe) {
+            effect.setFloat("edgeThickness", this._edgeThickness);
+            effect.setDirectColor4("edgeColor", this._edgeColor);
+        }
     }
 
-    private _registerInstanceBuffer(): void {
+    private _registerInstanceBuffer(kind: string): void {
         const template = this._map.template;
-        template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemInfosKind, 4); // dem infos
-        template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemIdsKind, 4);
-        template.registerInstancedBuffer(TerrainHologramMaterialAtt.LayerIdsKind, 4);
+        switch (kind) {
+            case TerrainHologramMaterialAtt.DemInfosKind: {
+                template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemInfosKind, 4); // dem infos
+                break;
+            }
+            case TerrainHologramMaterialAtt.DemIdsKind: {
+                template.registerInstancedBuffer(TerrainHologramMaterialAtt.DemIdsKind, 4);
+                break;
+            }
+            case TerrainHologramMaterialAtt.LayerIdsKind: {
+                template.registerInstancedBuffer(TerrainHologramMaterialAtt.LayerIdsKind, 4);
+                break;
+            }
+        }
     }
 
     // messaged when tile has been added to the activ list of the map
@@ -403,7 +464,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
     // build the tile pool textures. This method is called at the creation of the material,
     // compute the depth of the pool giving the map diagonal as maximum length of the view
-    private _buildTextures(scene: Scene): void {
+    private _buildTextures(kind: string, scene: Scene): void {
         var metrics = this._map.metrics;
 
         // first remember we need to calculate the depth of the pool, which is the maximum number of texture tile we may have
@@ -417,35 +478,47 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const ntiles = Math.floor(diag / s) + 1;
         const depth = ntiles * ntiles;
 
-        const tilePoolElevationOptions = new TilePoolTextureOptions({
-            metrics: metrics,
-            count: depth,
-            format: Constants.TEXTUREFORMAT_R,
-            textureType: Constants.TEXTURETYPE_FLOAT,
-            samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
-            internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
-        });
-        this._elevationSampler = new TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
-
-        const tilePoolNormalOptions = new TilePoolTextureOptions({
-            metrics: metrics,
-            count: depth,
-            format: Constants.TEXTUREFORMAT_RGB,
-            textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
-            samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.RGB8, // force internal format
-        });
-        this._normalSampler = new TilePoolTexture(TerrainHologramMaterialSampler.NormalKind, tilePoolNormalOptions, scene);
-
-        const tilePoolLayerOptions = new TilePoolTextureOptions({
-            metrics: metrics,
-            count: depth,
-            format: Constants.TEXTUREFORMAT_RGB,
-            textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
-            samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.RGB8, // force internal format
-        });
-        this._layerSampler = new TilePoolTexture(TerrainHologramMaterialSampler.LayerKind, tilePoolLayerOptions, scene);
+        switch (kind) {
+            case TerrainHologramMaterialSampler.ElevationKind: {
+                const tilePoolElevationOptions = new TilePoolTextureOptions({
+                    metrics: metrics,
+                    count: depth,
+                    format: Constants.TEXTUREFORMAT_R,
+                    textureType: Constants.TEXTURETYPE_FLOAT,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
+                });
+                this._elevationSampler = new TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
+                break;
+            }
+            case TerrainHologramMaterialSampler.NormalKind: {
+                const tilePoolNormalOptions = new TilePoolTextureOptions({
+                    metrics: metrics,
+                    count: depth,
+                    format: Constants.TEXTUREFORMAT_RGB,
+                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format
+                });
+                this._normalSampler = new TilePoolTexture(TerrainHologramMaterialSampler.NormalKind, tilePoolNormalOptions, scene);
+                break;
+            }
+            case TerrainHologramMaterialSampler.LayerKind: {
+                const tilePoolLayerOptions = new TilePoolTextureOptions({
+                    metrics: metrics,
+                    count: depth,
+                    format: Constants.TEXTUREFORMAT_RGB,
+                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format
+                });
+                this._layerSampler = new TilePoolTexture(TerrainHologramMaterialSampler.LayerKind, tilePoolLayerOptions, scene);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
 
     // build the clip surfaces, which are the 4 planes (North, South, East, West ) used to clip the map content
@@ -477,7 +550,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
-        console.log(this._clipSurfaces);
     }
 
     // update the tile content. This methods is called when the tile is added or updated.

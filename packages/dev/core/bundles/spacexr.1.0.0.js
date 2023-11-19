@@ -266,16 +266,23 @@ class EventArgs {
     }
 }
 class PropertyChangedEventArgs extends EventArgs {
-    constructor(source, oldValue, newValue) {
+    constructor(source, oldValue, newValue, propertyName) {
         super(source);
-        this._o = oldValue;
-        this._v = newValue;
+        this._propertyName = propertyName;
+        this._oldValue = oldValue;
+        this._newValue = newValue;
+    }
+    get propertyName() {
+        return this._propertyName;
     }
     get oldValue() {
-        return this._o;
+        return this._oldValue;
     }
-    get value() {
-        return this._v;
+    get newValue() {
+        return this._newValue;
+    }
+    get source() {
+        return this._source;
     }
 }
 //# sourceMappingURL=events.args.js.map
@@ -1043,13 +1050,44 @@ __webpack_require__.r(__webpack_exports__);
 
 class KnownPlaces {
 }
-KnownPlaces.Locations = {
-    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.98817689833976, 86.92491071824738),
-    Chamonix: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.923351087244384, 6.871072898119941),
-    MountRainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.8523798847489, -121.76034290971147),
-    Haleakala: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.714420811112593, -156.25254225132156),
-    DiamondHead: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(21.26226248048085, -157.80602016703813),
-    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.1019466866649115, 105.42296583233852),
+KnownPlaces.Mountains = {
+    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925),
+    K2: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.8808, 76.5155),
+    Kangchenjunga: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.7025, 88.1475),
+    Lhotse: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9617, 86.9333),
+    Makalu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.8897, 87.0889),
+    ChoOyu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.0942, 86.6608),
+    Dhaulagiri: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.6967, 83.4872),
+    Manaslu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5494, 84.5599),
+    NangaParbat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.237, 74.5892),
+    Annapurna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5961, 83.8203),
+    Matterhorn: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.9763, 7.6586),
+    MontBlanc: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.8326, 6.8652),
+    Denali: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.0695, -151.0074),
+    Aconcagua: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-32.6532, -70.0109),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.0674, 37.3556),
+    Elbrus: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(43.3499, 42.4375),
+    PuncakJaya: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-4.0751, 137.1889),
+};
+KnownPlaces.Volcanoes = {
+    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.102, 105.423),
+    Vesuvius: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(40.821, 14.426),
+    Etna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.751, 14.993),
+    MaunaLoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.475, -155.608),
+    Kilauea: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.421, -155.287),
+    Fuji: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.3606, 138.7274),
+    StHelens: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.1912, -122.1944),
+    Pinatubo: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(15.142, 120.35),
+    Rainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.853, -121.76),
+    Cotopaxi: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.679, -78.438),
+    Popocatepetl: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.023, -98.622),
+    Eyjafjallajokull: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.633, -19.621),
+    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.404, 25.396),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.067, 37.355),
+    Arenal: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(10.463, -84.703),
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.588),
+    Tambora: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-8.25, 118.0),
+    Sakurajima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(31.593, 130.657),
 };
 
 //# sourceMappingURL=geography.knownPlaces.js.map
@@ -1124,6 +1162,42 @@ class Geo3 extends Geo2 {
 
 /***/ }),
 
+/***/ "./dist/geography/geography.projections.js":
+/*!*************************************************!*\
+  !*** ./dist/geography/geography.projections.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Projections": () => (/* binding */ Projections)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+
+
+
+class Projections {
+    static LatLonToWebMercator(lat, lon, ellipsoid) {
+        return Projections.LatLonToWebMercatorToRef(lat, lon, _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero(), ellipsoid);
+    }
+    static LatLonToWebMercatorToRef(lat, lon, ref, ellipsoid) {
+        ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
+        ref.x = lon * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD * ellipsoid.semiMajorAxis;
+        lat = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(lat, Projections.WebMercatorMinLatitude, Projections.WebMercatorMaxLatitude);
+        let rad = lat * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
+        ref.y = ellipsoid.semiMajorAxis * Math.log(Math.tan(_math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.PI_4 + rad / 2));
+        return ref;
+    }
+}
+Projections.WebMercatorMaxLatitude = 85.05112878;
+Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
+
+//# sourceMappingURL=geography.projections.js.map
+
+/***/ }),
+
 /***/ "./dist/geography/index.js":
 /*!*********************************!*\
   !*** ./dist/geography/index.js ***!
@@ -1136,6 +1210,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
+/* harmony export */   "Projections": () => (/* reexport safe */ _geography_projections__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isEnvelope),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)
 /* harmony export */ });
@@ -1143,6 +1218,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "./dist/geography/geography.position.js");
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.envelope */ "./dist/geography/geography.envelope.js");
 /* harmony import */ var _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.knownPlaces */ "./dist/geography/geography.knownPlaces.js");
+/* harmony import */ var _geography_projections__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography.projections */ "./dist/geography/geography.projections.js");
+
 
 
 
@@ -2303,6 +2380,9 @@ Scalar.EPSILON = 1.401298e-45;
 Scalar.DEG2RAD = Math.PI / 180;
 Scalar.INCH2METER = 0.0254;
 Scalar.METER2INCH = 39.3701;
+Scalar.PI = Math.PI;
+Scalar.PI_2 = Math.PI / 2;
+Scalar.PI_4 = Math.PI / 4;
 Scalar.Sign = function (value) {
     return value > 0 ? 1 : -1;
 };
@@ -2904,6 +2984,380 @@ class TerrainNormalizedGridBuilder {
 
 /***/ }),
 
+/***/ "./dist/space/Mechanics/index.js":
+/*!***************************************!*\
+  !*** ./dist/space/Mechanics/index.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.CelestialTracker),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.EquatorialVector),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.HorizonVector),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.JulianDate),
+/* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_kepler__WEBPACK_IMPORTED_MODULE_0__.KeplerOrbitBase),
+/* harmony export */   "MoonState": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.MoonState),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.SunTrajectoryConfig)
+/* harmony export */ });
+/* harmony import */ var _space_kepler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.kepler */ "./dist/space/Mechanics/space.kepler.js");
+/* harmony import */ var _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.celestialTracker */ "./dist/space/Mechanics/space.celestialTracker.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/space/Mechanics/space.celestialTracker.js":
+/*!********************************************************!*\
+  !*** ./dist/space/Mechanics/space.celestialTracker.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CelestialTracker": () => (/* binding */ CelestialTracker),
+/* harmony export */   "EquatorialVector": () => (/* binding */ EquatorialVector),
+/* harmony export */   "HorizonVector": () => (/* binding */ HorizonVector),
+/* harmony export */   "JulianDate": () => (/* binding */ JulianDate),
+/* harmony export */   "MoonState": () => (/* binding */ MoonState),
+/* harmony export */   "SunTrajectoryConfig": () => (/* binding */ SunTrajectoryConfig)
+/* harmony export */ });
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "./dist/math/math.js");
+
+class HorizonVector {
+    constructor(azimuth, altitude) {
+        this.azimuth = azimuth;
+        this.altitude = altitude;
+    }
+}
+class EquatorialVector {
+    constructor(rightAscension, declination) {
+        this.rightAscension = rightAscension;
+        this.declination = declination;
+    }
+}
+class MoonState {
+    constructor(fraction, phase, angle) {
+        this.fraction = fraction;
+        this.phase = phase;
+        this.angle = angle;
+    }
+}
+class SunTrajectoryConfig {
+    constructor(angle, riseName, setName) {
+        this.angle = angle;
+        this.riseName = riseName;
+        this.setName = setName;
+    }
+}
+class JulianDate {
+    static JulianCycle(d, lw) {
+        return Math.round(d - JulianDate.J0 - lw / (2 * Math.PI));
+    }
+    static FromDate(date) {
+        return new JulianDate(date.valueOf() / JulianDate.DayMs - 0.5 + JulianDate.J1970);
+    }
+    static ToDate(julian) {
+        return new Date((julian + 0.5 - JulianDate.J1970) * JulianDate.DayMs);
+    }
+    constructor(value) {
+        this._value = value;
+    }
+    get value() {
+        return this._value;
+    }
+    toDate() {
+        return new Date((this._value + 0.5 - JulianDate.J1970) * JulianDate.DayMs);
+    }
+    toDays() {
+        return this._value - JulianDate.J2000;
+    }
+}
+JulianDate.DayMs = 1000 * 60 * 60 * 24;
+JulianDate.J1970 = 2440588;
+JulianDate.J2000 = 2451545;
+JulianDate.J0 = 0.0009;
+
+class CelestialTracker {
+    static ApproxTransit(Ht, lw, n) {
+        return JulianDate.J0 + (Ht + lw) / (2 * Math.PI) + n;
+    }
+    static SolarTransitJ(ds, M, L) {
+        return JulianDate.J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+    }
+    static HourAngle(h, phi, d) {
+        return Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d)));
+    }
+    static ObserverAngle(height) {
+        return (-2.076 * Math.sqrt(height)) / 60;
+    }
+    static GetSetJ(h, lw, phi, dec, n, M, L) {
+        var w = CelestialTracker.HourAngle(h, phi, dec), a = CelestialTracker.ApproxTransit(w, lw, n);
+        return CelestialTracker.SolarTransitJ(a, M, L);
+    }
+    static Azimuth(H, phi, dec) {
+        return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi));
+    }
+    static Altitude(H, phi, dec) {
+        return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
+    }
+    static SiderealTime(d, lw) {
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (280.16 + 360.9856235 * d) - lw;
+    }
+    static Declination(l, b) {
+        return Math.asin(Math.sin(b) * CelestialTracker.EarthObliquity_Cos + Math.sin(l) * CelestialTracker.EarthObliquity_Sin * Math.cos(b));
+    }
+    static RightAscension(l, b) {
+        return Math.atan2(Math.sin(l) * CelestialTracker.EarthObliquity_Cos - Math.tan(b) * CelestialTracker.EarthObliquity_Sin, Math.cos(l));
+    }
+    static EclipticLongitude(M) {
+        const C = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+        const P = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 102.9372;
+        return M + C + P + Math.PI;
+    }
+    static SolarMeanAnomaly(d) {
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (357.5291 + 0.98560028 * d);
+    }
+    static SunCoords(d) {
+        const M = CelestialTracker.SolarMeanAnomaly(d);
+        const L = CelestialTracker.EclipticLongitude(M);
+        return new EquatorialVector(CelestialTracker.RightAscension(L, 0), CelestialTracker.Declination(L, 0));
+    }
+    static GetSunTimes(date, lat, lng, height) {
+        height = height || 0;
+        const lw = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * -lng;
+        const phi = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * lat;
+        const dh = CelestialTracker.ObserverAngle(height);
+        const d = JulianDate.FromDate(date).toDays();
+        const n = JulianDate.JulianCycle(d, lw);
+        const ds = CelestialTracker.ApproxTransit(0, lw, n);
+        const M = CelestialTracker.SolarMeanAnomaly(ds);
+        const L = CelestialTracker.EclipticLongitude(M);
+        const dec = CelestialTracker.Declination(L, 0);
+        const Jnoon = CelestialTracker.SolarTransitJ(ds, M, L);
+        var result = {
+            solarNoon: JulianDate.ToDate(Jnoon),
+            nadir: JulianDate.ToDate(Jnoon - 0.5),
+        };
+        const times = CelestialTracker.SunTrajectories;
+        for (let i = 0, len = times.length; i < len; i += 1) {
+            const time = times[i];
+            const h0 = (time.angle + dh) * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+            const Jset = CelestialTracker.GetSetJ(h0, lw, phi, dec, n, M, L);
+            const Jrise = Jnoon - (Jset - Jnoon);
+            result[time.riseName] = JulianDate.ToDate(Jrise);
+            result[time.setName] = JulianDate.ToDate(Jset);
+        }
+        return result;
+    }
+    static GetSunPosition(date, lat, lon) {
+        const lw = -lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const phi = lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const d = JulianDate.FromDate(date).toDays();
+        const c = CelestialTracker.SunCoords(d);
+        const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
+        return new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), CelestialTracker.Altitude(H, phi, c.declination));
+    }
+    static MoonCoords(d) {
+        const L = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (218.316 + 13.176396 * d);
+        const M = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (134.963 + 13.064993 * d);
+        const F = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (93.272 + 13.22935 * d);
+        const l = L + _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 6.289 * Math.sin(M);
+        const b = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 5.128 * Math.sin(F);
+        const dt = 385001 - 20905 * Math.cos(M);
+        const v = new EquatorialVector(CelestialTracker.RightAscension(l, b), CelestialTracker.Declination(l, b));
+        v.distance = dt;
+        return v;
+    }
+    static AstroRefraction(h) {
+        if (h < 0)
+            h = 0;
+        return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
+    }
+    static GetMoonPosition(date, lat, lon) {
+        const lw = -lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const phi = lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const d = JulianDate.FromDate(date).toDays();
+        const c = CelestialTracker.MoonCoords(d);
+        const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
+        let h = CelestialTracker.Altitude(H, phi, c.declination);
+        const pa = Math.atan2(Math.sin(H), Math.tan(phi) * Math.cos(c.declination) - Math.sin(c.declination) * Math.cos(H));
+        h = h + CelestialTracker.AstroRefraction(h);
+        const v = new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), h);
+        v.distance = c.distance;
+        v.parallacticAngle = pa;
+        return v;
+    }
+    static HoursLater(date, h) {
+        return new Date(date.valueOf() + (h * JulianDate.DayMs) / 24);
+    }
+}
+CelestialTracker.EarthObliquity = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 23.4397;
+CelestialTracker.EarthObliquity_Sin = Math.sin(CelestialTracker.EarthObliquity);
+CelestialTracker.EarthObliquity_Cos = Math.cos(CelestialTracker.EarthObliquity);
+CelestialTracker.SunTrajectories = [
+    new SunTrajectoryConfig(-0.833, "sunrise", "sunset"),
+    new SunTrajectoryConfig(-0.3, "sunriseEnd", "sunsetStart"),
+    new SunTrajectoryConfig(-6, "dawn", "dusk"),
+    new SunTrajectoryConfig(-12, "nauticalDawn", "nauticalDusk"),
+    new SunTrajectoryConfig(-18, "nightEnd", "night"),
+    new SunTrajectoryConfig(6, "goldenHourEnd", "goldenHour"),
+];
+CelestialTracker.GetMoonIllumination = function (date) {
+    const d = JulianDate.FromDate(date).toDays();
+    const s = CelestialTracker.SunCoords(d);
+    const m = CelestialTracker.MoonCoords(d);
+    const sdist = 149598000;
+    const phi = Math.acos(Math.sin(s.declination) * Math.sin(m.declination) + Math.cos(s.declination) * Math.cos(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
+    const inc = Math.atan2(sdist * Math.sin(phi), m.distance - sdist * Math.cos(phi));
+    const angle = Math.atan2(Math.cos(s.declination) * Math.sin(s.rightAscension - m.rightAscension), Math.sin(s.declination) * Math.cos(m.declination) - Math.cos(s.declination) * Math.sin(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
+    return new MoonState(1 + Math.cos(inc), 0.5 + (0.5 * inc * (angle < 0 ? -1 : 1)) / Math.PI, angle);
+};
+CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
+    var t = new Date(date);
+    if (inUTC)
+        t.setUTCHours(0, 0, 0, 0);
+    else
+        t.setHours(0, 0, 0, 0);
+    const hc = 0.133 * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    let h0 = CelestialTracker.GetMoonPosition(t, lat, lng).altitude - hc;
+    let rise, set, ye;
+    for (var i = 1; i <= 24; i += 2) {
+        const h1 = CelestialTracker.GetMoonPosition(CelestialTracker.HoursLater(t, i), lat, lng).altitude - hc;
+        const h2 = CelestialTracker.GetMoonPosition(CelestialTracker.HoursLater(t, i + 1), lat, lng).altitude - hc;
+        const a = (h0 + h2) / 2 - h1;
+        const b = (h2 - h0) / 2;
+        const xe = -b / (2 * a);
+        ye = (a * xe + b) * xe + h1;
+        const d = b * b - 4 * a * h1;
+        let roots = 0;
+        let x1 = 0;
+        let x2 = 0;
+        if (d >= 0) {
+            const dx = Math.sqrt(d) / (Math.abs(a) * 2);
+            x1 = xe - dx;
+            x2 = xe + dx;
+            if (Math.abs(x1) <= 1)
+                roots++;
+            if (Math.abs(x2) <= 1)
+                roots++;
+            if (x1 < -1)
+                x1 = x2;
+        }
+        if (roots === 1) {
+            if (h0 < 0)
+                rise = i + x1;
+            else
+                set = i + x1;
+        }
+        else if (roots === 2) {
+            rise = i + (ye < 0 ? x2 : x1);
+            set = i + (ye < 0 ? x1 : x2);
+        }
+        if (rise && set)
+            break;
+        h0 = h2;
+    }
+    var result = {};
+    if (rise)
+        result.rise = CelestialTracker.HoursLater(t, rise);
+    if (set)
+        result.set = CelestialTracker.HoursLater(t, set);
+    if (!rise && !set)
+        result[ye && ye > 0 ? "alwaysUp" : "alwaysDown"] = true;
+    return result;
+};
+
+//# sourceMappingURL=space.celestialTracker.js.map
+
+/***/ }),
+
+/***/ "./dist/space/Mechanics/space.kepler.js":
+/*!**********************************************!*\
+  !*** ./dist/space/Mechanics/space.kepler.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "KeplerOrbitBase": () => (/* binding */ KeplerOrbitBase)
+/* harmony export */ });
+/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math.units */ "./dist/math/math.units.js");
+
+class KeplerOrbitBase {
+    constructor(body, focus, semiMajorAxis, eccentricity = 0, periapsisTime = 0, inclination, ascendingNodeLongitude, periapsisAngle, period) {
+        this._body = body;
+        this._focus = focus;
+        this._semiMajorAxis = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(semiMajorAxis, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance.Units.Ly);
+        this._eccentricity = eccentricity;
+        this._periapsisTime = periapsisTime;
+        this._inclination = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(inclination, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
+        this._ascendingNodeLongitude = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(ascendingNodeLongitude, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
+        this._periapsisAngle = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(periapsisAngle, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
+        this._period = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.Yr);
+    }
+    get body() {
+        return this._body;
+    }
+    get focus() {
+        return this._focus;
+    }
+    get semiMajorAxis() {
+        return this._semiMajorAxis;
+    }
+    get semiMinorAxis() {
+        const v = this._semiMajorAxis.value * Math.sqrt(1.0 - this._eccentricity * this._eccentricity);
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
+    }
+    get periapsis() {
+        const v = this.semiMajorAxis.value * (1.0 - this._eccentricity);
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
+    }
+    get periapsisTime() {
+        return this._periapsisTime;
+    }
+    get periapsisAngle() {
+        return this._periapsisAngle;
+    }
+    get inclination() {
+        return this._inclination;
+    }
+    get period() {
+        return this._period;
+    }
+    get apoapsis() {
+        const v = this.semiMajorAxis.value * (1.0 + this._eccentricity);
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
+    }
+    get meanAngularSpeed() {
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Speed(360.0 / this._period.value);
+    }
+    getEccentricAnomaly(meanAnomaly, decimalPrecision) {
+        const dp = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
+        const K = Math.PI / 180.0;
+        let m = meanAnomaly / 360.0;
+        m = 2.0 * Math.PI * (m - Math.floor(m));
+        let E = this._eccentricity < 0.8 ? m : Math.PI;
+        let F = E - this._eccentricity * Math.sin(m) - m;
+        const maxIteration = KeplerOrbitBase.DefaultIterationLimit;
+        const delta = Math.pow(10, -dp);
+        let i = 0;
+        while (Math.abs(F) > delta && i++ < maxIteration) {
+            E -= F / (1.0 - this._eccentricity * Math.cos(E));
+            F = E - this._eccentricity * Math.sin(E) - m;
+        }
+        E /= K;
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
+    }
+}
+KeplerOrbitBase.DefaultDecimalPrecision = 5;
+KeplerOrbitBase.DefaultIterationLimit = 30;
+
+//# sourceMappingURL=space.kepler.js.map
+
+/***/ }),
+
 /***/ "./dist/space/index.js":
 /*!*****************************!*\
   !*** ./dist/space/index.js ***!
@@ -2914,17 +3368,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AxialTilt": () => (/* reexport safe */ _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__.AxialTilt),
 /* harmony export */   "CelestialNodeType": () => (/* reexport safe */ _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType),
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.CelestialTracker),
 /* harmony export */   "ColorValue": () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.ColorValue),
-/* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_kepler__WEBPACK_IMPORTED_MODULE_4__.KeplerOrbitBase),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.EquatorialVector),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.HorizonVector),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.JulianDate),
+/* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.KeplerOrbitBase),
+/* harmony export */   "MoonState": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.MoonState),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.MorganKeenanClass),
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.SpectralClass),
-/* harmony export */   "StarColor": () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor)
+/* harmony export */   "StarColor": () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.SunTrajectoryConfig)
 /* harmony export */ });
 /* harmony import */ var _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.axialTilt */ "./dist/space/space.axialTilt.js");
 /* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "./dist/space/space.interfaces.js");
 /* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.spectralClass */ "./dist/space/space.spectralClass.js");
 /* harmony import */ var _space_starColor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./space.starColor */ "./dist/space/space.starColor.js");
-/* harmony import */ var _space_kepler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./space.kepler */ "./dist/space/space.kepler.js");
+/* harmony import */ var _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Mechanics/index */ "./dist/space/Mechanics/index.js");
 
 
 
@@ -2997,91 +3457,6 @@ var CelestialNodeType;
     CelestialNodeType[CelestialNodeType["RING"] = 14] = "RING";
 })(CelestialNodeType || (CelestialNodeType = {}));
 //# sourceMappingURL=space.interfaces.js.map
-
-/***/ }),
-
-/***/ "./dist/space/space.kepler.js":
-/*!************************************!*\
-  !*** ./dist/space/space.kepler.js ***!
-  \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "KeplerOrbitBase": () => (/* binding */ KeplerOrbitBase)
-/* harmony export */ });
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math.units */ "./dist/math/math.units.js");
-
-class KeplerOrbitBase {
-    constructor(body, focus, semiMajorAxis, eccentricity = 0, periapsisTime = 0, inclination, ascendingNodeLongitude, periapsisAngle, period) {
-        this._body = body;
-        this._focus = focus;
-        this._semiMajorAxis = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(semiMajorAxis, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance.Units.Ly);
-        this._eccentricity = eccentricity;
-        this._periapsisTime = periapsisTime;
-        this._inclination = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(inclination, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._ascendingNodeLongitude = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(ascendingNodeLongitude, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._periapsisAngle = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(periapsisAngle, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._period = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.Yr);
-    }
-    get body() {
-        return this._body;
-    }
-    get focus() {
-        return this._focus;
-    }
-    get semiMajorAxis() {
-        return this._semiMajorAxis;
-    }
-    get semiMinorAxis() {
-        const v = this._semiMajorAxis.value * Math.sqrt(1.0 - this._eccentricity * this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
-    }
-    get periapsis() {
-        const v = this.semiMajorAxis.value * (1.0 - this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
-    }
-    get periapsisTime() {
-        return this._periapsisTime;
-    }
-    get periapsisAngle() {
-        return this._periapsisAngle;
-    }
-    get inclination() {
-        return this._inclination;
-    }
-    get period() {
-        return this._period;
-    }
-    get apoapsis() {
-        const v = this.semiMajorAxis.value * (1.0 + this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
-    }
-    get meanAngularSpeed() {
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Speed(360.0 / this._period.value);
-    }
-    getEccentricAnomaly(meanAnomaly, decimalPrecision) {
-        const dp = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
-        const K = Math.PI / 180.0;
-        let m = meanAnomaly / 360.0;
-        m = 2.0 * Math.PI * (m - Math.floor(m));
-        let E = this._eccentricity < 0.8 ? m : Math.PI;
-        let F = E - this._eccentricity * Math.sin(m) - m;
-        const maxIteration = KeplerOrbitBase.DefaultIterationLimit;
-        const delta = Math.pow(10, -dp);
-        let i = 0;
-        while (Math.abs(F) > delta && i++ < maxIteration) {
-            E -= F / (1.0 - this._eccentricity * Math.cos(E));
-            F = E - this._eccentricity * Math.sin(E) - m;
-        }
-        E /= K;
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
-    }
-}
-KeplerOrbitBase.DefaultDecimalPrecision = 5;
-KeplerOrbitBase.DefaultIterationLimit = 30;
-
-//# sourceMappingURL=space.kepler.js.map
 
 /***/ }),
 
@@ -3500,7 +3875,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileContentView": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ _tiles_mapview__WEBPACK_IMPORTED_MODULE_10__.TileMapContext),
 /* harmony export */   "TileMapView": () => (/* reexport safe */ _tiles_mapview__WEBPACK_IMPORTED_MODULE_10__.TileMapView),
-/* harmony export */   "TileMetrics": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.TileMetricsOptionsBuilder),
 /* harmony export */   "TileWebClient": () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_3__.TileWebClient),
@@ -3550,9 +3924,133 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "TileAddress": () => (/* binding */ TileAddress)
 /* harmony export */ });
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
 
 class TileAddress {
+    static IsValidAddress(a, metrics) {
+        if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
+            return false;
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            return false;
+        }
+        if (a.y < 0 || a.y > s) {
+            return false;
+        }
+        return true;
+    }
+    static AssertValidAddress(a, metrics) {
+        if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
+            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
+        }
+        const s = (0x01 << a.levelOfDetail) - 1;
+        if (a.x < 0 || a.x > s) {
+            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
+        }
+        if (a.y < 0 || a.y > s) {
+            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
+        }
+    }
+    static IsValidLod(lod, metrics) {
+        return lod >= metrics.minLOD && lod <= metrics.maxLOD;
+    }
+    static ClampLod(levelOfDetail, metrics) {
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
+    }
+    static GetLodScale(lod) {
+        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
+        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
+        return scale;
+    }
+    static ToParentKey(key) {
+        return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
+    }
+    static ToNormalizedSection(key) {
+        if (key === null || key === undefined || key.length <= 1) {
+            return null;
+        }
+        const c = key.charAt(key.length - 1);
+        let s = { x: 0, y: 0, z: 0.5 };
+        switch (c) {
+            case "1": {
+                s.x = s.z;
+                break;
+            }
+            case "2": {
+                s.y = s.z;
+                break;
+            }
+            case "3": {
+                s.x = s.y = s.z;
+                break;
+            }
+        }
+        return s;
+    }
+    static ToChildsKey(key) {
+        key = key || "";
+        return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
+    }
+    static ToNeigborsKey(key) {
+        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a) : null));
+    }
+    static ToNeigborsXY(a) {
+        const max = Math.pow(2, a.levelOfDetail);
+        const n = [
+            new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
+            new TileAddress(a.x - 1, a.y, a.levelOfDetail),
+            a,
+            new TileAddress(a.x + 1, a.y, a.levelOfDetail),
+            new TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
+            new TileAddress(a.x, a.y + 1, a.levelOfDetail),
+            new TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
+        ];
+        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
+    }
+    static TileXYToQuadKey(a) {
+        let quadKey = "";
+        for (let i = a.levelOfDetail; i > 0; i--) {
+            let digit = 0;
+            const mask = 1 << (i - 1);
+            if ((a.x & mask) != 0) {
+                digit++;
+            }
+            if ((a.y & mask) != 0) {
+                digit++;
+                digit++;
+            }
+            quadKey = quadKey + digit;
+        }
+        return quadKey;
+    }
+    static QuadKeyToTileXY(quadKey) {
+        let tileX = 0;
+        let tileY = 0;
+        const levelOfDetail = quadKey.length;
+        for (let i = levelOfDetail; i > 0; i--) {
+            const mask = 1 << (i - 1);
+            switch (quadKey[levelOfDetail - i]) {
+                case "0":
+                    break;
+                case "1":
+                    tileX |= mask;
+                    break;
+                case "2":
+                    tileY |= mask;
+                    break;
+                case "3":
+                    tileX |= mask;
+                    tileY |= mask;
+                    break;
+                default:
+                    throw new Error("Invalid QuadKey digit sequence.");
+            }
+        }
+        return { x: tileX, y: tileY, levelOfDetail: levelOfDetail };
+    }
     constructor(x, y, levelOfDetail) {
         this.x = x;
         this.y = y;
@@ -3560,7 +4058,7 @@ class TileAddress {
     }
     get quadkey() {
         if (!this._k) {
-            this._k = _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.TileMetrics.TileXYToQuadKey(this);
+            this._k = TileAddress.TileXYToQuadKey(this);
         }
         return this._k;
     }
@@ -3933,8 +4431,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "./dist/events/events.observable.js");
 /* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/events.args */ "./dist/events/events.args.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
 
 
 
@@ -4014,20 +4512,20 @@ class TileContentManager {
     }
     buildAlternativeTileContent(address) {
         let key = address.quadkey;
-        const parentCacheKey = this.buildCacheKey(_tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToParentKey(key));
+        const parentCacheKey = this.buildCacheKey(_tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToParentKey(key));
         const content = this._cache.get(parentCacheKey);
         if (content) {
             if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.IsTileContentView)(content)) {
                 return null;
             }
-            const source = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToNormalizedSection(key);
+            const source = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToNormalizedSection(key);
             if (source) {
                 return this.buildTileContentView(address, source) ?? null;
             }
         }
-        const childKeys = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToChildsKey(key);
+        const childKeys = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToChildsKey(key);
         const targets = childKeys.map((k) => {
-            return _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ToNormalizedSection(k);
+            return _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToNormalizedSection(k);
         });
         return this.buildTileContentView(address, null, targets) ?? null;
     }
@@ -4305,13 +4803,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
 /* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/events.args */ "./dist/events/events.args.js");
 /* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/cache */ "./dist/utils/cache.js");
-/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
+/* harmony import */ var _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../geometry/geometry.rectangle */ "./dist/geometry/geometry.rectangle.js");
+/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
 /* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../geography/geography.envelope */ "./dist/geography/geography.envelope.js");
-
 
 
 
@@ -4409,7 +4905,7 @@ class TileMapView {
         this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this._currentContext = new TileMapContext(-1);
         this._contexts = [...new Array(this.metrics.lodCount)].map((o, i) => new TileMapContext(i + this.metrics.minLOD));
-        this.invalidateSize(width, height).setView(center, _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.ClampLod(lod, this.metrics));
+        this.invalidateSize(width, height).setView(center, _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ClampLod(lod, this.metrics));
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
@@ -4426,6 +4922,10 @@ class TileMapView {
         this._zoomObservable = this._zoomObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable;
     }
+    get azimuthObservable() {
+        this._azimuthObservable = this._azimuthObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onAzimuthObserverAdded.bind(this));
+        return this._azimuthObservable;
+    }
     get updateObservable() {
         this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onUpdateObserverAdded.bind(this));
         return this._updateObservable;
@@ -4435,6 +4935,9 @@ class TileMapView {
     }
     get datasource() {
         return this._manager.datasource;
+    }
+    get manager() {
+        return this._manager;
     }
     get context() {
         return this._currentContext;
@@ -4501,27 +5004,31 @@ class TileMapView {
     setZoom(zoom) {
         const lodf = _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
         if (this._lodf != lodf) {
+            const old = this._lodf;
+            this._lodf = lodf;
+            this._lod = Math.round(this._lodf);
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lodf;
-                this._lodf = lodf;
-                this._lod = Math.round(this._lodf);
                 const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
-            }
-            else {
-                this._lodf = lodf;
-                this._lod = Math.round(this._lodf);
             }
             this.invalidate();
         }
         return this;
     }
     setAzimuth(r) {
-        this._azimuth = TileMapView.ClampAzimuth(r);
-        const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.DEG2RAD;
-        this._cosangle = Math.cos(rad);
-        this._sinangle = Math.sin(rad);
-        this.invalidate();
+        const clamped = TileMapView.ClampAzimuth(r);
+        if (this._azimuth != clamped) {
+            const old = this._azimuth;
+            this._azimuth = clamped;
+            const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.DEG2RAD;
+            this._cosangle = Math.cos(rad);
+            this._sinangle = Math.sin(rad);
+            if (this._azimuthObservable && this._azimuthObservable.hasObservers()) {
+                const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, clamped);
+                this._azimuthObservable.notifyObservers(e);
+            }
+            this.invalidate();
+        }
         return this;
     }
     zoomIn(delta) {
@@ -4573,7 +5080,7 @@ class TileMapView {
         return this.invalidate().validate();
     }
     _getContext(lod) {
-        if (_tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.IsValidLod(lod, this.metrics)) {
+        if (_tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.IsValidLod(lod, this.metrics)) {
             return this._contexts[lod - this.metrics.minLOD];
         }
         return null;
@@ -4581,8 +5088,12 @@ class TileMapView {
     onResizeObserverAdded(observer) { }
     onZoomObserverAdded(observer) { }
     onCenterObserverAdded(observer) { }
+    onAzimuthObserverAdded(observer) { }
     onUpdateObserverAdded(observer) { }
     doValidate() {
+        if (this._cacheLowerLOD || this._cacheUpperLOD) {
+            return this.doValidateWithCache();
+        }
         if (this._lod != this._currentContext._lod) {
             const newContext = this._getContext(this._lod);
             const oldContext = this._currentContext;
@@ -4592,6 +5103,8 @@ class TileMapView {
             return;
         }
         this.doValidateContext(this._currentContext, this._currentContext);
+    }
+    doValidateWithCache() {
     }
     doClearContext(oldLevel, newLevel) {
         let deleted = Array.from(oldLevel.tiles.values());
@@ -4605,7 +5118,7 @@ class TileMapView {
             return;
         }
         const contextLod = newLevel._lod;
-        let scale = _tiles_metrics__WEBPACK_IMPORTED_MODULE_4__.TileMetrics.GetLodScale(this._lodf);
+        let scale = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.GetLodScale(this._lodf);
         newLevel._scale = scale;
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, contextLod);
         newLevel._center = pixelCenterXY;
@@ -4622,7 +5135,7 @@ class TileMapView {
         const builder = new _tiles__WEBPACK_IMPORTED_MODULE_9__.TileBuilder().withMetrics(this.metrics);
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
-                const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_10__.TileAddress(x, y, contextLod);
+                const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress(x, y, contextLod);
                 const key = a.quadkey;
                 let t = newLevel.tiles.get(key);
                 if (t) {
@@ -4704,11 +5217,11 @@ class TileMapView {
         const h = this.height / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__.Rectangle(x0, y0, w, h);
+        let bounds = new _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_10__.Rectangle(x0, y0, w, h);
         if (this._azimuth) {
             const corners = bounds.points();
             const rotated = Array.from(this.rotatePointsArround(center, ...corners));
-            bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_11__.Rectangle.FromPoints(...rotated);
+            bounds = _geometry_geometry_rectangle__WEBPACK_IMPORTED_MODULE_10__.Rectangle.FromPoints(...rotated);
             return bounds;
         }
         return bounds;
@@ -4727,14 +5240,11 @@ class TileMapView {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AbstractTileMetrics": () => (/* binding */ AbstractTileMetrics),
-/* harmony export */   "TileMetrics": () => (/* binding */ TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* binding */ TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* binding */ TileMetricsOptionsBuilder)
 /* harmony export */ });
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
-
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography/geography.projections */ "./dist/geography/geography.projections.js");
 
 
 class TileMetricsOptions {
@@ -4746,12 +5256,12 @@ TileMetricsOptions.DefaultTileSize = 256;
 TileMetricsOptions.DefaultLOD = 0;
 TileMetricsOptions.DefaultMinLOD = 0;
 TileMetricsOptions.DefaultMaxLOD = 23;
-TileMetricsOptions.DefaultMinLatitude = -85.05112878;
-TileMetricsOptions.DefaultMaxLatitude = 85.05112878;
+TileMetricsOptions.DefaultMinLatitude = _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMinLatitude;
+TileMetricsOptions.DefaultMaxLatitude = _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMaxLatitude;
 TileMetricsOptions.DefaultMinLongitude = -180;
 TileMetricsOptions.DefaultMaxLongitude = 180;
 TileMetricsOptions.DefaultCellSize = 1;
-TileMetricsOptions.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.CellCoordinateReference.center;
+TileMetricsOptions.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.CellCoordinateReference.center;
 TileMetricsOptions.DefaultOverlap = 0;
 TileMetricsOptions.Shared = {
     tileSize: TileMetricsOptions.DefaultTileSize,
@@ -4820,132 +5330,6 @@ class TileMetricsOptionsBuilder {
             cellCoordinateReference: this._cellCoordinateReference,
             overlap: this._overlap,
         });
-    }
-}
-class TileMetrics {
-    static IsValidAddress(a, metrics) {
-        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
-            return false;
-        }
-        const s = (0x01 << a.levelOfDetail) - 1;
-        if (a.x < 0 || a.x > s) {
-            return false;
-        }
-        if (a.y < 0 || a.y > s) {
-            return false;
-        }
-        return true;
-    }
-    static AssertValidAddress(a, metrics) {
-        if (!TileMetrics.IsValidLod(a.levelOfDetail, metrics)) {
-            throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
-        }
-        const s = (0x01 << a.levelOfDetail) - 1;
-        if (a.x < 0 || a.x > s) {
-            throw new Error(`Invalid x ${a.x}, must be in [0,${s}] range.`);
-        }
-        if (a.y < 0 || a.y > s) {
-            throw new Error(`Invalid y ${a.y}, must be in [0,${s}] range.`);
-        }
-    }
-    static IsValidLod(lod, metrics) {
-        return lod >= metrics.minLOD && lod <= metrics.maxLOD;
-    }
-    static ClampLod(levelOfDetail, metrics) {
-        return _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
-    }
-    static GetLodScale(lod) {
-        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
-        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
-        return scale;
-    }
-    static ToParentKey(key) {
-        return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
-    }
-    static ToNormalizedSection(key) {
-        if (key === null || key === undefined || key.length <= 1) {
-            return null;
-        }
-        const c = key.charAt(key.length - 1);
-        let s = { x: 0, y: 0, z: 0.5 };
-        switch (c) {
-            case "1": {
-                s.x = s.z;
-                break;
-            }
-            case "2": {
-                s.y = s.z;
-                break;
-            }
-            case "3": {
-                s.x = s.y = s.z;
-                break;
-            }
-        }
-        return s;
-    }
-    static ToChildsKey(key) {
-        key = key || "";
-        return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
-    }
-    static ToNeigborsKey(key) {
-        return TileMetrics.ToNeigborsXY(TileMetrics.QuadKeyToTileXY(key)).map((a) => (a ? TileMetrics.TileXYToQuadKey(a) : null));
-    }
-    static ToNeigborsXY(a) {
-        const max = Math.pow(2, a.levelOfDetail);
-        const n = [
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x, a.y - 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x + 1, a.y - 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x - 1, a.y, a.levelOfDetail),
-            a,
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x + 1, a.y, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x - 1, a.y + 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x, a.y + 1, a.levelOfDetail),
-            new _tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(a.x + 1, a.y + 1, a.levelOfDetail),
-        ];
-        return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
-    }
-    static TileXYToQuadKey(a) {
-        let quadKey = "";
-        for (let i = a.levelOfDetail; i > 0; i--) {
-            let digit = 0;
-            const mask = 1 << (i - 1);
-            if ((a.x & mask) != 0) {
-                digit++;
-            }
-            if ((a.y & mask) != 0) {
-                digit++;
-                digit++;
-            }
-            quadKey = quadKey + digit;
-        }
-        return quadKey;
-    }
-    static QuadKeyToTileXY(quadKey) {
-        let tileX = 0;
-        let tileY = 0;
-        const levelOfDetail = quadKey.length;
-        for (let i = levelOfDetail; i > 0; i--) {
-            const mask = 1 << (i - 1);
-            switch (quadKey[levelOfDetail - i]) {
-                case "0":
-                    break;
-                case "1":
-                    tileX |= mask;
-                    break;
-                case "2":
-                    tileY |= mask;
-                    break;
-                case "3":
-                    tileX |= mask;
-                    tileY |= mask;
-                    break;
-                default:
-                    throw new Error("Invalid QuadKey digit sequence.");
-            }
-        }
-        return { x: tileX, y: tileY, levelOfDetail: levelOfDetail };
     }
 }
 class AbstractTileMetrics {
@@ -5754,6 +6138,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Cartesian3": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Cartesian3),
 /* harmony export */   "CartesianMode": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.CartesianMode),
 /* harmony export */   "CelestialNodeType": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.CelestialNodeType),
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.CelestialTracker),
 /* harmony export */   "CellCoordinateReference": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.CellCoordinateReference),
 /* harmony export */   "ColorValue": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.ColorValue),
 /* harmony export */   "ContentUpdateEventArgs": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ContentUpdateEventArgs),
@@ -5764,6 +6149,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "EPSG3857": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.EPSG3857),
 /* harmony export */   "Ellipsoid": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid),
 /* harmony export */   "Envelope": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Envelope),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.EquatorialVector),
 /* harmony export */   "EventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventArgs),
 /* harmony export */   "EventEmitter": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventEmitter),
 /* harmony export */   "EventState": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventState),
@@ -5783,12 +6169,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GoogleMap2DLayerCode": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
 /* harmony export */   "GoogleMap2DUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.HSLColor),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.HorizonVector),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
 /* harmony export */   "IsTileContentView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.IsTileContentView),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.JulianDate),
 /* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.KeplerOrbitBase),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.KnownPlaces),
 /* harmony export */   "Luminosity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Luminosity),
@@ -5800,12 +6188,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Mass),
 /* harmony export */   "MemoryCache": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.MemoryCache),
+/* harmony export */   "MoonState": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MoonState),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
 /* harmony export */   "ObjectPool": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPool),
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPoolOptions),
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
 /* harmony export */   "Power": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Power),
+/* harmony export */   "Projections": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Projections),
 /* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.PropertyChangedEventArgs),
 /* harmony export */   "Quantity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Quantity),
 /* harmony export */   "QuantityRange": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.QuantityRange),
@@ -5821,6 +6211,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.SpectralClass),
 /* harmony export */   "Speed": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Speed),
 /* harmony export */   "StarColor": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.StarColor),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.SunTrajectoryConfig),
 /* harmony export */   "Temperature": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Temperature),
 /* harmony export */   "TerrainGridOptions": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptions),
 /* harmony export */   "TerrainGridOptionsBuilder": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptionsBuilder),
@@ -5833,7 +6224,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TileContentView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMapContext),
 /* harmony export */   "TileMapView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMapView),
-/* harmony export */   "TileMetrics": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMetrics),
 /* harmony export */   "TileMetricsOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMetricsOptions),
 /* harmony export */   "TileMetricsOptionsBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMetricsOptionsBuilder),
 /* harmony export */   "TileWebClient": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileWebClient),

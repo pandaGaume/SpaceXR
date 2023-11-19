@@ -3527,6 +3527,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Cartesian3": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Cartesian3),
 /* harmony export */   "CartesianMode": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.CartesianMode),
 /* harmony export */   "CelestialNodeType": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.CelestialNodeType),
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.CelestialTracker),
 /* harmony export */   "CellCoordinateReference": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.CellCoordinateReference),
 /* harmony export */   "ColorValue": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.ColorValue),
 /* harmony export */   "ContentUpdateEventArgs": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ContentUpdateEventArgs),
@@ -3537,6 +3538,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "EPSG3857": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.EPSG3857),
 /* harmony export */   "Ellipsoid": () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid),
 /* harmony export */   "Envelope": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Envelope),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.EquatorialVector),
 /* harmony export */   "EventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventArgs),
 /* harmony export */   "EventEmitter": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventEmitter),
 /* harmony export */   "EventState": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.EventState),
@@ -3556,12 +3558,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GoogleMap2DLayerCode": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
 /* harmony export */   "GoogleMap2DUrlBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.HSLColor),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.HorizonVector),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
 /* harmony export */   "IsTileContentView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.IsTileContentView),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.JulianDate),
 /* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.KeplerOrbitBase),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.KnownPlaces),
 /* harmony export */   "Luminosity": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Luminosity),
@@ -3573,6 +3577,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MapzenAltitudeDecoder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
 /* harmony export */   "Mass": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Mass),
 /* harmony export */   "MemoryCache": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.MemoryCache),
+/* harmony export */   "MoonState": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MoonState),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
 /* harmony export */   "ObjectPool": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPool),
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPoolOptions),
@@ -3595,6 +3600,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.SpectralClass),
 /* harmony export */   "Speed": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Speed),
 /* harmony export */   "StarColor": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.StarColor),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.SunTrajectoryConfig),
 /* harmony export */   "Temperature": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Temperature),
 /* harmony export */   "TerrainGridOptions": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptions),
 /* harmony export */   "TerrainGridOptionsBuilder": () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptionsBuilder),
@@ -5001,6 +5007,380 @@ class TerrainNormalizedGridBuilder {
 
 /***/ }),
 
+/***/ "../core/dist/space/Mechanics/index.js":
+/*!*********************************************!*\
+  !*** ../core/dist/space/Mechanics/index.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.CelestialTracker),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.EquatorialVector),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.HorizonVector),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.JulianDate),
+/* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_kepler__WEBPACK_IMPORTED_MODULE_0__.KeplerOrbitBase),
+/* harmony export */   "MoonState": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.MoonState),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.SunTrajectoryConfig)
+/* harmony export */ });
+/* harmony import */ var _space_kepler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.kepler */ "../core/dist/space/Mechanics/space.kepler.js");
+/* harmony import */ var _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.celestialTracker */ "../core/dist/space/Mechanics/space.celestialTracker.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "../core/dist/space/Mechanics/space.celestialTracker.js":
+/*!**************************************************************!*\
+  !*** ../core/dist/space/Mechanics/space.celestialTracker.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CelestialTracker": () => (/* binding */ CelestialTracker),
+/* harmony export */   "EquatorialVector": () => (/* binding */ EquatorialVector),
+/* harmony export */   "HorizonVector": () => (/* binding */ HorizonVector),
+/* harmony export */   "JulianDate": () => (/* binding */ JulianDate),
+/* harmony export */   "MoonState": () => (/* binding */ MoonState),
+/* harmony export */   "SunTrajectoryConfig": () => (/* binding */ SunTrajectoryConfig)
+/* harmony export */ });
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "../core/dist/math/math.js");
+
+class HorizonVector {
+    constructor(azimuth, altitude) {
+        this.azimuth = azimuth;
+        this.altitude = altitude;
+    }
+}
+class EquatorialVector {
+    constructor(rightAscension, declination) {
+        this.rightAscension = rightAscension;
+        this.declination = declination;
+    }
+}
+class MoonState {
+    constructor(fraction, phase, angle) {
+        this.fraction = fraction;
+        this.phase = phase;
+        this.angle = angle;
+    }
+}
+class SunTrajectoryConfig {
+    constructor(angle, riseName, setName) {
+        this.angle = angle;
+        this.riseName = riseName;
+        this.setName = setName;
+    }
+}
+class JulianDate {
+    static JulianCycle(d, lw) {
+        return Math.round(d - JulianDate.J0 - lw / (2 * Math.PI));
+    }
+    static FromDate(date) {
+        return new JulianDate(date.valueOf() / JulianDate.DayMs - 0.5 + JulianDate.J1970);
+    }
+    static ToDate(julian) {
+        return new Date((julian + 0.5 - JulianDate.J1970) * JulianDate.DayMs);
+    }
+    constructor(value) {
+        this._value = value;
+    }
+    get value() {
+        return this._value;
+    }
+    toDate() {
+        return new Date((this._value + 0.5 - JulianDate.J1970) * JulianDate.DayMs);
+    }
+    toDays() {
+        return this._value - JulianDate.J2000;
+    }
+}
+JulianDate.DayMs = 1000 * 60 * 60 * 24;
+JulianDate.J1970 = 2440588;
+JulianDate.J2000 = 2451545;
+JulianDate.J0 = 0.0009;
+
+class CelestialTracker {
+    static ApproxTransit(Ht, lw, n) {
+        return JulianDate.J0 + (Ht + lw) / (2 * Math.PI) + n;
+    }
+    static SolarTransitJ(ds, M, L) {
+        return JulianDate.J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+    }
+    static HourAngle(h, phi, d) {
+        return Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d)));
+    }
+    static ObserverAngle(height) {
+        return (-2.076 * Math.sqrt(height)) / 60;
+    }
+    static GetSetJ(h, lw, phi, dec, n, M, L) {
+        var w = CelestialTracker.HourAngle(h, phi, dec), a = CelestialTracker.ApproxTransit(w, lw, n);
+        return CelestialTracker.SolarTransitJ(a, M, L);
+    }
+    static Azimuth(H, phi, dec) {
+        return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi));
+    }
+    static Altitude(H, phi, dec) {
+        return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
+    }
+    static SiderealTime(d, lw) {
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (280.16 + 360.9856235 * d) - lw;
+    }
+    static Declination(l, b) {
+        return Math.asin(Math.sin(b) * CelestialTracker.EarthObliquity_Cos + Math.sin(l) * CelestialTracker.EarthObliquity_Sin * Math.cos(b));
+    }
+    static RightAscension(l, b) {
+        return Math.atan2(Math.sin(l) * CelestialTracker.EarthObliquity_Cos - Math.tan(b) * CelestialTracker.EarthObliquity_Sin, Math.cos(l));
+    }
+    static EclipticLongitude(M) {
+        const C = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+        const P = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 102.9372;
+        return M + C + P + Math.PI;
+    }
+    static SolarMeanAnomaly(d) {
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (357.5291 + 0.98560028 * d);
+    }
+    static SunCoords(d) {
+        const M = CelestialTracker.SolarMeanAnomaly(d);
+        const L = CelestialTracker.EclipticLongitude(M);
+        return new EquatorialVector(CelestialTracker.RightAscension(L, 0), CelestialTracker.Declination(L, 0));
+    }
+    static GetSunTimes(date, lat, lng, height) {
+        height = height || 0;
+        const lw = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * -lng;
+        const phi = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * lat;
+        const dh = CelestialTracker.ObserverAngle(height);
+        const d = JulianDate.FromDate(date).toDays();
+        const n = JulianDate.JulianCycle(d, lw);
+        const ds = CelestialTracker.ApproxTransit(0, lw, n);
+        const M = CelestialTracker.SolarMeanAnomaly(ds);
+        const L = CelestialTracker.EclipticLongitude(M);
+        const dec = CelestialTracker.Declination(L, 0);
+        const Jnoon = CelestialTracker.SolarTransitJ(ds, M, L);
+        var result = {
+            solarNoon: JulianDate.ToDate(Jnoon),
+            nadir: JulianDate.ToDate(Jnoon - 0.5),
+        };
+        const times = CelestialTracker.SunTrajectories;
+        for (let i = 0, len = times.length; i < len; i += 1) {
+            const time = times[i];
+            const h0 = (time.angle + dh) * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+            const Jset = CelestialTracker.GetSetJ(h0, lw, phi, dec, n, M, L);
+            const Jrise = Jnoon - (Jset - Jnoon);
+            result[time.riseName] = JulianDate.ToDate(Jrise);
+            result[time.setName] = JulianDate.ToDate(Jset);
+        }
+        return result;
+    }
+    static GetSunPosition(date, lat, lon) {
+        const lw = -lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const phi = lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const d = JulianDate.FromDate(date).toDays();
+        const c = CelestialTracker.SunCoords(d);
+        const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
+        return new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), CelestialTracker.Altitude(H, phi, c.declination));
+    }
+    static MoonCoords(d) {
+        const L = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (218.316 + 13.176396 * d);
+        const M = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (134.963 + 13.064993 * d);
+        const F = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (93.272 + 13.22935 * d);
+        const l = L + _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 6.289 * Math.sin(M);
+        const b = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 5.128 * Math.sin(F);
+        const dt = 385001 - 20905 * Math.cos(M);
+        const v = new EquatorialVector(CelestialTracker.RightAscension(l, b), CelestialTracker.Declination(l, b));
+        v.distance = dt;
+        return v;
+    }
+    static AstroRefraction(h) {
+        if (h < 0)
+            h = 0;
+        return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
+    }
+    static GetMoonPosition(date, lat, lon) {
+        const lw = -lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const phi = lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const d = JulianDate.FromDate(date).toDays();
+        const c = CelestialTracker.MoonCoords(d);
+        const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
+        let h = CelestialTracker.Altitude(H, phi, c.declination);
+        const pa = Math.atan2(Math.sin(H), Math.tan(phi) * Math.cos(c.declination) - Math.sin(c.declination) * Math.cos(H));
+        h = h + CelestialTracker.AstroRefraction(h);
+        const v = new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), h);
+        v.distance = c.distance;
+        v.parallacticAngle = pa;
+        return v;
+    }
+    static HoursLater(date, h) {
+        return new Date(date.valueOf() + (h * JulianDate.DayMs) / 24);
+    }
+}
+CelestialTracker.EarthObliquity = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 23.4397;
+CelestialTracker.EarthObliquity_Sin = Math.sin(CelestialTracker.EarthObliquity);
+CelestialTracker.EarthObliquity_Cos = Math.cos(CelestialTracker.EarthObliquity);
+CelestialTracker.SunTrajectories = [
+    new SunTrajectoryConfig(-0.833, "sunrise", "sunset"),
+    new SunTrajectoryConfig(-0.3, "sunriseEnd", "sunsetStart"),
+    new SunTrajectoryConfig(-6, "dawn", "dusk"),
+    new SunTrajectoryConfig(-12, "nauticalDawn", "nauticalDusk"),
+    new SunTrajectoryConfig(-18, "nightEnd", "night"),
+    new SunTrajectoryConfig(6, "goldenHourEnd", "goldenHour"),
+];
+CelestialTracker.GetMoonIllumination = function (date) {
+    const d = JulianDate.FromDate(date).toDays();
+    const s = CelestialTracker.SunCoords(d);
+    const m = CelestialTracker.MoonCoords(d);
+    const sdist = 149598000;
+    const phi = Math.acos(Math.sin(s.declination) * Math.sin(m.declination) + Math.cos(s.declination) * Math.cos(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
+    const inc = Math.atan2(sdist * Math.sin(phi), m.distance - sdist * Math.cos(phi));
+    const angle = Math.atan2(Math.cos(s.declination) * Math.sin(s.rightAscension - m.rightAscension), Math.sin(s.declination) * Math.cos(m.declination) - Math.cos(s.declination) * Math.sin(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
+    return new MoonState(1 + Math.cos(inc), 0.5 + (0.5 * inc * (angle < 0 ? -1 : 1)) / Math.PI, angle);
+};
+CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
+    var t = new Date(date);
+    if (inUTC)
+        t.setUTCHours(0, 0, 0, 0);
+    else
+        t.setHours(0, 0, 0, 0);
+    const hc = 0.133 * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    let h0 = CelestialTracker.GetMoonPosition(t, lat, lng).altitude - hc;
+    let rise, set, ye;
+    for (var i = 1; i <= 24; i += 2) {
+        const h1 = CelestialTracker.GetMoonPosition(CelestialTracker.HoursLater(t, i), lat, lng).altitude - hc;
+        const h2 = CelestialTracker.GetMoonPosition(CelestialTracker.HoursLater(t, i + 1), lat, lng).altitude - hc;
+        const a = (h0 + h2) / 2 - h1;
+        const b = (h2 - h0) / 2;
+        const xe = -b / (2 * a);
+        ye = (a * xe + b) * xe + h1;
+        const d = b * b - 4 * a * h1;
+        let roots = 0;
+        let x1 = 0;
+        let x2 = 0;
+        if (d >= 0) {
+            const dx = Math.sqrt(d) / (Math.abs(a) * 2);
+            x1 = xe - dx;
+            x2 = xe + dx;
+            if (Math.abs(x1) <= 1)
+                roots++;
+            if (Math.abs(x2) <= 1)
+                roots++;
+            if (x1 < -1)
+                x1 = x2;
+        }
+        if (roots === 1) {
+            if (h0 < 0)
+                rise = i + x1;
+            else
+                set = i + x1;
+        }
+        else if (roots === 2) {
+            rise = i + (ye < 0 ? x2 : x1);
+            set = i + (ye < 0 ? x1 : x2);
+        }
+        if (rise && set)
+            break;
+        h0 = h2;
+    }
+    var result = {};
+    if (rise)
+        result.rise = CelestialTracker.HoursLater(t, rise);
+    if (set)
+        result.set = CelestialTracker.HoursLater(t, set);
+    if (!rise && !set)
+        result[ye && ye > 0 ? "alwaysUp" : "alwaysDown"] = true;
+    return result;
+};
+
+//# sourceMappingURL=space.celestialTracker.js.map
+
+/***/ }),
+
+/***/ "../core/dist/space/Mechanics/space.kepler.js":
+/*!****************************************************!*\
+  !*** ../core/dist/space/Mechanics/space.kepler.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "KeplerOrbitBase": () => (/* binding */ KeplerOrbitBase)
+/* harmony export */ });
+/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math.units */ "../core/dist/math/math.units.js");
+
+class KeplerOrbitBase {
+    constructor(body, focus, semiMajorAxis, eccentricity = 0, periapsisTime = 0, inclination, ascendingNodeLongitude, periapsisAngle, period) {
+        this._body = body;
+        this._focus = focus;
+        this._semiMajorAxis = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(semiMajorAxis, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance.Units.Ly);
+        this._eccentricity = eccentricity;
+        this._periapsisTime = periapsisTime;
+        this._inclination = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(inclination, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
+        this._ascendingNodeLongitude = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(ascendingNodeLongitude, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
+        this._periapsisAngle = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(periapsisAngle, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
+        this._period = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.Yr);
+    }
+    get body() {
+        return this._body;
+    }
+    get focus() {
+        return this._focus;
+    }
+    get semiMajorAxis() {
+        return this._semiMajorAxis;
+    }
+    get semiMinorAxis() {
+        const v = this._semiMajorAxis.value * Math.sqrt(1.0 - this._eccentricity * this._eccentricity);
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
+    }
+    get periapsis() {
+        const v = this.semiMajorAxis.value * (1.0 - this._eccentricity);
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
+    }
+    get periapsisTime() {
+        return this._periapsisTime;
+    }
+    get periapsisAngle() {
+        return this._periapsisAngle;
+    }
+    get inclination() {
+        return this._inclination;
+    }
+    get period() {
+        return this._period;
+    }
+    get apoapsis() {
+        const v = this.semiMajorAxis.value * (1.0 + this._eccentricity);
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
+    }
+    get meanAngularSpeed() {
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Speed(360.0 / this._period.value);
+    }
+    getEccentricAnomaly(meanAnomaly, decimalPrecision) {
+        const dp = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
+        const K = Math.PI / 180.0;
+        let m = meanAnomaly / 360.0;
+        m = 2.0 * Math.PI * (m - Math.floor(m));
+        let E = this._eccentricity < 0.8 ? m : Math.PI;
+        let F = E - this._eccentricity * Math.sin(m) - m;
+        const maxIteration = KeplerOrbitBase.DefaultIterationLimit;
+        const delta = Math.pow(10, -dp);
+        let i = 0;
+        while (Math.abs(F) > delta && i++ < maxIteration) {
+            E -= F / (1.0 - this._eccentricity * Math.cos(E));
+            F = E - this._eccentricity * Math.sin(E) - m;
+        }
+        E /= K;
+        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
+    }
+}
+KeplerOrbitBase.DefaultDecimalPrecision = 5;
+KeplerOrbitBase.DefaultIterationLimit = 30;
+
+//# sourceMappingURL=space.kepler.js.map
+
+/***/ }),
+
 /***/ "../core/dist/space/index.js":
 /*!***********************************!*\
   !*** ../core/dist/space/index.js ***!
@@ -5011,17 +5391,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AxialTilt": () => (/* reexport safe */ _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__.AxialTilt),
 /* harmony export */   "CelestialNodeType": () => (/* reexport safe */ _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType),
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.CelestialTracker),
 /* harmony export */   "ColorValue": () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.ColorValue),
-/* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _space_kepler__WEBPACK_IMPORTED_MODULE_4__.KeplerOrbitBase),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.EquatorialVector),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.HorizonVector),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.JulianDate),
+/* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.KeplerOrbitBase),
+/* harmony export */   "MoonState": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.MoonState),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.MorganKeenanClass),
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.SpectralClass),
-/* harmony export */   "StarColor": () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor)
+/* harmony export */   "StarColor": () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.SunTrajectoryConfig)
 /* harmony export */ });
 /* harmony import */ var _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.axialTilt */ "../core/dist/space/space.axialTilt.js");
 /* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "../core/dist/space/space.interfaces.js");
 /* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.spectralClass */ "../core/dist/space/space.spectralClass.js");
 /* harmony import */ var _space_starColor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./space.starColor */ "../core/dist/space/space.starColor.js");
-/* harmony import */ var _space_kepler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./space.kepler */ "../core/dist/space/space.kepler.js");
+/* harmony import */ var _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Mechanics/index */ "../core/dist/space/Mechanics/index.js");
 
 
 
@@ -5094,91 +5480,6 @@ var CelestialNodeType;
     CelestialNodeType[CelestialNodeType["RING"] = 14] = "RING";
 })(CelestialNodeType || (CelestialNodeType = {}));
 //# sourceMappingURL=space.interfaces.js.map
-
-/***/ }),
-
-/***/ "../core/dist/space/space.kepler.js":
-/*!******************************************!*\
-  !*** ../core/dist/space/space.kepler.js ***!
-  \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "KeplerOrbitBase": () => (/* binding */ KeplerOrbitBase)
-/* harmony export */ });
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math.units */ "../core/dist/math/math.units.js");
-
-class KeplerOrbitBase {
-    constructor(body, focus, semiMajorAxis, eccentricity = 0, periapsisTime = 0, inclination, ascendingNodeLongitude, periapsisAngle, period) {
-        this._body = body;
-        this._focus = focus;
-        this._semiMajorAxis = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(semiMajorAxis, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance.Units.Ly);
-        this._eccentricity = eccentricity;
-        this._periapsisTime = periapsisTime;
-        this._inclination = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(inclination, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._ascendingNodeLongitude = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(ascendingNodeLongitude, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._periapsisAngle = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(periapsisAngle, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._period = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.Yr);
-    }
-    get body() {
-        return this._body;
-    }
-    get focus() {
-        return this._focus;
-    }
-    get semiMajorAxis() {
-        return this._semiMajorAxis;
-    }
-    get semiMinorAxis() {
-        const v = this._semiMajorAxis.value * Math.sqrt(1.0 - this._eccentricity * this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
-    }
-    get periapsis() {
-        const v = this.semiMajorAxis.value * (1.0 - this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
-    }
-    get periapsisTime() {
-        return this._periapsisTime;
-    }
-    get periapsisAngle() {
-        return this._periapsisAngle;
-    }
-    get inclination() {
-        return this._inclination;
-    }
-    get period() {
-        return this._period;
-    }
-    get apoapsis() {
-        const v = this.semiMajorAxis.value * (1.0 + this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(v, this._semiMajorAxis.unit);
-    }
-    get meanAngularSpeed() {
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Speed(360.0 / this._period.value);
-    }
-    getEccentricAnomaly(meanAnomaly, decimalPrecision) {
-        const dp = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
-        const K = Math.PI / 180.0;
-        let m = meanAnomaly / 360.0;
-        m = 2.0 * Math.PI * (m - Math.floor(m));
-        let E = this._eccentricity < 0.8 ? m : Math.PI;
-        let F = E - this._eccentricity * Math.sin(m) - m;
-        const maxIteration = KeplerOrbitBase.DefaultIterationLimit;
-        const delta = Math.pow(10, -dp);
-        let i = 0;
-        while (Math.abs(F) > delta && i++ < maxIteration) {
-            E -= F / (1.0 - this._eccentricity * Math.cos(E));
-            F = E - this._eccentricity * Math.sin(E) - m;
-        }
-        E /= K;
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Distance(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
-    }
-}
-KeplerOrbitBase.DefaultDecimalPrecision = 5;
-KeplerOrbitBase.DefaultIterationLimit = 30;
-
-//# sourceMappingURL=space.kepler.js.map
 
 /***/ }),
 
@@ -8493,6 +8794,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Cartesian3": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Cartesian3),
 /* harmony export */   "CartesianMode": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CartesianMode),
 /* harmony export */   "CelestialNodeType": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CelestialNodeType),
+/* harmony export */   "CelestialTracker": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CelestialTracker),
 /* harmony export */   "CellCoordinateReference": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.CellCoordinateReference),
 /* harmony export */   "ClipIndex": () => (/* reexport safe */ _materials_index__WEBPACK_IMPORTED_MODULE_2__.ClipIndex),
 /* harmony export */   "ColorValue": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ColorValue),
@@ -8504,6 +8806,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "EPSG3857": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.EPSG3857),
 /* harmony export */   "Ellipsoid": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid),
 /* harmony export */   "Envelope": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Envelope),
+/* harmony export */   "EquatorialVector": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.EquatorialVector),
 /* harmony export */   "EventArgs": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.EventArgs),
 /* harmony export */   "EventEmitter": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.EventEmitter),
 /* harmony export */   "EventState": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.EventState),
@@ -8523,12 +8826,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GoogleMap2DLayerCode": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GoogleMap2DLayerCode),
 /* harmony export */   "GoogleMap2DUrlBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GoogleMap2DUrlBuilder),
 /* harmony export */   "HSLColor": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.HSLColor),
+/* harmony export */   "HorizonVector": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.HorizonVector),
 /* harmony export */   "ImageDataTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodec),
 /* harmony export */   "ImageDataTileCodecOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodecOptions),
 /* harmony export */   "ImageDataTileCodecOptionsBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   "ImageTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec),
 /* harmony export */   "IsTileContentView": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.IsTileContentView),
 /* harmony export */   "JsonTileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.JsonTileCodec),
+/* harmony export */   "JulianDate": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.JulianDate),
 /* harmony export */   "KeplerOrbitBase": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.KeplerOrbitBase),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
 /* harmony export */   "LengthUnits": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.LengthUnits),
@@ -8545,6 +8850,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MiniMapControl": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MiniMapControl),
 /* harmony export */   "MiniMapControlOptions": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MiniMapControlOptions),
 /* harmony export */   "Model": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.Model),
+/* harmony export */   "MoonState": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MoonState),
 /* harmony export */   "MorganKeenanClass": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MorganKeenanClass),
 /* harmony export */   "ObjectPool": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ObjectPool),
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ObjectPoolOptions),
@@ -8569,6 +8875,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpectralClass),
 /* harmony export */   "Speed": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Speed),
 /* harmony export */   "StarColor": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.StarColor),
+/* harmony export */   "SunTrajectoryConfig": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SunTrajectoryConfig),
 /* harmony export */   "SurfaceMapDisplay": () => (/* reexport safe */ _terrain_index__WEBPACK_IMPORTED_MODULE_0__.SurfaceMapDisplay),
 /* harmony export */   "SurfaceTileMap": () => (/* reexport safe */ _terrain_index__WEBPACK_IMPORTED_MODULE_0__.SurfaceTileMap),
 /* harmony export */   "SurfaceTileMapOptions": () => (/* reexport safe */ _terrain_index__WEBPACK_IMPORTED_MODULE_0__.SurfaceTileMapOptions),

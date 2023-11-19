@@ -1,5 +1,5 @@
-import { Distance, Angle, Timespan, Speed } from "../math/math.units";
-import { IKeplerOrbit, ICelestialBody } from "./space.interfaces";
+import { Distance, Angle, Timespan, Speed } from "../../math/math.units";
+import { IKeplerOrbit, ICelestialBody } from "../space.interfaces";
 
 export class KeplerOrbitBase implements IKeplerOrbit {
     public static DefaultDecimalPrecision = 5;

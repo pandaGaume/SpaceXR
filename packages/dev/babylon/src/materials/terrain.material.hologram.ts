@@ -275,6 +275,7 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         const engine = scene.getEngine();
 
         // we set the wireframe define
+        // while we relay to the Material wireframe property, the underlying fill mode is set by Babylon and the proper draw mode gl.LINES is used.
         defines.WIREFRAME = this.wireframe;
         if (this.wireframe) {
             // add specifics uniforms

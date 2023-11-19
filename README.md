@@ -1,3 +1,31 @@
-# spacexr
+# The SpaceXR Project
 
-support for space and terrain rendering
+## Overview
+
+Welcome to the SpaceXR Project - an innovative venture into the realm of 3D terrain rendering within the WebXR environment. Our mission is to revolutionize the way we interact with geographic data by bringing a comprehensive, immersive, and holographic approach to both 2D and 3D mapping.
+
+## Features
+
+- **Worldwide 3D Terrain Rendering**: Leveraging cutting-edge WebXR technology, SpaceXR renders detailed and accurate 3D representations of terrain across the globe.
+
+- **2D and 3D Mapping**: Our platform supports both traditional 2D mapping and advanced 3D models, providing a versatile toolkit for various applications, from education to professional GIS analysis.
+
+- **Holographic Content**: SpaceXR introduces an innovative "holographic" content approach, allowing users to engage with 3D terrain models in an interactive and immersive manner.
+
+- **Immersive World Experience**: Experience a true-to-life representation of the world in a fully immersive environment, where you can explore, analyze, and interact with the terrain like never before.
+
+## Technologies
+
+- **WebXR**: Utilizing the latest WebXR standards for high performance and cross-platform compatibility.
+- **3D Rendering**: Advanced 3D rendering techniques to accurately represent terrain contours and features (using, but not limited to, Babylonjs)
+- **Data Integration**: Seamless integration with Data source such OSM for accurate and comprehensive mapping data.
+- **WEB Maps**: use of any available 2D and 3D web map's
+
+
+## Contributing
+
+Contributions to the SpaceXR project are welcome! If you're interested in contributing, please read our contributing guidelines (link to guidelines).
+
+## Contact
+
+For more information or inquiries about the SpaceXR project, please contact us at [gaume.pelletier@gmail.com].

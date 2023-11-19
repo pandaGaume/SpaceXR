@@ -1,7 +1,11 @@
 import { IGeo2, IGeo3 } from "./geography.interfaces";
+import { Range } from "../math/math";
 
 export class Geo2 implements IGeo2 {
     public static Default = new Geo2(46.382581, -0.308024);
+
+    public static LatRange: Range = new Range(-90, 90);
+    public static LonRange: Range = new Range(-180, 180);
 
     public static Zero() {
         return new Geo2(0, 0);

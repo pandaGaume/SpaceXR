@@ -1,10 +1,11 @@
-import { IEnvelope, IGeo2, IGeo3 } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3, IGeoBounded } from "./geography.interfaces";
 import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
 export declare class Envelope implements IEnvelope {
     static MaxLongitude: number;
     static MaxLatitude: number;
     static MinLongitude: number;
     static MinLatitude: number;
+    static Zero(): IEnvelope;
     static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2): Envelope;
     static FromPoints(a: IGeo3 | IGeo2, b: IGeo3 | IGeo2): Envelope;
     _min: IGeo3;
@@ -30,4 +31,13 @@ export declare class Envelope implements IEnvelope {
     intersectWith(bounds: IEnvelope): boolean;
     contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
+}
+export declare abstract class GeoBounded implements IGeoBounded {
+    _parent?: GeoBounded;
+    _env?: IEnvelope;
+    constructor(parent?: GeoBounded);
+    get bounds(): IEnvelope | undefined;
+    validateEnvelope(): void;
+    invalidateEnvelope(): void;
+    protected abstract _buildEnvelope(b: IEnvelope): IEnvelope;
 }

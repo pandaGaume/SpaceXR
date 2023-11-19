@@ -1,6 +1,9 @@
 import { IGeo2, IGeo3 } from "./geography.interfaces";
+import { Range } from "../math/math";
 export declare class Geo2 implements IGeo2 {
     static Default: Geo2;
+    static LatRange: Range;
+    static LonRange: Range;
     static Zero(): Geo2;
     protected _lat: number;
     protected _lon: number;

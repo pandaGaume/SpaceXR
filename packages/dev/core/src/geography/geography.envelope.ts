@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Scalar } from "../math/math";
-import { IEnvelope, IGeo2, IGeo3, isLocation } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3, IGeoBounded, isLocation } from "./geography.interfaces";
 import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
 import { Geo3 } from "./geography.position";
 import { Size3 } from "../geometry/geometry.size";
@@ -10,6 +10,10 @@ export class Envelope implements IEnvelope {
     public static MaxLatitude = 90;
     public static MinLongitude = -Envelope.MaxLongitude;
     public static MinLatitude = -Envelope.MaxLatitude;
+
+    public static Zero(): IEnvelope {
+        return new Envelope(Geo3.Zero(), Geo3.Zero());
+    }
 
     public static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2) {
         const hasAlt = (<IGeo3>position).alt !== undefined && (<ISize3>size).thickness !== undefined;
@@ -178,4 +182,37 @@ export class Envelope implements IEnvelope {
             (alt === undefined || (this.hasAltitude && alt >= this._min.alt! && alt <= this._max.alt!))
         );
     }
+}
+
+export abstract class GeoBounded implements IGeoBounded {
+    _parent?: GeoBounded;
+    _env?: IEnvelope;
+
+    public constructor(parent?: GeoBounded) {
+        if (parent) {
+            this._parent = parent;
+        }
+    }
+
+    public get bounds(): IEnvelope | undefined {
+        this.validateEnvelope();
+        return this._env;
+    }
+
+    public validateEnvelope(): void {
+        if (!this._env) {
+            this._env = this._buildEnvelope(Envelope.Zero());
+        }
+    }
+
+    public invalidateEnvelope(): void {
+        if (this._env) {
+            delete this._env;
+            if (this._parent) {
+                this._parent.invalidateEnvelope();
+            }
+        }
+    }
+
+    protected abstract _buildEnvelope(b: IEnvelope): IEnvelope;
 }

@@ -1,4 +1,4 @@
-import { GeodeticSystem } from "../../geodesy/geodesy.system";
+import { PythagoreanFlatEarthCalculator } from "../../geodesy/geodesy.calculators";
 import { IDistanceProcessor } from "../../geodesy/geodesy.interfaces";
 import { Nullable } from "../../types";
 import { Envelope, GeoBounded } from "../geography.envelope";
@@ -501,7 +501,7 @@ export class GPXSegment implements IHasGPXExtensions {
         }
     }
 
-    public length(system: IDistanceProcessor = GeodeticSystem.Default): number {
+    public length(system: IDistanceProcessor = PythagoreanFlatEarthCalculator.Shared): number {
         let d: number = 0;
         if (this.trkpts) {
             for (let i: number = 0; i < this.trkpts.length - 1; i++) {
@@ -550,7 +550,7 @@ export class GPXTrack extends GPXItem {
         }
     }
 
-    public length(system: IDistanceProcessor = GeodeticSystem.Default): number {
+    public length(system: IDistanceProcessor = PythagoreanFlatEarthCalculator.Shared): number {
         let d: number = 0;
         if (this.trksegs) {
             for (let s of this.trksegs) {
@@ -829,7 +829,7 @@ export class GPXDocument extends GeoBounded implements IHasGPXExtensions {
         return (this._factories && this._factories.route ? this._factories.route() : null) || new GPXRoute();
     }
 
-    public length(system: IDistanceProcessor = GeodeticSystem.Default): number {
+    public length(system: IDistanceProcessor = PythagoreanFlatEarthCalculator.Shared): number {
         let d: number = 0;
         for (let t of this.tracks()) {
             d += t.length(system);

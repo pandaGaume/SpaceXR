@@ -171,31 +171,5 @@ export class GeodeticSystem implements IDistanceProcessor {
         return distance;
     }
 
-    public getDistanceFromFloat_haversine(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number {
-        if (lata === latb && lona === lonb && alta === altb) {
-            return 0;
-        }
-
-        lata *= Scalar.DEG2RAD;
-        lona *= Scalar.DEG2RAD;
-        latb *= Scalar.DEG2RAD;
-        lonb *= Scalar.DEG2RAD;
-
-        const dLat = (latb - lata) / 2;
-        const dLon = (lonb - lona) / 2;
-        const sdLat = Math.sin(dLat);
-        const sdlon = Math.sin(dLon);
-        const a = sdLat * sdLat + Math.cos(lata) * Math.cos(latb) * sdlon * sdlon;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        let distance = this._ellipsoid.semiMajorAxis * c; // Distance in ellipsoid units
-
-        if (alta !== undefined && altb !== undefined) {
-            /// calculates the straight-line distance considering the altitude difference. This is done using the Pythagorean theorem,
-            /// treating the Haversine distance and altitude difference as perpendicular sides of a right triangle.
-            const altDifference = altb - alta;
-            distance = Math.sqrt(distance * distance + altDifference * altDifference);
-        }
-
-        return distance;
-    }
+    
 }

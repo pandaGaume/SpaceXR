@@ -622,6 +622,83 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./dist/geodesy/geodesy.calculators.js":
+/*!*********************************************!*\
+  !*** ./dist/geodesy/geodesy.calculators.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CalculatorBase": () => (/* binding */ CalculatorBase),
+/* harmony export */   "HaversineCalculator": () => (/* binding */ HaversineCalculator),
+/* harmony export */   "PythagoreanFlatEarthCalculator": () => (/* binding */ PythagoreanFlatEarthCalculator)
+/* harmony export */ });
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
+/* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
+
+
+class CalculatorBase {
+    constructor(e) {
+        this._ellipsoid = e ?? _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84;
+    }
+    get ellipsoid() {
+        return this._ellipsoid;
+    }
+}
+class HaversineCalculator extends CalculatorBase {
+    constructor(e) {
+        super(e);
+    }
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
+        if (lata === latb && lona === lonb && alta === altb) {
+            return 0;
+        }
+        lata *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lona *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        latb *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lonb *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const dLat = (latb - lata) / 2;
+        const dLon = (lonb - lona) / 2;
+        const sdLat = Math.sin(dLat);
+        const sdlon = Math.sin(dLon);
+        const a = sdLat * sdLat + Math.cos(lata) * Math.cos(latb) * sdlon * sdlon;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        let distance = this._ellipsoid.semiMajorAxis * c;
+        if (alta !== undefined && altb !== undefined) {
+            const altDifference = altb - alta;
+            distance = Math.sqrt(distance * distance + altDifference * altDifference);
+        }
+        return distance;
+    }
+}
+HaversineCalculator.Shared = new HaversineCalculator();
+
+class PythagoreanFlatEarthCalculator extends CalculatorBase {
+    constructor(e) {
+        super(e);
+    }
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
+        if (lata === latb && lona === lonb && alta === altb) {
+            return 0;
+        }
+        const a = Math.PI / 2 - lata * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const b = Math.PI / 2 - latb * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD));
+        let distance = this._ellipsoid.semiMajorAxis * c;
+        if (alta !== undefined && altb !== undefined) {
+            const altDifference = altb - alta;
+            distance = Math.sqrt(distance * distance + altDifference * altDifference);
+        }
+        return distance;
+    }
+}
+PythagoreanFlatEarthCalculator.Shared = new PythagoreanFlatEarthCalculator();
+
+//# sourceMappingURL=geodesy.calculators.js.map
+
+/***/ }),
+
 /***/ "./dist/geodesy/geodesy.ellipsoid.js":
 /*!*******************************************!*\
   !*** ./dist/geodesy/geodesy.ellipsoid.js ***!
@@ -845,27 +922,6 @@ class GeodeticSystem {
         }
         return distance;
     }
-    getDistanceFromFloat_haversine(lata, lona, latb, lonb, alta, altb) {
-        if (lata === latb && lona === lonb && alta === altb) {
-            return 0;
-        }
-        lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const dLat = (latb - lata) / 2;
-        const dLon = (lonb - lona) / 2;
-        const sdLat = Math.sin(dLat);
-        const sdlon = Math.sin(dLon);
-        const a = sdLat * sdLat + Math.cos(lata) * Math.cos(latb) * sdlon * sdlon;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        let distance = this._ellipsoid.semiMajorAxis * c;
-        if (alta !== undefined && altb !== undefined) {
-            const altDifference = altb - alta;
-            distance = Math.sqrt(distance * distance + altDifference * altDifference);
-        }
-        return distance;
-    }
 }
 GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84);
 
@@ -916,7 +972,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GPXTrackpoint": () => (/* binding */ GPXTrackpoint),
 /* harmony export */   "GPXWaypoint": () => (/* binding */ GPXWaypoint)
 /* harmony export */ });
-/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "./dist/geodesy/geodesy.system.js");
+/* harmony import */ var _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geodesy/geodesy.calculators */ "./dist/geodesy/geodesy.calculators.js");
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography.envelope */ "./dist/geography/geography.envelope.js");
 /* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography.position */ "./dist/geography/geography.position.js");
 
@@ -1302,7 +1358,7 @@ class GPXSegment {
             ext.segment(e, this);
         }
     }
-    length(system = _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_2__.GeodeticSystem.Default) {
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.PythagoreanFlatEarthCalculator.Shared) {
         let d = 0;
         if (this.trkpts) {
             for (let i = 0; i < this.trkpts.length - 1; i++) {
@@ -1344,7 +1400,7 @@ class GPXTrack extends GPXItem {
             ext.track(e, this);
         }
     }
-    length(system = _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_2__.GeodeticSystem.Default) {
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.PythagoreanFlatEarthCalculator.Shared) {
         let d = 0;
         if (this.trksegs) {
             for (let s of this.trksegs) {
@@ -1506,7 +1562,7 @@ class GPXDocument extends _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.GeoBo
     createRoute() {
         return (this._factories && this._factories.route ? this._factories.route() : null) || new GPXRoute();
     }
-    length(system = _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_2__.GeodeticSystem.Default) {
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.PythagoreanFlatEarthCalculator.Shared) {
         let d = 0;
         for (let t of this.tracks()) {
             d += t.length(system);

@@ -25,5 +25,4 @@ export declare class GeodeticSystem implements IDistanceProcessor {
     get cartesianMode(): CartesianMode;
     geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): void;
     getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number;
-    getDistanceFromFloat_haversine(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number;
 }

@@ -68,14 +68,17 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _azimuthObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
     constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
     get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    get azimuthObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     get updateObservable(): Observable<UpdateEventArgs<T>>;
     get bounds(): IEnvelope | undefined;
     get datasource(): ITileDatasource<T, ITileAddress>;
+    get manager(): TileContentManager<T>;
     get context(): TileMapContext<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;
@@ -100,6 +103,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     private onResizeObserverAdded;
     private onZoomObserverAdded;
     private onCenterObserverAdded;
+    private onAzimuthObserverAdded;
     private onUpdateObserverAdded;
     protected doValidate(): void;
     protected doValidateWithCache(): void;

@@ -1,0 +1,37 @@
+import { ICanvasRenderingContext } from "@babylonjs/core";
+import { Control, Measure } from "@babylonjs/gui";
+import { IGeo2 } from "core/geography/geography.interfaces";
+import { ISize2 } from "core/geometry";
+import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
+import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileMapView, UpdateEventArgs } from "core/tiles/tiles.mapview";
+export declare class MapControl extends Control implements ITileMapApi {
+    static readonly DefaultColor = "white";
+    private _resolution?;
+    private _model;
+    private _background?;
+    constructor(name: string, manager: TileContentManager<HTMLImageElement>, resolution?: ISize2, center?: IGeo2, lod?: number);
+    get view(): TileMapView<HTMLImageElement> | undefined;
+    get background(): string | undefined;
+    set background(v: string | undefined);
+    hasTile(key: string): boolean;
+    getTile(key: string): ITile<HTMLImageElement> | undefined;
+    invalidateSize(w: number, h: number): ITileMapApi;
+    setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
+    setZoom(zoom: number): ITileMapApi;
+    setAzimuth(r: number): ITileMapApi;
+    zoomIn(delta: number): ITileMapApi;
+    zoomOut(delta: number): ITileMapApi;
+    translate(tx: number, ty: number): ITileMapApi;
+    rotate(r: number): ITileMapApi;
+    getContext(options?: CanvasRenderingContext2DSettings | undefined): ICanvasRenderingContext;
+    get resolution(): ISize2;
+    set resolution(v: ISize2);
+    get metrics(): ITileMetrics;
+    get azimuth(): number | undefined;
+    protected onUpdate(args: UpdateEventArgs<HTMLImageElement>): void;
+    protected onUpdateTiles(args: UpdateEventArgs<HTMLImageElement>): void;
+    protected onUpdateView(args: UpdateEventArgs<HTMLImageElement>): void;
+    protected _additionalProcessing(parentMeasure: Measure, context: ICanvasRenderingContext): void;
+    _draw(context: ICanvasRenderingContext, invalidatedRectangle?: Measure): void;
+}

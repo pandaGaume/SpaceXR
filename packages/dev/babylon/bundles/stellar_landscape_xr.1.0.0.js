@@ -3,6 +3,659 @@ var SPACEXR;
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./dist/gui/2D/index.js":
+/*!******************************!*\
+  !*** ./dist/gui/2D/index.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapControl: () => (/* reexport safe */ _mapControl__WEBPACK_IMPORTED_MODULE_0__.MapControl),
+/* harmony export */   MiniMapControl: () => (/* reexport safe */ _miniMapControl__WEBPACK_IMPORTED_MODULE_1__.MiniMapControl),
+/* harmony export */   MiniMapControlOptions: () => (/* reexport safe */ _miniMapControl__WEBPACK_IMPORTED_MODULE_1__.MiniMapControlOptions),
+/* harmony export */   View: () => (/* reexport safe */ _view__WEBPACK_IMPORTED_MODULE_2__.View)
+/* harmony export */ });
+/* harmony import */ var _mapControl__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mapControl */ "./dist/gui/2D/mapControl.js");
+/* harmony import */ var _miniMapControl__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./miniMapControl */ "./dist/gui/2D/miniMapControl.js");
+/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./view */ "./dist/gui/2D/view.js");
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/2D/mapControl.js":
+/*!***********************************!*\
+  !*** ./dist/gui/2D/mapControl.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapControl: () => (/* binding */ MapControl)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/gui */ "@babylonjs/gui");
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles/tiles.mapview */ "../core/dist/tiles/tiles.mapview.js");
+/* harmony import */ var core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles/tiles.geography */ "../core/dist/tiles/tiles.geography.js");
+/* harmony import */ var core_math_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/math/math */ "../core/dist/math/math.js");
+
+
+
+
+
+
+class MapControl extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control {
+    constructor(name, manager, resolution, center, lod) {
+        super(name);
+        this._resolution = resolution;
+        const tmp = this._resolution ?? core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size2.Zero();
+        this._model = new core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__.TileMapView(manager, tmp.width, tmp.height, center || core_geography_geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero(), lod || manager.metrics.minLOD);
+        this._model.updateObservable.add(this.onUpdate.bind(this));
+        this._model.validate();
+    }
+    get view() {
+        return this._model;
+    }
+    get background() {
+        return this._background;
+    }
+    set background(v) {
+        if (this._background != v) {
+            this._background = v;
+            this._markAsDirty();
+        }
+    }
+    hasTile(key) {
+        return this._model?.context.tiles.has(key) ?? false;
+    }
+    getTile(key) {
+        return this._model?.context.tiles.get(key);
+    }
+    invalidateSize(w, h) {
+        this._model?.invalidateSize(w, h);
+        this._model?.validate();
+        return this;
+    }
+    setView(center, zoom, rotation) {
+        this._model?.setView(center, zoom, rotation);
+        this._model?.validate();
+        return this;
+    }
+    setZoom(zoom) {
+        this._model?.setZoom(zoom);
+        this._model?.validate();
+        return this;
+    }
+    setAzimuth(r) {
+        this._model?.setAzimuth(r);
+        this._model?.validate();
+        return this;
+    }
+    zoomIn(delta) {
+        this._model?.zoomIn(delta ?? 1);
+        this._model?.validate();
+        return this;
+    }
+    zoomOut(delta) {
+        this._model?.zoomOut(delta ?? 1);
+        this._model?.validate();
+        return this;
+    }
+    translate(tx, ty) {
+        this._model?.translate(tx, ty);
+        this._model?.validate();
+        return this;
+    }
+    rotate(r) {
+        this._model?.rotate(r);
+        this._model?.validate();
+        return this;
+    }
+    getContext(options) {
+        return this._host.getContext();
+    }
+    get resolution() {
+        return this._resolution ?? new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size2(this.widthInPixels, this.heightInPixels);
+    }
+    set resolution(v) {
+        if (v != this._resolution) {
+            this._resolution = v;
+            this.invalidateSize(this._resolution.width, this._resolution.height);
+        }
+    }
+    get metrics() {
+        return this._model?.metrics ?? core_tiles_tiles_geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857.Shared;
+    }
+    get azimuth() {
+        return this._model?.azimuth;
+    }
+    onUpdate(args) {
+        if (!args) {
+            return;
+        }
+        switch (args.reason) {
+            case core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__.UpdateReason.tileReady: {
+                this.onUpdateTiles(args);
+                break;
+            }
+            case core_tiles_tiles_mapview__WEBPACK_IMPORTED_MODULE_2__.UpdateReason.viewChanged:
+            default: {
+                this.onUpdateView(args);
+                break;
+            }
+        }
+    }
+    onUpdateTiles(args) {
+        this._markAsDirty();
+    }
+    onUpdateView(args) {
+        this._markAsDirty();
+    }
+    _additionalProcessing(parentMeasure, context) {
+        super._additionalProcessing(parentMeasure, context);
+        if (!this._resolution) {
+            this.invalidateSize(this.widthInPixels, this.heightInPixels);
+        }
+    }
+    _draw(context, invalidatedRectangle) {
+        if (context) {
+            context.save();
+            const scale = this._model?.context.scale ?? 1;
+            const center = this._model?.context.center ?? core_geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Zero();
+            const res = this.resolution;
+            const ratioW = res ? this.widthInPixels / this.resolution.width : 1.0;
+            const ratioH = res ? this.heightInPixels / this.resolution.height : 1.0;
+            context.translate(this.widthInPixels / 2, this.heightInPixels / 2);
+            context.scale(scale * ratioW, scale * ratioH);
+            if (this.azimuth) {
+                const angle = this.azimuth * core_math_math__WEBPACK_IMPORTED_MODULE_6__.Scalar.DEG2RAD;
+                context.rotate(angle);
+            }
+            const tileSize = this.metrics.tileSize;
+            const tiles = Array.from(this._model?.context.tiles.values() ?? []);
+            for (const t of tiles) {
+                if (t.rect) {
+                    const x = t.rect.x - center.x;
+                    const y = t.rect.y - center.y;
+                    const item = t.content ?? null;
+                    if (item) {
+                        if (item instanceof HTMLImageElement) {
+                            context.drawImage(item, x, y);
+                            continue;
+                        }
+                    }
+                    else {
+                        context.fillStyle = this._background ?? MapControl.DefaultColor;
+                        context.fillRect(x, y, tileSize, tileSize);
+                    }
+                }
+            }
+            context.restore();
+        }
+    }
+}
+MapControl.DefaultColor = "white";
+//# sourceMappingURL=mapControl.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/2D/miniMapControl.js":
+/*!***************************************!*\
+  !*** ./dist/gui/2D/miniMapControl.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MiniMapControl: () => (/* binding */ MiniMapControl),
+/* harmony export */   MiniMapControlOptions: () => (/* binding */ MiniMapControlOptions)
+/* harmony export */ });
+/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./view */ "./dist/gui/2D/view.js");
+/* harmony import */ var _mapControl__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./mapControl */ "./dist/gui/2D/mapControl.js");
+/* harmony import */ var core_tiles_tiles_content_manager__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles/tiles.content.manager */ "../core/dist/tiles/tiles.content.manager.js");
+/* harmony import */ var core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _materials_terrain_material_hologram__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../materials/terrain.material.hologram */ "./dist/materials/terrain.material.hologram.js");
+/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/geography/geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/gui */ "@babylonjs/gui");
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/math/math */ "../core/dist/math/math.js");
+
+
+
+
+
+
+
+
+class MiniMapControlOptions {
+}
+class MiniMapControl extends _view__WEBPACK_IMPORTED_MODULE_1__.View {
+    static CreateDefaultSkin() {
+        return {
+            styles: {
+                map: {
+                    background: _materials_terrain_material_hologram__WEBPACK_IMPORTED_MODULE_2__.TerrainHologramMaterialOptions.DefaultBackgroundColor.toHexString(),
+                    width: "100%",
+                    height: "100%",
+                    alpha: 0.8,
+                },
+                window: {
+                    background: "#44000011",
+                    color: "red",
+                    thickness: 2,
+                },
+            },
+        };
+    }
+    constructor(name, options, model, skin) {
+        if (!options?.manager && !options?.source)
+            throw new Error("manager or datasource must be provided");
+        super(name, model, skin ?? MiniMapControl.CreateDefaultSkin(), options);
+    }
+    _onModelChanged(oldValue, newValue) {
+        if (oldValue) {
+            if (this._centerObserver)
+                oldValue.centerObservable.remove(this._centerObserver);
+            if (this._zoomObserver)
+                oldValue.zoomObservable.remove(this._zoomObserver);
+            if (this._azimuthObserver)
+                oldValue.zoomObservable.remove(this._azimuthObserver);
+        }
+        this._centerObserver = null;
+        this._zoomObserver = null;
+        this._azimuthObserver = null;
+        if (newValue) {
+            this._centerObserver = newValue.centerObservable.add(this._onCenterChanged.bind(this));
+            this._zoomObserver = newValue.zoomObservable.add(this._onZoomChanged.bind(this));
+            this._azimuthObserver = newValue.azimuthObservable.add(this._onAzimuthChanged.bind(this));
+        }
+    }
+    _onCenterChanged(args) {
+        if (this._map && args.newValue) {
+            this._map.setView(args.newValue);
+        }
+    }
+    _onZoomChanged(args) {
+        if (this._map && args.newValue != undefined) {
+            this._map.setZoom(args.newValue);
+        }
+    }
+    _onAzimuthChanged(args) {
+        if (this._window && args.newValue != undefined) {
+            this._window.rotation = -args.newValue * core_math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
+        }
+    }
+    _createContent(model, skin, options) {
+        const o = options;
+        let manager = o.manager;
+        if (!manager && o.source) {
+            manager = new core_tiles_tiles_content_manager__WEBPACK_IMPORTED_MODULE_4__.TileContentManager(o.source, o.cache);
+        }
+        const resolution = o.resolution ?? new core_geometry_geometry_size__WEBPACK_IMPORTED_MODULE_5__.Size2(model?.width ?? 0, model?.height ?? 0);
+        this._map = new _mapControl__WEBPACK_IMPORTED_MODULE_6__.MapControl(`map`, manager, resolution);
+        this.addControl(this._map);
+        this._window = new _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Rectangle(`window`);
+        this._window.verticalAlignment = _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control.VERTICAL_ALIGNMENT_CENTER;
+        this._window.horizontalAlignment = _babylonjs_gui__WEBPACK_IMPORTED_MODULE_0__.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        this.addControl(this._window);
+    }
+    _updateContent(oldValue, newValue) {
+        if (this._map && newValue) {
+            this._map.setView(newValue?.center ?? core_geography_geography_position__WEBPACK_IMPORTED_MODULE_7__.Geo2.Zero(), newValue?.levelOfDetail ?? 0, newValue?.azimuth ?? 0);
+            this._updateWindowSize(this.model);
+            if (this._window) {
+                this._window.rotation = newValue.azimuth * core_math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.DEG2RAD;
+            }
+        }
+    }
+    _additionalProcessing(parentMeasure, context) {
+        super._additionalProcessing(parentMeasure, context);
+        this._updateWindowSize(this.model);
+    }
+    _updateWindowSize(model) {
+        if (model) {
+            const v = this._map?.view;
+            if (this._window && v) {
+                const wratio = model.width / v.width;
+                const hratio = model.height / v.height;
+                this._window.widthInPixels = this.widthInPixels * wratio;
+                this._window.heightInPixels = this.heightInPixels * hratio;
+            }
+        }
+    }
+}
+//# sourceMappingURL=miniMapControl.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/2D/view.js":
+/*!*****************************!*\
+  !*** ./dist/gui/2D/view.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   View: () => (/* binding */ View)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babylonjs/gui */ "@babylonjs/gui");
+/* harmony import */ var _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_events_events_args__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/events/events.args */ "../core/dist/events/events.args.js");
+
+
+
+class View extends _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container {
+    static BuildPropertyBlock(name, iconUrl, value, key, sep) {
+        const block = new _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.StackPanel(`${name}Property`);
+        block.isVertical = false;
+        if (iconUrl != null || iconUrl !== undefined) {
+            const icon = new _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Image(`${name}Icon`, iconUrl);
+            block.addControl(icon);
+        }
+        if (key != null || key !== undefined) {
+            const txt = new _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.TextBlock(`${name}Key`);
+            txt.text = sep ? `${key}${sep}` : key;
+            block.addControl(txt);
+        }
+        if (value != null || value !== undefined) {
+            const txt = new _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.TextBlock(`${name}Value`);
+            txt.text = value;
+            block.addControl(txt);
+        }
+        return block;
+    }
+    static UpdatePropertyBlock(block, name, iconUrl, value, key, sep) {
+        if (iconUrl) {
+            const icon = block.getChildByName(`${name}Icon`);
+            if (icon) {
+                icon.source = iconUrl;
+            }
+        }
+        if (key) {
+            const txt = block.getChildByName(`${name}Key`);
+            if (txt) {
+                txt.text = sep ? `${key}${sep}` : key;
+            }
+        }
+        if (value) {
+            const txt = block.getChildByName(`${name}Value`);
+            if (txt) {
+                txt.text = value;
+            }
+        }
+    }
+    static ApplyStyleSheet(target, styles) {
+        if (styles) {
+            for (const c of target.children) {
+                if (c.name) {
+                    const s = styles[c.name];
+                    if (s) {
+                        for (const k in s) {
+                            if (k in c) {
+                                try {
+                                    c[k] = s[k];
+                                }
+                                catch {
+                                    console.error(`Error setting property ${k} = ${s[k]} on ${c.name}`);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (c instanceof _babylonjs_gui__WEBPACK_IMPORTED_MODULE_1__.Container) {
+                    View.ApplyStyleSheet(c, styles);
+                }
+            }
+        }
+    }
+    constructor(name, model, skin, options) {
+        super(name);
+        this._createContent(model, skin, options);
+        this.skin = skin;
+        this.model = model;
+    }
+    get propertyChangedObservable() {
+        if (!this._propertyChangedObservable) {
+            this._propertyChangedObservable = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        }
+        return this._propertyChangedObservable;
+    }
+    get model() {
+        return this._model;
+    }
+    set model(value) {
+        if (this._model !== value) {
+            const old = this._model;
+            this._model = value;
+            this._updateContent(old, value);
+            this._onModelChanged(old, value);
+            if (this._modelChangedObservable && this._modelChangedObservable.hasObservers()) {
+                this._modelChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._model));
+            }
+        }
+    }
+    get skin() {
+        return this._skin;
+    }
+    set skin(value) {
+        const old = this._skin;
+        this._skin = value;
+        this._updateSkin(old, value);
+        this._onSkinChanged(old, value);
+        if (this._skinChangedObservable && this._skinChangedObservable.hasObservers()) {
+            this._skinChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._skin));
+        }
+    }
+    get modelChangedObservable() {
+        if (!this._modelChangedObservable) {
+            this._modelChangedObservable = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        }
+        return this._modelChangedObservable;
+    }
+    get skinChangedObservable() {
+        if (!this._skinChangedObservable) {
+            this._skinChangedObservable = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        }
+        return this._skinChangedObservable;
+    }
+    _createContent(model, skin, options) { }
+    _updateContent(oldValue, newValue) {
+    }
+    _updateSkin(oldValue, newValue) {
+        View.ApplyStyleSheet(this, newValue?.styles);
+        this._updateContent(this._model, this._model);
+    }
+    _onModelChanged(oldValue, newValue) { }
+    _onSkinChanged(oldValue, newValue) { }
+    _firePropertyChanged(propertyName, oldValue, newValue) {
+        if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+            this._propertyChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, oldValue, newValue, propertyName));
+        }
+    }
+}
+//# sourceMappingURL=view.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/index.js":
+/*!***************************!*\
+  !*** ./dist/gui/index.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LengthUnits: () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.LengthUnits),
+/* harmony export */   MapControl: () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.MapControl),
+/* harmony export */   MiniMapControl: () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.MiniMapControl),
+/* harmony export */   MiniMapControlOptions: () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.MiniMapControlOptions),
+/* harmony export */   Model: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.Model),
+/* harmony export */   Skin: () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.Skin),
+/* harmony export */   SkinBuilder: () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.SkinBuilder),
+/* harmony export */   View: () => (/* reexport safe */ _2D_index__WEBPACK_IMPORTED_MODULE_0__.View),
+/* harmony export */   WeightUnits: () => (/* reexport safe */ _skin__WEBPACK_IMPORTED_MODULE_2__.WeightUnits)
+/* harmony export */ });
+/* harmony import */ var _2D_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./2D/index */ "./dist/gui/2D/index.js");
+/* harmony import */ var _model__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./model */ "./dist/gui/model.js");
+/* harmony import */ var _skin__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./skin */ "./dist/gui/skin.js");
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/model.js":
+/*!***************************!*\
+  !*** ./dist/gui/model.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Model: () => (/* binding */ Model)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_events_events_args__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/events/events.args */ "../core/dist/events/events.args.js");
+
+
+class Model {
+    constructor(name) {
+        this._name = name || this.constructor.name;
+    }
+    get name() {
+        return this._name;
+    }
+    get propertyChangedObservable() {
+        if (!this._propertyChangedObservable) {
+            this._propertyChangedObservable = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        }
+        return this._propertyChangedObservable;
+    }
+    _firePropertyChanged(propertyName, oldValue, newValue) {
+        if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+            this._propertyChangedObservable.notifyObservers(new core_events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, newValue, propertyName));
+        }
+    }
+}
+//# sourceMappingURL=model.js.map
+
+/***/ }),
+
+/***/ "./dist/gui/skin.js":
+/*!**************************!*\
+  !*** ./dist/gui/skin.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LengthUnits: () => (/* binding */ LengthUnits),
+/* harmony export */   Skin: () => (/* binding */ Skin),
+/* harmony export */   SkinBuilder: () => (/* binding */ SkinBuilder),
+/* harmony export */   WeightUnits: () => (/* binding */ WeightUnits)
+/* harmony export */ });
+var WeightUnits;
+(function (WeightUnits) {
+    WeightUnits["KG"] = "kg";
+    WeightUnits["STONE"] = "stone";
+})(WeightUnits || (WeightUnits = {}));
+var LengthUnits;
+(function (LengthUnits) {
+    LengthUnits["METER"] = "meter";
+    LengthUnits["FURLONG"] = "furlong";
+})(LengthUnits || (LengthUnits = {}));
+class Skin {
+    constructor(p) {
+        Object.assign(this, p);
+    }
+}
+class SkinBuilder {
+    constructor(url) {
+        this._url = url;
+    }
+    withName(name) {
+        this._url = name;
+        return this;
+    }
+    withUnits(units) {
+        this._units = units;
+        return this;
+    }
+    withStyles(styles) {
+        this._styles = styles;
+        return this;
+    }
+    withDictionary(dictionary) {
+        this._dictionary = dictionary;
+        return this;
+    }
+    withImages(images) {
+        this._images = images;
+        return this;
+    }
+    withUrl(url) {
+        this._url = url;
+        return this;
+    }
+    async build(ctor) {
+        let rawData = null;
+        if (this._url) {
+            rawData = await this._fetchJson(this._url);
+        }
+        else {
+            rawData = this._buildRawData({
+                name: this._name,
+                styles: this._styles,
+                dictionary: this._dictionary,
+                images: this._images,
+                units: this._units,
+            });
+        }
+        if (rawData) {
+            const skin = new ctor(rawData);
+            if (typeof skin.styles === "string") {
+                skin.styles = await this._fetchJson(skin.styles);
+            }
+            if (typeof skin.dictionary === "string") {
+                skin.dictionary = await this._fetchJson(skin.dictionary);
+            }
+            if (typeof skin.images === "string") {
+                skin.images = await this._fetchJson(skin.images);
+            }
+            return skin;
+        }
+        return null;
+    }
+    async _fetchJson(url) {
+        if (url) {
+            const response = await fetch(url);
+            if (response.ok) {
+                return await response.json();
+            }
+            else {
+                console.log(`Failed to load ${url}: ${response.status}`);
+            }
+        }
+        return null;
+    }
+    _buildRawData(data) {
+        return data;
+    }
+}
+//# sourceMappingURL=skin.js.map
+
+/***/ }),
+
 /***/ "./dist/holograms/index.js":
 /*!*********************************!*\
   !*** ./dist/holograms/index.js ***!
@@ -426,7 +1079,7 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
             count: depth,
             format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_R,
             textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT,
-            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_NEAREST_NEAREST,
+            samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
             internalFormat: scene.getEngine()._gl.R16F,
         });
         this._elevationSampler = new _textures_tilePoolTexture__WEBPACK_IMPORTED_MODULE_3__.TilePoolTexture(TerrainHologramMaterialSampler.ElevationKind, tilePoolElevationOptions, scene);
@@ -470,7 +1123,6 @@ class TerrainHologramMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0
         a = p.subtract(vx);
         b = axes[0];
         this._clipSurfaces.push({ point: a, normal: b });
-        console.log(this._clipSurfaces);
     }
     _updateTileContent(tile) {
         const key = tile.address.quadkey;
@@ -642,13 +1294,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../.. */ "../core/dist/tiles/tiles.geography.js");
 
 
-const tuile = [];
 function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
     return function (texture, level, xoffset, yoffset, zoffset, width, height, depth, data, format = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGBA, textureType = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_INT) {
         const target = is3D ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D_ARRAY;
         const internalType = this._getWebGLTextureType(textureType);
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
+        let flipYState = this._gl.getParameter(this._gl.UNPACK_FLIP_Y_WEBGL);
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
+        }
+        let preMultiplyAlpha = this._gl.getParameter(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+        }
         this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, data);
         let err = this._gl.getError();
         if (err) {
@@ -656,7 +1315,12 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
         }
         this._bindTextureDirectly(target, null);
         texture.isReady = true;
-        tuile.push(texture);
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
+        }
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+        }
     };
 }
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR___updateSubRawTexture2DArray = _makeUpdateSubRawTexture2DArrayFunction(false);
@@ -685,6 +1349,14 @@ function _makeCreateRawTextureFunction(is3D) {
         }
         const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
         this._bindTextureDirectly(target, texture, true);
+        let flipYState = this._gl.getParameter(this._gl.UNPACK_FLIP_Y_WEBGL);
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
+        }
+        let preMultiplyAlpha = this._gl.getParameter(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+        }
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
         if (err) {
@@ -692,6 +1364,12 @@ function _makeCreateRawTextureFunction(is3D) {
         }
         this._bindTextureDirectly(target, null, true);
         texture.isReady = true;
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
+        }
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+        }
         return texture;
     };
 }
@@ -747,7 +1425,6 @@ class TilePoolTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Textu
             .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
         this.wrapV = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
-        this.updateSamplingMode(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.NEAREST_SAMPLINGMODE);
     }
     reserveArea() {
         if (this.freeAreaCount) {
@@ -1378,16 +2055,23 @@ class EventArgs {
     }
 }
 class PropertyChangedEventArgs extends EventArgs {
-    constructor(source, oldValue, newValue) {
+    constructor(source, oldValue, newValue, propertyName) {
         super(source);
-        this._o = oldValue;
-        this._v = newValue;
+        this._propertyName = propertyName;
+        this._oldValue = oldValue;
+        this._newValue = newValue;
+    }
+    get propertyName() {
+        return this._propertyName;
     }
     get oldValue() {
-        return this._o;
+        return this._oldValue;
     }
-    get value() {
-        return this._v;
+    get newValue() {
+        return this._newValue;
+    }
+    get source() {
+        return this._source;
     }
 }
 //# sourceMappingURL=events.args.js.map
@@ -2152,13 +2836,44 @@ __webpack_require__.r(__webpack_exports__);
 
 class KnownPlaces {
 }
-KnownPlaces.Locations = {
-    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.98817689833976, 86.92491071824738),
-    Chamonix: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.923351087244384, 6.871072898119941),
-    MountRainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.8523798847489, -121.76034290971147),
-    Haleakala: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.714420811112593, -156.25254225132156),
-    DiamondHead: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(21.26226248048085, -157.80602016703813),
-    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.1019466866649115, 105.42296583233852),
+KnownPlaces.Mountains = {
+    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925),
+    K2: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.8808, 76.5155),
+    Kangchenjunga: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.7025, 88.1475),
+    Lhotse: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9617, 86.9333),
+    Makalu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.8897, 87.0889),
+    ChoOyu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.0942, 86.6608),
+    Dhaulagiri: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.6967, 83.4872),
+    Manaslu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5494, 84.5599),
+    NangaParbat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.237, 74.5892),
+    Annapurna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5961, 83.8203),
+    Matterhorn: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.9763, 7.6586),
+    MontBlanc: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.8326, 6.8652),
+    Denali: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.0695, -151.0074),
+    Aconcagua: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-32.6532, -70.0109),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.0674, 37.3556),
+    Elbrus: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(43.3499, 42.4375),
+    PuncakJaya: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-4.0751, 137.1889),
+};
+KnownPlaces.Volcanoes = {
+    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.102, 105.423),
+    Vesuvius: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(40.821, 14.426),
+    Etna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.751, 14.993),
+    MaunaLoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.475, -155.608),
+    Kilauea: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.421, -155.287),
+    Fuji: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.3606, 138.7274),
+    StHelens: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.1912, -122.1944),
+    Pinatubo: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(15.142, 120.35),
+    Rainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.853, -121.76),
+    Cotopaxi: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.679, -78.438),
+    Popocatepetl: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.023, -98.622),
+    Eyjafjallajokull: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.633, -19.621),
+    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.404, 25.396),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.067, 37.355),
+    Arenal: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(10.463, -84.703),
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.588),
+    Tambora: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-8.25, 118.0),
+    Sakurajima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(31.593, 130.657),
 };
 //# sourceMappingURL=geography.knownPlaces.js.map
 
@@ -2231,6 +2946,41 @@ class Geo3 extends Geo2 {
 
 /***/ }),
 
+/***/ "../core/dist/geography/geography.projections.js":
+/*!*******************************************************!*\
+  !*** ../core/dist/geography/geography.projections.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Projections: () => (/* binding */ Projections)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+
+
+
+class Projections {
+    static LatLonToWebMercator(lat, lon, ellipsoid) {
+        return Projections.LatLonToWebMercatorToRef(lat, lon, _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero(), ellipsoid);
+    }
+    static LatLonToWebMercatorToRef(lat, lon, ref, ellipsoid) {
+        ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
+        ref.x = lon * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD * ellipsoid.semiMajorAxis;
+        lat = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(lat, Projections.WebMercatorMinLatitude, Projections.WebMercatorMaxLatitude);
+        let rad = lat * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
+        ref.y = ellipsoid.semiMajorAxis * Math.log(Math.tan(_math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.PI_4 + rad / 2));
+        return ref;
+    }
+}
+Projections.WebMercatorMaxLatitude = 85.05112878;
+Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
+//# sourceMappingURL=geography.projections.js.map
+
+/***/ }),
+
 /***/ "../core/dist/geography/index.js":
 /*!***************************************!*\
   !*** ../core/dist/geography/index.js ***!
@@ -2243,6 +2993,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Geo2: () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2),
 /* harmony export */   Geo3: () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
+/* harmony export */   Projections: () => (/* reexport safe */ _geography_projections__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   isEnvelope: () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isEnvelope),
 /* harmony export */   isLocation: () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)
 /* harmony export */ });
@@ -2250,6 +3001,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.envelope */ "../core/dist/geography/geography.envelope.js");
 /* harmony import */ var _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.knownPlaces */ "../core/dist/geography/geography.knownPlaces.js");
+/* harmony import */ var _geography_projections__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography.projections */ "../core/dist/geography/geography.projections.js");
+
 
 
 
@@ -2750,6 +3503,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
 /* harmony export */   Power: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Power),
+/* harmony export */   Projections: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.PropertyChangedEventArgs),
 /* harmony export */   Quantity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.QuantityRange),
@@ -3564,6 +4318,9 @@ Scalar.EPSILON = 1.401298e-45;
 Scalar.DEG2RAD = Math.PI / 180;
 Scalar.INCH2METER = 0.0254;
 Scalar.METER2INCH = 39.3701;
+Scalar.PI = Math.PI;
+Scalar.PI_2 = Math.PI / 2;
+Scalar.PI_4 = Math.PI / 4;
 Scalar.Sign = function (value) {
     return value > 0 ? 1 : -1;
 };
@@ -5782,6 +6539,10 @@ class TileMapView {
         this._zoomObservable = this._zoomObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable;
     }
+    get azimuthObservable() {
+        this._azimuthObservable = this._azimuthObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onAzimuthObserverAdded.bind(this));
+        return this._azimuthObservable;
+    }
     get updateObservable() {
         this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_5__.Observable(this.onUpdateObserverAdded.bind(this));
         return this._updateObservable;
@@ -5791,6 +6552,9 @@ class TileMapView {
     }
     get datasource() {
         return this._manager.datasource;
+    }
+    get manager() {
+        return this._manager;
     }
     get context() {
         return this._currentContext;
@@ -5857,27 +6621,31 @@ class TileMapView {
     setZoom(zoom) {
         const lodf = _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.Clamp(zoom, this.metrics.minLOD, this.metrics.maxLOD);
         if (this._lodf != lodf) {
+            const old = this._lodf;
+            this._lodf = lodf;
+            this._lod = Math.round(this._lodf);
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const old = this._lodf;
-                this._lodf = lodf;
-                this._lod = Math.round(this._lodf);
                 const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, zoom);
                 this._zoomObservable.notifyObservers(e);
-            }
-            else {
-                this._lodf = lodf;
-                this._lod = Math.round(this._lodf);
             }
             this.invalidate();
         }
         return this;
     }
     setAzimuth(r) {
-        this._azimuth = TileMapView.ClampAzimuth(r);
-        const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.DEG2RAD;
-        this._cosangle = Math.cos(rad);
-        this._sinangle = Math.sin(rad);
-        this.invalidate();
+        const clamped = TileMapView.ClampAzimuth(r);
+        if (this._azimuth != clamped) {
+            const old = this._azimuth;
+            this._azimuth = clamped;
+            const rad = this._azimuth * _math_math__WEBPACK_IMPORTED_MODULE_7__.Scalar.DEG2RAD;
+            this._cosangle = Math.cos(rad);
+            this._sinangle = Math.sin(rad);
+            if (this._azimuthObservable && this._azimuthObservable.hasObservers()) {
+                const e = new _events_events_args__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, clamped);
+                this._azimuthObservable.notifyObservers(e);
+            }
+            this.invalidate();
+        }
         return this;
     }
     zoomIn(delta) {
@@ -5937,6 +6705,7 @@ class TileMapView {
     onResizeObserverAdded(observer) { }
     onZoomObserverAdded(observer) { }
     onCenterObserverAdded(observer) { }
+    onAzimuthObserverAdded(observer) { }
     onUpdateObserverAdded(observer) { }
     doValidate() {
         if (this._cacheLowerLOD || this._cacheUpperLOD) {
@@ -6091,7 +6860,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileMetricsOptions: () => (/* binding */ TileMetricsOptions),
 /* harmony export */   TileMetricsOptionsBuilder: () => (/* binding */ TileMetricsOptionsBuilder)
 /* harmony export */ });
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography/geography.projections */ "../core/dist/geography/geography.projections.js");
+
 
 class TileMetricsOptions {
     constructor(p) {
@@ -6102,12 +6873,12 @@ TileMetricsOptions.DefaultTileSize = 256;
 TileMetricsOptions.DefaultLOD = 0;
 TileMetricsOptions.DefaultMinLOD = 0;
 TileMetricsOptions.DefaultMaxLOD = 23;
-TileMetricsOptions.DefaultMinLatitude = -85.05112878;
-TileMetricsOptions.DefaultMaxLatitude = 85.05112878;
+TileMetricsOptions.DefaultMinLatitude = _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMinLatitude;
+TileMetricsOptions.DefaultMaxLatitude = _geography_geography_projections__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMaxLatitude;
 TileMetricsOptions.DefaultMinLongitude = -180;
 TileMetricsOptions.DefaultMaxLongitude = 180;
 TileMetricsOptions.DefaultCellSize = 1;
-TileMetricsOptions.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.CellCoordinateReference.center;
+TileMetricsOptions.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.CellCoordinateReference.center;
 TileMetricsOptions.DefaultOverlap = 0;
 TileMetricsOptions.Shared = {
     tileSize: TileMetricsOptions.DefaultTileSize,
@@ -6898,6 +7669,16 @@ class ObjectPool {
 
 module.exports = BABYLON;
 
+/***/ }),
+
+/***/ "@babylonjs/gui":
+/*!******************************!*\
+  !*** external "BABYLON.GUI" ***!
+  \******************************/
+/***/ ((module) => {
+
+module.exports = BABYLON.GUI;
+
 /***/ })
 
 /******/ 	});
@@ -7427,8 +8208,8 @@ const name = "tilemapFragmentShader";
 const shader = `precision highp float;#include<lightFragmentDeclaration>
 #include<materialFragmentDeclaration>
 #include<clipFragmentDeclaration>
-in vec3 vNormal;in vec3 vUvs;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;uniform vec4 backColor;void main(void) {#include<clipFragment>
-if(vUvs.z<0.0 ){glFragColor=backColor ;return ;}glFragColor=texture(layer,vUvs) ;}`;
+in vec3 vNormal;in vec3 vUvs;in vec3 vUvsElevation;uniform DirLight light;uniform Material material;uniform highp sampler2DArray layer;uniform highp sampler2DArray altitudes;uniform vec4 backColor;void main(void) {#include<clipFragment>
+if(vUvs.z<0.0 ) {/*float alt0=float(texture(altitudes,vUvsElevation)) ;float minorInterval=100.0;float tolerance=2.0;float minorLines=mod(alt0,minorInterval);if (minorLines<tolerance) {vec3 contourColor=vec3(0.11,0.75,0.81); glFragColor=vec4(contourColor,1.0);} else {vec3 black=vec3(0.0,0.0,0.0); glFragColor=vec4(black,1.0);}*/glFragColor=backColor;return ;}glFragColor=texture(layer,vUvs) ;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapFragmentShader = { name, shader };
 //# sourceMappingURL=tilemap.fragment.js.map
@@ -7450,8 +8231,8 @@ __webpack_require__.r(__webpack_exports__);
 const name = "tilemapVertexShader";
 const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 demIds; in vec4 layerIds; #include<instancesDeclaration>
 #include<clipVertexDeclaration>
-uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;void main(void) {#include<instancesVertex>
-float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt=float(texture(altitudes,v)) ;alt=(alt-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);#include<clipVertex>
+uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;out vec3 vUvsElevation;void main(void) {#include<instancesVertex>
+float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(altitudes,v)) ;float alt=(alt0-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);vUvsElevation=v,#include<clipVertex>
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const tilemapVertexShader = { name, shader };
@@ -7524,21 +8305,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.JsonTileCodec),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
+/* harmony export */   LengthUnits: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.LengthUnits),
 /* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Luminosity),
 /* harmony export */   MapBox: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapBox),
 /* harmony export */   MapBoxTerrainDemV1UrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapBoxTerrainDemV1UrlBuilder),
+/* harmony export */   MapControl: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MapControl),
 /* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapZenDemUrlBuilder),
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapboxAltitudeDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MapzenAltitudeDecoder),
 /* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Mass),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MemoryCache),
+/* harmony export */   MiniMapControl: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MiniMapControl),
+/* harmony export */   MiniMapControlOptions: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.MiniMapControlOptions),
+/* harmony export */   Model: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.Model),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.MorganKeenanClass),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Observer),
 /* harmony export */   Power: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Power),
+/* harmony export */   Projections: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs),
 /* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.QuantityRange),
@@ -7551,6 +8338,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Size3),
+/* harmony export */   Skin: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.Skin),
+/* harmony export */   SkinBuilder: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.SkinBuilder),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpectralClass),
 /* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Speed),
 /* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.StarColor),
@@ -7586,10 +8375,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Unit),
 /* harmony export */   UpdateEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.UpdateEventArgs),
 /* harmony export */   UpdateReason: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.UpdateReason),
+/* harmony export */   View: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.View),
 /* harmony export */   VirtualDisplay: () => (/* reexport safe */ _holograms_index__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay),
 /* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Voltage),
 /* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Volume),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder),
+/* harmony export */   WeightUnits: () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.WeightUnits),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.XmlDocumentTileCodec),
 /* harmony export */   isBox: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isBox),
 /* harmony export */   isCartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isCartesian3),
@@ -7604,6 +8395,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _holograms_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./holograms/index */ "./dist/holograms/index.js");
 /* harmony import */ var _materials_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./materials/index */ "./dist/materials/index.js");
 /* harmony import */ var core_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/index */ "../core/dist/index.js");
+/* harmony import */ var _gui_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./gui/index */ "./dist/gui/index.js");
+
 
 
 

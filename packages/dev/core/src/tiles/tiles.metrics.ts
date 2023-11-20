@@ -1,14 +1,15 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsOptions, CellCoordinateReference } from "./tiles.interfaces";
+import { Projections } from "../geography/geography.projections";
 
 export class TileMetricsOptions implements ITileMetricsOptions {
     public static DefaultTileSize = 256;
     public static DefaultLOD = 0;
     public static DefaultMinLOD = 0;
     public static DefaultMaxLOD = 23;
-    public static DefaultMinLatitude = -85.05112878;
-    public static DefaultMaxLatitude = 85.05112878;
+    public static DefaultMinLatitude = Projections.WebMercatorMinLatitude;
+    public static DefaultMaxLatitude = Projections.WebMercatorMaxLatitude;
     public static DefaultMinLongitude = -180;
     public static DefaultMaxLongitude = 180;
     public static DefaultCellSize = 1;

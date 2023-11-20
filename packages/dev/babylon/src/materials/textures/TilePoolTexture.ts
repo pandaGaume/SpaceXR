@@ -33,8 +33,6 @@ declare module "@babylonjs/core/Engines/thinEngine" {
     }
 }
 
-const tuile = []
-
 function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
     return function (
         this: ThinEngine,
@@ -54,6 +52,27 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         const internalType = this._getWebGLTextureType(textureType);
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
+
+        // When working with WebGL, it's crucial to remember that changes made to the WebGL context's state are global and persistent
+        // across all subsequent operations using that context. This means that if you set certain flags or states, such as `UNPACK_FLIP_Y_WEBGL`,
+        // they will remain in effect for all future operations unless explicitly changed again.
+        // To avoid unintended side-effects and maintain modular, predictable code, it's a best practice to save the current state of
+        // the WebGL context before setting mandatory flags or making significant state changes. After you've completed the operations
+        // that require these specific settings, you should then restore the context to its original state.
+        // This practice ensures that other parts of your application that use the same WebGL context aren't adversely affected by unexpected state changes.
+        // In WebGL, however, there's no direct method to save and restore the entire context state at once (like a push/pop mechanism).
+        // You need to manually save and restore the parameters that you change. It's important to be mindful of this to maintain the integrity
+        // of your rendering process and avoid hard-to-track bugs.
+        let flipYState = this._gl.getParameter(this._gl.UNPACK_FLIP_Y_WEBGL);
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0); // Texture 3D does NOT support FLIP_Y
+        }
+
+        let preMultiplyAlpha = this._gl.getParameter(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // Texture 3D does NOT support PREMULTIPLY_ALPHA
+        }
+
         this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, <any>data);
         let err = this._gl.getError();
         if (err) {
@@ -61,7 +80,12 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         }
         this._bindTextureDirectly(target, null);
         texture.isReady = true;
-        tuile.push(texture);
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1); // restore state
+        }
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1); // Restore state
+        }
     };
 }
 
@@ -99,7 +123,29 @@ function _makeCreateRawTextureFunction(is3D: boolean) {
             this._gl.pixelStorei(this._gl.UNPACK_ALIGNMENT, 1);
         }
         const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
+
         this._bindTextureDirectly(target, texture, true);
+
+        // When working with WebGL, it's crucial to remember that changes made to the WebGL context's state are global and persistent
+        // across all subsequent operations using that context. This means that if you set certain flags or states, such as `UNPACK_FLIP_Y_WEBGL`,
+        // they will remain in effect for all future operations unless explicitly changed again.
+        // To avoid unintended side-effects and maintain modular, predictable code, it's a best practice to save the current state of
+        // the WebGL context before setting mandatory flags or making significant state changes. After you've completed the operations
+        // that require these specific settings, you should then restore the context to its original state.
+        // This practice ensures that other parts of your application that use the same WebGL context aren't adversely affected by unexpected state changes.
+        // In WebGL, however, there's no direct method to save and restore the entire context state at once (like a push/pop mechanism).
+        // You need to manually save and restore the parameters that you change. It's important to be mindful of this to maintain the integrity
+        // of your rendering process and avoid hard-to-track bugs.
+        let flipYState = this._gl.getParameter(this._gl.UNPACK_FLIP_Y_WEBGL);
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0); // Texture 3D does NOT support FLIP_Y
+        }
+
+        let preMultiplyAlpha = this._gl.getParameter(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // Texture 3D does NOT support PREMULTIPLY_ALPHA
+        }
+
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
         if (err) {
@@ -107,6 +153,12 @@ function _makeCreateRawTextureFunction(is3D: boolean) {
         }
         this._bindTextureDirectly(target, null, true);
         texture.isReady = true;
+        if (flipYState) {
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1); // restore state
+        }
+        if (preMultiplyAlpha) {
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1); // Restore state
+        }
         return texture;
     };
 }
@@ -202,7 +254,6 @@ export class TilePoolTexture extends Texture implements ITilePoolTexture {
             .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
         this.wrapU = Texture.CLAMP_ADDRESSMODE;
         this.wrapV = Texture.CLAMP_ADDRESSMODE;
-        this.updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
     }
 
     public reserveArea(): Nullable<TilePoolTextureArea> {

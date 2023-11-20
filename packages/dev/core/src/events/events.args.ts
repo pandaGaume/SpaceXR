@@ -9,21 +9,31 @@ export class EventArgs<S> {
     }
 }
 
-export class PropertyChangedEventArgs<S, V> extends EventArgs<S> {
-    _o?: V;
-    _v?: V;
+export class PropertyChangedEventArgs<S, T> extends EventArgs<S> {
+    private _propertyName?: string;
+    private _oldValue?: T;
+    private _newValue?: T;
 
-    public constructor(source: S, oldValue?: V, newValue?: V) {
+    public constructor(source: S, oldValue?: T, newValue?: T, propertyName?: string) {
         super(source);
-        this._o = oldValue;
-        this._v = newValue;
+        this._propertyName = propertyName;
+        this._oldValue = oldValue;
+        this._newValue = newValue;
     }
 
-    public get oldValue(): V | undefined {
-        return this._o;
+    public get propertyName(): string | undefined {
+        return this._propertyName;
     }
 
-    public get value(): V | undefined {
-        return this._v;
+    public get oldValue(): T | undefined {
+        return this._oldValue;
+    }
+
+    public get newValue(): T | undefined {
+        return this._newValue;
+    }
+
+    public get source(): S {
+        return this._source;
     }
 }

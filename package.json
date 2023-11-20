@@ -20,11 +20,15 @@
     ],
     "scripts": {
         "start": "node -r @dev/build-tools",
+        "install:all": "npm install && npm run install:buildTools && npm run install:babylon && npm run install:core && echo All packages installed",
+        "install:buildTools": "cd packages/dev/buildTools && npm run build:build-tools",
+        "install:babylon": "cd packages/dev/babylon && npm run build:babylon:assets && npm run publish:babylon:dev",
+        "install:core": "cd packages/dev/core && npm run build:core:dev",
         "build:dev": "npm run compile:dev",
         "compile:dev": "tsc -b ./tsconfig.packages.dev.json",
         "test": "jest"
     },
     "dependencies": {
-        "@babylonjs/gui": "^6.24.0"
+        "@babylonjs/gui": "^6.29.1"
     }
 }

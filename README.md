@@ -62,7 +62,7 @@ To resume this error, we must run the command in the folder packages/dev/babylon
 
 ## Contributing
 
-Contributions to the SpaceXR project are welcome! If you're interested in contributing, please read our contributing guidelines (link to guidelines).
+Contributions to the SpaceXR project are welcome! If you're interested in contributing, please read our [contributing guidelines](./contributing.md) to learn more about how to get started.
 
 ## Contact
 

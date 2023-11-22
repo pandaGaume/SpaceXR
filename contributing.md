@@ -1,5 +1,7 @@
 # Contributing to SpaceXR
 
+This document is based on the Contributing file from the [Babylon.js repository](https://github.com/BabylonJS/Babylon.js/blob/master/contributing.md)
+
 ## Golden rules
 
 SpaceXR is built upon 3 golden rules:
@@ -21,7 +23,6 @@ SpaceXR is base on babylon.js, a 3D rendering engine. So every piece of code has
 A developer should be able to quickly and easily learn to use the API.
 
 Simplicity and a low barrier to entry are must-have features of every API. If you have any second thoughts about the complexity of a design, it is almost always much better to cut the feature from the current release and spend more time to get the design right for the next release.
-
 
 ### Simplicity
 

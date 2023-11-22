@@ -10,6 +10,14 @@
 
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
         <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
             #mapcanvas3d {
                 width: 100%;
                 height: 100%;
@@ -246,7 +254,7 @@
                 // screenAxes.zAxis.parent = ctx;
 
                 // debug panels
-                // scene.debugLayer.show();
+                scene.debugLayer.show();
 
                 // XR support
                 // WARNING : This might be the new mode for XR but did not work for non obvious reason...

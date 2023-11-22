@@ -77,7 +77,7 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 2, new BABYLON.Vector3(0, 1.5, 0), scene);
                 camera.setTarget(new BABYLON.Vector3(0, 50, 0));
                 camera.wheelPrecision = 20;
                 camera.minZ = 0;
@@ -88,12 +88,22 @@
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.7;
 
+                const root = new BABYLON.TransformNode("root", scene);
+                // as the logic is in centimeter, we need to scale it down to meter for VR.
+                root.scaling = new BABYLON.Vector3(0.01, 0.01, 0.01);
+
+                // create a basic ground
+                const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 500, height: 500 }, scene);
+                ground.parent = root;
+
+                // load the gltf model of the table
                 BABYLON.SceneLoader.ImportMesh(null, "./models/", "holographic_table.glb", scene, function (meshes) {
                     meshes[0].position = new BABYLON.Vector3(-25, 0, -10);
-                    meshes[0].scaling = new BABYLON.Vector3(-100, 100, 100);
+                    meshes[0].scaling = new BABYLON.Vector3(-100, 100, 100); // original model is already in meter... this is stupid, so we need to address the unit topic.
+                    meshes[0].parent = root;
                 });
 
-                // create a basic table (in centimeter)
+                // create a basic holo surface (in centimeter)
                 const h = 170;
                 const w = 270;
                 const t = 100;
@@ -105,6 +115,8 @@
                     { width: 320, height: 180, thickness: 720 }, // in 'pixel', ratio of 16/9
                     scene
                 );
+                display.parent = root;
+
                 display.position.y = 90;
                 display.rotation.x = -Math.PI / 2;
                 display.rotation.z = -Math.PI / 2;
@@ -131,7 +143,7 @@
 
                 // construire la carte.
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
-                //map.material.wireframe = true;
+                map.material.wireframe = true;
                 map.material.edgeColor = new BABYLON.Color4(0, 0, 200, 1);
 
                 // interaction avec la carte
@@ -254,8 +266,9 @@
                 // WARNING : This might be the new mode for XR but did not work for non obvious reason...
                 // const xr = await scene.createDefaultXRExperienceAsync();
                 // So, add vr as old fashion and deprecated way
-                var helper = scene.createDefaultVRExperience({ createDeviceOrientationCamera: false });
+                var helper = scene.createDefaultVRExperience({ createDeviceOrientationCamera: false, floorMeshes: [ground] });
                 helper.enableInteractions();
+                helper.teleportationEnabled = true;
                 return scene;
             }
 

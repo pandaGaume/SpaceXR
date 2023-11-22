@@ -6,7 +6,7 @@ Welcome to the SpaceXR Project - an innovative venture into the realm of 3D terr
 
 ## Installation
 
-The step for the intallation is important soplease follow the guideline below.npm install
+The step for the intallation is important so please follow the guideline below
 
 ```bash
 npm install
@@ -28,7 +28,7 @@ npm run build:core:dev
 cd ../../..
 ```
 
-Or if you prefer, you can write `npm run install:all` to execute all the commands above.
+Or if you prefer, you can write `npm run build:all` to execute all the commands above in the main folder.
 
 ### Common Issues
 

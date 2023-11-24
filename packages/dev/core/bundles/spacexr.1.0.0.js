@@ -634,8 +634,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "HaversineCalculator": () => (/* binding */ HaversineCalculator),
 /* harmony export */   "PythagoreanFlatEarthCalculator": () => (/* binding */ PythagoreanFlatEarthCalculator)
 /* harmony export */ });
+/* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.position */ "./dist/geography/geography.position.js");
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
 /* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
+
 
 
 class CalculatorBase {
@@ -671,6 +673,37 @@ class HaversineCalculator extends CalculatorBase {
         }
         return distance;
     }
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+        if (lat1 === lat2 && lon1 === lon2) {
+            return 0;
+        }
+        lat1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lat2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const dlon = lon2 - lon1;
+        const coslat2 = Math.cos(lat2);
+        const y = Math.sin(dlon) * coslat2;
+        const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * coslat2 * Math.cos(dlon);
+        return Math.atan2(y, x) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+    }
+    getLocationAtDistanceAzimuth(lat, lon, dist, az) {
+        if (dist == 0) {
+            return new _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat, lon);
+        }
+        lat *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        az *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const ddr = dist / this._ellipsoid.semiMajorAxis;
+        const cosddr = Math.cos(ddr);
+        const sinddr = Math.sin(ddr);
+        const coslat = Math.cos(lat);
+        const sinlat = Math.sin(lat);
+        const coslatsinddr = coslat * sinddr;
+        const lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
+        const lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
+        return new _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1 * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG, lon1 * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG);
+    }
 }
 HaversineCalculator.Shared = new HaversineCalculator();
 
@@ -678,19 +711,39 @@ class PythagoreanFlatEarthCalculator extends CalculatorBase {
     constructor(e) {
         super(e);
     }
-    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
-        if (lata === latb && lona === lonb && alta === altb) {
+    getDistanceFromFloat(lata, lona, latb, lonb) {
+        if (lata === latb && lona === lonb) {
             return 0;
         }
         const a = Math.PI / 2 - lata * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
         const b = Math.PI / 2 - latb * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
         const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD));
         let distance = this._ellipsoid.semiMajorAxis * c;
-        if (alta !== undefined && altb !== undefined) {
-            const altDifference = altb - alta;
-            distance = Math.sqrt(distance * distance + altDifference * altDifference);
-        }
         return distance;
+    }
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+        if (lat1 === lat2 && lon1 === lon2) {
+            return 0;
+        }
+        lat1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lat2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const dLon = lon2 - lon1;
+        const dLat = lat2 - lat1;
+        let azimuth = Math.atan2(dLon, dLat) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        if (azimuth < 0) {
+            azimuth += 360;
+        }
+        return azimuth;
+    }
+    getLocationAtDistanceAzimuth(lat1, lon1, dist, az) {
+        const unit2deg = 1 / (((2 * Math.PI) / 360) * this._ellipsoid.semiMajorAxis);
+        az *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lat1;
+        let newLat = lat1 + dist * Math.cos(az) * unit2deg;
+        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1 * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD);
+        return new _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(newLat, newLon);
     }
 }
 PythagoreanFlatEarthCalculator.Shared = new PythagoreanFlatEarthCalculator();
@@ -907,20 +960,6 @@ class GeodeticSystem {
             target.y = y;
             target.z = z;
         }
-    }
-    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
-        if (lata === latb && lona === lonb && alta === altb) {
-            return 0;
-        }
-        const a = Math.PI / 2 - lata * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const b = Math.PI / 2 - latb * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD));
-        let distance = this._ellipsoid.semiMajorAxis * c;
-        if (alta !== undefined && altb !== undefined) {
-            const altDifference = altb - alta;
-            distance = Math.sqrt(distance * distance + altDifference * altDifference);
-        }
-        return distance;
     }
 }
 GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84);
@@ -1358,7 +1397,7 @@ class GPXSegment {
             ext.segment(e, this);
         }
     }
-    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.PythagoreanFlatEarthCalculator.Shared) {
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared) {
         let d = 0;
         if (this.trkpts) {
             for (let i = 0; i < this.trkpts.length - 1; i++) {
@@ -1400,7 +1439,7 @@ class GPXTrack extends GPXItem {
             ext.track(e, this);
         }
     }
-    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.PythagoreanFlatEarthCalculator.Shared) {
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared) {
         let d = 0;
         if (this.trksegs) {
             for (let s of this.trksegs) {
@@ -1562,7 +1601,7 @@ class GPXDocument extends _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.GeoBo
     createRoute() {
         return (this._factories && this._factories.route ? this._factories.route() : null) || new GPXRoute();
     }
-    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.PythagoreanFlatEarthCalculator.Shared) {
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared) {
         let d = 0;
         for (let t of this.tracks()) {
             d += t.length(system);
@@ -1930,17 +1969,27 @@ class Envelope {
         const upper = new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0, alt1) : undefined);
         return new Envelope(lower, upper);
     }
-    static FromPoints(a, b) {
+    static FromPoints(...array) {
+        const a = array[0];
         const hasAlt = a.alt !== undefined && a.alt !== undefined;
         const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
         const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt0 = hasAlt ? a.alt : undefined;
-        const lat1 = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(b.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
-        const lon1 = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(b.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
-        const alt1 = hasAlt ? a.alt : undefined;
-        const lower = new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0, alt1) : undefined);
-        const upper = new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0, alt1) : undefined);
-        return new Envelope(lower, upper);
+        const env = new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0));
+        for (let i = 1; i < array.length; i++) {
+            env.addInPlace(array[i]);
+        }
+        return env;
+    }
+    static FromEnvelopes(...array) {
+        let env = undefined;
+        for (let i = 0; i < array.length; i++) {
+            const a = array[i];
+            if (a) {
+                env = env ? env.unionInPlace(a) : a.clone();
+            }
+        }
+        return env;
     }
     constructor(lowerCorner, upperCorner) {
         this._min = lowerCorner;
@@ -2019,6 +2068,17 @@ class Envelope {
         if (this.hasAltitude && alt) {
             this._min.alt = Math.min(this._min.alt, alt);
             this._max.alt = Math.max(this._max.alt, alt);
+        }
+        return this;
+    }
+    unionInPlace(other) {
+        this._min.lat = Math.min(this._min.lat, other.south);
+        this._max.lat = Math.max(this._max.lat, other.north);
+        this._min.lon = Math.min(this._min.lon, other.west);
+        this._max.lon = Math.max(this._max.lon, other.east);
+        if (this.hasAltitude && other.hasAltitude) {
+            this._min.alt = Math.min(this._min.alt, other.bottom);
+            this._max.alt = Math.max(this._max.alt, other.top);
         }
         return this;
     }
@@ -2159,6 +2219,89 @@ KnownPlaces.Volcanoes = {
 
 /***/ }),
 
+/***/ "./dist/geography/geography.path.js":
+/*!******************************************!*\
+  !*** ./dist/geography/geography.path.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "GeoPath": () => (/* binding */ GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* binding */ GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* binding */ GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* binding */ GeoWaypoint)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geodesy/geodesy.calculators */ "./dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.envelope */ "./dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "./dist/geography/geography.position.js");
+
+
+
+class GeoPathItem extends _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.GeoBounded {
+    constructor(id, parent) {
+        super(parent);
+        this.id = id;
+    }
+}
+class GeoSegment extends GeoPathItem {
+    static FromPolyline(polyline, id, parent) {
+        const points = [];
+        for (let i = 0; i < polyline.length; i++) {
+            points.push(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2(polyline[i][0], polyline[i][1]));
+        }
+        return new GeoSegment(id, points, parent);
+    }
+    static Length(segment, proc) {
+        proc = proc ?? _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared;
+        let length = 0;
+        for (let i = 0; i < segment.points.length - 1; i++) {
+            const a = segment.points[i];
+            const b = segment.points[i + 1];
+            length += proc.getDistanceFromFloat(a.lat, a.lon, b.lat, b.lon);
+        }
+        return length;
+    }
+    constructor(id, points, parent) {
+        super(id, parent);
+        this.id = id;
+        this.points = points || [];
+    }
+    _buildEnvelope(b) {
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(...this.points);
+    }
+}
+class GeoWaypoint extends GeoPathItem {
+    constructor(id, position, parent) {
+        super(id, parent);
+        this.position = position;
+    }
+    _buildEnvelope(b) {
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(this.position);
+    }
+}
+class GeoPath extends GeoPathItem {
+    constructor(id, segments, parent) {
+        super(id, parent);
+        this.id = id;
+        this.segments = segments || [];
+    }
+    _buildEnvelope(b) {
+        let baseEnvelope = _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromEnvelopes(...this.segments.map((s) => s.bounds));
+        if (this.waypoints) {
+            const points = this.waypoints.map((w) => w.position);
+            const secondary = _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(...points);
+            if (secondary) {
+                return baseEnvelope ? baseEnvelope.unionInPlace(secondary) : secondary;
+            }
+        }
+        return baseEnvelope;
+    }
+}
+//# sourceMappingURL=geography.path.js.map
+
+/***/ }),
+
 /***/ "./dist/geography/geography.position.js":
 /*!**********************************************!*\
   !*** ./dist/geography/geography.position.js ***!
@@ -2170,15 +2313,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo2": () => (/* binding */ Geo2),
 /* harmony export */   "Geo3": () => (/* binding */ Geo3)
 /* harmony export */ });
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
+/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.interfaces */ "./dist/geography/geography.interfaces.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
+
 
 class Geo2 {
     static Zero() {
         return new Geo2(0, 0);
     }
     constructor(lat, lon) {
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)(lat)) {
+            lon = lat.lon;
+            lat = lat.lat;
+        }
         this._lat = lat;
-        this._lon = lon;
+        this._lon = lon ?? 0;
     }
     get lat() {
         return this._lat;
@@ -2200,8 +2349,8 @@ class Geo2 {
     }
 }
 Geo2.Default = new Geo2(46.382581, -0.308024);
-Geo2.LatRange = new _math_math__WEBPACK_IMPORTED_MODULE_0__.Range(-90, 90);
-Geo2.LonRange = new _math_math__WEBPACK_IMPORTED_MODULE_0__.Range(-180, 180);
+Geo2.LatRange = new _math_math__WEBPACK_IMPORTED_MODULE_1__.Range(-90, 90);
+Geo2.LonRange = new _math_math__WEBPACK_IMPORTED_MODULE_1__.Range(-180, 180);
 
 class Geo3 extends Geo2 {
     static Zero() {
@@ -2209,6 +2358,9 @@ class Geo3 extends Geo2 {
     }
     constructor(lat, lon, alt) {
         super(lat, lon);
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)(lat)) {
+            alt = lat.alt;
+        }
         this._alt = alt;
     }
     get alt() {
@@ -2267,6 +2419,123 @@ Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
 
 /***/ }),
 
+/***/ "./dist/geography/geography.tools.js":
+/*!*******************************************!*\
+  !*** ./dist/geography/geography.tools.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "PathwayPointGenerator": () => (/* binding */ PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* binding */ PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* binding */ PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* binding */ PathwayPointGeneratorOptions)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy/geodesy.calculators */ "./dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geography_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.path */ "./dist/geography/geography.path.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.position */ "./dist/geography/geography.position.js");
+
+
+
+var PathwayPointGeneratorEndMode;
+(function (PathwayPointGeneratorEndMode) {
+    PathwayPointGeneratorEndMode[PathwayPointGeneratorEndMode["BEGIN"] = 1] = "BEGIN";
+    PathwayPointGeneratorEndMode[PathwayPointGeneratorEndMode["END"] = 2] = "END";
+    PathwayPointGeneratorEndMode[PathwayPointGeneratorEndMode["BOTH"] = 3] = "BOTH";
+})(PathwayPointGeneratorEndMode || (PathwayPointGeneratorEndMode = {}));
+class PathwayPointGeneratorOptions {
+}
+class PathwayPointGeneratorBuilder {
+    constructor() { }
+    withOptions(options) {
+        this._options = options;
+        return this;
+    }
+    withEndMode(mode) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.endMode = mode;
+        return this;
+    }
+    withDistanceProcessor(processor) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.distanceProcessor = processor;
+        return this;
+    }
+    withDistance(distance) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.distance = distance;
+        return this;
+    }
+    withCount(count) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.count = count;
+        return this;
+    }
+    build() {
+        return new PathwayPointGenerator(this._options);
+    }
+}
+class PathwayPointGenerator {
+    constructor(options) {
+        this._options = options;
+    }
+    *generate(path) {
+        if (path.points.length < 2) {
+            return;
+        }
+        if (!this._options) {
+            yield* path.points;
+            return;
+        }
+        const dp = this._options?.distanceProcessor ?? _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__.HaversineCalculator.Shared;
+        let distance = this._options.distance;
+        if (!distance) {
+            if (this._options.count) {
+                if (this._options.count < 2) {
+                    yield path.points[0];
+                    yield path.points[1];
+                    return;
+                }
+                const totalLength = _geography_path__WEBPACK_IMPORTED_MODULE_1__.GeoSegment.Length(path, dp);
+                distance = totalLength / (this._options.count - 1);
+            }
+        }
+        if (distance) {
+            let cumulativLength = 0;
+            let a = path.points[0];
+            const endMode = this._options?.endMode ?? PathwayPointGeneratorEndMode.BOTH;
+            if (endMode === PathwayPointGeneratorEndMode.BEGIN || endMode === PathwayPointGeneratorEndMode.BOTH) {
+                yield a;
+            }
+            for (let i = 1; i < path.points.length; i++) {
+                const b = path.points[i];
+                let d = dp.getDistanceFromFloat(a.lat, a.lon, b.lat, b.lon);
+                if (d + cumulativLength > distance) {
+                    const az = dp.getAzimuthFromFloat(a.lat, a.lon, b.lat, b.lon);
+                    do {
+                        const remain = distance - cumulativLength;
+                        const p2 = dp.getLocationAtDistanceAzimuth(a.lat, a.lon, remain, az);
+                        const p3 = new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(p2);
+                        yield p3;
+                        d -= remain;
+                        cumulativLength = 0;
+                        a = p3;
+                    } while (d >= distance);
+                }
+                cumulativLength += d;
+                a = b;
+            }
+            if (endMode === PathwayPointGeneratorEndMode.END || endMode === PathwayPointGeneratorEndMode.BOTH) {
+                yield path.points[path.points.length - 1];
+            }
+        }
+    }
+}
+//# sourceMappingURL=geography.tools.js.map
+
+/***/ }),
+
 /***/ "./dist/geography/index.js":
 /*!*********************************!*\
   !*** ./dist/geography/index.js ***!
@@ -2276,26 +2545,34 @@ Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Envelope": () => (/* reexport safe */ _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope),
-/* harmony export */   "GPXBounds": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXBounds),
-/* harmony export */   "GPXCopyright": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXCopyright),
-/* harmony export */   "GPXDocument": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXDocument),
-/* harmony export */   "GPXItem": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXItem),
-/* harmony export */   "GPXLink": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXLink),
-/* harmony export */   "GPXMetadata": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXMetadata),
-/* harmony export */   "GPXOwner": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXOwner),
-/* harmony export */   "GPXRoute": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXRoute),
-/* harmony export */   "GPXRoutepoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXRoutepoint),
-/* harmony export */   "GPXSegment": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXSegment),
-/* harmony export */   "GPXTrack": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXTrack),
-/* harmony export */   "GPXTrackpoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXTrackpoint),
-/* harmony export */   "GPXWaypoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GPXWaypoint),
-/* harmony export */   "Garmin": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.Garmin),
-/* harmony export */   "GarminAddress": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GarminAddress),
-/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_5__.GarminPhoneNumber),
+/* harmony export */   "GPXBounds": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXBounds),
+/* harmony export */   "GPXCopyright": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXCopyright),
+/* harmony export */   "GPXDocument": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXDocument),
+/* harmony export */   "GPXItem": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXItem),
+/* harmony export */   "GPXLink": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXLink),
+/* harmony export */   "GPXMetadata": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXMetadata),
+/* harmony export */   "GPXOwner": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXOwner),
+/* harmony export */   "GPXRoute": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXRoute),
+/* harmony export */   "GPXRoutepoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXRoutepoint),
+/* harmony export */   "GPXSegment": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXSegment),
+/* harmony export */   "GPXTrack": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXTrack),
+/* harmony export */   "GPXTrackpoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXTrackpoint),
+/* harmony export */   "GPXWaypoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXWaypoint),
+/* harmony export */   "Garmin": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GarminPhoneNumber),
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3),
 /* harmony export */   "GeoBounded": () => (/* reexport safe */ _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.GeoBounded),
+/* harmony export */   "GeoPath": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoWaypoint),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
+/* harmony export */   "PathwayPointGenerator": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGeneratorOptions),
 /* harmony export */   "Projections": () => (/* reexport safe */ _geography_projections__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isEnvelope),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)
@@ -2305,7 +2582,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.envelope */ "./dist/geography/geography.envelope.js");
 /* harmony import */ var _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.knownPlaces */ "./dist/geography/geography.knownPlaces.js");
 /* harmony import */ var _geography_projections__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography.projections */ "./dist/geography/geography.projections.js");
-/* harmony import */ var _GPX_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./GPX/index */ "./dist/geography/GPX/index.js");
+/* harmony import */ var _geography_path__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./geography.path */ "./dist/geography/geography.path.js");
+/* harmony import */ var _geography_tools__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./geography.tools */ "./dist/geography/geography.tools.js");
+/* harmony import */ var _GPX_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./GPX/index */ "./dist/geography/GPX/index.js");
+
+
 
 
 
@@ -3466,6 +3747,7 @@ class Scalar {
 }
 Scalar.EPSILON = 1.401298e-45;
 Scalar.DEG2RAD = Math.PI / 180;
+Scalar.RAD2DEG = 180 / Math.PI;
 Scalar.INCH2METER = 0.0254;
 Scalar.METER2INCH = 39.3701;
 Scalar.PI = Math.PI;
@@ -7266,6 +7548,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo3),
 /* harmony export */   "GeoBounded": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoBounded),
+/* harmony export */   "GeoPath": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoWaypoint),
 /* harmony export */   "GeodeticGridPainter": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridPainter),
 /* harmony export */   "GeodeticGridView": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridView),
 /* harmony export */   "GeodeticGridViewOptions": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridViewOptions),
@@ -7299,6 +7585,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPoolOptions),
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
+/* harmony export */   "PathwayPointGenerator": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGeneratorOptions),
 /* harmony export */   "Power": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Power),
 /* harmony export */   "Projections": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Projections),
 /* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.PropertyChangedEventArgs),

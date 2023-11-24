@@ -26,6 +26,17 @@
         {
             "type": "chrome",
             "request": "launch",
+            "name": "Launch test geo on chrome",
+            "url": "http://localhost:1338/packages/host/www/testGeography.html",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "pathMapping": {
+                "/": "${workspaceFolder}/packages/dev/core/"
+            }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
             "name": "Map on chrome",
             "url": "http://localhost:1338/packages/host/www/babylonmap.html",
             "webRoot": "${workspaceFolder}",

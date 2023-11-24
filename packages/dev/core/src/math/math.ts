@@ -3,6 +3,7 @@ export type ParametricValue = number;
 export class Scalar {
     public static EPSILON = 1.401298e-45;
     public static DEG2RAD = Math.PI / 180;
+    public static RAD2DEG = 180 / Math.PI;
     public static INCH2METER = 0.0254;
     public static METER2INCH = 39.3701;
 

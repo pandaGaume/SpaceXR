@@ -7,7 +7,8 @@ export declare class Envelope implements IEnvelope {
     static MinLatitude: number;
     static Zero(): IEnvelope;
     static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2): Envelope;
-    static FromPoints(a: IGeo3 | IGeo2, b: IGeo3 | IGeo2): Envelope;
+    static FromPoints(...array: (IGeo3 | IGeo2)[]): IEnvelope | undefined;
+    static FromEnvelopes(...array: (IEnvelope | undefined | null)[]): IEnvelope | undefined;
     _min: IGeo3;
     _max: IGeo3;
     private constructor();
@@ -26,8 +27,9 @@ export declare class Envelope implements IEnvelope {
     get hasAltitude(): boolean;
     get center(): IGeo3;
     get size(): ISize3;
-    add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
-    addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
+    add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    unionInPlace(other: IEnvelope): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;
     contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
@@ -39,5 +41,5 @@ export declare abstract class GeoBounded implements IGeoBounded {
     get bounds(): IEnvelope | undefined;
     validateEnvelope(): void;
     invalidateEnvelope(): void;
-    protected abstract _buildEnvelope(b: IEnvelope): IEnvelope;
+    protected abstract _buildEnvelope(b: IEnvelope): IEnvelope | undefined;
 }

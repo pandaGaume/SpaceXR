@@ -266,9 +266,8 @@
                 // WARNING : This might be the new mode for XR but did not work for non obvious reason...
                 // const xr = await scene.createDefaultXRExperienceAsync();
                 // So, add vr as old fashion and deprecated way
-                var helper = scene.createDefaultVRExperience({ createDeviceOrientationCamera: false, floorMeshes: [ground] });
-                helper.enableInteractions();
-                helper.teleportationEnabled = true;
+                var vrHelper = scene.createDefaultVRExperience({ createDeviceOrientationCamera: false, floorMeshes: [ground] });
+                vrHelper.enableInteractions();
                 return scene;
             }
 

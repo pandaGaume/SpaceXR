@@ -1,4 +1,4 @@
-import { PythagoreanFlatEarthCalculator } from "../../geodesy/geodesy.calculators";
+import { HaversineCalculator } from "../../geodesy/geodesy.calculators";
 import { IDistanceProcessor } from "../../geodesy/geodesy.interfaces";
 import { Nullable } from "../../types";
 import { Envelope, GeoBounded } from "../geography.envelope";
@@ -164,7 +164,7 @@ export class GPXBounds {
         return this;
     }
 
-    public toEnvelope(): Envelope {
+    public toEnvelope(): IEnvelope | undefined {
         return Envelope.FromPoints(
             new Geo3(this.minlat ?? Geo2.LatRange.min, this.minlon ?? Geo2.LonRange.min),
             new Geo3(this.maxlat ?? Geo2.LatRange.max ?? Geo2.LatRange.min, this.maxlon ?? Geo2.LonRange.max ?? Geo2.LonRange.min)
@@ -501,7 +501,7 @@ export class GPXSegment implements IHasGPXExtensions {
         }
     }
 
-    public length(system: IDistanceProcessor = PythagoreanFlatEarthCalculator.Shared): number {
+    public length(system: IDistanceProcessor = HaversineCalculator.Shared): number {
         let d: number = 0;
         if (this.trkpts) {
             for (let i: number = 0; i < this.trkpts.length - 1; i++) {
@@ -550,7 +550,7 @@ export class GPXTrack extends GPXItem {
         }
     }
 
-    public length(system: IDistanceProcessor = PythagoreanFlatEarthCalculator.Shared): number {
+    public length(system: IDistanceProcessor = HaversineCalculator.Shared): number {
         let d: number = 0;
         if (this.trksegs) {
             for (let s of this.trksegs) {
@@ -829,7 +829,7 @@ export class GPXDocument extends GeoBounded implements IHasGPXExtensions {
         return (this._factories && this._factories.route ? this._factories.route() : null) || new GPXRoute();
     }
 
-    public length(system: IDistanceProcessor = PythagoreanFlatEarthCalculator.Shared): number {
+    public length(system: IDistanceProcessor = HaversineCalculator.Shared): number {
         let d: number = 0;
         for (let t of this.tracks()) {
             d += t.length(system);

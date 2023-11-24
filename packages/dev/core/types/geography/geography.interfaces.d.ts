@@ -10,8 +10,8 @@ export interface IGeo3 extends IComparable<IGeo3>, ICloneable<IGeo3> {
     alt?: number;
     hasAltitude: boolean;
 }
-export declare function isLocation(b: unknown): b is IGeo3;
-export interface IEnvelope extends IComparable<IEnvelope> {
+export declare function isLocation(b: unknown): b is IGeo2 | IGeo3;
+export interface IEnvelope extends IComparable<IEnvelope>, ICloneable<IEnvelope> {
     north: number;
     south: number;
     east: number;
@@ -25,8 +25,9 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     hasAltitude: boolean;
     center: IGeo3;
     size: ISize3;
-    add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
-    addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
+    add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    unionInPlace(other: IEnvelope): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;
     contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
@@ -34,4 +35,21 @@ export interface IEnvelope extends IComparable<IEnvelope> {
 export declare function isEnvelope(b: unknown): b is IEnvelope;
 export interface IGeoBounded {
     bounds?: IEnvelope;
+}
+export interface IGeoPathItem extends IGeoBounded {
+    id?: string;
+}
+export interface IGeoSegment<T extends IGeo2> extends IGeoPathItem {
+    points: T[];
+}
+export interface IGeoWaypoint<T extends IGeo2> extends IGeoPathItem {
+    position: T;
+}
+export interface IGeoRoute<T extends IGeo2> extends IGeoPathItem {
+    points: IGeoWaypoint<T>[];
+}
+export interface IGeoPath<T extends IGeo2, W extends IGeoWaypoint<T>> extends IGeoPathItem {
+    segments: IGeoSegment<T>[];
+    waypoints?: W[];
+    routes?: IGeoRoute<T>[];
 }

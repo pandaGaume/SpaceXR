@@ -1,6 +1,6 @@
 import { IDistanceProcessor } from "../../geodesy/geodesy.interfaces";
 import { Nullable } from "../../types";
-import { Envelope, GeoBounded } from "../geography.envelope";
+import { GeoBounded } from "../geography.envelope";
 import { IEnvelope } from "../geography.interfaces";
 export interface IHasGPXExtensions {
     [key: string]: any;
@@ -49,7 +49,7 @@ export declare class GPXBounds {
     maxlat?: number;
     maxlon?: number;
     parse(e: Element): this;
-    toEnvelope(): Envelope;
+    toEnvelope(): IEnvelope | undefined;
 }
 export declare class GPXMetadata implements IHasGPXExtensions {
     name?: Nullable<string>;

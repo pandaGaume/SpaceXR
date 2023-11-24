@@ -1,4 +1,4 @@
-import { IGeo2, IGeo3 } from "./geography.interfaces";
+import { IGeo2, IGeo3, isLocation } from "./geography.interfaces";
 import { Range } from "../math/math";
 
 export class Geo2 implements IGeo2 {
@@ -14,9 +14,13 @@ export class Geo2 implements IGeo2 {
     protected _lat: number;
     protected _lon: number;
 
-    public constructor(lat: number, lon: number) {
+    public constructor(lat: number | IGeo2, lon?: number) {
+        if (isLocation(lat)) {
+            lon = lat.lon;
+            lat = lat.lat;
+        }
         this._lat = lat;
-        this._lon = lon;
+        this._lon = lon ?? 0;
     }
 
     public get lat(): number {
@@ -50,8 +54,12 @@ export class Geo3 extends Geo2 implements IGeo3 {
 
     protected _alt?: number;
 
-    public constructor(lat: number, lon: number, alt?: number) {
+    public constructor(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number) {
         super(lat, lon);
+        if (isLocation(lat)) {
+            alt = (<IGeo3>lat).alt;
+        }
+
         this._alt = alt;
     }
 

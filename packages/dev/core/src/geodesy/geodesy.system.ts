@@ -3,7 +3,6 @@ import { IEnvelope, IGeo3 } from "../geography/geography.interfaces";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { Scalar } from "../math";
-import { IDistanceProcessor } from "./geodesy.interfaces";
 
 export enum CartesianMode {
     ECEF,
@@ -11,7 +10,7 @@ export enum CartesianMode {
     NED,
 }
 
-export class GeodeticSystem implements IDistanceProcessor {
+export class GeodeticSystem {
     public static readonly Default: GeodeticSystem = new GeodeticSystem(Ellipsoid.WGS84);
     /**
      * Given lat, lon and alt, return an array of 16, which is the enu transformation matrix (4x4)
@@ -141,35 +140,4 @@ export class GeodeticSystem implements IDistanceProcessor {
             target.z = z;
         }
     }
-
-    /// <summary>
-    /// give the distance between two points using the Pythagorean flat-Earth approximation
-    /// The Pythagorean flat-Earth approximation assumes that meridians are parallel, that the parallels of latitude
-    /// are negligibly different from great circles, and that great circles are negligibly different from
-    /// straight lines. Close to the poles, the parallels of latitude are not only shorter than great circles,
-    /// but indispensably curved. Taking this into account leads to the use of polar coordinates and the planar law
-    /// of cosines for computing short distances near the poles. The Polar Coordinate Flat-Earth Formulas computationally
-    /// only a little more expensive than the Pythagorean Theorem and will give smaller maximum errors for higher latitudes and
-    /// greater distances. The maximum errors, which depend upon azimuth in addition to separation distance, are equal
-    /// at 80 degrees latitude when the separation is 33 km (20 mi), 82 degrees at 18 km (11 mi), 84 degrees at 9 km (5.4 mi).
-    /// But even at 88 degrees the polar error can be as large as 20 meters (66 ft) when the distance between the points is 20 km (12 mi).
-    /// </summary>
-    public getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number {
-        if (lata === latb && lona === lonb && alta === altb) {
-            return 0;
-        }
-        const a = Math.PI / 2 - lata * Scalar.DEG2RAD;
-        const b = Math.PI / 2 - latb * Scalar.DEG2RAD;
-        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * Scalar.DEG2RAD));
-        let distance = this._ellipsoid.semiMajorAxis * c;
-        if (alta !== undefined && altb !== undefined) {
-            /// calculates the straight-line distance considering the altitude difference. This is done using the Pythagorean theorem,
-            /// treating the Haversine distance and altitude difference as perpendicular sides of a right triangle.
-            const altDifference = altb - alta;
-            distance = Math.sqrt(distance * distance + altDifference * altDifference);
-        }
-        return distance;
-    }
-
-    
 }

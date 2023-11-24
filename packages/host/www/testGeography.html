@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Leaflet Map with Complex Polyline to Mont Blanc</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+        <!-- Leaflet JavaScript -->
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <!-- SpaceXR-->
+        <script src="../../dev/core/bundles/spacexr.1.0.0.js"></script>
+
+        <style>
+            #mapid {
+                height: 1500px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapid"></div>
+
+        <script>
+            // Initialize the map on the "mapid" div with a given center and zoom
+            var mymap = L.map("mapid").setView([45.8326, 6.8652], 10); // Centered near Mont Blanc
+
+            // Add a tile layer to add to our map
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap contributors",
+                maxZoom: 18,
+            }).addTo(mymap);
+
+            // Define an array of latitude and longitude pairs for a fictional path to Mont Blanc
+            var latlngs = [
+                [45.9237, 6.8694], // Start point near Chamonix
+                [45.9045, 6.8458],
+                [45.8873, 6.8387],
+                [45.8712, 6.8431],
+                [45.8499, 6.8525],
+                [45.8326, 6.8652], // End point near Mont Blanc
+            ];
+
+            // Create a polyline and add it to the map
+            var polyline = L.polyline(latlngs, { color: "blue" }).addTo(mymap);
+
+            // Create markers at the start and end points
+            L.marker([45.9237, 6.8694]).addTo(mymap).bindPopup("Start Point near Chamonix");
+            L.marker([45.8326, 6.8652]).addTo(mymap).bindPopup("End Point near Mont Blanc");
+
+            // Optionally, you can also center the map view on the polyline
+            mymap.fitBounds(polyline.getBounds());
+
+            // Create a Segment object from the polyline
+            const segment = SPACEXR.GeoSegment.FromPolyline(latlngs);
+
+            // generate points along the segment every 500 meters (according the default ellipsoid data wich are in meter)
+            const generator = new SPACEXR.PathwayPointGeneratorBuilder().withDistance(500).build();
+            const points = Array.from(generator.generate(segment));
+            for (let p of points) {
+                L.marker([p.lat, p.lon]).addTo(mymap).bindPopup("Point");
+            }
+        </script>
+    </body>
+</html>

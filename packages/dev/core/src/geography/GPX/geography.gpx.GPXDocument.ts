@@ -3,7 +3,7 @@ import { IDistanceProcessor } from "../../geodesy/geodesy.interfaces";
 import { Nullable } from "../../types";
 import { Envelope, GeoBounded } from "../geography.envelope";
 import { IEnvelope } from "../geography.interfaces";
-import { Geo2, Geo3 } from "../geography.position";
+import { Geo2 } from "../geography.position";
 
 export interface IHasGPXExtensions {
     [key: string]: any;
@@ -166,8 +166,8 @@ export class GPXBounds {
 
     public toEnvelope(): IEnvelope | undefined {
         return Envelope.FromPoints(
-            new Geo3(this.minlat ?? Geo2.LatRange.min, this.minlon ?? Geo2.LonRange.min),
-            new Geo3(this.maxlat ?? Geo2.LatRange.max ?? Geo2.LatRange.min, this.maxlon ?? Geo2.LonRange.max ?? Geo2.LonRange.min)
+            new Geo2(this.minlat ?? Geo2.LatRange.min, this.minlon ?? Geo2.LonRange.min),
+            new Geo2(this.maxlat ?? Geo2.LatRange.max ?? Geo2.LatRange.min, this.maxlon ?? Geo2.LonRange.max ?? Geo2.LonRange.min)
         );
     }
 }
@@ -837,11 +837,7 @@ export class GPXDocument extends GeoBounded implements IHasGPXExtensions {
         return d;
     }
 
-    protected _buildEnvelope(b: IEnvelope): IEnvelope {
-        var e = b ?? Envelope.Zero();
-        for (var wp of this.trackpoints()) {
-            e.addInPlace(wp.lat ?? 0, wp.lon);
-        }
-        return e;
+    protected _buildEnvelope(): IEnvelope | undefined {
+        return Envelope.FromPoints(...Array.from(this.trackpoints()).map((wp) => new Geo2(wp.lat ?? 0, wp.lon ?? 0)));
     }
 }

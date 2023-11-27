@@ -36,6 +36,7 @@ export declare function isEnvelope(b: unknown): b is IEnvelope;
 export interface IGeoBounded {
     bounds?: IEnvelope;
 }
+export declare function isGeoBounded(b: unknown): b is IGeoBounded;
 export interface IGeoPathItem extends IGeoBounded {
     id?: string;
 }

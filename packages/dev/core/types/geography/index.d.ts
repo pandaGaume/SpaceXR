@@ -6,3 +6,4 @@ export * from "./geography.projections";
 export * from "./geography.path";
 export * from "./geography.tools";
 export * from "./GPX/index";
+export * from "./geography.index";

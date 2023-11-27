@@ -18,7 +18,7 @@ export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
         center: Geo2.Zero(),
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
-        exageration: 1.0
+        exageration: 1.0,
     });
 
     public center?: IGeo2;
@@ -37,7 +37,7 @@ export class SurfaceTileMapOptionsBuilder {
     _gridOptions?: TerrainGridOptions;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
- 
+
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
         return this;

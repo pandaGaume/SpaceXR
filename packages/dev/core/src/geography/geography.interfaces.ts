@@ -54,6 +54,11 @@ export interface IGeoBounded {
     bounds?: IEnvelope;
 }
 
+export function isGeoBounded(b: unknown): b is IGeoBounded {
+    if (typeof b !== "object" || b === null) return false;
+    return (<IGeoBounded>b).bounds !== undefined && isEnvelope((<IGeoBounded>b).bounds);
+}
+
 export interface IGeoPathItem extends IGeoBounded {
     id?: string;
 }

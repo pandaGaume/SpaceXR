@@ -43,8 +43,8 @@
                 const canvas = document.getElementById("tileCanvas");
 
                 // initialiser la localisation et le niveau de zoom
-                let center = new SPACEXR.Geo2(27.98817689833976, 86.92491071824738); // everest
-                const lod = 12;
+                let center = SPACEXR.KnownPlaces.Mountains.Matterhorn
+                const lod = 10;
 
                 // definir la source de donnée.
                 const tileClient = SPACEXR.Google.SatelliteClient2d() ;

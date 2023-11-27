@@ -201,5 +201,5 @@ export declare class GPXDocument extends GeoBounded implements IHasGPXExtensions
     createSegment(): GPXSegment;
     createRoute(): GPXRoute;
     length(system?: IDistanceProcessor): number;
-    protected _buildEnvelope(b: IEnvelope): IEnvelope;
+    protected _buildEnvelope(): IEnvelope | undefined;
 }

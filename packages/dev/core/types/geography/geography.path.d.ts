@@ -11,17 +11,17 @@ export declare class GeoSegment<T extends IGeo2> extends GeoPathItem implements 
     static Length<T extends IGeo2>(segment: IGeoSegment<T>, proc?: IDistanceProcessor): number;
     points: T[];
     constructor(id?: string, points?: T[], parent?: GeoPathItem);
-    protected _buildEnvelope(b: IEnvelope): IEnvelope | undefined;
+    protected _buildEnvelope(): IEnvelope | undefined;
 }
 export declare class GeoWaypoint<T extends IGeo2> extends GeoPathItem implements IGeoWaypoint<T> {
     position: T;
     constructor(id: string, position: T, parent?: GeoPathItem);
-    protected _buildEnvelope(b: IEnvelope): IEnvelope | undefined;
+    protected _buildEnvelope(): IEnvelope | undefined;
 }
 export declare class GeoPath extends GeoPathItem implements IGeoPath<IGeo2, IGeoWaypoint<IGeo2>> {
     segments: GeoSegment<IGeo2>[];
     waypoints?: IGeoWaypoint<IGeo2>[];
     routes?: IGeoRoute<IGeo2>[];
     constructor(id?: string, segments?: GeoSegment<Geo2>[], parent?: GeoPathItem);
-    protected _buildEnvelope(b: IEnvelope): IEnvelope | undefined;
+    protected _buildEnvelope(): IEnvelope | undefined;
 }

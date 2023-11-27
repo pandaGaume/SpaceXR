@@ -1619,7 +1619,7 @@ SurfaceTileMapOptions.Default = new SurfaceTileMapOptions({
     center: core_geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2.Zero(),
     levelOfDetail: 10,
     gridOptions: core_meshes_terrain_grid__WEBPACK_IMPORTED_MODULE_3__.TerrainGridOptions.Shared,
-    exageration: 1.0
+    exageration: 1.0,
 });
 
 class SurfaceTileMapOptionsBuilder {
@@ -2481,6 +2481,136 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "../core/dist/geodesy/geodesy.calculators.js":
+/*!***************************************************!*\
+  !*** ../core/dist/geodesy/geodesy.calculators.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CalculatorBase": () => (/* binding */ CalculatorBase),
+/* harmony export */   "HaversineCalculator": () => (/* binding */ HaversineCalculator),
+/* harmony export */   "PythagoreanFlatEarthCalculator": () => (/* binding */ PythagoreanFlatEarthCalculator)
+/* harmony export */ });
+/* harmony import */ var _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+
+
+
+class CalculatorBase {
+    constructor(e) {
+        this._ellipsoid = e ?? _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84;
+    }
+    get ellipsoid() {
+        return this._ellipsoid;
+    }
+}
+class HaversineCalculator extends CalculatorBase {
+    constructor(e) {
+        super(e);
+    }
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
+        if (lata === latb && lona === lonb && alta === altb) {
+            return 0;
+        }
+        lata *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lona *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        latb *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lonb *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const dLat = (latb - lata) / 2;
+        const dLon = (lonb - lona) / 2;
+        const sdLat = Math.sin(dLat);
+        const sdlon = Math.sin(dLon);
+        const a = sdLat * sdLat + Math.cos(lata) * Math.cos(latb) * sdlon * sdlon;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        let distance = this._ellipsoid.semiMajorAxis * c;
+        if (alta !== undefined && altb !== undefined) {
+            const altDifference = altb - alta;
+            distance = Math.sqrt(distance * distance + altDifference * altDifference);
+        }
+        return distance;
+    }
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+        if (lat1 === lat2 && lon1 === lon2) {
+            return 0;
+        }
+        lat1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lat2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const dlon = lon2 - lon1;
+        const coslat2 = Math.cos(lat2);
+        const y = Math.sin(dlon) * coslat2;
+        const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * coslat2 * Math.cos(dlon);
+        return Math.atan2(y, x) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+    }
+    getLocationAtDistanceAzimuth(lat, lon, dist, az) {
+        if (dist == 0) {
+            return new _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat, lon);
+        }
+        lat *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        az *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const ddr = dist / this._ellipsoid.semiMajorAxis;
+        const cosddr = Math.cos(ddr);
+        const sinddr = Math.sin(ddr);
+        const coslat = Math.cos(lat);
+        const sinlat = Math.sin(lat);
+        const coslatsinddr = coslat * sinddr;
+        const lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
+        const lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
+        return new _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1 * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG, lon1 * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG);
+    }
+}
+HaversineCalculator.Shared = new HaversineCalculator();
+
+class PythagoreanFlatEarthCalculator extends CalculatorBase {
+    constructor(e) {
+        super(e);
+    }
+    getDistanceFromFloat(lata, lona, latb, lonb) {
+        if (lata === latb && lona === lonb) {
+            return 0;
+        }
+        const a = Math.PI / 2 - lata * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const b = Math.PI / 2 - latb * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD));
+        let distance = this._ellipsoid.semiMajorAxis * c;
+        return distance;
+    }
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+        if (lat1 === lat2 && lon1 === lon2) {
+            return 0;
+        }
+        lat1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon1 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lat2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lon2 *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const dLon = lon2 - lon1;
+        const dLat = lat2 - lat1;
+        let azimuth = Math.atan2(dLon, dLat) * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        if (azimuth < 0) {
+            azimuth += 360;
+        }
+        return azimuth;
+    }
+    getLocationAtDistanceAzimuth(lat1, lon1, dist, az) {
+        const unit2deg = 1 / (((2 * Math.PI) / 360) * this._ellipsoid.semiMajorAxis);
+        az *= _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        lat1;
+        let newLat = lat1 + dist * Math.cos(az) * unit2deg;
+        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1 * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD);
+        return new _geography_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(newLat, newLon);
+    }
+}
+PythagoreanFlatEarthCalculator.Shared = new PythagoreanFlatEarthCalculator();
+
+//# sourceMappingURL=geodesy.calculators.js.map
+
+/***/ }),
+
 /***/ "../core/dist/geodesy/geodesy.ellipsoid.js":
 /*!*************************************************!*\
   !*** ../core/dist/geodesy/geodesy.ellipsoid.js ***!
@@ -2585,8 +2715,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GeodeticSystem": () => (/* binding */ GeodeticSystem)
 /* harmony export */ });
 /* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
-/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
+/* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+
 
 
 
@@ -2627,9 +2759,13 @@ class GeodeticSystem {
             return [om0, om4, 0, om12, om1, om5, om9, om13, om2, om6, om10, om14, 0, 0, 0, 1.0];
         }
     }
-    constructor(e, bounds) {
+    constructor(e, bounds, calculator) {
         this._ellipsoid = e || _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84;
         this._bounds = bounds;
+        this._calculator = calculator ?? _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared;
+    }
+    get calculator() {
+        return this._calculator;
     }
     get ellipsoid() {
         return this._ellipsoid;
@@ -2656,7 +2792,7 @@ class GeodeticSystem {
         return this._enuTransform;
     }
     get ENUObservable() {
-        this._enuObservable = this._enuObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
+        this._enuObservable = this._enuObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
         return this._enuObservable;
     }
     get cartesianMode() {
@@ -2691,6 +2827,8 @@ class GeodeticSystem {
         }
     }
 }
+GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84);
+
 //# sourceMappingURL=geodesy.system.js.map
 
 /***/ }),
@@ -2711,6 +2849,946 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geodesy_system__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geodesy.system */ "../core/dist/geodesy/geodesy.system.js");
 
 
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "../core/dist/geography/GPX/geography.gpx.GPXDocument.js":
+/*!***************************************************************!*\
+  !*** ../core/dist/geography/GPX/geography.gpx.GPXDocument.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "GPXBounds": () => (/* binding */ GPXBounds),
+/* harmony export */   "GPXCopyright": () => (/* binding */ GPXCopyright),
+/* harmony export */   "GPXDocument": () => (/* binding */ GPXDocument),
+/* harmony export */   "GPXItem": () => (/* binding */ GPXItem),
+/* harmony export */   "GPXLink": () => (/* binding */ GPXLink),
+/* harmony export */   "GPXMetadata": () => (/* binding */ GPXMetadata),
+/* harmony export */   "GPXOwner": () => (/* binding */ GPXOwner),
+/* harmony export */   "GPXRoute": () => (/* binding */ GPXRoute),
+/* harmony export */   "GPXRoutepoint": () => (/* binding */ GPXRoutepoint),
+/* harmony export */   "GPXSegment": () => (/* binding */ GPXSegment),
+/* harmony export */   "GPXTrack": () => (/* binding */ GPXTrack),
+/* harmony export */   "GPXTrackpoint": () => (/* binding */ GPXTrackpoint),
+/* harmony export */   "GPXWaypoint": () => (/* binding */ GPXWaypoint)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geodesy/geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography.envelope */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography.position */ "../core/dist/geography/geography.position.js");
+
+
+
+class GPXCopyright {
+    parse(e) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.author: {
+                        this.author = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.year: {
+                        this.year = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.license: {
+                        this.license = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+}
+class GPXLink {
+    parse(e) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.text: {
+                        this.text = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.type: {
+                        this.type = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+}
+class GPXOwner {
+    parse(e) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.name: {
+                        this.name = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.email: {
+                        this.email = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.link: {
+                        this.link = new GPXLink().parse(n);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+}
+class GPXBounds {
+    parse(e) {
+        for (let i = 0; i !== e.attributes.length; i++) {
+            const a = e.attributes[i];
+            switch (a.localName) {
+                case GPXDocument.AttributeNames.minlat: {
+                    this.minlat = GPXDocument.ParseFloatAttribute(a);
+                    break;
+                }
+                case GPXDocument.AttributeNames.minlon: {
+                    this.minlat = GPXDocument.ParseFloatAttribute(a);
+                    break;
+                }
+                case GPXDocument.AttributeNames.maxlat: {
+                    this.minlat = GPXDocument.ParseFloatAttribute(a);
+                    break;
+                }
+                case GPXDocument.AttributeNames.maxlon: {
+                    this.minlat = GPXDocument.ParseFloatAttribute(a);
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+        return this;
+    }
+    toEnvelope() {
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2(this.minlat ?? _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.LatRange.min, this.minlon ?? _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.LonRange.min), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2(this.maxlat ?? _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.LatRange.max ?? _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.LatRange.min, this.maxlon ?? _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.LonRange.max ?? _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2.LonRange.min));
+    }
+}
+class GPXMetadata {
+    parse(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.name: {
+                        this.name = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.desc: {
+                        this.desc = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.author: {
+                        this.author = new GPXOwner().parse(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.copyright: {
+                        this.copyright = new GPXCopyright().parse(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.link: {
+                        this.links = this.links || [];
+                        this.links.push(new GPXLink().parse(n));
+                        break;
+                    }
+                    case GPXDocument.TagNames.time: {
+                        this.time = GPXDocument.ParseDateElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.keywords: {
+                        this.keywords = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.bounds: {
+                        this.bounds = new GPXBounds().parse(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.extensions: {
+                        this.parseExtensions(n, doc);
+                    }
+                    default: {
+                        this.parseExtension(n, doc);
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+    parseExtensions(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            this.parseExtension(e.children[i], doc);
+        }
+    }
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.metadata) {
+            ext.metadata(e, this);
+        }
+    }
+}
+class GPXItem {
+    parse(n, doc) {
+        switch (n.localName) {
+            case GPXDocument.TagNames.name: {
+                this.name = GPXDocument.ParseTextElement(n);
+                break;
+            }
+            case GPXDocument.TagNames.cmt: {
+                this.cmt = GPXDocument.ParseTextElement(n);
+                break;
+            }
+            case GPXDocument.TagNames.desc: {
+                this.desc = GPXDocument.ParseTextElement(n);
+                break;
+            }
+            case GPXDocument.TagNames.src: {
+                this.src = GPXDocument.ParseTextElement(n);
+                break;
+            }
+            case GPXDocument.TagNames.link: {
+                this.links = this.links || [];
+                this.links.push(new GPXLink().parse(n));
+                break;
+            }
+            case GPXDocument.TagNames.type: {
+                this.type = GPXDocument.ParseTextElement(n);
+                break;
+            }
+            case GPXDocument.TagNames.extensions: {
+                this.parseExtensions(n, doc);
+            }
+            default: {
+                this.parseExtension(n, doc);
+                break;
+            }
+        }
+        return this;
+    }
+    parseExtensions(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            this.parseExtension(e.children[i], doc);
+        }
+    }
+}
+class GPXWaypoint extends GPXItem {
+    parse(e, doc) {
+        for (let i = 0; i !== e.attributes.length; i++) {
+            const a = e.attributes[i];
+            switch (a.localName) {
+                case GPXDocument.AttributeNames.lat: {
+                    this.lat = GPXDocument.ParseFloatAttribute(a);
+                    break;
+                }
+                case GPXDocument.AttributeNames.lon: {
+                    this.lon = GPXDocument.ParseFloatAttribute(a);
+                    break;
+                }
+            }
+        }
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.ele: {
+                        this.ele = GPXDocument.ParseFloatElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.time: {
+                        this.time = GPXDocument.ParseDateElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.magvar: {
+                        this.magvar = GPXDocument.ParseFloatElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.geoidheight: {
+                        this.geoidheight = GPXDocument.ParseFloatElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.sym: {
+                        this.sym = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.fix: {
+                        this.fix = GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.sat: {
+                        this.sat = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.hdop: {
+                        this.hdop = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.vdop: {
+                        this.vdop = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.pdop: {
+                        this.pdop = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.ageofgpsdata: {
+                        this.ageofgpsdata = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.dgpsid: {
+                        this.dgpsid = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    default: {
+                        super.parse(n, doc);
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.waypoint) {
+            ext.waypoint(e, this);
+        }
+    }
+}
+class GPXTrackpoint extends GPXWaypoint {
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.trackpoint) {
+            ext.trackpoint(e, this);
+        }
+    }
+}
+class GPXRoutepoint extends GPXWaypoint {
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.routepoint) {
+            ext.routepoint(e, this);
+        }
+    }
+}
+class GPXRoute extends GPXItem {
+    parse(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.rtept: {
+                        this.rtepts = this.rtepts || [];
+                        this.rtepts.push(doc.createRoutepoint().parse(n, doc));
+                        break;
+                    }
+                    case GPXDocument.TagNames.number: {
+                        this.number = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    default: {
+                        super.parse(n, doc);
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.route) {
+            ext.route(e, this);
+        }
+    }
+}
+class GPXSegment {
+    parse(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.trkpt: {
+                        this.trkpts = this.trkpts || [];
+                        this.trkpts.push(doc.createTrackpoint().parse(n, doc));
+                        break;
+                    }
+                    case GPXDocument.TagNames.extensions: {
+                        this.parseExtensions(n, doc);
+                    }
+                    default: {
+                        this.parseExtension(n, doc);
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+    parseExtensions(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            this.parseExtension(e.children[i], doc);
+        }
+    }
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.segment) {
+            ext.segment(e, this);
+        }
+    }
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared) {
+        let d = 0;
+        if (this.trkpts) {
+            for (let i = 0; i < this.trkpts.length - 1; i++) {
+                const a = this.trkpts[i];
+                const b = this.trkpts[i + 1];
+                d += system.getDistanceFromFloat(a.lat ?? 0, a.lon ?? 0, b.lat ?? 0, b.lon ?? 0);
+            }
+        }
+        return d;
+    }
+}
+class GPXTrack extends GPXItem {
+    parse(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.trkseg: {
+                        this.trksegs = this.trksegs || [];
+                        this.trksegs.push(doc.createSegment().parse(n, doc));
+                        break;
+                    }
+                    case GPXDocument.TagNames.number: {
+                        this.number = GPXDocument.ParseIntElement(n);
+                        break;
+                    }
+                    default: {
+                        super.parse(n, doc);
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.track) {
+            ext.track(e, this);
+        }
+    }
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared) {
+        let d = 0;
+        if (this.trksegs) {
+            for (let s of this.trksegs) {
+                d += s.length(system);
+            }
+        }
+        return d;
+    }
+}
+class GPXDocument extends _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.GeoBounded {
+    constructor(doc, ...extensions) {
+        super();
+        this.addExtensions(...extensions);
+        if (doc) {
+            this.parse(doc);
+        }
+    }
+    getExtension(namespace) {
+        return this._extensions && namespace ? this._extensions.get(namespace) : null;
+    }
+    addExtensions(...extensions) {
+        if (extensions) {
+            this._extensions = this._extensions || new Map();
+            for (const e of extensions) {
+                if (e) {
+                    this._extensions.set(e.namespace, e);
+                }
+            }
+        }
+    }
+    get meta() {
+        return this._meta;
+    }
+    *waypoints(predicate) {
+        if (!this._waypoints)
+            return;
+        for (const w of this._waypoints) {
+            if (!predicate || predicate(w)) {
+                yield w;
+            }
+        }
+    }
+    *tracks(predicate) {
+        if (!this._tracks)
+            return;
+        for (const t of this._tracks) {
+            if (!predicate || predicate(t)) {
+                yield t;
+            }
+        }
+    }
+    *routes(predicate) {
+        if (!this._routes)
+            return;
+        for (const r of this._routes) {
+            if (!predicate || predicate(r)) {
+                yield r;
+            }
+        }
+    }
+    *segments(predicate) {
+        if (!this._tracks)
+            return;
+        for (const t of this._tracks) {
+            if (!t.trksegs)
+                continue;
+            for (const s of t.trksegs) {
+                if (!predicate || predicate(s, t)) {
+                    yield s;
+                }
+            }
+        }
+    }
+    *trackpoints(predicate) {
+        if (!this._tracks)
+            return;
+        for (const t of this._tracks) {
+            if (!t.trksegs)
+                continue;
+            for (const s of t.trksegs) {
+                if (!s.trkpts)
+                    continue;
+                for (const wp of s.trkpts) {
+                    if (!predicate || predicate(wp, s, t)) {
+                        yield wp;
+                    }
+                }
+            }
+        }
+    }
+    parse(e, ...extensions) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case GPXDocument.TagNames.gpx: {
+                        this.parse(n);
+                        break;
+                    }
+                    case GPXDocument.TagNames.metadata: {
+                        this._meta = this.createMetadata().parse(n, this);
+                        break;
+                    }
+                    case GPXDocument.TagNames.trk: {
+                        this._tracks = this._tracks || [];
+                        this._tracks.push(this.createTrack().parse(n, this));
+                        break;
+                    }
+                    case GPXDocument.TagNames.rte: {
+                        this._routes = this._routes || [];
+                        this._routes.push(this.createRoute().parse(n, this));
+                        break;
+                    }
+                    case GPXDocument.TagNames.wpt: {
+                        this._waypoints = this._waypoints || [];
+                        this._waypoints.push(this.createWaypoint().parse(n, this));
+                        break;
+                    }
+                    case GPXDocument.TagNames.extensions: {
+                        this.parseExtensions(n, this);
+                    }
+                    default: {
+                        this.parseExtension(n, this);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    parseExtensions(e, doc) {
+        for (let i = 0; i !== e.children.length; i++) {
+            this.parseExtension(e.children[i], doc);
+        }
+    }
+    parseExtension(e, doc) {
+        const ext = doc.getExtension(e.namespaceURI);
+        if (ext && ext.gpx) {
+            ext.gpx(e, this);
+        }
+    }
+    createMetadata() {
+        return (this._factories && this._factories.metadata ? this._factories.metadata() : null) || new GPXMetadata();
+    }
+    createWaypoint() {
+        return (this._factories && this._factories.waypoint ? this._factories.waypoint() : null) || new GPXWaypoint();
+    }
+    createTrackpoint() {
+        return (this._factories && this._factories.waypoint ? this._factories.trackpoint?.() : null) || new GPXTrackpoint();
+    }
+    createRoutepoint() {
+        return (this._factories && this._factories.waypoint ? this._factories.routepoint?.() : null) || new GPXRoutepoint();
+    }
+    createTrack() {
+        return (this._factories && this._factories.track ? this._factories.track() : null) || new GPXTrack();
+    }
+    createSegment() {
+        return (this._factories && this._factories.segment ? this._factories.segment() : null) || new GPXSegment();
+    }
+    createRoute() {
+        return (this._factories && this._factories.route ? this._factories.route() : null) || new GPXRoute();
+    }
+    length(system = _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared) {
+        let d = 0;
+        for (let t of this.tracks()) {
+            d += t.length(system);
+        }
+        return d;
+    }
+    _buildEnvelope() {
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(...Array.from(this.trackpoints()).map((wp) => new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2(wp.lat ?? 0, wp.lon ?? 0)));
+    }
+}
+GPXDocument.ParseIntElement = function (e) {
+    if (!e || !e.firstChild) {
+        return null;
+    }
+    const n = e.firstChild.nodeValue;
+    return n ? Number.parseInt(n) : null;
+};
+GPXDocument.ParseFloatElement = function (e) {
+    if (!e || !e.firstChild) {
+        return null;
+    }
+    const n = e.firstChild.nodeValue;
+    return n ? Number.parseFloat(n) : null;
+};
+GPXDocument.ParseTextElement = function (e) {
+    if (!e || !e.firstChild) {
+        return null;
+    }
+    return e.firstChild.nodeValue;
+};
+GPXDocument.ParseDateElement = function (e) {
+    if (!e || !e.firstChild) {
+        return null;
+    }
+    const n = e.firstChild.nodeValue;
+    return n ? new Date(Date.parse(n)) : null;
+};
+GPXDocument.ParseIntAttribute = function (a) {
+    return Number.parseInt(a.value);
+};
+GPXDocument.ParseFloatAttribute = function (a) {
+    return Number.parseFloat(a.value);
+};
+GPXDocument.ParseTextAttribute = function (a) {
+    return a.value;
+};
+GPXDocument.ParseDateAttribute = function (a) {
+    return new Date(Date.parse(a.value));
+};
+GPXDocument.DefaultNamespace = "http://www.topografix.com/GPX/1/1";
+GPXDocument.TagNames = {
+    gpx: "gpx",
+    metadata: "metadata",
+    link: "link",
+    text: "text",
+    time: "time",
+    trk: "trk",
+    name: "name",
+    trkseg: "trkseg",
+    trkpt: "trkpt",
+    ele: "ele",
+    rte: "rte",
+    rtept: "rtept",
+    wpt: "wpt",
+    author: "author",
+    year: "year",
+    license: "license",
+    type: "type",
+    email: "email",
+    desc: "desc",
+    copyright: "copyright",
+    keywords: "keywords",
+    bounds: "bounds",
+    cmt: "cmt",
+    src: "src",
+    magvar: "magvar",
+    geoidheight: "geoidheight",
+    sym: "sym",
+    fix: "fix",
+    sat: "sat",
+    hdop: "hdop",
+    vdop: "vdop",
+    pdop: "pdop",
+    ageofgpsdata: "ageofgpsdata",
+    dgpsid: "dgpsid",
+    number: "number",
+    extensions: "extensions",
+};
+GPXDocument.AttributeNames = {
+    lat: "lat",
+    lon: "lon",
+    minlat: "minlat",
+    minlon: "minlon",
+    maxlat: "maxlat",
+    maxlon: "maxlon",
+};
+
+//# sourceMappingURL=geography.gpx.GPXDocument.js.map
+
+/***/ }),
+
+/***/ "../core/dist/geography/GPX/index.js":
+/*!*******************************************!*\
+  !*** ../core/dist/geography/GPX/index.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "GPXBounds": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXBounds),
+/* harmony export */   "GPXCopyright": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXCopyright),
+/* harmony export */   "GPXDocument": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument),
+/* harmony export */   "GPXItem": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXItem),
+/* harmony export */   "GPXLink": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXLink),
+/* harmony export */   "GPXMetadata": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXMetadata),
+/* harmony export */   "GPXOwner": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXOwner),
+/* harmony export */   "GPXRoute": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXRoute),
+/* harmony export */   "GPXRoutepoint": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXRoutepoint),
+/* harmony export */   "GPXSegment": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXSegment),
+/* harmony export */   "GPXTrack": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXTrack),
+/* harmony export */   "GPXTrackpoint": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXTrackpoint),
+/* harmony export */   "GPXWaypoint": () => (/* reexport safe */ _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXWaypoint),
+/* harmony export */   "Garmin": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.GarminPhoneNumber)
+/* harmony export */ });
+/* harmony import */ var _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.gpx.GPXDocument */ "../core/dist/geography/GPX/geography.gpx.GPXDocument.js");
+/* harmony import */ var _vendors_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vendors/index */ "../core/dist/geography/GPX/vendors/index.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "../core/dist/geography/GPX/vendors/garmin/geography.gpx.GarminExtensions.js":
+/*!***********************************************************************************!*\
+  !*** ../core/dist/geography/GPX/vendors/garmin/geography.gpx.GarminExtensions.js ***!
+  \***********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Garmin": () => (/* binding */ Garmin),
+/* harmony export */   "GarminAddress": () => (/* binding */ GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* binding */ GarminPhoneNumber)
+/* harmony export */ });
+/* harmony import */ var _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geography.gpx.GPXDocument */ "../core/dist/geography/GPX/geography.gpx.GPXDocument.js");
+
+class GarminAddress {
+    parse(e) {
+        for (let i = 0; i !== e.children.length; i++) {
+            const n = e.children[i];
+            if (n.nodeType === 1) {
+                switch (n.localName) {
+                    case Garmin.TagNames.StreetAddress: {
+                        this.streetAddress = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case Garmin.TagNames.City: {
+                        this.city = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case Garmin.TagNames.State: {
+                        this.state = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case Garmin.TagNames.Country: {
+                        this.country = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    case Garmin.TagNames.PostalCode: {
+                        this.postalCode = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(n);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+}
+class GarminPhoneNumber {
+    parse(e) {
+        for (let i = 0; i !== e.attributes.length; i++) {
+            const a = e.attributes[i];
+            switch (a.localName) {
+                case Garmin.AttributeNames.Category: {
+                    this.category = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextAttribute(a);
+                    break;
+                }
+            }
+        }
+        this.value = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(e);
+        return this;
+    }
+}
+class Garmin {
+}
+Garmin.TagNames = {
+    StreetAddress: "StreetAddress",
+    City: "City",
+    State: "State",
+    Country: "Country",
+    PostalCode: "PostalCode",
+    Proximity: "Proximity",
+    Temperature: "Temperature",
+    Depth: "Depth",
+    DisplayMode: "DisplayMode",
+    Categories: "Categories",
+    Address: "Address",
+    PhoneNumber: "PhoneNumber",
+    DisplayColor: "DisplayColor",
+};
+Garmin.AttributeNames = {
+    Category: "Category",
+};
+Garmin.Extension = {
+    namespace: "http://www.garmin.com/xmlschemas/GpxExtensions/v3",
+    waypoint: function (e, target) {
+        switch (e.localName) {
+            case Garmin.TagNames.Proximity: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseFloatElement(e);
+                break;
+            }
+            case Garmin.TagNames.Temperature: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseFloatElement(e);
+                break;
+            }
+            case Garmin.TagNames.Depth: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseFloatElement(e);
+                break;
+            }
+            case Garmin.TagNames.DisplayMode: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(e);
+                break;
+            }
+            case Garmin.TagNames.Address: {
+                target[e.localName] = new GarminAddress().parse(e);
+                break;
+            }
+            case Garmin.TagNames.PhoneNumber: {
+                target[e.localName] = new GarminPhoneNumber().parse(e);
+                break;
+            }
+            default:
+                break;
+        }
+    },
+    route: function (e, target) {
+        switch (e.localName) {
+            case Garmin.TagNames.DisplayColor: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(e);
+                break;
+            }
+            default:
+                break;
+        }
+    },
+    track: function (e, target) {
+        switch (e.localName) {
+            case Garmin.TagNames.DisplayColor: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseTextElement(e);
+                break;
+            }
+            default:
+                break;
+        }
+    },
+    trackpoint: function (e, target) {
+        switch (e.localName) {
+            case Garmin.TagNames.Temperature: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseFloatElement(e);
+                break;
+            }
+            case Garmin.TagNames.Depth: {
+                target[e.localName] = _geography_gpx_GPXDocument__WEBPACK_IMPORTED_MODULE_0__.GPXDocument.ParseFloatElement(e);
+                break;
+            }
+            default:
+                break;
+        }
+    },
+};
+
+//# sourceMappingURL=geography.gpx.GarminExtensions.js.map
+
+/***/ }),
+
+/***/ "../core/dist/geography/GPX/vendors/garmin/index.js":
+/*!**********************************************************!*\
+  !*** ../core/dist/geography/GPX/vendors/garmin/index.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Garmin": () => (/* reexport safe */ _geography_gpx_GarminExtensions__WEBPACK_IMPORTED_MODULE_0__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ _geography_gpx_GarminExtensions__WEBPACK_IMPORTED_MODULE_0__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _geography_gpx_GarminExtensions__WEBPACK_IMPORTED_MODULE_0__.GarminPhoneNumber)
+/* harmony export */ });
+/* harmony import */ var _geography_gpx_GarminExtensions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.gpx.GarminExtensions */ "../core/dist/geography/GPX/vendors/garmin/geography.gpx.GarminExtensions.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "../core/dist/geography/GPX/vendors/index.js":
+/*!***************************************************!*\
+  !*** ../core/dist/geography/GPX/vendors/index.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Garmin": () => (/* reexport safe */ _garmin_index__WEBPACK_IMPORTED_MODULE_0__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ _garmin_index__WEBPACK_IMPORTED_MODULE_0__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _garmin_index__WEBPACK_IMPORTED_MODULE_0__.GarminPhoneNumber)
+/* harmony export */ });
+/* harmony import */ var _garmin_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./garmin/index */ "../core/dist/geography/GPX/vendors/garmin/index.js");
+
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -2723,42 +3801,97 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Envelope": () => (/* binding */ Envelope)
+/* harmony export */   "Envelope": () => (/* binding */ Envelope),
+/* harmony export */   "GeoBounded": () => (/* binding */ GeoBounded)
 /* harmony export */ });
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
-/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
-/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
-/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
 
 
 
 
 class Envelope {
+    static Zero() {
+        return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero());
+    }
+    static Split2(a) {
+        if (a) {
+            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.isGeoBounded)(a)) {
+                return Envelope.Split2(a.bounds);
+            }
+            const center = a.center;
+            return [
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon)),
+                new Envelope(center, new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east)),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west), center),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east)),
+            ];
+        }
+        return [];
+    }
+    static Split3(a) {
+        if (a) {
+            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.isGeoBounded)(a)) {
+                return Envelope.Split3(a.bounds);
+            }
+            if (a.hasAltitude) {
+                const center = a.center;
+                return [
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west, a.bottom), center),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east, a.top)),
+                ];
+            }
+        }
+        return [];
+    }
     static FromSize(position, size) {
         const hasAlt = position.alt !== undefined && size.thickness !== undefined;
-        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(position.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
-        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(position.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(position.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(position.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt0 = hasAlt ? position.alt : undefined;
         const h = size.width % 180;
-        const lat1 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(position.lat + h, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lat1 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(position.lat + h, Envelope.MinLatitude, Envelope.MaxLatitude);
         const w = size.width % 360;
-        const lon1 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(position.lon + w, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const lon1 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(position.lon + w, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt1 = hasAlt ? position.alt + size.thickness : undefined;
-        const lower = new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0, alt1) : undefined);
-        const upper = new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0, alt1) : undefined);
+        const lower = new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0, alt1) : undefined);
+        const upper = new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0, alt1) : undefined);
         return new Envelope(lower, upper);
     }
-    static FromPoints(a, b) {
+    static FromPoints(...array) {
+        const a = array[0];
         const hasAlt = a.alt !== undefined && a.alt !== undefined;
-        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
-        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt0 = hasAlt ? a.alt : undefined;
-        const lat1 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(b.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
-        const lon1 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(b.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
-        const alt1 = hasAlt ? a.alt : undefined;
-        const lower = new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(Math.min(lat0, lat1), Math.min(lon0, lon1), hasAlt ? Math.min(alt0, alt1) : undefined);
-        const upper = new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(Math.max(lat0, lat1), Math.max(lon0, lon1), hasAlt ? Math.max(alt0, alt1) : undefined);
-        return new Envelope(lower, upper);
+        const env = new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0));
+        for (let i = 1; i < array.length; i++) {
+            env.addInPlace(array[i]);
+        }
+        return env;
+    }
+    static FromEnvelopes(...array) {
+        let env = undefined;
+        for (let i = 0; i < array.length; i++) {
+            let a = array[i];
+            if (a) {
+                if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.isGeoBounded)(a)) {
+                    a = a.bounds;
+                }
+                if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.isEnvelope)(a)) {
+                    env = env ? env.unionInPlace(a) : a.clone();
+                }
+            }
+        }
+        return env;
     }
     constructor(lowerCorner, upperCorner) {
         this._min = lowerCorner;
@@ -2783,16 +3916,16 @@ class Envelope {
         return this._max.alt;
     }
     get nw() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.north, this.west);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.north, this.west);
     }
     get sw() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.south, this.west);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.south, this.west);
     }
     get ne() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.north, this.east);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.north, this.east);
     }
     get se() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.south, this.east);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.south, this.east);
     }
     equals(other) {
         return (other &&
@@ -2813,19 +3946,19 @@ class Envelope {
         const lat = this._min.lon + (this._max.lon - this._min.lon) / 2;
         const lon = this._min.lat + (this._max.lat - this._min.lat) / 2;
         const alt = this.hasAltitude ? this._min.alt + (this._max.alt - this._min.alt) / 2 : undefined;
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(lat, lon, alt);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat, lon, alt);
     }
     get size() {
         const w = this._max.lon - this._min.lon;
         const h = this._max.lat - this._min.lat;
         const t = this.hasAltitude ? this._max.alt - this._min.alt : 0;
-        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_2__.Size3(w, h, t);
+        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_3__.Size3(w, h, t);
     }
     add(lat, lon, alt) {
         return this.clone().addInPlace(lat, lon, alt);
     }
     addInPlace(lat, lon, alt) {
-        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_3__.isLocation)(lat)) {
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.isLocation)(lat)) {
             return this.addInPlace(lat.lat, lat.lon, lat.alt);
         }
         this._min.lat = Math.min(this._min.lat, lat);
@@ -2837,6 +3970,17 @@ class Envelope {
         if (this.hasAltitude && alt) {
             this._min.alt = Math.min(this._min.alt, alt);
             this._max.alt = Math.max(this._max.alt, alt);
+        }
+        return this;
+    }
+    unionInPlace(other) {
+        this._min.lat = Math.min(this._min.lat, other.south);
+        this._max.lat = Math.max(this._max.lat, other.north);
+        this._min.lon = Math.min(this._min.lon, other.west);
+        this._max.lon = Math.max(this._max.lon, other.east);
+        if (this.hasAltitude && other.hasAltitude) {
+            this._min.alt = Math.min(this._min.alt, other.bottom);
+            this._max.alt = Math.max(this._max.alt, other.top);
         }
         return this;
     }
@@ -2866,7 +4010,224 @@ Envelope.MaxLatitude = 90;
 Envelope.MinLongitude = -Envelope.MaxLongitude;
 Envelope.MinLatitude = -Envelope.MaxLatitude;
 
+class GeoBounded {
+    constructor(bounds, parent) {
+        if (parent) {
+            this._parent = parent;
+        }
+        this._env = bounds;
+    }
+    get parent() {
+        return this._parent;
+    }
+    get bounds() {
+        this.validateEnvelope();
+        return this._env;
+    }
+    validateEnvelope() {
+        if (!this._env) {
+            this._env = this._buildEnvelope();
+        }
+    }
+    invalidateEnvelope() {
+        if (this._env) {
+            delete this._env;
+            if (this._parent) {
+                this._parent.invalidateEnvelope();
+            }
+        }
+    }
+}
 //# sourceMappingURL=geography.envelope.js.map
+
+/***/ }),
+
+/***/ "../core/dist/geography/geography.index.js":
+/*!*************************************************!*\
+  !*** ../core/dist/geography/geography.index.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SpatialIndex": () => (/* binding */ SpatialIndex),
+/* harmony export */   "SpatialIndexNode": () => (/* binding */ SpatialIndexNode),
+/* harmony export */   "SpatialIndexOptions": () => (/* binding */ SpatialIndexOptions),
+/* harmony export */   "SpatialIndexType": () => (/* binding */ SpatialIndexType)
+/* harmony export */ });
+/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.envelope */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
+
+
+var SpatialIndexType;
+(function (SpatialIndexType) {
+    SpatialIndexType[SpatialIndexType["QUADTREE"] = 0] = "QUADTREE";
+    SpatialIndexType[SpatialIndexType["OCTREE"] = 1] = "OCTREE";
+})(SpatialIndexType || (SpatialIndexType = {}));
+class SpatialIndexOptions {
+    constructor() {
+        this.type = SpatialIndexOptions.DefaultType;
+        this.maxDepth = SpatialIndexOptions.DefaultMaxDepth;
+        this.maxCount = SpatialIndexOptions.DefaultMaxCount;
+        this.threshold = SpatialIndexOptions.DefaultThreshold;
+    }
+}
+SpatialIndexOptions.DefaultType = SpatialIndexType.QUADTREE;
+SpatialIndexOptions.DefaultMaxCount = 32;
+SpatialIndexOptions.DefaultMaxDepth = 10;
+SpatialIndexOptions.DefaultThreshold = 8;
+
+class SpatialIndexNode {
+    constructor(bounds, parent) {
+        this._parent = parent;
+        this._env = bounds;
+        this._childrens = [];
+    }
+    get childrens() {
+        return this._childrens;
+    }
+    bounds() {
+        return this._env;
+    }
+    get depth() {
+        if (!this._parent)
+            return 0;
+        return this._parent.depth + 1;
+    }
+    get count() {
+        if (this._content) {
+            return this._content.length;
+        }
+        let result = 0;
+        if (this._childrens) {
+            for (const child of this._childrens) {
+                result += child.count;
+            }
+        }
+        return result;
+    }
+    *contents(predicate) {
+        if (this._content) {
+            for (const c of this._content) {
+                if (!predicate || predicate(c)) {
+                    yield c;
+                }
+            }
+            return;
+        }
+        if (this._childrens) {
+            for (const child of this._childrens) {
+                yield* child.contents(predicate);
+            }
+        }
+    }
+    add(item, options) {
+        if (item && item.bounds?.intersectWith(this._env)) {
+            if (!this._childrens || this._childrens.length === 0) {
+                this._content = this._content || [];
+                if (this._content.length < options?.maxCount ?? SpatialIndexOptions.DefaultMaxCount) {
+                    this._content.push(item);
+                    return;
+                }
+                const type = options?.type ?? SpatialIndexOptions.DefaultType;
+                if (type === SpatialIndexType.QUADTREE) {
+                    this._childrens.push(..._geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.Split2(this._env).map((e) => new SpatialIndexNode(e, this)));
+                }
+                else {
+                    this._childrens.push(..._geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.Split3(this._env).map((e) => new SpatialIndexNode(e, this)));
+                }
+                for (const child of this._childrens) {
+                    for (const content of this._content) {
+                        child.add(content, options);
+                    }
+                }
+                this._content = [];
+            }
+            for (const child of this._childrens) {
+                child.add(item, options);
+            }
+        }
+    }
+    remove(item, options) {
+        if (item && item.bounds?.intersectWith(this._env)) {
+            if (this._content) {
+                const index = this._content.findIndex((c) => c === item);
+                if (index >= 0) {
+                    this._content.splice(index, 1);
+                    return;
+                }
+            }
+            if (this._childrens) {
+                let count = 0;
+                for (const child of this._childrens) {
+                    child.remove(item, options);
+                    count += child.count;
+                }
+                const max = options?.maxCount ?? SpatialIndexOptions.DefaultMaxCount;
+                let t = options?.threshold ?? SpatialIndexOptions.DefaultThreshold;
+                t = Math.min(t, max);
+                if (max - count >= t) {
+                    this._content = [];
+                    for (const child of this._childrens) {
+                        for (const content of child.contents()) {
+                            this._content.push(content);
+                        }
+                        child.clear();
+                    }
+                    this._childrens = [];
+                }
+            }
+        }
+    }
+    get(bounds) {
+        if (bounds) {
+            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.isGeoBounded)(bounds)) {
+                return this.get(bounds.bounds);
+            }
+            if (this._env.intersectWith(bounds)) {
+                if (this._content) {
+                    return this._content.filter((c) => c.bounds?.intersectWith(bounds));
+                }
+                const result = [];
+                for (const child of this._childrens) {
+                    result.push(...child.get(bounds));
+                }
+                return result;
+            }
+        }
+        return [];
+    }
+    clear() {
+        this._content = undefined;
+        if (this._childrens) {
+            for (const child of this._childrens) {
+                child.clear();
+            }
+        }
+    }
+}
+class SpatialIndex {
+    constructor(bounds, options) {
+        this._root = new SpatialIndexNode(bounds);
+        this._options = options || new SpatialIndexOptions();
+    }
+    get root() {
+        return this._root;
+    }
+    get bounds() {
+        return this._root.bounds();
+    }
+    add(item) {
+        this._root.add(item, this._options);
+    }
+    remove(item) {
+        this._root.remove(item, this._options);
+    }
+    get(bounds) {
+        return this._root.get(bounds);
+    }
+}
+//# sourceMappingURL=geography.index.js.map
 
 /***/ }),
 
@@ -2879,6 +4240,7 @@ Envelope.MinLatitude = -Envelope.MaxLatitude;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "isEnvelope": () => (/* binding */ isEnvelope),
+/* harmony export */   "isGeoBounded": () => (/* binding */ isGeoBounded),
 /* harmony export */   "isLocation": () => (/* binding */ isLocation)
 /* harmony export */ });
 function isLocation(b) {
@@ -2890,6 +4252,11 @@ function isEnvelope(b) {
     if (typeof b !== "object" || b === null)
         return false;
     return b.nw !== undefined && b.sw !== undefined && b.ne !== undefined && b.nw !== undefined;
+}
+function isGeoBounded(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    return b.bounds !== undefined && isEnvelope(b.bounds);
 }
 //# sourceMappingURL=geography.interfaces.js.map
 
@@ -2953,6 +4320,89 @@ KnownPlaces.Volcanoes = {
 
 /***/ }),
 
+/***/ "../core/dist/geography/geography.path.js":
+/*!************************************************!*\
+  !*** ../core/dist/geography/geography.path.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "GeoPath": () => (/* binding */ GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* binding */ GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* binding */ GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* binding */ GeoWaypoint)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geodesy/geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.envelope */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
+
+
+
+class GeoPathItem extends _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.GeoBounded {
+    constructor(id, parent) {
+        super(undefined, parent);
+        this.id = id;
+    }
+}
+class GeoSegment extends GeoPathItem {
+    static FromPolyline(polyline, id, parent) {
+        const points = [];
+        for (let i = 0; i < polyline.length; i++) {
+            points.push(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2(polyline[i][0], polyline[i][1]));
+        }
+        return new GeoSegment(id, points, parent);
+    }
+    static Length(segment, proc) {
+        proc = proc ?? _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.HaversineCalculator.Shared;
+        let length = 0;
+        for (let i = 0; i < segment.points.length - 1; i++) {
+            const a = segment.points[i];
+            const b = segment.points[i + 1];
+            length += proc.getDistanceFromFloat(a.lat, a.lon, b.lat, b.lon);
+        }
+        return length;
+    }
+    constructor(id, points, parent) {
+        super(id, parent);
+        this.id = id;
+        this.points = points || [];
+    }
+    _buildEnvelope() {
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(...this.points);
+    }
+}
+class GeoWaypoint extends GeoPathItem {
+    constructor(id, position, parent) {
+        super(id, parent);
+        this.position = position;
+    }
+    _buildEnvelope() {
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(this.position);
+    }
+}
+class GeoPath extends GeoPathItem {
+    constructor(id, segments, parent) {
+        super(id, parent);
+        this.id = id;
+        this.segments = segments || [];
+    }
+    _buildEnvelope() {
+        let baseEnvelope = _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromEnvelopes(...this.segments.map((s) => s.bounds));
+        if (this.waypoints) {
+            const points = this.waypoints.map((w) => w.position);
+            const secondary = _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(...points);
+            if (secondary) {
+                return baseEnvelope ? baseEnvelope.unionInPlace(secondary) : secondary;
+            }
+        }
+        return baseEnvelope;
+    }
+}
+//# sourceMappingURL=geography.path.js.map
+
+/***/ }),
+
 /***/ "../core/dist/geography/geography.position.js":
 /*!****************************************************!*\
   !*** ../core/dist/geography/geography.position.js ***!
@@ -2964,13 +4414,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Geo2": () => (/* binding */ Geo2),
 /* harmony export */   "Geo3": () => (/* binding */ Geo3)
 /* harmony export */ });
+/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+
+
 class Geo2 {
     static Zero() {
         return new Geo2(0, 0);
     }
     constructor(lat, lon) {
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)(lat)) {
+            lon = lat.lon;
+            lat = lat.lat;
+        }
         this._lat = lat;
-        this._lon = lon;
+        this._lon = lon ?? 0;
     }
     get lat() {
         return this._lat;
@@ -2992,6 +4450,8 @@ class Geo2 {
     }
 }
 Geo2.Default = new Geo2(46.382581, -0.308024);
+Geo2.LatRange = new _math_math__WEBPACK_IMPORTED_MODULE_1__.Range(-90, 90);
+Geo2.LonRange = new _math_math__WEBPACK_IMPORTED_MODULE_1__.Range(-180, 180);
 
 class Geo3 extends Geo2 {
     static Zero() {
@@ -2999,6 +4459,9 @@ class Geo3 extends Geo2 {
     }
     constructor(lat, lon, alt) {
         super(lat, lon);
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)(lat)) {
+            alt = lat.alt;
+        }
         this._alt = alt;
     }
     get alt() {
@@ -3057,6 +4520,123 @@ Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
 
 /***/ }),
 
+/***/ "../core/dist/geography/geography.tools.js":
+/*!*************************************************!*\
+  !*** ../core/dist/geography/geography.tools.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "PathwayPointGenerator": () => (/* binding */ PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* binding */ PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* binding */ PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* binding */ PathwayPointGeneratorOptions)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy/geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geography_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.path */ "../core/dist/geography/geography.path.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
+
+
+
+var PathwayPointGeneratorEndMode;
+(function (PathwayPointGeneratorEndMode) {
+    PathwayPointGeneratorEndMode[PathwayPointGeneratorEndMode["BEGIN"] = 1] = "BEGIN";
+    PathwayPointGeneratorEndMode[PathwayPointGeneratorEndMode["END"] = 2] = "END";
+    PathwayPointGeneratorEndMode[PathwayPointGeneratorEndMode["BOTH"] = 3] = "BOTH";
+})(PathwayPointGeneratorEndMode || (PathwayPointGeneratorEndMode = {}));
+class PathwayPointGeneratorOptions {
+}
+class PathwayPointGeneratorBuilder {
+    constructor() { }
+    withOptions(options) {
+        this._options = options;
+        return this;
+    }
+    withEndMode(mode) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.endMode = mode;
+        return this;
+    }
+    withDistanceProcessor(processor) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.distanceProcessor = processor;
+        return this;
+    }
+    withDistance(distance) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.distance = distance;
+        return this;
+    }
+    withCount(count) {
+        this._options = this._options || new PathwayPointGeneratorOptions();
+        this._options.count = count;
+        return this;
+    }
+    build() {
+        return new PathwayPointGenerator(this._options);
+    }
+}
+class PathwayPointGenerator {
+    constructor(options) {
+        this._options = options;
+    }
+    *generate(path) {
+        if (path.points.length < 2) {
+            return;
+        }
+        if (!this._options) {
+            yield* path.points;
+            return;
+        }
+        const dp = this._options?.distanceProcessor ?? _geodesy_geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__.HaversineCalculator.Shared;
+        let distance = this._options.distance;
+        if (!distance) {
+            if (this._options.count) {
+                if (this._options.count < 2) {
+                    yield path.points[0];
+                    yield path.points[1];
+                    return;
+                }
+                const totalLength = _geography_path__WEBPACK_IMPORTED_MODULE_1__.GeoSegment.Length(path, dp);
+                distance = totalLength / (this._options.count - 1);
+            }
+        }
+        if (distance) {
+            let cumulativLength = 0;
+            let a = path.points[0];
+            const endMode = this._options?.endMode ?? PathwayPointGeneratorEndMode.BOTH;
+            if (endMode === PathwayPointGeneratorEndMode.BEGIN || endMode === PathwayPointGeneratorEndMode.BOTH) {
+                yield a;
+            }
+            for (let i = 1; i < path.points.length; i++) {
+                const b = path.points[i];
+                let d = dp.getDistanceFromFloat(a.lat, a.lon, b.lat, b.lon);
+                if (d + cumulativLength > distance) {
+                    const az = dp.getAzimuthFromFloat(a.lat, a.lon, b.lat, b.lon);
+                    do {
+                        const remain = distance - cumulativLength;
+                        const p2 = dp.getLocationAtDistanceAzimuth(a.lat, a.lon, remain, az);
+                        const p3 = new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(p2);
+                        yield p3;
+                        d -= remain;
+                        cumulativLength = 0;
+                        a = p3;
+                    } while (d >= distance);
+                }
+                cumulativLength += d;
+                a = b;
+            }
+            if (endMode === PathwayPointGeneratorEndMode.END || endMode === PathwayPointGeneratorEndMode.BOTH) {
+                yield path.points[path.points.length - 1];
+            }
+        }
+    }
+}
+//# sourceMappingURL=geography.tools.js.map
+
+/***/ }),
+
 /***/ "../core/dist/geography/index.js":
 /*!***************************************!*\
   !*** ../core/dist/geography/index.js ***!
@@ -3066,11 +4646,41 @@ Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Envelope": () => (/* reexport safe */ _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope),
+/* harmony export */   "GPXBounds": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXBounds),
+/* harmony export */   "GPXCopyright": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXCopyright),
+/* harmony export */   "GPXDocument": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXDocument),
+/* harmony export */   "GPXItem": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXItem),
+/* harmony export */   "GPXLink": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXLink),
+/* harmony export */   "GPXMetadata": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXMetadata),
+/* harmony export */   "GPXOwner": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXOwner),
+/* harmony export */   "GPXRoute": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXRoute),
+/* harmony export */   "GPXRoutepoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXRoutepoint),
+/* harmony export */   "GPXSegment": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXSegment),
+/* harmony export */   "GPXTrack": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXTrack),
+/* harmony export */   "GPXTrackpoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXTrackpoint),
+/* harmony export */   "GPXWaypoint": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GPXWaypoint),
+/* harmony export */   "Garmin": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _GPX_index__WEBPACK_IMPORTED_MODULE_7__.GarminPhoneNumber),
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3),
+/* harmony export */   "GeoBounded": () => (/* reexport safe */ _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.GeoBounded),
+/* harmony export */   "GeoPath": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* reexport safe */ _geography_path__WEBPACK_IMPORTED_MODULE_5__.GeoWaypoint),
 /* harmony export */   "KnownPlaces": () => (/* reexport safe */ _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__.KnownPlaces),
+/* harmony export */   "PathwayPointGenerator": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* reexport safe */ _geography_tools__WEBPACK_IMPORTED_MODULE_6__.PathwayPointGeneratorOptions),
 /* harmony export */   "Projections": () => (/* reexport safe */ _geography_projections__WEBPACK_IMPORTED_MODULE_4__.Projections),
+/* harmony export */   "SpatialIndex": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.SpatialIndex),
+/* harmony export */   "SpatialIndexNode": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.SpatialIndexNode),
+/* harmony export */   "SpatialIndexOptions": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.SpatialIndexOptions),
+/* harmony export */   "SpatialIndexType": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.SpatialIndexType),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isEnvelope),
+/* harmony export */   "isGeoBounded": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isGeoBounded),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.isLocation)
 /* harmony export */ });
 /* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
@@ -3078,6 +4688,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.envelope */ "../core/dist/geography/geography.envelope.js");
 /* harmony import */ var _geography_knownPlaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.knownPlaces */ "../core/dist/geography/geography.knownPlaces.js");
 /* harmony import */ var _geography_projections__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography.projections */ "../core/dist/geography/geography.projections.js");
+/* harmony import */ var _geography_path__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./geography.path */ "../core/dist/geography/geography.path.js");
+/* harmony import */ var _geography_tools__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./geography.tools */ "../core/dist/geography/geography.tools.js");
+/* harmony import */ var _GPX_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./GPX/index */ "../core/dist/geography/GPX/index.js");
+/* harmony import */ var _geography_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./geography.index */ "../core/dist/geography/geography.index.js");
+
+
+
+
 
 
 
@@ -3548,8 +5166,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Float32TileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodec),
 /* harmony export */   "Float32TileCodecOptions": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodecOptions),
 /* harmony export */   "Float32TileCodecOptionsBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodecOptionsBuilder),
+/* harmony export */   "GPXBounds": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXBounds),
+/* harmony export */   "GPXCopyright": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXCopyright),
+/* harmony export */   "GPXDocument": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXDocument),
+/* harmony export */   "GPXItem": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXItem),
+/* harmony export */   "GPXLink": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXLink),
+/* harmony export */   "GPXMetadata": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXMetadata),
+/* harmony export */   "GPXOwner": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXOwner),
+/* harmony export */   "GPXRoute": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXRoute),
+/* harmony export */   "GPXRoutepoint": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXRoutepoint),
+/* harmony export */   "GPXSegment": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXSegment),
+/* harmony export */   "GPXTrack": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXTrack),
+/* harmony export */   "GPXTrackpoint": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXTrackpoint),
+/* harmony export */   "GPXWaypoint": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GPXWaypoint),
+/* harmony export */   "Garmin": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GarminPhoneNumber),
 /* harmony export */   "Geo2": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Geo3),
+/* harmony export */   "GeoBounded": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoBounded),
+/* harmony export */   "GeoPath": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.GeoWaypoint),
 /* harmony export */   "GeodeticGridPainter": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridPainter),
 /* harmony export */   "GeodeticGridView": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridView),
 /* harmony export */   "GeodeticGridViewOptions": () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.GeodeticGridViewOptions),
@@ -3583,6 +5222,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPoolOptions),
 /* harmony export */   "Observable": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.Observer),
+/* harmony export */   "PathwayPointGenerator": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.PathwayPointGeneratorOptions),
 /* harmony export */   "Power": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Power),
 /* harmony export */   "Projections": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.Projections),
 /* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_0__.PropertyChangedEventArgs),
@@ -3597,6 +5240,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Side": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Side),
 /* harmony export */   "Size2": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Size2),
 /* harmony export */   "Size3": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.Size3),
+/* harmony export */   "SpatialIndex": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.SpatialIndex),
+/* harmony export */   "SpatialIndexNode": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.SpatialIndexNode),
+/* harmony export */   "SpatialIndexOptions": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.SpatialIndexOptions),
+/* harmony export */   "SpatialIndexType": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.SpatialIndexType),
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.SpectralClass),
 /* harmony export */   "Speed": () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_5__.Speed),
 /* harmony export */   "StarColor": () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_7__.StarColor),
@@ -3629,6 +5276,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "isBox": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isBox),
 /* harmony export */   "isCartesian3": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isCartesian3),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.isEnvelope),
+/* harmony export */   "isGeoBounded": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.isGeoBounded),
 /* harmony export */   "isLocation": () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_2__.isLocation),
 /* harmony export */   "isRectangle": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isRectangle),
 /* harmony export */   "isSize2": () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_3__.isSize2),
@@ -3913,7 +5561,7 @@ class CanvasTileMap extends _map__WEBPACK_IMPORTED_MODULE_1__.AbstractDisplayMap
     }
     invalidate(ctx, tiles) {
         if (ctx) {
-            const scale = this._scale;
+            const scale = this._scale * 10;
             const center = this._center;
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);
@@ -4401,6 +6049,7 @@ class Scalar {
 }
 Scalar.EPSILON = 1.401298e-45;
 Scalar.DEG2RAD = Math.PI / 180;
+Scalar.RAD2DEG = 180 / Math.PI;
 Scalar.INCH2METER = 0.0254;
 Scalar.METER2INCH = 39.3701;
 Scalar.PI = Math.PI;
@@ -8755,7 +10404,7 @@ const shader = `precision highp float;in vec3 position; in vec2 uv; in vec4 d
 #endif
 #include<instancesDeclaration>
 #include<clipVertexDeclaration>
-uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;void main(void) {#include<instancesVertex>
+uniform mat4 viewProjection; uniform highp sampler2DArray altitudes;uniform highp sampler2DArray normals;uniform highp float minAlt;uniform highp float mapscale;uniform highp float exageration;out vec4 vPosition;out vec3 vNormal;out vec3 vUvs;out vec3 vUvs1;void main(void) {#include<instancesVertex>
 float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(altitudes,v)) ;float alt=(alt0-minAlt)*mapscale*exageration;vPosition=vec4(position.xy,alt ,1.0) ;vec4 worldPos=finalWorld*vPosition;gl_Position=viewProjection*worldPos;vec4 pixel=texture(normals,v);float x=(2.0*pixel.r)-1.0;float y=(2.0*pixel.g)-1.0;float z=(pixel.b*255.0-128.0)/127.0;vNormal=vec3(x,z,y);depth=layerIds[0] ;vUvs=vec3(position.xy+0.5,depth);#include<clipVertex>
 #if defined(WIREFRAME)
 #include<wireframeVertex>
@@ -8816,8 +10465,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Float32TileCodec": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodec),
 /* harmony export */   "Float32TileCodecOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodecOptions),
 /* harmony export */   "Float32TileCodecOptionsBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodecOptionsBuilder),
+/* harmony export */   "GPXBounds": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXBounds),
+/* harmony export */   "GPXCopyright": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXCopyright),
+/* harmony export */   "GPXDocument": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXDocument),
+/* harmony export */   "GPXItem": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXItem),
+/* harmony export */   "GPXLink": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXLink),
+/* harmony export */   "GPXMetadata": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXMetadata),
+/* harmony export */   "GPXOwner": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXOwner),
+/* harmony export */   "GPXRoute": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXRoute),
+/* harmony export */   "GPXRoutepoint": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXRoutepoint),
+/* harmony export */   "GPXSegment": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXSegment),
+/* harmony export */   "GPXTrack": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXTrack),
+/* harmony export */   "GPXTrackpoint": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXTrackpoint),
+/* harmony export */   "GPXWaypoint": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GPXWaypoint),
+/* harmony export */   "Garmin": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Garmin),
+/* harmony export */   "GarminAddress": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GarminAddress),
+/* harmony export */   "GarminPhoneNumber": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GarminPhoneNumber),
 /* harmony export */   "Geo2": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Geo2),
 /* harmony export */   "Geo3": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Geo3),
+/* harmony export */   "GeoBounded": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeoBounded),
+/* harmony export */   "GeoPath": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeoPath),
+/* harmony export */   "GeoPathItem": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeoPathItem),
+/* harmony export */   "GeoSegment": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeoSegment),
+/* harmony export */   "GeoWaypoint": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeoWaypoint),
 /* harmony export */   "GeodeticGridPainter": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeodeticGridPainter),
 /* harmony export */   "GeodeticGridView": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeodeticGridView),
 /* harmony export */   "GeodeticGridViewOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.GeodeticGridViewOptions),
@@ -8856,6 +10526,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ObjectPoolOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.ObjectPoolOptions),
 /* harmony export */   "Observable": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Observable),
 /* harmony export */   "Observer": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Observer),
+/* harmony export */   "PathwayPointGenerator": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PathwayPointGenerator),
+/* harmony export */   "PathwayPointGeneratorBuilder": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PathwayPointGeneratorBuilder),
+/* harmony export */   "PathwayPointGeneratorEndMode": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PathwayPointGeneratorEndMode),
+/* harmony export */   "PathwayPointGeneratorOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PathwayPointGeneratorOptions),
 /* harmony export */   "Power": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Power),
 /* harmony export */   "Projections": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Projections),
 /* harmony export */   "PropertyChangedEventArgs": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs),
@@ -8872,6 +10546,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Size3": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Size3),
 /* harmony export */   "Skin": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.Skin),
 /* harmony export */   "SkinBuilder": () => (/* reexport safe */ _gui_index__WEBPACK_IMPORTED_MODULE_4__.SkinBuilder),
+/* harmony export */   "SpatialIndex": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpatialIndex),
+/* harmony export */   "SpatialIndexNode": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpatialIndexNode),
+/* harmony export */   "SpatialIndexOptions": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpatialIndexOptions),
+/* harmony export */   "SpatialIndexType": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpatialIndexType),
 /* harmony export */   "SpectralClass": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.SpectralClass),
 /* harmony export */   "Speed": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.Speed),
 /* harmony export */   "StarColor": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.StarColor),
@@ -8918,6 +10596,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "isBox": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isBox),
 /* harmony export */   "isCartesian3": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isCartesian3),
 /* harmony export */   "isEnvelope": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isEnvelope),
+/* harmony export */   "isGeoBounded": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isGeoBounded),
 /* harmony export */   "isLocation": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isLocation),
 /* harmony export */   "isRectangle": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isRectangle),
 /* harmony export */   "isSize2": () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_3__.isSize2),

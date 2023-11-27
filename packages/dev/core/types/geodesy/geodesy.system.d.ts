@@ -2,6 +2,7 @@ import { Ellipsoid } from "./geodesy.ellipsoid";
 import { IEnvelope, IGeo3 } from "../geography/geography.interfaces";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
+import { IDistanceProcessor } from "./geodesy.interfaces";
 export declare enum CartesianMode {
     ECEF = 0,
     ENU = 1,
@@ -15,7 +16,9 @@ export declare class GeodeticSystem {
     _enuReference?: IGeo3;
     _enuTransform?: Array<number>;
     _enuObservable?: Observable<GeodeticSystem>;
-    constructor(e?: Ellipsoid, bounds?: IEnvelope);
+    _calculator: IDistanceProcessor;
+    constructor(e?: Ellipsoid, bounds?: IEnvelope, calculator?: IDistanceProcessor);
+    get calculator(): IDistanceProcessor;
     get ellipsoid(): Ellipsoid;
     get ENUReference(): IGeo3 | undefined;
     set ENUReference(v: IGeo3 | undefined);

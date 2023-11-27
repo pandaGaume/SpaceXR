@@ -94,7 +94,7 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
 
     private invalidate(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<CanvasTileContentType>> | Array<ITile<CanvasTileContentType>>) {
         if (ctx) {
-            const scale = this._scale;
+            const scale = this._scale * 10;
             const center = this._center;
             const res = this._display.resolution;
             ctx.translate(res.width / 2, res.height / 2);

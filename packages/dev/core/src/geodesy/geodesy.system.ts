@@ -3,6 +3,8 @@ import { IEnvelope, IGeo3 } from "../geography/geography.interfaces";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { Scalar } from "../math";
+import { HaversineCalculator } from "./geodesy.calculators";
+import { IDistanceProcessor } from "./geodesy.interfaces";
 
 export enum CartesianMode {
     ECEF,
@@ -62,10 +64,16 @@ export class GeodeticSystem {
     _enuReference?: IGeo3;
     _enuTransform?: Array<number>;
     _enuObservable?: Observable<GeodeticSystem>;
+    _calculator: IDistanceProcessor;
 
-    public constructor(e?: Ellipsoid, bounds?: IEnvelope) {
+    public constructor(e?: Ellipsoid, bounds?: IEnvelope, calculator?: IDistanceProcessor) {
         this._ellipsoid = e || Ellipsoid.WGS84;
         this._bounds = bounds;
+        this._calculator = calculator ?? HaversineCalculator.Shared;
+    }
+
+    public get calculator(): IDistanceProcessor {
+        return this._calculator;
     }
 
     public get ellipsoid(): Ellipsoid {

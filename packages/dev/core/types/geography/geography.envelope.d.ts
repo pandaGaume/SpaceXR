@@ -6,9 +6,11 @@ export declare class Envelope implements IEnvelope {
     static MinLongitude: number;
     static MinLatitude: number;
     static Zero(): IEnvelope;
+    static Split2(a: IEnvelope | IGeoBounded | undefined): IEnvelope[];
+    static Split3(a: IEnvelope | IGeoBounded | undefined): IEnvelope[];
     static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2): Envelope;
     static FromPoints(...array: (IGeo3 | IGeo2)[]): IEnvelope | undefined;
-    static FromEnvelopes(...array: (IEnvelope | undefined | null)[]): IEnvelope | undefined;
+    static FromEnvelopes(...array: (IEnvelope | IGeoBounded | undefined | null)[]): IEnvelope | undefined;
     _min: IGeo3;
     _max: IGeo3;
     private constructor();
@@ -37,9 +39,10 @@ export declare class Envelope implements IEnvelope {
 export declare abstract class GeoBounded implements IGeoBounded {
     _parent?: GeoBounded;
     _env?: IEnvelope;
-    constructor(parent?: GeoBounded);
+    constructor(bounds?: IEnvelope, parent?: GeoBounded);
+    get parent(): GeoBounded | undefined;
     get bounds(): IEnvelope | undefined;
     validateEnvelope(): void;
     invalidateEnvelope(): void;
-    protected abstract _buildEnvelope(b: IEnvelope): IEnvelope | undefined;
+    protected abstract _buildEnvelope(): IEnvelope | undefined;
 }

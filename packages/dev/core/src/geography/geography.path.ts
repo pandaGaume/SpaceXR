@@ -8,7 +8,7 @@ export abstract class GeoPathItem extends GeoBounded implements IGeoPathItem {
     public id?: string;
 
     public constructor(id?: string, parent?: GeoPathItem) {
-        super(parent);
+        super(undefined, parent);
         this.id = id;
     }
 }
@@ -41,7 +41,7 @@ export class GeoSegment<T extends IGeo2> extends GeoPathItem implements IGeoSegm
         this.points = points || [];
     }
 
-    protected _buildEnvelope(b: IEnvelope): IEnvelope | undefined {
+    protected _buildEnvelope(): IEnvelope | undefined {
         return Envelope.FromPoints(...this.points);
     }
 }
@@ -51,7 +51,7 @@ export class GeoWaypoint<T extends IGeo2> extends GeoPathItem implements IGeoWay
         super(id, parent);
     }
 
-    protected _buildEnvelope(b: IEnvelope): IEnvelope | undefined {
+    protected _buildEnvelope(): IEnvelope | undefined {
         return Envelope.FromPoints(this.position);
     }
 }
@@ -67,7 +67,7 @@ export class GeoPath extends GeoPathItem implements IGeoPath<IGeo2, IGeoWaypoint
         this.segments = segments || [];
     }
 
-    protected _buildEnvelope(b: IEnvelope): IEnvelope | undefined {
+    protected _buildEnvelope(): IEnvelope | undefined {
         let baseEnvelope = Envelope.FromEnvelopes(...this.segments.map((s) => s.bounds));
         if (this.waypoints) {
             const points = this.waypoints.map((w) => w.position);

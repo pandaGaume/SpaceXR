@@ -31,6 +31,7 @@ uniform highp float exageration;
 out vec4 vPosition;
 out vec3 vNormal;
 out vec3 vUvs;
+out vec3 vUvs1;
 
 void main(void) {
     
@@ -73,8 +74,10 @@ void main(void) {
     float z = (pixel.b * 255.0 - 128.0) / 127.0;
     vNormal = vec3(x,z,y);
  
+    // depth, which is the texture index, is ALWAYS stored at index 0 by design 
     depth = layerIds[0] ;
-    vUvs = vec3(position.xy + 0.5, depth);
+    vUvs = vec3(position.xy+0.5, depth);
+    // vUvs = vec3(uv.xy, depth);
 
     #include<clipVertex>
 

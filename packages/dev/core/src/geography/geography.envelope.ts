@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Scalar } from "../math/math";
-import { IEnvelope, IGeo2, IGeo3, IGeoBounded, isLocation } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3, IGeoBounded, isEnvelope, isGeoBounded, isLocation } from "./geography.interfaces";
 import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
 import { Geo3 } from "./geography.position";
 import { Size3 } from "../geometry/geometry.size";
@@ -13,6 +13,66 @@ export class Envelope implements IEnvelope {
 
     public static Zero(): IEnvelope {
         return new Envelope(Geo3.Zero(), Geo3.Zero());
+    }
+
+    /// <summary>
+    /// Split the envelmope in 4 equal parts
+    ///  +----+----+
+    ///  | 0  | 1  |
+    ///  +----+----+
+    ///  | 2  | 3  |
+    ///  +----+----+
+    /// </summary>
+    public static Split2(a: IEnvelope | IGeoBounded | undefined): IEnvelope[] {
+        if (a) {
+            if (isGeoBounded(a)) {
+                return Envelope.Split2(a.bounds);
+            }
+            const center = a.center;
+            return [
+                new Envelope(new Geo3(center.lat, a.west), new Geo3(a.north, center.lon)),
+                new Envelope(center, new Geo3(a.north, a.east)),
+                new Envelope(new Geo3(a.south, a.west), center),
+                new Envelope(new Geo3(a.south, center.lon), new Geo3(center.lat, a.east)),
+            ];
+        }
+        return [];
+    }
+
+    /// <summary>
+    /// Split the envelmope in 8 equal parts (3D)
+    ///  +----+----+
+    ///  | 0  | 1  |
+    ///  +----+----+ bottom
+    ///  | 2  | 3  |
+    ///  +----+----+
+    ///  +----+----+
+    ///  | 4  | 5  |
+    ///  +----+----+ top
+    ///  | 6  | 7  |
+    ///  +----+----+
+    /// </summary>
+    public static Split3(a: IEnvelope | IGeoBounded | undefined): IEnvelope[] {
+        if (a) {
+            if (isGeoBounded(a)) {
+                return Envelope.Split3(a.bounds);
+            }
+            if (a.hasAltitude) {
+                const center = a.center;
+                return [
+                    new Envelope(new Geo3(center.lat, a.west, a.bottom), new Geo3(a.north, center.lon, center.alt)),
+                    new Envelope(new Geo3(center.lat, center.lon, a.bottom), new Geo3(a.north, a.east, center.alt)),
+                    new Envelope(new Geo3(a.south, a.west, a.bottom), center),
+                    new Envelope(new Geo3(a.south, center.lon, a.bottom), new Geo3(center.lat, a.east, center.alt)),
+
+                    new Envelope(new Geo3(center.lat, a.west, center.alt), new Geo3(a.north, center.lon, a.top)),
+                    new Envelope(new Geo3(center.lat, center.lon, center.alt), new Geo3(a.north, a.east, a.top)),
+                    new Envelope(new Geo3(a.south, a.west, center.alt), new Geo3(center.lat, center.lon, a.top)),
+                    new Envelope(new Geo3(a.south, center.lon, center.alt), new Geo3(center.lat, a.east, a.top)),
+                ];
+            }
+        }
+        return [];
     }
 
     public static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2) {
@@ -50,12 +110,17 @@ export class Envelope implements IEnvelope {
         return env;
     }
 
-    public static FromEnvelopes(...array: (IEnvelope | undefined | null)[]): IEnvelope | undefined {
+    public static FromEnvelopes(...array: (IEnvelope | IGeoBounded | undefined | null)[]): IEnvelope | undefined {
         let env: IEnvelope | undefined = undefined;
         for (let i = 0; i < array.length; i++) {
-            const a = array[i];
+            let a = array[i];
             if (a) {
-                env = env ? env.unionInPlace(a) : a.clone();
+                if (isGeoBounded(a)) {
+                    a = a.bounds;
+                }
+                if (isEnvelope(a)) {
+                    env = env ? env.unionInPlace(a) : a.clone();
+                }
             }
         }
         return env;
@@ -210,10 +275,15 @@ export abstract class GeoBounded implements IGeoBounded {
     _parent?: GeoBounded;
     _env?: IEnvelope;
 
-    public constructor(parent?: GeoBounded) {
+    public constructor(bounds?: IEnvelope, parent?: GeoBounded) {
         if (parent) {
             this._parent = parent;
         }
+        this._env = bounds;
+    }
+
+    public get parent(): GeoBounded | undefined {
+        return this._parent;
     }
 
     public get bounds(): IEnvelope | undefined {
@@ -223,7 +293,7 @@ export abstract class GeoBounded implements IGeoBounded {
 
     public validateEnvelope(): void {
         if (!this._env) {
-            this._env = this._buildEnvelope(Envelope.Zero());
+            this._env = this._buildEnvelope();
         }
     }
 
@@ -236,5 +306,5 @@ export abstract class GeoBounded implements IGeoBounded {
         }
     }
 
-    protected abstract _buildEnvelope(b: IEnvelope): IEnvelope | undefined;
+    protected abstract _buildEnvelope(): IEnvelope | undefined;
 }

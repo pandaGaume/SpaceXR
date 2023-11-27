@@ -2,40 +2,10 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent, TileSection } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileContentView, ITileMetrics, TileContent, TileSection } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
-
-export class TileBuilder<T> implements ITileBuilder<T> {
-    _a?: ITileAddress;
-    _d?: TileContent<T>;
-    _m?: ITileMetrics;
-
-    public withAddress(a: ITileAddress): ITileBuilder<T> {
-        this._a = a;
-        return this;
-    }
-
-    public withData(d: TileContent<T>): ITileBuilder<T> {
-        this._d = d;
-        return this;
-    }
-
-    public withMetrics(metrics: ITileMetrics): ITileBuilder<T> {
-        this._m = metrics;
-        return this;
-    }
-
-    public build(): ITile<T> {
-        const t = new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
-        if (this._m) {
-            t.bounds = Tile.BuildEnvelope(t.address, this._m);
-            t.rect = Tile.BuildBounds(t.address, this._m);
-        }
-        return t;
-    }
-}
 
 export class TileContentView implements ITileContentView {
     public static BuildKey(address: ITileAddress, source?: TileSection, target?: TileSection) {
@@ -55,8 +25,12 @@ export class TileContentView implements ITileContentView {
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {
-    public static Builder<T>(): ITileBuilder<T> {
-        return new TileBuilder<T>();
+    
+    public static Build<T>(metrics: ITileMetrics, a: ITileAddress, d?: TileContent<T>): ITile<T> {
+        const t = new Tile<T>(a?.x || 0, a?.y || 0, a?.levelOfDetail || metrics?.minLOD || 0, d || null);
+        t.bounds = Tile.BuildEnvelope(t.address, metrics);
+        t.rect = Tile.BuildBounds(t.address, metrics);
+        return t;
     }
 
     public static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
@@ -82,7 +56,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
     private _env?: IEnvelope;
     private _rect?: IRectangle;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>) {
+    protected constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>) {
         super(x, y, levelOfDetail);
         this._value = data;
     }
@@ -106,7 +80,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return this._env;
     }
 
-    public set bounds(e: IEnvelope | undefined) {
+    protected set bounds(e: IEnvelope | undefined) {
         this._env = e;
     }
 
@@ -114,7 +88,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return this._rect;
     }
 
-    public set rect(r: IRectangle | undefined) {
+    protected set rect(r: IRectangle | undefined) {
         this._rect = r;
     }
 }

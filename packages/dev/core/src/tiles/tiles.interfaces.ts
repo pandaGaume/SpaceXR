@@ -44,13 +44,6 @@ export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
 
-export interface ITileBuilder<T> {
-    withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: TileContent<T>): ITileBuilder<T>;
-    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
-    build(): ITile<T>;
-}
-
 export enum CellCoordinateReference {
     center = "center",
     nw = "nw",

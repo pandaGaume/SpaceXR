@@ -5489,7 +5489,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TextTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.TextTileCodec),
 /* harmony export */   "Tile": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile),
 /* harmony export */   "TileAddress": () => (/* reexport safe */ _tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress),
-/* harmony export */   "TileBuilder": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileBuilder),
 /* harmony export */   "TileContentManager": () => (/* reexport safe */ _tiles_content_manager__WEBPACK_IMPORTED_MODULE_11__.TileContentManager),
 /* harmony export */   "TileContentView": () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ _tiles_mapview__WEBPACK_IMPORTED_MODULE_10__.TileMapContext),
@@ -6298,7 +6297,6 @@ class FetchResult {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Tile": () => (/* binding */ Tile),
-/* harmony export */   "TileBuilder": () => (/* binding */ TileBuilder),
 /* harmony export */   "TileContentView": () => (/* binding */ TileContentView)
 /* harmony export */ });
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
@@ -6311,28 +6309,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileBuilder {
-    withAddress(a) {
-        this._a = a;
-        return this;
-    }
-    withData(d) {
-        this._d = d;
-        return this;
-    }
-    withMetrics(metrics) {
-        this._m = metrics;
-        return this;
-    }
-    build() {
-        const t = new Tile(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
-        if (this._m) {
-            t.bounds = Tile.BuildEnvelope(t.address, this._m);
-            t.rect = Tile.BuildBounds(t.address, this._m);
-        }
-        return t;
-    }
-}
 class TileContentView {
     static BuildKey(address, source, target) {
         return `${address.quadkey}_${source?.toString() ?? "x"}_${target?.toString() ?? "x"}`;
@@ -6350,8 +6326,11 @@ class TileContentView {
     }
 }
 class Tile extends _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
-    static Builder() {
-        return new TileBuilder();
+    static Build(metrics, a, d) {
+        const t = new Tile(a?.x || 0, a?.y || 0, a?.levelOfDetail || metrics?.minLOD || 0, d || null);
+        t.bounds = Tile.BuildEnvelope(t.address, metrics);
+        t.rect = Tile.BuildBounds(t.address, metrics);
+        return t;
     }
     static BuildEnvelope(a, metrics) {
         if (metrics) {
@@ -6751,7 +6730,6 @@ class TileMapView {
         const y1 = Math.min(maxIndex, seTileXY.y);
         const remains = new Array();
         let added = new Array();
-        const builder = new _tiles__WEBPACK_IMPORTED_MODULE_9__.TileBuilder().withMetrics(this.metrics);
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
                 const a = new _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress(x, y, contextLod);
@@ -6767,7 +6745,7 @@ class TileMapView {
                     added.push(t);
                     continue;
                 }
-                t = builder.withAddress(a).build();
+                t = _tiles__WEBPACK_IMPORTED_MODULE_9__.Tile.Build(this.metrics, a);
                 this._cache.set(key, t);
                 t.content = this._manager.getTileContent(a);
                 added.push(t);
@@ -7867,7 +7845,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TextTileCodec": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TextTileCodec),
 /* harmony export */   "Tile": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.Tile),
 /* harmony export */   "TileAddress": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),
-/* harmony export */   "TileBuilder": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileBuilder),
 /* harmony export */   "TileContentManager": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileContentManager),
 /* harmony export */   "TileContentView": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileContentView),
 /* harmony export */   "TileMapContext": () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_8__.TileMapContext),

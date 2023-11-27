@@ -10,7 +10,7 @@ import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
-import { TileBuilder } from "./tiles";
+import { Tile} from "./tiles";
 import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Envelope } from "../geography/geography.envelope";
@@ -464,7 +464,6 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
         const remains = new Array<ITile<T>>();
         let added = new Array<ITile<T>>();
-        const builder = new TileBuilder<T>().withMetrics(this.metrics);
 
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
@@ -485,7 +484,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 }
 
                 // we need to create the tile.
-                t = builder.withAddress(a).build();
+                t = Tile.Build(this.metrics, a);
                 // set empty tile
                 this._cache.set(key, t);
 

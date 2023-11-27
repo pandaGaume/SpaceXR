@@ -11,3 +11,7 @@ dist
 typings
 lib/*.js
 *.map
+
+**/bundles
+**/*.tsbuildinfo
+

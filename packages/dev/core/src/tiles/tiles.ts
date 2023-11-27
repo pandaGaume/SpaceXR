@@ -25,15 +25,7 @@ export class TileContentView implements ITileContentView {
 }
 
 export class Tile<T> extends TileAddress implements ITile<T> {
-    
-    public static Build<T>(metrics: ITileMetrics, a: ITileAddress, d?: TileContent<T>): ITile<T> {
-        const t = new Tile<T>(a?.x || 0, a?.y || 0, a?.levelOfDetail || metrics?.minLOD || 0, d || null);
-        t.bounds = Tile.BuildEnvelope(t.address, metrics);
-        t.rect = Tile.BuildBounds(t.address, metrics);
-        return t;
-    }
-
-    public static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
+    private static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
         if (metrics) {
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
@@ -44,7 +36,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    public static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined {
+    private static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined {
         if (metrics) {
             const p = metrics.getTileXYToPixelXY(a.x, a.y);
             return new Rectangle(p.x, p.y, metrics.tileSize, metrics.tileSize);
@@ -52,13 +44,19 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    private _value: TileContent<T>;
+    private _value?: TileContent<T>;
     private _env?: IEnvelope;
     private _rect?: IRectangle;
+    private _metrics: ITileMetrics;
 
-    protected constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>) {
+    public constructor(x: number, y: number, levelOfDetail: number, metrics: ITileMetrics, data?: TileContent<T>) {
         super(x, y, levelOfDetail);
+        this._metrics = metrics;
         this._value = data;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._metrics;
     }
 
     public get address(): ITileAddress {
@@ -68,27 +66,25 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return this.address.quadkey;
     }
 
-    public get content(): TileContent<T> {
+    public get content(): TileContent<T> | undefined {
         return this._value;
     }
 
-    public set content(v: TileContent<T>) {
+    public set content(v: TileContent<T> | undefined) {
         this._value = v;
     }
 
     public get bounds(): IEnvelope | undefined {
+        if (!this._env) {
+            this._env = Tile.BuildEnvelope(this.address, this.metrics);
+        }
         return this._env;
     }
 
-    protected set bounds(e: IEnvelope | undefined) {
-        this._env = e;
-    }
-
     public get rect(): IRectangle | undefined {
+        if (!this._rect) {
+            this._rect = Tile.BuildBounds(this.address, this.metrics);
+        }
         return this._rect;
-    }
-
-    protected set rect(r: IRectangle | undefined) {
-        this._rect = r;
     }
 }

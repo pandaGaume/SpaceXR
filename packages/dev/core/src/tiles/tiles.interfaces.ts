@@ -30,20 +30,6 @@ export function IsTileContentView<T>(b: unknown): b is ITileContentView {
     return (<any>b).source !== undefined && (<any>b).target !== undefined;
 }
 
-export type TileContent<T> = Nullable<T | ITileContentView>;
-
-export interface ITile<T> extends IGeoBounded {
-    address: ITileAddress;
-    content: TileContent<T>;
-    rect?: IRectangle;
-    key: string;
-    neighborKeys?: string;
-}
-
-export interface ITileProxy<T> {
-    delegate: ITile<T>;
-}
-
 export enum CellCoordinateReference {
     center = "center",
     nw = "nw",
@@ -94,6 +80,20 @@ export interface ITileMetrics {
 
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;
+}
+
+export type TileContent<T> = Nullable<T | ITileContentView>;
+
+export interface ITile<T> extends IGeoBounded, ITileMetricsProvider {
+    address: ITileAddress;
+    content?: TileContent<T>;
+    rect?: IRectangle;
+    key: string;
+    neighborKeys?: string;
+}
+
+export interface ITileProxy<T> {
+    delegate: ITile<T>;
 }
 
 export class FetchResult<T> {

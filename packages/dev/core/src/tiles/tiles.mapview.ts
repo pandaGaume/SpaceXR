@@ -484,7 +484,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
                 }
 
                 // we need to create the tile.
-                t = Tile.Build(this.metrics, a);
+                t = new Tile(x, y, contextLod, this.metrics);
                 // set empty tile
                 this._cache.set(key, t);
 

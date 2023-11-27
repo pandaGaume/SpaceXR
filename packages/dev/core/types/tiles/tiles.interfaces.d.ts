@@ -17,17 +17,6 @@ export interface ITileCruncher<T> {
     Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
 export declare function IsTileContentView<T>(b: unknown): b is ITileContentView;
-export type TileContent<T> = Nullable<T | ITileContentView>;
-export interface ITile<T> extends IGeoBounded {
-    address: ITileAddress;
-    content: TileContent<T>;
-    rect?: IRectangle;
-    key: string;
-    neighborKeys?: string;
-}
-export interface ITileProxy<T> {
-    delegate: ITile<T>;
-}
 export declare enum CellCoordinateReference {
     center = "center",
     nw = "nw",
@@ -71,6 +60,17 @@ export interface ITileMetrics {
 }
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;
+}
+export type TileContent<T> = Nullable<T | ITileContentView>;
+export interface ITile<T> extends IGeoBounded, ITileMetricsProvider {
+    address: ITileAddress;
+    content?: TileContent<T>;
+    rect?: IRectangle;
+    key: string;
+    neighborKeys?: string;
+}
+export interface ITileProxy<T> {
+    delegate: ITile<T>;
 }
 export declare class FetchResult<T> {
     address: ITileAddress;

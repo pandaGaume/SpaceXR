@@ -12,19 +12,18 @@ export declare class TileContentView implements ITileContentView {
     get key(): string;
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {
-    static Build<T>(metrics: ITileMetrics, a: ITileAddress, d?: TileContent<T>): ITile<T>;
-    static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined;
-    static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined;
-    private _value;
+    private static BuildEnvelope;
+    private static BuildBounds;
+    private _value?;
     private _env?;
     private _rect?;
-    protected constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>);
+    private _metrics;
+    constructor(x: number, y: number, levelOfDetail: number, metrics: ITileMetrics, data?: TileContent<T>);
+    get metrics(): ITileMetrics;
     get address(): ITileAddress;
     get key(): string;
-    get content(): TileContent<T>;
-    set content(v: TileContent<T>);
+    get content(): TileContent<T> | undefined;
+    set content(v: TileContent<T> | undefined);
     get bounds(): IEnvelope | undefined;
-    protected set bounds(e: IEnvelope | undefined);
     get rect(): IRectangle | undefined;
-    protected set rect(r: IRectangle | undefined);
 }

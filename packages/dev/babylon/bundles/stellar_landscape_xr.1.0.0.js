@@ -1843,6 +1843,9 @@ class TerrainTile {
     get key() {
         return this._delegate.key;
     }
+    get metrics() {
+        return this._delegate.metrics;
+    }
     get content() {
         return this._delegate.content;
     }
@@ -8378,12 +8381,6 @@ class TileContentView {
     }
 }
 class Tile extends _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
-    static Build(metrics, a, d) {
-        const t = new Tile(a?.x || 0, a?.y || 0, a?.levelOfDetail || metrics?.minLOD || 0, d || null);
-        t.bounds = Tile.BuildEnvelope(t.address, metrics);
-        t.rect = Tile.BuildBounds(t.address, metrics);
-        return t;
-    }
     static BuildEnvelope(a, metrics) {
         if (metrics) {
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
@@ -8401,9 +8398,13 @@ class Tile extends _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
         }
         return undefined;
     }
-    constructor(x, y, levelOfDetail, data) {
+    constructor(x, y, levelOfDetail, metrics, data) {
         super(x, y, levelOfDetail);
+        this._metrics = metrics;
         this._value = data;
+    }
+    get metrics() {
+        return this._metrics;
     }
     get address() {
         return this;
@@ -8418,16 +8419,16 @@ class Tile extends _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
         this._value = v;
     }
     get bounds() {
+        if (!this._env) {
+            this._env = Tile.BuildEnvelope(this.address, this.metrics);
+        }
         return this._env;
     }
-    set bounds(e) {
-        this._env = e;
-    }
     get rect() {
+        if (!this._rect) {
+            this._rect = Tile.BuildBounds(this.address, this.metrics);
+        }
         return this._rect;
-    }
-    set rect(r) {
-        this._rect = r;
     }
 }
 //# sourceMappingURL=tiles.js.map
@@ -8797,7 +8798,7 @@ class TileMapView {
                     added.push(t);
                     continue;
                 }
-                t = _tiles__WEBPACK_IMPORTED_MODULE_9__.Tile.Build(this.metrics, a);
+                t = new _tiles__WEBPACK_IMPORTED_MODULE_9__.Tile(x, y, contextLod, this.metrics);
                 this._cache.set(key, t);
                 t.content = this._manager.getTileContent(a);
                 added.push(t);

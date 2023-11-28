@@ -9,4 +9,4 @@ export * from "./vendors/index";
 export * from "./tiles";
 export * from "./tiles.urlBuilder";
 export * from "./tiles.mapview";
-export * from "./tiles.content.manager";
+export * from "./tiles.content.provider";

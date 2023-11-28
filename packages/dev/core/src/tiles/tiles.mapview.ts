@@ -204,7 +204,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this.validateBounds();
     }
 
-    public get manager(): ITileContentProvider<T> {
+    public get contentProvider(): ITileContentProvider<T> {
         return this._contentProvider;
     }
 
@@ -226,7 +226,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
-        return this.manager.metrics;
+        return this.contentProvider.metrics;
     }
 
     // SIZE

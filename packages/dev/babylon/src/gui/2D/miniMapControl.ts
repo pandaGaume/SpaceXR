@@ -6,7 +6,7 @@ import { IGeo2 } from "core/geography/geography.interfaces";
 import { Observer } from "core/events/events.observable";
 import { Nullable } from "core/types";
 import { MapControl } from "./mapControl";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { ITileDatasource, ITileAddress } from "core/tiles/tiles.interfaces";
 import { ISize2 } from "core/geometry/geometry.interfaces";
 import { IMemoryCache } from "core/utils/cache";
@@ -22,7 +22,7 @@ type MinimapSkinType = IViewSkin;
 
 export class MiniMapControlOptions {
     public resolution?: ISize2;
-    public manager?: TileContentManager<HTMLImageElement>;
+    public provider?: TileContentProvider<HTMLImageElement>;
     public source?: ITileDatasource<HTMLImageElement, ITileAddress>;
     public cache?: IMemoryCache<string, HTMLImageElement>;
 }
@@ -54,7 +54,7 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
     private _window?: Rectangle;
 
     public constructor(name: string, options: MiniMapControlOptions, model?: TileMapView<any>, skin?: IViewSkin) {
-        if (!options?.manager && !options?.source) throw new Error("manager or datasource must be provided");
+        if (!options?.provider && !options?.source) throw new Error("manager or datasource must be provided");
         super(name, model, skin ?? MiniMapControl.CreateDefaultSkin(), options);
     }
 
@@ -96,14 +96,14 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
     // this is the place where we create the content of the view. This is called by contructor.
     protected _createContent(model?: MinimapModelType, skin?: MinimapSkinType, options?: any): void {
         const o = options as MiniMapControlOptions;
-        let manager = o.manager;
-        if (!manager && o.source) {
-            manager = new TileContentManager(o.source, o.cache);
+        let provider = o.provider;
+        if (!provider && o.source) {
+            provider = new TileContentProvider(o.source, o.cache);
         }
 
         const resolution = o.resolution ?? new Size2(model?.width ?? 0, model?.height ?? 0);
 
-        this._map = new MapControl(`map`, manager!, resolution);
+        this._map = new MapControl(`map`, provider!, resolution);
         this.addControl(this._map);
 
         this._window = new Rectangle(`window`);

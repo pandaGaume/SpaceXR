@@ -135,7 +135,7 @@
                 // 2D UI support
                 const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
                 const options = {
-                    manager: new SPACEXR.TileContentManager(layerMinimapClient),
+                    provider: new SPACEXR.TileContentProvider(layerMinimapClient),
                     resolution: { width: display.resolution.width * 2, height: display.resolution.height * 2 },
                 };
                 const minimap2D = new SPACEXR.MiniMapControl("minimap", options, map.view);

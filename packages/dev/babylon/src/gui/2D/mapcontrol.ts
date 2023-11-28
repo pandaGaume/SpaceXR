@@ -5,7 +5,7 @@ import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
 import { Cartesian3, ISize2, Size2 } from "core/geometry";
 import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { TileMapView, UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 import { EPSG3857 } from "core/tiles/tiles.geography";
 import { Scalar } from "core/math/math";
@@ -17,7 +17,7 @@ export class MapControl extends Control implements ITileMapApi {
     private _model: TileMapView<HTMLImageElement>;
     private _background?: string;
 
-    public constructor(name: string, manager: TileContentManager<HTMLImageElement>, resolution?: ISize2, center?: IGeo2, lod?: number) {
+    public constructor(name: string, manager: TileContentProvider<HTMLImageElement>, resolution?: ISize2, center?: IGeo2, lod?: number) {
         super(name);
         this._resolution = resolution;
         const tmp = this._resolution ?? Size2.Zero();

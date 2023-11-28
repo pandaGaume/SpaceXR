@@ -3,7 +3,7 @@ import { ITile, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
 import { Observable, Observer } from "../events/events.observable";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileContentProvider } from "core/tiles/tiles.content.provider";
 export interface IMapDisplay {
     resolution: ISize3;
 }
@@ -17,7 +17,7 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     _addedObservable?: Observable<T>;
     _removedObservable?: Observable<T>;
     _updatedObservable?: Observable<T>;
-    constructor(display: D, manager: TileContentManager<V>, center?: IGeo2, lod?: number);
+    constructor(display: D, manager: TileContentProvider<V>, center?: IGeo2, lod?: number);
     get addedObservable(): Observable<T>;
     get removedObservable(): Observable<T>;
     get updatedObservable(): Observable<T>;

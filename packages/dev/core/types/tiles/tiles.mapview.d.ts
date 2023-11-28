@@ -76,7 +76,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     get azimuthObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     get updateObservable(): Observable<UpdateEventArgs<T>>;
     get bounds(): IEnvelope | undefined;
-    get manager(): ITileContentProvider<T>;
+    get contentProvider(): ITileContentProvider<T>;
     get context(): TileMapContext<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;

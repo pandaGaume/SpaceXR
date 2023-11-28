@@ -15,7 +15,7 @@ import { Observable, Observer } from "../events/events.observable";
 import { TileContentView } from "./tiles";
 import { TileAddress } from "./tiles.address";
 
-export class TileContentManager<T> implements ITileContentProvider<T> {
+export class TileContentProvider<T> implements ITileContentProvider<T> {
     // cache
     private _cache: IMemoryCache<string, TileContent<T>>;
     // data source
@@ -75,7 +75,7 @@ export class TileContentManager<T> implements ITileContentProvider<T> {
             .fetchAsync(address, this) // we pass this as context
             .then((result: FetchResult<Nullable<T>>) => {
                 if (result.content) {
-                    const manager = <TileContentManager<T>>result.userArgs[0];
+                    const manager = <TileContentProvider<T>>result.userArgs[0];
                     const address = result.address;
                     // we have the content of the tile.
                     const content = result.content;

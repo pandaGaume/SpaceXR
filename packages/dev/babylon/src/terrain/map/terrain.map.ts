@@ -11,14 +11,14 @@ import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
-import { TileContentManager } from "../..";
+import { TileContentProvider } from "core/tiles/tiles.content.provider";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({
         center: Geo2.Zero(),
         levelOfDetail: 10,
         gridOptions: TerrainGridOptions.Shared,
-        exageration: 1.0
+        exageration: 1.0,
     });
 
     public center?: IGeo2;
@@ -37,7 +37,7 @@ export class SurfaceTileMapOptionsBuilder {
     _gridOptions?: TerrainGridOptions;
     _exageration?: number;
     _layerClient?: ITileClient<HTMLImageElement>;
- 
+
     public withCenter(v?: IGeo2): SurfaceTileMapOptionsBuilder {
         this._center = v;
         return this;
@@ -88,7 +88,7 @@ export class SurfaceTileMap<V extends IDemInfos, H extends SurfaceMapDisplay> ex
 
     public constructor(name: string, display: H, datasource: ITileDatasource<V, ITileAddress>, options?: SurfaceTileMapOptions, scene?: Nullable<Scene>) {
         const o = { ...SurfaceTileMapOptions.Default, ...options };
-        super(display, new TileContentManager(datasource), o.center, o.levelOfDetail);
+        super(display, new TileContentProvider(datasource), o.center, o.levelOfDetail);
         this._options = o;
         this._grid = this.buildGrid();
         this._template = this.buildMesh(name, scene);

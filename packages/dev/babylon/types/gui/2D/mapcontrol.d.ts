@@ -3,14 +3,14 @@ import { Control, Measure } from "@babylonjs/gui";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { ISize2 } from "core/geometry";
 import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { TileMapView, UpdateEventArgs } from "core/tiles/tiles.mapview";
 export declare class MapControl extends Control implements ITileMapApi {
     static readonly DefaultColor = "white";
     private _resolution?;
     private _model;
     private _background?;
-    constructor(name: string, manager: TileContentManager<HTMLImageElement>, resolution?: ISize2, center?: IGeo2, lod?: number);
+    constructor(name: string, manager: TileContentProvider<HTMLImageElement>, resolution?: ISize2, center?: IGeo2, lod?: number);
     get view(): TileMapView<HTMLImageElement> | undefined;
     get background(): string | undefined;
     set background(v: string | undefined);

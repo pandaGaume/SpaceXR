@@ -1,7 +1,7 @@
 import { TileMapView } from "core/tiles/tiles.mapview";
 import { View } from "./view";
 import { IViewSkin } from "../skin";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { ITileDatasource, ITileAddress } from "core/tiles/tiles.interfaces";
 import { ISize2 } from "core/geometry/geometry.interfaces";
 import { IMemoryCache } from "core/utils/cache";
@@ -11,7 +11,7 @@ type MinimapModelType = TileMapView<any>;
 type MinimapSkinType = IViewSkin;
 export declare class MiniMapControlOptions {
     resolution?: ISize2;
-    manager?: TileContentManager<HTMLImageElement>;
+    provider?: TileContentProvider<HTMLImageElement>;
     source?: ITileDatasource<HTMLImageElement, ITileAddress>;
     cache?: IMemoryCache<string, HTMLImageElement>;
 }

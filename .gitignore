@@ -8,6 +8,8 @@ node_modules
 .npm
 
 dist
-typings
+types
+bundles
 lib/*.js
 *.map
+*.tsbuildinfo

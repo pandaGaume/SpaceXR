@@ -1,6 +1,8 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2, ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
+import { EventArgs } from "../events/events.args";
+import { Observable } from "../events/events.observable";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
@@ -18,6 +20,18 @@ export interface ITileCruncher<T> {
 }
 export declare function IsTileContentView<T>(b: unknown): b is ITileContentView;
 export type TileContent<T> = Nullable<T | ITileContentView>;
+export declare class ContentUpdateEventArgs<T> extends EventArgs<ITileContentProvider<T>> {
+    _address: ITileAddress;
+    _content: TileContent<T>;
+    constructor(address: ITileAddress, content: TileContent<T>, sender: ITileContentProvider<T>);
+    get address(): ITileAddress;
+    get content(): TileContent<T>;
+}
+export interface ITileContentProvider<T> extends ITileMetricsProvider {
+    id?: string;
+    contentUpdateObservable: Observable<ContentUpdateEventArgs<T>>;
+    getTileContent(address: ITileAddress): TileContent<T>;
+}
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;
     content: TileContent<T>;

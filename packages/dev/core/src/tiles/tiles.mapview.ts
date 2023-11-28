@@ -1,6 +1,6 @@
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
+import { ITileContentProvider, ContentUpdateEventArgs, ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile} from "./tiles.interfaces";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
 import { IValidable, Nullable } from "../types";
@@ -11,7 +11,6 @@ import { IMemoryCache, MemoryCache } from "../utils/cache";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 import { TileBuilder } from "./tiles";
-import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Envelope } from "../geography/geography.envelope";
 
@@ -131,7 +130,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _cache: IMemoryCache<string, ITile<T>>;
 
     // data source
-    _manager: TileContentManager<T>;
+    _contentProvider: ITileContentProvider<T>;
 
     // current navigation parameters
     _w: number = 0;
@@ -163,10 +162,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _azimuthObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
-    public constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
+    public constructor(contentProvider: ITileContentProvider<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
-        this._manager = manager;
-        this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
+        this._contentProvider = contentProvider;
+        this._contentProvider.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this._currentContext = new TileMapContext<T>(-1); // initialize with -1 to force context switch
         // note : The map method alone will not iterate over the holes created by the arry constructor.
         // So we use the spread operator to first convert these holes into undefined values, and then use map.
@@ -205,12 +204,8 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this.validateBounds();
     }
 
-    public get datasource(): ITileDatasource<T, ITileAddress> {
-        return this._manager.datasource;
-    }
-
-    public get manager(): TileContentManager<T> {
-        return this._manager;
+    public get manager(): ITileContentProvider<T> {
+        return this._contentProvider;
     }
 
     public get context(): TileMapContext<T> {
@@ -231,7 +226,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
     // METRICS PROVIDER
     public get metrics(): ITileMetrics {
-        return this.datasource.metrics;
+        return this.manager.metrics;
     }
 
     // SIZE
@@ -491,7 +486,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
 
                 // and retreive the content.
                 // underlying operation will trigger the event to update observer
-                t.content = this._manager.getTileContent(a);
+                t.content = this._contentProvider.getTileContent(a);
                 added.push(t);
             }
         }

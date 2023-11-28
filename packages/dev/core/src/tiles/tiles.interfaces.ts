@@ -1,6 +1,8 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2, ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
+import { EventArgs } from "../events/events.args";
+import { Observable } from "../events/events.observable";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -31,6 +33,31 @@ export function IsTileContentView<T>(b: unknown): b is ITileContentView {
 }
 
 export type TileContent<T> = Nullable<T | ITileContentView>;
+
+export class ContentUpdateEventArgs<T> extends EventArgs<ITileContentProvider<T>> {
+    _address: ITileAddress;
+    _content: TileContent<T>;
+
+    public constructor(address: ITileAddress, content: TileContent<T>, sender: ITileContentProvider<T>) {
+        super(sender);
+        this._address = address;
+        this._content = content;
+    }
+
+    public get address(): ITileAddress {
+        return this._address;
+    }
+
+    public get content(): TileContent<T> {
+        return this._content;
+    }
+}
+
+export interface ITileContentProvider<T> extends ITileMetricsProvider {
+    id?: string;
+    contentUpdateObservable: Observable<ContentUpdateEventArgs<T>>;
+    getTileContent(address: ITileAddress): TileContent<T>;
+}
 
 export interface ITile<T> extends IGeoBounded {
     address: ITileAddress;

@@ -1,31 +1,21 @@
 import { IMemoryCache, MemoryCache } from "../utils/cache";
-import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "./tiles.interfaces";
+import {
+    ITileContentProvider,
+    FetchResult,
+    ITileAddress,
+    TileSection,
+    ITileDatasource,
+    ITileMetrics,
+    IsTileContentView,
+    TileContent,
+    ContentUpdateEventArgs,
+} from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { Observable, Observer } from "../events/events.observable";
-import { EventArgs } from "../events/events.args";
 import { TileContentView } from "./tiles";
 import { TileAddress } from "./tiles.address";
 
-export class ContentUpdateEventArgs<T> extends EventArgs<TileContentManager<T>> {
-    _address: ITileAddress;
-    _content: TileContent<T>;
-
-    public constructor(address: ITileAddress, content: TileContent<T>, sender: TileContentManager<T>) {
-        super(sender);
-        this._address = address;
-        this._content = content;
-    }
-
-    public get address(): ITileAddress {
-        return this._address;
-    }
-
-    public get content(): TileContent<T> {
-        return this._content;
-    }
-}
-
-export class TileContentManager<T> {
+export class TileContentManager<T> implements ITileContentProvider<T> {
     // cache
     private _cache: IMemoryCache<string, TileContent<T>>;
     // data source
@@ -40,6 +30,10 @@ export class TileContentManager<T> {
         this._cache = cache || new MemoryCache<string, TileContent<T>>();
         this._datasource = datasource;
         this._smoothingZomm = false;
+    }
+
+    public get id(): string | undefined {
+        return this._datasource.name;
     }
 
     public get cache(): IMemoryCache<string, TileContent<T>> {

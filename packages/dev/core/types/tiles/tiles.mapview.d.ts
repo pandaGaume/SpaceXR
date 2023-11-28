@@ -1,11 +1,10 @@
 import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
+import { ITileContentProvider, ContentUpdateEventArgs, ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile } from "./tiles.interfaces";
 import { Observable } from "../events/events.observable";
 import { IValidable, Nullable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
-import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 export interface IContextMetrics {
     lod: number;
     scale: number;
@@ -49,7 +48,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     removedObservable: any;
     static ClampAzimuth(a: number): number;
     _cache: IMemoryCache<string, ITile<T>>;
-    _manager: TileContentManager<T>;
+    _contentProvider: ITileContentProvider<T>;
     _w: number;
     _h: number;
     _lodf: number;
@@ -70,15 +69,14 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _azimuthObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
-    constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
+    constructor(contentProvider: ITileContentProvider<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
     get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
     get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     get azimuthObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
     get updateObservable(): Observable<UpdateEventArgs<T>>;
     get bounds(): IEnvelope | undefined;
-    get datasource(): ITileDatasource<T, ITileAddress>;
-    get manager(): TileContentManager<T>;
+    get manager(): ITileContentProvider<T>;
     get context(): TileMapContext<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;

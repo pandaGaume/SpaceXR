@@ -3843,7 +3843,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "AbstractTileMetrics": () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_2__.AbstractTileMetrics),
 /* harmony export */   "BlobTileCodec": () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_5__.BlobTileCodec),
 /* harmony export */   "CellCoordinateReference": () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.CellCoordinateReference),
-/* harmony export */   "ContentUpdateEventArgs": () => (/* reexport safe */ _tiles_content_manager__WEBPACK_IMPORTED_MODULE_11__.ContentUpdateEventArgs),
+/* harmony export */   "ContentUpdateEventArgs": () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.ContentUpdateEventArgs),
 /* harmony export */   "EPSG3857": () => (/* reexport safe */ _tiles_geography__WEBPACK_IMPORTED_MODULE_6__.EPSG3857),
 /* harmony export */   "FetchError": () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_3__.FetchError),
 /* harmony export */   "FetchResult": () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.FetchResult),
@@ -4424,13 +4424,11 @@ XmlDocumentTileCodec.Shared = new XmlDocumentTileCodec();
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ContentUpdateEventArgs": () => (/* binding */ ContentUpdateEventArgs),
 /* harmony export */   "TileContentManager": () => (/* binding */ TileContentManager)
 /* harmony export */ });
-/* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/cache */ "./dist/utils/cache.js");
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "./dist/events/events.observable.js");
-/* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/events.args */ "./dist/events/events.args.js");
+/* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/cache */ "./dist/utils/cache.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/events.observable */ "./dist/events/events.observable.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
 /* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/tiles.address.js");
 
@@ -4438,25 +4436,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-class ContentUpdateEventArgs extends _events_events_args__WEBPACK_IMPORTED_MODULE_0__.EventArgs {
-    constructor(address, content, sender) {
-        super(sender);
-        this._address = address;
-        this._content = content;
-    }
-    get address() {
-        return this._address;
-    }
-    get content() {
-        return this._content;
-    }
-}
 class TileContentManager {
     constructor(datasource, cache) {
-        this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_1__.MemoryCache();
+        this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_0__.MemoryCache();
         this._datasource = datasource;
         this._smoothingZomm = false;
+    }
+    get id() {
+        return this._datasource.name;
     }
     get cache() {
         return this._cache;
@@ -4468,7 +4455,7 @@ class TileContentManager {
         return this._datasource.metrics;
     }
     get contentUpdateObservable() {
-        this._contentUpdateObservable = this._contentUpdateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable(this.onContentObserverAdded.bind(this));
+        this._contentUpdateObservable = this._contentUpdateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable(this.onContentObserverAdded.bind(this));
         return this._contentUpdateObservable;
     }
     buildCacheKey(key) {
@@ -4490,7 +4477,7 @@ class TileContentManager {
                 const content = result.content;
                 manager._cache.set(this.buildCacheKey(address.quadkey), content);
                 if (this._contentUpdateObservable) {
-                    const e = new ContentUpdateEventArgs(address, content, manager);
+                    const e = new _tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.ContentUpdateEventArgs(address, content, manager);
                     this._contentUpdateObservable.notifyObservers(e);
                 }
             }
@@ -4515,7 +4502,7 @@ class TileContentManager {
         const parentCacheKey = this.buildCacheKey(_tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToParentKey(key));
         const content = this._cache.get(parentCacheKey);
         if (content) {
-            if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_5__.IsTileContentView)(content)) {
+            if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsTileContentView)(content)) {
                 return null;
             }
             const source = _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToNormalizedSection(key);
@@ -4637,10 +4624,13 @@ EPSG3857.Shared = new EPSG3857();
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CellCoordinateReference": () => (/* binding */ CellCoordinateReference),
+/* harmony export */   "ContentUpdateEventArgs": () => (/* binding */ ContentUpdateEventArgs),
 /* harmony export */   "FetchResult": () => (/* binding */ FetchResult),
 /* harmony export */   "IsTileContentView": () => (/* binding */ IsTileContentView),
 /* harmony export */   "isTileAddress": () => (/* binding */ isTileAddress)
 /* harmony export */ });
+/* harmony import */ var _events_events_args__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/events.args */ "./dist/events/events.args.js");
+
 function isTileAddress(b) {
     if (typeof b !== "object" || b === null)
         return false;
@@ -4650,6 +4640,19 @@ function IsTileContentView(b) {
     if (typeof b !== "object" || b === null)
         return false;
     return b.source !== undefined && b.target !== undefined;
+}
+class ContentUpdateEventArgs extends _events_events_args__WEBPACK_IMPORTED_MODULE_0__.EventArgs {
+    constructor(address, content, sender) {
+        super(sender);
+        this._address = address;
+        this._content = content;
+    }
+    get address() {
+        return this._address;
+    }
+    get content() {
+        return this._content;
+    }
 }
 var CellCoordinateReference;
 (function (CellCoordinateReference) {
@@ -4890,7 +4893,7 @@ class TileMapView {
     static ClampAzimuth(a) {
         return ((a % 360) + 360) % 360;
     }
-    constructor(manager, width, height, center, lod, cache) {
+    constructor(contentProvider, width, height, center, lod, cache) {
         this._w = 0;
         this._h = 0;
         this._lodf = 0;
@@ -4901,8 +4904,8 @@ class TileMapView {
         this._valid = false;
         this._cartesianCache = _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         this._cache = cache || new _utils_cache__WEBPACK_IMPORTED_MODULE_3__.MemoryCache();
-        this._manager = manager;
-        this._manager.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
+        this._contentProvider = contentProvider;
+        this._contentProvider.contentUpdateObservable.add(this.onTileContentUpdate.bind(this));
         this._currentContext = new TileMapContext(-1);
         this._contexts = [...new Array(this.metrics.lodCount)].map((o, i) => new TileMapContext(i + this.metrics.minLOD));
         this.invalidateSize(width, height).setView(center, _tiles_address__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ClampLod(lod, this.metrics));
@@ -4933,11 +4936,8 @@ class TileMapView {
     get bounds() {
         return this.validateBounds();
     }
-    get datasource() {
-        return this._manager.datasource;
-    }
     get manager() {
-        return this._manager;
+        return this._contentProvider;
     }
     get context() {
         return this._currentContext;
@@ -4952,7 +4952,7 @@ class TileMapView {
         return this._azimuth;
     }
     get metrics() {
-        return this.datasource.metrics;
+        return this.manager.metrics;
     }
     get width() {
         return this._w;
@@ -5150,7 +5150,7 @@ class TileMapView {
                 }
                 t = builder.withAddress(a).build();
                 this._cache.set(key, t);
-                t.content = this._manager.getTileContent(a);
+                t.content = this._contentProvider.getTileContent(a);
                 added.push(t);
             }
         }

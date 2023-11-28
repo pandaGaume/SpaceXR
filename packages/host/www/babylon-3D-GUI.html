@@ -77,9 +77,11 @@
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
-                camera.setTarget(new BABYLON.Vector3(0, 50, 0));
-                camera.wheelPrecision = 20;
+                // const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", 0, 60 * Math.PI / 180, 350, new BABYLON.Vector3(0, 0, 0), scene);
+
+                // camera.setTarget(new BABYLON.Vector3(0, 50, 0));
+                camera.wheelPrecision = 1;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, true);
@@ -132,20 +134,16 @@
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
 
                 //#region 3D GUI
+                
+                // #43e1be
+                const lightBlue = new BABYLON.Color3(67 / 255, 225 / 255, 190 / 255);
+                scene.ambientColor = lightBlue;
                 // var anchor = new BABYLON.TransformNode("");
                 const manager = new BABYLON.GUI.GUI3DManager(scene);
-                // const panel = new BABYLON.GUI.PlanePanel();
-                const panel = new BABYLON.GUI.NearMenu("commandPanel");
+                manager.useRealisticScaling = true;
+                const panel = new BABYLON.GUI.PlanePanel();
                 manager.addControl(panel);
-                let follower = panel.defaultBehavior.followBehavior;
-                follower.defaultDistance = 10;
-                follower.minimumDistance = 10;
-                follower.maximumDistance = 35;
-                // panel.linkToTransformNode(display);
                 panel.margin = 0.2;
-                // panel.position.x = -200;
-                // panel.position.y = 70;
-                // panel.orientation = BABYLON.GUI.Container3D.FACEORIGIN_ORIENTATION;
                 panel.scaling = new BABYLON.Vector3(12, 12, 12);
 
                 var addButton = function () {
@@ -157,17 +155,64 @@
 
                 // update layout only after all controls have been added
                 panel.blockLayout = true;
-                for (var index = 0; index < 3; index++) {
-                    addButton();
-                }
+                // for (var index = 0; index < 3; index++) {
+                //     addButton();
+                // }
 
-                // var text1 = new BABYLON.GUI.TextBlock();
-                // text1.text = "LAYERS";
-                // text1.color = "#42e7c5";
-                // text1.fontSize = 24;
-                // button.content = text1;
+                // BABYLON.SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "both_houses_scene.babylon").then((result) => {
+                //     const house1 = scene.getMeshByName("detached_house");
+                //     house1.scaling = new BABYLON.Vector3(2, 2, 2);
+                //     const meshButton = new BABYLON.GUI.MeshButton3D(house1, "meshButton");
+                //     panel.addControl(meshButton);
+                //     // house1.position.y = 2;
+                //     // const house2 = result.meshes[2];
+                //     // house2.position.y = 1;
+                // });
+
+                const twoDimensionButton = new BABYLON.GUI.Button3D("reset");
+                const text = new BABYLON.GUI.TextBlock();
+                text.text = "reset";
+                text.color = "white";
+                text.fontSize = 24;
+                twoDimensionButton.content = text;
+                panel.addControl(twoDimensionButton);
+
+                // Mesh button
+                const faceWidth = 512,
+                    textureWidth = 1076;
+                const meshOptions = {
+                    width: 1,
+                    height: 1,
+                    depth: 0.1,
+                    faceUV: [
+                        new BABYLON.Vector4(faceWidth / textureWidth, 0, 2 * faceWidth / textureWidth, 1), // rear
+                        new BABYLON.Vector4(0, 0, faceWidth / textureWidth, 1), // front
+                        new BABYLON.Vector4(2 * faceWidth / textureWidth, 0, 1, 1), // right
+                        new BABYLON.Vector4(2 * faceWidth / textureWidth, 0, 1, 1), // left
+                        new BABYLON.Vector4(2 * faceWidth / textureWidth, 0, 1, 1), // top
+                        new BABYLON.Vector4(2 * faceWidth / textureWidth, 0, 1, 1) // bottom
+                    ]
+                };
+                const box = BABYLON.MeshBuilder.CreateBox("box", meshOptions);
+                const dvMaterial = new BABYLON.StandardMaterial("dvButtonMaterial", scene);
+                dvMaterial.ambientColor = new BABYLON.Color3(1, 1, 1);
+                // dvMaterial.diffuseColor = lightBlue;
+                // dvMaterial.ambientColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+                // dvMaterial.alpha = 0.8;
+                dvMaterial.diffuseTexture = new BABYLON.Texture("textures/search-button-texture.png", scene);
+                // dvMaterial.diffuseTexture.hasAlpha = true;
+                dvMaterial.alphaMode = BABYLON.Engine.ALPHA_MAXIMIZED;
+                // dvMaterial.wireframe = true;
+                box.material = dvMaterial;
+                box.visibility = 0.9999;
+                const meshButton = new BABYLON.GUI.MeshButton3D(box, "meshButton");
+                panel.addControl(meshButton);
 
                 panel.blockLayout = false;
+                panel.position.x = 150;
+                panel.position.y = 100; // "height"
+                panel.position.z = 50; // parallel to table
+                panel.node.rotation = new BABYLON.Vector3(0,  - Math.PI / 2, 0);
                 //#endregion
 
                 //map.view.centerObservable.add((arg) => minimap2D.setView(arg.newValue));
@@ -275,14 +320,14 @@
                 var zoomInBt = document.getElementById("zoomin");
                 zoomInBt.addEventListener("click", () => {
                     map.zoomIn(0.1);
-                    minimap2D.zoomIn(0.1);
+                    // minimap2D.zoomIn(0.1);
                 });
 
                 // Add a click event listener to the zoom out button
                 var zoomOutBt = document.getElementById("zoomout");
                 zoomOutBt.addEventListener("click", () => {
                     map.zoomOut(0.1);
-                    minimap2D.zoomOut(0.1);
+                    // minimap2D.zoomOut(0.1);
                 });
 
                 //

@@ -135,8 +135,8 @@ export interface ITileMetricsProvider {
 }
 
 export class FetchResult<T> {
-    public static Null<T>(address: ITileAddress): FetchResult<Nullable<T>> {
-        return new FetchResult<Nullable<T>>(address, null);
+    public static Null<T>(address: ITileAddress, userArgs: Nullable<Array<unknown>>): FetchResult<Nullable<T>> {
+        return new FetchResult<Nullable<T>>(address, null, userArgs);
     }
 
     status?: number;

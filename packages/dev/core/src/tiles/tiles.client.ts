@@ -75,7 +75,7 @@ export class TileWebClient<T> implements ITileClient<T> {
         }
         if (TileAddress.IsValidAddress(request, this._metrics) === false) {
             // Do NOT fetch url if address is invalid - return null content
-            return FetchResult.Null<T>(request);
+            return FetchResult.Null<T>(request, userArgs);
         }
         const url = this._urlFactory.buildUrl(request, ...userArgs);
         if (!url) {

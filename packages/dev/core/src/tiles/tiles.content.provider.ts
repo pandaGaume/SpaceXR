@@ -75,16 +75,18 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
             .fetchAsync(address, this) // we pass this as context
             .then((result: FetchResult<Nullable<T>>) => {
                 if (result.content) {
-                    const manager = <TileContentProvider<T>>result.userArgs[0];
-                    const address = result.address;
-                    // we have the content of the tile.
-                    const content = result.content;
-                    // we store the value in cache
-                    manager._cache.set(this.buildCacheKey(address.quadkey), content);
-                    // we notify the observers
-                    if (this._contentUpdateObservable) {
-                        const e = new ContentUpdateEventArgs<T>(address, content, manager);
-                        this._contentUpdateObservable.notifyObservers(e);
+                    const provider = <TileContentProvider<T>>result?.userArgs?.[0];
+                    if (provider) {
+                        const address = result.address;
+                        // we have the content of the tile.
+                        const content = result.content;
+                        // we store the value in cache
+                        provider._cache.set(this.buildCacheKey(address.quadkey), content);
+                        // we notify the observers
+                        if (this._contentUpdateObservable) {
+                            const e = new ContentUpdateEventArgs<T>(address, content, provider);
+                            this._contentUpdateObservable.notifyObservers(e);
+                        }
                     }
                 }
             })

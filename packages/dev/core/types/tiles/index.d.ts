@@ -11,4 +11,6 @@ export * from "./vendors/index";
 export * from "./tiles";
 export * from "./tiles.urlBuilder";
 export * from "./tiles.mapview";
+export * from "./tiles.tilemap";
+export * from "./tiles.tileview";
 export * from "./tiles.content.provider";

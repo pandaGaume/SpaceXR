@@ -8,8 +8,8 @@ export declare class Scalar {
     static PI_2: number;
     static PI_4: number;
     static WithinEpsilon(a: number, b: number, epsilon?: number): boolean;
-    static Sign: (value: number) => 1 | -1;
-    static Clamp: (value: number, min: number, max: number) => number;
+    static Sign(value: number): 1 | -1;
+    static Clamp(value: number, min: number, max: number): number;
     static GetRandomInt(min: number, max: number): number;
 }
 export declare abstract class AbstractRange<T> {

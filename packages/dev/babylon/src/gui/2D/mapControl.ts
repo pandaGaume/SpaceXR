@@ -10,6 +10,8 @@ import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { TileMapView, UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 import { EPSG3857 } from "core/tiles/tiles.geography";
 import { Scalar } from "core/math/math";
+import { PropertyChangedEventArgs } from "core/events/events.args";
+import { Observable } from "core/events/events.observable";
 
 export class MapControl extends Control implements ITileMapApi {
     public static readonly DefaultColor = "white";
@@ -50,6 +52,29 @@ export class MapControl extends Control implements ITileMapApi {
         return this._model?.context.tiles.get(key);
     }
 
+    public get width(): number {
+        return this._model.width;
+    }
+
+    public get height(): number {
+        return this._model.height;
+    }
+
+    public get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>> {
+        return this._model.resizeObservable;
+    }
+
+    public get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>> {
+        return this._model.centerObservable;
+    }
+
+    public get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
+        return this._model.zoomObservable;
+    }
+
+    public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
+        return this._model.azimuthObservable;
+    }
     public invalidateSize(w: number, h: number): ITileMapApi {
         this._model?.invalidateSize(w, h);
         this._model?.validate();

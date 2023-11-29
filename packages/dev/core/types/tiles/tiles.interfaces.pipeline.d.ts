@@ -39,7 +39,7 @@ export declare class TilePipelineEventArgs extends EventArgs<PipelineType> {
     get infos(): IContextMetrics;
     get values(): PipelineValue[];
 }
-export interface ITileView extends ITileMapApi, IPipelineComponent {
+export interface ITileView extends ITileMapApi, IPipelineComponent, ITileMetricsProvider {
     addressAddedObservable: Observable<TilePipelineEventArgs>;
     addressRemovedObservable: Observable<TilePipelineEventArgs>;
 }

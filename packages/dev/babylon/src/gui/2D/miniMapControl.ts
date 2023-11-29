@@ -16,6 +16,7 @@ import { Geo2 } from "core/geography/geography.position";
 import { Control, Measure, Rectangle } from "@babylonjs/gui";
 import { Scalar } from "core/math/math";
 import { ICanvasRenderingContext } from "@babylonjs/core";
+import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
 
 type MinimapModelType = TileMapView<any>;
 type MinimapSkinType = IViewSkin;
@@ -46,9 +47,9 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
         } as MinimapSkinType;
     }
 
-    private _centerObserver?: Nullable<Observer<PropertyChangedEventArgs<MinimapModelType, IGeo2>>>;
-    private _zoomObserver?: Nullable<Observer<PropertyChangedEventArgs<MinimapModelType, number>>>;
-    private _azimuthObserver?: Nullable<Observer<PropertyChangedEventArgs<MinimapModelType, number>>>;
+    private _centerObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileMapApi, IGeo2>>>;
+    private _zoomObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileMapApi, number>>>;
+    private _azimuthObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileMapApi, number>>>;
 
     private _map?: MapControl;
     private _window?: Rectangle;
@@ -75,19 +76,19 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
             this._azimuthObserver = newValue.azimuthObservable.add(this._onAzimuthChanged.bind(this));
         }
     }
-    private _onCenterChanged(args: PropertyChangedEventArgs<MinimapModelType, IGeo2>) {
+    private _onCenterChanged(args: PropertyChangedEventArgs<ITileMapApi, IGeo2>) {
         if (this._map && args.newValue) {
             this._map.setView(args.newValue);
         }
     }
 
-    private _onZoomChanged(args: PropertyChangedEventArgs<MinimapModelType, number>) {
+    private _onZoomChanged(args: PropertyChangedEventArgs<ITileMapApi, number>) {
         if (this._map && args.newValue != undefined) {
             this._map.setZoom(args.newValue);
         }
     }
 
-    private _onAzimuthChanged(args: PropertyChangedEventArgs<MinimapModelType, number>) {
+    private _onAzimuthChanged(args: PropertyChangedEventArgs<ITileMapApi, number>) {
         if (this._window && args.newValue != undefined) {
             this._window.rotation = -args.newValue * Scalar.DEG2RAD;
         }

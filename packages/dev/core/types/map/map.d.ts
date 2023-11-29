@@ -2,9 +2,10 @@ import { TileMapView, UpdateEventArgs } from "../tiles/tiles.mapview";
 import { ITile, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { ITileMapApi } from "../tiles/tiles.interfaces.api";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
+import { ICartesian2, ISize2, ISize3 } from "../geometry/geometry.interfaces";
 import { Observable, Observer } from "../events/events.observable";
-import { TileContentProvider } from "core/tiles/tiles.content.provider";
+import { TileContentProvider } from "../tiles/tiles.content.provider";
+import { PropertyChangedEventArgs } from "../events/events.args";
 export interface IMapDisplay {
     resolution: ISize3;
 }
@@ -24,6 +25,12 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     get updatedObservable(): Observable<T>;
     hasTile(key: string): boolean;
     getTile(key: string): T | undefined;
+    get width(): number;
+    get height(): number;
+    get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
+    get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
+    get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;

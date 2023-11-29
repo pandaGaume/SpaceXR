@@ -6,6 +6,8 @@ import { ITile, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
 import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { TileMapView, UpdateEventArgs } from "core/tiles/tiles.mapview";
+import { PropertyChangedEventArgs } from "core/events/events.args";
+import { Observable } from "core/events/events.observable";
 export declare class MapControl extends Control implements ITileMapApi {
     static readonly DefaultColor = "white";
     private _resolution?;
@@ -17,6 +19,12 @@ export declare class MapControl extends Control implements ITileMapApi {
     set background(v: string | undefined);
     hasTile(key: string): boolean;
     getTile(key: string): ITile<HTMLImageElement> | undefined;
+    get width(): number;
+    get height(): number;
+    get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
+    get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
+    get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;

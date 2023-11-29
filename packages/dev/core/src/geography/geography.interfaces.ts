@@ -14,7 +14,7 @@ export interface IGeo3 extends IComparable<IGeo3>, ICloneable<IGeo3> {
     hasAltitude: boolean;
 }
 
-export function isLocation(b: unknown): b is IGeo3 {
+export function isLocation(b: unknown): b is IGeo2 | IGeo3 {
     if (typeof b !== "object" || b === null) return false;
     return (<IGeo3>b).lat !== undefined && (<IGeo3>b).lon !== undefined;
 }
@@ -37,11 +37,13 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     center: IGeo3;
     size: ISize3;
 
-    add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
-    addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
+    add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    unionInPlace(other: IEnvelope): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;
     contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
+    clone(): IEnvelope;
 }
 
 export function isEnvelope(b: unknown): b is IEnvelope {
@@ -51,4 +53,9 @@ export function isEnvelope(b: unknown): b is IEnvelope {
 
 export interface IGeoBounded {
     bounds?: IEnvelope;
+}
+
+export function isGeoBounded(b: unknown): b is IGeoBounded {
+    if (typeof b !== "object" || b === null) return false;
+    return (<IGeoBounded>b).bounds !== undefined && isEnvelope((<IGeoBounded>b).bounds);
 }

@@ -2,9 +2,9 @@ import { ISize2 } from "../geometry/geometry.interfaces";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { Observable } from "../events/events.observable";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ITileClient } from "./tiles.interfaces";
+import { ITileClient, ITileMetricsProvider } from "./tiles.interfaces";
 
-export interface ITileMapApi {
+export interface ITileMapApi extends ITileMetricsProvider, ISize2 {
     resizeObservable: Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
     centerObservable: Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
     zoomObservable: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;

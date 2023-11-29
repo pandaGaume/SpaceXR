@@ -152,10 +152,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
 
     // event
-    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
-    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
-    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
-    _azimuthObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _resizeObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
+    _centerObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
 
     public constructor(contentProvider: ITileContentProvider<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
@@ -173,20 +173,20 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     }
 
     /// EVENTS
-    public get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>> {
-        this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>(this.onResizeObserverAdded.bind(this));
+    public get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>> {
+        this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>(this.onResizeObserverAdded.bind(this));
         return this._resizeObservable!;
     }
-    public get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>> {
-        this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>(this.onCenterObserverAdded.bind(this));
+    public get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>> {
+        this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>(this.onCenterObserverAdded.bind(this));
         return this._centerObservable!;
     }
-    public get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>> {
-        this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onZoomObserverAdded.bind(this));
+    public get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
+        this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, number>>(this.onZoomObserverAdded.bind(this));
         return this._zoomObservable!;
     }
-    public get azimuthObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>> {
-        this._azimuthObservable = this._azimuthObservable || new Observable<PropertyChangedEventArgs<TileMapView<T>, number>>(this.onAzimuthObserverAdded.bind(this));
+    public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
+        this._azimuthObservable = this._azimuthObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, number>>(this.onAzimuthObserverAdded.bind(this));
         return this._azimuthObservable!;
     }
 
@@ -381,10 +381,10 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return null;
     }
 
-    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, ISize2>>): void {}
-    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
-    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>): void {}
-    private onAzimuthObserverAdded(observer: Observer<PropertyChangedEventArgs<TileMapView<T>, number>>): void {}
+    private onResizeObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, ISize2>>): void {}
+    private onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, number>>): void {}
+    private onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, IGeo2>>): void {}
+    private onAzimuthObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, number>>): void {}
     private onUpdateObserverAdded(observer: Observer<UpdateEventArgs<T>>): void {}
 
     // VIRTUALS

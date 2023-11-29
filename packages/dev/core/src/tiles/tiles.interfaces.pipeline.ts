@@ -75,7 +75,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipeline
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
 
-type PipelineType = IMapView | ITileProvider<any>;
+type PipelineType = ITileView | ITileProvider<any>;
 type PipelineValue = ITileAddress | ITile<any>[];
 
 /// <summary>
@@ -109,7 +109,7 @@ export class TilePipelineEventArgs extends EventArgs<PipelineType> {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface IMapView extends ITileMapApi, IPipelineComponent {
+export interface ITileView extends ITileMapApi, IPipelineComponent {
     addressAddedObservable: Observable<TilePipelineEventArgs>;
     addressRemovedObservable: Observable<TilePipelineEventArgs>;
 }

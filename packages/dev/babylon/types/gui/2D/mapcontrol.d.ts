@@ -2,7 +2,8 @@ import { ICanvasRenderingContext } from "@babylonjs/core";
 import { Control, Measure } from "@babylonjs/gui";
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { ISize2 } from "core/geometry";
-import { ITile, ITileMapApi, ITileMetrics } from "core/tiles/tiles.interfaces";
+import { ITile, ITileMetrics } from "core/tiles/tiles.interfaces";
+import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
 import { TileContentProvider } from "core/tiles/tiles.content.provider";
 import { TileMapView, UpdateEventArgs } from "core/tiles/tiles.mapview";
 export declare class MapControl extends Control implements ITileMapApi {

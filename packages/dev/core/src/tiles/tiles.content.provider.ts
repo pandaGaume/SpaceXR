@@ -1,15 +1,6 @@
 import { IMemoryCache, MemoryCache } from "../utils/cache";
-import {
-    ITileContentProvider,
-    FetchResult,
-    ITileAddress,
-    TileSection,
-    ITileDatasource,
-    ITileMetrics,
-    IsTileContentView,
-    TileContent,
-    ContentUpdateEventArgs,
-} from "./tiles.interfaces";
+import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "./tiles.interfaces";
+import { ITileContentProvider, ContentUpdateEventArgs } from "./tiles.interfaces.pipeline";
 import { Nullable } from "../types";
 import { Observable, Observer } from "../events/events.observable";
 import { TileContentView } from "./tiles";

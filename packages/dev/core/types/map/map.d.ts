@@ -1,5 +1,6 @@
 import { TileMapView, UpdateEventArgs } from "../tiles/tiles.mapview";
-import { ITile, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITileMapApi } from "../tiles/tiles.interfaces.api";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
 import { Observable, Observer } from "../events/events.observable";

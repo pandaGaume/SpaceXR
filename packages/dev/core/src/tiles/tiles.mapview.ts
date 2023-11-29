@@ -1,6 +1,8 @@
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ITileContentProvider, ContentUpdateEventArgs, ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile} from "./tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITile } from "./tiles.interfaces";
+import { ITileContentProvider, ContentUpdateEventArgs } from "./tiles.interfaces.pipeline";
+import { ITileMapApi } from "./tiles.interfaces.api";
 import { Geo2 } from "../geography/geography.position";
 import { Observable, Observer } from "../events/events.observable";
 import { IValidable, Nullable } from "../types";

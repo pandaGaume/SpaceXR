@@ -44,6 +44,12 @@ Or if you prefer, you can write `npm run build:all` to execute all the commands 
 -   **Data Integration**: Seamless integration with Data source such OSM for accurate and comprehensive mapping data.
 -   **WEB Maps**: use of any available 2D and 3D web map's
 
+## Documentations
+
+**Introduction to the Web Tile Interface Pipeline**
+
+In the realm of modern web mapping, the efficiency and precision of how map data is handled and displayed are paramount. Our web tile interface pipeline stands as a testament to this, embodying a sophisticated system that ensures seamless and dynamic map rendering. This pipeline is a complex orchestration of various components, each with its unique role in the process of fetching, processing, and displaying map tiles. From the foundational Tile Metrics, which define the geographic and resolution parameters, to the TileConsumer, responsible for the final rendering of the map data, each component works in harmony to create an intuitive and responsive user experience. We invite you to explore a detailed overview of each component in our [pipeline](./docs/tile_pipeline.md), where the intricate functionalities and interactions are elaborated.
+
 ## Contributing
 
 Contributions to the SpaceXR project are welcome! If you're interested in contributing, please read our [contributing guidelines](./contributing.md) to learn more about how to get started.

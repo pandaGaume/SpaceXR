@@ -109,7 +109,7 @@ export class TilePipelineEventArgs extends EventArgs<PipelineType> {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITileMapApi, IPipelineComponent {
+export interface ITileView extends ITileMapApi, IPipelineComponent, ITileMetricsProvider {
     addressAddedObservable: Observable<TilePipelineEventArgs>;
     addressRemovedObservable: Observable<TilePipelineEventArgs>;
 }

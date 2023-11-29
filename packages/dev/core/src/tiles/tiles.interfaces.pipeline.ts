@@ -47,6 +47,7 @@ export class ContentUpdateEventArgs<T> extends AddressValueEventArgs<ITileConten
         super(address, content, sender);
         this._result = result;
     }
+
     public get content(): TileContent<T> {
         return this.value;
     }
@@ -59,12 +60,24 @@ export class ContentUpdateEventArgs<T> extends AddressValueEventArgs<ITileConten
     }
 }
 
+/// <summary>
+/// The TileContentProvider is responsible for fetching the content of tiles. It is tasked with the following:
+/// - Accepting Tile Addresses: The TileContentProvider is responsible for accepting or rejecting tile addresses based on the metrics of the View.
+/// - Fetching Tile Content: Once a tile address is accepted, the TileContentProvider is tasked with fetching the content of the tile.
+/// - Managing Content Update Events: The TileContentProvider is responsible for managing events related to content updates. It uses the observable pattern
+///   to send notifications about content updates, allowing other components of the system to react and update accordingly.
+/// </summary>
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipelineComponent {
     contentUpdateObservable: Observable<ContentUpdateEventArgs<T>>;
+
     accept(address: ITileAddress): boolean;
+
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
 
+/// <summary>
+/// Event args carrying a navigation metrics context and values. This is used by the tile pipeline observable between view and tileProvider, then between TileProvider and TileConsumer.
+/// </summary>
 export class TilePipelineEventArgs<S, T> extends EventArgs<S> {
     private _infos: IContextMetrics;
     private _values: T[];
@@ -84,6 +97,9 @@ export class TilePipelineEventArgs<S, T> extends EventArgs<S> {
     }
 }
 
+/// <summary>
+/// Specialized event args carrying a navigation metrics context and tile addresses. This is used by the view observables.
+/// </summary>
 export class TileMapEventArgs extends TilePipelineEventArgs<IMapView, ITileAddress> {
     public constructor(sender: IMapView, infos: IContextMetrics, ...values: ITileAddress[]) {
         super(sender, infos, ...values);
@@ -107,7 +123,7 @@ export interface IMapView extends ITileMapApi, IPipelineComponent {
 }
 
 /// <summary>
-/// Used by the tile provider observable to carry the tile objects related to the address, along with the metrics context of the view.
+/// Specialized event args carrying a navigation metrics context and tiles. This is used by the TileProvider observables.
 /// </summary>
 export class TileProviderEventArgs<T> extends TilePipelineEventArgs<ITileProvider<T>, ITile<T>> {
     public constructor(sender: ITileProvider<T>, infos: IContextMetrics, ...values: ITile<T>[]) {

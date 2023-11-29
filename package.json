@@ -19,6 +19,11 @@
         "packages/**/*"
     ],
     "scripts": {
+        "start": "node -r @dev/build-tools",
+        "build:all": "npm install && npm run build:buildTools && npm run build:babylon && npm run build:core && echo All packages builded successfully!",
+        "build:buildTools": "cd packages/dev/buildTools && npm run build:build-tools",
+        "build:babylon": "cd packages/dev/babylon && npm run build:babylon:assets && npm run publish:babylon:dev",
+        "build:core": "cd packages/dev/core && npm run build:core:dev",
         "build:dev": "npm run compile:dev",
         "compile:dev": "tsc -b ./tsconfig.packages.dev.json",
         "test": "jest"

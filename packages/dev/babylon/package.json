@@ -22,5 +22,8 @@
     "sideEffects": false,
     "devDependencies": {
         "@dev/build-tools": "^1.0.0"
+    },
+    "dependencies": {
+        "path-scurry": "^1.10.1"
     }
 }

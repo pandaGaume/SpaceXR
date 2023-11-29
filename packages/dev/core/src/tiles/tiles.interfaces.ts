@@ -67,6 +67,10 @@ export interface ITile<T> extends IGeoBounded {
     neighborKeys?: string;
 }
 
+export interface ITileProvider<T> extends ITileMetricsProvider {
+    getTile(address: ITileAddress): ITile<T>;
+}
+
 export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
@@ -131,9 +135,13 @@ export interface ITileMetricsProvider {
 }
 
 export class FetchResult<T> {
+    public static Null<T>(address: ITileAddress): FetchResult<Nullable<T>> {
+        return new FetchResult<Nullable<T>>(address, null);
+    }
+
     status?: number;
     statusText?: string;
-    public constructor(public address: ITileAddress, public content: T, public userArgs: Array<unknown>) {}
+    public constructor(public address: ITileAddress, public content: T, public userArgs: Nullable<Array<unknown>> = null) {}
 }
 
 export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {

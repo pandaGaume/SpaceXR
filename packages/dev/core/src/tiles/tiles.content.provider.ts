@@ -23,6 +23,10 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         this._smoothingZomm = false;
     }
 
+    public accept(address: ITileAddress): boolean {
+        return TileAddress.IsValidAddress(address, this.metrics);
+    }
+
     public get id(): string | undefined {
         return this._datasource.name;
     }

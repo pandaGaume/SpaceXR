@@ -8,6 +8,7 @@ export declare class TileContentProvider<T> implements ITileContentProvider<T> {
     _contentUpdateObservable?: Observable<ContentUpdateEventArgs<T>>;
     _smoothingZomm: boolean;
     constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>);
+    accept(address: ITileAddress): boolean;
     get id(): string | undefined;
     get cache(): IMemoryCache<string, TileContent<T>>;
     get datasource(): ITileDatasource<T, ITileAddress>;

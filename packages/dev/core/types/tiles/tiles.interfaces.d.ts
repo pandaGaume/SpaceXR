@@ -19,6 +19,7 @@ export interface ITileCruncher<T> {
 export declare function IsTileContentView<T>(b: unknown): b is ITileContentView;
 export type TileContent<T> = Nullable<T | ITileContentView>;
 export interface ITile<T> extends IGeoBounded {
+    namespace?: string;
     address: ITileAddress;
     content: TileContent<T>;
     rect?: IRectangle;

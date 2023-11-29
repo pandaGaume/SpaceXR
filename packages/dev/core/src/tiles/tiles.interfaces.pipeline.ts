@@ -1,33 +1,154 @@
+import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { EventArgs } from "../events/events.args";
 import { Observable } from "../events/events.observable";
 import { Nullable } from "../types";
 import { ITile, ITileAddress, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
+import { ITileMapApi } from "./tiles.interfaces.api";
 
-export class ContentUpdateEventArgs<T> extends EventArgs<ITileContentProvider<T>> {
+export interface IPipelineComponent {
+    id?: string;
+}
+
+export interface IContextMetrics {
+    lod: number;
+    scale: number;
+    center: ICartesian2;
+}
+
+/// <summary>
+/// Base class of event args carrying a tile address and a value.
+/// </summary>
+export class AddressValueEventArgs<S, T> extends EventArgs<S> {
     _address: ITileAddress;
-    _content: TileContent<T>;
+    _value: T;
 
-    public constructor(address: ITileAddress, content: TileContent<T>, sender: ITileContentProvider<T>) {
+    public constructor(address: ITileAddress, value: T, sender: S) {
         super(sender);
         this._address = address;
-        this._content = content;
+        this._value = value;
     }
 
     public get address(): ITileAddress {
         return this._address;
     }
 
-    public get content(): TileContent<T> {
-        return this._content;
+    public get value(): T {
+        return this._value;
     }
 }
 
-export interface ITileContentProvider<T> extends ITileMetricsProvider {
-    id?: string;
+/// <summary>
+/// Event args carrying a tile address and a content. This is used by the content provider observable.
+/// </summary>
+export class ContentUpdateEventArgs<T> extends AddressValueEventArgs<ITileContentProvider<T>, TileContent<T>> {
+    private _result: number;
+
+    public constructor(address: ITileAddress, content: TileContent<T>, sender: ITileContentProvider<T>, result: number = 0) {
+        super(address, content, sender);
+        this._result = result;
+    }
+    public get content(): TileContent<T> {
+        return this.value;
+    }
+
+    /// <summary>
+    /// Result of the content update. 0 means success, any other value is an error code.
+    /// </summary>
+    public get result(): number {
+        return this._result;
+    }
+}
+
+export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipelineComponent {
     contentUpdateObservable: Observable<ContentUpdateEventArgs<T>>;
+    accept(address: ITileAddress): boolean;
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
 
-export interface ITileProvider<T> extends ITileMetricsProvider {
-    getTile(address: ITileAddress): Nullable<ITile<T>>;
+export class TilePipelineEventArgs<S, T> extends EventArgs<S> {
+    private _infos: IContextMetrics;
+    private _values: T[];
+
+    public constructor(sender: S, infos: IContextMetrics, ...values: T[]) {
+        super(sender);
+        this._infos = infos;
+        this._values = values;
+    }
+
+    public get infos(): IContextMetrics {
+        return this._infos;
+    }
+
+    public get values(): T[] {
+        return this._values;
+    }
+}
+
+export class TileMapEventArgs extends TilePipelineEventArgs<IMapView, ITileAddress> {
+    public constructor(sender: IMapView, infos: IContextMetrics, ...values: ITileAddress[]) {
+        super(sender, infos, ...values);
+    }
+    public get addresses(): ITileAddress[] {
+        return this.values;
+    }
+}
+
+/// <summary>
+/// The View component is tasked with selecting appropriate tile addresses, guided by the Tile Metrics and navigation properties. Its role is expanded to include the following:
+/// - Tile Selection Based on Navigation Properties: Considers the geographic center, azimuth, and level of detail in tile selection, ensuring relevance and accuracy.
+/// - Dimension and Scalability: Defines the dimension in unitless TileXY units, enabling flexibility and adaptability to different screen sizes and resolutions.
+/// - Event Management Through Observable Pattern: Crucially, the View is responsible for managing events using the observable pattern. It sends notifications about 'Added'
+///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
+///   and responsive to changes, such as user navigation or zoom adjustments.
+/// </summary>
+export interface IMapView extends ITileMapApi, IPipelineComponent {
+    addressAddedObservable: Observable<TileMapEventArgs>;
+    addressRemovedObservable: Observable<TileMapEventArgs>;
+}
+
+/// <summary>
+/// Used by the tile provider observable to carry the tile objects related to the address, along with the metrics context of the view.
+/// </summary>
+export class TileProviderEventArgs<T> extends TilePipelineEventArgs<ITileProvider<T>, ITile<T>> {
+    public constructor(sender: ITileProvider<T>, infos: IContextMetrics, ...values: ITile<T>[]) {
+        super(sender, infos, ...values);
+    }
+    public get tiles(): ITile<T>[] {
+        return this.values;
+    }
+}
+
+/// <summary>
+/// The TileProvider acts as a critical intermediary between the View and the TileContentProvider. Its responsibilities include:
+/// - Observing View Events: The TileProvider is tasked with observing events generated by the View, particularly those related to tile addition or removal.
+/// - Synchronization with TileContentProvider: Upon receiving events from the View, the TileProvider synchronizes these with the TileContentProvider.
+///   This synchronization ensures that the content of the tiles is in line with the changes in the View.
+/// - Managing Tile Events: Once the TileContent is ready, the TileProvider takes over the role of event management. It uses the observable pattern
+///   to handle 'Add', 'Remove', and 'Update' tile events. The 'Update' event is particularly significant in the context of asynchronous content loading,
+///   allowing the system to dynamically update tiles as new content becomes available or as user interactions necessitate changes.
+/// </summary>
+export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
+    /// <summary> messaged when a tile is updated </summary>
+    tileUpdateObservable: Observable<TileProviderEventArgs<T>>;
+
+    /// <summary> messaged when a tile is added </summary>
+    tileAddedObservable: Observable<TileProviderEventArgs<T>>;
+
+    /// <summary> messaged when a tile is removed </summary>
+    tileRemovedObservable: Observable<TileProviderEventArgs<T>>;
+
+    /// <summary>
+    /// Get tiles using one address. Typically used by the pipeline, this method is using the underlying providers,
+    /// first to verify if the content provider are accepting the address, and then ask for the contents itself.
+    /// </summary>
+    getTile(address: ITileAddress): Nullable<ITile<T>[]>;
+
+    /// <summary> register a content provider to the pipeline </summary>
+    addContentProvider(contentProvider: ITileContentProvider<T>): void;
+
+    /// <summary> unregister a content provider from the pipeline </summary>
+    removeContentProvider(contentProvider: ITileContentProvider<T>): void;
+
+    /// <summary> get a content provider from the pipeline using is name. Name is usually comming from ITile.namespace. </summary>
+    getProviderByName(name: string): ITileContentProvider<T>;
 }

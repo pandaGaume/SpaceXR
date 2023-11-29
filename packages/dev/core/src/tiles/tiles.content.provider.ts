@@ -79,7 +79,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
                         provider._cache.set(this.buildCacheKey(address.quadkey), content);
                         // we notify the observers
                         if (this._contentUpdateObservable) {
-                            const e = new ContentUpdateEventArgs<T>(address, content, provider);
+                            const e = new ContentUpdateEventArgs<T>(provider, address, content);
                             this._contentUpdateObservable.notifyObservers(e);
                         }
                     }

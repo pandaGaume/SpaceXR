@@ -15,13 +15,13 @@ export interface IContextMetrics {
 export declare class AddressValueEventArgs<S, T> extends EventArgs<S> {
     _address: ITileAddress;
     _value: T;
-    constructor(address: ITileAddress, value: T, sender: S);
+    constructor(sender: S, address: ITileAddress, value: T);
     get address(): ITileAddress;
     get value(): T;
 }
 export declare class ContentUpdateEventArgs<T> extends AddressValueEventArgs<ITileContentProvider<T>, TileContent<T>> {
     private _result;
-    constructor(address: ITileAddress, content: TileContent<T>, sender: ITileContentProvider<T>, result?: number);
+    constructor(sender: ITileContentProvider<T>, address: ITileAddress, content: TileContent<T>, result?: number);
     get content(): TileContent<T>;
     get result(): number;
 }
@@ -30,31 +30,26 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipeline
     accept(address: ITileAddress): boolean;
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
-export declare class TilePipelineEventArgs<S, T> extends EventArgs<S> {
+type PipelineType = ITileView | ITileProvider<any>;
+type PipelineValue = ITileAddress | ITile<any>[];
+export declare class TilePipelineEventArgs extends EventArgs<PipelineType> {
     private _infos;
     private _values;
-    constructor(sender: S, infos: IContextMetrics, ...values: T[]);
+    constructor(sender: PipelineType, infos: IContextMetrics, ...values: PipelineValue[]);
     get infos(): IContextMetrics;
-    get values(): T[];
+    get values(): PipelineValue[];
 }
-export declare class TileMapEventArgs extends TilePipelineEventArgs<IMapView, ITileAddress> {
-    constructor(sender: IMapView, infos: IContextMetrics, ...values: ITileAddress[]);
-    get addresses(): ITileAddress[];
-}
-export interface IMapView extends ITileMapApi, IPipelineComponent {
-    addressAddedObservable: Observable<TileMapEventArgs>;
-    addressRemovedObservable: Observable<TileMapEventArgs>;
-}
-export declare class TileProviderEventArgs<T> extends TilePipelineEventArgs<ITileProvider<T>, ITile<T>> {
-    constructor(sender: ITileProvider<T>, infos: IContextMetrics, ...values: ITile<T>[]);
-    get tiles(): ITile<T>[];
+export interface ITileView extends ITileMapApi, IPipelineComponent {
+    addressAddedObservable: Observable<TilePipelineEventArgs>;
+    addressRemovedObservable: Observable<TilePipelineEventArgs>;
 }
 export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
-    tileUpdateObservable: Observable<TileProviderEventArgs<T>>;
-    tileAddedObservable: Observable<TileProviderEventArgs<T>>;
-    tileRemovedObservable: Observable<TileProviderEventArgs<T>>;
+    tileUpdateObservable: Observable<TilePipelineEventArgs>;
+    tileAddedObservable: Observable<TilePipelineEventArgs>;
+    tileRemovedObservable: Observable<TilePipelineEventArgs>;
     getTile(address: ITileAddress): Nullable<ITile<T>[]>;
     addContentProvider(contentProvider: ITileContentProvider<T>): void;
     removeContentProvider(contentProvider: ITileContentProvider<T>): void;
     getProviderByName(name: string): ITileContentProvider<T>;
 }
+export {};

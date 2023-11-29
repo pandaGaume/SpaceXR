@@ -22,7 +22,7 @@ export class AddressValueEventArgs<S, T> extends EventArgs<S> {
     _address: ITileAddress;
     _value: T;
 
-    public constructor(address: ITileAddress, value: T, sender: S) {
+    public constructor(sender: S, address: ITileAddress, value: T) {
         super(sender);
         this._address = address;
         this._value = value;
@@ -43,8 +43,8 @@ export class AddressValueEventArgs<S, T> extends EventArgs<S> {
 export class ContentUpdateEventArgs<T> extends AddressValueEventArgs<ITileContentProvider<T>, TileContent<T>> {
     private _result: number;
 
-    public constructor(address: ITileAddress, content: TileContent<T>, sender: ITileContentProvider<T>, result: number = 0) {
-        super(address, content, sender);
+    public constructor(sender: ITileContentProvider<T>, address: ITileAddress, content: TileContent<T>, result: number = 0) {
+        super(sender, address, content);
         this._result = result;
     }
 

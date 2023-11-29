@@ -13,6 +13,7 @@ import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Envelope, GeoBounded } from "../geography/geography.envelope";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { IContextMetrics } from "./tiles.interfaces.pipeline";
+import { TileAddress } from "./tiles.address";
 
 export class TileMapContextMetrics implements IContextMetrics {
     _lod: number;
@@ -72,11 +73,13 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
-    _context: TileMapContextMetrics;
 
     // interns
     _valid: boolean = false;
-    _cartesianCache: ICartesian2 = Cartesian2.Zero(); // used to avoid creating a new object each time we need to rotate a point
+    _cartesianCache: ICartesian2; // used to avoid creating a new object each time we need to rotate a point
+    _centerXY: ICartesian2;
+    _scale: number;
+    _boundsXY: IRectangle;
 
     public constructor(metrics: ITileMetrics, size?: ISize2, center?: IGeo2, lod?: number, azimuth?: number) {
         super();
@@ -89,7 +92,10 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
         this._azimuth = 0;
         this._cosangle = 0;
         this._sinangle = 1;
-        this._context = new TileMapContextMetrics();
+        this._cartesianCache = Cartesian2.Zero();
+        this._centerXY = Cartesian2.Zero();
+        this._scale = 1;
+        this._boundsXY = Rectangle.Zero();
 
         this.invalidateSize(size?.width ?? 0, size?.height ?? 0).setView(center ?? Geo2.Zero(), lod, azimuth);
     }
@@ -240,11 +246,10 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
             tx = p.x;
             ty = p.y;
         }
-        const lod = Math.round(this._lodf);
-        const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
+        const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
-        const center = this.metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
+        const center = this.metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, this._lod);
         return this.setView(center);
     }
 
@@ -253,15 +258,16 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     }
 
     // INTERNALS
-    protected _doValidate() {}
+    protected _doValidate() {
+        this._scale = TileAddress.GetLodScale(this._lodf);
+        this._centerXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._lod);
+        this._boundsXY = this._getRectangle(this._centerXY, this._scale);
+    }
 
     protected _buildEnvelope(): IEnvelope | undefined {
-        let rect = this._getRectangle(this._context._center, this._context._scale);
-
-        // compute the bounds of tile xy
-        let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._context._lod);
-        let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._context._lod);
-
+        let rect = this._boundsXY;
+        let nw = this.metrics.getPixelXYToLatLon(rect.xmin, rect.ymin, this._lod);
+        let se = this.metrics.getPixelXYToLatLon(rect.xmax, rect.ymax, this._lod);
         return Envelope.FromPoints(nw, se);
     }
 
@@ -292,7 +298,7 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
         return <R>r;
     }
 
-    private _getRectangle(center: ICartesian2, scale: number): IRectangle {
+    protected _getRectangle(center: ICartesian2, scale: number): IRectangle {
         const w = this.width / scale;
         const h = this.height / scale;
         const x0 = center.x - w / 2;

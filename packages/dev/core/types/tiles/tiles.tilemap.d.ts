@@ -1,7 +1,7 @@
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { Observable, Observer } from "../events/events.observable";
 import { IEnvelope, IGeo2 } from "../geography/geography.interfaces";
-import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { ITileMetrics } from "./tiles.interfaces";
 import { ITileMapApi } from "./tiles.interfaces.api";
 import { IValidable } from "../types";
@@ -33,9 +33,11 @@ export declare class TileMapBase extends GeoBounded implements ITileMapApi, IVal
     _azimuth: number;
     _cosangle: number;
     _sinangle: number;
-    _context: TileMapContextMetrics;
     _valid: boolean;
     _cartesianCache: ICartesian2;
+    _centerXY: ICartesian2;
+    _scale: number;
+    _boundsXY: IRectangle;
     constructor(metrics: ITileMetrics, size?: ISize2, center?: IGeo2, lod?: number, azimuth?: number);
     get width(): number;
     get height(): number;
@@ -65,5 +67,5 @@ export declare class TileMapBase extends GeoBounded implements ITileMapApi, IVal
     private _rotatePointInv;
     private _rotatePointsArround;
     private _rotatePointArround;
-    private _getRectangle;
+    protected _getRectangle(center: ICartesian2, scale: number): IRectangle;
 }

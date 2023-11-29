@@ -149,14 +149,60 @@ export class TileAddress implements ITileAddress {
     }
 
     private _k?: string;
+    private _x?: number;
+    private _y?: number;
+    private _lod?: number;
 
-    public constructor(public x: number, public y: number, public levelOfDetail: number) {}
+    public constructor(x: number, y: number, levelOfDetail: number) {
+        this._x = x;
+        this._y = y;
+        this._lod = levelOfDetail;
+    }
+
+    public get x(): number {
+        return this._x!;
+    }
+
+    public set x(value: number) {
+        if (this._x !== value) {
+            this._x = value;
+            this._k = undefined;
+        }
+    }
+
+    public get y(): number {
+        return this._y!;
+    }
+
+    public set y(value: number) {
+        if (this._y !== value) {
+            this._y = value;
+            this._k = undefined;
+        }
+    }
+
+    public get levelOfDetail(): number {
+        return this._lod!;
+    }
+
+    public set levelOfDetail(value: number) {
+        if (this._lod !== value) {
+            this._lod = value;
+            this._k = undefined;
+        }
+    }
+
     public get quadkey(): string {
         if (!this._k) {
             this._k = TileAddress.TileXYToQuadKey(this);
         }
         return this._k;
     }
+
+    public clone(): ITileAddress {
+        return new TileAddress(this.x, this.y, this.levelOfDetail);
+    }
+
     public toString(): string {
         return `x:${this.x}, y:${this.y}, lod:${this.levelOfDetail}, k:${this.quadkey}`;
     }

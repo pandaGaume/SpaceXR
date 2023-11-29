@@ -75,14 +75,18 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipeline
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
 
+type PipelineType = IMapView | ITileProvider<any>;
+type PipelineValue = ITileAddress | ITile<any>[];
+
 /// <summary>
 /// Event args carrying a navigation metrics context and values. This is used by the tile pipeline observable between view and tileProvider, then between TileProvider and TileConsumer.
+/// We use polymorphic approach with PipelineType and PipelineValue in order to avoid having to create a new class for each type of pipeline and beeing able to reuse the instance along the pipeline.
 /// </summary>
-export class TilePipelineEventArgs<S, T> extends EventArgs<S> {
+export class TilePipelineEventArgs extends EventArgs<PipelineType> {
     private _infos: IContextMetrics;
-    private _values: T[];
+    private _values: PipelineValue[];
 
-    public constructor(sender: S, infos: IContextMetrics, ...values: T[]) {
+    public constructor(sender: PipelineType, infos: IContextMetrics, ...values: PipelineValue[]) {
         super(sender);
         this._infos = infos;
         this._values = values;
@@ -92,20 +96,8 @@ export class TilePipelineEventArgs<S, T> extends EventArgs<S> {
         return this._infos;
     }
 
-    public get values(): T[] {
+    public get values(): PipelineValue[] {
         return this._values;
-    }
-}
-
-/// <summary>
-/// Specialized event args carrying a navigation metrics context and tile addresses. This is used by the view observables.
-/// </summary>
-export class TileMapEventArgs extends TilePipelineEventArgs<IMapView, ITileAddress> {
-    public constructor(sender: IMapView, infos: IContextMetrics, ...values: ITileAddress[]) {
-        super(sender, infos, ...values);
-    }
-    public get addresses(): ITileAddress[] {
-        return this.values;
     }
 }
 
@@ -118,20 +110,8 @@ export class TileMapEventArgs extends TilePipelineEventArgs<IMapView, ITileAddre
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
 export interface IMapView extends ITileMapApi, IPipelineComponent {
-    addressAddedObservable: Observable<TileMapEventArgs>;
-    addressRemovedObservable: Observable<TileMapEventArgs>;
-}
-
-/// <summary>
-/// Specialized event args carrying a navigation metrics context and tiles. This is used by the TileProvider observables.
-/// </summary>
-export class TileProviderEventArgs<T> extends TilePipelineEventArgs<ITileProvider<T>, ITile<T>> {
-    public constructor(sender: ITileProvider<T>, infos: IContextMetrics, ...values: ITile<T>[]) {
-        super(sender, infos, ...values);
-    }
-    public get tiles(): ITile<T>[] {
-        return this.values;
-    }
+    addressAddedObservable: Observable<TilePipelineEventArgs>;
+    addressRemovedObservable: Observable<TilePipelineEventArgs>;
 }
 
 /// <summary>
@@ -145,13 +125,13 @@ export class TileProviderEventArgs<T> extends TilePipelineEventArgs<ITileProvide
 /// </summary>
 export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
     /// <summary> messaged when a tile is updated </summary>
-    tileUpdateObservable: Observable<TileProviderEventArgs<T>>;
+    tileUpdateObservable: Observable<TilePipelineEventArgs>;
 
     /// <summary> messaged when a tile is added </summary>
-    tileAddedObservable: Observable<TileProviderEventArgs<T>>;
+    tileAddedObservable: Observable<TilePipelineEventArgs>;
 
     /// <summary> messaged when a tile is removed </summary>
-    tileRemovedObservable: Observable<TileProviderEventArgs<T>>;
+    tileRemovedObservable: Observable<TilePipelineEventArgs>;
 
     /// <summary>
     /// Get tiles using one address. Typically used by the pipeline, this method is using the underlying providers,

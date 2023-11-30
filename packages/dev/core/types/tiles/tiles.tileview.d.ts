@@ -1,20 +1,24 @@
-import { Observable, Observer } from "../events/events.observable";
-import { IGeo2 } from "../geography/geography.interfaces";
-import { ISize2 } from "../geometry/geometry.interfaces";
-import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
-import { ITileView, TilePipelineEventArgs } from "./tiles.interfaces.pipeline";
-import { TileMapBase, TileMapContextMetrics } from "./tiles.tilemap";
-export declare class TileView extends TileMapBase implements ITileView {
+import { EventState, Observable, Observer } from "../events/events.observable";
+import { ITileAddress } from "./tiles.interfaces";
+import { ITileView } from "./tiles.interfaces.pipeline";
+import { ITileMapApi } from "./tiles.interfaces.api";
+import { Nullable } from "../types";
+export declare class TileView implements ITileView {
     _id?: string;
-    _addressAddedObservable?: Observable<TilePipelineEventArgs>;
-    _addressRemovedObservable?: Observable<TilePipelineEventArgs>;
+    _addressAddedObservable?: Observable<Array<ITileAddress>>;
+    _addressRemovedObservable?: Observable<Array<ITileAddress>>;
     _activ: Map<string, ITileAddress>;
-    constructor(id: string, metrics: ITileMetrics, size?: ISize2, center?: IGeo2, lod?: number, azimuth?: number);
+    _api: Nullable<ITileMapApi>;
+    _observer: Nullable<Observer<ITileMapApi>>;
+    constructor(id: string, model?: ITileMapApi);
+    get api(): Nullable<ITileMapApi>;
+    set api(api: Nullable<ITileMapApi>);
     get id(): string | undefined;
-    get addressAddedObservable(): Observable<TilePipelineEventArgs>;
-    get addressRemovedObservable(): Observable<TilePipelineEventArgs>;
-    protected _doValidate(): void;
-    protected _doValidateContext(context: TileMapContextMetrics, dispatchEvent?: boolean): void;
-    protected _onAddressAddedObserverAdded(observer: Observer<TilePipelineEventArgs>): void;
-    protected _onAddressRemovedObserverAdded(observer: Observer<TilePipelineEventArgs>): void;
+    get addressAddedObservable(): Observable<Array<ITileAddress>>;
+    get addressRemovedObservable(): Observable<Array<ITileAddress>>;
+    protected _onViewChanged(eventData: ITileMapApi, eventState: EventState): void;
+    protected _doValidateContext(api: ITileMapApi, dispatchEvent?: boolean): void;
+    protected _doClearContext(api: ITileMapApi, dispatchEvent?: boolean): void;
+    protected _onAddressAddedObserverAdded(observer: Observer<Array<ITileAddress>>): void;
+    protected _onAddressRemovedObserverAdded(observer: Observer<Array<ITileAddress>>): void;
 }

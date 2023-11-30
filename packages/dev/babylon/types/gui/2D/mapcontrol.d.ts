@@ -1,7 +1,7 @@
 import { ICanvasRenderingContext } from "@babylonjs/core";
 import { Control, Measure } from "@babylonjs/gui";
 import { IGeo2 } from "core/geography/geography.interfaces";
-import { ISize2 } from "core/geometry";
+import { Cartesian2, IRectangle, ISize2 } from "core/geometry";
 import { ITile, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
 import { TileContentProvider } from "core/tiles/tiles.content.provider";
@@ -25,6 +25,14 @@ export declare class MapControl extends Control implements ITileMapApi {
     get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    get viewChangedObservable(): Observable<ITileMapApi>;
+    get center(): IGeo2;
+    get zoom(): number;
+    get levelOfDetail(): number;
+    get azimuth(): number;
+    get scale(): number;
+    get centerXY(): Cartesian2;
+    get boundsXY(): IRectangle;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
@@ -37,7 +45,6 @@ export declare class MapControl extends Control implements ITileMapApi {
     get resolution(): ISize2;
     set resolution(v: ISize2);
     get metrics(): ITileMetrics;
-    get azimuth(): number | undefined;
     protected onUpdate(args: UpdateEventArgs<HTMLImageElement>): void;
     protected onUpdateTiles(args: UpdateEventArgs<HTMLImageElement>): void;
     protected onUpdateView(args: UpdateEventArgs<HTMLImageElement>): void;

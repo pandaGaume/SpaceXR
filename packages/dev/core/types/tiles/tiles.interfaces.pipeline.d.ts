@@ -2,7 +2,7 @@ import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { EventArgs } from "../events/events.args";
 import { Observable } from "../events/events.observable";
 import { Nullable } from "../types";
-import { ITile, ITileAddress, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
 import { ITileMapApi } from "./tiles.interfaces.api";
 export interface IPipelineComponent {
     id?: string;
@@ -30,26 +30,17 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipeline
     accept(address: ITileAddress): boolean;
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
-type PipelineType = ITileView | ITileProvider<any>;
-type PipelineValue = ITileAddress | ITile<any>[];
-export declare class TilePipelineEventArgs extends EventArgs<PipelineType> {
-    private _infos;
-    private _values;
-    constructor(sender: PipelineType, infos: IContextMetrics, ...values: PipelineValue[]);
-    get infos(): IContextMetrics;
-    get values(): PipelineValue[];
-}
-export interface ITileView extends ITileMapApi, IPipelineComponent, ITileMetricsProvider {
-    addressAddedObservable: Observable<TilePipelineEventArgs>;
-    addressRemovedObservable: Observable<TilePipelineEventArgs>;
+export interface ITileView extends IPipelineComponent {
+    addressAddedObservable: Observable<Array<ITileAddress>>;
+    addressRemovedObservable: Observable<Array<ITileAddress>>;
+    api: Nullable<ITileMapApi>;
 }
 export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
-    tileUpdateObservable: Observable<TilePipelineEventArgs>;
-    tileAddedObservable: Observable<TilePipelineEventArgs>;
-    tileRemovedObservable: Observable<TilePipelineEventArgs>;
+    tileUpdateObservable: Observable<Array<ITile<T>>>;
+    tileAddedObservable: Observable<Array<ITile<T>>>;
+    tileRemovedObservable: Observable<Array<ITile<T>>>;
     getTile(address: ITileAddress): Nullable<ITile<T>[]>;
-    addContentProvider(contentProvider: ITileContentProvider<T>): void;
-    removeContentProvider(contentProvider: ITileContentProvider<T>): void;
-    getProviderByName(name: string): ITileContentProvider<T>;
+    addContentProvider<P extends T>(contentProvider: ITileContentProvider<P>, builder: ITileBuilder<P>): void;
+    removeContentProvider<P extends T>(name: string): void;
+    getProviderByName<P extends T>(name: string): ITileContentProvider<P> | undefined;
 }
-export {};

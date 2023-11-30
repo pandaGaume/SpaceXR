@@ -4,7 +4,6 @@ import { Observable, Observer } from "../events/events.observable";
 import { IEnvelope, IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { ITileMetrics } from "./tiles.interfaces";
-
 import { ITileMapApi } from "./tiles.interfaces.api";
 import { Size2 } from "../geometry/geometry.size";
 import { Scalar } from "../math/math";
@@ -12,41 +11,12 @@ import { IValidable } from "../types";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Envelope, GeoBounded } from "../geography/geography.envelope";
 import { Rectangle } from "../geometry/geometry.rectangle";
-import { IContextMetrics } from "./tiles.interfaces.pipeline";
 import { TileAddress } from "./tiles.address";
-
-export class TileMapContextMetrics implements IContextMetrics {
-    _lod: number;
-    _scale: number = 1;
-    _center: ICartesian2 = Cartesian2.Zero();
-
-    public constructor(lod?: number, scale?: number, center?: ICartesian2) {
-        this._lod = lod ?? 0;
-        this._scale = scale ?? 1;
-        this._center = center ?? Cartesian2.Zero();
-    }
-
-    public get lod(): number {
-        return this._lod;
-    }
-
-    public get scale(): number {
-        return this._scale;
-    }
-
-    public get center(): ICartesian2 {
-        return this._center;
-    }
-
-    public clone(): TileMapContextMetrics {
-        return new TileMapContextMetrics(this._lod, this._scale, new Cartesian2(this._center.x, this._center.y));
-    }
-}
 
 export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<TileMapBase> {
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
-     * @param a the azimuth value
+     * @param a the azimuth value.
      * @returns the clampled value.
      */
     public static ClampAzimuth(a: number): number {
@@ -61,6 +31,8 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     _centerObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    _viewChangedObservable?: Observable<ITileMapApi>;
+
     _metrics: ITileMetrics;
 
     // current navigation parameters
@@ -96,20 +68,7 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
         this._centerXY = Cartesian2.Zero();
         this._scale = 1;
         this._boundsXY = Rectangle.Zero();
-
         this.invalidateSize(size?.width ?? 0, size?.height ?? 0).setView(center ?? Geo2.Zero(), lod, azimuth);
-    }
-
-    public get width(): number {
-        return this._w;
-    }
-
-    public get height(): number {
-        return this._h;
-    }
-
-    public get metrics(): ITileMetrics {
-        return this._metrics;
     }
 
     /// VALIDABLE
@@ -124,7 +83,7 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
 
     public validate(): TileMapBase {
         if (!this._valid) {
-            this._doValidate();
+            this._doValidateInternal();
             this._valid = true;
         }
         return this;
@@ -135,24 +94,68 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     }
 
     // MAP API
+    public get center(): IGeo2 {
+        return this._center;
+    }
+
+    public get zoom(): number {
+        return this._lodf;
+    }
+
+    public get levelOfDetail(): number {
+        return this._lod;
+    }
+    public get azimuth(): number {
+        return this._azimuth;
+    }
+
+    public get scale(): number {
+        return this._scale;
+    }
+
+    public get centerXY(): ICartesian2 {
+        return this._centerXY;
+    }
+
+    public get boundsXY(): IRectangle {
+        return this._boundsXY;
+    }
+
+    public get width(): number {
+        return this._w;
+    }
+
+    public get height(): number {
+        return this._h;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._metrics;
+    }
+
     public get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>> {
         this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>(this._onResizeObserverAdded.bind(this));
-        return this._resizeObservable!;
+        return this._resizeObservable;
     }
 
     public get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>> {
         this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>(this._onCenterObserverAdded.bind(this));
-        return this._centerObservable!;
+        return this._centerObservable;
     }
 
     public get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
         this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, number>>(this._onZoomObserverAdded.bind(this));
-        return this._zoomObservable!;
+        return this._zoomObservable;
     }
 
     public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
         this._azimuthObservable = this._azimuthObservable || new Observable<PropertyChangedEventArgs<ITileMapApi, number>>(this._onAzimuthObserverAdded.bind(this));
-        return this._azimuthObservable!;
+        return this._azimuthObservable;
+    }
+
+    public get viewChangedObservable(): Observable<ITileMapApi> {
+        this._viewChangedObservable = this._viewChangedObservable || new Observable<ITileMapApi>(this._onViewChangedObserverAdded.bind(this));
+        return this._viewChangedObservable;
     }
 
     public invalidateSize(w: number, h: number): ITileMapApi {
@@ -258,10 +261,32 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     }
 
     // INTERNALS
-    protected _doValidate() {
+    protected _doValidateInternal() {
+        this._beforeValidate();
+
+        // set the metrics
         this._scale = TileAddress.GetLodScale(this._lodf);
         this._centerXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this._lod);
         this._boundsXY = this._getRectangle(this._centerXY, this._scale);
+
+        this._doValidate();
+
+        // dispatch event
+        if (this._viewChangedObservable && this._viewChangedObservable.hasObservers()) {
+            this._viewChangedObservable.notifyObservers(this);
+        }
+
+        this._afterValidate();
+    }
+
+    protected _beforeValidate() {
+        /* nothing to do here, may be override by subclass */
+    }
+    protected _doValidate() {
+        /* nothing to do here, may be override by subclass */
+    }
+    protected _afterValidate() {
+        /* nothing to do here, may be override by subclass */
     }
 
     protected _buildEnvelope(): IEnvelope | undefined {
@@ -275,6 +300,7 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     protected _onZoomObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, number>>): void {}
     protected _onCenterObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, IGeo2>>): void {}
     protected _onAzimuthObserverAdded(observer: Observer<PropertyChangedEventArgs<ITileMapApi, number>>): void {}
+    protected _onViewChangedObserverAdded(observer: Observer<ITileMapApi>): void {}
 
     private _rotatePointInv<R extends ICartesian2>(x: number, y: number, target?: R): R {
         const r = target || Cartesian2.Zero();

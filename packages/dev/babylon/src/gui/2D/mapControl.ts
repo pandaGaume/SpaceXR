@@ -3,7 +3,7 @@ import { Control, Measure } from "@babylonjs/gui";
 
 import { IGeo2 } from "core/geography/geography.interfaces";
 import { Geo2 } from "core/geography/geography.position";
-import { Cartesian3, ISize2, Size2 } from "core/geometry";
+import { Cartesian2, Cartesian3, IRectangle, ISize2, Size2 } from "core/geometry";
 import { ITile, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
 import { TileContentProvider } from "core/tiles/tiles.content.provider";
@@ -75,6 +75,39 @@ export class MapControl extends Control implements ITileMapApi {
     public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
         return this._model.azimuthObservable;
     }
+
+    public get viewChangedObservable(): Observable<ITileMapApi> {
+        return this._model.viewChangedObservable;
+    }
+
+    public get center(): IGeo2 {
+        return this._model?.center ?? Geo2.Zero();
+    }
+
+    public get zoom(): number {
+        return this._model?.zoom ?? 0;
+    }
+
+    public get levelOfDetail(): number {
+        return this._model?.levelOfDetail ?? 0;
+    }
+
+    public get azimuth(): number {
+        return this._model?.azimuth ?? 0;
+    }
+
+    public get scale(): number {
+        return this._model?.scale ?? 1;
+    }
+
+    public get centerXY(): Cartesian2 {
+        return this._model?.centerXY ?? Cartesian2.Zero();
+    }
+
+    public get boundsXY(): IRectangle {
+        return this._model?.boundsXY ?? Size2.Zero();
+    }
+
     public invalidateSize(w: number, h: number): ITileMapApi {
         this._model?.invalidateSize(w, h);
         this._model?.validate();
@@ -134,10 +167,6 @@ export class MapControl extends Control implements ITileMapApi {
 
     public get metrics(): ITileMetrics {
         return this._model?.metrics ?? EPSG3857.Shared;
-    }
-
-    public get azimuth(): number | undefined {
-        return this._model?.azimuth;
     }
 
     protected onUpdate(args: UpdateEventArgs<HTMLImageElement>): void {

@@ -1,4 +1,4 @@
-import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITile } from "./tiles.interfaces";
 import { ITileContentProvider, ContentUpdateEventArgs, IContextMetrics } from "./tiles.interfaces.pipeline";
@@ -12,12 +12,14 @@ export declare class TileMapContext<T> implements IContextMetrics {
     _scale: number;
     _center: ICartesian2;
     _tiles: Map<string, ITile<T>>;
+    _rect: IRectangle;
     constructor(lod?: number);
     get lod(): number;
     get scale(): number;
     get tiles(): Map<string, ITile<T>>;
     get size(): number;
     get center(): ICartesian2;
+    get rect(): IRectangle;
     clear(): void;
 }
 export declare enum UpdateReason {
@@ -66,12 +68,18 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _zoomObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
+    _viewChangedObservable?: Observable<ITileMapApi>;
     constructor(contentProvider: ITileContentProvider<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
     get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
     get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
     get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     get updateObservable(): Observable<UpdateEventArgs<T>>;
+    get viewChangedObservable(): Observable<ITileMapApi>;
+    get zoom(): number;
+    get scale(): number;
+    get centerXY(): ICartesian2;
+    get boundsXY(): IRectangle;
     get bounds(): IEnvelope | undefined;
     get contentProvider(): ITileContentProvider<T>;
     get context(): TileMapContext<T>;

@@ -2,7 +2,7 @@ import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { EventArgs } from "../events/events.args";
 import { Observable } from "../events/events.observable";
 import { Nullable } from "../types";
-import { ITile, ITileAddress, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
 import { ITileMapApi } from "./tiles.interfaces.api";
 
 export interface IPipelineComponent {
@@ -75,32 +75,6 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IPipeline
     getTileContent(address: ITileAddress): Nullable<TileContent<T>>;
 }
 
-type PipelineType = ITileView | ITileProvider<any>;
-type PipelineValue = ITileAddress | ITile<any>[];
-
-/// <summary>
-/// Event args carrying a navigation metrics context and values. This is used by the tile pipeline observable between view and tileProvider, then between TileProvider and TileConsumer.
-/// We use polymorphic approach with PipelineType and PipelineValue in order to avoid having to create a new class for each type of pipeline and beeing able to reuse the instance along the pipeline.
-/// </summary>
-export class TilePipelineEventArgs extends EventArgs<PipelineType> {
-    private _infos: IContextMetrics;
-    private _values: PipelineValue[];
-
-    public constructor(sender: PipelineType, infos: IContextMetrics, ...values: PipelineValue[]) {
-        super(sender);
-        this._infos = infos;
-        this._values = values;
-    }
-
-    public get infos(): IContextMetrics {
-        return this._infos;
-    }
-
-    public get values(): PipelineValue[] {
-        return this._values;
-    }
-}
-
 /// <summary>
 /// The View component is tasked with selecting appropriate tile addresses, guided by the Tile Metrics and navigation properties. Its role is expanded to include the following:
 /// - Tile Selection Based on Navigation Properties: Considers the geographic center, azimuth, and level of detail in tile selection, ensuring relevance and accuracy.
@@ -109,9 +83,10 @@ export class TilePipelineEventArgs extends EventArgs<PipelineType> {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITileMapApi, IPipelineComponent, ITileMetricsProvider {
-    addressAddedObservable: Observable<TilePipelineEventArgs>;
-    addressRemovedObservable: Observable<TilePipelineEventArgs>;
+export interface ITileView extends IPipelineComponent {
+    addressAddedObservable: Observable<Array<ITileAddress>>;
+    addressRemovedObservable: Observable<Array<ITileAddress>>;
+    api: Nullable<ITileMapApi>;
 }
 
 /// <summary>
@@ -125,13 +100,13 @@ export interface ITileView extends ITileMapApi, IPipelineComponent, ITileMetrics
 /// </summary>
 export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
     /// <summary> messaged when a tile is updated </summary>
-    tileUpdateObservable: Observable<TilePipelineEventArgs>;
+    tileUpdateObservable: Observable<Array<ITile<T>>>;
 
     /// <summary> messaged when a tile is added </summary>
-    tileAddedObservable: Observable<TilePipelineEventArgs>;
+    tileAddedObservable: Observable<Array<ITile<T>>>;
 
     /// <summary> messaged when a tile is removed </summary>
-    tileRemovedObservable: Observable<TilePipelineEventArgs>;
+    tileRemovedObservable: Observable<Array<ITile<T>>>;
 
     /// <summary>
     /// Get tiles using one address. Typically used by the pipeline, this method is using the underlying providers,
@@ -140,11 +115,11 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineCompone
     getTile(address: ITileAddress): Nullable<ITile<T>[]>;
 
     /// <summary> register a content provider to the pipeline </summary>
-    addContentProvider(contentProvider: ITileContentProvider<T>): void;
+    addContentProvider<P extends T>(contentProvider: ITileContentProvider<P>, builder: ITileBuilder<P>): void;
 
     /// <summary> unregister a content provider from the pipeline </summary>
-    removeContentProvider(contentProvider: ITileContentProvider<T>): void;
+    removeContentProvider<P extends T>(name:string): void;
 
     /// <summary> get a content provider from the pipeline using is name. Name is usually comming from ITile.namespace. </summary>
-    getProviderByName(name: string): ITileContentProvider<T>;
+    getProviderByName<P extends T>(name: string): ITileContentProvider<P> | undefined;
 }

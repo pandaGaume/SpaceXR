@@ -3,7 +3,7 @@ import { ITile, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interf
 import { ITileMapApi } from "../tiles/tiles.interfaces.api";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
-import { ICartesian2, ISize2, ISize3 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Observable, Observer } from "../events/events.observable";
 import { TileContentProvider } from "../tiles/tiles.content.provider";
@@ -78,6 +78,29 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
 
     public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
         return this._view.azimuthObservable;
+    }
+    public get viewChangedObservable(): Observable<ITileMapApi> {
+        return this._view.viewChangedObservable;
+    }
+
+    public get center(): IGeo2 {
+        return this._view.center;
+    }
+    public get zoom(): number {
+        return this._view.zoom;
+    }
+    public get levelOfDetail(): number {
+        return this._view.levelOfDetail;
+    }
+
+    public get scale(): number {
+        return this._view.scale;
+    }
+    public get centerXY(): ICartesian2 {
+        return this._view.centerXY;
+    }
+    public get boundsXY(): IRectangle {
+        return this._view.boundsXY;
     }
 
     public invalidateSize(w: number, h: number): ITileMapApi {

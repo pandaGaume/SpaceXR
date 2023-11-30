@@ -21,6 +21,7 @@ export class TileMapContext<T> implements IContextMetrics {
     _scale: number = 1;
     _center: ICartesian2 = Cartesian2.Zero();
     _tiles: Map<string, ITile<T>>;
+    _rect: IRectangle = Rectangle.Zero();
 
     public constructor(lod?: number) {
         this._lod = lod || 0;
@@ -47,6 +48,10 @@ export class TileMapContext<T> implements IContextMetrics {
 
     public get center(): ICartesian2 {
         return this._center;
+    }
+
+    public get rect(): IRectangle {
+        return this._rect;
     }
 
     public clear(): void {
@@ -106,6 +111,7 @@ export class UpdateEventArgs<T> extends EventArgs<TileMapView<T>> {
     }
 }
 
+/// @deprecated
 export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider, IValidable<TileMapView<T>>, IGeoBounded {
     addedObservable: any;
     removedObservable: any;
@@ -157,6 +163,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
     _zoomObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
+    _viewChangedObservable?: Observable<ITileMapApi>;
 
     public constructor(contentProvider: ITileContentProvider<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>) {
         this._cache = cache || new MemoryCache<string, ITile<T>>();
@@ -195,7 +202,29 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         return this._updateObservable!;
     }
 
+    public get viewChangedObservable(): Observable<ITileMapApi> {
+        this._viewChangedObservable = this._viewChangedObservable || new Observable<ITileMapApi>();
+        return this._viewChangedObservable!;
+    }
+
     /// PROPERTIES
+
+    public get zoom(): number {
+        return this._lodf;
+    }
+
+    public get scale(): number {
+        return this._currentContext._scale;
+    }
+
+    public get centerXY(): ICartesian2 {
+        return this._currentContext._center;
+    }
+
+    public get boundsXY(): IRectangle {
+        return this._currentContext._rect;
+    }
+
     public get bounds(): IEnvelope | undefined {
         return this.validateBounds();
     }
@@ -442,6 +471,7 @@ export class TileMapView<T> implements ITileMapApi, ISize2, ITileMetricsProvider
         const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, contextLod);
         newLevel._center = pixelCenterXY;
         const rect = this.getRectangle(pixelCenterXY, scale);
+        newLevel._rect = rect;
 
         // compute the bounds of tile xy
         let nwTileXY = this.metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);

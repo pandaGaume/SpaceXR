@@ -19,6 +19,12 @@ export class TileConsumerBase<T> implements ITileConsumer<T> {
         this._updateObserver = this._provider.tileUpdatedObservable.add(this.onTileUpdated.bind(this));
     }
 
+    public dispose(): void {
+        this._addedObserver?.dispose();
+        this._removedObserver?.dispose();
+        this._updateObserver?.dispose();
+    }
+
     public get id(): string | undefined {
         return this._id;
     }

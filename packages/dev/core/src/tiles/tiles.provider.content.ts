@@ -127,6 +127,8 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return this.buildTileContentView(address, null, targets) ?? null;
     }
 
+    public dispose(): void {}
+
     // INTERNALS
     private onContentObserverAdded(observer: Observer<ContentUpdateEventArgs<T>>): void {}
 }

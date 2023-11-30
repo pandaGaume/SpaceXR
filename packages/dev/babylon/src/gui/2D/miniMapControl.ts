@@ -6,7 +6,7 @@ import { IGeo2 } from "core/geography/geography.interfaces";
 import { Observer } from "core/events/events.observable";
 import { Nullable } from "core/types";
 import { MapControl } from "./mapControl";
-import { TileContentProvider } from "core/tiles/tiles.content.provider";
+import { TileContentProvider } from "core/tiles/tiles.provider.content";
 import { ITileDatasource, ITileAddress } from "core/tiles/tiles.interfaces";
 import { ISize2 } from "core/geometry/geometry.interfaces";
 import { IMemoryCache } from "core/utils/cache";

@@ -46,6 +46,12 @@ export class TileView implements ITileView {
         return this._id;
     }
 
+    public dispose(): void {
+        this._api = null;
+        this._observer?.dispose();
+        this._observer = null;
+    }
+
     public get addressAddedObservable(): Observable<Array<ITileAddress>> {
         this._addressAddedObservable = this._addressAddedObservable || new Observable<Array<ITileAddress>>(this._onAddressAddedObserverAdded.bind(this));
         return this._addressAddedObservable!;

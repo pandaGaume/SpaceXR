@@ -1,10 +1,10 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { EventArgs } from "../events/events.args";
 import { Observable } from "../events/events.observable";
-import { Nullable } from "../types";
+import { IDisposable, Nullable } from "../types";
 import { ITile, ITileAddress, ITileBuilder, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
 import { ITileMapApi } from "./tiles.interfaces.api";
-export interface IPipelineComponent {
+export interface IPipelineComponent extends IDisposable {
     id?: string;
 }
 export interface IContextMetrics {
@@ -35,7 +35,7 @@ export interface ITileView extends IPipelineComponent {
     addressRemovedObservable: Observable<Array<ITileAddress>>;
     api: Nullable<ITileMapApi>;
 }
-export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
+export interface ITileProvider<T> extends IPipelineComponent {
     tileUpdatedObservable: Observable<Array<ITile<T>>>;
     tileAddedObservable: Observable<Array<ITile<T>>>;
     tileRemovedObservable: Observable<Array<ITile<T>>>;

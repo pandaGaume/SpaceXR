@@ -6,7 +6,7 @@ import { Geo2 } from "../geography/geography.position";
 import { ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Observable, Observer } from "../events/events.observable";
-import { TileContentProvider } from "../tiles/tiles.content.provider";
+import { TileContentProvider } from "../tiles/tiles.provider.content";
 import { PropertyChangedEventArgs } from "../events/events.args";
 
 export interface IMapDisplay {

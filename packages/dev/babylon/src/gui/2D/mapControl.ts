@@ -6,7 +6,7 @@ import { Geo2 } from "core/geography/geography.position";
 import { Cartesian2, Cartesian3, IRectangle, ISize2, Size2 } from "core/geometry";
 import { ITile, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
-import { TileContentProvider } from "core/tiles/tiles.content.provider";
+import { TileContentProvider } from "core/tiles/tiles.provider.content";
 import { TileMapView, UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
 import { EPSG3857 } from "core/tiles/tiles.geography";
 import { Scalar } from "core/math/math";

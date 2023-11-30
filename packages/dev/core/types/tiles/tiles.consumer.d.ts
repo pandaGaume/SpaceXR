@@ -9,6 +9,7 @@ export declare class TileConsumerBase<T> implements ITileConsumer<T> {
     _removedObserver: Nullable<Observer<ITile<T>[]>>;
     _updateObserver: Nullable<Observer<ITile<T>[]>>;
     constructor(id: string, provider: ITileProvider<T>);
+    dispose(): void;
     get id(): string | undefined;
     protected onTileAdded(eventData: ITile<T>[], eventState: EventState): void;
     protected onTileRemoved(eventData: ITile<T>[], eventState: EventState): void;

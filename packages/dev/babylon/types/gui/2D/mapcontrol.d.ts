@@ -4,7 +4,7 @@ import { IGeo2 } from "core/geography/geography.interfaces";
 import { Cartesian2, IRectangle, ISize2 } from "core/geometry";
 import { ITile, ITileMetrics } from "core/tiles/tiles.interfaces";
 import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
-import { TileContentProvider } from "core/tiles/tiles.content.provider";
+import { TileContentProvider } from "core/tiles/tiles.provider.content";
 import { TileMapView, UpdateEventArgs } from "core/tiles/tiles.mapview";
 import { PropertyChangedEventArgs } from "core/events/events.args";
 import { Observable } from "core/events/events.observable";

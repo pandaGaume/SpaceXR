@@ -14,6 +14,7 @@ export declare class TileView implements ITileView {
     get api(): Nullable<ITileMapApi>;
     set api(api: Nullable<ITileMapApi>);
     get id(): string | undefined;
+    dispose(): void;
     get addressAddedObservable(): Observable<Array<ITileAddress>>;
     get addressRemovedObservable(): Observable<Array<ITileAddress>>;
     protected _onViewChanged(eventData: ITileMapApi, eventState: EventState): void;

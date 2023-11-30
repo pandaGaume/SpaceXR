@@ -1,27 +1,32 @@
 import { Nullable } from "../types";
-import { Observable, Observer } from "../events/events.observable";
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics } from "./tiles.interfaces";
-import { ITileContentProvider, ITileProvider } from "./tiles.interfaces.pipeline";
+import { EventState, Observable, Observer } from "../events/events.observable";
+import { ITile, ITileAddress, ITileBuilder } from "./tiles.interfaces";
+import { ITileContentProvider, ITileProvider, ITileView } from "./tiles.interfaces.pipeline";
 
 export class TilesProvider<T> implements ITileProvider<T> {
     _tileUpdateObservable?: Observable<Array<ITile<T>>>;
     _tileAddedObservable?: Observable<Array<ITile<T>>>;
     _tileRemovedObservable?: Observable<Array<ITile<T>>>;
-    _metrics: ITileMetrics;
     _id?: string | undefined;
     _contentProviders?: Map<string, ITileContentProvider<T>>;
+    _view: ITileView;
+    _addedObserver?: Nullable<Observer<Array<ITileAddress>>>;
+    _removedObserver?: Nullable<Observer<Array<ITileAddress>>>;
 
-    public constructor(id: string, metrics: ITileMetrics) {
+    public constructor(id: string, view: ITileView) {
         this._id = id;
-        this._metrics = metrics;
+        this._view = view;
+        this._addedObserver = this._view.addressAddedObservable.add(this.onTileAdded.bind(this));
+        this._removedObserver = this._view.addressRemovedObservable.add(this.onTileRemoved.bind(this));
+    }
+
+    public dispose() {
+        this._addedObserver?.dispose();
+        this._removedObserver?.dispose();
     }
 
     public get id(): string | undefined {
         return this._id;
-    }
-
-    public get metrics(): ITileMetrics {
-        return this._metrics;
     }
 
     public get tileUpdatedObservable(): Observable<Array<ITile<T>>> {
@@ -70,6 +75,9 @@ export class TilesProvider<T> implements ITileProvider<T> {
         }
         return undefined;
     }
+
+    protected onTileAdded(eventData: ITileAddress[], eventState: EventState): void {}
+    protected onTileRemoved(eventData: ITileAddress[], eventState: EventState): void {}
 
     protected _onTileUpdateObserverAdded(observer: Observer<Array<ITile<T>>>): void {}
     protected _onTileAddedObserverAdded(observer: Observer<Array<ITile<T>>>): void {}

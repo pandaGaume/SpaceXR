@@ -12,7 +12,7 @@ export declare class TilesProvider<T> implements ITileProvider<T> {
     constructor(id: string, metrics: ITileMetrics);
     get id(): string | undefined;
     get metrics(): ITileMetrics;
-    get tileUpdateObservable(): Observable<Array<ITile<T>>>;
+    get tileUpdatedObservable(): Observable<Array<ITile<T>>>;
     get tileAddedObservable(): Observable<Array<ITile<T>>>;
     get tileRemovedObservable(): Observable<Array<ITile<T>>>;
     getTile(address: ITileAddress): Nullable<ITile<T>[]>;

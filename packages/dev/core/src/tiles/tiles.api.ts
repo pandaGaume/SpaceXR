@@ -13,7 +13,7 @@ import { Envelope, GeoBounded } from "../geography/geography.envelope";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 
-export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<TileMapBase> {
+export class TileMapApiBase extends GeoBounded implements ITileMapApi, IValidable<TileMapApiBase> {
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
      * @param a the azimuth value.
@@ -76,12 +76,12 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
         return this._valid;
     }
 
-    public invalidate(): TileMapBase {
+    public invalidate(): TileMapApiBase {
         this._valid = false;
         return this;
     }
 
-    public validate(): TileMapBase {
+    public validate(): TileMapApiBase {
         if (!this._valid) {
             this._doValidateInternal();
             this._valid = true;
@@ -89,7 +89,7 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
         return this;
     }
 
-    public revalidate(): TileMapBase {
+    public revalidate(): TileMapApiBase {
         return this.invalidate().validate();
     }
 
@@ -217,7 +217,7 @@ export class TileMapBase extends GeoBounded implements ITileMapApi, IValidable<T
     }
 
     public setAzimuth(r: number): ITileMapApi {
-        const clamped = TileMapBase.ClampAzimuth(r);
+        const clamped = TileMapApiBase.ClampAzimuth(r);
         if (this._azimuth != clamped) {
             const old = this._azimuth;
             this._azimuth = clamped;

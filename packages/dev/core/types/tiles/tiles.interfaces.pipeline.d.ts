@@ -36,11 +36,13 @@ export interface ITileView extends IPipelineComponent {
     api: Nullable<ITileMapApi>;
 }
 export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
-    tileUpdateObservable: Observable<Array<ITile<T>>>;
+    tileUpdatedObservable: Observable<Array<ITile<T>>>;
     tileAddedObservable: Observable<Array<ITile<T>>>;
     tileRemovedObservable: Observable<Array<ITile<T>>>;
     getTile(address: ITileAddress): Nullable<ITile<T>[]>;
     addContentProvider<P extends T>(contentProvider: ITileContentProvider<P>, builder: ITileBuilder<P>): void;
     removeContentProvider<P extends T>(name: string): void;
     getProviderByName<P extends T>(name: string): ITileContentProvider<P> | undefined;
+}
+export interface ITileConsumer<T> extends IPipelineComponent {
 }

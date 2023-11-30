@@ -24,7 +24,7 @@ export class TilesProvider<T> implements ITileProvider<T> {
         return this._metrics;
     }
 
-    public get tileUpdateObservable(): Observable<Array<ITile<T>>> {
+    public get tileUpdatedObservable(): Observable<Array<ITile<T>>> {
         this._tileUpdateObservable = this._tileUpdateObservable || new Observable<Array<ITile<T>>>(this._onTileUpdateObserverAdded.bind(this));
         return this._tileUpdateObservable!;
     }

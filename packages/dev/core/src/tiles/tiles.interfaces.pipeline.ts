@@ -100,7 +100,7 @@ export interface ITileView extends IPipelineComponent {
 /// </summary>
 export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineComponent {
     /// <summary> messaged when a tile is updated </summary>
-    tileUpdateObservable: Observable<Array<ITile<T>>>;
+    tileUpdatedObservable: Observable<Array<ITile<T>>>;
 
     /// <summary> messaged when a tile is added </summary>
     tileAddedObservable: Observable<Array<ITile<T>>>;
@@ -118,8 +118,10 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IPipelineCompone
     addContentProvider<P extends T>(contentProvider: ITileContentProvider<P>, builder: ITileBuilder<P>): void;
 
     /// <summary> unregister a content provider from the pipeline </summary>
-    removeContentProvider<P extends T>(name:string): void;
+    removeContentProvider<P extends T>(name: string): void;
 
     /// <summary> get a content provider from the pipeline using is name. Name is usually comming from ITile.namespace. </summary>
     getProviderByName<P extends T>(name: string): ITileContentProvider<P> | undefined;
 }
+
+export interface ITileConsumer<T> extends IPipelineComponent {}

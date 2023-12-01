@@ -1,20 +1,21 @@
 import { Nullable } from "../../types";
 import { EventState, Observable, Observer } from "../../events/events.observable";
 import { ITile, ITileAddress, ITileBuilder } from "../tiles.interfaces";
-import { ITileContentProvider, ITileProvider, ITileView } from "./tiles.interfaces.pipeline";
+import { ITileContentProvider, ITileProvider, ITileSystem, ITileView } from "./tiles.interfaces.pipeline";
+import { TileSystemComponent } from "./tiles.system";
 
-export class TilesProvider<T> implements ITileProvider<T> {
+export class TilesProvider<T> extends TileSystemComponent<T> implements ITileProvider<T> {
     _tileUpdateObservable?: Observable<Array<ITile<T>>>;
     _tileAddedObservable?: Observable<Array<ITile<T>>>;
     _tileRemovedObservable?: Observable<Array<ITile<T>>>;
-    _id?: string | undefined;
+
     _contentProviders?: Map<string, ITileContentProvider<T>>;
-    _view: ITileView;
+    _view: ITileView<T>;
     _addedObserver?: Nullable<Observer<Array<ITileAddress>>>;
     _removedObserver?: Nullable<Observer<Array<ITileAddress>>>;
 
-    public constructor(id: string, view: ITileView) {
-        this._id = id;
+    public constructor(id: string, system: ITileSystem<T>, view: ITileView<T>) {
+        super(id, system);
         this._view = view;
         this._addedObserver = this._view.addressAddedObservable.add(this.onTileAdded.bind(this));
         this._removedObserver = this._view.addressRemovedObservable.add(this.onTileRemoved.bind(this));
@@ -23,10 +24,6 @@ export class TilesProvider<T> implements ITileProvider<T> {
     public dispose() {
         this._addedObserver?.dispose();
         this._removedObserver?.dispose();
-    }
-
-    public get id(): string | undefined {
-        return this._id;
     }
 
     public get tileUpdatedObservable(): Observable<Array<ITile<T>>> {

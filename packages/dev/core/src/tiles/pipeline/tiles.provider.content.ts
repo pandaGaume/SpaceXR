@@ -1,6 +1,6 @@
 import { IMemoryCache, MemoryCache } from "../../utils/cache";
 import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "../tiles.interfaces";
-import { ITileContentProvider, ContentUpdateEventArgs } from "./tiles.interfaces.pipeline";
+import { ITileContentProvider, ContentUpdateEventArgs, ITileSystem } from "./tiles.interfaces.pipeline";
 import { Nullable } from "../../types";
 import { Observable, Observer } from "../../events/events.observable";
 import { TileContentView } from "../tiles";
@@ -25,6 +25,10 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
 
     public accept(address: ITileAddress): boolean {
         return TileAddress.IsValidAddress(address, this.metrics);
+    }
+
+    public get system(): ITileSystem<T> {
+        return <any>null;
     }
 
     public get id(): string | undefined {

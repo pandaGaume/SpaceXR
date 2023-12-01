@@ -1,12 +1,17 @@
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ITileMetrics, ITileMetricsProvider, ITile } from "./tiles.interfaces";
-import { ITileContentProvider, ContentUpdateEventArgs, IContextMetrics } from "./pipeline/tiles.interfaces.pipeline";
+import { ITileContentProvider, ContentUpdateEventArgs } from "./pipeline/tiles.interfaces.pipeline";
 import { ITileMapApi } from "./api/tiles.interfaces.api";
 import { Observable } from "../events/events.observable";
 import { IValidable, Nullable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
+export interface IContextMetrics {
+    lod: number;
+    scale: number;
+    center: ICartesian2;
+}
 export declare class TileMapContext<T> implements IContextMetrics {
     _lod: number;
     _scale: number;

@@ -1,6 +1,6 @@
 import { IMemoryCache } from "../../utils/cache";
 import { ITileAddress, TileSection, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
-import { ITileContentProvider, ContentUpdateEventArgs } from "./tiles.interfaces.pipeline";
+import { ITileContentProvider, ContentUpdateEventArgs, ITileSystem } from "./tiles.interfaces.pipeline";
 import { Observable } from "../../events/events.observable";
 export declare class TileContentProvider<T> implements ITileContentProvider<T> {
     private _cache;
@@ -9,6 +9,7 @@ export declare class TileContentProvider<T> implements ITileContentProvider<T> {
     _smoothingZomm: boolean;
     constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>);
     accept(address: ITileAddress): boolean;
+    get system(): ITileSystem<T>;
     get id(): string | undefined;
     get cache(): IMemoryCache<string, TileContent<T>>;
     get datasource(): ITileDatasource<T, ITileAddress>;

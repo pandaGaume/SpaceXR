@@ -5,7 +5,6 @@ import { IGeo2, IGeoBounded } from "../../geography/geography.interfaces";
 import { ITileClient, ITileMetricsProvider } from "../tiles.interfaces";
 
 export interface ITileMapApi extends ITileMetricsProvider, ISize2, IGeoBounded {
-    resizeObservable: Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
     centerObservable: Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
     zoomObservable: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     azimuthObservable: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
@@ -19,7 +18,6 @@ export interface ITileMapApi extends ITileMetricsProvider, ISize2, IGeoBounded {
     centerXY: ICartesian2;
     boundsXY: IRectangle;
 
-    invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;
     setAzimuth(r: number): ITileMapApi;

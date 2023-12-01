@@ -1,135 +1,216 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
 import { ITileAddress } from "../tiles.interfaces";
-import { ITileView } from "./tiles.interfaces.pipeline";
+import { ITileDisplay, ITileNavigationState, ITileSystem, ITileView } from "./tiles.interfaces.pipeline";
 import { TileAddress } from "../tiles.address";
-import { ITileMapApi } from "../api/tiles.interfaces.api";
 import { Nullable } from "../../types";
+import { PropertyChangedEventArgs } from "../../events/events.args";
+import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfaces";
+import { TileSystemComponent } from "./tiles.system";
+import { Rectangle } from "../../geometry/geometry.rectangle";
+import { Cartesian2 } from "../../geometry/geometry.cartesian";
+import { Scalar } from "../../math/math";
 
-export class TileView implements ITileView {
-    _id?: string;
+export class TileView<T> extends TileSystemComponent<T> implements ITileView<T> {
+    /**
+     * Keep an azimuth angle within the range of 0 to 360 degrees
+     * @param a the azimuth value.
+     * @returns the clampled value.
+     */
+    public static ClampAzimuth(a: number): number {
+        // the modulo operator (%) is used to get the remainder when the azimuth is divided by 360.
+        // Adding 360 to the result ensures that negative values are shifted into the positive range.
+        // Finally, taking the modulo 360 of the sum ensures that values greater than 360 are wrapped
+        // back to the range of 0 to 360.
+        return ((a % 360) + 360) % 360;
+    }
+
     _addressAddedObservable?: Observable<Array<ITileAddress>>;
     _addressRemovedObservable?: Observable<Array<ITileAddress>>;
-    _activ: Map<string, ITileAddress>;
-    _api: Nullable<ITileMapApi>;
-    _observer: Nullable<Observer<ITileMapApi>>;
+    _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
+    _state: Nullable<ITileNavigationState> = null;
+    _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
+    _azimuthObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, number>>> = null;
+    _display: Nullable<ITileDisplay> = null;
+    _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>> = null;
 
-    public constructor(id: string, model?: ITileMapApi) {
-        this._id = id;
-        this._api = null;
-        this._observer = null;
-        this._activ = new Map<string, ITileAddress>();
-        if (model) {
-            this.api = model;
+    // cached values
+    _azimuth: number = 0;
+    _cosAzimuth: number = 1;
+    _sinAzimuth: number = 0;
+
+    public constructor(id: string, system: ITileSystem<T>, display?: ITileDisplay, state?: ITileNavigationState) {
+        super(id, system);
+        this.display = display ?? null;
+        this.state = state ?? null;
+    }
+
+    public get state(): Nullable<ITileNavigationState> {
+        return this._state;
+    }
+
+    public set state(state: Nullable<ITileNavigationState>) {
+        if (this._state !== state) {
+            if (this._state) {
+                this._stateObserver?.dispose();
+                this._stateObserver = null;
+                this._azimuthObserver?.dispose();
+                this._azimuthObserver = null;
+                this._doClearContext(this._state, true);
+            }
+            this._state = state;
+            if (this._state) {
+                this._stateObserver = this._state.stateChangedObservable.add(this._onStateChanged.bind(this));
+                this._azimuthObserver = this._state.azimuthObservable.add(this._onAzimuthChanged.bind(this));
+                this._doValidateContext(this._state, true); // force context to be validated if we change of api.
+            }
         }
     }
 
-    public get api(): Nullable<ITileMapApi> {
-        return this._api;
+    public get display(): Nullable<ITileDisplay> {
+        return this._display;
     }
 
-    public set api(api: Nullable<ITileMapApi>) {
-        if (this._api === api) return;
-
-        if (this._api) {
-            this._api?.viewChangedObservable.remove(this._observer);
-            this._observer = null;
-            this._doClearContext(this._api, true);
+    public set display(display: Nullable<ITileDisplay>) {
+        if (this._display !== display) {
+            if (this._display) {
+                this._displayObserver?.dispose();
+                this._displayObserver = null;
+                this._doClearContext(this._state, true);
+            }
+            this._display = display;
+            if (this._display) {
+                this._displayObserver = this._display.resizeObservable.add(this._onResize.bind(this));
+                this._doValidateContext(this._state, true); // force context to be validated if we change of api.
+            }
         }
-        this._api = api;
-        if (this._api) {
-            this._observer = this._api.viewChangedObservable.add(this._onViewChanged.bind(this));
-            this._doValidateContext(this._api, true); // force context to be validated if we change of api.
-        }
     }
-
-    public get id(): string | undefined {
-        return this._id;
-    }
-
     public dispose(): void {
-        this._api = null;
-        this._observer?.dispose();
-        this._observer = null;
+        this._state = null;
+        this._stateObserver?.dispose();
+        this._stateObserver = null;
     }
 
     public get addressAddedObservable(): Observable<Array<ITileAddress>> {
-        this._addressAddedObservable = this._addressAddedObservable || new Observable<Array<ITileAddress>>(this._onAddressAddedObserverAdded.bind(this));
+        this._addressAddedObservable = this._addressAddedObservable || new Observable<Array<ITileAddress>>();
         return this._addressAddedObservable!;
     }
 
     public get addressRemovedObservable(): Observable<Array<ITileAddress>> {
-        this._addressRemovedObservable = this._addressRemovedObservable || new Observable<Array<ITileAddress>>(this._onAddressRemovedObserverAdded.bind(this));
+        this._addressRemovedObservable = this._addressRemovedObservable || new Observable<Array<ITileAddress>>();
         return this._addressRemovedObservable!;
     }
 
     // INTERNALS
-    protected _onViewChanged(eventData: ITileMapApi, eventState: EventState) {
+    protected _onStateChanged(eventData: ITileNavigationState, eventState: EventState) {
         this._doValidateContext(eventData, true);
     }
 
-    protected _doValidateContext(api: ITileMapApi, dispatchEvent: boolean = true) {
-        let rect = api.boundsXY;
-        let metrics = api.metrics;
-        let lod = api.levelOfDetail;
-        // compute the bounds of tile xy
-        let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
-        let seTileXY = metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
+    protected _onAzimuthChanged(eventData: PropertyChangedEventArgs<ITileNavigationState, number>, eventState: EventState) {
+        // this is a bit tricky, we need to update the cached values to avoid computing them each time.
+        // this event occur always before onStateChanged, so we can safely update the cached values.
+        var azimuth = eventData.newValue ?? 0;
+        let clamped = TileView.ClampAzimuth(azimuth) * Scalar.DEG2RAD;
+        this._cosAzimuth = Math.cos(clamped);
+        this._sinAzimuth = Math.sin(clamped);
+    }
 
-        const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
-        const x0 = Math.max(0, nwTileXY.x);
-        const y0 = Math.max(0, nwTileXY.y);
-        const x1 = Math.min(maxIndex, seTileXY.x);
-        const y1 = Math.min(maxIndex, seTileXY.y);
+    protected _onResize(eventData: PropertyChangedEventArgs<ITileDisplay, ISize2>, eventState: EventState) {
+        this._doValidateContext(this._state, true);
+    }
 
-        const remains = new Array<ITileAddress>();
-        const added = new Array<ITileAddress>();
+    protected _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
+        if (state && this._display) {
+            const metrics = this.metrics;
+            const center = state.center;
+            const lod = Scalar.Clamp(Math.round(state.zoom), this.metrics.minLOD, this.metrics.maxLOD);
+            const pixelCenterXY = metrics.getLatLonToPixelXY(center.lat, center.lon, lod);
+            const scale = TileAddress.GetLodScale(state.zoom);
+            const rect = this.getRectangle(pixelCenterXY, scale);
 
-        const tmp = new TileAddress(0, 0, lod);
-        for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
-            for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
-                const key = tmp.quadkey;
-                const activ = this._activ.get(key);
-                if (activ) {
-                    remains.push(activ);
-                    this._activ.delete(key);
-                    continue;
+            // compute the bounds of tile xy
+            let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
+            let seTileXY = metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
+
+            const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
+            const x0 = Math.max(0, nwTileXY.x);
+            const y0 = Math.max(0, nwTileXY.y);
+            const x1 = Math.min(maxIndex, seTileXY.x);
+            const y1 = Math.min(maxIndex, seTileXY.y);
+
+            const remains = new Array<ITileAddress>();
+            const added = new Array<ITileAddress>();
+
+            const tmp = new TileAddress(0, 0, lod);
+            for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
+                for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
+                    const key = tmp.quadkey;
+                    const activ = this._activ.get(key);
+                    if (activ) {
+                        remains.push(activ);
+                        this._activ.delete(key);
+                        continue;
+                    }
+                    added.push(tmp.clone());
                 }
-                added.push(tmp.clone());
             }
-        }
 
-        let deleted = Array.from(this._activ.values());
-        this._activ.clear();
+            let deleted = Array.from(this._activ.values());
+            this._activ.clear();
 
-        for (const a of remains) {
-            this._activ.set(a.quadkey, a);
-        }
-
-        for (const a of added) {
-            this._activ.set(a.quadkey, a);
-        }
-
-        if (dispatchEvent) {
-            if (added.length && this._addressAddedObservable?.hasObservers()) {
-                this._addressAddedObservable.notifyObservers(added);
+            for (const a of remains) {
+                this._activ.set(a.quadkey, a);
             }
-            if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
-                this._addressRemovedObservable.notifyObservers(deleted);
+
+            for (const a of added) {
+                this._activ.set(a.quadkey, a);
             }
-        }
-    }
 
-    protected _doClearContext(api: ITileMapApi, dispatchEvent: boolean = true) {
-        let deleted = Array.from(this._activ.values());
-        this._activ.clear();
-
-        if (dispatchEvent) {
-            if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
-                this._addressRemovedObservable.notifyObservers(deleted);
+            if (dispatchEvent) {
+                if (added.length && this._addressAddedObservable?.hasObservers()) {
+                    this._addressAddedObservable.notifyObservers(added);
+                }
+                if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
+                    this._addressRemovedObservable.notifyObservers(deleted);
+                }
             }
         }
     }
 
-    protected _onAddressAddedObserverAdded(observer: Observer<Array<ITileAddress>>): void {}
-    protected _onAddressRemovedObserverAdded(observer: Observer<Array<ITileAddress>>): void {}
+    protected _doClearContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
+        if (state) {
+            let deleted = Array.from(this._activ.values());
+            this._activ.clear();
+
+            if (dispatchEvent) {
+                if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
+                    this._addressRemovedObservable.notifyObservers(deleted);
+                }
+            }
+        }
+    }
+
+    private getRectangle(center: ICartesian2, scale: number): IRectangle {
+        const w = this._display?.width ?? 0 / scale;
+        const h = this._display?.height ?? 0 / scale;
+        const x0 = center.x - w / 2;
+        const y0 = center.y - h / 2;
+        let bounds = new Rectangle(x0, y0, w, h);
+        // bounds.points is returning a new set of points, so we need to rotate them if azimuth is non zero.
+        return this._state?.azimuth ? Rectangle.FromPoints(...this.rotatePointsArround(center, ...bounds.points())) : bounds;
+    }
+
+    private *rotatePointsArround(center: ICartesian2, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
+        for (const p of points) {
+            yield this.rotatePointArround(p.x, p.y, center, p);
+        }
+    }
+
+    private rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, target?: R): R {
+        const r = target || Cartesian2.Zero();
+        const translatedX = x - center.x;
+        const translatedY = y - center.y;
+        r.x = translatedX * this._cosAzimuth - translatedY * this._sinAzimuth + center.x;
+        r.y = translatedX * this._sinAzimuth + translatedY * this._cosAzimuth + center.y;
+        return <R>r;
+    }
 }

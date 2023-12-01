@@ -1,19 +1,18 @@
 import { Nullable } from "../../types";
 import { EventState, Observable, Observer } from "../../events/events.observable";
 import { ITile, ITileAddress, ITileBuilder } from "../tiles.interfaces";
-import { ITileContentProvider, ITileProvider, ITileView } from "./tiles.interfaces.pipeline";
-export declare class TilesProvider<T> implements ITileProvider<T> {
+import { ITileContentProvider, ITileProvider, ITileSystem, ITileView } from "./tiles.interfaces.pipeline";
+import { TileSystemComponent } from "./tiles.system";
+export declare class TilesProvider<T> extends TileSystemComponent<T> implements ITileProvider<T> {
     _tileUpdateObservable?: Observable<Array<ITile<T>>>;
     _tileAddedObservable?: Observable<Array<ITile<T>>>;
     _tileRemovedObservable?: Observable<Array<ITile<T>>>;
-    _id?: string | undefined;
     _contentProviders?: Map<string, ITileContentProvider<T>>;
-    _view: ITileView;
+    _view: ITileView<T>;
     _addedObserver?: Nullable<Observer<Array<ITileAddress>>>;
     _removedObserver?: Nullable<Observer<Array<ITileAddress>>>;
-    constructor(id: string, view: ITileView);
+    constructor(id: string, system: ITileSystem<T>, view: ITileView<T>);
     dispose(): void;
-    get id(): string | undefined;
     get tileUpdatedObservable(): Observable<Array<ITile<T>>>;
     get tileAddedObservable(): Observable<Array<ITile<T>>>;
     get tileRemovedObservable(): Observable<Array<ITile<T>>>;

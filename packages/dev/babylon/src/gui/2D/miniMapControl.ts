@@ -6,7 +6,7 @@ import { IGeo2 } from "core/geography/geography.interfaces";
 import { Observer } from "core/events/events.observable";
 import { Nullable } from "core/types";
 import { MapControl } from "./mapControl";
-import { TileContentProvider } from "core/tiles/tiles.provider.content";
+import { TileContentProvider } from "core/tiles/pipeline/tiles.provider.content";
 import { ITileDatasource, ITileAddress } from "core/tiles/tiles.interfaces";
 import { ISize2 } from "core/geometry/geometry.interfaces";
 import { IMemoryCache } from "core/utils/cache";
@@ -16,7 +16,7 @@ import { Geo2 } from "core/geography/geography.position";
 import { Control, Measure, Rectangle } from "@babylonjs/gui";
 import { Scalar } from "core/math/math";
 import { ICanvasRenderingContext } from "@babylonjs/core";
-import { ITileMapApi } from "core/tiles/tiles.interfaces.api";
+import { ITileMapApi } from "core/tiles/api/tiles.interfaces.api";
 
 type MinimapModelType = TileMapView<any>;
 type MinimapSkinType = IViewSkin;

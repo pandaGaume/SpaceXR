@@ -1,10 +1,10 @@
 import { TileMapView, UpdateEventArgs } from "../tiles/tiles.mapview";
 import { ITile, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
-import { ITileMapApi } from "../tiles/tiles.interfaces.api";
+import { ITileMapApi } from "../tiles/api/tiles.interfaces.api";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.interfaces";
 import { Observable, Observer } from "../events/events.observable";
-import { TileContentProvider } from "../tiles/tiles.provider.content";
+import { TileContentProvider } from "../tiles/pipeline/tiles.provider.content";
 import { PropertyChangedEventArgs } from "../events/events.args";
 export interface IMapDisplay {
     resolution: ISize3;

@@ -1,9 +1,9 @@
-import { ICartesian2 } from "../geometry/geometry.interfaces";
-import { EventArgs } from "../events/events.args";
-import { Observable } from "../events/events.observable";
-import { IDisposable, Nullable } from "../types";
-import { ITile, ITileAddress, ITileBuilder, ITileMetricsProvider, TileContent } from "./tiles.interfaces";
-import { ITileMapApi } from "./tiles.interfaces.api";
+import { ICartesian2 } from "../../geometry/geometry.interfaces";
+import { EventArgs, PropertyChangedEventArgs } from "../../events/events.args";
+import { Observable } from "../../events/events.observable";
+import { IDisposable, Nullable } from "../../types";
+import { ITile, ITileAddress, ITileBuilder, ITileMetricsProvider, TileContent } from "../tiles.interfaces";
+import { ITileMapApi } from "../api/tiles.interfaces.api";
 
 export interface IPipelineComponent extends IDisposable {
     id?: string;
@@ -124,4 +124,7 @@ export interface ITileProvider<T> extends IPipelineComponent {
     getProviderByName<P extends T>(name: string): ITileContentProvider<P> | undefined;
 }
 
-export interface ITileConsumer<T> extends IPipelineComponent {}
+export interface ITileConsumer<T> extends IPipelineComponent {
+    providerChangedObservable: Observable<PropertyChangedEventArgs<ITileConsumer<T>, ITileProvider<T>>>;
+    provider?: ITileProvider<T>;
+}

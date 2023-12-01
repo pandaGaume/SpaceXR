@@ -1,5 +1,5 @@
-import { Nullable } from "../types";
-import { ITileCodec } from "./tiles.interfaces";
+import { Nullable } from "../../types";
+import { ITileCodec } from "../tiles.interfaces";
 
 export class BlobTileCodec implements ITileCodec<Blob> {
     public static Shared = new BlobTileCodec();

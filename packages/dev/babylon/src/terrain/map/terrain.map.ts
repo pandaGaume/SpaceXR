@@ -11,7 +11,7 @@ import { SurfaceMapDisplay } from "./terrain.mapDisplay";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";
-import { TileContentProvider } from "core/tiles/tiles.provider.content";
+import { TileContentProvider } from "core/tiles/pipeline/tiles.provider.content";
 
 export class SurfaceTileMapOptions extends TerrainHologramMaterialOptions {
     public static Default = new SurfaceTileMapOptions({

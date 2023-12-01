@@ -1,6 +1,6 @@
-import { Nullable } from "../types";
-import { EventState, Observable, Observer } from "../events/events.observable";
-import { ITile, ITileAddress, ITileBuilder } from "./tiles.interfaces";
+import { Nullable } from "../../types";
+import { EventState, Observable, Observer } from "../../events/events.observable";
+import { ITile, ITileAddress, ITileBuilder } from "../tiles.interfaces";
 import { ITileContentProvider, ITileProvider, ITileView } from "./tiles.interfaces.pipeline";
 
 export class TilesProvider<T> implements ITileProvider<T> {

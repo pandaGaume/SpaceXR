@@ -1,10 +1,10 @@
-import { IMemoryCache, MemoryCache } from "../utils/cache";
-import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "./tiles.interfaces";
+import { IMemoryCache, MemoryCache } from "../../utils/cache";
+import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "../tiles.interfaces";
 import { ITileContentProvider, ContentUpdateEventArgs } from "./tiles.interfaces.pipeline";
-import { Nullable } from "../types";
-import { Observable, Observer } from "../events/events.observable";
-import { TileContentView } from "./tiles";
-import { TileAddress } from "./tiles.address";
+import { Nullable } from "../../types";
+import { Observable, Observer } from "../../events/events.observable";
+import { TileContentView } from "../tiles";
+import { TileAddress } from "../tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
     // cache

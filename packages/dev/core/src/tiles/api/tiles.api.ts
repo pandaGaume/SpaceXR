@@ -1,17 +1,17 @@
-import { Geo2 } from "../geography/geography.position";
-import { PropertyChangedEventArgs } from "../events/events.args";
-import { Observable, Observer } from "../events/events.observable";
-import { IEnvelope, IGeo2 } from "../geography/geography.interfaces";
-import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
-import { ITileMetrics } from "./tiles.interfaces";
+import { Geo2 } from "../../geography/geography.position";
+import { PropertyChangedEventArgs } from "../../events/events.args";
+import { Observable, Observer } from "../../events/events.observable";
+import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfaces";
+import { ITileMetrics } from "../tiles.interfaces";
 import { ITileMapApi } from "./tiles.interfaces.api";
-import { Size2 } from "../geometry/geometry.size";
-import { Scalar } from "../math/math";
-import { IValidable } from "../types";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
-import { Envelope, GeoBounded } from "../geography/geography.envelope";
-import { Rectangle } from "../geometry/geometry.rectangle";
-import { TileAddress } from "./tiles.address";
+import { Size2 } from "../../geometry/geometry.size";
+import { Scalar } from "../../math/math";
+import { IValidable } from "../../types";
+import { Cartesian2 } from "../../geometry/geometry.cartesian";
+import { Envelope, GeoBounded } from "../../geography/geography.envelope";
+import { Rectangle } from "../../geometry/geometry.rectangle";
+import { TileAddress } from "../tiles.address";
 
 export class TileMapApiBase extends GeoBounded implements ITileMapApi, IValidable<TileMapApiBase> {
     /**

@@ -1,9 +1,9 @@
-import { EventState, Observable, Observer } from "../events/events.observable";
-import { ITileAddress } from "./tiles.interfaces";
+import { EventState, Observable, Observer } from "../../events/events.observable";
+import { ITileAddress } from "../tiles.interfaces";
 import { ITileView } from "./tiles.interfaces.pipeline";
-import { TileAddress } from "./tiles.address";
-import { ITileMapApi } from "./tiles.interfaces.api";
-import { Nullable } from "../types";
+import { TileAddress } from "../tiles.address";
+import { ITileMapApi } from "../api/tiles.interfaces.api";
+import { Nullable } from "../../types";
 
 export class TileView implements ITileView {
     _id?: string;

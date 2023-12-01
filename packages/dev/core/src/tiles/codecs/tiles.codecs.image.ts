@@ -1,6 +1,6 @@
-import { Side } from "..";
-import { Nullable } from "../types";
-import { IPixelDecoder, ITileCodec } from "./tiles.interfaces";
+import { Side } from "../..";
+import { Nullable } from "../../types";
+import { IPixelDecoder, ITileCodec } from "../tiles.interfaces";
 
 export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
     public static Shared = new ImageTileCodec();

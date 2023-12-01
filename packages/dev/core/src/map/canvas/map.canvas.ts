@@ -6,7 +6,7 @@ import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { CanvasDisplay } from "./map.canvas.display";
 import { RGBAColor } from "../../math/math.color";
-import { TileContentProvider } from "../../tiles/tiles.provider.content";
+import { TileContentProvider } from "../../tiles/pipeline/tiles.provider.content";
 
 type CanvasTileContentType = HTMLImageElement;
 type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;

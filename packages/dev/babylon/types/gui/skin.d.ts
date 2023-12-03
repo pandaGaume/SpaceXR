@@ -27,6 +27,7 @@ export declare class Skin implements IViewSkin {
     constructor(p: Partial<IViewSkin>);
 }
 export declare class SkinBuilder<T extends Skin> {
+    static readonly DefaultLang: string;
     _url?: string;
     _units?: IUnits;
     _name?: string;
@@ -40,7 +41,8 @@ export declare class SkinBuilder<T extends Skin> {
     withDictionary(dictionary: any): SkinBuilder<T>;
     withImages(images: any): SkinBuilder<T>;
     withUrl(url: string): SkinBuilder<T>;
-    build(ctor: new (p: Partial<T>) => T): Promise<Nullable<T>>;
+    buildAsync(ctor: new (p: Partial<T>) => T): Promise<Nullable<T>>;
+    protected _fetchJsonWithLang(url: string, lang?: string): Promise<any>;
     protected _fetchJson(url: string): Promise<any>;
     protected _buildRawData(data: any): any;
 }

@@ -14,6 +14,7 @@ export declare class MiniMapControlOptions {
     provider?: TileContentProvider<HTMLImageElement>;
     source?: ITileDatasource<HTMLImageElement, ITileAddress>;
     cache?: IMemoryCache<string, HTMLImageElement>;
+    skin?: IViewSkin;
 }
 export declare class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
     private static CreateDefaultSkin;
@@ -22,7 +23,7 @@ export declare class MiniMapControl extends View<MinimapModelType, MinimapSkinTy
     private _azimuthObserver?;
     private _map?;
     private _window?;
-    constructor(name: string, options: MiniMapControlOptions, model?: TileMapView<any>, skin?: IViewSkin);
+    constructor(name: string, options: MiniMapControlOptions, model?: TileMapView<any>);
     protected _onModelChanged(oldValue: MinimapModelType | undefined, newValue: MinimapModelType | undefined): void;
     private _onCenterChanged;
     private _onZoomChanged;

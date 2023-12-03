@@ -7,12 +7,13 @@ export declare class View<T, S extends IViewSkin> extends Container implements I
     static BuildPropertyBlock(name: string, iconUrl: string, value: string, key?: string, sep?: string): StackPanel;
     static UpdatePropertyBlock(block: StackPanel, name: string, iconUrl: string, value: string, key?: string, sep?: string): void;
     static ApplyStyleSheet(target: Container, styles?: any): void;
+    private static _applyStyleSheet;
     private _model?;
     private _modelChangedObservable?;
     private _skinChangedObservable?;
     private _skin?;
     private _propertyChangedObservable?;
-    constructor(name?: string, model?: T, skin?: S, options?: any);
+    constructor(name?: string, skin?: S, model?: T, options?: any);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<IModel, any>>;
     get model(): T | undefined;
     set model(value: T | undefined);

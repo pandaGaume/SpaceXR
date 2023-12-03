@@ -37,6 +37,8 @@ export class Skin implements IViewSkin {
 }
 
 export class SkinBuilder<T extends Skin> {
+    public static readonly DefaultLang: string = "en";
+
     _url?: string;
     _units?: IUnits;
     _name?: string;
@@ -78,7 +80,7 @@ export class SkinBuilder<T extends Skin> {
         return this;
     }
 
-    public async build(ctor: new (p: Partial<T>) => T): Promise<Nullable<T>> {
+    public async buildAsync(ctor: new (p: Partial<T>) => T): Promise<Nullable<T>> {
         let rawData: any = null;
         if (this._url) {
             rawData = await this._fetchJson(this._url);
@@ -94,15 +96,37 @@ export class SkinBuilder<T extends Skin> {
         if (rawData) {
             const skin = new ctor(rawData);
             if (typeof skin.styles === "string") {
-                skin.styles = await this._fetchJson(skin.styles);
+                skin.styles = await this._fetchJsonWithLang(skin.styles);
             }
             if (typeof skin.dictionary === "string") {
-                skin.dictionary = await this._fetchJson(skin.dictionary);
+                skin.dictionary = await this._fetchJsonWithLang(skin.dictionary);
             }
             if (typeof skin.images === "string") {
-                skin.images = await this._fetchJson(skin.images);
+                skin.images = await this._fetchJsonWithLang(skin.images);
             }
             return skin;
+        }
+        return null;
+    }
+
+    protected async _fetchJsonWithLang(url: string, lang?: string): Promise<any> {
+        if (url) {
+            // very basic language detection
+            if (!lang) {
+                const langage = navigator.language ?? SkinBuilder.DefaultLang;
+                lang = langage.substring(0, 2);
+            }
+            let modifiedUrl = url.replace("{lang}", lang);
+
+            let response = await fetch(modifiedUrl);
+            if (response.ok) {
+                return await response.json();
+            } else {
+                if (lang != SkinBuilder.DefaultLang) {
+                    return await this._fetchJsonWithLang(url, SkinBuilder.DefaultLang);
+                }
+                console.log(`Failed to load ${url}: ${response.status}`);
+            }
         }
         return null;
     }

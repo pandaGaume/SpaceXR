@@ -26,6 +26,7 @@ export class MiniMapControlOptions {
     public provider?: TileContentProvider<HTMLImageElement>;
     public source?: ITileDatasource<HTMLImageElement, ITileAddress>;
     public cache?: IMemoryCache<string, HTMLImageElement>;
+    public skin?: IViewSkin;
 }
 
 export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
@@ -54,9 +55,9 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
     private _map?: MapControl;
     private _window?: Rectangle;
 
-    public constructor(name: string, options: MiniMapControlOptions, model?: TileMapView<any>, skin?: IViewSkin) {
+    public constructor(name: string, options: MiniMapControlOptions, model?: TileMapView<any>) {
         if (!options?.provider && !options?.source) throw new Error("manager or datasource must be provided");
-        super(name, model, skin ?? MiniMapControl.CreateDefaultSkin(), options);
+        super(name, options.skin ?? MiniMapControl.CreateDefaultSkin(), model, options);
     }
 
     protected _onModelChanged(oldValue: MinimapModelType | undefined, newValue: MinimapModelType | undefined): void {

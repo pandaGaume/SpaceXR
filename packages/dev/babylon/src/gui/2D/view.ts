@@ -1,5 +1,5 @@
 import { Observable } from "@babylonjs/core";
-import { Container, StackPanel, TextBlock, Image } from "@babylonjs/gui";
+import { Container, StackPanel, TextBlock, Image, Control } from "@babylonjs/gui";
 
 import { IModel } from "../model";
 import { IViewSkin } from "../skin";
@@ -50,26 +50,31 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
 
     public static ApplyStyleSheet(target: Container, styles?: any): void {
         if (styles) {
+            View._applyStyleSheet(target, styles);
             for (const c of target.children) {
-                if (c.name) {
-                    const s = styles[c.name];
-                    if (s) {
-                        for (const k in s) {
-                            // The in operator checks for the presence of a property in an object or its prototype chain.
-                            if (k in c) {
-                                // console.log(`Applying style ${k} = ${s[k]} to ${c.name}`);
-                                try {
-                                    (<any>c)[k] = s[k];
-                                } catch {
-                                    // do no let the error propagate
-                                    console.error(`Error setting property ${k} = ${s[k]} on ${c.name}`);
-                                }
-                            }
-                        }
-                    }
-                }
+                View._applyStyleSheet(c, styles);
                 if (c instanceof Container) {
                     View.ApplyStyleSheet(c, styles);
+                }
+            }
+        }
+    }
+
+    private static _applyStyleSheet(c: Control, styles?: any): void {
+        if (c.name) {
+            const s = styles[c.name];
+            if (s) {
+                for (const k in s) {
+                    // The in operator checks for the presence of a property in an object or its prototype chain.
+                    if (k in c) {
+                        //console.log(`Applying style ${k} = ${s[k]} to ${c.name}`)
+                        try {
+                            (<any>c)[k] = s[k];
+                        } catch {
+                            // do no let the error propagate
+                            console.error(`Error setting property ${k} = ${s[k]} on ${c.name}`);
+                        }
+                    }
                 }
             }
         }
@@ -81,7 +86,7 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
     private _skin?: S;
     private _propertyChangedObservable?: Observable<PropertyChangedEventArgs<IModel, any>>;
 
-    public constructor(name?: string, model?: T, skin?: S, options?: any) {
+    public constructor(name?: string, skin?: S, model?: T, options?: any) {
         super(name);
         this._createContent(model, skin, options);
         this.skin = skin;
@@ -147,7 +152,9 @@ export class View<T, S extends IViewSkin> extends Container implements IModel {
 
     protected _updateSkin(oldValue: IViewSkin | undefined, newValue: IViewSkin | undefined): void {
         View.ApplyStyleSheet(this, newValue?.styles); // this apply the style sheet down the hierarchy
-        this._updateContent(this._model, this._model); // this update the content  it could be impacted by styling
+        if (this._model) {
+            this._updateContent(this._model, this._model); // this update the content  it could be impacted by styling
+        }
     }
 
     protected _onModelChanged(oldValue: T | undefined, newValue: T | undefined): void {}

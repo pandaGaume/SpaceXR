@@ -9,6 +9,7 @@
         <script src="./libs/babylon.inspector.bundle.js"></script>
 
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+        <script src="../../dev/babylon.gui/bundles/stellar_landscape_ui_xr.1.0.0.js"></script>
         <style>
             #mapcanvas3d {
                 width: 100%;
@@ -138,7 +139,7 @@
                     provider: new SPACEXR.TileContentProvider(layerMinimapClient),
                     resolution: { width: display.resolution.width * 2, height: display.resolution.height * 2 },
                 };
-                const minimap2D = new SPACEXR.MiniMapControl("minimap", options, map.view);
+                const minimap2D = new SPACEXR.GUI.MiniMapControl("minimap", options, map.view);
                 minimap2D.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
                 minimap2D.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
                 minimap2D.top = "10px";

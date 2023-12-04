@@ -11,7 +11,6 @@ import { ITileDatasource, ITileAddress } from "core/tiles/tiles.interfaces";
 import { ISize2 } from "core/geometry/geometry.interfaces";
 import { IMemoryCache } from "core/utils/cache";
 import { Size2 } from "core/geometry/geometry.size";
-import { TerrainHologramMaterialOptions } from "../../materials/terrain.material.hologram";
 import { Geo2 } from "core/geography/geography.position";
 import { Control, Measure, Rectangle } from "@babylonjs/gui";
 import { Scalar } from "core/math/math";
@@ -34,7 +33,7 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
         return {
             styles: {
                 map: {
-                    background: TerrainHologramMaterialOptions.DefaultBackgroundColor.toHexString(),
+                    background: "#00000000",
                     width: "100%",
                     height: "100%",
                     alpha: 0.8,

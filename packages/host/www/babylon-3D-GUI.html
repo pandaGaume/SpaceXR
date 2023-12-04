@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Exemple de dessin de tuiles holographique avec support GUI 2D</title>
+        <title>3D GUI</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
+
         <script src="./libs/babylon.js"></script>
         <script src="./libs/babylonjs.loaders.js"></script>
         <script src="./libs/babylon.glTF2FileLoader.js"></script>
@@ -9,6 +14,7 @@
         <script src="./libs/babylon.inspector.bundle.js"></script>
 
         <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+
         <style>
             #mapcanvas3d {
                 width: 100%;
@@ -171,9 +177,10 @@
 
                 const twoDimensionButton = new BABYLON.GUI.Button3D("reset");
                 const text = new BABYLON.GUI.TextBlock();
-                text.text = "reset";
+                text.text = "RESET";
                 text.color = "white";
                 text.fontSize = 24;
+                text.fontFamily = 'Electrolize';
                 twoDimensionButton.content = text;
                 panel.addControl(twoDimensionButton);
 

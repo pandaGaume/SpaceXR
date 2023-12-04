@@ -34,8 +34,6 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
             styles: {
                 map: {
                     background: "#00000000",
-                    width: "100%",
-                    height: "100%",
                     alpha: 0.8,
                 },
                 window: {
@@ -47,6 +45,7 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
         } as MinimapSkinType;
     }
 
+    // this is observer from core/spacexr, which are similar too these found under Babylonjs.
     private _centerObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileMapApi, IGeo2>>>;
     private _zoomObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileMapApi, number>>>;
     private _azimuthObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileMapApi, number>>>;
@@ -61,9 +60,9 @@ export class MiniMapControl extends View<MinimapModelType, MinimapSkinType> {
 
     protected _onModelChanged(oldValue: MinimapModelType | undefined, newValue: MinimapModelType | undefined): void {
         if (oldValue) {
-            if (this._centerObserver) oldValue.centerObservable.remove(this._centerObserver);
-            if (this._zoomObserver) oldValue.zoomObservable.remove(this._zoomObserver);
-            if (this._azimuthObserver) oldValue.zoomObservable.remove(this._azimuthObserver);
+            this._centerObserver?.dispose();
+            this._zoomObserver?.dispose();
+            this._azimuthObserver?.dispose();
         }
 
         this._centerObserver = null;

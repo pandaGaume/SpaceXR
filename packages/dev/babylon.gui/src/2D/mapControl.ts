@@ -24,7 +24,7 @@ export class MapControl extends Control implements ITileMapApi {
         super(name);
         this._resolution = resolution;
         const tmp = this._resolution ?? Size2.Zero();
-        this._model = new TileMapView(manager, tmp.width, tmp.height, center || Geo2.Zero(), lod || (manager.metrics?.minLOD??0));
+        this._model = new TileMapView(manager, tmp.width, tmp.height, center || Geo2.Zero(), lod || (manager.metrics?.minLOD ?? 0));
         this._model.updateObservable.add(this.onUpdate.bind(this));
         this._model.validate();
     }
@@ -202,8 +202,6 @@ export class MapControl extends Control implements ITileMapApi {
         }
     }
 
-    // this is the place we draw the tiles
-    //protected _localDraw(context: ICanvasRenderingContext): void {
     public _draw(context: ICanvasRenderingContext, invalidatedRectangle?: Measure): void {
         if (context) {
             context.save();

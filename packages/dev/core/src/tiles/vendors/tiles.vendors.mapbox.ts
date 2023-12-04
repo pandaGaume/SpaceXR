@@ -14,7 +14,7 @@ export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
         this.withHost("api.mapbox.com")
             .withSecure(true)
             .withQuery(`access_token=${token}`)
-            .withPath(`raster/v1/mapbox.mapbox-terrain-dem-v1/{z}/{x}/{y}.{extension}`)
+            .withPath(`raster/v1/mapbox.mapbox-terrain-dem-v1/{z}/{x}/{y}{@2x}.{extension}`)
             .withExtension(extension);
     }
 }

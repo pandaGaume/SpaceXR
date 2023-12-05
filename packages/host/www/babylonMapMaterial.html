@@ -124,14 +124,15 @@
 
                 camera.setTarget(display);
 
-                // definir la source de donnée.
-                const demClient = SPACEXR.MapZen.DemClient();
-                //const layerClient = SPACEXR.Google.SatelliteClient2d();
-
                 tokenMapBox = "pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q"
+                // definir la source de donnée.
+                //const demClient = SPACEXR.MapZen.DemClient();
+                //const layerClient = SPACEXR.Google.SatelliteClient2d();
+                const demClient = SPACEXR.MapBox.TerrainDemV1Client(tokenMapBox);
                 const layerClient = SPACEXR.MapBox.TerrainClientSatellite(tokenMapBox);
 
-                console.log("layerClient", layerClient);
+                //const layerClient = SPACEXR.MapBox.TerrainClientSatellite(tokenMapBox);
+                
 
                 const mapOptions = {
                     center: SPACEXR.KnownPlaces.Mountains.Matterhorn,

@@ -3,6 +3,10 @@ import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { EPSG3857 } from "../tiles.geography";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
+export declare enum MapZen2DLayerCode {
+    Terrarium = "terrarium",
+    Normal = "normal"
+}
 export declare class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     static Terrarium: MapZenDemUrlBuilder;
     static Normal: MapZenDemUrlBuilder;

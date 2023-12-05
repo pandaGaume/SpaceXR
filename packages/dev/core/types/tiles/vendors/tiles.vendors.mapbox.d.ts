@@ -14,15 +14,6 @@ export declare enum MapBoxMap2DLayerCode {
     traffic = "mapbox.mapbox-traffic-v1"
 }
 export declare class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
-    private static TOKEN;
-    static Bathymetry: MapBoxTerrainDemV1UrlBuilder;
-    static Country: MapBoxTerrainDemV1UrlBuilder;
-    static Satellite: MapBoxTerrainDemV1UrlBuilder;
-    static Terrain: MapBoxTerrainDemV1UrlBuilder;
-    static TerrainRGB: MapBoxTerrainDemV1UrlBuilder;
-    static TerrainV2: MapBoxTerrainDemV1UrlBuilder;
-    static Traffic: MapBoxTerrainDemV1UrlBuilder;
-    static Transit: MapBoxTerrainDemV1UrlBuilder;
     constructor(token: string, extension?: string, ...types: (MapBoxMap2DLayerCode | string)[]);
 }
 export declare class MapboxAltitudeDecoder implements IPixelDecoder {

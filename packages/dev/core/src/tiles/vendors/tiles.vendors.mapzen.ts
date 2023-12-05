@@ -6,9 +6,14 @@ import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { EPSG3857 } from "../tiles.geography";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 
+export enum MapZen2DLayerCode{
+    Terrarium = "terrarium",
+    Normal = "normal",
+}
+
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
-    public static Terrarium = new MapZenDemUrlBuilder("terrarium");
-    public static Normal = new MapZenDemUrlBuilder("normal");
+    public static Terrarium = new MapZenDemUrlBuilder(MapZen2DLayerCode.Terrarium);
+    public static Normal = new MapZenDemUrlBuilder(MapZen2DLayerCode.Normal);
 
     public constructor(format: string, extension = "png") {
         super();

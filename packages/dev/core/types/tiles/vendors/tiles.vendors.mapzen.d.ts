@@ -1,8 +1,8 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
-import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { EPSG3857 } from "../tiles.geography";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
+import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 export declare class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     static Terrarium: MapZenDemUrlBuilder;
     static Normal: MapZenDemUrlBuilder;
@@ -15,7 +15,7 @@ export declare class MapzenAltitudeDecoder implements IPixelDecoder {
 export declare class MapZen {
     private static readonly KEY;
     static MaxLevelOfDetail: number;
-    static MetricsOptions: import("../tiles.interfaces").ITileMetricsOptions;
+    static MetricsOptions: import("..").ITileMetricsOptions;
     static Metrics: EPSG3857;
     static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;

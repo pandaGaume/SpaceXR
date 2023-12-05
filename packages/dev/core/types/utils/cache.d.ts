@@ -1,14 +1,16 @@
+import { IDisposable } from "..";
 export declare enum EvictionReason {
     user = 0,
     expired = 1
 }
 export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>, reason: EvictionReason) => void;
-export interface IMemoryCache<K, V> {
+export interface IMemoryCache<K, V> extends IDisposable {
     contains(key: K): boolean;
     get(key: K): V | undefined;
     set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
     delete(key: K): void;
     keys(): IterableIterator<K>;
+    clear(predicate?: (k: K) => boolean): void;
 }
 export declare class CachePolicyBuilder {
     _slidingExpiration?: number;
@@ -71,6 +73,8 @@ export declare class MemoryCache<K, V> implements IMemoryCache<K, V> {
     set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
     delete(key: K): void;
     keys(): IterableIterator<K>;
+    clear(predicate?: (k: K) => boolean): void;
+    dispose(): void;
     protected gc(): void;
     private updateTimer;
     private sortList;

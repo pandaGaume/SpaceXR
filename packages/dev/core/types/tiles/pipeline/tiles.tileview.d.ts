@@ -1,11 +1,12 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITileAddress } from "../tiles.interfaces";
-import { ITileDisplay, ITileNavigationState, ITileSystem, ITileView } from "./tiles.interfaces.pipeline";
+import { ITileAddress, ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
+import { ITileDisplay, ITileView } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { ISize2 } from "../../geometry/geometry.interfaces";
-import { TileSystemComponent } from "./tiles.system";
-export declare class TileView<T> extends TileSystemComponent<T> implements ITileView<T> {
+import { TilePipelineComponent } from "./tiles.pipeline";
+import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+export declare class TileView<T> extends TilePipelineComponent implements ITileView<T>, ITileMetricsProvider {
     static ClampAzimuth(a: number): number;
     _addressAddedObservable?: Observable<Array<ITileAddress>>;
     _addressRemovedObservable?: Observable<Array<ITileAddress>>;
@@ -15,10 +16,12 @@ export declare class TileView<T> extends TileSystemComponent<T> implements ITile
     _azimuthObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, number>>>;
     _display: Nullable<ITileDisplay>;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>>;
+    _metrics: ITileMetrics;
     _azimuth: number;
     _cosAzimuth: number;
     _sinAzimuth: number;
-    constructor(id: string, system: ITileSystem<T>, display?: ITileDisplay, state?: ITileNavigationState);
+    constructor(id: string, metrics: ITileMetrics, display?: ITileDisplay, state?: ITileNavigationState);
+    get metrics(): ITileMetrics;
     get state(): Nullable<ITileNavigationState>;
     set state(state: Nullable<ITileNavigationState>);
     get display(): Nullable<ITileDisplay>;

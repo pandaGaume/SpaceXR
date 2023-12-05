@@ -3,9 +3,9 @@ import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { Float32TileCodec, Float32TileCodecOptionsBuilder } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../tiles.geography";
-import { IPixelDecoder } from "../tiles.interfaces";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
+import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 
 export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
     // https://api.mapbox.com/raster/v1/mapbox.mapbox-terrain-dem-v1/14/8800/5372.webp?sku=101iNLHSEcgVj&access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY5YzJzczA2ejIzM29hNGQ3emFsMXgifQ.az9JUrQP7klCgD3W-ueILQ

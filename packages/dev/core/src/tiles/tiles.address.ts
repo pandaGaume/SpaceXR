@@ -1,5 +1,4 @@
 import { Nullable } from "../types";
-import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { Scalar } from "../math/math";
 import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
 
@@ -50,39 +49,13 @@ export class TileAddress implements ITileAddress {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }
 
-    /// <summary>
-    /// Returns the normalized section of the quadkey in the form of Vector3(x,y,z) where x,y,z are in [0,1] range
-    /// and define the upper left corner of the section.
-    /// </summary>
-    public static ToNormalizedSection(key: string): Nullable<ICartesian3> {
-        if (key === null || key === undefined || key.length <= 1) {
-            return null;
-        }
-        const c = key.charAt(key.length - 1);
-        let s: ICartesian3 = { x: 0, y: 0, z: 0.5 };
-        switch (c) {
-            case "1": {
-                s.x = s.z;
-                break;
-            }
-            case "2": {
-                s.y = s.z;
-                break;
-            }
-            case "3": {
-                s.x = s.y = s.z;
-                break;
-            }
-        }
-        return s;
-    }
     public static ToChildsKey(key: string): string[] {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
     }
 
     public static ToNeigborsKey(key: string): Nullable<string>[] {
-        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a) : null));
+        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
     }
 
     public static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[] {
@@ -101,15 +74,15 @@ export class TileAddress implements ITileAddress {
         return n.map((ad) => (ad.x >= 0 && ad.y >= 0 && ad.x < max && ad.y < max ? ad : null));
     }
 
-    public static TileXYToQuadKey(a: ITileAddress): string {
+    public static TileXYToQuadKey(x: number, y: number, levelOfDetail: number): string {
         let quadKey = "";
-        for (let i = a.levelOfDetail; i > 0; i--) {
+        for (let i = levelOfDetail; i > 0; i--) {
             let digit = 0;
             const mask = 1 << (i - 1);
-            if ((a.x & mask) != 0) {
+            if ((x & mask) != 0) {
                 digit++;
             }
-            if ((a.y & mask) != 0) {
+            if ((y & mask) != 0) {
                 digit++;
                 digit++;
             }
@@ -194,7 +167,7 @@ export class TileAddress implements ITileAddress {
 
     public get quadkey(): string {
         if (!this._k) {
-            this._k = TileAddress.TileXYToQuadKey(this);
+            this._k = TileAddress.TileXYToQuadKey(this.x, this.y, this.levelOfDetail);
         }
         return this._k;
     }

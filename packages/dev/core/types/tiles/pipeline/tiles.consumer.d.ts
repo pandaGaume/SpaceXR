@@ -1,5 +1,5 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITileConsumer, ITileProvider } from "./tiles.interfaces.pipeline";
+import { ITileConsumer, ITileProvider } from "./tiles.pipeline.interfaces";
 import { ITile } from "../tiles.interfaces";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";

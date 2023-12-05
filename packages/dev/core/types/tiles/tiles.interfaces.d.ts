@@ -1,23 +1,24 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export type TileSection = Nullable<ICartesian3 | Nullable<ICartesian3>[]>;
-export interface ITileContentView {
-    address: ITileAddress;
-    source?: TileSection;
-    target?: TileSection;
+export interface ITileAddressProcessor {
+    process(address: ITileAddress, metrics?: ITileMetrics): ITileAddress[] | ITileSection;
 }
+export interface ITileSection extends ICartesian2, ISize2 {
+    address: ITileAddress;
+}
+export declare function IsTileSection(b: unknown): b is ITileSection;
 export interface ITileCruncher<T> {
     Downsampling(childs: T[]): Nullable<T>;
     Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
-export declare function IsTileContentView<T>(b: unknown): b is ITileContentView;
-export type TileContent<T> = Nullable<T | ITileContentView>;
+export declare function IsTileContentView<T>(b: unknown): b is ITileSection;
+export type TileContent<T> = Nullable<T | ITileSection>;
 export interface ITile<T> extends IGeoBounded {
     namespace?: string;
     address: ITileAddress;
@@ -30,6 +31,7 @@ export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
 export interface ITileBuilder<T> {
+    withNamespace(namesapce: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContent<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
@@ -88,9 +90,9 @@ export declare class FetchResult<T> {
     statusText?: string;
     constructor(address: ITileAddress, content: T, userArgs?: Nullable<Array<unknown>>);
 }
-export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {
+export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
-    fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 export interface ITileUrlBuilder {
     buildUrl(address: ITileAddress, ...params: unknown[]): string;
@@ -99,7 +101,4 @@ export interface ITileCodec<T> {
     decodeAsync(r: void | Response): Promise<Nullable<T>>;
 }
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
-}
-export interface IPixelDecoder {
-    decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }

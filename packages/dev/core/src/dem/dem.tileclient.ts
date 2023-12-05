@@ -3,12 +3,12 @@ import { FetchResult, ITileAddress, ITileClient, ITileMetrics } from "../tiles/t
 import { IDemInfos } from "./dem.interfaces";
 import { DemInfos } from "./dem.infos";
 
-export class DemTileWebClient implements ITileClient<IDemInfos> {
+export class DemTileWebClient implements ITileClient<IDemInfos,ITileAddress> {
     _name: string;
-    _elevationsDataSource: ITileClient<Float32Array>;
-    _normalsDataSource?: ITileClient<Uint8ClampedArray | HTMLImageElement>;
+    _elevationsDataSource: ITileClient<Float32Array,ITileAddress>;
+    _normalsDataSource?: ITileClient<Uint8ClampedArray | HTMLImageElement,ITileAddress>;
 
-    public constructor(name: string, elevationSrc: ITileClient<Float32Array>, normalSrc?: ITileClient<Uint8ClampedArray | HTMLImageElement>) {
+    public constructor(name: string, elevationSrc: ITileClient<Float32Array,ITileAddress>, normalSrc?: ITileClient<Uint8ClampedArray | HTMLImageElement,ITileAddress>) {
         this._name = name;
         this._elevationsDataSource = elevationSrc;
         this._normalsDataSource = normalSrc;

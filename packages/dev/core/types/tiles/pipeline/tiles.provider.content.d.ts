@@ -1,24 +1,25 @@
 import { IMemoryCache } from "../../utils/cache";
-import { ITileAddress, TileSection, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
-import { ITileContentProvider, ContentUpdateEventArgs, ITileSystem } from "./tiles.interfaces.pipeline";
-import { Observable } from "../../events/events.observable";
+import { ITileAddress, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
+import { ITileContentProvider } from "./tiles.pipeline.interfaces";
+import { Nullable } from "../../types";
+export interface ITileContentProviderOptions<T> {
+    datasource: ITileDatasource<T, ITileAddress>;
+    cache?: IMemoryCache<string, TileContent<T>>;
+}
 export declare class TileContentProvider<T> implements ITileContentProvider<T> {
+    private _name;
     private _cache;
+    private _ownCache;
     private _datasource;
-    _contentUpdateObservable?: Observable<ContentUpdateEventArgs<T>>;
-    _smoothingZomm: boolean;
-    constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>);
+    constructor(name: string, options: ITileContentProviderOptions<T>);
     accept(address: ITileAddress): boolean;
-    get system(): ITileSystem<T>;
-    get id(): string | undefined;
-    get cache(): IMemoryCache<string, TileContent<T>>;
+    get name(): string;
     get datasource(): ITileDatasource<T, ITileAddress>;
     get metrics(): ITileMetrics;
-    get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>>;
+    private get prefix();
     private buildCacheKey;
-    getTileContent(address: ITileAddress): TileContent<T>;
-    protected buildTileContentView(address: ITileAddress, source?: TileSection, target?: TileSection): TileContent<T> | undefined;
-    protected buildAlternativeTileContent(address: ITileAddress): TileContent<T>;
+    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
+    protected buildTemporaryContent(address: ITileAddress): TileContent<T>;
+    protected buildAlternativContent(address: ITileAddress): TileContent<T>;
     dispose(): void;
-    private onContentObserverAdded;
 }

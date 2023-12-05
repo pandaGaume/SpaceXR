@@ -1,10 +1,10 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
-import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { Float32TileCodec, ImageTileCodec, RGBATileCodec } from "../codecs/tiles.codecs.image";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { EPSG3857 } from "../tiles.geography";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
+import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     public static Terrarium = new MapZenDemUrlBuilder("terrarium");

@@ -54,7 +54,7 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
     _options: CanvasTileMapOptions;
 
     public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number, options?: CanvasTileMapOptions) {
-        super(new CanvasDisplay(canvas), new TileContentProvider<CanvasTileContentType>(datasource), center, lod);
+        super(new CanvasDisplay(canvas), new TileContentProvider<CanvasTileContentType>("", { datasource: datasource }), center, lod);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
         this._observer = new ResizeObserver(() => {
             this.invalidateSize(canvas.width, canvas.height);

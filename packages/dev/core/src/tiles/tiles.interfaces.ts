@@ -1,6 +1,6 @@
 import { Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, ICartesian3, IRectangle } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -12,12 +12,22 @@ export interface ITileAddress extends ICartesian2 {
     quadkey: string;
 }
 
-export type TileSection = Nullable<ICartesian3 | Nullable<ICartesian3>[]>;
+/// <summary>
+/// The TileAddressProcessor is versatile in its capabilities, primarily filtering and modifying addresses.
+/// Not only to support increased zoom levels in layered Digital Elevation Model (DEM) applications,
+/// but also adaptable for various other use cases.
+/// </summary>
+export interface ITileAddressProcessor {
+    process(address: ITileAddress, metrics?: ITileMetrics): ITileAddress[] | ITileSection;
+}
 
-export interface ITileContentView {
+export interface ITileSection extends ICartesian2, ISize2 {
     address: ITileAddress;
-    source?: TileSection;
-    target?: TileSection;
+}
+
+export function IsTileSection(b: unknown): b is ITileSection {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileSection>b).address !== undefined && (<ITileSection>b).width !== undefined && (<ITileSection>b).height !== undefined;
 }
 
 export interface ITileCruncher<T> {
@@ -25,12 +35,12 @@ export interface ITileCruncher<T> {
     Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
 
-export function IsTileContentView<T>(b: unknown): b is ITileContentView {
+export function IsTileContentView<T>(b: unknown): b is ITileSection {
     if (typeof b !== "object" || b === null) return false;
     return (<any>b).source !== undefined && (<any>b).target !== undefined;
 }
 
-export type TileContent<T> = Nullable<T | ITileContentView>;
+export type TileContent<T> = Nullable<T | ITileSection>;
 
 export interface ITile<T> extends IGeoBounded {
     namespace?: string;
@@ -46,6 +56,7 @@ export interface ITileProxy<T> {
 }
 
 export interface ITileBuilder<T> {
+    withNamespace(namesapce: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContent<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
@@ -114,9 +125,9 @@ export class FetchResult<T> {
     public constructor(public address: ITileAddress, public content: T, public userArgs: Nullable<Array<unknown>> = null) {}
 }
 
-export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {
+export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
-    fetchAsync(request: R, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 
 export interface ITileUrlBuilder {
@@ -128,7 +139,3 @@ export interface ITileCodec<T> {
 }
 
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}
-
-export interface IPixelDecoder {
-    decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
-}

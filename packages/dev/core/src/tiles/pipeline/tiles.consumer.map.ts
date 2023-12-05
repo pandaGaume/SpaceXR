@@ -2,8 +2,8 @@ import { IGeo2 } from "../../geography/geography.interfaces";
 import { EventState } from "../../events/events.observable";
 import { TileConsumerBase } from "./tiles.consumer";
 import { ITile } from "../tiles.interfaces";
-import { ITileMapApi } from "../api/tiles.interfaces.api";
-import { ITileProvider } from "./tiles.interfaces.pipeline";
+import { ITileMapApi } from "../api/tiles.api.interfaces";
+import { ITileProvider } from "./tiles.pipeline.interfaces";
 
 export class TileMapOptions {
     center?: IGeo2;

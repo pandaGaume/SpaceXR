@@ -1,24 +1,17 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent, TileSection } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./tiles.address";
 export declare class TileBuilder<T> implements ITileBuilder<T> {
+    _ns?: string;
     _a?: ITileAddress;
     _d?: TileContent<T>;
     _m?: ITileMetrics;
+    withNamespace(namesapce: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: TileContent<T>): ITileBuilder<T>;
-    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    withData(d: TileContent<T>): ITileBuilder<T, ITileAddress>;
+    withMetrics(metrics: ITileMetrics): ITileBuilder<T, ITileAddress>;
     build(): ITile<T>;
-}
-export declare class TileContentView implements ITileContentView {
-    address: ITileAddress;
-    source?: TileSection | undefined;
-    target?: TileSection | undefined;
-    static BuildKey(address: ITileAddress, source?: TileSection, target?: TileSection): string;
-    private _key?;
-    constructor(address: ITileAddress, source?: TileSection | undefined, target?: TileSection | undefined);
-    get key(): string;
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {
     static Builder<T>(): ITileBuilder<T>;

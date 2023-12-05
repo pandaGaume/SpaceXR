@@ -1,42 +1,33 @@
 import { IMemoryCache, MemoryCache } from "../../utils/cache";
-import { FetchResult, ITileAddress, TileSection, ITileDatasource, ITileMetrics, IsTileContentView, TileContent } from "../tiles.interfaces";
-import { ITileContentProvider, ContentUpdateEventArgs, ITileSystem } from "./tiles.interfaces.pipeline";
+import { ITileAddress, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
+import { ITileContentProvider } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
-import { Observable, Observer } from "../../events/events.observable";
-import { TileContentView } from "../tiles";
 import { TileAddress } from "../tiles.address";
 
+export interface ITileContentProviderOptions<T> {
+    datasource: ITileDatasource<T, ITileAddress>;
+    cache?: IMemoryCache<string, TileContent<T>>;
+}
+
 export class TileContentProvider<T> implements ITileContentProvider<T> {
-    // cache
+    private _name: string;
     private _cache: IMemoryCache<string, TileContent<T>>;
-    // data source
+    private _ownCache: boolean;
     private _datasource: ITileDatasource<T, ITileAddress>;
-    // observable
-    _contentUpdateObservable?: Observable<ContentUpdateEventArgs<T>>;
 
-    // options to enable/disable transition between levels of details
-    _smoothingZomm: boolean;
-
-    public constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>) {
-        this._cache = cache || new MemoryCache<string, TileContent<T>>();
-        this._datasource = datasource;
-        this._smoothingZomm = false;
+    public constructor(name: string, options: ITileContentProviderOptions<T>) {
+        this._name = name;
+        this._datasource = options.datasource;
+        this._cache = options.cache || new MemoryCache<string, TileContent<T>>();
+        this._ownCache = !options.cache;
     }
 
     public accept(address: ITileAddress): boolean {
         return TileAddress.IsValidAddress(address, this.metrics);
     }
 
-    public get system(): ITileSystem<T> {
-        return <any>null;
-    }
-
-    public get id(): string | undefined {
-        return this._datasource.name;
-    }
-
-    public get cache(): IMemoryCache<string, TileContent<T>> {
-        return this._cache;
+    public get name(): string {
+        return this._name;
     }
 
     public get datasource(): ITileDatasource<T, ITileAddress> {
@@ -46,16 +37,15 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return this._datasource.metrics;
     }
 
-    public get contentUpdateObservable(): Observable<ContentUpdateEventArgs<T>> {
-        this._contentUpdateObservable = this._contentUpdateObservable || new Observable<ContentUpdateEventArgs<T>>(this.onContentObserverAdded.bind(this));
-        return this._contentUpdateObservable!;
+    private get prefix(): string {
+        return `${this._name}_`;
     }
 
     private buildCacheKey(key: string): string {
-        return `${this._datasource.name}_${key}`;
+        return `${this.prefix}${key}`;
     }
 
-    public getTileContent(address: ITileAddress): TileContent<T> {
+    public async fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>> {
         const cacheKey = this.buildCacheKey(address.quadkey);
 
         // first have a look in cache
@@ -63,76 +53,51 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
             return this._cache.get(cacheKey)!;
         }
 
-        // then try to build the content using alternative method
-        let c = this._smoothingZomm ? this.buildAlternativeTileContent(address) : null;
+        // then try to build a temporary content using alternative method
+        let c = this.buildTemporaryContent(address);
 
         // store the content, either null or not. This flag the address as beeing processed.
         this._cache.set(cacheKey, c);
 
         // then try to get it from the datasource
-        this._datasource
-            .fetchAsync(address, this) // we pass this as context
-            .then((result: FetchResult<Nullable<T>>) => {
-                if (result.content) {
-                    const provider = <TileContentProvider<T>>result?.userArgs?.[0];
-                    if (provider) {
-                        const address = result.address;
-                        // we have the content of the tile.
-                        const content = result.content;
-                        // we store the value in cache
-                        provider._cache.set(this.buildCacheKey(address.quadkey), content);
-                        // we notify the observers
-                        if (this._contentUpdateObservable) {
-                            const e = new ContentUpdateEventArgs<T>(provider, address, content);
-                            this._contentUpdateObservable.notifyObservers(e);
-                        }
-                    }
+        try {
+            const result = await this._datasource.fetchAsync(address);
+            if (result.content) {
+                const provider = <TileContentProvider<T>>result?.userArgs?.[0];
+                if (provider) {
+                    const address = result.address;
+                    // we have the content of the tile.
+                    const content = result.content;
+                    // we store the value in cache
+                    provider._cache.set(this.buildCacheKey(address.quadkey), content);
                 }
-            })
-            .catch((reason: any) => {
-                // the lookup operation has failed - TODO describe a strategy
-                console.log(`the lookup operation has failed because of ${reason}`);
-            });
-
+            }
+        } catch (reason: any) {
+            // the lookup operation has failed - TODO describe a strategy
+            console.log(`the lookup operation has failed because of ${reason}`);
+            return this.buildAlternativContent(address);
+        }
         return c;
     }
 
-    protected buildTileContentView(address: ITileAddress, source?: TileSection, target?: TileSection): TileContent<T> | undefined {
-        let cacheKey = this.buildCacheKey(TileContentView.BuildKey(address, source, target));
-        if (this._cache.contains(cacheKey)) {
-            const view = this._cache.get(cacheKey);
-            return view;
-        }
-        const view = new TileContentView(address, source, target);
-        this._cache.set(cacheKey, view);
-        return view;
+    protected buildTemporaryContent(address: ITileAddress): TileContent<T> {
+        // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
+        // in oder to avoid empty tile to be displayed during pan and zoom operation.
+        return null;
+    }
+    protected buildAlternativContent(address: ITileAddress): TileContent<T> {
+        // TODO : implement a strategy to build an alternativ content
+        // this could be used when the datasource is not available or when the lookup operation has failed
+        // or when the content is unavailable on purpose such as a 404 error for sea based tile
+        return null;
     }
 
-    protected buildAlternativeTileContent(address: ITileAddress): TileContent<T> {
-        let key = address.quadkey;
-        const parentCacheKey = this.buildCacheKey(TileAddress.ToParentKey(key));
-        const content = this._cache.get(parentCacheKey);
-        if (content) {
-            if (IsTileContentView(content)) {
-                return null;
-            }
-            // get the corresponding upper left corner of the parent source tile
-            const source = TileAddress.ToNormalizedSection(key);
-            if (source) {
-                return this.buildTileContentView(address, source) ?? null;
-            }
+    public dispose(): void {
+        if (this._ownCache) {
+            this._cache.dispose();
+            return;
         }
-
-        // try to get the content from the childs
-        const childKeys = TileAddress.ToChildsKey(key);
-        const targets = childKeys.map((k) => {
-            return TileAddress.ToNormalizedSection(k);
-        });
-        return this.buildTileContentView(address, null, targets) ?? null;
+        const prefix = this.prefix;
+        this._cache.clear((k) => k.startsWith(prefix));
     }
-
-    public dispose(): void {}
-
-    // INTERNALS
-    private onContentObserverAdded(observer: Observer<ContentUpdateEventArgs<T>>): void {}
 }

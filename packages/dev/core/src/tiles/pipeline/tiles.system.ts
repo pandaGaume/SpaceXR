@@ -1,50 +1,45 @@
-import { ITileMetrics } from "../tiles.interfaces";
-import { ITileSystem, ITileSystemComponent, ITilePipelineComponent } from "./tiles.interfaces.pipeline";
+import { ITileContentProvider, ITileSystem } from "./tiles.pipeline.interfaces";
+import { ITileAddressProcessor, ITileBuilder, ITileMetrics } from "../tiles.interfaces";
 
-export class TilePipelineComponent implements ITilePipelineComponent {
-    _id: string;
-
-    public constructor(id: string) {
-        this._id = id;
-    }
-
-    public get id(): string {
-        return this._id;
-    }
-
-    public dispose(): void {}
-}
-
-export class TileSystemComponent<T> extends TilePipelineComponent implements ITileSystemComponent<T> {
-    _tileSystem: ITileSystem<T>;
-
-    public constructor(id: string, system: ITileSystem<T>) {
-        super(id);
-        this._tileSystem = system;
-    }
-
-    public get system(): ITileSystem<T> {
-        return this._tileSystem;
-    }
-
-    public set system(s: ITileSystem<T>) {
-        this._tileSystem = s;
-    }
-
-    public get metrics(): ITileMetrics {
-        return this._tileSystem.metrics;
-    }
-
-    public dispose(): void {}
+export interface ITileSystemOptions<T> {
+    metrics: ITileMetrics;
+    addressProcessor?: ITileAddressProcessor | undefined;
+    provider: ITileContentProvider<T>;
+    factory: ITileBuilder<T>;
 }
 
 export class TileSystem<T> implements ITileSystem<T> {
+    _name: string;
     _metrics: ITileMetrics;
+    _addressProcessor?: ITileAddressProcessor | undefined;
+    _provider: ITileContentProvider<T>;
+    _factory: ITileBuilder<T>;
 
-    public constructor(metrics: ITileMetrics) {
-        this._metrics = metrics;
+    public constructor(name: string, options: ITileSystemOptions<T>) {
+        this._name = name;
+        this._metrics = options.metrics;
+        this._addressProcessor = options.addressProcessor;
+        this._provider = options.provider;
+        this._factory = options.factory;
     }
+
     public get metrics(): ITileMetrics {
         return this._metrics;
+    }
+
+    public get name(): string {
+        return this._name;
+    }
+
+    public get provider(): ITileContentProvider<T> {
+        return this._provider;
+    }
+
+    public get factory(): ITileBuilder<T> {
+        return this._factory;
+    }
+
+    public get addressProcessor(): ITileAddressProcessor | undefined {
+        return this._addressProcessor;
     }
 }

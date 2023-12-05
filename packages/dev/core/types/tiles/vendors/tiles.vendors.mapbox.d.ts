@@ -1,7 +1,7 @@
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { TileWebClientOptions } from "../tiles.client";
-import { IPixelDecoder } from "../tiles.interfaces";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
+import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 export declare class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
     constructor(token: string, extension?: string);
 }

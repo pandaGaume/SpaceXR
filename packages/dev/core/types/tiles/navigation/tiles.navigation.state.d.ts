@@ -1,0 +1,33 @@
+import { IGeo2 } from "../../geography/geography.interfaces";
+import { PropertyChangedEventArgs } from "../../events/events.args";
+import { Observable } from "../../events/events.observable";
+import { ITileNavigationState } from "./tiles.navigation.interfaces";
+export declare class TileNavigationState implements ITileNavigationState {
+    _centerObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
+    _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
+    _stateChangedObservable?: Observable<ITileNavigationState>;
+    _valid: boolean;
+    _lodf: number;
+    _center: IGeo2;
+    _azimuth: number;
+    constructor(center?: IGeo2, lod?: number, azimuth?: number);
+    get center(): IGeo2;
+    set center(center: IGeo2);
+    get zoom(): number;
+    set zoom(lodf: number);
+    get azimuth(): number;
+    set azimuth(r: number);
+    get isValid(): boolean;
+    invalidate(): ITileNavigationState;
+    validate(): ITileNavigationState;
+    revalidate(): ITileNavigationState;
+    get centerObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
+    get zoomObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
+    get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
+    get stateChangedObservable(): Observable<ITileNavigationState>;
+    protected _doValidateInternal(): void;
+    protected _beforeValidate(): void;
+    protected _doValidate(): void;
+    protected _afterValidate(): void;
+}

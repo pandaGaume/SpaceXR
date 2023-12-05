@@ -1,3 +1,5 @@
+import { IDisposable } from "..";
+
 export enum EvictionReason {
     user,
     expired,
@@ -5,12 +7,13 @@ export enum EvictionReason {
 
 export type PostEvictionCallback<K, V> = (e: CacheEntry<K, V>, reason: EvictionReason) => void;
 
-export interface IMemoryCache<K, V> {
+export interface IMemoryCache<K, V> extends IDisposable {
     contains(key: K): boolean;
     get(key: K): V | undefined;
     set(key: K, value: V, options?: CacheEntryOptions<K, V>): void;
     delete(key: K): void;
     keys(): IterableIterator<K>;
+    clear(predicate?: (k: K) => boolean): void;
 }
 
 export class CachePolicyBuilder {
@@ -202,6 +205,23 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
 
     public keys(): IterableIterator<K> {
         return this._cache.keys();
+    }
+
+    public clear(predicate?: (k: K) => boolean): void {
+        const keys = [...this._cache.keys()];
+        for (const k of keys) {
+            if (predicate && predicate(k)) {
+                this.delete(k);
+            }
+        }
+    }
+
+    public dispose(): void {
+        if (this._timer) {
+            clearTimeout(this._timer);
+            this._timer = undefined;
+        }
+        this.clear();
     }
 
     protected gc(): void {

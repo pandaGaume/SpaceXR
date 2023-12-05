@@ -2,15 +2,21 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileContentView, ITileMetrics, TileContent, TileSection } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./tiles.address";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
+    _ns?: string;
     _a?: ITileAddress;
     _d?: TileContent<T>;
     _m?: ITileMetrics;
+
+    public withNamespace(namesapce: string): ITileBuilder<T> {
+        this._ns = namesapce;
+        return this;
+    }
 
     public withAddress(a: ITileAddress): ITileBuilder<T> {
         this._a = a;
@@ -34,23 +40,6 @@ export class TileBuilder<T> implements ITileBuilder<T> {
             t.rect = Tile.BuildBounds(t.address, this._m);
         }
         return t;
-    }
-}
-
-export class TileContentView implements ITileContentView {
-    public static BuildKey(address: ITileAddress, source?: TileSection, target?: TileSection) {
-        return `${address.quadkey}_${source?.toString() ?? "x"}_${target?.toString() ?? "x"}`;
-    }
-
-    private _key?: string;
-
-    public constructor(public address: ITileAddress, public source?: TileSection, public target?: TileSection) {}
-
-    public get key(): string {
-        if (!this._key) {
-            this._key = TileContentView.BuildKey(this.address, this.source, this.target);
-        }
-        return this._key;
     }
 }
 

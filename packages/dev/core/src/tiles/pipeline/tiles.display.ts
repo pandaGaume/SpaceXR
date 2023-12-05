@@ -3,7 +3,7 @@ import { PropertyChangedEventArgs } from "../../events/events.args";
 import { ISize2 } from "../../geometry/geometry.interfaces";
 import { Size2 } from "../../geometry/geometry.size";
 import { IValidable } from "../../types";
-import { ITileDisplay } from "./tiles.interfaces.pipeline";
+import { ITileDisplay } from "./tiles.pipeline.interfaces";
 
 export class TileDisplay implements ITileDisplay, IValidable<TileDisplay> {
     _resizeObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;

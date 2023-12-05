@@ -1,7 +1,7 @@
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
-import { ITileNavigationState } from "./tiles.interfaces.pipeline";
+import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Geo2 } from "../../geography/geography.position";
 
 export class TileNavigationState implements ITileNavigationState {

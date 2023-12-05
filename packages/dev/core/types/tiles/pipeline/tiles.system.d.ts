@@ -1,21 +1,21 @@
-import { ITileMetrics } from "../tiles.interfaces";
-import { ITileSystem, ITileSystemComponent, ITilePipelineComponent } from "./tiles.interfaces.pipeline";
-export declare class TilePipelineComponent implements ITilePipelineComponent {
-    _id: string;
-    constructor(id: string);
-    get id(): string;
-    dispose(): void;
-}
-export declare class TileSystemComponent<T> extends TilePipelineComponent implements ITileSystemComponent<T> {
-    _tileSystem: ITileSystem<T>;
-    constructor(id: string, system: ITileSystem<T>);
-    get system(): ITileSystem<T>;
-    set system(s: ITileSystem<T>);
-    get metrics(): ITileMetrics;
-    dispose(): void;
+import { ITileContentProvider, ITileSystem } from "./tiles.pipeline.interfaces";
+import { ITileAddressProcessor, ITileBuilder, ITileMetrics } from "../tiles.interfaces";
+export interface ITileSystemOptions<T> {
+    metrics: ITileMetrics;
+    addressProcessor?: ITileAddressProcessor | undefined;
+    provider: ITileContentProvider<T>;
+    factory: ITileBuilder<T>;
 }
 export declare class TileSystem<T> implements ITileSystem<T> {
+    _name: string;
     _metrics: ITileMetrics;
-    constructor(metrics: ITileMetrics);
+    _addressProcessor?: ITileAddressProcessor | undefined;
+    _provider: ITileContentProvider<T>;
+    _factory: ITileBuilder<T>;
+    constructor(name: string, options: ITileSystemOptions<T>);
     get metrics(): ITileMetrics;
+    get name(): string;
+    get provider(): ITileContentProvider<T>;
+    get factory(): ITileBuilder<T>;
+    get addressProcessor(): ITileAddressProcessor | undefined;
 }

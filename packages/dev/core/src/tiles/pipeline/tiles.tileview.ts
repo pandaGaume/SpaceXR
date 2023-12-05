@@ -1,16 +1,17 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITileAddress } from "../tiles.interfaces";
-import { ITileDisplay, ITileNavigationState, ITileSystem, ITileView } from "./tiles.interfaces.pipeline";
+import { ITileAddress, ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
+import { ITileDisplay, ITileView } from "./tiles.pipeline.interfaces";
 import { TileAddress } from "../tiles.address";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfaces";
-import { TileSystemComponent } from "./tiles.system";
+import { TilePipelineComponent } from "./tiles.pipeline";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Cartesian2 } from "../../geometry/geometry.cartesian";
 import { Scalar } from "../../math/math";
+import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 
-export class TileView<T> extends TileSystemComponent<T> implements ITileView<T> {
+export class TileView<T> extends TilePipelineComponent implements ITileView<T>, ITileMetricsProvider {
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
      * @param a the azimuth value.
@@ -32,16 +33,22 @@ export class TileView<T> extends TileSystemComponent<T> implements ITileView<T> 
     _azimuthObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, number>>> = null;
     _display: Nullable<ITileDisplay> = null;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>> = null;
+    _metrics: ITileMetrics;
 
     // cached values
     _azimuth: number = 0;
     _cosAzimuth: number = 1;
     _sinAzimuth: number = 0;
 
-    public constructor(id: string, system: ITileSystem<T>, display?: ITileDisplay, state?: ITileNavigationState) {
-        super(id, system);
+    public constructor(id: string, metrics: ITileMetrics, display?: ITileDisplay, state?: ITileNavigationState) {
+        super(id);
+        this._metrics = metrics;
         this.display = display ?? null;
         this.state = state ?? null;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._metrics;
     }
 
     public get state(): Nullable<ITileNavigationState> {

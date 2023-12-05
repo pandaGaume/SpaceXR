@@ -10,6 +10,13 @@ export interface ICartesian3 {
     z: number;
     toString(): string;
 }
+export interface ICartesian4 {
+    x: number;
+    y: number;
+    z: number;
+    w: number;
+    toString(): string;
+}
 export declare function isCartesian3(b: unknown): b is ICartesian3;
 export interface ISize2 {
     height: number;

@@ -13,6 +13,14 @@ export interface ICartesian3 {
     toString(): string;
 }
 
+export interface ICartesian4 {
+    x: number;
+    y: number;
+    z: number;
+    w: number;
+    toString(): string;
+}
+
 export function isCartesian3(b: unknown): b is ICartesian3 {
     if (typeof b !== "object" || b === null) return false;
     return (<ICartesian3>b).x !== undefined && (<ICartesian3>b).y !== undefined && (<ICartesian3>b).z !== undefined;

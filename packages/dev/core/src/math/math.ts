@@ -15,11 +15,11 @@ export class Scalar {
         return -epsilon <= num && num <= epsilon;
     }
 
-    public static Sign = function (value: number) {
+    public static Sign(value: number) {
         return value > 0 ? 1 : -1;
-    };
+    }
 
-    public static Clamp = function (value: number, min: number, max: number) {
+    public static Clamp(value: number, min: number, max: number) {
         if (min === void 0) {
             min = 0;
         }
@@ -27,7 +27,7 @@ export class Scalar {
             max = 1;
         }
         return Math.min(max, Math.max(min, value));
-    };
+    }
 
     public static GetRandomInt(min: number, max: number): number {
         min = Math.ceil(min);

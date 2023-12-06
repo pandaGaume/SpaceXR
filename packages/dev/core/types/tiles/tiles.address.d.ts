@@ -2,9 +2,6 @@ import { Nullable } from "../types";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
 export declare class TileAddress implements ITileAddress {
-    x: number;
-    y: number;
-    levelOfDetail: number;
     static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean;
     static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void;
     static IsValidLod(lod: number, metrics: ITileMetrics): boolean;
@@ -18,7 +15,17 @@ export declare class TileAddress implements ITileAddress {
     static TileXYToQuadKey(a: ITileAddress): string;
     static QuadKeyToTileXY(quadKey: string): ITileAddress;
     private _k?;
+    private _x?;
+    private _y?;
+    private _lod?;
     constructor(x: number, y: number, levelOfDetail: number);
+    get x(): number;
+    set x(value: number);
+    get y(): number;
+    set y(value: number);
+    get levelOfDetail(): number;
+    set levelOfDetail(value: number);
     get quadkey(): string;
+    clone(): ITileAddress;
     toString(): string;
 }

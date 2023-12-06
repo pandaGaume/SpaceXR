@@ -1,11 +1,12 @@
-import { ICartesian2, ISize2 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileMapApi, ITile, ITileDatasource, ITileAddress } from "./tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITile } from "./tiles.interfaces";
+import { ITileContentProvider, ContentUpdateEventArgs } from "./pipeline/tiles.interfaces.pipeline";
+import { ITileMapApi } from "./api/tiles.interfaces.api";
 import { Observable } from "../events/events.observable";
 import { IValidable, Nullable } from "../types";
 import { EventArgs, PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../utils/cache";
-import { ContentUpdateEventArgs, TileContentManager } from "./tiles.content.manager";
 export interface IContextMetrics {
     lod: number;
     scale: number;
@@ -16,12 +17,14 @@ export declare class TileMapContext<T> implements IContextMetrics {
     _scale: number;
     _center: ICartesian2;
     _tiles: Map<string, ITile<T>>;
+    _rect: IRectangle;
     constructor(lod?: number);
     get lod(): number;
     get scale(): number;
     get tiles(): Map<string, ITile<T>>;
     get size(): number;
     get center(): ICartesian2;
+    get rect(): IRectangle;
     clear(): void;
 }
 export declare enum UpdateReason {
@@ -49,7 +52,7 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     removedObservable: any;
     static ClampAzimuth(a: number): number;
     _cache: IMemoryCache<string, ITile<T>>;
-    _manager: TileContentManager<T>;
+    _contentProvider: ITileContentProvider<T>;
     _w: number;
     _h: number;
     _lodf: number;
@@ -65,20 +68,25 @@ export declare class TileMapView<T> implements ITileMapApi, ISize2, ITileMetrics
     _sinangle: number;
     _valid: boolean;
     _cartesianCache: ICartesian2;
-    _resizeObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
-    _centerObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
-    _zoomObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
-    _azimuthObservable?: Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _resizeObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
+    _centerObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
+    _zoomObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     _updateObservable?: Observable<UpdateEventArgs<T>>;
-    constructor(manager: TileContentManager<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
-    get resizeObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, ISize2>>;
-    get centerObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, IGeo2>>;
-    get zoomObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
-    get azimuthObservable(): Observable<PropertyChangedEventArgs<TileMapView<T>, number>>;
+    _viewChangedObservable?: Observable<ITileMapApi>;
+    constructor(contentProvider: ITileContentProvider<T>, width: number, height: number, center: IGeo2, lod: number, cache?: IMemoryCache<string, ITile<T>>);
+    get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
+    get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
+    get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
     get updateObservable(): Observable<UpdateEventArgs<T>>;
+    get viewChangedObservable(): Observable<ITileMapApi>;
+    get zoom(): number;
+    get scale(): number;
+    get centerXY(): ICartesian2;
+    get boundsXY(): IRectangle;
     get bounds(): IEnvelope | undefined;
-    get datasource(): ITileDatasource<T, ITileAddress>;
-    get manager(): TileContentManager<T>;
+    get contentProvider(): ITileContentProvider<T>;
     get context(): TileMapContext<T>;
     get levelOfDetail(): number;
     get center(): IGeo2;

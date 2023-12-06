@@ -1,0 +1,17 @@
+{
+    "extends": "../../../tsconfig.json",
+    "name": "spacexr-babylon-gui",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declarationDir": "./types",
+        "skipLibCheck": true,
+        "paths": {
+            "core/*": ["./dev/core/src/*"] // base url set in parent config
+        }
+    },
+    "references": [{ "path": "../core" }],
+    "include": ["./src/**/*.ts"],
+    "exclude": ["**/node_modules", "**/dist", "**/types"]
+}

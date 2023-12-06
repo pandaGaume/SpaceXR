@@ -16,10 +16,14 @@ declare class SurfaceDefinition {
 }
 export declare class TerrainHologramMaterialOptions {
     static DefaultBackgroundColor: Color4;
+    static DefaultEdgeColor: Color4;
+    static DefaultEdgeThickness: number;
     static DefaultExageration: number;
     layerClient?: ITileClient<HTMLImageElement>;
     exageration?: number;
     backgroundColor?: Color4;
+    edgeColor?: Color4;
+    edgeThickness?: number;
 }
 export declare class TerrainHologramMaterialAtt {
     static DemInfosKind: string;
@@ -49,6 +53,8 @@ export declare class TerrainHologramMaterial<V extends IDemInfos, H extends Surf
     private _mapScale;
     private _clipSurfaces;
     _backgroundColor: Color4;
+    _edgeColor: Color4;
+    _edgeThickness: number;
     constructor(name: string, map: SurfaceTileMap<V, H>, options: TerrainHologramMaterialOptions, scene: Scene);
     get LayerClient(): ITileClient<HTMLImageElement> | undefined;
     set LayerClient(v: ITileClient<HTMLImageElement> | undefined);
@@ -60,6 +66,10 @@ export declare class TerrainHologramMaterial<V extends IDemInfos, H extends Surf
     get mapScale(): number;
     private set mapScale(value);
     get clipSurfaces(): SurfaceDefinition[];
+    get edgeColor(): Color4;
+    set edgeColor(v: Color4);
+    get edgeThickness(): number;
+    set edgeThickness(v: number);
     isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
     bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void;
     dispose(forceDisposeEffect?: boolean): void;

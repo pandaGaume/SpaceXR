@@ -10,7 +10,7 @@ export interface IGeo3 extends IComparable<IGeo3>, ICloneable<IGeo3> {
     alt?: number;
     hasAltitude: boolean;
 }
-export declare function isLocation(b: unknown): b is IGeo3;
+export declare function isLocation(b: unknown): b is IGeo2 | IGeo3;
 export interface IEnvelope extends IComparable<IEnvelope> {
     north: number;
     south: number;
@@ -25,13 +25,16 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     hasAltitude: boolean;
     center: IGeo3;
     size: ISize3;
-    add(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
-    addInPlace(lat: number | IGeo3, lon?: number, alt?: number): IEnvelope;
+    add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
+    unionInPlace(other: IEnvelope): IEnvelope;
     intersectWith(bounds: IEnvelope): boolean;
     contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
+    clone(): IEnvelope;
 }
 export declare function isEnvelope(b: unknown): b is IEnvelope;
 export interface IGeoBounded {
     bounds?: IEnvelope;
 }
+export declare function isGeoBounded(b: unknown): b is IGeoBounded;

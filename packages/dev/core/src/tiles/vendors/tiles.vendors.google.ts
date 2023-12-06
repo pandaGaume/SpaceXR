@@ -1,5 +1,5 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
-import { ImageTileCodec } from "../tiles.codecs.image";
+import { ImageTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../tiles.geography";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";

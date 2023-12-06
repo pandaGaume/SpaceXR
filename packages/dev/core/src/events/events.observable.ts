@@ -97,7 +97,7 @@ export class Observer<T> {
     ) {}
 
     public dispose(): void {
-        this.source.remove(this);
+        this.source?.remove(this);
     }
 }
 

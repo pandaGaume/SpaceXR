@@ -1,9 +1,11 @@
 import { TileMapView, UpdateEventArgs } from "../tiles/tiles.mapview";
-import { ITile, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITileMapApi } from "../tiles/api/tiles.interfaces.api";
 import { IGeo2 } from "../geography/geography.interfaces";
-import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.interfaces";
 import { Observable, Observer } from "../events/events.observable";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { PropertyChangedEventArgs } from "../events/events.args";
+import { ITileContentProvider } from "core/tiles/pipeline/tiles.interfaces.pipeline";
 export interface IMapDisplay {
     resolution: ISize3;
 }
@@ -17,12 +19,25 @@ export declare abstract class AbstractDisplayMap<V, T extends ITile<V>, D extend
     _addedObservable?: Observable<T>;
     _removedObservable?: Observable<T>;
     _updatedObservable?: Observable<T>;
-    constructor(display: D, manager: TileContentManager<V>, center?: IGeo2, lod?: number);
+    constructor(display: D, manager: ITileContentProvider<V>, center?: IGeo2, lod?: number);
     get addedObservable(): Observable<T>;
     get removedObservable(): Observable<T>;
     get updatedObservable(): Observable<T>;
     hasTile(key: string): boolean;
     getTile(key: string): T | undefined;
+    get width(): number;
+    get height(): number;
+    get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>>;
+    get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>>;
+    get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>>;
+    get viewChangedObservable(): Observable<ITileMapApi>;
+    get center(): IGeo2;
+    get zoom(): number;
+    get levelOfDetail(): number;
+    get scale(): number;
+    get centerXY(): ICartesian2;
+    get boundsXY(): IRectangle;
     invalidateSize(w: number, h: number): ITileMapApi;
     setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
     setZoom(zoom: number): ITileMapApi;

@@ -1,0 +1,37 @@
+import { EventState, Observable, Observer } from "../../events/events.observable";
+import { ITileAddress } from "../tiles.interfaces";
+import { ITileDisplay, ITileNavigationState, ITileSystem, ITileView } from "./tiles.interfaces.pipeline";
+import { Nullable } from "../../types";
+import { PropertyChangedEventArgs } from "../../events/events.args";
+import { ISize2 } from "../../geometry/geometry.interfaces";
+import { TileSystemComponent } from "./tiles.system";
+export declare class TileView<T> extends TileSystemComponent<T> implements ITileView<T> {
+    static ClampAzimuth(a: number): number;
+    _addressAddedObservable?: Observable<Array<ITileAddress>>;
+    _addressRemovedObservable?: Observable<Array<ITileAddress>>;
+    _activ: Map<string, ITileAddress>;
+    _state: Nullable<ITileNavigationState>;
+    _stateObserver: Nullable<Observer<ITileNavigationState>>;
+    _azimuthObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, number>>>;
+    _display: Nullable<ITileDisplay>;
+    _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>>;
+    _azimuth: number;
+    _cosAzimuth: number;
+    _sinAzimuth: number;
+    constructor(id: string, system: ITileSystem<T>, display?: ITileDisplay, state?: ITileNavigationState);
+    get state(): Nullable<ITileNavigationState>;
+    set state(state: Nullable<ITileNavigationState>);
+    get display(): Nullable<ITileDisplay>;
+    set display(display: Nullable<ITileDisplay>);
+    dispose(): void;
+    get addressAddedObservable(): Observable<Array<ITileAddress>>;
+    get addressRemovedObservable(): Observable<Array<ITileAddress>>;
+    protected _onStateChanged(eventData: ITileNavigationState, eventState: EventState): void;
+    protected _onAzimuthChanged(eventData: PropertyChangedEventArgs<ITileNavigationState, number>, eventState: EventState): void;
+    protected _onResize(eventData: PropertyChangedEventArgs<ITileDisplay, ISize2>, eventState: EventState): void;
+    protected _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent?: boolean): void;
+    protected _doClearContext(state: Nullable<ITileNavigationState>, dispatchEvent?: boolean): void;
+    private getRectangle;
+    private rotatePointsArround;
+    private rotatePointArround;
+}

@@ -1,6 +1,7 @@
 import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { Scalar } from "../math/math";
+import { TileAddress } from "./tiles.address";
 
 export class TileWebClientOptions {
     public static Default = new TileWebClientOptions({ maxRetry: 3, initialDelay: 1000 });
@@ -70,11 +71,15 @@ export class TileWebClient<T> implements ITileClient<T> {
 
     public async fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
         if (!request) {
-            throw new FetchError(`invalid request parameter ${request}`, ...userArgs);
+            throw new FetchError(`invalid request parameter.`);
+        }
+        if (TileAddress.IsValidAddress(request, this._metrics) === false) {
+            // Do NOT fetch url if address is invalid - return null content
+            return FetchResult.Null<T>(request, userArgs);
         }
         const url = this._urlFactory.buildUrl(request, ...userArgs);
         if (!url) {
-            throw new FetchError(`Builded url of ${request.toString()} can not be null`, ...userArgs);
+            throw new FetchError(`Builded url of ${request.toString()} can not be null`);
         }
 
         const maxRetry = this._o.maxRetry || 1;

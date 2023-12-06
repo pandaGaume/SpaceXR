@@ -1,0 +1,24 @@
+{
+    "name": "spacexr-babylon-gui",
+    "version": "1.0.0",
+    "main": "dist/index",
+    "module": "dist/index",
+    "esnext": "dist/index",
+    "types": "dist/index",
+    "private": true,
+    "files": [
+        "src"
+    ],
+    "scripts": {
+        "clean:babylon:gui": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+        "compile:babylon:gui:source": "tsc --project tsconfig.json",
+        "build:babylon:gui:dev": "npm run clean:babylon:gui && npm run compile:babylon:gui:source",
+        "webpack:babylon:gui:dev": "webpack --mode development --stats-error-details",
+        "publish:babylon:gui:dev": "npm run build:babylon:gui:dev && npm run webpack:babylon:gui:dev"
+    },
+    "sideEffects": false,
+    "devDependencies": {},
+    "dependencies": {
+        "path-scurry": "^1.10.1"
+    }
+}

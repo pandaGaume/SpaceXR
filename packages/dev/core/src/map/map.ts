@@ -1,11 +1,13 @@
 import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tiles.mapview";
-import { ITile, ITileMapApi, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITileMapApi } from "../tiles/api/tiles.interfaces.api";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
-import { ICartesian2, ISize3 } from "../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.interfaces";
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Observable, Observer } from "../events/events.observable";
-import { TileContentManager } from "core/tiles/tiles.content.manager";
+import { PropertyChangedEventArgs } from "../events/events.args";
+import { ITileContentProvider } from "core/tiles/pipeline/tiles.interfaces.pipeline";
 
 export interface IMapDisplay {
     resolution: ISize3;
@@ -24,7 +26,7 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
     _removedObservable?: Observable<T>;
     _updatedObservable?: Observable<T>;
 
-    public constructor(display: D, manager: TileContentManager<V>, center?: IGeo2, lod?: number) {
+    public constructor(display: D, manager: ITileContentProvider<V>, center?: IGeo2, lod?: number) {
         this._display = display;
         this._view = new TileMapView(manager, display.resolution.width, display.resolution.height, center || Geo2.Zero(), lod || manager.metrics.minLOD);
         this._view.updateObservable.add(this.onUpdate.bind(this));
@@ -52,6 +54,53 @@ export abstract class AbstractDisplayMap<V, T extends ITile<V>, D extends IMapDi
 
     public getTile(key: string): T | undefined {
         return this._activ.get(key);
+    }
+
+    public get width(): number {
+        return this._view.width;
+    }
+
+    public get height(): number {
+        return this._view.height;
+    }
+
+    public get resizeObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, ISize2>> {
+        return this._view.resizeObservable;
+    }
+
+    public get centerObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, IGeo2>> {
+        return this._view.centerObservable;
+    }
+
+    public get zoomObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
+        return this._view.zoomObservable;
+    }
+
+    public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileMapApi, number>> {
+        return this._view.azimuthObservable;
+    }
+    public get viewChangedObservable(): Observable<ITileMapApi> {
+        return this._view.viewChangedObservable;
+    }
+
+    public get center(): IGeo2 {
+        return this._view.center;
+    }
+    public get zoom(): number {
+        return this._view.zoom;
+    }
+    public get levelOfDetail(): number {
+        return this._view.levelOfDetail;
+    }
+
+    public get scale(): number {
+        return this._view.scale;
+    }
+    public get centerXY(): ICartesian2 {
+        return this._view.centerXY;
+    }
+    public get boundsXY(): IRectangle {
+        return this._view.boundsXY;
     }
 
     public invalidateSize(w: number, h: number): ITileMapApi {

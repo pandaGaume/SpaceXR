@@ -33,6 +33,7 @@ export function IsTileContentView<T>(b: unknown): b is ITileContentView {
 export type TileContent<T> = Nullable<T | ITileContentView>;
 
 export interface ITile<T> extends IGeoBounded {
+    namespace?: string;
     address: ITileAddress;
     content: TileContent<T>;
     rect?: IRectangle;
@@ -104,9 +105,13 @@ export interface ITileMetricsProvider {
 }
 
 export class FetchResult<T> {
+    public static Null<T>(address: ITileAddress, userArgs: Nullable<Array<unknown>>): FetchResult<Nullable<T>> {
+        return new FetchResult<Nullable<T>>(address, null, userArgs);
+    }
+
     status?: number;
     statusText?: string;
-    public constructor(public address: ITileAddress, public content: T, public userArgs: Array<unknown>) {}
+    public constructor(public address: ITileAddress, public content: T, public userArgs: Nullable<Array<unknown>> = null) {}
 }
 
 export interface ITileDatasource<T, R extends ITileAddress> extends ITileMetricsProvider {
@@ -126,21 +131,4 @@ export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}
 
 export interface IPixelDecoder {
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
-}
-
-export interface ITileMapApi {
-    invalidateSize(w: number, h: number): ITileMapApi;
-    setView(center: IGeo2, zoom?: number, rotation?: number): ITileMapApi;
-    setZoom(zoom: number): ITileMapApi;
-    setAzimuth(r: number): ITileMapApi;
-    zoomIn(delta: number): ITileMapApi;
-    zoomOut(delta: number): ITileMapApi;
-    translate(tx: number, ty: number): ITileMapApi;
-    rotate(r: number): ITileMapApi;
-}
-
-export interface ITileMapLayerApi<T> {
-    addLayer(key: string, source: ITileClient<T>): ITileMapLayerApi<T>;
-    removeLayer(key: string): ITileMapLayerApi<T>;
-    setMainLayer(key: string): ITileMapLayerApi<T>;
 }

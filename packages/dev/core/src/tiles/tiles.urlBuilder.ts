@@ -71,7 +71,6 @@ export class WebTileUrlBuilder implements ITileUrlBuilder {
             str = str.replace("{s}", s);
             this._i = i + 1;
         }
-        console.log(str);
         return str;
     }
 }

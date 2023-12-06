@@ -29,7 +29,7 @@ export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
             .withPath(`v4/${types}/{z}/{x}/{y}.{extension}90`)
             .withExtension(extension);
     }
-    //FIXME : regarder pourquoi les images sont générer bizzarement
+    //TODO: uptdate resolution to 512 with this path : v4/${types}/{z}/{x}/{y}@2x.{extension}90
 }
 
 export class MapboxAltitudeDecoder implements IPixelDecoder {
@@ -63,7 +63,6 @@ export class MapBox {
             MapBox.Metrics,
             options
         );
-        console.log(elevationClient);
         return new DemTileWebClient(`${MapBox.KEY}_dem`, elevationClient);
     }
 

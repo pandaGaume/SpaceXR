@@ -125,28 +125,32 @@
                 camera.setTarget(display);
 
                 tokenMapBox = "pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q"
-                // definir la source de donnée.
+                // define the source of the map
                 //const demClient = SPACEXR.MapZen.DemClient();
                 //const layerClient = SPACEXR.Google.SatelliteClient2d();
                 const demClient = SPACEXR.MapBox.TerrainDemV1Client(tokenMapBox);
-                const layerClient = SPACEXR.MapBox.TerrainClientSatellite(tokenMapBox);
+                const layerClient = SPACEXR.Openplanatary.MoonHillshadedClient();
+
+                const test = SPACEXR.Openplanatary.MoonDemClient()
+                console.log(test)
+                console.log(demClient)
 
                 //const layerClient = SPACEXR.MapBox.TerrainClientSatellite(tokenMapBox);
                 
 
                 const mapOptions = {
                     center: SPACEXR.KnownPlaces.Mountains.Matterhorn,
-                    levelOfDetail: 12,
+                    levelOfDetail: 3,
                     layerClient: layerClient,
                     exageration: 1.5,
                     lodTransition: 0,
                     insets: new BABYLON.Vector3(0, 0, 10),
                 };
 
-                // construire la carte.
+                // create the map
                 const map = new SPACEXR.SurfaceTileMap("terrain", display, demClient, mapOptions, scene);
 
-                // interaction avec la carte
+                // interaction with the map
                 // Warning !! this MUST be include into a Manager somewhere
                 let startingPixel;
 

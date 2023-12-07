@@ -53,6 +53,7 @@ export declare abstract class AbstractTileMetrics implements ITileMetrics {
     _o: TileMetricsOptions;
     constructor(options?: Partial<TileMetricsOptions>);
     get options(): TileMetricsOptions;
+    isCompatibleWith(metrics: ITileMetrics): boolean;
     mapSize(levelOfDetail: number): number;
     get minLOD(): number;
     get maxLOD(): number;

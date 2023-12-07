@@ -127,6 +127,26 @@ export abstract class AbstractTileMetrics implements ITileMetrics {
         return this._o;
     }
 
+    public isCompatibleWith(metrics: ITileMetrics): boolean {
+        if (metrics === undefined) {
+            return false;
+        }
+        if (metrics === this) {
+            return true;
+        }
+        return (
+            this.minLOD === metrics.minLOD &&
+            this.maxLOD === metrics.maxLOD &&
+            this.tileSize === metrics.tileSize &&
+            this.cellSize === metrics.cellSize &&
+            this.cellCoordinateReference === metrics.cellCoordinateReference &&
+            this.overlap === metrics.overlap &&
+            this.minLatitude === metrics.minLatitude &&
+            this.maxLatitude === metrics.maxLatitude &&
+            this.minLongitude === metrics.minLongitude &&
+            this.maxLongitude === metrics.maxLongitude
+        );
+    }
     public mapSize(levelOfDetail: number): number {
         return this.tileSize << levelOfDetail;
     }

@@ -23,8 +23,11 @@ export declare class TileWebClient<T> implements ITileClient<T> {
     _urlFactory: ITileUrlBuilder;
     _codec: ITileCodec<T>;
     _metrics: ITileMetrics;
+    _zindex: number;
     constructor(name: string, urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions);
     get name(): string;
+    get zindex(): number;
+    set zindex(v: number);
     get metrics(): ITileMetrics;
     fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }

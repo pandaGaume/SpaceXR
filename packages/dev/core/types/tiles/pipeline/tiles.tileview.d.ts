@@ -6,7 +6,7 @@ import { PropertyChangedEventArgs } from "../../events/events.args";
 import { ISize2 } from "../../geometry/geometry.interfaces";
 import { TilePipelineComponent } from "./tiles.pipeline";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-export declare class TileView<T> extends TilePipelineComponent implements ITileView<T>, ITileMetricsProvider {
+export declare class TileView<T> extends TilePipelineComponent implements ITileView, ITileMetricsProvider {
     static ClampAzimuth(a: number): number;
     _addressAddedObservable?: Observable<Array<ITileAddress>>;
     _addressRemovedObservable?: Observable<Array<ITileAddress>>;

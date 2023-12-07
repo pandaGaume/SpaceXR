@@ -1,178 +1,119 @@
-import { IDisposable, Nullable } from "../../types";
-import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITile, ITileAddress, ITileMetrics, IsTileSection } from "../tiles.interfaces";
-import { ITileProvider, ITileSystem, ITileView } from "./tiles.pipeline.interfaces";
-import { ITileSystemOptions, TileSystem } from "./tiles.system";
-import { TilePipelineComponent } from "./tiles.pipeline";
+import { ITileContentProvider, ITileProvider } from "./tiles.pipeline.interfaces";
+import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileMetrics } from "../tiles.interfaces";
+import { Observable } from "../../events/events.observable";
 
-class TileContentProviderItem<T> extends TileSystem<T> implements IDisposable {
-    private _tiles: Map<string, ITile<T>>;
+export class TileProvider<T> implements ITileProvider<T> {
+    _tileUpdatedObservable?: Observable<ITile<T>>;
+    _enableObservable?: Observable<ITileProvider<T>>;
 
-    constructor(name: string, options: ITileSystemOptions<T>) {
-        super(name, options);
-        this._tiles = new Map<string, ITile<T>>();
+    _name: string;
+    _addressProcessor?: ITileAddressProcessor | undefined;
+    _contentProvider: ITileContentProvider<T>;
+    _factory: ITileBuilder<T>;
+    _activTiles?: Map<string, ITile<T>>;
+    _enabled: boolean;
+
+    public constructor(name: string, provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled = true) {
+        this._name = name;
+        this._addressProcessor = addressProcessor;
+        this._contentProvider = provider;
+        this._factory = factory;
+        this._enabled = enabled;
+    }
+
+    public get tileUpdatedObservable(): Observable<ITile<T>> {
+        this._tileUpdatedObservable = this._tileUpdatedObservable || new Observable<ITile<T>>();
+        return this._tileUpdatedObservable!;
+    }
+
+    public get enableObservable(): Observable<ITileProvider<T>> {
+        this._enableObservable = this._enableObservable || new Observable<ITileProvider<T>>();
+        return this._enableObservable!;
+    }
+
+    public get zindex(): number {
+        return this._contentProvider.zindex;
+    }
+
+    public get enabled(): boolean {
+        return this._enabled;
+    }
+
+    public set enabled(v: boolean) {
+        if (this._enabled !== v) {
+            this._enabled = v;
+            if (this._enableObservable && this._enableObservable.hasObservers()) {
+                this._enableObservable.notifyObservers(this, -1, this, this);
+            }
+        }
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._contentProvider.metrics;
+    }
+
+    public get name(): string {
+        return this._name;
+    }
+
+    public get contentProvider(): ITileContentProvider<T> {
+        return this._contentProvider;
+    }
+
+    public get factory(): ITileBuilder<T> {
+        return this._factory;
+    }
+
+    public get addressProcessor(): ITileAddressProcessor | undefined {
+        return this._addressProcessor;
     }
 
     public dispose() {
-        this._tiles.clear();
+        this._activTiles?.clear();
     }
 
-    public get activTiles(): Map<string, ITile<T>> {
-        return this._tiles;
-    }
-}
-
-export class TilesProvider<T> extends TilePipelineComponent implements ITileProvider<T> {
-    _tileUpdateObservable?: Observable<Array<ITile<T>>>;
-    _tileAddedObservable?: Observable<Array<ITile<T>>>;
-    _tileRemovedObservable?: Observable<Array<ITile<T>>>;
-
-    _items?: Map<string, TileContentProviderItem<T>>;
-    _view: ITileView<T>;
-    _metrics: ITileMetrics;
-    _addedObserver?: Nullable<Observer<Array<ITileAddress>>>;
-    _removedObserver?: Nullable<Observer<Array<ITileAddress>>>;
-
-    public constructor(id: string, view: ITileView<T>, metrics: ITileMetrics) {
-        super(id);
-        this._view = view;
-        this._metrics = metrics;
-
-        this._addedObserver = this._view.addressAddedObservable.add(this._onTileAddressesAdded.bind(this));
-        this._removedObserver = this._view.addressRemovedObservable.add(this._onTileAddressesRemoved.bind(this));
+    public *activTiles(): IterableIterator<ITile<T>> {
+        return this._activTiles?.values() ?? [];
     }
 
-    public get metrics() {
-        return this._metrics;
-    }
-
-    public dispose() {
-        this._addedObserver?.dispose();
-        this._removedObserver?.dispose();
-    }
-
-    public get tileUpdatedObservable(): Observable<Array<ITile<T>>> {
-        this._tileUpdateObservable = this._tileUpdateObservable || new Observable<Array<ITile<T>>>(this._onTileUpdateObserverAdded.bind(this));
-        return this._tileUpdateObservable!;
-    }
-
-    public get tileAddedObservable(): Observable<Array<ITile<T>>> {
-        this._tileAddedObservable = this._tileAddedObservable || new Observable<Array<ITile<T>>>(this._onTileAddedObserverAdded.bind(this));
-        return this._tileAddedObservable!;
-    }
-    public get tileRemovedObservable(): Observable<Array<ITile<T>>> {
-        this._tileRemovedObservable = this._tileRemovedObservable || new Observable<Array<ITile<T>>>(this._onTileRemovedObserverAdded.bind(this));
-        return this._tileRemovedObservable!;
-    }
-
-    public getTile(address: ITileAddress, ...userArgs: Array<unknown>): Nullable<ITile<T>[]> {
-        throw new Error("Method not implemented.");
-    }
-
-    public addContentProvider<P extends T>(system: ITileSystem<P>): void {
-        if (system?.name === undefined || system.name === "") throw new Error("system name can't be empty");
-        this._items = this._items ?? new Map<string, TileContentProviderItem<T>>();
-        const tmp = new TileContentProviderItem<P>(system.name, {
-            metrics: this.metrics,
-            addressProcessor: system.addressProcessor,
-            provider: system.provider,
-            factory: system.factory,
-        });
-        this._items.set(system.name, tmp);
-    }
-
-    public removeContentProvider(name: string): void {
-        if (this._items === undefined) {
-            return;
-        }
-        if (name === undefined || name === "") throw new Error("name can't be empty");
-        const tmp = this._items.get(name) as TileContentProviderItem<T>;
-        if (tmp && this._items.delete(name)) {
-            tmp.dispose();
-        }
-    }
-
-    public getContentProviderByName<P extends T>(name: string): ITileSystem<P> | undefined {
-        if (this._items) {
-            if (name === undefined || name === "") throw new Error("name can't be empty");
-            const tmp = this._items.get(name);
-            return tmp as unknown as ITileSystem<P>;
-        }
-        return undefined;
-    }
-
-    protected _onTileAddressesAdded(eventData: ITileAddress[], eventState: EventState): void {
-        // this is the place where we should add the tile to the system
+    public activateTile(...address: Array<ITileAddress>): Array<ITile<T>> {
+        const toActivate = address.length === 0 ? [...(this._activTiles?.values() ?? [])].map((t) => t.address) : address;
         const tiles = new Array<ITile<T>>();
-        for (const ts of this._items?.values() ?? []) {
-            for (const address of eventData) {
-                this._onTileAddressAdded(ts, address, tiles);
+        for (const a of toActivate ?? []) {
+            if (this._activTiles?.has(a.quadkey)) {
+                tiles.push(this._activTiles.get(a.quadkey)!);
+                continue;
             }
-        }
-        if (this._tileAddedObservable && this._tileAddedObservable.hasObservers()) {
-            this._tileAddedObservable.notifyObservers(tiles);
-        }
-    }
-
-    protected _onTileAddressAdded(system: TileContentProviderItem<T>, address: ITileAddress, buffer: ITile<T>[]): void {
-        let a = system.addressProcessor?.process(address, this.metrics) ?? [];
-        if (IsTileSection(a)) {
-            a = [a.address];
-        }
-        const factory = system.factory.withNamespace(system.provider.name);
-        for (const address of a) {
-            if (system.activTiles.has(address.quadkey)) {
-                buffer.push(system.activTiles.get(address.quadkey)!);
-            }
-            const tile = factory.withAddress(address).build();
-            if (tile) {
-                system.activTiles.set(address.quadkey, tile);
-                buffer.push(tile);
-                system.provider.fetchContentAsync(tile.address).then((content) => {
-                    if (content) {
-                        tile.content = content;
-                        if (this.tileUpdatedObservable && this.tileUpdatedObservable.hasObservers()) {
-                            this.tileUpdatedObservable.notifyObservers([tile]);
+            const factory = this._factory.withNamespace(this._contentProvider.name).withAddress(a);
+            try {
+                const tile = factory.build();
+                if (tile) {
+                    this._contentProvider.fetchContentAsync(tile.address).then((content) => {
+                        if (content) {
+                            tile.content = content;
+                            if (this.tileUpdatedObservable && this.tileUpdatedObservable.hasObservers()) {
+                                this.tileUpdatedObservable.notifyObservers(tile, -1, this, this);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                tiles.push(tile);
+            } catch (e) {
+                console.log(e);
             }
         }
+        return tiles;
     }
 
-    protected _onTileAddressesRemoved(eventData: ITileAddress[], eventState: EventState): void {
-        // this is the place where we should remove the tile from the system
+    public deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>> {
+        const toDeactivate = address.length === 0 ? this._activTiles?.keys() : address.map((a) => a.quadkey);
         const tiles = new Array<ITile<T>>();
-        for (const ts of this._items?.values() ?? []) {
-            for (const address of eventData) {
-                this._onTileAddressRemoved(ts, address, tiles);
+        for (const k of toDeactivate ?? []) {
+            if (this._activTiles?.has(k)) {
+                tiles.push(this._activTiles.get(k)!);
+                this._activTiles.delete(k)!;
             }
         }
-        if (this._tileRemovedObservable && this._tileRemovedObservable.hasObservers()) {
-            this._tileRemovedObservable.notifyObservers(tiles);
-        }
-    }
-
-    protected _onTileAddressRemoved(system: TileContentProviderItem<T>, address: ITileAddress, buffer: ITile<T>[]): void {
-        let a = system.addressProcessor?.process(address, this.metrics) ?? [];
-        if (IsTileSection(a)) {
-            a = [a.address];
-        }
-        for (const address of a) {
-            if (system.activTiles.has(address.quadkey)) {
-                buffer.push(system.activTiles.get(address.quadkey)!);
-                system.activTiles.delete(address.quadkey);
-            }
-        }
-    }
-
-    protected _onTileUpdateObserverAdded(observer: Observer<Array<ITile<T>>>): void {
-        /*nothing to do here*/
-    }
-    protected _onTileAddedObserverAdded(observer: Observer<Array<ITile<T>>>): void {
-        /*nothing to do here*/
-    }
-    protected _onTileRemovedObserverAdded(observer: Observer<Array<ITile<T>>>): void {
-        /*nothing to do here*/
+        return tiles;
     }
 }

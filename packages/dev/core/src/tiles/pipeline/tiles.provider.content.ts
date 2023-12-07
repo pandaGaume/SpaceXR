@@ -4,22 +4,17 @@ import { ITileContentProvider } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
 import { TileAddress } from "../tiles.address";
 
-export interface ITileContentProviderOptions<T> {
-    datasource: ITileDatasource<T, ITileAddress>;
-    cache?: IMemoryCache<string, TileContent<T>>;
-}
-
 export class TileContentProvider<T> implements ITileContentProvider<T> {
     private _name: string;
     private _cache: IMemoryCache<string, TileContent<T>>;
     private _ownCache: boolean;
     private _datasource: ITileDatasource<T, ITileAddress>;
 
-    public constructor(name: string, options: ITileContentProviderOptions<T>) {
+    public constructor(name: string, datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>) {
         this._name = name;
-        this._datasource = options.datasource;
-        this._cache = options.cache || new MemoryCache<string, TileContent<T>>();
-        this._ownCache = !options.cache;
+        this._datasource = datasource;
+        this._cache = cache || new MemoryCache<string, TileContent<T>>();
+        this._ownCache = !cache;
     }
 
     public accept(address: ITileAddress): boolean {
@@ -28,6 +23,10 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
 
     public get name(): string {
         return this._name;
+    }
+
+    public get zindex(): number {
+        return this._datasource.zindex;
     }
 
     public get datasource(): ITileDatasource<T, ITileAddress> {

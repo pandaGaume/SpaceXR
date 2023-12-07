@@ -11,7 +11,7 @@ import { Cartesian2 } from "../../geometry/geometry.cartesian";
 import { Scalar } from "../../math/math";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 
-export class TileView<T> extends TilePipelineComponent implements ITileView<T>, ITileMetricsProvider {
+export class TileView<T> extends TilePipelineComponent implements ITileView, ITileMetricsProvider {
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
      * @param a the azimuth value.

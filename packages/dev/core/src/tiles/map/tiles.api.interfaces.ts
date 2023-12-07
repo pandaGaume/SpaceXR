@@ -2,7 +2,7 @@ import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfa
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
 import { IGeo2, IGeoBounded } from "../../geography/geography.interfaces";
-import { ITileAddress, ITileClient, ITileMetricsProvider } from "../tiles.interfaces";
+import { ITileClient, ITileMetricsProvider } from "../tiles.interfaces";
 
 // @deprecated
 export interface ITileMapApi extends ITileMetricsProvider, ISize2, IGeoBounded {
@@ -29,7 +29,7 @@ export interface ITileMapApi extends ITileMetricsProvider, ISize2, IGeoBounded {
 }
 
 export interface ITileMapLayerApi<T> {
-    addLayer(key: string, source: ITileClient<T,ITileAddress>): ITileMapLayerApi<T>;
+    addLayer(key: string, source: ITileClient<T>): ITileMapLayerApi<T>;
     removeLayer(key: string): ITileMapLayerApi<T>;
     setMainLayer(key: string): ITileMapLayerApi<T>;
 }

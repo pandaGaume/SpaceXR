@@ -9,8 +9,8 @@ export declare class TileBuilder<T> implements ITileBuilder<T> {
     _m?: ITileMetrics;
     withNamespace(namesapce: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: TileContent<T>): ITileBuilder<T, ITileAddress>;
-    withMetrics(metrics: ITileMetrics): ITileBuilder<T, ITileAddress>;
+    withData(d: TileContent<T>): ITileBuilder<T>;
+    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
 export declare class Tile<T> extends TileAddress implements ITile<T> {

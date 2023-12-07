@@ -13,32 +13,48 @@ export interface ITileDisplay extends ISize2, IDisposable {
 }
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
     name: string;
+    zindex: number;
     datasource: ITileDatasource<T, ITileAddress>;
     accept(address: ITileAddress): boolean;
     fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
 }
-export interface ITileSystem<T> extends ITileMetricsProvider {
+export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
+    tileUpdatedObservable: Observable<ITile<T>>;
+    enableObservable: Observable<ITileProvider<T>>;
     name: string;
+    zindex: number;
     addressProcessor?: ITileAddressProcessor;
-    provider: ITileContentProvider<T>;
+    contentProvider: ITileContentProvider<T>;
     factory: ITileBuilder<T>;
+    activTiles(): IterableIterator<ITile<T>>;
+    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+    enabled: boolean;
 }
-export interface ITileView<T> extends ITilePipelineComponent {
+export interface ITileView extends ITilePipelineComponent {
     addressAddedObservable: Observable<Array<ITileAddress>>;
     addressRemovedObservable: Observable<Array<ITileAddress>>;
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
 }
-export interface ITileProvider<T> extends ITilePipelineComponent, ITileMetricsProvider {
-    tileUpdatedObservable: Observable<Array<ITile<T>>>;
+export interface ITileProducer<T> extends ITilePipelineComponent, ITileMetricsProvider {
+    tileUpdatedObservable: Observable<ITile<T>>;
     tileAddedObservable: Observable<Array<ITile<T>>>;
     tileRemovedObservable: Observable<Array<ITile<T>>>;
+    view?: ITileView;
+    providers(predicate?: (p: ITileProvider<T>) => boolean): IterableIterator<ITileProvider<T>>;
     getTile(address: ITileAddress, ...userArgs: Array<unknown>): Nullable<ITile<T>[]>;
-    addContentProvider<P extends T>(system: ITileSystem<P>): void;
-    removeContentProvider(name: string): void;
-    getContentProviderByName<P extends T>(name: string): ITileSystem<P> | undefined;
+    addProvider(system: ITileProvider<T>): void;
+    removeProvider(name: string): void;
+    getProviderByName(name: string): ITileProvider<T> | undefined;
 }
 export interface ITileConsumer<T> extends ITilePipelineComponent {
-    providerChangedObservable: Observable<PropertyChangedEventArgs<ITileConsumer<T>, ITileProvider<T>>>;
-    provider?: ITileProvider<T>;
+    addProducer(producer: ITileProducer<T>): void;
+    removeProducer(name: string): void;
+    getProducerByName(name: string): ITileProducer<T> | undefined;
+}
+export interface ITilePipeline<T> extends ITileMetricsProvider, IDisposable {
+    view: ITileView;
+    producer: ITileProducer<T>;
+    consumer: ITileConsumer<T>;
 }

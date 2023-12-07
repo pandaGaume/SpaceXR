@@ -46,6 +46,7 @@ export class TileWebClient<T> implements ITileClient<T> {
     _urlFactory: ITileUrlBuilder;
     _codec: ITileCodec<T>;
     _metrics: ITileMetrics;
+    _zindex: number;
 
     public constructor(name: string, urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions) {
         if (!urlFactory) {
@@ -58,11 +59,20 @@ export class TileWebClient<T> implements ITileClient<T> {
         this._urlFactory = urlFactory;
         this._codec = codec;
         this._metrics = metrics;
+        this._zindex = 0;
         this._o = { ...TileWebClientOptions.Default, ...options };
     }
 
     public get name(): string {
         return this._name;
+    }
+
+    public get zindex(): number {
+        return this._zindex;
+    }
+
+    public set zindex(v: number) {
+        this._zindex = v;
     }
 
     public get metrics(): ITileMetrics {

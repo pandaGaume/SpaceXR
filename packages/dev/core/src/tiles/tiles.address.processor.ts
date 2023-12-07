@@ -7,7 +7,7 @@ import { TileSection } from "./tiles.section";
 /// The TileAddressProcessor is mainly used to support increase zoom levels in layered Digital Elevation Model (DEM) applications.
 /// It is also adaptable for various other use cases.
 /// </summary>
-export class OffsetAddressProcessor implements ITileAddressProcessor<ITileAddress> {
+export class OffsetAddressProcessor implements ITileAddressProcessor {
     _offset: ICartesian3;
 
     constructor(offset: ICartesian3) {

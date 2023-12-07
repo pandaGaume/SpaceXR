@@ -109,6 +109,7 @@ export interface ITileMetrics {
     getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
     getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
     getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
+    isCompatibleWith(metrics: ITileMetrics): boolean;
 }
 
 export interface ITileMetricsProvider {
@@ -127,6 +128,7 @@ export class FetchResult<T> {
 
 export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
+    zindex: number;
     fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 

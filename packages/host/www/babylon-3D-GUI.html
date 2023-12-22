@@ -165,24 +165,14 @@
                 //     addButton();
                 // }
 
-                // BABYLON.SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "both_houses_scene.babylon").then((result) => {
-                //     const house1 = scene.getMeshByName("detached_house");
-                //     house1.scaling = new BABYLON.Vector3(2, 2, 2);
-                //     const meshButton = new BABYLON.GUI.MeshButton3D(house1, "meshButton");
-                //     panel.addControl(meshButton);
-                //     // house1.position.y = 2;
-                //     // const house2 = result.meshes[2];
-                //     // house2.position.y = 1;
-                // });
-
-                const twoDimensionButton = new BABYLON.GUI.Button3D("reset");
-                const text = new BABYLON.GUI.TextBlock();
-                text.text = "RESET";
-                text.color = "white";
-                text.fontSize = 24;
-                text.fontFamily = 'Electrolize';
-                twoDimensionButton.content = text;
-                panel.addControl(twoDimensionButton);
+                // const twoDimensionButton = new BABYLON.GUI.Button3D("reset");
+                // const text = new BABYLON.GUI.TextBlock();
+                // text.text = "RESET";
+                // text.color = "white";
+                // text.fontSize = 24;
+                // text.fontFamily = 'Electrolize';
+                // twoDimensionButton.content = text;
+                // panel.addControl(twoDimensionButton);
 
                 // Mesh button
                 const faceWidth = 512,
@@ -202,10 +192,7 @@
                 };
                 const box = BABYLON.MeshBuilder.CreateBox("box", meshOptions);
                 const dvMaterial = new BABYLON.StandardMaterial("dvButtonMaterial", scene);
-                dvMaterial.ambientColor = new BABYLON.Color3(1, 1, 1);
-                // dvMaterial.diffuseColor = lightBlue;
-                // dvMaterial.ambientColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-                // dvMaterial.alpha = 0.8;
+                dvMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
                 dvMaterial.diffuseTexture = new BABYLON.Texture("textures/search-button-texture.png", scene);
                 // dvMaterial.diffuseTexture.hasAlpha = true;
                 dvMaterial.alphaMode = BABYLON.Engine.ALPHA_MAXIMIZED;
@@ -214,6 +201,33 @@
                 box.visibility = 0.9999;
                 const meshButton = new BABYLON.GUI.MeshButton3D(box, "meshButton");
                 panel.addControl(meshButton);
+
+                meshButton.pointerEnterAnimation = () => {
+                    box.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+                };
+                meshButton.pointerOutAnimation = () => {
+                    box.material.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+                };
+
+                // layersPanel
+                // const layersPanel = new BABYLON.GUI.StackPanel3D();
+                // layersPanel.isVertical = true;
+                const layers = ['Satellite', 'Monochrome', 'IGN'];
+                for (const layer of layers) {
+                    const layerButton = new BABYLON.GUI.Button3D(layer);
+                    const text = new BABYLON.GUI.TextBlock();
+                    text.text = layer;
+                    text.color = "white";
+                    text.fontSize = 24;
+                    text.fontFamily = 'Electrolize';
+                    layerButton.content = text;
+                    layerButton.onPointerClickObservable.add(() => {
+                        // change map layer
+                    });
+                    panel.addControl(layerButton);
+                }
+                
+                // panel.addControl(layersPanel);
 
                 panel.blockLayout = false;
                 panel.position.x = 150;

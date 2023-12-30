@@ -14,6 +14,7 @@ export interface IMemoryCache<K, V> extends IDisposable {
     delete(key: K): void;
     keys(): IterableIterator<K>;
     clear(predicate?: (k: K) => boolean): void;
+    any(predicate?: (k: K) => boolean): boolean;
 }
 
 export class CachePolicyBuilder {
@@ -214,6 +215,17 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
                 this.delete(k);
             }
         }
+    }
+
+    public any(predicate?: (k: K) => boolean): boolean {
+        if (!predicate) return true;
+        const keys = [...this._cache.keys()];
+        for (const k of keys) {
+            if (predicate(k)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public dispose(): void {

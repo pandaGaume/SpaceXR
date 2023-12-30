@@ -4,16 +4,20 @@ import { Nullable } from "../types";
 import { TileAddress } from "./tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
-    private _name: string;
     private _cache: IMemoryCache<string, TileContent<T>>;
     private _ownCache: boolean;
     private _datasource: ITileDatasource<T, ITileAddress>;
+    private _prefix?: string;
 
-    public constructor(name: string, datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>) {
-        this._name = name;
+    public constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>) {
         this._datasource = datasource;
         this._cache = cache || new MemoryCache<string, TileContent<T>>();
-        this._ownCache = !cache;
+        if (cache) {
+            this._prefix = this._buildPrefix();
+            this._ownCache = false;
+        } else {
+            this._ownCache = true;
+        }
     }
 
     public accept(address: ITileAddress): boolean {
@@ -21,7 +25,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
     }
 
     public get name(): string {
-        return this._name;
+        return this._datasource.name;
     }
 
     public get zindex(): number {
@@ -31,16 +35,18 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
     public get datasource(): ITileDatasource<T, ITileAddress> {
         return this._datasource;
     }
+
     public get metrics(): ITileMetrics {
         return this._datasource.metrics;
     }
 
-    private get prefix(): string {
-        return `${this._name}_`;
-    }
-
-    private buildCacheKey(key: string): string {
-        return `${this.prefix}${key}`;
+    public dispose(): void {
+        if (this._prefix && !this._ownCache) {
+            const p = this._prefix;
+            this._cache.clear((k) => k.startsWith(p));
+            return;
+        }
+        this._cache.clear();
     }
 
     public async fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>> {
@@ -90,12 +96,15 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return null;
     }
 
-    public dispose(): void {
-        if (this._ownCache) {
-            this._cache.dispose();
-            return;
+    protected _buildPrefix(): string {
+        let p = `${this.name}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}_`;
+        while (this._cache?.any((k) => k.startsWith(p))) {
+            p = `${this.name}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}_`;
         }
-        const prefix = this.prefix;
-        this._cache.clear((k) => k.startsWith(prefix));
+        return p;
+    }
+
+    private buildCacheKey(key: string): string {
+        return this._prefix ? `${key}` : `${this._prefix}${key}`;
     }
 }

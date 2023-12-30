@@ -2,32 +2,30 @@ import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileContentP
 import { Observable } from "../events/events.observable";
 
 export class TileProvider<T> implements ITileProvider<T> {
-    _tileUpdatedObservable?: Observable<ITile<T>>;
-    _enableObservable?: Observable<ITileProvider<T>>;
+    _updatedObservable?: Observable<ITile<T>>;
+    _enabledObservable?: Observable<ITileProvider<T>>;
 
-    _name: string;
     _addressProcessor?: ITileAddressProcessor | undefined;
     _contentProvider: ITileContentProvider<T>;
     _factory: ITileBuilder<T>;
     _activTiles?: Map<string, ITile<T>>;
     _enabled: boolean;
 
-    public constructor(name: string, provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled = true) {
-        this._name = name;
+    public constructor(provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled = true) {
         this._addressProcessor = addressProcessor;
         this._contentProvider = provider;
         this._factory = factory;
         this._enabled = enabled;
     }
 
-    public get tileUpdatedObservable(): Observable<ITile<T>> {
-        this._tileUpdatedObservable = this._tileUpdatedObservable || new Observable<ITile<T>>();
-        return this._tileUpdatedObservable!;
+    public get updatedObservable(): Observable<ITile<T>> {
+        this._updatedObservable = this._updatedObservable || new Observable<ITile<T>>();
+        return this._updatedObservable!;
     }
 
-    public get enableObservable(): Observable<ITileProvider<T>> {
-        this._enableObservable = this._enableObservable || new Observable<ITileProvider<T>>();
-        return this._enableObservable!;
+    public get enabledObservable(): Observable<ITileProvider<T>> {
+        this._enabledObservable = this._enabledObservable || new Observable<ITileProvider<T>>();
+        return this._enabledObservable!;
     }
 
     public get zindex(): number {
@@ -41,8 +39,8 @@ export class TileProvider<T> implements ITileProvider<T> {
     public set enabled(v: boolean) {
         if (this._enabled !== v) {
             this._enabled = v;
-            if (this._enableObservable && this._enableObservable.hasObservers()) {
-                this._enableObservable.notifyObservers(this, -1, this, this);
+            if (this._enabledObservable && this._enabledObservable.hasObservers()) {
+                this._enabledObservable.notifyObservers(this, -1, this, this);
             }
         }
     }
@@ -52,7 +50,7 @@ export class TileProvider<T> implements ITileProvider<T> {
     }
 
     public get name(): string {
-        return this._name;
+        return this._contentProvider.name;
     }
 
     public get contentProvider(): ITileContentProvider<T> {
@@ -90,8 +88,8 @@ export class TileProvider<T> implements ITileProvider<T> {
                     this._contentProvider.fetchContentAsync(tile.address).then((content) => {
                         if (content) {
                             tile.content = content;
-                            if (this.tileUpdatedObservable && this.tileUpdatedObservable.hasObservers()) {
-                                this.tileUpdatedObservable.notifyObservers(tile, -1, this, this);
+                            if (this.updatedObservable && this.updatedObservable.hasObservers()) {
+                                this.updatedObservable.notifyObservers(tile, -1, this, this);
                             }
                         }
                     });

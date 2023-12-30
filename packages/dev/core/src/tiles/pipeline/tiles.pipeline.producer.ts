@@ -11,6 +11,10 @@ interface ITileProducerItem<T> {
 }
 
 export class TileProducer<T> implements ITileProducer<T> {
+    private static AssertValidName(name: string): void {
+        if (name === undefined || name === "") throw new Error("system name can't be empty");
+    }
+
     _tileUpdateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _tileAddedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _tileRemovedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
@@ -21,8 +25,11 @@ export class TileProducer<T> implements ITileProducer<T> {
     // internal pipeline links
     _links: Array<ITilePipelineLink<ITile<T>>> = [];
 
-    public constructor(id: string) {
+    public constructor(id: string, ...provider: Array<ITileProvider<T>>) {
         this._id = id;
+        for (const p of provider) {
+            this.addProvider(p);
+        }
     }
 
     public get id(): string {
@@ -83,7 +90,7 @@ export class TileProducer<T> implements ITileProducer<T> {
     }
 
     public addProvider(provider: ITileProvider<T>): void {
-        if (provider?.name === undefined || provider.name === "") throw new Error("system name can't be empty");
+        TileProducer.AssertValidName(provider?.name);
         this._items = this._items ?? new Map<string, ITileProducerItem<T>>();
         if (this._items.has(provider.name)) {
             // remove previous provider with same name
@@ -95,8 +102,8 @@ export class TileProducer<T> implements ITileProducer<T> {
         }
         const item: ITileProducerItem<T> = {
             provider: provider,
-            updateObserver: provider.tileUpdatedObservable.add(this._onTileUpdated.bind(this)),
-            enabledObserver: provider.enableObservable.add(this._onProviderEnablePropertyChanged.bind(this)),
+            updateObserver: provider.updatedObservable.add(this._onTileUpdated.bind(this)),
+            enabledObserver: provider.enabledObservable.add(this._onProviderEnablePropertyChanged.bind(this)),
         };
         this._items.set(provider.name, item);
         if (provider.enabled) {
@@ -108,7 +115,7 @@ export class TileProducer<T> implements ITileProducer<T> {
         if (this._items === undefined) {
             return;
         }
-        if (name === undefined || name === "") throw new Error("name can't be empty");
+        TileProducer.AssertValidName(name);
         const tmp = this._items.get(name);
         if (tmp) {
             tmp.provider.deactivateTile(); // remove all tiles
@@ -120,7 +127,7 @@ export class TileProducer<T> implements ITileProducer<T> {
 
     public getProviderByName(name: string): ITileProvider<T> | undefined {
         if (this._items) {
-            if (name === undefined || name === "") throw new Error("name can't be empty");
+            TileProducer.AssertValidName(name);
             return this._items.get(name)?.provider;
         }
         return undefined;

@@ -149,24 +149,35 @@ export interface ITileDisplay extends ISize2, IDisposable {
     setSize(w: number, h: number): ITileDisplay;
 }
 
+/// <summary>
+/// Act as decorator arround ITileDatasource to provide address filtering, content generation and also caching capabilities
+/// </summary>
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
-    name: string;
-    zindex: number;
-    datasource: ITileDatasource<T, ITileAddress>;
-    accept(address: ITileAddress): boolean;
-    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
+    name: string; // usually shortcut for datasource?.name
+    zindex: number; // usually shortcut for datasource?.zindex
+    datasource: ITileDatasource<T, ITileAddress>; // the underlying data source
+    accept(address: ITileAddress): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
+    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>; // fetch content using datasource.
 }
 
+/// <summary>
+/// Used as entry point to Tile Data source. It is responsible for managing the lifecycle of the datasource and the content provider
+/// plus dealing with the asynchronous nature of the data source, by providing update notification.
+/// The main interaction is done usin activateTile and deactivateTile methods which are messaging the datasource and content provider and also
+/// managing the local cache
+/// </summary>
 export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
-    tileUpdatedObservable: Observable<ITile<T>>;
-    enableObservable: Observable<ITileProvider<T>>;
-    name: string;
-    zindex: number;
-    addressProcessor?: ITileAddressProcessor;
-    contentProvider: ITileContentProvider<T>;
-    factory: ITileBuilder<T>;
-    activTiles(): IterableIterator<ITile<T>>;
-    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    enabled: boolean;
+    updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated by the data source or the content provider
+    enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
+
+    name: string; // usually shortcut for contentProvider?.name
+    zindex: number; // usually shortcut for contentProvider?.zindex
+    addressProcessor?: ITileAddressProcessor; // give ability to filter and/or modify address before fetching content
+    contentProvider: ITileContentProvider<T>; // the underlying data source
+    factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
+    enabled: boolean; // enable/disable the provider
+
+    activTiles(): IterableIterator<ITile<T>>; // return all active tiles
+    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
+    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }

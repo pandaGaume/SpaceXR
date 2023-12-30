@@ -23,3 +23,44 @@ export interface IValidable<T> {
     validate(): T;
     revalidate(): T;
 }
+
+export class ValidableBase implements IValidable<ValidableBase> {
+    _valid: boolean = false;
+
+    public get isValid(): boolean {
+        return this._valid;
+    }
+
+    public invalidate(): ValidableBase {
+        this._valid = false;
+        return this;
+    }
+
+    public validate(): ValidableBase {
+        if (!this._valid) {
+            this._doValidateInternal();
+            this._valid = true;
+        }
+        return this;
+    }
+
+    public revalidate(): ValidableBase {
+        return this.invalidate().validate();
+    }
+
+    protected _doValidateInternal() {
+        this._beforeValidate();
+        this._doValidate();
+        this._afterValidate();
+    }
+
+    protected _beforeValidate() {
+        /* nothing to do here, may be override by subclass */
+    }
+    protected _doValidate() {
+        /* nothing to do here, may be override by subclass */
+    }
+    protected _afterValidate() {
+        /* nothing to do here, may be override by subclass */
+    }
+}

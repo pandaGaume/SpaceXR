@@ -1,17 +1,17 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITileAddress, ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
-import { ITileDisplay, ITileView } from "./tiles.pipeline.interfaces";
+import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { TileAddress } from "../tiles.address";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfaces";
-import { TilePipelineComponent } from "./tiles.pipeline";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Cartesian2 } from "../../geometry/geometry.cartesian";
 import { Scalar } from "../../math/math";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+import { TilePipelineLink } from "./tiles.pipeline.link";
 
-export class TileView<T> extends TilePipelineComponent implements ITileView, ITileMetricsProvider {
+export class TileView implements ITileView {
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
      * @param a the azimuth value.
@@ -25,8 +25,10 @@ export class TileView<T> extends TilePipelineComponent implements ITileView, ITi
         return ((a % 360) + 360) % 360;
     }
 
-    _addressAddedObservable?: Observable<Array<ITileAddress>>;
-    _addressRemovedObservable?: Observable<Array<ITileAddress>>;
+    _addressAddedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _addressRemovedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _addressUpdatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+
     _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
     _state: Nullable<ITileNavigationState> = null;
     _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
@@ -35,16 +37,24 @@ export class TileView<T> extends TilePipelineComponent implements ITileView, ITi
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>> = null;
     _metrics: ITileMetrics;
 
+    // internal pipeline links
+    _links: Array<ITilePipelineLink<ITileAddress>> = [];
+
     // cached values
     _azimuth: number = 0;
     _cosAzimuth: number = 1;
     _sinAzimuth: number = 0;
+    _id: string;
 
     public constructor(id: string, metrics: ITileMetrics, display?: ITileDisplay, state?: ITileNavigationState) {
-        super(id);
+        this._id = id;
         this._metrics = metrics;
         this.display = display ?? null;
         this.state = state ?? null;
+    }
+
+    public get id(): string {
+        return this._id;
     }
 
     public get metrics(): ITileMetrics {
@@ -91,20 +101,41 @@ export class TileView<T> extends TilePipelineComponent implements ITileView, ITi
             }
         }
     }
+
     public dispose(): void {
+        // dispose relation with the navigation state
         this._state = null;
         this._stateObserver?.dispose();
         this._stateObserver = null;
+
+        // dispose the links
+        for (const l of this._links) {
+            l.dispose();
+        }
+        this._links = [];
     }
 
-    public get addressAddedObservable(): Observable<Array<ITileAddress>> {
-        this._addressAddedObservable = this._addressAddedObservable || new Observable<Array<ITileAddress>>();
+    public get addedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
+        this._addressAddedObservable = this._addressAddedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
         return this._addressAddedObservable!;
     }
 
-    public get addressRemovedObservable(): Observable<Array<ITileAddress>> {
-        this._addressRemovedObservable = this._addressRemovedObservable || new Observable<Array<ITileAddress>>();
+    public get removedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
+        this._addressRemovedObservable = this._addressRemovedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
         return this._addressRemovedObservable!;
+    }
+
+    public get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
+        this._addressUpdatedObservable = this._addressUpdatedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+        return this._addressUpdatedObservable!;
+    }
+
+    public linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions): void {
+        // a view may be linked to several targets, so we need to keep track of them.
+        if (this._links.findIndex((l) => l.target === target) === -1) {
+            const link = new TilePipelineLink(this, target, options);
+            this._links.push(link);
+        }
     }
 
     // INTERNALS
@@ -174,10 +205,10 @@ export class TileView<T> extends TilePipelineComponent implements ITileView, ITi
 
             if (dispatchEvent) {
                 if (added.length && this._addressAddedObservable?.hasObservers()) {
-                    this._addressAddedObservable.notifyObservers(added);
+                    this._addressAddedObservable.notifyObservers(added, -1, this, this);
                 }
                 if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
-                    this._addressRemovedObservable.notifyObservers(deleted);
+                    this._addressRemovedObservable.notifyObservers(deleted, -1, this, this);
                 }
             }
         }
@@ -190,7 +221,7 @@ export class TileView<T> extends TilePipelineComponent implements ITileView, ITi
 
             if (dispatchEvent) {
                 if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
-                    this._addressRemovedObservable.notifyObservers(deleted);
+                    this._addressRemovedObservable.notifyObservers(deleted, -1, this, this);
                 }
             }
         }

@@ -1,9 +1,8 @@
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
-import { IValidable } from "../../types";
 
-export interface ITileNavigationState extends IValidable<ITileNavigationState> {
+export interface ITileNavigationState {
     centerObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
     zoomObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
     azimuthObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;

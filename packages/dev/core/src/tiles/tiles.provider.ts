@@ -1,6 +1,5 @@
-import { ITileContentProvider, ITileProvider } from "./tiles.pipeline.interfaces";
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileMetrics } from "../tiles.interfaces";
-import { Observable } from "../../events/events.observable";
+import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileContentProvider, ITileMetrics, ITileProvider } from "./tiles.interfaces";
+import { Observable } from "../events/events.observable";
 
 export class TileProvider<T> implements ITileProvider<T> {
     _tileUpdatedObservable?: Observable<ITile<T>>;

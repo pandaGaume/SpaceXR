@@ -1,8 +1,7 @@
-import { IMemoryCache, MemoryCache } from "../../utils/cache";
-import { ITileAddress, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
-import { ITileContentProvider } from "./tiles.pipeline.interfaces";
-import { Nullable } from "../../types";
-import { TileAddress } from "../tiles.address";
+import { IMemoryCache, MemoryCache } from "../utils/cache";
+import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContent } from "./tiles.interfaces";
+import { Nullable } from "../types";
+import { TileAddress } from "./tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
     private _name: string;

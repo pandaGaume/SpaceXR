@@ -1,39 +1,37 @@
-import { Observable } from "../../events/events.observable";
+import { EventState, Observable } from "../../events/events.observable";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileDatasource, ITileMetricsProvider, TileContent } from "../tiles.interfaces";
-import { ISize2 } from "../../geometry/geometry.interfaces";
+import { ITile, ITileAddress, ITileDisplay, ITileMetricsProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { PropertyChangedEventArgs } from "../../events/events.args";
+
+export type IPipelineMessageType<T> = Array<T>;
+
+export interface ITargetBlock<T> {
+    added(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    removed(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    updated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+}
+
+export interface ILinkOptions {}
+
+export interface ISourceBlock<T> {
+    /// <summary> messaged when a tile is updated </summary>
+    updatedObservable: Observable<IPipelineMessageType<T>>;
+    /// <summary> messaged when a tile is added </summary>
+    addedObservable: Observable<IPipelineMessageType<T>>;
+    /// <summary> messaged when a tile is removed </summary>
+    removedObservable: Observable<IPipelineMessageType<T>>;
+
+    linkTo(target: ITargetBlock<T>, options?: ILinkOptions): void;
+}
+
+export interface ITilePipelineLink<T> extends IDisposable {
+    source: ISourceBlock<T>;
+    target: ITargetBlock<T>;
+    options?: ILinkOptions;
+}
 
 export interface ITilePipelineComponent extends IDisposable {
     id?: string;
-}
-
-export interface ITileDisplay extends ISize2, IDisposable {
-    resizeObservable: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;
-    setSize(w: number, h: number): ITileDisplay;
-}
-
-export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
-    name: string;
-    zindex: number;
-    datasource: ITileDatasource<T, ITileAddress>;
-    accept(address: ITileAddress): boolean;
-    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
-}
-
-export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
-    tileUpdatedObservable: Observable<ITile<T>>;
-    enableObservable: Observable<ITileProvider<T>>;
-    name: string;
-    zindex: number;
-    addressProcessor?: ITileAddressProcessor;
-    contentProvider: ITileContentProvider<T>;
-    factory: ITileBuilder<T>;
-    activTiles(): IterableIterator<ITile<T>>;
-    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    enabled: boolean;
 }
 
 /// <summary>
@@ -44,51 +42,11 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITilePipelineComponent {
-    addressAddedObservable: Observable<Array<ITileAddress>>;
-    addressRemovedObservable: Observable<Array<ITileAddress>>;
+export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress> {
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
 }
 
-export interface ITileProducer<T> extends ITilePipelineComponent, ITileMetricsProvider {
-    /// <summary> messaged when a tile is updated </summary>
-    tileUpdatedObservable: Observable<ITile<T>>;
+export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {}
 
-    /// <summary> messaged when a tile is added </summary>
-    tileAddedObservable: Observable<Array<ITile<T>>>;
-
-    /// <summary> messaged when a tile is removed </summary>
-    tileRemovedObservable: Observable<Array<ITile<T>>>;
-
-    view?: ITileView;
-
-    providers(predicate?: (p: ITileProvider<T>) => boolean): IterableIterator<ITileProvider<T>>;
-
-    /// <summary>
-    /// Get tiles using one address. Typically used by the pipeline, this method is using the underlying providers,
-    /// first to verify if the content provider are accepting the address, and then ask for the contents itself.
-    /// </summary>
-    getTile(address: ITileAddress, ...userArgs: Array<unknown>): Nullable<ITile<T>[]>;
-
-    /// <summary> register a content provider to the pipeline </summary>
-    addProvider(system: ITileProvider<T>): void;
-
-    /// <summary> unregister a content provider from the pipeline </summary>
-    removeProvider(name: string): void;
-
-    /// <summary> get a content provider from the pipeline using is name. Name is usually comming from ITile.namespace. </summary>
-    getProviderByName(name: string): ITileProvider<T> | undefined;
-}
-
-export interface ITileConsumer<T> extends ITilePipelineComponent {
-    addProducer(producer: ITileProducer<T>): void;
-    removeProducer(name: string): void;
-    getProducerByName(name: string): ITileProducer<T> | undefined;
-}
-
-export interface ITilePipeline<T> extends ITileMetricsProvider, IDisposable {
-    view: ITileView;
-    producer: ITileProducer<T>;
-    consumer: ITileConsumer<T>;
-}
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {}

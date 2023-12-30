@@ -14,3 +14,4 @@ export * from "./tiles.urlBuilder";
 export * from "./tiles.mapview";
 export * from "./tiles.section";
 export * from "./tiles.address.processor";
+export * from "./tiles.display";

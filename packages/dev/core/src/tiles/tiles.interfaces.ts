@@ -1,6 +1,8 @@
-import { Nullable } from "../types";
+import { IDisposable, Nullable } from "../types";
 import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { Observable } from "../events/events.observable";
+import { PropertyChangedEventArgs } from "../events/events.args";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -141,3 +143,30 @@ export interface ITileCodec<T> {
 }
 
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}
+
+export interface ITileDisplay extends ISize2, IDisposable {
+    resizeObservable: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;
+    setSize(w: number, h: number): ITileDisplay;
+}
+
+export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
+    name: string;
+    zindex: number;
+    datasource: ITileDatasource<T, ITileAddress>;
+    accept(address: ITileAddress): boolean;
+    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
+}
+
+export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
+    tileUpdatedObservable: Observable<ITile<T>>;
+    enableObservable: Observable<ITileProvider<T>>;
+    name: string;
+    zindex: number;
+    addressProcessor?: ITileAddressProcessor;
+    contentProvider: ITileContentProvider<T>;
+    factory: ITileBuilder<T>;
+    activTiles(): IterableIterator<ITile<T>>;
+    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+    enabled: boolean;
+}

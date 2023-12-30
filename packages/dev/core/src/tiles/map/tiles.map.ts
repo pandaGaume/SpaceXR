@@ -1,8 +1,8 @@
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { EventState } from "../../events/events.observable";
-import { TileConsumerBase } from "../pipeline/tiles.consumer";
-import { ITileDisplay, ITileProducer, ITileProvider } from "../pipeline/tiles.pipeline.interfaces";
-import { ITile, ITileAddress, ITileDatasource } from "../tiles.interfaces";
+import { TileConsumerBase } from "../pipeline/tiles.pipeline.consumer";
+import { ITileProducer } from "../pipeline/tiles.pipeline.interfaces";
+import { ITile, ITileAddress, ITileDatasource, ITileDisplay } from "../tiles.interfaces";
 
 export interface ITileMapOptions {
     center?: IGeo2;
@@ -14,11 +14,9 @@ export interface ITileMapOptions {
 
 export class TileMapBase<T> extends TileConsumerBase<T> {
     _display: ITileDisplay;
-    _valid: boolean;
 
     public constructor(id: string, display: ITileDisplay, options?: ITileMapOptions) {
         super(id);
-        this._valid = false;
         this._display = display;
         if (options?.dataSources) {
             this.addDataSources(...options.dataSources);

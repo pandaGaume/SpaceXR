@@ -1,74 +1,78 @@
 import { Nullable } from "../../types";
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITile, ITileAddress, ITileMetrics, IsTileSection } from "../tiles.interfaces";
-import { ITileProducer, ITileProvider, ITileView } from "./tiles.pipeline.interfaces";
-import { TilePipelineComponent } from "./tiles.pipeline";
+import { ITile, ITileAddress, ITileMetrics, ITileProvider, IsTileSection } from "../tiles.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileProducer } from "./tiles.pipeline.interfaces";
+import { TilePipelineLink } from "./tiles.pipeline.link";
 
-interface TileProducerItem<T> {
+interface ITileProducerItem<T> {
     provider: ITileProvider<T>;
     updateObserver?: Nullable<Observer<ITile<T>>>;
     enabledObserver?: Nullable<Observer<ITileProvider<T>>>;
 }
 
-export class TilesProducer<T> extends TilePipelineComponent implements ITileProducer<T> {
-    _tileUpdateObservable?: Observable<ITile<T>>;
-    _tileAddedObservable?: Observable<Array<ITile<T>>>;
-    _tileRemovedObservable?: Observable<Array<ITile<T>>>;
+export class TileProducer<T> implements ITileProducer<T> {
+    _tileUpdateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _tileAddedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _tileRemovedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
 
-    _items?: Map<string, TileProducerItem<T>>;
-    _view?: ITileView;
-    _metrics: ITileMetrics;
-    _addedObserver?: Nullable<Observer<Array<ITileAddress>>>;
-    _removedObserver?: Nullable<Observer<Array<ITileAddress>>>;
+    _items?: Map<string, ITileProducerItem<T>>;
+    _id: string;
 
-    public constructor(id: string, metrics: ITileMetrics, view?: ITileView) {
-        super(id);
-        this._metrics = metrics;
-        this.view = view;
+    // internal pipeline links
+    _links: Array<ITilePipelineLink<ITile<T>>> = [];
+
+    public constructor(id: string) {
+        this._id = id;
     }
 
-    public get metrics() {
-        return this._metrics;
+    public get id(): string {
+        return this._id;
     }
 
-    public get view(): ITileView | undefined {
-        return this._view;
-    }
-
-    public set view(value: ITileView | undefined) {
-        if (this._view !== value) {
-            this._view = value;
-            this._addedObserver?.dispose();
-            this._removedObserver?.dispose();
-            this._addedObserver = this._view?.addressAddedObservable.add(this._onTileAddressesAdded.bind(this));
-            this._removedObserver = this._view?.addressRemovedObservable.add(this._onTileAddressesRemoved.bind(this));
-        }
-    }
-
-    public dispose() {
-        this._addedObserver?.dispose();
-        this._removedObserver?.dispose();
-    }
-
-    public get tileUpdatedObservable(): Observable<ITile<T>> {
-        this._tileUpdateObservable = this._tileUpdateObservable || new Observable<ITile<T>>();
+    /// begin ISourceBlock
+    public get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
+        this._tileUpdateObservable = this._tileUpdateObservable || new Observable<IPipelineMessageType<ITile<T>>>();
         return this._tileUpdateObservable!;
     }
 
-    public get tileAddedObservable(): Observable<Array<ITile<T>>> {
-        this._tileAddedObservable = this._tileAddedObservable || new Observable<Array<ITile<T>>>();
+    public get addedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
+        this._tileAddedObservable = this._tileAddedObservable || new Observable<IPipelineMessageType<ITile<T>>>();
         return this._tileAddedObservable!;
     }
-    public get tileRemovedObservable(): Observable<Array<ITile<T>>> {
-        this._tileRemovedObservable = this._tileRemovedObservable || new Observable<Array<ITile<T>>>();
+
+    public get removedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
+        this._tileRemovedObservable = this._tileRemovedObservable || new Observable<IPipelineMessageType<ITile<T>>>();
         return this._tileRemovedObservable!;
     }
+
+    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void {
+        // a view may be linked to several targets, so we need to keep track of them.
+        if (this._links.findIndex((l) => l.target === target) === -1) {
+            const link = new TilePipelineLink(this, target, options);
+            this._links.push(link);
+        }
+    }
+    /// end ISourceBlock
+
+    /// begin ITargetBlock
+    public added(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
+        const data = Array.isArray(eventData) ? eventData : [eventData];
+        this._onTileAddressesAdded(data, eventState);
+    }
+    public removed(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
+        const data = Array.isArray(eventData) ? eventData : [eventData];
+        this._onTileAddressesRemoved(data, eventState);
+    }
+    public updated(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
+        // nothing to do here, updating address is not suppose to happen
+    }
+    /// end ITargetBlock
 
     public getTile(address: ITileAddress, ...userArgs: Array<unknown>): Nullable<ITile<T>[]> {
         throw new Error("Method not implemented.");
     }
 
-    public *providers(predicate?: (p: ITileProvider<T>) => boolean): IterableIterator<ITileProvider<T>> {
+    public *getProviders(predicate?: (p: ITileProvider<T>) => boolean): IterableIterator<ITileProvider<T>> {
         if (this._items) {
             for (const p of this._items.values()) {
                 if (predicate === undefined || predicate(p.provider)) {
@@ -80,7 +84,7 @@ export class TilesProducer<T> extends TilePipelineComponent implements ITileProd
 
     public addProvider(provider: ITileProvider<T>): void {
         if (provider?.name === undefined || provider.name === "") throw new Error("system name can't be empty");
-        this._items = this._items ?? new Map<string, TileProducerItem<T>>();
+        this._items = this._items ?? new Map<string, ITileProducerItem<T>>();
         if (this._items.has(provider.name)) {
             // remove previous provider with same name
             const old = this._items.get(provider.name);
@@ -89,7 +93,7 @@ export class TilesProducer<T> extends TilePipelineComponent implements ITileProd
             }
             this.removeProvider(provider.name);
         }
-        const item: TileProducerItem<T> = {
+        const item: ITileProducerItem<T> = {
             provider: provider,
             updateObserver: provider.tileUpdatedObservable.add(this._onTileUpdated.bind(this)),
             enabledObserver: provider.enableObservable.add(this._onProviderEnablePropertyChanged.bind(this)),
@@ -122,6 +126,14 @@ export class TilesProducer<T> extends TilePipelineComponent implements ITileProd
         return undefined;
     }
 
+    public dispose() {
+        // dispose the links
+        for (const l of this._links) {
+            l.dispose();
+        }
+        this._links = [];
+    }
+
     protected _onTileAddressesAdded(eventData: ITileAddress[], eventState: EventState): void {
         // this is the place where we should add the tile to the system
         for (const ts of this._items?.values() ?? []) {
@@ -133,13 +145,13 @@ export class TilesProducer<T> extends TilePipelineComponent implements ITileProd
                 this._onTileAddressAdded(ts, address, tiles);
             }
             if (this._tileAddedObservable && this._tileAddedObservable.hasObservers()) {
-                this._tileAddedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState.userInfo);
+                this._tileAddedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState?.userInfo);
             }
         }
     }
 
-    protected _onTileAddressAdded(item: TileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[]): void {
-        let tmp = item.provider.addressProcessor?.process(address, this.metrics) ?? [];
+    protected _onTileAddressAdded(item: ITileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[], metrics?: ITileMetrics): void {
+        let tmp = item.provider.addressProcessor?.process(address, metrics ?? item.provider.metrics) ?? [];
         if (IsTileSection(tmp)) {
             tmp = [tmp.address];
         }
@@ -157,13 +169,13 @@ export class TilesProducer<T> extends TilePipelineComponent implements ITileProd
                 this._onTileAddressRemoved(ts, address, tiles);
             }
             if (this._tileRemovedObservable && this._tileRemovedObservable.hasObservers()) {
-                this._tileRemovedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState.userInfo);
+                this._tileRemovedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState?.userInfo);
             }
         }
     }
 
-    protected _onTileAddressRemoved(item: TileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[]): void {
-        let tmp = item.provider.addressProcessor?.process(address, this.metrics) ?? [];
+    protected _onTileAddressRemoved(item: ITileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[], metrics?: ITileMetrics): void {
+        let tmp = item.provider.addressProcessor?.process(address, metrics ?? item.provider.metrics) ?? [];
         if (IsTileSection(tmp)) {
             tmp = [tmp.address];
         }
@@ -173,8 +185,8 @@ export class TilesProducer<T> extends TilePipelineComponent implements ITileProd
     protected _onTileUpdated(eventData: ITile<T>, eventState: EventState): void {
         const provider = eventState.target as ITileProvider<T>;
         if (provider?.enabled) {
-            if (this.tileUpdatedObservable && this.tileUpdatedObservable.hasObservers()) {
-                this.tileUpdatedObservable.notifyObservers(eventData, -1, provider, this, eventState.userInfo);
+            if (this.updatedObservable && this.updatedObservable.hasObservers()) {
+                this.updatedObservable.notifyObservers([eventData], -1, provider, this, eventState?.userInfo);
             }
         }
     }

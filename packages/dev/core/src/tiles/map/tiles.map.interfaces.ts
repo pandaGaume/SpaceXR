@@ -49,7 +49,9 @@ export interface ITileMap<T> extends ITileConsumer<T> {
 
     display: ITileDisplay;
     navigation: ITileNavigationApi;
-    getLayers(predicate?: (l: ITileMapLayer<T>) => boolean): IterableIterator<ITileMapLayer<T>>;
+
+    getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
+
     addLayer(layer: ITileMapLayer<T>): void;
     removeLayer(layer: ITileMapLayer<T>): void;
 

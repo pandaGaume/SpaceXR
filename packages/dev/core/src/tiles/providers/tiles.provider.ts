@@ -65,7 +65,7 @@ export class TileProvider<T> implements ITileProvider<T> {
         this._activTiles?.clear();
     }
 
-    public *activTiles(): IterableIterator<ITile<T>> {
+    public *getActivTiles(): IterableIterator<ITile<T>> {
         return this._activTiles?.values() ?? [];
     }
 

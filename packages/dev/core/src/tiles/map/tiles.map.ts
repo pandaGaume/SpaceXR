@@ -12,13 +12,14 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
     _layerRemovedObservable?: Observable<ITileMapLayer<T>>;
 
-    _display: ITileDisplay;
-    _navigation: ITileNavigationApi;
-    _pipeline: ITilePipeline<T>;
-    _layers?: Map<string, ITileMapLayer<T>>;
+    protected _display: ITileDisplay;
+    protected _navigation: ITileNavigationApi;
+    protected _pipeline: ITilePipeline<T>;
+    protected _layers?: Map<string, ITileMapLayer<T>>;
 
     // internal
-    _orderedLayers?: ITileMapLayer<T>[];
+    protected _orderedLayers?: ITileMapLayer<T>[];
+
     _viewAddedObserver: Nullable<Observer<ITileView>>;
     _viewRemovedObserver: Nullable<Observer<ITileView>>;
 
@@ -99,7 +100,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         return this._pipeline;
     }
 
-    public *getLayers(predicate?: ((l: ITileMapLayer<T>) => boolean) | undefined): IterableIterator<ITileMapLayer<T>> {
+    public *getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted: boolean = true): IterableIterator<ITileMapLayer<T>> {
+        if (sorted) return this.getOrderedLayers(predicate);
+
         if (this._layers) {
             if (predicate) {
                 for (const layer of this._layers.values()) {
@@ -107,6 +110,18 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
                 }
             } else {
                 yield* this._layers.values();
+            }
+        }
+    }
+
+    public *getOrderedLayers(predicate?: (l: ITileMapLayer<T>) => boolean): IterableIterator<ITileMapLayer<T>> {
+        if (this._orderedLayers) {
+            if (predicate) {
+                for (const layer of this._orderedLayers ?? []) {
+                    if (predicate(layer)) yield layer;
+                }
+            } else {
+                yield* this._orderedLayers ?? [];
             }
         }
     }

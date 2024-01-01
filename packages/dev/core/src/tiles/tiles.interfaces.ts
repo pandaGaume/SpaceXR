@@ -191,7 +191,7 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
     enabled: boolean; // enable/disable the provider
 
-    activTiles(): IterableIterator<ITile<T>>; // return all active tiles
+    getActivTiles(): IterableIterator<ITile<T>>; // return all active tiles
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }

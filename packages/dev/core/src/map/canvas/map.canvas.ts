@@ -16,10 +16,10 @@ type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 export class CanvasTileMapOptions {
     public static DefaultBackColor = RGBAColor.LightGray();
     public static DefaultForeColor = RGBAColor.Gray();
-    public static Default = new CanvasTileMapOptions({ backColor: CanvasTileMapOptions.DefaultBackColor, foreColor: CanvasTileMapOptions.DefaultForeColor });
+    public static Default = new CanvasTileMapOptions({ background: CanvasTileMapOptions.DefaultBackColor, color: CanvasTileMapOptions.DefaultForeColor });
 
-    public backColor?: RGBAColor;
-    public foreColor?: RGBAColor;
+    public background?: RGBAColor;
+    public color?: RGBAColor;
     public fillEmpty?: FillRectFn;
 
     public constructor(p: Partial<CanvasTileMapOptions>) {
@@ -32,12 +32,12 @@ export class CanvasTileMapOptionsBuilder {
     private _foreColor?: RGBAColor;
     public _fillEmpty?: FillRectFn;
 
-    public withBackColor(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
+    public withBackground(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
         this._backColor = v instanceof RGBAColor ? v : new RGBAColor(v, g ?? 0, b ?? 0);
         return this;
     }
 
-    public withForeColor(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
+    public withColor(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
         this._foreColor = v instanceof RGBAColor ? v : new RGBAColor(v, g ?? 0, b ?? 0);
         return this;
     }
@@ -48,7 +48,7 @@ export class CanvasTileMapOptionsBuilder {
     }
 
     public build(): CanvasTileMapOptions {
-        return new CanvasTileMapOptions({ backColor: this._backColor, foreColor: this._foreColor, fillEmpty: this._fillEmpty });
+        return new CanvasTileMapOptions({ background: this._backColor, color: this._foreColor, fillEmpty: this._fillEmpty });
     }
 }
 
@@ -60,26 +60,23 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         display: ITileDisplay,
         pipeline: ITilePipeline<CanvasTileContentType>,
         options?: CanvasTileMapOptions,
-        metrics?: ITileMetrics,
-        nav?: ITileNavigationApi
+        nav?: ITileNavigationApi | ITileMetrics
     ) {
-        super(name, display, pipeline, metrics, nav);
+        super(name, display, pipeline, nav);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
     }
 
-    protected invalidateTiles(added: ITile<CanvasTileContentType>[] | undefined, removed: ITile<CanvasTileContentType>[] | undefined): void {
+    protected invalidateTiles(added?: ITile<CanvasTileContentType>[], removed?: ITile<CanvasTileContentType>[]): void {
         if (added) {
             const ctx = this._getContext2D();
             if (ctx) {
                 ctx.save();
-                ctx.strokeStyle = this._options?.foreColor?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
-                this.draw(ctx, added);
+                ctx.strokeStyle = this._options?.color?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
+                this._draw(ctx, added);
                 ctx.restore();
             }
         }
     }
-
-    protected *_activTiles(predicate?: (t: ITile<CanvasTileContentType>) => boolean): IterableIterator<ITile<CanvasTileContentType>> {}
 
     protected invalidateDisplay(rect?: IRectangle) {
         const ctx = this._getContext2D();
@@ -87,15 +84,23 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
             ctx.save();
             const res = this._display;
             rect = rect || new Rectangle(0, 0, res.width, res.height);
-            ctx.fillStyle = this._options?.backColor?.toString() ?? CanvasTileMapOptions.DefaultBackColor.toString();
-            ctx.strokeStyle = this._options?.foreColor?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
+            ctx.fillStyle = this._options?.background?.toString() ?? CanvasTileMapOptions.DefaultBackColor.toString();
+            ctx.strokeStyle = this._options?.color?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
             ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-            this.draw(ctx, this._activTiles());
+            this._draw(ctx, this._getActivTiles());
             ctx.restore();
         }
     }
 
-    private draw(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<CanvasTileContentType>> | Array<ITile<CanvasTileContentType>>) {
+    protected *_getActivTiles(predicate?: (t: ITile<CanvasTileContentType>) => boolean): IterableIterator<ITile<CanvasTileContentType>> {
+        for (const p of this._orderedLayers ?? []) {
+            if (p.enabled) {
+                yield* p.provider.getActivTiles();
+            }
+        }
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<CanvasTileContentType>> | Array<ITile<CanvasTileContentType>>) {
         if (ctx) {
             const scale = this.navigation.scale;
             const center = this.navigation.pixelXY;

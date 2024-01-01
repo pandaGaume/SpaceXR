@@ -1,5 +1,5 @@
 import { ICartesian2, ICartesian4, ISize2 } from "../geometry/geometry.interfaces";
-import { TileAddress } from "./tiles.address";
+import { TileAddress } from "./address/tiles.address";
 import { ITileAddress, ITileSection } from "./tiles.interfaces";
 
 export class TileSection implements ITileSection {

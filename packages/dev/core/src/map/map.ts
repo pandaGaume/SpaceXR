@@ -1,5 +1,5 @@
 import { TileMapView, UpdateEventArgs, UpdateReason } from "../tiles/tiles.mapview";
-import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
+import { ITile, ITileContentProvider, ITileMetrics, ITileMetricsProvider } from "../tiles/tiles.interfaces";
 import { ITileMapApi } from "../tiles/map/tiles.api.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { Geo2 } from "../geography/geography.position";
@@ -7,7 +7,6 @@ import { ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.in
 import { Cartesian2 } from "../geometry/geometry.cartesian";
 import { Observable, Observer } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
-import { ITileContentProvider } from "core/tiles/pipeline/tiles.pipeline.interfaces";
 
 export interface IMapDisplay {
     resolution: ISize3;

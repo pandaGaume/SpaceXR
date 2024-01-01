@@ -1,6 +1,6 @@
-import { Nullable } from "../types";
-import { Scalar } from "../math/math";
-import { ITileAddress, ITileMetrics } from "./tiles.interfaces";
+import { Nullable } from "../../types";
+import { Scalar } from "../../math/math";
+import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 
 export class TileAddress implements ITileAddress {
     public static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean {

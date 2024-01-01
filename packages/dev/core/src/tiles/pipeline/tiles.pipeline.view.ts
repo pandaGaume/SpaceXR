@@ -1,64 +1,45 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
 import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
-import { TileAddress } from "../tiles.address";
+import { TileAddress } from "../address/tiles.address";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfaces";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Cartesian2 } from "../../geometry/geometry.cartesian";
-import { Scalar } from "../../math/math";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { TilePipelineLink } from "./tiles.pipeline.link";
+import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 
 export class TileView implements ITileView {
-    /**
-     * Keep an azimuth angle within the range of 0 to 360 degrees
-     * @param a the azimuth value.
-     * @returns the clampled value.
-     */
-    public static ClampAzimuth(a: number): number {
-        // the modulo operator (%) is used to get the remainder when the azimuth is divided by 360.
-        // Adding 360 to the result ensures that negative values are shifted into the positive range.
-        // Finally, taking the modulo 360 of the sum ensures that values greater than 360 are wrapped
-        // back to the range of 0 to 360.
-        return ((a % 360) + 360) % 360;
-    }
-
-    _addressAddedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
-    _addressRemovedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
-    _addressUpdatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
 
     _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
     _state: Nullable<ITileNavigationState> = null;
     _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
-    _azimuthObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, number>>> = null;
     _display: Nullable<ITileDisplay> = null;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>> = null;
-    _metrics: ITileMetrics;
 
     // internal pipeline links
     _links: Array<ITilePipelineLink<ITileAddress>> = [];
 
     // cached values
-    _azimuth: number = 0;
-    _cosAzimuth: number = 1;
-    _sinAzimuth: number = 0;
     _id: string;
 
-    public constructor(id: string, metrics: ITileMetrics, display?: ITileDisplay, state?: ITileNavigationState) {
+    public constructor(id: string, display?: ITileDisplay, state?: ITileNavigationState) {
         this._id = id;
-        this._metrics = metrics;
         this.display = display ?? null;
         this.state = state ?? null;
     }
 
-    public get id(): string {
+    public get name(): string {
         return this._id;
     }
 
     public get metrics(): ITileMetrics {
-        return this._metrics;
+        return this._state?.metrics ?? EPSG3857.Shared;
     }
 
     public get state(): Nullable<ITileNavigationState> {
@@ -70,14 +51,11 @@ export class TileView implements ITileView {
             if (this._state) {
                 this._stateObserver?.dispose();
                 this._stateObserver = null;
-                this._azimuthObserver?.dispose();
-                this._azimuthObserver = null;
                 this._doClearContext(this._state, true);
             }
             this._state = state;
             if (this._state) {
                 this._stateObserver = this._state.stateChangedObservable.add(this._onStateChanged.bind(this));
-                this._azimuthObserver = this._state.azimuthObservable.add(this._onAzimuthChanged.bind(this));
                 this._doValidateContext(this._state, true); // force context to be validated if we change of api.
             }
         }
@@ -116,18 +94,18 @@ export class TileView implements ITileView {
     }
 
     public get addedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._addressAddedObservable = this._addressAddedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
-        return this._addressAddedObservable!;
+        this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+        return this._addedObservable!;
     }
 
     public get removedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._addressRemovedObservable = this._addressRemovedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
-        return this._addressRemovedObservable!;
+        this._removedObservable = this._removedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+        return this._removedObservable!;
     }
 
     public get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._addressUpdatedObservable = this._addressUpdatedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
-        return this._addressUpdatedObservable!;
+        this._updatedObservable = this._updatedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+        return this._updatedObservable!;
     }
 
     public linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions): void {
@@ -138,18 +116,19 @@ export class TileView implements ITileView {
         }
     }
 
+    public unlinkFrom(target: ITargetBlock<ITileAddress>): ITilePipelineLink<ITileAddress> | undefined {
+        const i = this._links.findIndex((l) => l.target === target);
+        if (i !== -1) {
+            const l = this._links.splice(i)[0];
+            l.dispose();
+            return l;
+        }
+        return undefined;
+    }
+
     // INTERNALS
     protected _onStateChanged(eventData: ITileNavigationState, eventState: EventState) {
         this._doValidateContext(eventData, true);
-    }
-
-    protected _onAzimuthChanged(eventData: PropertyChangedEventArgs<ITileNavigationState, number>, eventState: EventState) {
-        // this is a bit tricky, we need to update the cached values to avoid computing them each time.
-        // this event occur always before onStateChanged, so we can safely update the cached values.
-        var azimuth = eventData.newValue ?? 0;
-        let clamped = TileView.ClampAzimuth(azimuth) * Scalar.DEG2RAD;
-        this._cosAzimuth = Math.cos(clamped);
-        this._sinAzimuth = Math.sin(clamped);
     }
 
     protected _onResize(eventData: PropertyChangedEventArgs<ITileDisplay, ISize2>, eventState: EventState) {
@@ -159,10 +138,9 @@ export class TileView implements ITileView {
     protected _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
             const metrics = this.metrics;
-            const center = state.center;
-            const lod = Scalar.Clamp(Math.round(state.zoom), this.metrics.minLOD, this.metrics.maxLOD);
-            const pixelCenterXY = metrics.getLatLonToPixelXY(center.lat, center.lon, lod);
-            const scale = TileAddress.GetLodScale(state.zoom);
+            const lod = state.lod;
+            const pixelCenterXY = state.pixelXY;
+            const scale = state.scale;
             const rect = this.getRectangle(pixelCenterXY, scale);
 
             // compute the bounds of tile xy
@@ -204,11 +182,11 @@ export class TileView implements ITileView {
             }
 
             if (dispatchEvent) {
-                if (added.length && this._addressAddedObservable?.hasObservers()) {
-                    this._addressAddedObservable.notifyObservers(added, -1, this, this);
+                if (added.length && this._addedObservable?.hasObservers()) {
+                    this._addedObservable.notifyObservers(added, -1, this, this);
                 }
-                if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
-                    this._addressRemovedObservable.notifyObservers(deleted, -1, this, this);
+                if (deleted.length && this._removedObservable?.hasObservers()) {
+                    this._removedObservable.notifyObservers(deleted, -1, this, this);
                 }
             }
         }
@@ -220,8 +198,8 @@ export class TileView implements ITileView {
             this._activ.clear();
 
             if (dispatchEvent) {
-                if (deleted.length && this._addressRemovedObservable?.hasObservers()) {
-                    this._addressRemovedObservable.notifyObservers(deleted, -1, this, this);
+                if (deleted.length && this._removedObservable?.hasObservers()) {
+                    this._removedObservable.notifyObservers(deleted, -1, this, this);
                 }
             }
         }
@@ -247,8 +225,10 @@ export class TileView implements ITileView {
         const r = target || Cartesian2.Zero();
         const translatedX = x - center.x;
         const translatedY = y - center.y;
-        r.x = translatedX * this._cosAzimuth - translatedY * this._sinAzimuth + center.x;
-        r.y = translatedX * this._sinAzimuth + translatedY * this._cosAzimuth + center.y;
+        const cos = this._state?.azimuth?.cos ?? 1;
+        const sin = this._state?.azimuth?.sin ?? 0;
+        r.x = translatedX * cos - translatedY * sin + center.x;
+        r.y = translatedX * sin + translatedY * cos + center.y;
         return <R>r;
     }
 }

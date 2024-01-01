@@ -1,15 +1,18 @@
-import { ITile, ITileAddress, ITileDatasource } from "../../tiles/tiles.interfaces";
-import { AbstractDisplayMap } from "../map";
-import { IGeo2 } from "../../geography/geography.interfaces";
+import { ITile, ITileDisplay, ITileMetrics } from "../../tiles/tiles.interfaces";
+
 import { IRectangle } from "../../geometry/geometry.interfaces";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
-import { CanvasDisplay } from "./map.canvas.display";
 import { RGBAColor } from "../../math/math.color";
-import { TileContentProvider } from "../../tiles/tiles.provider.content";
+
+import { TileMapBase } from "../../tiles/map/tiles.map";
+import { ITilePipeline } from "../../tiles/pipeline/tiles.pipeline.interfaces";
+import { ITileNavigationApi } from "../../tiles/navigation/tiles.navigation.interfaces";
 
 type CanvasTileContentType = HTMLImageElement;
+
 type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
+
 export class CanvasTileMapOptions {
     public static DefaultBackColor = RGBAColor.LightGray();
     public static DefaultForeColor = RGBAColor.Gray();
@@ -49,62 +52,62 @@ export class CanvasTileMapOptionsBuilder {
     }
 }
 
-export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITile<CanvasTileContentType>, CanvasDisplay> {
-    _observer: ResizeObserver;
+export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileContentType> {
     _options: CanvasTileMapOptions;
 
-    public constructor(canvas: HTMLCanvasElement, datasource: ITileDatasource<CanvasTileContentType, ITileAddress>, center?: IGeo2, lod?: number, options?: CanvasTileMapOptions) {
-        super(new CanvasDisplay(canvas), new TileContentProvider<CanvasTileContentType>("", { datasource: datasource }), center, lod);
+    public constructor(
+        name: string,
+        display: ITileDisplay,
+        pipeline: ITilePipeline<CanvasTileContentType>,
+        options?: CanvasTileMapOptions,
+        metrics?: ITileMetrics,
+        nav?: ITileNavigationApi
+    ) {
+        super(name, display, pipeline, metrics, nav);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
-        this._observer = new ResizeObserver(() => {
-            this.invalidateSize(canvas.width, canvas.height);
-        });
-        this._observer.observe(canvas);
     }
-
-    protected onDeleted(key: string, tile: ITile<CanvasTileContentType>): void {}
-    protected onAdded(key: string, tile: ITile<CanvasTileContentType>): void {}
-    protected onUpdated(key: string, tile: ITile<CanvasTileContentType>): void {}
 
     protected invalidateTiles(added: ITile<CanvasTileContentType>[] | undefined, removed: ITile<CanvasTileContentType>[] | undefined): void {
         if (added) {
-            const ctx = this._display.getContext();
+            const ctx = this._getContext2D();
             if (ctx) {
                 ctx.save();
                 ctx.strokeStyle = this._options?.foreColor?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
-                this.invalidate(ctx, added);
+                this.draw(ctx, added);
                 ctx.restore();
             }
         }
     }
 
+    protected *_activTiles(predicate?: (t: ITile<CanvasTileContentType>) => boolean): IterableIterator<ITile<CanvasTileContentType>> {}
+
     protected invalidateDisplay(rect?: IRectangle) {
-        const ctx = this._display.getContext();
+        const ctx = this._getContext2D();
         if (ctx) {
             ctx.save();
-            const res = this._display.resolution;
+            const res = this._display;
             rect = rect || new Rectangle(0, 0, res.width, res.height);
             ctx.fillStyle = this._options?.backColor?.toString() ?? CanvasTileMapOptions.DefaultBackColor.toString();
             ctx.strokeStyle = this._options?.foreColor?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
             ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-            this.invalidate(ctx, this._activ.values());
+            this.draw(ctx, this._activTiles());
             ctx.restore();
         }
     }
 
-    private invalidate(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<CanvasTileContentType>> | Array<ITile<CanvasTileContentType>>) {
+    private draw(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<CanvasTileContentType>> | Array<ITile<CanvasTileContentType>>) {
         if (ctx) {
-            const scale = this._scale;
-            const center = this._center;
-            const res = this._display.resolution;
+            const scale = this.navigation.scale;
+            const center = this.navigation.pixelXY;
+            const res = this._display;
             ctx.translate(res.width / 2, res.height / 2);
             ctx.scale(scale, scale);
-            if (this.azimuth) {
+            if (this.navigation.azimuth) {
                 // convert azimuth to canvas rotation, which is clockwize, and cartesian
-                const angle = this.azimuth * Scalar.DEG2RAD;
+                const angle = this.navigation.azimuth.value * Scalar.DEG2RAD;
                 ctx.rotate(angle);
             }
-            const tileSize = this.metrics.tileSize;
+            const tileSize = this.navigation.metrics.tileSize;
             for (const t of tiles) {
                 if (t.rect) {
                     const x = t.rect.x - center.x;
@@ -129,4 +132,6 @@ export class CanvasTileMap extends AbstractDisplayMap<CanvasTileContentType, ITi
             }
         }
     }
+
+    protected abstract _getContext2D(): CanvasRenderingContext2D | null;
 }

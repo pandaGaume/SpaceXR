@@ -1,5 +1,5 @@
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileContentProvider, ITileMetrics, ITileProvider } from "./tiles.interfaces";
-import { Observable } from "../events/events.observable";
+import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { Observable } from "../../events/events.observable";
 
 export class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
@@ -26,10 +26,6 @@ export class TileProvider<T> implements ITileProvider<T> {
     public get enabledObservable(): Observable<ITileProvider<T>> {
         this._enabledObservable = this._enabledObservable || new Observable<ITileProvider<T>>();
         return this._enabledObservable!;
-    }
-
-    public get zindex(): number {
-        return this._contentProvider.zindex;
     }
 
     public get enabled(): boolean {

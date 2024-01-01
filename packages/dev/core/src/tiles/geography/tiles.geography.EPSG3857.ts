@@ -1,11 +1,11 @@
-import { AbstractTileMetrics } from "./tiles.metrics";
-import { IGeo2 } from "../geography/geography.interfaces";
-import { ICartesian2 } from "../geometry/geometry.interfaces";
-import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
-import { Scalar } from "../math/math";
-import { Geo2 } from "../geography/geography.position";
-import { Cartesian2 } from "../geometry/geometry.cartesian";
-import { ITileMetricsOptions } from "./tiles.interfaces";
+import { AbstractTileMetrics } from "../tiles.metrics";
+import { IGeo2 } from "../../geography/geography.interfaces";
+import { ICartesian2 } from "../../geometry/geometry.interfaces";
+import { Ellipsoid } from "../../geodesy/geodesy.ellipsoid";
+import { Scalar } from "../../math/math";
+import { Geo2 } from "../../geography/geography.position";
+import { Cartesian2 } from "../../geometry/geometry.cartesian";
+import { ITileMetricsOptions } from "../tiles.interfaces";
 
 export class EPSG3857 extends AbstractTileMetrics {
     public static Shared = new EPSG3857();

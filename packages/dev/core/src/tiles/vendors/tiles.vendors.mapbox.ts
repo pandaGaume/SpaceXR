@@ -2,7 +2,7 @@ import { Side } from "../../geometry/geometry.interfaces";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { Float32TileCodec, Float32TileCodecOptionsBuilder } from "../codecs/tiles.codecs.image";
-import { EPSG3857 } from "../tiles.geography";
+import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";

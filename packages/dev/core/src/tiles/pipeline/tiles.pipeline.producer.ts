@@ -4,6 +4,9 @@ import { ITile, ITileAddress, ITileMetrics, ITileProvider, IsTileSection } from 
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileProducer } from "./tiles.pipeline.interfaces";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 
+/// <summary>
+/// Internal interface to keep track of the provider subscription
+/// </summary>
 interface ITileProducerItem<T> {
     provider: ITileProvider<T>;
     updateObserver?: Nullable<Observer<ITile<T>>>;
@@ -15,9 +18,9 @@ export class TileProducer<T> implements ITileProducer<T> {
         if (name === undefined || name === "") throw new Error("system name can't be empty");
     }
 
-    _tileUpdateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
-    _tileAddedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
-    _tileRemovedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _updateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _addedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _removedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
 
     _items?: Map<string, ITileProducerItem<T>>;
     _id: string;
@@ -32,33 +35,45 @@ export class TileProducer<T> implements ITileProducer<T> {
         }
     }
 
-    public get id(): string {
+    public get name(): string {
         return this._id;
     }
 
     /// begin ISourceBlock
     public get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
-        this._tileUpdateObservable = this._tileUpdateObservable || new Observable<IPipelineMessageType<ITile<T>>>();
-        return this._tileUpdateObservable!;
+        this._updateObservable = this._updateObservable || new Observable<IPipelineMessageType<ITile<T>>>();
+        return this._updateObservable!;
     }
 
     public get addedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
-        this._tileAddedObservable = this._tileAddedObservable || new Observable<IPipelineMessageType<ITile<T>>>();
-        return this._tileAddedObservable!;
+        this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<ITile<T>>>();
+        return this._addedObservable!;
     }
 
     public get removedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
-        this._tileRemovedObservable = this._tileRemovedObservable || new Observable<IPipelineMessageType<ITile<T>>>();
-        return this._tileRemovedObservable!;
+        this._removedObservable = this._removedObservable || new Observable<IPipelineMessageType<ITile<T>>>();
+        return this._removedObservable!;
     }
 
     public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
+            // avoid linking twice to the same target
             const link = new TilePipelineLink(this, target, options);
             this._links.push(link);
         }
     }
+
+    public unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined {
+        const i = this._links.findIndex((l) => l.target === target);
+        if (i !== -1) {
+            const l = this._links.splice(i)[0];
+            l.dispose();
+            return l;
+        }
+        return undefined;
+    }
+
     /// end ISourceBlock
 
     /// begin ITargetBlock
@@ -139,6 +154,13 @@ export class TileProducer<T> implements ITileProducer<T> {
             l.dispose();
         }
         this._links = [];
+
+        // dispose the provider observers
+        for (const p of this._items?.values() ?? []) {
+            p.updateObserver?.dispose();
+            p.enabledObserver?.dispose();
+        }
+        this._items?.clear();
     }
 
     protected _onTileAddressesAdded(eventData: ITileAddress[], eventState: EventState): void {
@@ -151,8 +173,8 @@ export class TileProducer<T> implements ITileProducer<T> {
             for (const address of eventData) {
                 this._onTileAddressAdded(ts, address, tiles);
             }
-            if (this._tileAddedObservable && this._tileAddedObservable.hasObservers()) {
-                this._tileAddedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState?.userInfo);
+            if (this._addedObservable && this._addedObservable.hasObservers()) {
+                this._addedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState?.userInfo);
             }
         }
     }
@@ -175,8 +197,8 @@ export class TileProducer<T> implements ITileProducer<T> {
             for (const address of eventData) {
                 this._onTileAddressRemoved(ts, address, tiles);
             }
-            if (this._tileRemovedObservable && this._tileRemovedObservable.hasObservers()) {
-                this._tileRemovedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState?.userInfo);
+            if (this._removedObservable && this._removedObservable.hasObservers()) {
+                this._removedObservable.notifyObservers(tiles, -1, ts.provider, this, eventState?.userInfo);
             }
         }
     }

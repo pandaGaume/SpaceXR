@@ -3,6 +3,7 @@ import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
+import { IMemoryCache } from "../cache/cache";
 
 export function isTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
@@ -130,7 +131,6 @@ export class FetchResult<T> {
 
 export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
-    zindex: number;
     fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 
@@ -154,10 +154,25 @@ export interface ITileDisplay extends ISize2, IDisposable {
 /// </summary>
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
     name: string; // usually shortcut for datasource?.name
-    zindex: number; // usually shortcut for datasource?.zindex
     datasource: ITileDatasource<T, ITileAddress>; // the underlying data source
     accept(address: ITileAddress): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
     fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>; // fetch content using datasource.
+}
+
+export interface ITileContentProviderBuilder<T> {
+    // name and metrics are comming from data sourec
+    withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
+    withCache(cache: IMemoryCache<string, TileContent<T>>): ITileContentProviderBuilder<T>;
+    build(): ITileContentProvider<T>;
+}
+
+export function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T> {
+    if (b === null || typeof b !== "object") return false;
+    return (
+        (<ITileContentProviderBuilder<T>>b).build !== undefined &&
+        (<ITileContentProviderBuilder<T>>b).withDatasource !== undefined &&
+        (<ITileContentProviderBuilder<T>>b).withCache !== undefined
+    );
 }
 
 /// <summary>
@@ -171,7 +186,6 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
 
     name: string; // usually shortcut for contentProvider?.name
-    zindex: number; // usually shortcut for contentProvider?.zindex
     addressProcessor?: ITileAddressProcessor; // give ability to filter and/or modify address before fetching content
     contentProvider: ITileContentProvider<T>; // the underlying data source
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
@@ -180,4 +194,23 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
     activTiles(): IterableIterator<ITile<T>>; // return all active tiles
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
+}
+
+export interface ITileProviderBuilder<T> {
+    withEnabled(enabled: boolean): ITileProviderBuilder<T>;
+    withFactory(factory: ITileBuilder<T>): ITileProviderBuilder<T>;
+    withAddressProcessor(processor: ITileAddressProcessor): ITileProviderBuilder<T>;
+    withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T>;
+    build(): ITileProvider<T>;
+}
+
+export function IsTileProviderBuilder<T>(b: unknown): b is ITileProviderBuilder<T> {
+    if (b === null || typeof b !== "object") return false;
+    return (
+        (<ITileProviderBuilder<T>>b).build !== undefined &&
+        (<ITileProviderBuilder<T>>b).withEnabled !== undefined &&
+        (<ITileProviderBuilder<T>>b).withFactory !== undefined &&
+        (<ITileProviderBuilder<T>>b).withAddressProcessor !== undefined &&
+        (<ITileProviderBuilder<T>>b).withContentProvider !== undefined
+    );
 }

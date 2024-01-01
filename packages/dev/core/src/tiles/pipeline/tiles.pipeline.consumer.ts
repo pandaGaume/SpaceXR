@@ -11,34 +11,42 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
         this._id = id;
     }
 
-    public get id(): string {
+    public get name(): string {
         return this._id;
     }
 
     /// begin ITargetBlock
     public added(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        this._onTileAdded(data, eventState);
+        if (!this._onTileAdded(eventData, eventState)) {
+            this.invalidate();
+        }
     }
+
     public removed(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        this._onTileRemoved(data, eventState);
+        if (!this._onTileRemoved(eventData, eventState)) {
+            this.invalidate();
+        }
     }
+
     public updated(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        this._onTileUpdated(data, eventState);
+        if (!this._onTileRemoved(eventData, eventState)) {
+            this.invalidate();
+        }
     }
     /// end ITargetBlock
 
     public dispose() {}
 
-    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
+    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): boolean {
         /* nothing to do here, may be override by subclass */
+        return false;
     }
-    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void {
+    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): boolean {
         /* nothing to do here, may be override by subclass */
+        return false;
     }
-    protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void {
+    protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): boolean {
         /* nothing to do here, may be override by subclass */
+        return false;
     }
 }

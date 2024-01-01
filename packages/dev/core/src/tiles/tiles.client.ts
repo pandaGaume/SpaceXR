@@ -1,7 +1,7 @@
 import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { Scalar } from "../math/math";
-import { TileAddress } from "./tiles.address";
+import { TileAddress } from "./address/tiles.address";
 
 export class TileWebClientOptions {
     public static Default = new TileWebClientOptions({ maxRetry: 3, initialDelay: 1000 });

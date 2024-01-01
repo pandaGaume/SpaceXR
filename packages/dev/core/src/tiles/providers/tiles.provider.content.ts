@@ -1,7 +1,7 @@
-import { IMemoryCache, MemoryCache } from "../utils/cache";
-import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContent } from "./tiles.interfaces";
-import { Nullable } from "../types";
-import { TileAddress } from "./tiles.address";
+import { IMemoryCache, MemoryCache } from "../../cache/cache";
+import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
+import { Nullable } from "../../types";
+import { TileAddress } from "../address/tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
     private _cache: IMemoryCache<string, TileContent<T>>;
@@ -26,10 +26,6 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
 
     public get name(): string {
         return this._datasource.name;
-    }
-
-    public get zindex(): number {
-        return this._datasource.zindex;
     }
 
     public get datasource(): ITileDatasource<T, ITileAddress> {

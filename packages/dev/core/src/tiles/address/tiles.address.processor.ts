@@ -1,10 +1,10 @@
-import { ICartesian3 } from "../geometry/geometry.interfaces";
+import { ICartesian3 } from "../../geometry/geometry.interfaces";
 import { TileAddress } from "./tiles.address";
-import { ITileAddress, ITileAddressProcessor, ITileMetrics, ITileSection } from "./tiles.interfaces";
-import { TileSection } from "./tiles.section";
+import { ITileAddress, ITileAddressProcessor, ITileMetrics, ITileSection } from "../tiles.interfaces";
+import { TileSection } from "../tiles.section";
 
 /// <summary>
-/// The TileAddressProcessor is mainly used to support increase zoom levels in layered Digital Elevation Model (DEM) applications.
+/// The OffsetAddressProcessor is mainly used to support increase zoom levels in layered Digital Elevation Model (DEM) applications.
 /// It is also adaptable for various other use cases.
 /// </summary>
 export class OffsetAddressProcessor implements ITileAddressProcessor {

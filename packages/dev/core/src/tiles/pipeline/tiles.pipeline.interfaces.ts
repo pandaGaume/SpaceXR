@@ -22,6 +22,7 @@ export interface ISourceBlock<T> {
     removedObservable: Observable<IPipelineMessageType<T>>;
 
     linkTo(target: ITargetBlock<T>, options?: ILinkOptions): void;
+    unlinkFrom(target: ITargetBlock<T>): ITilePipelineLink<T> | undefined;
 }
 
 export interface ITilePipelineLink<T> extends IDisposable {
@@ -31,7 +32,7 @@ export interface ITilePipelineLink<T> extends IDisposable {
 }
 
 export interface ITilePipelineComponent extends IDisposable {
-    id?: string;
+    name?: string;
 }
 
 /// <summary>
@@ -50,3 +51,25 @@ export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider,
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {}
 
 export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {}
+
+export interface ITilePipeline<T> extends ISourceBlock<ITile<T>>, IDisposable {
+    viewAddedObservable: Observable<ITileView>;
+    viewRemovedObservable: Observable<ITileView>;
+
+    view: Array<ITileView>;
+    producer: ITileProducer<T>;
+
+    tryAddView(view: ITileView): boolean;
+    tryRemoveView(view: ITileView): boolean;
+}
+
+export interface ITilePipelineBuilder<T> {
+    withProducer(producer: ITileProducer<T>): ITilePipelineBuilder<T>;
+    withView(...view: Array<ITileView>): ITilePipelineBuilder<T>;
+    build(): ITilePipeline<T>;
+}
+
+export function IsTilePipelineBuilder<T>(b: unknown): b is ITilePipelineBuilder<T> {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITilePipelineBuilder<T>>b).build !== undefined && (<ITilePipelineBuilder<T>>b).withProducer !== undefined && (<ITilePipelineBuilder<T>>b).withView !== undefined;
+}

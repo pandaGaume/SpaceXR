@@ -1,9 +1,9 @@
-import { Observable } from "../events/events.observable";
-import { PropertyChangedEventArgs } from "../events/events.args";
-import { ISize2 } from "../geometry/geometry.interfaces";
-import { Size2 } from "../geometry/geometry.size";
-import { ValidableBase } from "../types";
-import { ITileDisplay } from "./tiles.interfaces";
+import { Observable } from "../../events/events.observable";
+import { PropertyChangedEventArgs } from "../../events/events.args";
+import { ISize2 } from "../../geometry/geometry.interfaces";
+import { Size2 } from "../../geometry/geometry.size";
+import { ValidableBase } from "../../types";
+import { ITileDisplay } from "../tiles.interfaces";
 
 export class TileDisplay extends ValidableBase implements ITileDisplay {
     _resizeObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;

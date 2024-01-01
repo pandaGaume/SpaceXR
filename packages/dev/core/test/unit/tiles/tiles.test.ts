@@ -1,5 +1,5 @@
 import { TileMetrics } from "../../../src/tiles/tiles.metrics";
-import { EPSG3857 } from "../../../src/tiles/tiles.geography";
+import { EPSG3857 } from "../../../src/tiles/geography/tiles.geography.EPSG3857";
 import { WebTileUrlBuilder } from "../../../src/tiles/tiles.urlBuilder";
 import { ITileDatasource, ITileAddress } from "../../../src/tiles/tiles.interfaces";
 import { TileAddress } from "../../../src/tiles/tiles.address";

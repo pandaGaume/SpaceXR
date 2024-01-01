@@ -5,7 +5,7 @@ import { Envelope } from "../geography/geography.envelope";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
-import { TileAddress } from "./tiles.address";
+import { TileAddress } from "./address/tiles.address";
 import { TileBuilder } from "./tiles.builder";
 
 export class Tile<T> extends TileAddress implements ITile<T> {

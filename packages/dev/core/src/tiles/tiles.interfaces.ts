@@ -1,5 +1,5 @@
 import { IDisposable, Nullable } from "../types";
-import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
@@ -181,7 +181,7 @@ export function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentPr
 /// The main interaction is done usin activateTile and deactivateTile methods which are messaging the datasource and content provider and also
 /// managing the local cache
 /// </summary>
-export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
+export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGeoBounded {
     updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated by the data source or the content provider
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
 
@@ -191,7 +191,7 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
     enabled: boolean; // enable/disable the provider
 
-    getActivTiles(): IterableIterator<ITile<T>>; // return all active tiles
+    getActivTiles(predicate?: IEnvelope | ((t: ITile<T>) => boolean)): IterableIterator<ITile<T>>; // return all active tiles
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }

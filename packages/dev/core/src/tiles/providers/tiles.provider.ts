@@ -1,5 +1,7 @@
 import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
+import { IEnvelope } from "../../geography/geography.interfaces";
+import { Envelope } from "../../geography/geography.envelope";
 
 export class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
@@ -11,11 +13,25 @@ export class TileProvider<T> implements ITileProvider<T> {
     _activTiles?: Map<string, ITile<T>>;
     _enabled: boolean;
 
+    // internal, keep the main bounds of the active tiles into the provider.
+    _bounds?: IEnvelope;
+
     public constructor(provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled = true) {
         this._addressProcessor = addressProcessor;
         this._contentProvider = provider;
         this._factory = factory;
         this._enabled = enabled;
+    }
+
+    public get bounds(): IEnvelope | undefined {
+        if (!this._bounds) {
+            this._bounds = this._buildBounds();
+        }
+        return this._bounds;
+    }
+
+    protected _buildBounds(): IEnvelope | undefined {
+        return Envelope.FromEnvelopes(...this.getActivTiles());
     }
 
     public get updatedObservable(): Observable<ITile<T>> {
@@ -65,7 +81,28 @@ export class TileProvider<T> implements ITileProvider<T> {
         this._activTiles?.clear();
     }
 
-    public *getActivTiles(): IterableIterator<ITile<T>> {
+    public *getActivTiles(predicate?: IEnvelope | ((t: ITile<T>) => boolean)): IterableIterator<ITile<T>> {
+        if (predicate) {
+            if (predicate instanceof Function) {
+                for (const t of this._activTiles?.values() ?? []) {
+                    if (predicate(t)) {
+                        yield t;
+                    }
+                }
+            } else {
+                const b = this.bounds;
+                if (b?.intersectWith(predicate)) {
+                    return;
+                }
+                // this is a place where we can optimize the search by using a quadtree
+                for (const t of this._activTiles?.values() ?? []) {
+                    const b = t.bounds;
+                    if (b && predicate.intersectWith(b)) {
+                        yield t;
+                    }
+                }
+            }
+        }
         return this._activTiles?.values() ?? [];
     }
 

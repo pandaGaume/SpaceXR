@@ -16,7 +16,7 @@ export class Envelope implements IEnvelope {
     }
 
     /// <summary>
-    /// Split the envelmope in 4 equal parts
+    /// Split the envelope in 4 equal parts
     ///  +----+----+
     ///  | 0  | 1  |
     ///  +----+----+
@@ -40,7 +40,7 @@ export class Envelope implements IEnvelope {
     }
 
     /// <summary>
-    /// Split the envelmope in 8 equal parts (3D)
+    /// Split the envelope in 8 equal parts (3D)
     ///  +----+----+
     ///  | 0  | 1  |
     ///  +----+----+ bottom

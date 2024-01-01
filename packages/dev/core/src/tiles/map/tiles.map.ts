@@ -6,7 +6,10 @@ import { ITileNavigationApi, IsTileNavigationState } from "../navigation/tiles.n
 import { TileNavigation } from "../navigation";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
-import { Nullable } from "core/types";
+import { Nullable } from "../../types";
+import { IEnvelope } from "../../geography";
+import { IRectangle } from "../../geometry/geometry.interfaces";
+import { Rectangle } from "../../geometry/geometry.rectangle";
 
 export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
@@ -22,6 +25,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
 
     _viewAddedObserver: Nullable<Observer<ITileView>>;
     _viewRemovedObserver: Nullable<Observer<ITileView>>;
+
+    _invalidBounds?: IEnvelope;
+    _invalidRect?: IRectangle;
 
     /// <summary>
     /// Create a new tile map.
@@ -199,13 +205,67 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         this._removeSortedLayer(layer);
     }
 
-    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): boolean {
-        return super._onTileAdded(eventData, eventState);
+    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
+        this._defineInvalidateBounds(eventData);
     }
-    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): boolean {
-        return super._onTileRemoved(eventData, eventState);
+
+    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void {
+        this._defineInvalidateBounds(eventData);
     }
-    protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): boolean {
-        return super._onTileUpdated(eventData, eventState);
+
+    protected _defineInvalidateBounds(eventData: Array<ITile<T>>): void {
+        let env: IEnvelope | undefined;
+        let rect: IRectangle | undefined;
+        for (const tile of eventData) {
+            const b = tile.bounds;
+            if (b) {
+                if (!env) {
+                    env = b.clone();
+                } else {
+                    env.unionInPlace(b);
+                }
+            }
+            const r = tile.rect;
+            if (r) {
+                if (!rect) {
+                    rect = r.clone();
+                } else {
+                    rect.unionInPlace(r);
+                }
+            }
+        }
+        if (env) {
+            this._invalidateEnvelope(env);
+        }
+        if (rect) {
+            this._invalidateRectangle(rect);
+        }
     }
+
+    protected _invalidateEnvelope(env: IEnvelope): void {
+        // may be cumulative
+        this._invalidBounds = this._invalidBounds ? this._invalidBounds.unionInPlace(env) : env;
+    }
+
+    protected _invalidateRectangle(rect: IRectangle): void {
+        // may be cumulative
+        this._invalidRect = this._invalidRect ? this._invalidRect.unionInPlace(rect) : rect;
+    }
+
+    protected *_getActivTiles(rect?: IRectangle): IterableIterator<ITile<T>> {
+        for (const l of this._orderedLayers ?? []) {
+            if (l.enabled && l.provider.enabled) {
+                yield* l.provider.activTiles.intersect(rect);
+            }
+        }
+    }
+
+    protected _doValidate() {
+        const tiles = this._getActivTiles(this._invalidRect);
+        this._displayTiles(tiles);
+        this._invalidBounds = undefined;
+        this._invalidRect = undefined;
+    }
+
+    protected _displayTiles(tiles: IterableIterator<ITile<T>>) {}
 }

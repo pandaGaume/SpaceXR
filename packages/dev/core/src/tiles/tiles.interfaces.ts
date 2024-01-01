@@ -1,6 +1,6 @@
 import { IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
@@ -45,13 +45,30 @@ export function IsTileContentView<T>(b: unknown): b is ITileSection {
 
 export type TileContent<T> = Nullable<T | ITileSection>;
 
-export interface ITile<T> extends IGeoBounded {
+export interface ITile<T> extends IGeoBounded, IBounded {
     namespace?: string;
     address: ITileAddress;
     content: TileContent<T>;
-    rect?: IRectangle;
-    key: string;
-    neighborKeys?: string;
+    quadkey: string; // shortcut for address.quadkey
+}
+
+/// <summary>
+/// The TileCollection is a collection of tiles, it is used to store the active tiles of a provider
+/// Tile are stored using a quadkey index, this allow fast access to a tile using its address only.
+/// Namespace is supposed to be consistent within a collection.
+/// The collection also provide the overall bounds (geographical and pixel) of the tiles it contains.
+/// </summary>
+export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
+    count: number;
+    has(address: ITileAddress): boolean;
+    get(address: ITileAddress): ITile<T> | undefined;
+    getAll(...tile: Array<ITileAddress>): void;
+    add(tile: ITile<T>): void;
+    addAll(...tile: Array<ITile<T>>): void;
+    remove(address: ITileAddress): void;
+    removeAll(...address: Array<ITileAddress>): void;
+    clear(): void;
+    intersect(bounds?: IRectangle | IEnvelope): IterableIterator<ITile<T>>;
 }
 
 export interface ITileProxy<T> {
@@ -59,7 +76,7 @@ export interface ITileProxy<T> {
 }
 
 export interface ITileBuilder<T> {
-    withNamespace(namesapce: string): ITileBuilder<T>;
+    withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContent<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
@@ -181,7 +198,7 @@ export function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentPr
 /// The main interaction is done usin activateTile and deactivateTile methods which are messaging the datasource and content provider and also
 /// managing the local cache
 /// </summary>
-export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGeoBounded {
+export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated by the data source or the content provider
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
 
@@ -190,8 +207,8 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGe
     contentProvider: ITileContentProvider<T>; // the underlying data source
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
     enabled: boolean; // enable/disable the provider
+    activTiles: ITileCollection<T>; // return all active tiles
 
-    getActivTiles(predicate?: IEnvelope | ((t: ITile<T>) => boolean)): IterableIterator<ITile<T>>; // return all active tiles
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }

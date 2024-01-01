@@ -1,4 +1,4 @@
-import { IGeo2, isLocation } from "../../geography/geography.interfaces";
+import { IGeo2, IsLocation } from "../../geography/geography.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
 import { ITileMetricsProvider } from "../tiles.interfaces";
@@ -24,7 +24,7 @@ export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
     if (b === null || typeof b !== "object") return false;
     return (
         (<ITileNavigationState>b).center !== undefined &&
-        isLocation((<ITileNavigationState>b).center) &&
+        IsLocation((<ITileNavigationState>b).center) &&
         (<ITileNavigationState>b).zoom !== undefined &&
         (<ITileNavigationState>b).azimuth !== undefined &&
         (<ITileNavigationState>b).azimuth instanceof Bearing

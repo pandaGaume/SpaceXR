@@ -17,36 +17,30 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
 
     /// begin ITargetBlock
     public added(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        if (!this._onTileAdded(eventData, eventState)) {
-            this.invalidate();
-        }
+        this._onTileAdded(eventData, eventState);
+        this.invalidate();
     }
 
     public removed(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        if (!this._onTileRemoved(eventData, eventState)) {
-            this.invalidate();
-        }
+        this._onTileRemoved(eventData, eventState);
+        this.invalidate();
     }
 
     public updated(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        if (!this._onTileRemoved(eventData, eventState)) {
-            this.invalidate();
-        }
+        this._onTileRemoved(eventData, eventState);
+        this.invalidate();
     }
     /// end ITargetBlock
 
     public dispose() {}
 
-    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): boolean {
+    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
         /* nothing to do here, may be override by subclass */
-        return false;
     }
-    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): boolean {
+    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void {
         /* nothing to do here, may be override by subclass */
-        return false;
     }
-    protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): boolean {
+    protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void {
         /* nothing to do here, may be override by subclass */
-        return false;
     }
 }

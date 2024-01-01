@@ -44,7 +44,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
     public get address(): ITileAddress {
         return this;
     }
-    public get key(): string {
+    public get quadkey(): string {
         return this.address.quadkey;
     }
 

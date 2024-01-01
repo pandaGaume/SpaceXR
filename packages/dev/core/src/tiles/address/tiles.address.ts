@@ -3,6 +3,10 @@ import { Scalar } from "../../math/math";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 
 export class TileAddress implements ITileAddress {
+    public static IsEquals(a: ITileAddress, b: ITileAddress): boolean {
+        return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
+    }
+
     public static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean {
         if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
             return false;

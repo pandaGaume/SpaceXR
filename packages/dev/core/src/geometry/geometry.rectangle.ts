@@ -1,5 +1,5 @@
 import { Cartesian2 } from "./geometry.cartesian";
-import { IRectangle, ICartesian2, ISize2 } from "./geometry.interfaces";
+import { IRectangle, ICartesian2, ISize2, IBounded, isRectangle } from "./geometry.interfaces";
 
 export class Rectangle implements IRectangle {
     public static Zero(): IRectangle {
@@ -25,6 +25,24 @@ export class Rectangle implements IRectangle {
             }
         }
         return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
+    }
+
+    public static FromRectangles(...array: Array<IRectangle | IBounded | undefined>): IRectangle | undefined {
+        let rect: IRectangle | undefined = undefined;
+        for (let i = 0; i < array.length; i++) {
+            let a = array[i];
+            if (a) {
+                if (isRectangle(a)) {
+                    rect = rect ? rect.unionInPlace(a) : a.clone();
+                } else {
+                    a = a.rect;
+                    if (a) {
+                        rect = rect ? rect.unionInPlace(a) : a.clone();
+                    }
+                }
+            }
+        }
+        return rect;
     }
 
     public constructor(public x: number, public y: number, public width: number, public height: number) {}

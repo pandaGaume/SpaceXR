@@ -75,6 +75,10 @@ export function isRectangle(b: unknown): b is IRectangle {
     return (<IRectangle>b).ymax !== undefined && (<IRectangle>b).xmin !== undefined && (<IRectangle>b).xmax !== undefined && (<IRectangle>b).ymin !== undefined;
 }
 
+export interface IBounded {
+    rect?: IRectangle;
+}
+
 export interface IBox extends ISize3, ICartesian3 {
     top: number;
     left: number;

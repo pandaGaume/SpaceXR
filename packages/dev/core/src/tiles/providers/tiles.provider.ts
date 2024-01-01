@@ -1,7 +1,8 @@
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
-import { Envelope } from "../../geography/geography.envelope";
+import { IRectangle } from "core/geometry/geometry.interfaces";
+import { TileCollection } from "../tiles.collections";
 
 export class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
@@ -10,11 +11,8 @@ export class TileProvider<T> implements ITileProvider<T> {
     _addressProcessor?: ITileAddressProcessor | undefined;
     _contentProvider: ITileContentProvider<T>;
     _factory: ITileBuilder<T>;
-    _activTiles?: Map<string, ITile<T>>;
+    _activTiles?: TileCollection<T>;
     _enabled: boolean;
-
-    // internal, keep the main bounds of the active tiles into the provider.
-    _bounds?: IEnvelope;
 
     public constructor(provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled = true) {
         this._addressProcessor = addressProcessor;
@@ -24,14 +22,11 @@ export class TileProvider<T> implements ITileProvider<T> {
     }
 
     public get bounds(): IEnvelope | undefined {
-        if (!this._bounds) {
-            this._bounds = this._buildBounds();
-        }
-        return this._bounds;
+        return this._activTiles?.bounds;
     }
 
-    protected _buildBounds(): IEnvelope | undefined {
-        return Envelope.FromEnvelopes(...this.getActivTiles());
+    public get rect(): IRectangle | undefined {
+        return this._activTiles?.rect;
     }
 
     public get updatedObservable(): Observable<ITile<T>> {
@@ -81,37 +76,17 @@ export class TileProvider<T> implements ITileProvider<T> {
         this._activTiles?.clear();
     }
 
-    public *getActivTiles(predicate?: IEnvelope | ((t: ITile<T>) => boolean)): IterableIterator<ITile<T>> {
-        if (predicate) {
-            if (predicate instanceof Function) {
-                for (const t of this._activTiles?.values() ?? []) {
-                    if (predicate(t)) {
-                        yield t;
-                    }
-                }
-            } else {
-                const b = this.bounds;
-                if (b?.intersectWith(predicate)) {
-                    return;
-                }
-                // this is a place where we can optimize the search by using a quadtree
-                for (const t of this._activTiles?.values() ?? []) {
-                    const b = t.bounds;
-                    if (b && predicate.intersectWith(b)) {
-                        yield t;
-                    }
-                }
-            }
-        }
-        return this._activTiles?.values() ?? [];
+    public get activTiles(): ITileCollection<T> {
+        return this._activTiles ?? (this._activTiles = new TileCollection<T>());
     }
 
     public activateTile(...address: Array<ITileAddress>): Array<ITile<T>> {
-        const toActivate = address.length === 0 ? [...(this._activTiles?.values() ?? [])].map((t) => t.address) : address;
+        const toActivate = address.length === 0 ? [...(this._activTiles ?? [])].map((t) => t.address) : address;
         const tiles = new Array<ITile<T>>();
         for (const a of toActivate ?? []) {
-            if (this._activTiles?.has(a.quadkey)) {
-                tiles.push(this._activTiles.get(a.quadkey)!);
+            const t = this._activTiles?.get(a);
+            if (t) {
+                tiles.push(t);
                 continue;
             }
             const factory = this._factory.withNamespace(this._contentProvider.name).withAddress(a);
@@ -136,14 +111,17 @@ export class TileProvider<T> implements ITileProvider<T> {
     }
 
     public deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>> {
-        const toDeactivate = address.length === 0 ? this._activTiles?.keys() : address.map((a) => a.quadkey);
-        const tiles = new Array<ITile<T>>();
-        for (const k of toDeactivate ?? []) {
-            if (this._activTiles?.has(k)) {
-                tiles.push(this._activTiles.get(k)!);
-                this._activTiles.delete(k)!;
+        if (this._activTiles && this._activTiles.count) {
+            const tiles = new Array<ITile<T>>();
+            for (const a of address ?? []) {
+                const t = this._activTiles?.get(a);
+                if (t) {
+                    tiles.push(t);
+                    this._activTiles?.remove(a)!;
+                }
             }
+            return tiles;
         }
-        return tiles;
+        return [];
     }
 }

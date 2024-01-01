@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Scalar } from "../math/math";
-import { IEnvelope, IGeo2, IGeo3, IGeoBounded, isEnvelope, isGeoBounded, isLocation } from "./geography.interfaces";
+import { IEnvelope, IGeo2, IGeo3, IGeoBounded, IsEnvelope, IsGeoBounded, IsLocation } from "./geography.interfaces";
 import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
 import { Geo3 } from "./geography.position";
 import { Size3 } from "../geometry/geometry.size";
@@ -25,7 +25,7 @@ export class Envelope implements IEnvelope {
     /// </summary>
     public static Split2(a: IEnvelope | IGeoBounded | undefined): IEnvelope[] {
         if (a) {
-            if (isGeoBounded(a)) {
+            if (IsGeoBounded(a)) {
                 return Envelope.Split2(a.bounds);
             }
             const center = a.center;
@@ -54,7 +54,7 @@ export class Envelope implements IEnvelope {
     /// </summary>
     public static Split3(a: IEnvelope | IGeoBounded | undefined): IEnvelope[] {
         if (a) {
-            if (isGeoBounded(a)) {
+            if (IsGeoBounded(a)) {
                 return Envelope.Split3(a.bounds);
             }
             if (a.hasAltitude) {
@@ -115,11 +115,13 @@ export class Envelope implements IEnvelope {
         for (let i = 0; i < array.length; i++) {
             let a = array[i];
             if (a) {
-                if (isGeoBounded(a)) {
-                    a = a.bounds;
-                }
-                if (isEnvelope(a)) {
+                if (IsEnvelope(a)) {
                     env = env ? env.unionInPlace(a) : a.clone();
+                } else {
+                    a = a.bounds;
+                    if (a) {
+                        env = env ? env.unionInPlace(a) : a.clone();
+                    }
                 }
             }
         }
@@ -214,7 +216,7 @@ export class Envelope implements IEnvelope {
     }
 
     public addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope {
-        if (isLocation(lat)) {
+        if (IsLocation(lat)) {
             return this.addInPlace(lat.lat, lat.lon, (<IGeo3>lat).alt);
         }
 
@@ -243,7 +245,7 @@ export class Envelope implements IEnvelope {
         return this;
     }
 
-    public intersectWith(bounds: IEnvelope): boolean {
+    public intersect(bounds: IEnvelope): boolean {
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
             return false;
         }

@@ -1,7 +1,6 @@
 import { ITile, ITileDisplay, ITileMetrics } from "../../tiles/tiles.interfaces";
 
 import { IRectangle } from "../../geometry/geometry.interfaces";
-import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Scalar } from "../../math/math";
 import { RGBAColor } from "../../math/math.color";
 
@@ -14,9 +13,9 @@ type CanvasTileContentType = HTMLImageElement;
 type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
 
 export class CanvasTileMapOptions {
-    public static DefaultBackColor = RGBAColor.LightGray();
-    public static DefaultForeColor = RGBAColor.Gray();
-    public static Default = new CanvasTileMapOptions({ background: CanvasTileMapOptions.DefaultBackColor, color: CanvasTileMapOptions.DefaultForeColor });
+    public static DefaultBackground = RGBAColor.LightGray();
+    public static DefaultColor = RGBAColor.Gray();
+    public static Default = new CanvasTileMapOptions({ background: CanvasTileMapOptions.DefaultBackground, color: CanvasTileMapOptions.DefaultColor });
 
     public background?: RGBAColor;
     public color?: RGBAColor;
@@ -64,40 +63,6 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     ) {
         super(name, display, pipeline, nav);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
-    }
-
-    protected invalidateTiles(added?: ITile<CanvasTileContentType>[], removed?: ITile<CanvasTileContentType>[]): void {
-        if (added) {
-            const ctx = this._getContext2D();
-            if (ctx) {
-                ctx.save();
-                ctx.strokeStyle = this._options?.color?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
-                this._draw(ctx, added);
-                ctx.restore();
-            }
-        }
-    }
-
-    protected invalidateDisplay(rect?: IRectangle) {
-        const ctx = this._getContext2D();
-        if (ctx) {
-            ctx.save();
-            const res = this._display;
-            rect = rect || new Rectangle(0, 0, res.width, res.height);
-            ctx.fillStyle = this._options?.background?.toString() ?? CanvasTileMapOptions.DefaultBackColor.toString();
-            ctx.strokeStyle = this._options?.color?.toString() ?? CanvasTileMapOptions.DefaultForeColor.toString();
-            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-            this._draw(ctx, this._getActivTiles());
-            ctx.restore();
-        }
-    }
-
-    protected *_getActivTiles(predicate?: (t: ITile<CanvasTileContentType>) => boolean): IterableIterator<ITile<CanvasTileContentType>> {
-        for (const p of this._orderedLayers ?? []) {
-            if (p.enabled) {
-                yield* p.provider.getActivTiles();
-            }
-        }
     }
 
     protected _draw(ctx: CanvasRenderingContext2D, tiles: IterableIterator<ITile<CanvasTileContentType>> | Array<ITile<CanvasTileContentType>>) {

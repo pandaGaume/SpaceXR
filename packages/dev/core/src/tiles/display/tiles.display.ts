@@ -1,26 +1,39 @@
 import { Observable } from "../../events/events.observable";
 import { PropertyChangedEventArgs } from "../../events/events.args";
-import { ISize2 } from "../../geometry/geometry.interfaces";
-import { Size2 } from "../../geometry/geometry.size";
-import { ValidableBase } from "../../types";
-import { ITileDisplay } from "../tiles.interfaces";
 
-export class TileDisplay extends ValidableBase implements ITileDisplay {
-    _resizeObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;
+import { Size2 } from "../../geometry/geometry.size";
+import { ITileDisplay } from "../tiles.interfaces";
+import { Cartesian2 } from "core/geometry";
+
+export class TileDisplay implements ITileDisplay {
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    _x: number;
+    _y: number;
     _w: number;
     _h: number;
 
-    public constructor(w?: number, h?: number) {
-        super();
+    public constructor(x?: number, y?: number, w?: number, h?: number) {
+        this._x = x ?? 0;
+        this._y = y ?? 0;
         this._w = w ?? 0;
         this._h = h ?? 0;
     }
 
     public dispose(): void {}
 
-    public get resizeObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>> {
-        this._resizeObservable = this._resizeObservable || new Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>();
-        return this._resizeObservable;
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, unknown>> {
+        if (!this._propertyChangedObservable) {
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>();
+        }
+        return this._propertyChangedObservable;
+    }
+
+    public get x(): number {
+        return this._x;
+    }
+
+    public get y(): number {
+        return this._y;
     }
 
     public get width(): number {
@@ -31,21 +44,36 @@ export class TileDisplay extends ValidableBase implements ITileDisplay {
         return this._h;
     }
 
-    public setSize(w: number, h: number): ITileDisplay {
+    public translate(x: number, y: number): ITileDisplay {
+        if (this._x !== x || this._y != y) {
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                const old = new Cartesian2(this._x, this._y);
+                const value = new Cartesian2(x, y);
+                this._x = x;
+                this._y = y;
+                const e = new PropertyChangedEventArgs(this, old, value, "position");
+                this._propertyChangedObservable.notifyObservers(e);
+                return this;
+            }
+            this._x = x;
+            this._y = y;
+        }
+        return this;
+    }
+
+    public resize(w: number, h: number): ITileDisplay {
         if (this._w !== w || this._h != h) {
-            if (this._resizeObservable && this._resizeObservable.hasObservers()) {
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const old = new Size2(this._w, this._h);
                 const value = new Size2(w, h);
                 this._w = w;
                 this._h = h;
-                const e = new PropertyChangedEventArgs(this, old, value);
-                this._resizeObservable.notifyObservers(e);
-                this.invalidate();
+                const e = new PropertyChangedEventArgs(this, old, value, "size");
+                this._propertyChangedObservable.notifyObservers(e);
                 return this;
             }
             this._w = w;
             this._h = h;
-            this.invalidate();
         }
         return this;
     }

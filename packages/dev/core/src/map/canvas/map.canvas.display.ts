@@ -26,8 +26,8 @@ export class CanvasDisplay extends TileDisplay {
         return false;
     }
 
-    public constructor(public canvas: HTMLCanvasElement) {
-        super(canvas.width, canvas.height);
+    public constructor(public canvas: HTMLCanvasElement, x?: number, y?: number, w?: number, h?: number) {
+        super(x ?? 0, y ?? 0, w ?? canvas.width, h ?? canvas.height);
     }
 
     public getContext(options?: CanvasRenderingContext2DSettings | undefined): CanvasRenderingContext2D | null {

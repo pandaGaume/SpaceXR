@@ -6,6 +6,7 @@ export class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
     _name?: string;
     _provider?: ITileProvider<T> | ITileProviderBuilder<T>;
     _zindex?: number;
+    _alpha?: number;
     _enabled?: boolean;
 
     public constructor(name?: string, provider?: ITileProvider<T>) {
@@ -32,6 +33,11 @@ export class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
         return this;
     }
 
+    public withAlpha(alpha: number): ITileMapLayerBuilder<T> {
+        this._alpha = alpha;
+        return this;
+    }
+
     public withEnabled(enabled: boolean): ITileMapLayerBuilder<T> {
         this._enabled = enabled;
         return this;
@@ -43,8 +49,8 @@ export class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
         }
         if (IsTileProviderBuilder<T>(this._provider)) {
             const p = this._provider?.build();
-            return new TileMapLayer<T>(this._name ?? "", p, this._zindex, this._enabled);
+            return new TileMapLayer<T>(this._name ?? "", p, this._zindex, this._alpha, this._enabled);
         }
-        return new TileMapLayer<T>(this._name ?? "", this._provider, this._zindex, this._enabled);
+        return new TileMapLayer<T>(this._name ?? "", this._provider, this._zindex, this._alpha, this._enabled);
     }
 }

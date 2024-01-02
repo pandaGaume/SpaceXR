@@ -161,9 +161,10 @@ export interface ITileCodec<T> {
 
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}
 
-export interface ITileDisplay extends ISize2, IDisposable {
-    resizeObservable: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;
-    setSize(w: number, h: number): ITileDisplay;
+export interface ITileDisplay extends ICartesian2, ISize2, IDisposable {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    resize(w: number, h: number): ITileDisplay;
+    translate(x: number, y: number): ITileDisplay;
 }
 
 /// <summary>

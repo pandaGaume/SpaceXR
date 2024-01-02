@@ -7,12 +7,14 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;
     _provider: ITileProvider<T>;
     _zindex: number;
+    _alpha: number;
     _enabled: boolean;
 
-    public constructor(name: string, provider: ITileProvider<T>, zindex?: number, enabled?: boolean) {
+    public constructor(name: string, provider: ITileProvider<T>, zindex?: number, alpha?: number, enabled?: boolean) {
         this._name = name;
         this._provider = provider;
         this._zindex = zindex ?? -1;
+        this._alpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1.0) : 1.0; // default is opaque
         this._enabled = enabled ?? true; // default is enabled
     }
 
@@ -58,6 +60,24 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
                 return;
             }
             this._zindex = zindex;
+        }
+    }
+
+    public get alpha(): number {
+        return this._alpha;
+    }
+
+    public set alpha(alpha: number) {
+        const a = Math.min(Math.max(alpha, 0), 1.0);
+        if (this._alpha !== a) {
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                const oldValue = this._alpha;
+                this._alpha = a;
+                const args = new PropertyChangedEventArgs<ITileMapLayer<T>, unknown>(this, oldValue, this._alpha, "alpha");
+                this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+                return;
+            }
+            this._alpha = a;
         }
     }
 

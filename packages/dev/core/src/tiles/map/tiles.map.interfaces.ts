@@ -1,14 +1,16 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileView } from "../pipeline/tiles.pipeline.interfaces";
-import { ITile, ITileDisplay, ITileMetrics, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { ITileConsumer, ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
+import { ITileDisplay, ITileMetrics, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
+import { Nullable } from "../../types";
 
 export interface ITileMapLayer<T> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>>;
     name: string;
     provider: ITileProvider<T>;
     zindex: number;
+    alpha: number;
     enabled: boolean;
 }
 
@@ -16,6 +18,7 @@ export interface ITileMapLayerBuilder<T> {
     name: string; // provide access to the underlying name for uniquely identify the intended layer
     withName(name: string): ITileMapLayerBuilder<T>;
     withZIndex(zindex: number): ITileMapLayerBuilder<T>;
+    withAlpha(value: number): ITileMapLayerBuilder<T>;
     withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T>;
     withEnabled(enabled: boolean): ITileMapLayerBuilder<T>;
     build(): ITileMapLayer<T>;
@@ -47,7 +50,7 @@ export interface ITileMap<T> extends ITileConsumer<T> {
     layerAddedObservable: Observable<ITileMapLayer<T>>;
     layerRemovedObservable: Observable<ITileMapLayer<T>>;
 
-    display: ITileDisplay;
+    display: Nullable<ITileDisplay>;
     navigation: ITileNavigationApi;
 
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;

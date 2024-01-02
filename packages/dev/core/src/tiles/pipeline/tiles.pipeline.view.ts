@@ -74,7 +74,7 @@ export class TileView implements ITileView {
             }
             this._display = display;
             if (this._display) {
-                this._displayObserver = this._display.resizeObservable.add(this._onResize.bind(this));
+                this._displayObserver = this._display.resizedObservable.add(this._onResize.bind(this));
                 this._doValidateContext(this._state, true); // force context to be validated if we change of api.
             }
         }

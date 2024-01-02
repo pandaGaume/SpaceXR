@@ -36,8 +36,8 @@ export class ValidableBase implements IValidable<ValidableBase> {
         return this;
     }
 
-    public validate(): ValidableBase {
-        if (!this._valid) {
+    public validate(force?: boolean): ValidableBase {
+        if (!this._valid || force) {
             this._doValidateInternal();
             this._valid = true;
         }

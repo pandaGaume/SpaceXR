@@ -1,21 +1,19 @@
 import { EventState, Observable, Observer } from "../../events/events.observable";
 import { TileConsumerBase } from "../pipeline/tiles.pipeline.consumer";
 import { ITilePipeline, ITilePipelineBuilder, ITileView, IsTilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
-import { ITile, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
+import { ITileDisplay, ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationApi, IsTileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { TileNavigation } from "../navigation";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
-import { IEnvelope } from "../../geography";
-import { IRectangle } from "../../geometry/geometry.interfaces";
-import { Rectangle } from "../../geometry/geometry.rectangle";
+import { PropertyChangedEventArgs } from "../../events/events.args";
 
 export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
     _layerRemovedObservable?: Observable<ITileMapLayer<T>>;
 
-    protected _display: ITileDisplay;
+    protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationApi;
     protected _pipeline: ITilePipeline<T>;
     protected _layers?: Map<string, ITileMapLayer<T>>;
@@ -26,8 +24,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _viewAddedObserver: Nullable<Observer<ITileView>>;
     _viewRemovedObserver: Nullable<Observer<ITileView>>;
 
-    _invalidBounds?: IEnvelope;
-    _invalidRect?: IRectangle;
+    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
 
     /// <summary>
     /// Create a new tile map.
@@ -41,6 +38,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     public constructor(name: string, display: ITileDisplay, pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationApi | ITileMetrics) {
         super(name ?? "");
         this._display = display;
+
         if (IsTilePipelineBuilder<T>(pipeline)) {
             pipeline = pipeline.build();
         }
@@ -58,7 +56,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
 
         // link the views to the map (ie navigation state and display)
         for (const view of this._pipeline.view) {
-            this._linkView(view);
+            this._bindView(view);
         }
 
         // listen to view added/removed events in order to link/unlink the views to the map
@@ -76,16 +74,20 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         return this._layerRemovedObservable;
     }
 
-    public get display(): ITileDisplay {
+    public get display(): Nullable<ITileDisplay> {
         return this._display;
     }
 
-    public set display(display: ITileDisplay) {
+    public set display(display: Nullable<ITileDisplay>) {
         if (this._display !== display) {
-            this._display = display;
-            for (const view of this._pipeline.view) {
-                view.display = this._display;
+            if (this._display) {
+                this._unbindDisplay(this._display);
             }
+            this._display = display;
+            if (this._display) {
+                this._bindDisplay(this._display);
+            }
+            this.invalidate();
         }
     }
 
@@ -99,6 +101,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
             for (const view of this._pipeline.view) {
                 view.state = this._navigation;
             }
+            this.invalidate();
         }
     }
 
@@ -136,6 +139,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         if (!this._layers) this._layers = new Map<string, ITileMapLayer<T>>();
         if (layer.name && !this._layers.has(layer.name)) {
             this._layers.set(layer.name, layer);
+            this._addSortedLayer(layer);
+            this.invalidate();
+            // we give the hand to other components
             this._onLayerAdded(layer);
             if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
                 this._layerAddedObservable.notifyObservers(layer, -1, this, this);
@@ -146,6 +152,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     public removeLayer(layer: ITileMapLayer<T>): void {
         if (this._layers && layer.name && this._layers.has(layer.name)) {
             this._layers.delete(layer.name);
+            this._removeSortedLayer(layer);
+            this.invalidate();
+            // we give the hand to other components
             this._onLayerRemoved(layer);
             if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
                 this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
@@ -160,35 +169,62 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         this._viewRemovedObserver?.dispose();
         this._pipeline.unlinkFrom(this);
         for (const view of this._pipeline.view) {
-            this._unlinkView(view);
+            this._unbindView(view);
+        }
+        if (this._display) {
+            this._unbindDisplay(this._display);
         }
     }
 
-    protected _onViewAdded(view: ITileView, state: EventState): void {
-        this._linkView(view);
+    private _onViewAdded(view: ITileView, state: EventState): void {
+        this._bindView(view);
     }
 
-    protected _onViewRemoved(view: ITileView, state: EventState): void {
-        this._unlinkView(view);
+    private _onViewRemoved(view: ITileView, state: EventState): void {
+        this._unbindView(view);
     }
 
-    protected _linkView(view: ITileView): void {
+    private _bindView(view: ITileView): void {
         view.display = this._display;
         view.state = this._navigation;
+        this.invalidate();
+        this._onViewBinded(view);
     }
 
-    protected _unlinkView(view: ITileView): void {
+    private _unbindView(view: ITileView): void {
         view.display = null;
         view.state = null;
+        this.invalidate();
+        this._onViewUnbinded(view);
     }
 
-    protected _addSortedLayer(layer: ITileMapLayer<T>): void {
+    private _bindDisplay(display: ITileDisplay): void {
+        this._display = display;
+        this._displayPropertyObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
+        for (const view of this._pipeline.view) {
+            view.display = this._display;
+        }
+        this.invalidate();
+        this._onDisplayBinded(display);
+    }
+
+    private _unbindDisplay(display: ITileDisplay): void {
+        this._displayPropertyObserver?.dispose();
+        for (const view of this._pipeline.view) {
+            view.display = null;
+        }
+        this._display = null;
+        this.invalidate();
+        this._onDisplayUnbinded(display);
+    }
+
+    private _addSortedLayer(layer: ITileMapLayer<T>): void {
         if (!this._orderedLayers) this._orderedLayers = [];
         this._orderedLayers.push(layer);
         this._orderedLayers.sort((a, b) => a.zindex - b.zindex); // sort by zindex
     }
 
-    protected _removeSortedLayer(layer: ITileMapLayer<T>): void {
+    private _removeSortedLayer(layer: ITileMapLayer<T>): void {
         if (this._orderedLayers) {
             const index = this._orderedLayers.findIndex((l) => l === layer);
             if (index !== -1) {
@@ -197,75 +233,53 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         }
     }
 
+    private _onDisplayPropertyChanged(display: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
+        switch (display.propertyName) {
+            case "size": {
+                this.invalidate();
+                this._onDisplayResized(display.source);
+                break;
+            }
+            case "position": {
+                this.invalidate();
+                this._onDisplayTranslated(display.source);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    protected _onDisplayUnbinded(display: ITileDisplay): void {
+        /* nothing to do here - overrided by subclasses */
+    }
+
+    protected _onDisplayBinded(display: ITileDisplay): void {
+        /* nothing to do here - overrided by subclasses */
+    }
+
+    protected _onDisplayResized(display: ITileDisplay): void {
+        /* nothing to do here - overrided by subclasses */
+    }
+
+    protected _onDisplayTranslated(display: ITileDisplay): void {
+        /* nothing to do here - overrided by subclasses */
+    }
+
     protected _onLayerAdded(layer: ITileMapLayer<T>): void {
-        this._addSortedLayer(layer);
+        /* nothing to do here - overrided by subclasses */
     }
 
     protected _onLayerRemoved(layer: ITileMapLayer<T>): void {
-        this._removeSortedLayer(layer);
+        /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
-        this._defineInvalidateBounds(eventData);
+    protected _onViewUnbinded(view: ITileView): void {
+        /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void {
-        this._defineInvalidateBounds(eventData);
+    protected _onViewBinded(view: ITileView): void {
+        /* nothing to do here - overrided by subclasses */
     }
-
-    protected _defineInvalidateBounds(eventData: Array<ITile<T>>): void {
-        let env: IEnvelope | undefined;
-        let rect: IRectangle | undefined;
-        for (const tile of eventData) {
-            const b = tile.bounds;
-            if (b) {
-                if (!env) {
-                    env = b.clone();
-                } else {
-                    env.unionInPlace(b);
-                }
-            }
-            const r = tile.rect;
-            if (r) {
-                if (!rect) {
-                    rect = r.clone();
-                } else {
-                    rect.unionInPlace(r);
-                }
-            }
-        }
-        if (env) {
-            this._invalidateEnvelope(env);
-        }
-        if (rect) {
-            this._invalidateRectangle(rect);
-        }
-    }
-
-    protected _invalidateEnvelope(env: IEnvelope): void {
-        // may be cumulative
-        this._invalidBounds = this._invalidBounds ? this._invalidBounds.unionInPlace(env) : env;
-    }
-
-    protected _invalidateRectangle(rect: IRectangle): void {
-        // may be cumulative
-        this._invalidRect = this._invalidRect ? this._invalidRect.unionInPlace(rect) : rect;
-    }
-
-    protected *_getActivTiles(rect?: IRectangle): IterableIterator<ITile<T>> {
-        for (const l of this._orderedLayers ?? []) {
-            if (l.enabled && l.provider.enabled) {
-                yield* l.provider.activTiles.intersect(rect);
-            }
-        }
-    }
-
-    protected _doValidate() {
-        const tiles = this._getActivTiles(this._invalidRect);
-        this._displayTiles(tiles);
-        this._invalidBounds = undefined;
-        this._invalidRect = undefined;
-    }
-
-    protected _displayTiles(tiles: IterableIterator<ITile<T>>) {}
 }

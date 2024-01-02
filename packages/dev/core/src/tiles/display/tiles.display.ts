@@ -3,7 +3,7 @@ import { PropertyChangedEventArgs } from "../../events/events.args";
 
 import { Size2 } from "../../geometry/geometry.size";
 import { ITileDisplay } from "../tiles.interfaces";
-import { Cartesian2 } from "core/geometry";
+import { Cartesian2 } from "../../geometry";
 
 export class TileDisplay implements ITileDisplay {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;

@@ -1,0 +1,38 @@
+import { Observable, Observer } from "../../events/events.observable";
+import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
+import { Nullable } from "../../types";
+import { PropertyChangedEventArgs } from "../../events/events.args";
+import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+export declare class TileView implements ITileView {
+    _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _activ: Map<string, ITileAddress>;
+    _state: Nullable<ITileNavigationState>;
+    _stateObserver: Nullable<Observer<ITileNavigationState>>;
+    _display: Nullable<ITileDisplay>;
+    _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
+    _links: Array<ITilePipelineLink<ITileAddress>>;
+    _id: string;
+    constructor(id: string, display?: ITileDisplay, state?: ITileNavigationState);
+    get name(): string;
+    get metrics(): ITileMetrics;
+    get state(): Nullable<ITileNavigationState>;
+    set state(state: Nullable<ITileNavigationState>);
+    get display(): Nullable<ITileDisplay>;
+    set display(display: Nullable<ITileDisplay>);
+    dispose(): void;
+    get addedObservable(): Observable<IPipelineMessageType<ITileAddress>>;
+    get removedObservable(): Observable<IPipelineMessageType<ITileAddress>>;
+    get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>>;
+    linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions): void;
+    unlinkFrom(target: ITargetBlock<ITileAddress>): ITilePipelineLink<ITileAddress> | undefined;
+    private _onStateChanged;
+    private _onDisplayPropertyChanged;
+    private _doValidateContext;
+    private _doClearContext;
+    private getRectangle;
+    private rotatePointsArround;
+    private rotatePointArround;
+}

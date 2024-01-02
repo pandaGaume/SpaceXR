@@ -16,3 +16,14 @@ export interface IValidable<T> {
     validate(): T;
     revalidate(): T;
 }
+export declare class ValidableBase implements IValidable<ValidableBase> {
+    _valid: boolean;
+    get isValid(): boolean;
+    invalidate(): ValidableBase;
+    validate(force?: boolean): ValidableBase;
+    revalidate(): ValidableBase;
+    protected _doValidateInternal(): void;
+    protected _beforeValidate(): void;
+    protected _doValidate(): void;
+    protected _afterValidate(): void;
+}

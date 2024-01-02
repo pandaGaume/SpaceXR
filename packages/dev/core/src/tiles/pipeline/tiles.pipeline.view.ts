@@ -4,7 +4,7 @@ import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, IT
 import { TileAddress } from "../address/tiles.address";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
-import { ICartesian2, IRectangle, ISize2 } from "../../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle} from "../../geometry/geometry.interfaces";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Cartesian2 } from "../../geometry/geometry.cartesian";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
@@ -20,7 +20,7 @@ export class TileView implements ITileView {
     _state: Nullable<ITileNavigationState> = null;
     _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
     _display: Nullable<ITileDisplay> = null;
-    _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, ISize2>>> = null;
+    _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>> = null;
 
     // internal pipeline links
     _links: Array<ITilePipelineLink<ITileAddress>> = [];
@@ -74,7 +74,7 @@ export class TileView implements ITileView {
             }
             this._display = display;
             if (this._display) {
-                this._displayObserver = this._display.resizedObservable.add(this._onResize.bind(this));
+                this._displayObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
                 this._doValidateContext(this._state, true); // force context to be validated if we change of api.
             }
         }
@@ -127,15 +127,23 @@ export class TileView implements ITileView {
     }
 
     // INTERNALS
-    protected _onStateChanged(eventData: ITileNavigationState, eventState: EventState) {
+    private _onStateChanged(eventData: ITileNavigationState, eventState: EventState) {
         this._doValidateContext(eventData, true);
     }
 
-    protected _onResize(eventData: PropertyChangedEventArgs<ITileDisplay, ISize2>, eventState: EventState) {
-        this._doValidateContext(this._state, true);
+    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
+        switch (event.propertyName) {
+            case "size": {
+                this._doValidateContext(this._state, true);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
 
-    protected _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
+    private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
             const metrics = this.metrics;
             const lod = state.lod;
@@ -192,7 +200,7 @@ export class TileView implements ITileView {
         }
     }
 
-    protected _doClearContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
+    private _doClearContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state) {
             let deleted = Array.from(this._activ.values());
             this._activ.clear();

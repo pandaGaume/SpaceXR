@@ -1,6 +1,9 @@
-import { Nullable } from "../types";
-import { IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IDisposable, Nullable } from "../types";
+import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { IBounded, ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { Observable } from "../events/events.observable";
+import { PropertyChangedEventArgs } from "../events/events.args";
+import { IMemoryCache } from "../cache/cache";
 export declare function isTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
@@ -19,19 +22,29 @@ export interface ITileCruncher<T> {
 }
 export declare function IsTileContentView<T>(b: unknown): b is ITileSection;
 export type TileContent<T> = Nullable<T | ITileSection>;
-export interface ITile<T> extends IGeoBounded {
+export interface ITile<T> extends IGeoBounded, IBounded {
     namespace?: string;
     address: ITileAddress;
     content: TileContent<T>;
-    rect?: IRectangle;
-    key: string;
-    neighborKeys?: string;
+    quadkey: string;
+}
+export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
+    count: number;
+    has(address: ITileAddress): boolean;
+    get(address: ITileAddress): ITile<T> | undefined;
+    getAll(...tile: Array<ITileAddress>): void;
+    add(tile: ITile<T>): void;
+    addAll(...tile: Array<ITile<T>>): void;
+    remove(address: ITileAddress): void;
+    removeAll(...address: Array<ITileAddress>): void;
+    clear(): void;
+    intersect(bounds?: IRectangle | IEnvelope): IterableIterator<ITile<T>>;
 }
 export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
 export interface ITileBuilder<T> {
-    withNamespace(namesapce: string): ITileBuilder<T>;
+    withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContent<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
@@ -93,7 +106,6 @@ export declare class FetchResult<T> {
 }
 export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
-    zindex: number;
     fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 export interface ITileUrlBuilder {
@@ -104,3 +116,40 @@ export interface ITileCodec<T> {
 }
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
 }
+export interface ITileDisplay extends ICartesian2, ISize2, IDisposable {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    resize(w: number, h: number): ITileDisplay;
+    translate(x: number, y: number): ITileDisplay;
+}
+export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
+    name: string;
+    datasource: ITileDatasource<T, ITileAddress>;
+    accept(address: ITileAddress): boolean;
+    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
+}
+export interface ITileContentProviderBuilder<T> {
+    withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
+    withCache(cache: IMemoryCache<string, TileContent<T>>): ITileContentProviderBuilder<T>;
+    build(): ITileContentProvider<T>;
+}
+export declare function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T>;
+export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+    updatedObservable: Observable<ITile<T>>;
+    enabledObservable: Observable<ITileProvider<T>>;
+    name: string;
+    addressProcessor?: ITileAddressProcessor;
+    contentProvider: ITileContentProvider<T>;
+    factory: ITileBuilder<T>;
+    enabled: boolean;
+    activTiles: ITileCollection<T>;
+    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+}
+export interface ITileProviderBuilder<T> {
+    withEnabled(enabled: boolean): ITileProviderBuilder<T>;
+    withFactory(factory: ITileBuilder<T>): ITileProviderBuilder<T>;
+    withAddressProcessor(processor: ITileAddressProcessor): ITileProviderBuilder<T>;
+    withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T>;
+    build(): ITileProvider<T>;
+}
+export declare function IsTileProviderBuilder<T>(b: unknown): b is ITileProviderBuilder<T>;

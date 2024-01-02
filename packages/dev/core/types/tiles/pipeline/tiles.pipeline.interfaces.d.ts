@@ -1,60 +1,49 @@
-import { Observable } from "../../events/events.observable";
+import { EventState, Observable } from "../../events/events.observable";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileDatasource, ITileMetricsProvider, TileContent } from "../tiles.interfaces";
-import { ISize2 } from "../../geometry/geometry.interfaces";
+import { ITile, ITileAddress, ITileDisplay, ITileMetricsProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { PropertyChangedEventArgs } from "../../events/events.args";
+export type IPipelineMessageType<T> = Array<T>;
+export interface ITargetBlock<T> {
+    added(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    removed(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    updated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+}
+export interface ILinkOptions {
+}
+export interface ISourceBlock<T> {
+    updatedObservable: Observable<IPipelineMessageType<T>>;
+    addedObservable: Observable<IPipelineMessageType<T>>;
+    removedObservable: Observable<IPipelineMessageType<T>>;
+    linkTo(target: ITargetBlock<T>, options?: ILinkOptions): void;
+    unlinkFrom(target: ITargetBlock<T>): ITilePipelineLink<T> | undefined;
+}
+export interface ITilePipelineLink<T> extends IDisposable {
+    source: ISourceBlock<T>;
+    target: ITargetBlock<T>;
+    options?: ILinkOptions;
+}
 export interface ITilePipelineComponent extends IDisposable {
-    id?: string;
+    name?: string;
 }
-export interface ITileDisplay extends ISize2, IDisposable {
-    resizeObservable: Observable<PropertyChangedEventArgs<ITileDisplay, ISize2>>;
-    setSize(w: number, h: number): ITileDisplay;
-}
-export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
-    name: string;
-    zindex: number;
-    datasource: ITileDatasource<T, ITileAddress>;
-    accept(address: ITileAddress): boolean;
-    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
-}
-export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable {
-    tileUpdatedObservable: Observable<ITile<T>>;
-    enableObservable: Observable<ITileProvider<T>>;
-    name: string;
-    zindex: number;
-    addressProcessor?: ITileAddressProcessor;
-    contentProvider: ITileContentProvider<T>;
-    factory: ITileBuilder<T>;
-    activTiles(): IterableIterator<ITile<T>>;
-    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    enabled: boolean;
-}
-export interface ITileView extends ITilePipelineComponent {
-    addressAddedObservable: Observable<Array<ITileAddress>>;
-    addressRemovedObservable: Observable<Array<ITileAddress>>;
+export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress> {
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
 }
-export interface ITileProducer<T> extends ITilePipelineComponent, ITileMetricsProvider {
-    tileUpdatedObservable: Observable<ITile<T>>;
-    tileAddedObservable: Observable<Array<ITile<T>>>;
-    tileRemovedObservable: Observable<Array<ITile<T>>>;
-    view?: ITileView;
-    providers(predicate?: (p: ITileProvider<T>) => boolean): IterableIterator<ITileProvider<T>>;
-    getTile(address: ITileAddress, ...userArgs: Array<unknown>): Nullable<ITile<T>[]>;
-    addProvider(system: ITileProvider<T>): void;
-    removeProvider(name: string): void;
-    getProviderByName(name: string): ITileProvider<T> | undefined;
+export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
 }
-export interface ITileConsumer<T> extends ITilePipelineComponent {
-    addProducer(producer: ITileProducer<T>): void;
-    removeProducer(name: string): void;
-    getProducerByName(name: string): ITileProducer<T> | undefined;
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {
 }
-export interface ITilePipeline<T> extends ITileMetricsProvider, IDisposable {
-    view: ITileView;
+export interface ITilePipeline<T> extends ISourceBlock<ITile<T>>, IDisposable {
+    viewAddedObservable: Observable<ITileView>;
+    viewRemovedObservable: Observable<ITileView>;
+    view: Array<ITileView>;
     producer: ITileProducer<T>;
-    consumer: ITileConsumer<T>;
+    tryAddView(view: ITileView): boolean;
+    tryRemoveView(view: ITileView): boolean;
 }
+export interface ITilePipelineBuilder<T> {
+    withProducer(producer: ITileProducer<T>): ITilePipelineBuilder<T>;
+    withView(...view: Array<ITileView>): ITilePipelineBuilder<T>;
+    build(): ITilePipeline<T>;
+}
+export declare function IsTilePipelineBuilder<T>(b: unknown): b is ITilePipelineBuilder<T>;

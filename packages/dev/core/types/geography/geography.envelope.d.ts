@@ -32,7 +32,7 @@ export declare class Envelope implements IEnvelope {
     add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     unionInPlace(other: IEnvelope): IEnvelope;
-    intersectWith(bounds: IEnvelope): boolean;
+    intersect(bounds: IEnvelope): boolean;
     contains(loc: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
 }

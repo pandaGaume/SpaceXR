@@ -1,18 +1,7 @@
 import { IEnvelope } from "../geography/geography.interfaces";
 import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
-import { TileAddress } from "./tiles.address";
-export declare class TileBuilder<T> implements ITileBuilder<T> {
-    _ns?: string;
-    _a?: ITileAddress;
-    _d?: TileContent<T>;
-    _m?: ITileMetrics;
-    withNamespace(namesapce: string): ITileBuilder<T>;
-    withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: TileContent<T>): ITileBuilder<T>;
-    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
-    build(): ITile<T>;
-}
+import { TileAddress } from "./address/tiles.address";
 export declare class Tile<T> extends TileAddress implements ITile<T> {
     static Builder<T>(): ITileBuilder<T>;
     static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined;
@@ -22,7 +11,7 @@ export declare class Tile<T> extends TileAddress implements ITile<T> {
     private _rect?;
     constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>);
     get address(): ITileAddress;
-    get key(): string;
+    get quadkey(): string;
     get content(): TileContent<T>;
     set content(v: TileContent<T>);
     get bounds(): IEnvelope | undefined;

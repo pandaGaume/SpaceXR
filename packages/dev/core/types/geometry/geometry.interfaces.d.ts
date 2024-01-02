@@ -49,6 +49,9 @@ export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> 
     points(): IterableIterator<ICartesian2>;
 }
 export declare function isRectangle(b: unknown): b is IRectangle;
+export interface IBounded {
+    rect?: IRectangle;
+}
 export interface IBox extends ISize3, ICartesian3 {
     top: number;
     left: number;

@@ -1,4 +1,5 @@
-import { Observable, PropertyChangedEventArgs } from "core/events";
+import { Observable, PropertyChangedEventArgs } from "../../events";
+
 import { ITileProvider } from "../tiles.interfaces";
 import { ITileMapLayer } from "./tiles.map.interfaces";
 

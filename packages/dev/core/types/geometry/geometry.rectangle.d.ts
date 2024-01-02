@@ -1,4 +1,4 @@
-import { IRectangle, ICartesian2, ISize2 } from "./geometry.interfaces";
+import { IRectangle, ICartesian2, ISize2, IBounded } from "./geometry.interfaces";
 export declare class Rectangle implements IRectangle {
     x: number;
     y: number;
@@ -7,6 +7,7 @@ export declare class Rectangle implements IRectangle {
     static Zero(): IRectangle;
     static FromSize(size: ISize2): IRectangle;
     static FromPoints(...params: Array<ICartesian2>): IRectangle;
+    static FromRectangles(...array: Array<IRectangle | IBounded | undefined>): IRectangle | undefined;
     constructor(x: number, y: number, width: number, height: number);
     points(): IterableIterator<ICartesian2>;
     clone(): IRectangle;

@@ -1,11 +1,9 @@
-import { IGeo2 } from "../../geography/geography.interfaces";
-import { PropertyChangedEventArgs } from "../../events/events.args";
-import { Observable } from "../../events/events.observable";
+import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { ValidableBase } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
-import { ICartesian2 } from "../../geometry/geometry.interfaces";
-import { Bearing } from "../../geography/geography.bearing";
+import { ICartesian2 } from "../../geometry/";
+import { IGeo2, Bearing } from "../../geography";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;

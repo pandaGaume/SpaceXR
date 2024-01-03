@@ -1,13 +1,9 @@
-import { IGeo2, IsLocation } from "../../geography/geography.interfaces";
-import { PropertyChangedEventArgs } from "../../events/events.args";
-import { Observable } from "../../events/events.observable";
+import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { Geo2 } from "../../geography/geography.position";
 import { ValidableBase } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
-import { ICartesian2 } from "../../geometry/geometry.interfaces";
-import { Cartesian2 } from "../../geometry/geometry.cartesian";
-import { Bearing } from "../../geography/geography.bearing";
+import { ICartesian2, Cartesian2 } from "../../geometry";
+import { IGeo2, IsLocation, Bearing, Geo2 } from "../../geography";
 import { TileAddress } from "../address/tiles.address";
 import { EPSG3857 } from "../geography";
 

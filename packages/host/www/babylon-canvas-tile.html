@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mesh avec un canvas HTML comme texture</title>
+    <script src="./libs/babylon.js"></script>
+    <script src="./libs/babylonjs.loaders.js"></script>
+    <script src="./libs/babylon.glTF2FileLoader.js"></script>
+    <script src="./libs/babylon.gui.js"></script>
+    <script src="./libs/babylon.inspector.bundle.js"></script>
+    <script src="../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+
+    <style>
+        #tile-container {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="tiles-container">
+        <!-- <canvas id="tile-canvas" width="512" height="512"></canvas> -->
+    </div>
+    <script>
+
+        function degreesToRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+    function convertGeoToPixel(point, rect, canvas) {
+        const lonDelta = rect.northEast.lon - rect.southWest.lon;
+        const x = (point.lon - rect.southWest.lon) * (canvas.width / lonDelta);
+
+        const pointLatRad = degreesToRadians(point.lat);
+        const worldMapWidth = ((canvas.width / lonDelta) * 360) / (2 * Math.PI);
+        const bottomLatRad = degreesToRadians(rect.southWest.lat);
+        const mapOffsetY = (worldMapWidth / 2 * Math.log((1 + Math.sin(bottomLatRad)) / (1 - Math.sin(bottomLatRad))));
+
+        const y = canvas.height - ((worldMapWidth / 2 * Math.log((1 + Math.sin(pointLatRad)) / (1 - Math.sin(pointLatRad)))) - mapOffsetY);
+        return { x, y };
+    }
+
+        window.onload = async () => {
+
+            // ctx.fillStyle = '#000040';
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const pathCoordinates = [
+                new SPACEXR.Geo2(48.63971, 2.5423),
+                new SPACEXR.Geo2(48.62332, 2.56213)
+            ];
+
+            const pathEnvelope = SPACEXR.Envelope.FromPoints(...pathCoordinates);
+
+            const tileSize = 256;
+            const maxZoom = 15;
+            // const maxIndex = Math.pow(2, zoom) - 1;
+            // First determine the tiles on which the feature is visible at the given zoom level
+            const nwTileXY = SPACEXR.EPSG3857.Shared.getLatLonToTileXY(pathEnvelope.nw.lat, pathEnvelope.nw.lon, maxZoom);
+            let xMin = nwTileXY.x;
+            let yMin = nwTileXY.y;
+            const seTileXY = SPACEXR.EPSG3857.Shared.getLatLonToTileXY(pathEnvelope.se.lat, pathEnvelope.se.lon, maxZoom);
+            let xMax = seTileXY.x;
+            let yMax = seTileXY.y;
+            // Draw the feature on each tile
+            for (let x = xMin; x <= xMax; x++) {
+                for (let y = yMin; y <= yMax; y++) {
+
+                    const tileRect = {
+                        northEast: SPACEXR.EPSG3857.Shared.getTileXYToLatLon(x + 1, y, maxZoom),
+                        southWest: SPACEXR.EPSG3857.Shared.getTileXYToLatLon(x, y + 1, maxZoom)
+                    };
+                    console.log('tile rect: ', tileRect);
+
+                    const tileCanvas = document.createElement("canvas");
+                    tileCanvas.width = tileSize;
+                    tileCanvas.height = tileSize; 
+                    const ctx = tileCanvas.getContext('2d');
+
+                    const screenCoordinates = pathCoordinates.map((point) => {
+                        return convertGeoToPixel(point, tileRect, tileCanvas);
+                    });
+
+                    // Draw the path on the canvas.
+                    ctx.strokeStyle = 'cyan';
+                    ctx.beginPath();
+                    for (let i = 0; i < screenCoordinates.length - 1; i++) {
+                        ctx.moveTo(screenCoordinates[i].x, screenCoordinates[i].y);
+                        ctx.lineTo(screenCoordinates[i + 1].x, screenCoordinates[i + 1].y);
+                    }
+                    ctx.stroke();
+                    ctx.closePath();
+
+                    tileCanvas.style.position = 'absolute';
+                    tileCanvas.style.left = `${(x - xMin) * tileSize}px`;
+                    tileCanvas.style.top = `${(y - yMin) * tileSize}px`;
+                    tileCanvas.style.border = `1px solid #222`;
+                    const container = document.getElementById('tiles-container');
+                    container.appendChild(tileCanvas);
+                }
+            }
+
+            // Build tiles for all zoom levels / LOD
+            // for (let zoom = 1; zoom <= maxZoom; zoom++) {
+            //     const maxIndex = Math.pow(2, zoom) - 1;
+
+            //     // for each feature, convert its bounding box coordinates to tile
+            //     // coordinates.
+
+
+            //     for (let x = 0; x <= maxIndex; x++) {
+            //         for (let y = 0; y <= maxIndex; y++) {
+            //             const tileCanvas = document.createElement("canvas");
+            //             tileCanvas.width = tileSize;
+            //             tileCanvas.height = tileSize;
+            //             // find features that are visible on the tile
+            //             // (a feature can be visible even though none of its points is in the bounds)
+
+            //         }
+            //     }
+            // }
+
+            // alternative: use a quad tree. Find the tiles the feature intersects with.
+            // Only draw on candidate tiles and their parent up to the root.
+
+            // Features should be drawn entirely (i.e. all points), even the parts that are out of the canvas.
+            // One way of optimization could be drawing on the biggest possible at a given zoom level,
+            // and dividing this canvas into tiles.  
+
+
+        };
+    </script>
+</body>
+
+</html>

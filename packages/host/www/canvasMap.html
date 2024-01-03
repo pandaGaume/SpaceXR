@@ -45,16 +45,16 @@
                 const canvas = document.getElementById("tileCanvas");
 
                 // initialiser la localisation et le niveau de zoom
-                let center = new SPACEXR.Geo2(27.98817689833976, 86.92491071824738); // everest
+                // cela peut être un tableau de coordonnées [lat, lon] ou un objet { lat: lat, lon: lon }
+                let center = [27.98817689833976, 86.92491071824738]; // everest
                 const lod = 12;
 
                 // definir la source de donnée.
                 const tileClient = SPACEXR.Google.SatelliteClient2d() ;
                  
                 // construire la carte.
-
-                const map = new SPACEXR.Map("myMap", canvas).setView(center, lod);
-                const layer = new SPACEXR.TileLayer("myLayer", tileClient).addTo(map);
+                const map = new SPACEXR.CanvasMap("myMap", canvas).setView([27.98817689833976, 86.92491071824738], lod);
+                const layer = new SPACEXR.TileLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
 
                 function onDrag(m, dx, dy, b) {
                     switch (b) {

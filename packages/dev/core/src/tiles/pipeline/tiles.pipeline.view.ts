@@ -163,10 +163,7 @@ export class TileView implements ITileView {
     private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
             const metrics = this.metrics;
-            let lod = state.lod;
-            if (this._zoffset) {
-                lod = TileAddress.ClampLod(lod + this._zoffset, metrics);
-            }
+            const lod = TileAddress.ClampLod(state.lod + this._zoffset, metrics);
             const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
             const scale = state.scale;
             const rect = this.getRectangle(pixelCenterXY, scale);

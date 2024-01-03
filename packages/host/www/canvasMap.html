@@ -56,20 +56,17 @@
                 const map = new SPACEXR.CanvasMap("myMap", canvas).setView([27.98817689833976, 86.92491071824738], lod);
                 const layer = new SPACEXR.TileMapLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
                 
-                // afficher la carte
-                map.validate();
-
                 function onDrag(m, dx, dy, b) {
                     switch (b) {
                         case 0: {
                             // translate the center of the map according the drag displacement
                             // then we have to negate the drag displacement
-                            map.translatePixel(-dx, -dy).validate();
+                            map.translatePixel(-dx, -dy);
                             break;
                         }
                         case 2: {
                             map.rotate(dx);
-                            updateCompassRotation(map.azimuth).validate();
+                            updateCompassRotation(map.navigation.azimuth.value);
                             break;
                         }
                     }
@@ -78,10 +75,10 @@
                 function onWheel(m, dz) {
                     if (dz < 0) {
                         // zoom in
-                        map.zoomIn(dz).validate();
+                        map.zoomIn(dz);
                     } else {
                         // zoom out
-                        map.zoomOut(dz).validate();
+                        map.zoomOut(dz);
                     }
                 }
                 
@@ -93,7 +90,7 @@
  
                     // Function to handle the compass click event
                 function handleCompassClick(event) {
-                    map.setAzimuth(0);
+                    map.setView(undefined, undefined, 0);
                     updateCompassRotation(0);
                 }
 
@@ -119,7 +116,16 @@
                           console.log('UP')
                      }
                 });
+                
+                function updateFrame() {
+                    // Update the animation frame
+                    map.validate();
+                    // Recursively request another frame update
+                    requestAnimationFrame(updateFrame);
+                }
 
+                // Start the animation
+                requestAnimationFrame(updateFrame);
             };
         </script>
     </body>

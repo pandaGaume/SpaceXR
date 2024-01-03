@@ -109,10 +109,10 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
             }
             this.center = center;
         }
-        if (zoom) {
+        if (zoom !== undefined) {
             this.zoom = zoom;
         }
-        if (rotation) {
+        if (rotation !== undefined) {
             this.azimuth = new Bearing(rotation);
         }
         return this;

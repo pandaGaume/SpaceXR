@@ -1,5 +1,5 @@
 import { Observable } from "../../events/events.observable";
-import { ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
+import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
 import { ITileDisplay, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
@@ -61,7 +61,7 @@ export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknow
     layerRemovedObservable: Observable<ITileMapLayer<T>>;
 
     display: Nullable<ITileDisplay>;
-    navigation: ITileNavigationApi<unknown>;
+    navigation: ITileNavigationState;
 
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
 
@@ -75,7 +75,7 @@ export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknow
 export interface ITileMapBuilder<T> {
     withName(name: string): ITileMapBuilder<T>;
     withDisplay(display: ITileDisplay): ITileMapBuilder<T>;
-    withNavigation(navigation: ITileNavigationApi<unknown> | ITileMetrics): ITileMapBuilder<T>;
+    withNavigation(navigation: ITileNavigationState | ITileMetrics): ITileMapBuilder<T>;
     withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T>;
     withLayer(...layer: Array<ITileMapLayer<T> | ITileMapLayerBuilder<T>>): ITileMapBuilder<T>;
     build(): ITileMap<T> | undefined;

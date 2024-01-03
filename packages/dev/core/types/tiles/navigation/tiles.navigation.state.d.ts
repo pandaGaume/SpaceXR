@@ -2,7 +2,7 @@ import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { ValidableBase } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
-import { ICartesian2 } from "../../geometry/";
+import { ICartesian2 } from "../../geometry";
 import { IGeo2, Bearing } from "../../geography";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;

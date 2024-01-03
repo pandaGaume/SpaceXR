@@ -143,19 +143,21 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     public addLayer(layer: ITileMapLayer<T>): void {
         if (!this._layers) this._layers = new Map<string, ITileMapLayer<T>>();
         if (layer.name && !this._layers.has(layer.name)) {
+            // first add the provider to the pipeline
+            this._pipeline.producer.addProvider(layer.provider);
+
             // now verify the view and associated metrics
             const view = this._pipeline.view;
             if (!view) {
-                this._pipeline.view = new TileView(`${this.name}.view`, this._display, layer.provider.metrics, this._navigation, layer.zoomOffset);
+                this._pipeline.view = new TileView(`${this.name}.view`, undefined, layer.provider.metrics, undefined, layer.zoomOffset);
             } else {
                 // we have a view, we check if the metrics are the same
                 const metrics = layer.provider.metrics;
                 if (view.metrics !== metrics && !view.metrics.isCompatibleWith(metrics) && view.zoffset !== layer.zoomOffset) {
+                    this._pipeline.producer.removeProvider(layer.provider.name);
                     throw new Error(`The layer ${layer.provider.name} is not compatible with the actual view.`);
                 }
             }
-
-            this._pipeline.producer.addProvider(layer.provider);
 
             this._layers.set(layer.name, layer);
             this._addSortedLayer(layer);

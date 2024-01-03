@@ -19,6 +19,7 @@ export declare class Google {
     static MaxLevelOfDetail: number;
     static MetricsOptions: import("..").ITileMetricsOptions;
     static Metrics: EPSG3857;
+    static Attribution: string;
     static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static StreetClient2d(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static SatelliteClient2d(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;

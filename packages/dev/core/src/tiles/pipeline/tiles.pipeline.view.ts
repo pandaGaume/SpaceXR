@@ -33,10 +33,11 @@ export class TileView implements ITileView {
 
     public constructor(id: string, display: Nullable<ITileDisplay> = null, metrics?: ITileMetrics, state?: ITileNavigationState, zoffset: number = 0) {
         this._id = id;
-        this.display = display ?? null;
-        this.state = state ?? null;
         this._metrics = metrics ?? EPSG3857.Shared;
         this._zoffset = zoffset;
+        // set the properties using defined setters
+        this.display = display ?? null;
+        this.state = state ?? null;
     }
 
     public get zoffset(): number {
@@ -66,7 +67,7 @@ export class TileView implements ITileView {
     public set state(state: Nullable<ITileNavigationState>) {
         if (this._state !== state) {
             if (this._state) {
-                this._stateObserver?.dispose();
+                this._stateObserver?.disconnect();
                 this._stateObserver = null;
                 this._doClearContext(this._state, true);
             }
@@ -85,7 +86,7 @@ export class TileView implements ITileView {
     public set display(display: Nullable<ITileDisplay>) {
         if (this._display !== display) {
             if (this._display) {
-                this._displayObserver?.dispose();
+                this._displayObserver?.disconnect();
                 this._displayObserver = null;
                 this._doClearContext(this._state, true);
             }
@@ -100,7 +101,7 @@ export class TileView implements ITileView {
     public dispose(): void {
         // dispose relation with the navigation state
         this._state = null;
-        this._stateObserver?.dispose();
+        this._stateObserver?.disconnect();
         this._stateObserver = null;
 
         // dispose the links

@@ -1,6 +1,6 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileDisplay, ITileMetricsProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileDisplay, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 export type IPipelineMessageType<T> = Array<T>;
 export interface ITargetBlock<T> {
@@ -31,6 +31,8 @@ export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider,
     zoffset?: number;
 }
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
+    addProvider(provider: ITileProvider<T>): void;
+    removeProvider(name: string): void;
 }
 export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {
 }

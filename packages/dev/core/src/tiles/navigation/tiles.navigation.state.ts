@@ -12,9 +12,7 @@ import { TileAddress } from "../address/tiles.address";
 import { EPSG3857 } from "../geography";
 
 export class TileNavigationState extends ValidableBase implements ITileNavigationState {
-    _centerObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
-    _zoomObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
-    _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
 
     _lodf: number;
@@ -45,12 +43,12 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
 
     public set center(center: IGeo2) {
         if (center && !this._center.equals(center)) {
-            if (this._centerObservable && this._centerObservable.hasObservers()) {
+            if (this._propertyChangedObservable?.hasObservers()) {
                 const old = this._center.clone();
                 this._center.lat = center.lat;
                 this._center.lon = center.lon;
-                const e = new PropertyChangedEventArgs(this, old, center);
-                this._centerObservable.notifyObservers(e);
+                const e = new PropertyChangedEventArgs(this, old, center, "center");
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 this.invalidate();
                 return;
             }
@@ -68,11 +66,11 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         if (this._lodf != lodf) {
             const old = this._lodf;
             this._lodf = lodf;
-            if (this._zoomObservable && this._zoomObservable.hasObservers()) {
-                const e = new PropertyChangedEventArgs(this, old, this._lodf);
-                this._zoomObservable.notifyObservers(e);
-            }
             this.invalidate();
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, old, this._lodf, "zoom");
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
         }
     }
 
@@ -84,27 +82,17 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         if (this._azimuth.value != r.value) {
             const old = this._azimuth;
             this._azimuth = r;
-            if (this._azimuthObservable && this._azimuthObservable.hasObservers()) {
-                const e = new PropertyChangedEventArgs(this, old, this._azimuth);
-                this._azimuthObservable.notifyObservers(e);
-            }
             this.invalidate();
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, old, this._azimuth, "azimuth");
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
         }
     }
 
-    public get centerObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>> {
-        this._centerObservable = this._centerObservable || new Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>();
-        return this._centerObservable;
-    }
-
-    public get zoomObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, number>> {
-        this._zoomObservable = this._zoomObservable || new Observable<PropertyChangedEventArgs<ITileNavigationState, number>>();
-        return this._zoomObservable;
-    }
-
-    public get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>> {
-        this._azimuthObservable = this._azimuthObservable || new Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>();
-        return this._azimuthObservable;
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>> {
+        if (!this._propertyChangedObservable) this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>();
+        return this._propertyChangedObservable;
     }
 
     public get stateChangedObservable(): Observable<ITileNavigationState> {

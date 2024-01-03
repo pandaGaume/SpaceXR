@@ -170,7 +170,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     name: string; // usually shortcut for datasource?.name
     datasource: ITileDatasource<T, ITileAddress>; // the underlying data source
     accept(address: ITileAddress): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
-    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>; // fetch content using datasource.
+    fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
 }
 
 export interface ITileContentProviderBuilder<T> {

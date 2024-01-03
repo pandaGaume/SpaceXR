@@ -40,9 +40,9 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
     }
 
     public dispose(): void {
-        this._addedObserver?.dispose();
-        this._removedObserver?.dispose();
-        this._updatedObserver?.dispose();
+        this._addedObserver?.disconnect();
+        this._removedObserver?.disconnect();
+        this._updatedObserver?.disconnect();
         this._addedObserver = null;
         this._removedObserver = null;
         this._updatedObserver = null;

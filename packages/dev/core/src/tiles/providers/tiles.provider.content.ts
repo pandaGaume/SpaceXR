@@ -1,6 +1,5 @@
 import { IMemoryCache, MemoryCache } from "../../cache/cache";
-import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
-import { Nullable } from "../../types";
+import { ITile, ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContent } from "../tiles.interfaces";
 import { TileAddress } from "../address/tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
@@ -45,12 +44,14 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         this._cache.clear();
     }
 
-    public async fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>> {
+    public fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T> {
+        const address = tile.address;
         const cacheKey = this.buildCacheKey(address.quadkey);
 
         // first have a look in cache
         if (this._cache.contains(cacheKey)) {
-            return this._cache.get(cacheKey)!;
+            tile.content = this._cache.get(cacheKey)!;
+            return tile;
         }
 
         // then try to build a temporary content using alternative method
@@ -60,24 +61,18 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         this._cache.set(cacheKey, c);
 
         // then try to get it from the datasource
-        try {
-            const result = await this._datasource.fetchAsync(address);
-            if (result.content) {
-                const provider = <TileContentProvider<T>>result?.userArgs?.[0];
-                if (provider) {
-                    const address = result.address;
-                    // we have the content of the tile.
-                    const content = result.content;
-                    // we store the value in cache
-                    provider._cache.set(this.buildCacheKey(address.quadkey), content);
-                }
+        this._datasource.fetchAsync(address).then(
+            (result) => {
+                this._cache.set(this.buildCacheKey(address.quadkey), result.content);
+                tile.content = result.content;
+                callback?.(tile);
+            },
+            (reason) => {
+                console.log(`the fetch operation has failed because of ${reason}`);
             }
-        } catch (reason: any) {
-            // the lookup operation has failed - TODO describe a strategy
-            console.log(`the lookup operation has failed because of ${reason}`);
-            return this.buildAlternativContent(address);
-        }
-        return c;
+        );
+        tile.content = c;
+        return tile;
     }
 
     protected buildTemporaryContent(address: ITileAddress): TileContent<T> {

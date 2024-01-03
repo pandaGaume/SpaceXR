@@ -54,19 +54,22 @@
                  
                 // construire la carte.
                 const map = new SPACEXR.CanvasMap("myMap", canvas).setView([27.98817689833976, 86.92491071824738], lod);
-                const layer = new SPACEXR.TileLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+                const layer = new SPACEXR.TileMapLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+                
+                // afficher la carte
+                map.validate();
 
                 function onDrag(m, dx, dy, b) {
                     switch (b) {
                         case 0: {
                             // translate the center of the map according the drag displacement
                             // then we have to negate the drag displacement
-                            map.translate(-dx, -dy);
+                            map.translatePixel(-dx, -dy).validate();
                             break;
                         }
                         case 2: {
                             map.rotate(dx);
-                            updateCompassRotation(map.azimuth);
+                            updateCompassRotation(map.azimuth).validate();
                             break;
                         }
                     }
@@ -75,10 +78,10 @@
                 function onWheel(m, dz) {
                     if (dz < 0) {
                         // zoom in
-                        map.zoomIn(dz);
+                        map.zoomIn(dz).validate();
                     } else {
                         // zoom out
-                        map.zoomOut(dz);
+                        map.zoomOut(dz).validate();
                     }
                 }
                 

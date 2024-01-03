@@ -14,11 +14,15 @@ export class TileProvider<T> implements ITileProvider<T> {
     _activTiles: TileCollection<T>;
     _enabled: boolean;
 
+    // internal
+    _callback: (t: ITile<T>) => void;
+
     public constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled = true) {
         this._contentProvider = provider;
-        this._factory = factory ?? Tile.Builder<T>();
+        this._factory = (factory ?? Tile.Builder<T>()).withMetrics(provider.metrics); // ensure the factory has the right metrics to build bounds.
         this._enabled = enabled;
         this._activTiles = new TileCollection<T>();
+        this._callback = this._onContentFetched.bind(this);
     }
 
     public get bounds(): IEnvelope | undefined {
@@ -86,18 +90,17 @@ export class TileProvider<T> implements ITileProvider<T> {
             }
             const factory = this._factory.withNamespace(this._contentProvider.name).withAddress(a);
             try {
-                const tile = factory.build();
+                let tile = factory.build();
                 if (tile) {
-                    this._contentProvider.fetchContentAsync(tile.address).then((content) => {
-                        if (content) {
-                            tile.content = content;
-                            if (this.updatedObservable && this.updatedObservable.hasObservers()) {
-                                this.updatedObservable.notifyObservers(tile, -1, this, this);
-                            }
-                        }
-                    });
+                    // fetch content, possibiliy generate alterative content
+                    // if underlying async operation are performed, then the callback will be messaged when the content
+                    // is available.
+                    tile = this._contentProvider.fetchContent(tile, this._callback);
+                    // add to collection
+                    this._activTiles?.add(tile);
+                    // push to result
+                    tiles.push(tile);
                 }
-                tiles.push(tile);
             } catch (e) {
                 console.log(e);
             }
@@ -118,5 +121,11 @@ export class TileProvider<T> implements ITileProvider<T> {
             return tiles;
         }
         return [];
+    }
+
+    protected _onContentFetched(tile: ITile<T>): void {
+        if (this.updatedObservable?.hasObservers()) {
+            this.updatedObservable.notifyObservers(tile, -1, this, this);
+        }
     }
 }

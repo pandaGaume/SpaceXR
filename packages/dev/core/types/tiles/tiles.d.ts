@@ -11,7 +11,6 @@ export declare class Tile<T> extends TileAddress implements ITile<T> {
     private _rect?;
     constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>);
     get address(): ITileAddress;
-    get quadkey(): string;
     get content(): TileContent<T>;
     set content(v: TileContent<T>);
     get bounds(): IEnvelope | undefined;

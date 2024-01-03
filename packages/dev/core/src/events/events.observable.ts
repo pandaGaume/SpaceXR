@@ -96,7 +96,7 @@ export class Observer<T> {
         public scope: any = null
     ) {}
 
-    public dispose(): void {
+    public disconnect(): void {
         this.source?.remove(this);
     }
 }

@@ -7,9 +7,7 @@ import { ITileMetrics } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry/geometry.interfaces";
 import { Bearing } from "../../geography/geography.bearing";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
-    _centerObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
-    _zoomObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
-    _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
     _lodf: number;
     _center: IGeo2;
@@ -24,9 +22,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     set zoom(lodf: number);
     get azimuth(): Bearing;
     set azimuth(r: Bearing);
-    get centerObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
-    get zoomObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
-    get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     get stateChangedObservable(): Observable<ITileNavigationState>;
     setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState;
     zoomIn(delta: number): TileNavigationState;

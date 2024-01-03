@@ -26,11 +26,26 @@ export class CanvasDisplay extends TileDisplay {
         return false;
     }
 
+    _resizeObserver: ResizeObserver;
+
     public constructor(public canvas: HTMLCanvasElement, x?: number, y?: number, w?: number, h?: number) {
+        // the canvas width and height are the buffer size of the cannvas. default values are width:300, height:150.
+        // the canvas clientWidth and clientHeight are the size of the canvas in the browser window.
+        // so we need to adapt the buffer size to the client size.
+        CanvasDisplay.ResizeToDisplaySize(canvas);
         super(x ?? 0, y ?? 0, w ?? canvas.width, h ?? canvas.height);
+        this._resizeObserver = new ResizeObserver(() => {
+            CanvasDisplay.ResizeToDisplaySize(canvas);
+            this.resize(canvas.width, canvas.height);
+        });
     }
 
     public getContext(options?: CanvasRenderingContext2DSettings | undefined): CanvasRenderingContext2D | null {
         return this.canvas.getContext("2d", options);
+    }
+
+    public dispose(): void {
+        super.dispose();
+        this._resizeObserver.disconnect();
     }
 }

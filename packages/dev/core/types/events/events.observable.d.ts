@@ -17,7 +17,7 @@ export declare class Observer<T> {
     _willBeUnregistered: boolean;
     unregisterOnNextCall: boolean;
     constructor(source: Observable<T>, callback: (eventData: T, eventState: EventState) => void, mask: number, scope?: any);
-    dispose(): void;
+    disconnect(): void;
 }
 export declare class Observable<T> {
     private _observers;

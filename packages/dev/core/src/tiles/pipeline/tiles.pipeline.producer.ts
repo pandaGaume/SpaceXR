@@ -135,8 +135,8 @@ export class TileProducer<T> implements ITileProducer<T> {
         if (tmp) {
             tmp.provider.deactivateTile(); // remove all tiles
             this._items.delete(name);
-            tmp.updateObserver?.dispose();
-            tmp.enabledObserver?.dispose();
+            tmp.updateObserver?.disconnect();
+            tmp.enabledObserver?.disconnect();
         }
     }
 
@@ -157,8 +157,8 @@ export class TileProducer<T> implements ITileProducer<T> {
 
         // dispose the provider observers
         for (const p of this._items?.values() ?? []) {
-            p.updateObserver?.dispose();
-            p.enabledObserver?.dispose();
+            p.updateObserver?.disconnect();
+            p.enabledObserver?.disconnect();
         }
         this._items?.clear();
     }

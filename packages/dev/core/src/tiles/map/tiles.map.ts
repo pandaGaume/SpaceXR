@@ -155,6 +155,8 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
                 }
             }
 
+            this._pipeline.producer.addProvider(layer.provider);
+
             this._layers.set(layer.name, layer);
             this._addSortedLayer(layer);
             this.invalidate();
@@ -170,6 +172,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         if (this._layers && layer.name && this._layers.has(layer.name)) {
             this._layers.delete(layer.name);
             this._removeSortedLayer(layer);
+            this._pipeline.producer.removeProvider(layer.provider.name);
             this.invalidate();
             // we give the hand to other components
             this._onLayerRemoved(layer);
@@ -182,7 +185,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     public dispose() {
         super.dispose();
         // clear pipeline links
-        this._pipelinePropertyObserver?.dispose();
+        this._pipelinePropertyObserver?.disconnect();
         this._pipeline.unlinkFrom(this);
         if (this._pipeline.view) {
             this._unbindView(this._pipeline.view);
@@ -194,32 +197,32 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
 
     // navigation proxy
     public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T> {
-        this._navigation.setView(center, zoom, rotation);
+        this._navigation.setView(center, zoom, rotation).validate();
         return this;
     }
 
     public zoomIn(delta: number): TileMapBase<T> {
-        this._navigation.zoomIn(delta);
+        this._navigation.zoomIn(delta).validate();
         return this;
     }
 
     public zoomOut(delta: number): TileMapBase<T> {
-        this._navigation.zoomOut(delta);
+        this._navigation.zoomOut(delta).validate();
         return this;
     }
 
     public translatePixel(tx: number, ty: number): TileMapBase<T> {
-        this._navigation.translatePixel(tx, ty);
+        this._navigation.translatePixel(tx, ty).validate();
         return this;
     }
 
     public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T> {
-        this._navigation.translate(lat, lon);
+        this._navigation.translate(lat, lon).validate();
         return this;
     }
 
     public rotate(r: number): TileMapBase<T> {
-        this._navigation.rotate(r);
+        this._navigation.rotate(r).validate();
         return this;
     }
     // end navigation proxy
@@ -252,7 +255,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     }
 
     private _unbindDisplay(display: ITileDisplay): void {
-        this._displayPropertyObserver?.dispose();
+        this._displayPropertyObserver?.disconnect();
         this._display = null;
         if (this._pipeline.view) {
             this._pipeline.view.display = this._display;

@@ -10,6 +10,7 @@ export declare class TileProvider<T> implements ITileProvider<T> {
     _factory: ITileBuilder<T>;
     _activTiles: TileCollection<T>;
     _enabled: boolean;
+    _callback: (t: ITile<T>) => void;
     constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled?: boolean);
     get bounds(): IEnvelope | undefined;
     get rect(): IRectangle | undefined;
@@ -25,4 +26,5 @@ export declare class TileProvider<T> implements ITileProvider<T> {
     get activTiles(): ITileCollection<T>;
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+    protected _onContentFetched(tile: ITile<T>): void;
 }

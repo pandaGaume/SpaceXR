@@ -109,7 +109,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         // we scale the canvas according the navigation scale
         ctx.scale(scale, scale);
         // we rotate the canvas according the navigation azimuth
-        if (this.navigation.azimuth) {
+        if (this.navigation.azimuth?.value) {
             // convert azimuth to canvas rotation, which is clockwize, and cartesian
             const angle = this.navigation.azimuth.value * Scalar.DEG2RAD;
             ctx.rotate(angle);

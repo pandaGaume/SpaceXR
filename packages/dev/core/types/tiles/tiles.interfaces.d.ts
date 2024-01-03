@@ -123,7 +123,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     name: string;
     datasource: ITileDatasource<T, ITileAddress>;
     accept(address: ITileAddress): boolean;
-    fetchContentAsync(address: ITileAddress, ...userArgs: Array<unknown>): Promise<Nullable<TileContent<T>>>;
+    fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>;
 }
 export interface ITileContentProviderBuilder<T> {
     withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;

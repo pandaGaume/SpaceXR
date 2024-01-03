@@ -1,19 +1,10 @@
 import { Tile } from "../tiles";
-import {
-    ITileAddressProcessor,
-    ITileBuilder,
-    ITileContentProvider,
-    ITileContentProviderBuilder,
-    ITileProvider,
-    ITileProviderBuilder,
-    IsTileContentProviderBuilder,
-} from "../tiles.interfaces";
+import { ITileBuilder, ITileContentProvider, ITileContentProviderBuilder, ITileProvider, ITileProviderBuilder, IsTileContentProviderBuilder } from "../tiles.interfaces";
 import { TileProvider } from "./tiles.provider";
 
 export class TileProviderBuilder<T> implements ITileProviderBuilder<T> {
     _enabled?: boolean;
     _factory?: ITileBuilder<T>;
-    _addressProcessor?: ITileAddressProcessor;
     _contentProvider?: ITileContentProvider<T> | ITileContentProviderBuilder<T>;
 
     public withEnabled(enabled: boolean): ITileProviderBuilder<T> {
@@ -24,10 +15,7 @@ export class TileProviderBuilder<T> implements ITileProviderBuilder<T> {
         this._factory = factory;
         return this;
     }
-    public withAddressProcessor(processor: ITileAddressProcessor): ITileProviderBuilder<T> {
-        this._addressProcessor = processor;
-        return this;
-    }
+
     public withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T> {
         this._contentProvider = contentProvider;
         return this;
@@ -39,8 +27,8 @@ export class TileProviderBuilder<T> implements ITileProviderBuilder<T> {
         }
         if (IsTileContentProviderBuilder<T>(this._contentProvider)) {
             const p = this._contentProvider?.build();
-            return new TileProvider<T>(p, this._factory ?? Tile.Builder<T>(), this._addressProcessor, this._enabled);
+            return new TileProvider<T>(p, this._factory ?? Tile.Builder<T>(), this._enabled);
         }
-        return new TileProvider<T>(this._contentProvider, this._factory ?? Tile.Builder<T>(), this._addressProcessor, this._enabled);
+        return new TileProvider<T>(this._contentProvider, this._factory ?? Tile.Builder<T>(), this._enabled);
     }
 }

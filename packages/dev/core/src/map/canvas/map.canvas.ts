@@ -1,17 +1,18 @@
-import { ITileCollection, ITileDisplay, ITileMetrics } from "../../tiles/tiles.interfaces";
+import { ITileDisplay, ITileMetrics } from "../../tiles/tiles.interfaces";
 
 import { Scalar } from "../../math/math";
 import { RGBAColor } from "../../math/math.color";
 
 import { TileMapBase } from "../../tiles/map/tiles.map";
 import { ITilePipeline } from "../../tiles/pipeline/tiles.pipeline.interfaces";
-import { ITileNavigationApi } from "../../tiles/navigation/tiles.navigation.interfaces";
+import { ITileNavigationState } from "../../tiles/navigation/tiles.navigation.interfaces";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
+import { ITileMapLayer } from "core/tiles";
 
-type CanvasTileContentType = HTMLImageElement;
+export type CanvasTileContentType = HTMLImageElement;
 
-type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
+export type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
 
 export class CanvasTileMapOptions {
     public static DefaultBackground = RGBAColor.LightGray();
@@ -70,10 +71,10 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
 
     public constructor(
         name: string,
-        display: ITileDisplay,
-        pipeline: ITilePipeline<CanvasTileContentType>,
+        display?: Nullable<ITileDisplay>,
+        pipeline?: ITilePipeline<CanvasTileContentType>,
         options?: CanvasTileMapOptions,
-        nav?: ITileNavigationApi | ITileMetrics
+        nav?: ITileNavigationState | ITileMetrics
     ) {
         super(name, display, pipeline, nav);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
@@ -117,7 +118,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         for (const l of this._orderedLayers ?? []) {
             if (l.enabled && l.provider.enabled) {
                 ctx.globalAlpha = l.alpha;
-                this._drawLayer(ctx, l.provider.activTiles);
+                this._drawLayer(ctx, l);
             }
         }
         ctx.restore();
@@ -126,9 +127,15 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     /// <summary>
     /// Draw the layer on the canvas. This method is messaged from the draw method.
     /// </summary>
-    protected _drawLayer(ctx: CanvasRenderingContext2D, tiles: ITileCollection<CanvasTileContentType>): void {
-        const center = this.navigation.pixelXY;
-        const tileSize = this.navigation.metrics.tileSize;
+    protected _drawLayer(ctx: CanvasRenderingContext2D, layer: ITileMapLayer<CanvasTileContentType>): void {
+        const provider = layer.provider;
+        const tiles = provider.activTiles;
+        if (!tiles || !tiles.count) {
+            return;
+        }
+        const metrics = provider.metrics;
+        const center = metrics.getLatLonToPixelXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+        const tileSize = metrics.tileSize;
 
         for (const t of tiles) {
             if (t.rect) {
@@ -166,16 +173,19 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     protected abstract _getContext2D(): Nullable<CanvasRenderingContext2D>;
 }
 
-export class CanvasTileMap extends AbstractContext2DTileMap {
+export class CanvasMap extends AbstractContext2DTileMap {
     _context: Nullable<CanvasRenderingContext2D>;
 
     public constructor(
         name: string,
-        display: CanvasDisplay,
-        pipeline: ITilePipeline<CanvasTileContentType>,
+        display: CanvasDisplay | HTMLCanvasElement,
+        pipeline?: ITilePipeline<CanvasTileContentType>,
         options?: CanvasTileMapOptions,
-        nav?: ITileNavigationApi | ITileMetrics
+        nav?: ITileNavigationState | ITileMetrics
     ) {
+        if (display instanceof HTMLCanvasElement) {
+            display = new CanvasDisplay(display);
+        }
         super(name, display, pipeline, options, nav);
         this._context = display.getContext();
     }

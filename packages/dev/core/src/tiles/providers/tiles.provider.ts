@@ -1,24 +1,24 @@
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IRectangle } from "core/geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collections";
+import { Tile } from "../tiles";
 
 export class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
     _enabledObservable?: Observable<ITileProvider<T>>;
 
-    _addressProcessor?: ITileAddressProcessor | undefined;
     _contentProvider: ITileContentProvider<T>;
     _factory: ITileBuilder<T>;
-    _activTiles?: TileCollection<T>;
+    _activTiles: TileCollection<T>;
     _enabled: boolean;
 
-    public constructor(provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled = true) {
-        this._addressProcessor = addressProcessor;
+    public constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled = true) {
         this._contentProvider = provider;
-        this._factory = factory;
+        this._factory = factory ?? Tile.Builder<T>();
         this._enabled = enabled;
+        this._activTiles = new TileCollection<T>();
     }
 
     public get bounds(): IEnvelope | undefined {
@@ -67,17 +67,12 @@ export class TileProvider<T> implements ITileProvider<T> {
     public get factory(): ITileBuilder<T> {
         return this._factory;
     }
-
-    public get addressProcessor(): ITileAddressProcessor | undefined {
-        return this._addressProcessor;
-    }
-
     public dispose() {
         this._activTiles?.clear();
     }
 
     public get activTiles(): ITileCollection<T> {
-        return this._activTiles ?? (this._activTiles = new TileCollection<T>());
+        return this._activTiles;
     }
 
     public activateTile(...address: Array<ITileAddress>): Array<ITile<T>> {

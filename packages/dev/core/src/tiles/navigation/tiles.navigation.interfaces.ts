@@ -1,11 +1,10 @@
 import { IGeo2, IsLocation } from "../../geography/geography.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
-import { ITileMetricsProvider } from "../tiles.interfaces";
 import { Bearing } from "../../geography/geography.bearing";
-import { ICartesian2 } from "../../geometry/geometry.interfaces";
+import { ITileMetrics } from "../tiles.interfaces";
 
-export interface ITileNavigationState extends ITileMetricsProvider {
+export interface ITileNavigationState extends ITileNavigationApi<unknown> {
     centerObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
     zoomObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
     azimuthObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
@@ -17,7 +16,6 @@ export interface ITileNavigationState extends ITileMetricsProvider {
 
     lod: number; // Math.round(zoom)
     scale: number; // scale corresponding to the decimal part of zoom
-    pixelXY: ICartesian2; // metrics.getLatLonToPixelXY(center.lat, center.lon, lod)
 }
 
 export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
@@ -31,10 +29,11 @@ export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
     );
 }
 
-export interface ITileNavigationApi extends ITileNavigationState {
-    setView(center: IGeo2, zoom?: number, rotation?: number): void;
-    zoomIn(delta: number): void;
-    zoomOut(delta: number): void;
-    translate(tx: number, ty: number): void;
-    rotate(r: number): void;
+export interface ITileNavigationApi<T> {
+    setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): T;
+    zoomIn(delta: number): T;
+    zoomOut(delta: number): T;
+    translatePixel(tx: number, ty: number, metrics?: ITileMetrics): T;
+    translate(lat: IGeo2 | Array<number> | number, lon?: number): T;
+    rotate(r: number): T;
 }

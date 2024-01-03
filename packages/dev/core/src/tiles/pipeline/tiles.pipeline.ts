@@ -1,70 +1,49 @@
-import { Observable } from "../../events/events.observable";
+import { Observable, PropertyChangedEventArgs } from "../../events";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipeline, ITilePipelineLink, ITileProducer, ITileView } from "./tiles.pipeline.interfaces";
 import { ITile } from "../tiles.interfaces";
+import { TileProducer } from "./tiles.pipeline.producer";
 
 export class TilePipeline<T> implements ITilePipeline<T> {
-    private _viewAddedObservable?: Observable<ITileView>;
-    private _viewRemovedObservable?: Observable<ITileView>;
+    private _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;
 
-    private _view: Array<ITileView>;
+    private _view?: ITileView;
     private _producer: ITileProducer<T>;
 
-    public constructor(producer: ITileProducer<T>, ...view: Array<ITileView>) {
+    public constructor(producer?: ITileProducer<T>, view?: ITileView) {
         this._view = view;
-        this._producer = producer;
-        for (const v of view) {
-            v.linkTo(this._producer);
-        }
+        this._producer = producer ?? new TileProducer<T>("");
+        this._view?.linkTo(this._producer);
     }
 
-    public get viewAddedObservable(): Observable<ITileView> {
-        if (!this._viewAddedObservable) this._viewAddedObservable = new Observable<ITileView>();
-        return this._viewAddedObservable;
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>> {
+        if (!this._propertyChangedObservable) this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>();
+        return this._propertyChangedObservable;
     }
 
-    public get viewRemovedObservable(): Observable<ITileView> {
-        if (!this._viewRemovedObservable) this._viewRemovedObservable = new Observable<ITileView>();
-        return this._viewRemovedObservable;
-    }
-
-    public get view(): Array<ITileView> {
+    public get view(): ITileView | undefined {
         return this._view;
+    }
+
+    public set view(view: ITileView | undefined) {
+        if (this._view !== view) {
+            const old = this._view;
+            this._view?.unlinkFrom(this._producer);
+            this._view = view;
+            this._view?.linkTo(this._producer);
+
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const args = new PropertyChangedEventArgs<ITilePipeline<T>, unknown>(this, old, this._view, "view");
+                this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+            }
+        }
     }
 
     public get producer(): ITileProducer<T> {
         return this._producer;
     }
 
-    public tryAddView(view: ITileView): boolean {
-        if (this._view.findIndex((v) => v === view) !== -1) {
-            this._view.push(view);
-            view.linkTo(this._producer);
-            if (this._viewAddedObservable && this._viewAddedObservable.hasObservers()) {
-                this._viewAddedObservable.notifyObservers(view, -1, this, this);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public tryRemoveView(view: ITileView): boolean {
-        const index = this._view.findIndex((v) => v === view);
-        if (index !== -1) {
-            view.unlinkFrom(this._producer);
-            this._view.splice(index, 1);
-            if (this._viewRemovedObservable && this._viewRemovedObservable.hasObservers()) {
-                this._viewRemovedObservable.notifyObservers(view, -1, this, this);
-            }
-            return true;
-        }
-        return false;
-    }
-
     dispose(): void {
-        for (const v of this._view) {
-            v.state = null;
-            v.unlinkFrom(this._producer);
-        }
+        this._view?.unlinkFrom(this._producer);
     }
 
     public get addedObservable(): Observable<IPipelineMessageType<ITile<T>>> {

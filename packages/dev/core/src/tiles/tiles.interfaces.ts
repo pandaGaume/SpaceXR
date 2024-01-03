@@ -15,15 +15,6 @@ export interface ITileAddress extends ICartesian2 {
     quadkey: string;
 }
 
-/// <summary>
-/// The TileAddressProcessor is versatile in its capabilities, primarily filtering and modifying addresses.
-/// Not only to support increased zoom levels in layered Digital Elevation Model (DEM) applications,
-/// but also adaptable for various other use cases.
-/// </summary>
-export interface ITileAddressProcessor {
-    process(address: ITileAddress, metrics?: ITileMetrics): ITileAddress[] | ITileSection;
-}
-
 export interface ITileSection extends ICartesian2, ISize2 {
     address: ITileAddress;
 }
@@ -151,6 +142,11 @@ export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetrics
     fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 
+export function IsTileDatasource<T, A extends ITileAddress>(b: unknown): b is ITileDatasource<T, A> {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileDatasource<T, A>>b).fetchAsync !== undefined && (<ITileDatasource<T, A>>b).metrics !== undefined;
+}
+
 export interface ITileUrlBuilder {
     buildUrl(address: ITileAddress, ...params: unknown[]): string;
 }
@@ -204,7 +200,6 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGe
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
 
     name: string; // usually shortcut for contentProvider?.name
-    addressProcessor?: ITileAddressProcessor; // give ability to filter and/or modify address before fetching content
     contentProvider: ITileContentProvider<T>; // the underlying data source
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
     enabled: boolean; // enable/disable the provider
@@ -214,10 +209,14 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGe
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }
 
+export function IsTileProvider<T>(b: unknown): b is ITileProvider<T> {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileProvider<T>>b).activateTile !== undefined && (<ITileProvider<T>>b).deactivateTile !== undefined;
+}
+
 export interface ITileProviderBuilder<T> {
     withEnabled(enabled: boolean): ITileProviderBuilder<T>;
     withFactory(factory: ITileBuilder<T>): ITileProviderBuilder<T>;
-    withAddressProcessor(processor: ITileAddressProcessor): ITileProviderBuilder<T>;
     withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T>;
     build(): ITileProvider<T>;
 }
@@ -228,7 +227,6 @@ export function IsTileProviderBuilder<T>(b: unknown): b is ITileProviderBuilder<
         (<ITileProviderBuilder<T>>b).build !== undefined &&
         (<ITileProviderBuilder<T>>b).withEnabled !== undefined &&
         (<ITileProviderBuilder<T>>b).withFactory !== undefined &&
-        (<ITileProviderBuilder<T>>b).withAddressProcessor !== undefined &&
         (<ITileProviderBuilder<T>>b).withContentProvider !== undefined
     );
 }

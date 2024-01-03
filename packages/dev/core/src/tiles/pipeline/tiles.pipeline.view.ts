@@ -4,7 +4,7 @@ import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, IT
 import { TileAddress } from "../address/tiles.address";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
-import { ICartesian2, IRectangle} from "../../geometry/geometry.interfaces";
+import { ICartesian2, IRectangle } from "../../geometry/geometry.interfaces";
 import { Rectangle } from "../../geometry/geometry.rectangle";
 import { Cartesian2 } from "../../geometry/geometry.cartesian";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
@@ -18,9 +18,12 @@ export class TileView implements ITileView {
 
     _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
     _state: Nullable<ITileNavigationState> = null;
+    _zoffset: number;
     _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
     _display: Nullable<ITileDisplay> = null;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>> = null;
+
+    _metrics: ITileMetrics;
 
     // internal pipeline links
     _links: Array<ITilePipelineLink<ITileAddress>> = [];
@@ -28,10 +31,24 @@ export class TileView implements ITileView {
     // cached values
     _id: string;
 
-    public constructor(id: string, display?: ITileDisplay, state?: ITileNavigationState) {
+    public constructor(id: string, display: Nullable<ITileDisplay> = null, metrics?: ITileMetrics, state?: ITileNavigationState, zoffset: number = 0) {
         this._id = id;
         this.display = display ?? null;
         this.state = state ?? null;
+        this._metrics = metrics ?? EPSG3857.Shared;
+        this._zoffset = zoffset;
+    }
+
+    public get zoffset(): number {
+        return this._zoffset;
+    }
+
+    public set zoffset(v: number) {
+        if (this._zoffset !== v) {
+            this._doClearContext(this._state, true);
+            this._zoffset = v;
+            this._doValidateContext(this._state, true);
+        }
     }
 
     public get name(): string {
@@ -39,7 +56,7 @@ export class TileView implements ITileView {
     }
 
     public get metrics(): ITileMetrics {
-        return this._state?.metrics ?? EPSG3857.Shared;
+        return this._metrics;
     }
 
     public get state(): Nullable<ITileNavigationState> {
@@ -146,8 +163,11 @@ export class TileView implements ITileView {
     private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
             const metrics = this.metrics;
-            const lod = state.lod;
-            const pixelCenterXY = state.pixelXY;
+            let lod = state.lod;
+            if (this._zoffset) {
+                lod = TileAddress.ClampLod(lod + this._zoffset, metrics);
+            }
+            const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
             const scale = state.scale;
             const rect = this.getRectangle(pixelCenterXY, scale);
 

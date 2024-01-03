@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../../dev/core/bundles/spacexr.1.0.0.js"></script>
         <script src="./scripts/inputs.js"></script>
@@ -50,7 +52,9 @@
                 const tileClient = SPACEXR.Google.SatelliteClient2d() ;
                  
                 // construire la carte.
-                const map = new SPACEXR.CanvasTileMap(canvas, tileClient, center, lod);
+
+                const map = new SPACEXR.Map("myMap", canvas).setView(center, lod);
+                const layer = new SPACEXR.TileLayer("myLayer", tileClient).addTo(map);
 
                 function onDrag(m, dx, dy, b) {
                     switch (b) {
@@ -97,6 +101,7 @@
                 compass.addEventListener('click', handleCompassClick);
 
                 const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
+
                 translateManager.attachControl(canvas);
                 const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });
 

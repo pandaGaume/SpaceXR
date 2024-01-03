@@ -9,9 +9,6 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export interface ITileAddressProcessor {
-    process(address: ITileAddress, metrics?: ITileMetrics): ITileAddress[] | ITileSection;
-}
 export interface ITileSection extends ICartesian2, ISize2 {
     address: ITileAddress;
 }
@@ -108,6 +105,7 @@ export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetrics
     name: string;
     fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
+export declare function IsTileDatasource<T, A extends ITileAddress>(b: unknown): b is ITileDatasource<T, A>;
 export interface ITileUrlBuilder {
     buildUrl(address: ITileAddress, ...params: unknown[]): string;
 }
@@ -137,7 +135,6 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGe
     updatedObservable: Observable<ITile<T>>;
     enabledObservable: Observable<ITileProvider<T>>;
     name: string;
-    addressProcessor?: ITileAddressProcessor;
     contentProvider: ITileContentProvider<T>;
     factory: ITileBuilder<T>;
     enabled: boolean;
@@ -145,10 +142,10 @@ export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGe
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
 }
+export declare function IsTileProvider<T>(b: unknown): b is ITileProvider<T>;
 export interface ITileProviderBuilder<T> {
     withEnabled(enabled: boolean): ITileProviderBuilder<T>;
     withFactory(factory: ITileBuilder<T>): ITileProviderBuilder<T>;
-    withAddressProcessor(processor: ITileAddressProcessor): ITileProviderBuilder<T>;
     withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T>;
     build(): ITileProvider<T>;
 }

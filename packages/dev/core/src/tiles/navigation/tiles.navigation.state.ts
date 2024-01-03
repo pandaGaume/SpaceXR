@@ -1,7 +1,7 @@
-import { IGeo2 } from "../../geography/geography.interfaces";
+import { IGeo2, IsLocation } from "../../geography/geography.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
-import { ITileNavigationApi, ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Geo2 } from "../../geography/geography.position";
 import { ValidableBase } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
@@ -9,14 +9,14 @@ import { ICartesian2 } from "../../geometry/geometry.interfaces";
 import { Cartesian2 } from "../../geometry/geometry.cartesian";
 import { Bearing } from "../../geography/geography.bearing";
 import { TileAddress } from "../address/tiles.address";
+import { EPSG3857 } from "../geography";
 
-export class TileNavigation extends ValidableBase implements ITileNavigationApi {
+export class TileNavigationState extends ValidableBase implements ITileNavigationState {
     _centerObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
     _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
 
-    _metrics: ITileMetrics;
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
@@ -26,7 +26,6 @@ export class TileNavigation extends ValidableBase implements ITileNavigationApi 
 
     public constructor(metrics: ITileMetrics, center?: IGeo2, lod?: number, azimuth?: number) {
         super();
-        this._metrics = metrics;
         this._lodf = 0;
         this._center = Geo2.Zero();
         this._azimuth = new Bearing(azimuth ?? 0);
@@ -38,14 +37,6 @@ export class TileNavigation extends ValidableBase implements ITileNavigationApi 
 
     public get scale(): number {
         return TileAddress.GetLodScale(this._lodf);
-    }
-
-    public get pixelXY(): ICartesian2 {
-        return this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, this.lod);
-    }
-
-    public get metrics(): ITileMetrics {
-        return this._metrics;
     }
 
     public get center(): IGeo2 {
@@ -74,10 +65,9 @@ export class TileNavigation extends ValidableBase implements ITileNavigationApi 
     }
 
     public set zoom(lodf: number) {
-        const clamped = TileAddress.ClampLod(lodf, this._metrics);
-        if (this._lodf != clamped) {
+        if (this._lodf != lodf) {
             const old = this._lodf;
-            this._lodf = clamped;
+            this._lodf = lodf;
             if (this._zoomObservable && this._zoomObservable.hasObservers()) {
                 const e = new PropertyChangedEventArgs(this, old, this._lodf);
                 this._zoomObservable.notifyObservers(e);
@@ -122,8 +112,13 @@ export class TileNavigation extends ValidableBase implements ITileNavigationApi 
         return this._stateChangedObservable;
     }
 
-    public setView(center: IGeo2, zoom?: number, rotation?: number): void {
+    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
         if (center) {
+            if (Array.isArray(center)) {
+                const lat = center.length > 0 ? center[0] : 0;
+                const lon = center.length > 1 ? center[1] : 0;
+                center = new Geo2(lat, lon);
+            }
             this.center = center;
         }
         if (zoom) {
@@ -132,31 +127,56 @@ export class TileNavigation extends ValidableBase implements ITileNavigationApi 
         if (rotation) {
             this.azimuth = new Bearing(rotation);
         }
+        return this;
     }
 
-    public zoomIn(delta: number): void {
+    public zoomIn(delta: number): TileNavigationState {
         this.zoom += delta;
+        return this;
     }
 
-    public zoomOut(delta: number): void {
+    public zoomOut(delta: number): TileNavigationState {
         this.zoom -= delta;
+        return this;
     }
 
-    public translate(tx: number, ty: number): void {
+    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState {
+        const m = metrics ?? EPSG3857.Shared;
         if (this._azimuth) {
             const p = this.rotatePointInv(tx, ty, this._cartesianCache);
             tx = p.x;
             ty = p.y;
         }
         const lod = Math.round(this._lodf);
-        const pixelCenterXY = this.metrics.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
+        const pixelCenterXY = m.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
-        this.center = this.metrics.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
+        this.center = m.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
+        return this;
     }
 
-    public rotate(r: number): void {
+    public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState {
+        if (lat) {
+            let dlat;
+            let dlon;
+            if (Array.isArray(lat)) {
+                dlat = lat.length > 0 ? lat[0] : 0;
+                dlon = lat.length > 1 ? lat[1] : 0;
+            } else if (IsLocation(lat)) {
+                dlat = lat.lat;
+                dlon = lat.lon;
+            } else {
+                dlat = lat;
+                dlon = lon ?? 0;
+            }
+            this.center = new Geo2(this._center.lat + dlat, this._center.lon + dlon);
+        }
+        return this;
+    }
+
+    public rotate(r: number): TileNavigationState {
         this.azimuth = new Bearing(this._azimuth.value + r);
+        return this;
     }
 
     protected _doValidate() {

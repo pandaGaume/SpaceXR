@@ -1,24 +1,34 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileDisplay, ITileMetrics, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { ITileDisplay, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Nullable } from "../../types";
 
-export interface ITileMapLayer<T> {
+export interface ITileMapLayerOptions {
+    zindex: number;
+    alpha: number;
+    zoomOffset?: number;
+    attribution?: string;
+}
+
+export interface ITileMapLayer<T> extends ITileMapLayerOptions, ITileMetricsProvider {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>>;
     name: string;
     provider: ITileProvider<T>;
-    zindex: number;
-    alpha: number;
     enabled: boolean;
+
+    addTo(map: ITileMap<T>): ITileMapLayer<T>;
 }
 
 export interface ITileMapLayerBuilder<T> {
     name: string; // provide access to the underlying name for uniquely identify the intended layer
     withName(name: string): ITileMapLayerBuilder<T>;
+    withOptions(options?: ITileMapLayerOptions): ITileMapLayerBuilder<T>;
     withZIndex(zindex: number): ITileMapLayerBuilder<T>;
     withAlpha(value: number): ITileMapLayerBuilder<T>;
+    withzoomOffset(value: number): ITileMapLayerBuilder<T>;
+    withAttribution(value: string): ITileMapLayerBuilder<T>;
     withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T>;
     withEnabled(enabled: boolean): ITileMapLayerBuilder<T>;
     build(): ITileMapLayer<T>;
@@ -45,13 +55,13 @@ export function IsTileMapLayerBuilder<T>(b: unknown): b is ITileMapLayerBuilder<
 /// When removing a view, the map will clear the display and the navigation api of this view.
 /// Changing the display or the navigation api of a map will automatically update the display or the navigation api of all the views.
 /// </summary>
-export interface ITileMap<T> extends ITileConsumer<T> {
+export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknown> {
     // map related
     layerAddedObservable: Observable<ITileMapLayer<T>>;
     layerRemovedObservable: Observable<ITileMapLayer<T>>;
 
     display: Nullable<ITileDisplay>;
-    navigation: ITileNavigationApi;
+    navigation: ITileNavigationApi<unknown>;
 
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
 
@@ -65,8 +75,8 @@ export interface ITileMap<T> extends ITileConsumer<T> {
 export interface ITileMapBuilder<T> {
     withName(name: string): ITileMapBuilder<T>;
     withDisplay(display: ITileDisplay): ITileMapBuilder<T>;
-    withNavigation(navigation: ITileNavigationApi | ITileMetrics): ITileMapBuilder<T>;
+    withNavigation(navigation: ITileNavigationApi<unknown> | ITileMetrics): ITileMapBuilder<T>;
     withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T>;
     withLayer(...layer: Array<ITileMapLayer<T> | ITileMapLayerBuilder<T>>): ITileMapBuilder<T>;
-    build(): ITileMap<T>;
+    build(): ITileMap<T> | undefined;
 }

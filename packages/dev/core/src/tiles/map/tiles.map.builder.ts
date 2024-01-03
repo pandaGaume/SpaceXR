@@ -1,12 +1,12 @@
-import { ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
+import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+import { ITilePipeline, ITilePipelineBuilder, IsTilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
 import { ITileDisplay } from "../tiles.interfaces";
 import { ITileMap, ITileMapBuilder, ITileMapLayer, ITileMapLayerBuilder, IsTileMapLayerBuilder } from "./tiles.map.interfaces";
 
 export abstract class AbstractTileMapBuilder<T> implements ITileMapBuilder<T> {
     protected _name?: string;
     protected _display?: ITileDisplay;
-    protected _navigation?: ITileNavigationApi;
+    protected _navigation?: ITileNavigationState;
     protected _pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>;
     protected _layers?: Map<string, ITileMapLayer<T>>;
 
@@ -20,7 +20,7 @@ export abstract class AbstractTileMapBuilder<T> implements ITileMapBuilder<T> {
         return this;
     }
 
-    public withNavigation(navigation: ITileNavigationApi): ITileMapBuilder<T> {
+    public withNavigation(navigation: ITileNavigationState): ITileMapBuilder<T> {
         this._navigation = navigation;
         return this;
     }
@@ -44,8 +44,15 @@ export abstract class AbstractTileMapBuilder<T> implements ITileMapBuilder<T> {
         return this;
     }
 
+    public get pipeline(): ITilePipeline<T> | undefined {
+        if (IsTilePipelineBuilder<T>(this._pipeline)) {
+            return this._pipeline.build();
+        }
+        return this._pipeline;
+    }
+
     /// <summary>
     /// Build the tile map. This is where all the logic is implemented to build specific use case map, 2D, 3D with DEM or not, etc.
     /// </summary>
-    public abstract build(): ITileMap<T>;
+    public abstract build(): ITileMap<T> | undefined;
 }

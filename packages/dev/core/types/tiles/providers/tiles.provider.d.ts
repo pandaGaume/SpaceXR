@@ -1,4 +1,4 @@
-import { ITile, ITileAddress, ITileAddressProcessor, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IRectangle } from "core/geometry/geometry.interfaces";
@@ -6,12 +6,11 @@ import { TileCollection } from "../tiles.collections";
 export declare class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
     _enabledObservable?: Observable<ITileProvider<T>>;
-    _addressProcessor?: ITileAddressProcessor | undefined;
     _contentProvider: ITileContentProvider<T>;
     _factory: ITileBuilder<T>;
-    _activTiles?: TileCollection<T>;
+    _activTiles: TileCollection<T>;
     _enabled: boolean;
-    constructor(provider: ITileContentProvider<T>, factory: ITileBuilder<T>, addressProcessor?: ITileAddressProcessor, enabled?: boolean);
+    constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled?: boolean);
     get bounds(): IEnvelope | undefined;
     get rect(): IRectangle | undefined;
     get updatedObservable(): Observable<ITile<T>>;
@@ -22,7 +21,6 @@ export declare class TileProvider<T> implements ITileProvider<T> {
     get name(): string;
     get contentProvider(): ITileContentProvider<T>;
     get factory(): ITileBuilder<T>;
-    get addressProcessor(): ITileAddressProcessor | undefined;
     dispose(): void;
     get activTiles(): ITileCollection<T>;
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;

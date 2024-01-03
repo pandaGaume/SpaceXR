@@ -2,66 +2,71 @@ import { EventState, Observable, Observer } from "../../events/events.observable
 import { TileConsumerBase } from "../pipeline/tiles.pipeline.consumer";
 import { ITilePipeline, ITilePipelineBuilder, ITileView, IsTilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
 import { ITileDisplay, ITileMetrics } from "../tiles.interfaces";
-import { ITileNavigationApi, IsTileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { TileNavigation } from "../navigation";
+import { ITileNavigationState, IsTileNavigationState } from "../navigation/tiles.navigation.interfaces";
+import { TileNavigationState } from "../navigation";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { PropertyChangedEventArgs } from "../../events/events.args";
+import { IGeo2 } from "../../geography/geography.interfaces";
+import { TileView } from "../pipeline";
+import { TilePipelineBuilder } from "../pipeline/tiles.pipeline.builder";
 
 export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
     _layerRemovedObservable?: Observable<ITileMapLayer<T>>;
 
     protected _display: Nullable<ITileDisplay>;
-    protected _navigation: ITileNavigationApi;
+    protected _navigation: ITileNavigationState;
     protected _pipeline: ITilePipeline<T>;
     protected _layers?: Map<string, ITileMapLayer<T>>;
 
     // internal
     protected _orderedLayers?: ITileMapLayer<T>[];
 
-    _viewAddedObserver: Nullable<Observer<ITileView>>;
-    _viewRemovedObserver: Nullable<Observer<ITileView>>;
-
+    _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
 
     /// <summary>
     /// Create a new tile map.
     /// <param name="name">The map name.</param>
     /// <param name="display">The map display.</param>
-    /// <param name="pipeline">The underlying pipeline. May be a Pipeline object or a PipelineBuilder.</param>
+    /// <param name="pipeline">The underlying pipeline. May be a Pipeline object or a PipelineBuilder. If Ommitedn pipeline is created unsing _buildDefaultPipeline() function which may be ovverided.</param>
     /// <param name="nav">The optional navigation api. May be a NavigationAPI object or a ITileMetrics object. In the second case, it will build a new TileNavigation(metrics).
-    //  If the parameter is ommited, then new TileNavigation(EPSG3857.Shared) will be used.
     //  </param>
     /// </summary>
-    public constructor(name: string, display: ITileDisplay, pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationApi | ITileMetrics) {
+    public constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationState | ITileMetrics) {
         super(name ?? "");
-        this._display = display;
+        this._display = display ?? null;
+
+        if (!pipeline) {
+            pipeline = this._buildDefaultPipeline();
+        }
 
         if (IsTilePipelineBuilder<T>(pipeline)) {
             pipeline = pipeline.build();
         }
         this._pipeline = pipeline;
+        this._pipelinePropertyObserver = this._pipeline.propertyChangedObservable.add(this._onPipelinePropertyChanged.bind(this));
 
         // as TileConsumer, link the map to the pipeline
         this._pipeline.linkTo(this);
 
         // build the navigation state according parameters
-        nav = nav ?? new TileNavigation(EPSG3857.Shared);
+        nav = nav ?? new TileNavigationState(EPSG3857.Shared);
         if (!IsTileNavigationState(nav)) {
-            nav = new TileNavigation(nav);
+            nav = new TileNavigationState(nav);
         }
         this._navigation = nav;
 
         // link the views to the map (ie navigation state and display)
-        for (const view of this._pipeline.view) {
-            this._bindView(view);
+        if (this._pipeline.view) {
+            this._bindView(this._pipeline.view);
         }
+    }
 
-        // listen to view added/removed events in order to link/unlink the views to the map
-        this._viewAddedObserver = this._pipeline.viewAddedObservable.add(this._onViewAdded.bind(this));
-        this._viewRemovedObserver = this._pipeline.viewRemovedObservable.add(this._onViewRemoved.bind(this));
+    protected _buildDefaultPipeline(): ITilePipeline<T> {
+        return new TilePipelineBuilder<T>().build();
     }
 
     public get layerAddedObservable(): Observable<ITileMapLayer<T>> {
@@ -91,15 +96,15 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         }
     }
 
-    public get navigation(): ITileNavigationApi {
+    public get navigation(): ITileNavigationState {
         return this._navigation;
     }
 
-    public set navigation(nav: ITileNavigationApi) {
+    public set navigation(nav: ITileNavigationState) {
         if (this._navigation !== nav) {
             this._navigation = nav;
-            for (const view of this._pipeline.view) {
-                view.state = this._navigation;
+            if (this._pipeline.view) {
+                this._pipeline.view.state = this._navigation;
             }
             this.invalidate();
         }
@@ -138,6 +143,18 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     public addLayer(layer: ITileMapLayer<T>): void {
         if (!this._layers) this._layers = new Map<string, ITileMapLayer<T>>();
         if (layer.name && !this._layers.has(layer.name)) {
+            // now verify the view and associated metrics
+            const view = this._pipeline.view;
+            if (!view) {
+                this._pipeline.view = new TileView(`${this.name}.view`, this._display, layer.provider.metrics, this._navigation, layer.zoomOffset);
+            } else {
+                // we have a view, we check if the metrics are the same
+                const metrics = layer.provider.metrics;
+                if (view.metrics !== metrics && !view.metrics.isCompatibleWith(metrics) && view.zoffset !== layer.zoomOffset) {
+                    throw new Error(`The layer ${layer.provider.name} is not compatible with the actual view.`);
+                }
+            }
+
             this._layers.set(layer.name, layer);
             this._addSortedLayer(layer);
             this.invalidate();
@@ -165,35 +182,61 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     public dispose() {
         super.dispose();
         // clear pipeline links
-        this._viewAddedObserver?.dispose();
-        this._viewRemovedObserver?.dispose();
+        this._pipelinePropertyObserver?.dispose();
         this._pipeline.unlinkFrom(this);
-        for (const view of this._pipeline.view) {
-            this._unbindView(view);
+        if (this._pipeline.view) {
+            this._unbindView(this._pipeline.view);
         }
         if (this._display) {
             this._unbindDisplay(this._display);
         }
     }
 
-    private _onViewAdded(view: ITileView, state: EventState): void {
-        this._bindView(view);
+    // navigation proxy
+    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T> {
+        this._navigation.setView(center, zoom, rotation);
+        return this;
     }
 
-    private _onViewRemoved(view: ITileView, state: EventState): void {
-        this._unbindView(view);
+    public zoomIn(delta: number): TileMapBase<T> {
+        this._navigation.zoomIn(delta);
+        return this;
     }
 
+    public zoomOut(delta: number): TileMapBase<T> {
+        this._navigation.zoomOut(delta);
+        return this;
+    }
+
+    public translatePixel(tx: number, ty: number): TileMapBase<T> {
+        this._navigation.translatePixel(tx, ty);
+        return this;
+    }
+
+    public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T> {
+        this._navigation.translate(lat, lon);
+        return this;
+    }
+
+    public rotate(r: number): TileMapBase<T> {
+        this._navigation.rotate(r);
+        return this;
+    }
+    // end navigation proxy
     private _bindView(view: ITileView): void {
-        view.display = this._display;
-        view.state = this._navigation;
+        if (view) {
+            view.display = this._display;
+            view.state = this._navigation;
+        }
         this.invalidate();
         this._onViewBinded(view);
     }
 
     private _unbindView(view: ITileView): void {
-        view.display = null;
-        view.state = null;
+        if (view) {
+            view.display = null;
+            view.state = null;
+        }
         this.invalidate();
         this._onViewUnbinded(view);
     }
@@ -201,8 +244,8 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     private _bindDisplay(display: ITileDisplay): void {
         this._display = display;
         this._displayPropertyObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
-        for (const view of this._pipeline.view) {
-            view.display = this._display;
+        if (this._pipeline.view) {
+            this._pipeline.view.display = this._display;
         }
         this.invalidate();
         this._onDisplayBinded(display);
@@ -210,10 +253,10 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
 
     private _unbindDisplay(display: ITileDisplay): void {
         this._displayPropertyObserver?.dispose();
-        for (const view of this._pipeline.view) {
-            view.display = null;
-        }
         this._display = null;
+        if (this._pipeline.view) {
+            this._pipeline.view.display = this._display;
+        }
         this.invalidate();
         this._onDisplayUnbinded(display);
     }
@@ -233,16 +276,29 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         }
     }
 
-    private _onDisplayPropertyChanged(display: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
-        switch (display.propertyName) {
+    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
+        switch (event.propertyName) {
             case "size": {
                 this.invalidate();
-                this._onDisplayResized(display.source);
+                this._onDisplayResized(event.source);
                 break;
             }
             case "position": {
                 this.invalidate();
-                this._onDisplayTranslated(display.source);
+                this._onDisplayTranslated(event.source);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    private _onPipelinePropertyChanged(event: PropertyChangedEventArgs<ITilePipeline<T>, unknown>, state: EventState): void {
+        switch (event.propertyName) {
+            case "view": {
+                this._unbindView(<ITileView>event.oldValue);
+                this._bindView(<ITileView>event.newValue);
                 break;
             }
             default: {

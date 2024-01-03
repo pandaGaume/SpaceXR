@@ -10,12 +10,16 @@ export declare class TileView implements ITileView {
     _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _activ: Map<string, ITileAddress>;
     _state: Nullable<ITileNavigationState>;
+    _zoffset: number;
     _stateObserver: Nullable<Observer<ITileNavigationState>>;
     _display: Nullable<ITileDisplay>;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
+    _metrics: ITileMetrics;
     _links: Array<ITilePipelineLink<ITileAddress>>;
     _id: string;
-    constructor(id: string, display?: ITileDisplay, state?: ITileNavigationState);
+    constructor(id: string, display?: Nullable<ITileDisplay>, metrics?: ITileMetrics, state?: ITileNavigationState, zoffset?: number);
+    get zoffset(): number;
+    set zoffset(v: number);
     get name(): string;
     get metrics(): ITileMetrics;
     get state(): Nullable<ITileNavigationState>;

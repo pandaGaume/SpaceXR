@@ -1,4 +1,4 @@
-import { EventState, Observable } from "../../events/events.observable";
+import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
 import { ITile, ITileAddress, ITileDisplay, ITileMetricsProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
@@ -46,6 +46,7 @@ export interface ITilePipelineComponent extends IDisposable {
 export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress> {
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
+    zoffset?: number;
 }
 
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {}
@@ -53,19 +54,15 @@ export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<I
 export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {}
 
 export interface ITilePipeline<T> extends ISourceBlock<ITile<T>>, IDisposable {
-    viewAddedObservable: Observable<ITileView>;
-    viewRemovedObservable: Observable<ITileView>;
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;
 
-    view: Array<ITileView>;
+    view?: ITileView;
     producer: ITileProducer<T>;
-
-    tryAddView(view: ITileView): boolean;
-    tryRemoveView(view: ITileView): boolean;
 }
 
 export interface ITilePipelineBuilder<T> {
     withProducer(producer: ITileProducer<T>): ITilePipelineBuilder<T>;
-    withView(...view: Array<ITileView>): ITilePipelineBuilder<T>;
+    withView(view: ITileView): ITilePipelineBuilder<T>;
     build(): ITilePipeline<T>;
 }
 

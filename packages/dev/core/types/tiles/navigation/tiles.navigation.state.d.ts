@@ -1,17 +1,16 @@
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { Observable } from "../../events/events.observable";
-import { ITileNavigationApi, ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { ValidableBase } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry/geometry.interfaces";
 import { Bearing } from "../../geography/geography.bearing";
-export declare class TileNavigation extends ValidableBase implements ITileNavigationApi {
+export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
     _centerObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, IGeo2>>;
     _zoomObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
     _azimuthObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
-    _metrics: ITileMetrics;
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
@@ -19,8 +18,6 @@ export declare class TileNavigation extends ValidableBase implements ITileNaviga
     constructor(metrics: ITileMetrics, center?: IGeo2, lod?: number, azimuth?: number);
     get lod(): number;
     get scale(): number;
-    get pixelXY(): ICartesian2;
-    get metrics(): ITileMetrics;
     get center(): IGeo2;
     set center(center: IGeo2);
     get zoom(): number;
@@ -31,11 +28,12 @@ export declare class TileNavigation extends ValidableBase implements ITileNaviga
     get zoomObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, number>>;
     get azimuthObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, Bearing>>;
     get stateChangedObservable(): Observable<ITileNavigationState>;
-    setView(center: IGeo2, zoom?: number, rotation?: number): void;
-    zoomIn(delta: number): void;
-    zoomOut(delta: number): void;
-    translate(tx: number, ty: number): void;
-    rotate(r: number): void;
+    setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState;
+    zoomIn(delta: number): TileNavigationState;
+    zoomOut(delta: number): TileNavigationState;
+    translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
+    translate(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;
+    rotate(r: number): TileNavigationState;
     protected _doValidate(): void;
     private rotatePointInv;
 }

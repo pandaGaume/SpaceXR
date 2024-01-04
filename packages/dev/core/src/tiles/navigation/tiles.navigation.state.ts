@@ -26,7 +26,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _lod: number;
     _scale: number;
 
-    public constructor(metrics: ITileMetrics, center?: IGeo2, lod?: number, azimuth?: number) {
+    public constructor(center?: IGeo2, lod?: number, azimuth?: number) {
         super();
         this._lodf = 0;
         this._center = Geo2.Zero();

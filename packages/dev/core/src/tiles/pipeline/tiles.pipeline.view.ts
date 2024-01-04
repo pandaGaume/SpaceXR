@@ -169,6 +169,8 @@ export class TileView implements ITileView {
         }
     }
 
+    // TODO : Introduce lod context for each zoffset... the idea is to limit the zoom level for each zoffset at the metrics max & min lod.
+    // ALSO : Find a way to limit the navigation state to a specific lod range, as a navigation state MAY be shared by several views or pipelines...
     private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
             for (const z of this._zoffset) {

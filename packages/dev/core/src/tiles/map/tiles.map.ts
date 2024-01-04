@@ -31,7 +31,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     /// <param name="nav">The optional navigation api. May be a NavigationAPI object or a ITileMetrics object. In the second case, it will build a new TileNavigation(metrics).
     //  </param>
     /// </summary>
-    public constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationState | ITileMetrics) {
+    public constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationState) {
         super(name ?? "");
 
         if (!pipeline) {
@@ -51,10 +51,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         this._bindDisplay(this._display);
 
         // build the navigation state according parameters
-        nav = nav ?? new TileNavigationState(EPSG3857.Shared);
-        if (!IsTileNavigationState(nav)) {
-            nav = new TileNavigationState(nav);
-        }
+        nav = nav ?? new TileNavigationState();
         this._navigation = nav;
         this._bindNavigation(this._navigation);
 

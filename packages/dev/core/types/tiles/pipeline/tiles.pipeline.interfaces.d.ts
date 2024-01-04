@@ -28,7 +28,9 @@ export interface ITilePipelineComponent extends IDisposable {
 export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress> {
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
-    zoffset?: number;
+    zoffset: Array<number>;
+    tryAddZOffset(v: number): boolean;
+    tryRemoveZOffset(v: number): boolean;
 }
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
     addProvider(provider: ITileProvider<T>): void;

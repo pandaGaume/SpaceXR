@@ -46,7 +46,9 @@ export interface ITilePipelineComponent extends IDisposable {
 export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress> {
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
-    zoffset?: number;
+    zoffset: Array<number>; // return a shallow copy of the array
+    tryAddZOffset(v: number): boolean; // add a zoffset if it doesn't exist
+    tryRemoveZOffset(v: number): boolean; // remove a zoffset if it exists
 }
 
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {

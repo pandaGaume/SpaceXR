@@ -1,15 +1,12 @@
-import { EventState, Observable, Observer } from "../../events/events.observable";
+import { PropertyChangedEventArgs, EventState, Observable, Observer } from "../../events";
 import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
-import { TileAddress } from "../address/tiles.address";
+import { TileAddress } from "../address";
 import { Nullable } from "../../types";
-import { PropertyChangedEventArgs } from "../../events/events.args";
-import { ICartesian2, IRectangle } from "../../geometry/geometry.interfaces";
-import { Rectangle } from "../../geometry/geometry.rectangle";
-import { Cartesian2 } from "../../geometry/geometry.cartesian";
-import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
+import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
+import { EPSG3857 } from "../geography";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -18,7 +15,7 @@ export class TileView implements ITileView {
 
     _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
     _state: Nullable<ITileNavigationState> = null;
-    _zoffset: number;
+    _zoffset: Array<number>;
     _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
     _display: Nullable<ITileDisplay> = null;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>> = null;
@@ -34,22 +31,33 @@ export class TileView implements ITileView {
     public constructor(id: string, metrics?: ITileMetrics, display?: Nullable<ITileDisplay>, state?: ITileNavigationState, zoffset: number = 0) {
         this._id = id;
         this._metrics = metrics ?? EPSG3857.Shared;
-        this._zoffset = zoffset;
+        this._zoffset = [zoffset];
         // set the properties using defined setters
         this.display = display ?? null;
         this.state = state ?? null;
     }
 
-    public get zoffset(): number {
-        return this._zoffset;
+    public get zoffset(): Array<number> {
+        return [...this._zoffset]; // return a shallow copy to avoid modifications
     }
 
-    public set zoffset(v: number) {
-        if (this._zoffset !== v) {
-            this._doClearContext(this._state, true);
-            this._zoffset = v;
+    public tryAddZOffset(v: number): boolean {
+        if (this._zoffset.indexOf(v) === -1) {
+            this._zoffset.push(v);
             this._doValidateContext(this._state, true);
+            return true;
         }
+        return false;
+    }
+
+    public tryRemoveZOffset(v: number): boolean {
+        const i = this._zoffset.indexOf(v);
+        if (i !== -1) {
+            this._zoffset.splice(i, 1);
+            this._doClearContext(this._state, true);
+            return true;
+        }
+        return false;
     }
 
     public get name(): string {
@@ -163,57 +171,63 @@ export class TileView implements ITileView {
 
     private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
-            const metrics = this.metrics;
-            const lod = TileAddress.ClampLod(state.lod + this._zoffset, metrics);
-            const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
-            const scale = state.scale;
-            const rect = this.getRectangle(pixelCenterXY, scale);
-
-            // compute the bounds of tile xy
-            let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
-            let seTileXY = metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
-
-            const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
-            const x0 = Math.max(0, nwTileXY.x);
-            const y0 = Math.max(0, nwTileXY.y);
-            const x1 = Math.min(maxIndex, seTileXY.x);
-            const y1 = Math.min(maxIndex, seTileXY.y);
-
-            const remains = new Array<ITileAddress>();
-            const added = new Array<ITileAddress>();
-
-            const tmp = new TileAddress(0, 0, lod);
-            for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
-                for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
-                    const key = tmp.quadkey;
-                    const activ = this._activ.get(key);
-                    if (activ) {
-                        remains.push(activ);
-                        this._activ.delete(key);
-                        continue;
-                    }
-                    added.push(tmp.clone());
-                }
+            for (const z of this._zoffset) {
+                this._doValidateContextWithZoom(state, z, dispatchEvent);
             }
+        }
+    }
 
-            let deleted = Array.from(this._activ.values());
-            this._activ.clear();
+    private _doValidateContextWithZoom(state: ITileNavigationState, zoomOffset: number, dispatchEvent: boolean) {
+        const metrics = this.metrics;
+        const lod = TileAddress.ClampLod(state.lod + zoomOffset, metrics);
+        const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
+        const scale = state.scale;
+        const rect = this.getRectangle(pixelCenterXY, scale);
 
-            for (const a of remains) {
-                this._activ.set(a.quadkey, a);
-            }
+        // compute the bounds of tile xy
+        let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
+        let seTileXY = metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
 
-            for (const a of added) {
-                this._activ.set(a.quadkey, a);
-            }
+        const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
+        const x0 = Math.max(0, nwTileXY.x);
+        const y0 = Math.max(0, nwTileXY.y);
+        const x1 = Math.min(maxIndex, seTileXY.x);
+        const y1 = Math.min(maxIndex, seTileXY.y);
 
-            if (dispatchEvent) {
-                if (added.length && this._addedObservable?.hasObservers()) {
-                    this._addedObservable.notifyObservers(added, -1, this, this);
+        const remains = new Array<ITileAddress>();
+        const added = new Array<ITileAddress>();
+
+        const tmp = new TileAddress(0, 0, lod);
+        for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
+            for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
+                const key = tmp.quadkey;
+                const activ = this._activ.get(key);
+                if (activ) {
+                    remains.push(activ);
+                    this._activ.delete(key);
+                    continue;
                 }
-                if (deleted.length && this._removedObservable?.hasObservers()) {
-                    this._removedObservable.notifyObservers(deleted, -1, this, this);
-                }
+                added.push(tmp.clone());
+            }
+        }
+
+        let deleted = Array.from(this._activ.values());
+        this._activ.clear();
+
+        for (const a of remains) {
+            this._activ.set(a.quadkey, a);
+        }
+
+        for (const a of added) {
+            this._activ.set(a.quadkey, a);
+        }
+
+        if (dispatchEvent) {
+            if (added.length && this._addedObservable?.hasObservers()) {
+                this._addedObservable.notifyObservers(added, -1, this, this);
+            }
+            if (deleted.length && this._removedObservable?.hasObservers()) {
+                this._removedObservable.notifyObservers(deleted, -1, this, this);
             }
         }
     }

@@ -1,16 +1,15 @@
-import { Observable, Observer } from "../../events/events.observable";
+import { PropertyChangedEventArgs, Observable, Observer } from "../../events";
 import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
-import { PropertyChangedEventArgs } from "../../events/events.args";
-import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+import { ITileNavigationState } from "../navigation";
 export declare class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _activ: Map<string, ITileAddress>;
     _state: Nullable<ITileNavigationState>;
-    _zoffset: number;
+    _zoffset: Array<number>;
     _stateObserver: Nullable<Observer<ITileNavigationState>>;
     _display: Nullable<ITileDisplay>;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
@@ -18,8 +17,9 @@ export declare class TileView implements ITileView {
     _links: Array<ITilePipelineLink<ITileAddress>>;
     _id: string;
     constructor(id: string, metrics?: ITileMetrics, display?: Nullable<ITileDisplay>, state?: ITileNavigationState, zoffset?: number);
-    get zoffset(): number;
-    set zoffset(v: number);
+    get zoffset(): Array<number>;
+    tryAddZOffset(v: number): boolean;
+    tryRemoveZOffset(v: number): boolean;
     get name(): string;
     get metrics(): ITileMetrics;
     get state(): Nullable<ITileNavigationState>;
@@ -35,6 +35,7 @@ export declare class TileView implements ITileView {
     private _onStateChanged;
     private _onDisplayPropertyChanged;
     private _doValidateContext;
+    private _doValidateContextWithZoom;
     private _doClearContext;
     private getRectangle;
     private rotatePointsArround;

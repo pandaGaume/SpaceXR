@@ -1,16 +1,11 @@
-import { EventState, Observable, Observer } from "../../events/events.observable";
-import { TileConsumerBase } from "../pipeline/tiles.pipeline.consumer";
-import { ITilePipeline, ITilePipelineBuilder, ITileView, IsTilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
+import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
+import { TileConsumerBase, TilePipelineBuilder, TileView, ITilePipeline, ITilePipelineBuilder, ITileView, IsTilePipelineBuilder } from "../pipeline";
 import { ITileDisplay, ITileMetrics } from "../tiles.interfaces";
-import { ITileNavigationState, IsTileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { TileNavigationState } from "../navigation";
+import { ITileNavigationState, IsTileNavigationState, TileNavigationState } from "../navigation";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
-import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IGeo2 } from "../../geography/geography.interfaces";
-import { TileView } from "../pipeline";
-import { TilePipelineBuilder } from "../pipeline/tiles.pipeline.builder";
 
 export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
@@ -25,6 +20,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     protected _orderedLayers?: ITileMapLayer<T>[];
 
     _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
+    _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
 
     /// <summary>
@@ -37,7 +33,6 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     /// </summary>
     public constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationState | ITileMetrics) {
         super(name ?? "");
-        this._display = display ?? null;
 
         if (!pipeline) {
             pipeline = this._buildDefaultPipeline();
@@ -52,12 +47,16 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         // as TileConsumer, link the map to the pipeline
         this._pipeline.linkTo(this);
 
+        this._display = display ?? null;
+        this._bindDisplay(this._display);
+
         // build the navigation state according parameters
         nav = nav ?? new TileNavigationState(EPSG3857.Shared);
         if (!IsTileNavigationState(nav)) {
             nav = new TileNavigationState(nav);
         }
         this._navigation = nav;
+        this._bindNavigation(this._navigation);
 
         // link the views to the map (ie navigation state and display)
         if (this._pipeline.view) {
@@ -85,14 +84,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
 
     public set display(display: Nullable<ITileDisplay>) {
         if (this._display !== display) {
-            if (this._display) {
-                this._unbindDisplay(this._display);
-            }
+            this._unbindDisplay(this._display);
             this._display = display;
-            if (this._display) {
-                this._bindDisplay(this._display);
-            }
-            this.invalidate();
+            this._bindDisplay(this._display);
         }
     }
 
@@ -102,11 +96,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
 
     public set navigation(nav: ITileNavigationState) {
         if (this._navigation !== nav) {
+            this._unbindNavigation(this._navigation);
             this._navigation = nav;
-            if (this._pipeline.view) {
-                this._pipeline.view.state = this._navigation;
-            }
-            this.invalidate();
+            this._bindNavigation(this._navigation);
         }
     }
 
@@ -149,7 +141,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
             // now verify the view and associated metrics
             const view = this._pipeline.view;
             if (!view) {
-                this._pipeline.view = new TileView(`${this.name}.view`, undefined, layer.provider.metrics, undefined, layer.zoomOffset);
+                this._pipeline.view = new TileView(`${this.name}.view`, layer.provider.metrics, undefined, undefined, layer.zoomOffset);
             } else {
                 // we have a view, we check if the metrics are the same
                 const metrics = layer.provider.metrics;
@@ -195,6 +187,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         if (this._display) {
             this._unbindDisplay(this._display);
         }
+        this._displayPropertyObserver?.disconnect();
     }
 
     // navigation proxy
@@ -228,44 +221,6 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         return this;
     }
     // end navigation proxy
-    private _bindView(view: ITileView): void {
-        if (view) {
-            view.display = this._display;
-            view.state = this._navigation;
-        }
-        this.invalidate();
-        this._onViewBinded(view);
-    }
-
-    private _unbindView(view: ITileView): void {
-        if (view) {
-            view.display = null;
-            view.state = null;
-        }
-        this.invalidate();
-        this._onViewUnbinded(view);
-    }
-
-    private _bindDisplay(display: ITileDisplay): void {
-        this._display = display;
-        this._displayPropertyObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
-        if (this._pipeline.view) {
-            this._pipeline.view.display = this._display;
-        }
-        this.invalidate();
-        this._onDisplayBinded(display);
-    }
-
-    private _unbindDisplay(display: ITileDisplay): void {
-        this._displayPropertyObserver?.disconnect();
-        this._display = null;
-        if (this._pipeline.view) {
-            this._pipeline.view.display = this._display;
-        }
-        this.invalidate();
-        this._onDisplayUnbinded(display);
-    }
-
     private _addSortedLayer(layer: ITileMapLayer<T>): void {
         if (!this._orderedLayers) this._orderedLayers = [];
         this._orderedLayers.push(layer);
@@ -279,6 +234,10 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
                 this._orderedLayers.splice(index, 1);
             }
         }
+    }
+
+    private _onNavigationUpdated(event: ITileNavigationState, state: EventState): void {
+        this.invalidate();
     }
 
     private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
@@ -312,14 +271,82 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         }
     }
 
-    protected _onDisplayUnbinded(display: ITileDisplay): void {
+    private _bindView(view: ITileView): void {
+        if (view) {
+            view.display = this._display;
+            view.state = this._navigation;
+        }
+        this.invalidate();
+        this._onViewBinded(view);
+    }
+
+    private _unbindView(view: ITileView): void {
+        if (view) {
+            view.display = null;
+            view.state = null;
+        }
+        this.invalidate();
+        this._onViewUnbinded(view);
+    }
+
+    private _bindDisplay(display: Nullable<ITileDisplay>): void {
+        if (display) {
+            this._display = display;
+            this._displayPropertyObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
+        }
+        if (this._pipeline.view) {
+            this._pipeline.view.display = this._display;
+        }
+        this.invalidate();
+        this._onDisplayBinded(display);
+    }
+
+    private _unbindDisplay(display: Nullable<ITileDisplay>): void {
+        this._displayPropertyObserver?.disconnect();
+        this._display = null;
+        if (this._pipeline.view) {
+            this._pipeline.view.display = null;
+        }
+        this.invalidate();
+        this._onDisplayUnbinded(display);
+    }
+
+    private _bindNavigation(nav?: ITileNavigationState): void {
+        if (nav) {
+            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdated.bind(this));
+        }
+        if (this._pipeline.view) {
+            this._pipeline.view.state = this._navigation;
+        }
+
+        this.invalidate();
+        this._onNavigationBinded(nav);
+    }
+
+    private _unbindNavigation(nav?: ITileNavigationState): void {
+        this._navigationUpdatedObserver?.disconnect();
+        if (this._pipeline.view) {
+            this._pipeline.view.state = null;
+        }
+        this.invalidate();
+        this._onNavigationUnbinded(nav);
+    }
+
+    protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayBinded(display: ITileDisplay): void {
+    protected _onDisplayBinded(display: Nullable<ITileDisplay>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
+    protected _onNavigationUnbinded(nav?: ITileNavigationState): void {
+        /* nothing to do here - overrided by subclasses */
+    }
+
+    protected _onNavigationBinded(nav?: ITileNavigationState): void {
+        /* nothing to do here - overrided by subclasses */
+    }
     protected _onDisplayResized(display: ITileDisplay): void {
         /* nothing to do here - overrided by subclasses */
     }

@@ -42,13 +42,6 @@ export class TileAddress implements ITileAddress {
         return Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
     }
 
-    public static GetLodScale(lod: number): number {
-        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
-        // scale corresponding to the decimal part
-        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
-        return scale;
-    }
-
     public static ToParentKey(key: string): string {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
     }

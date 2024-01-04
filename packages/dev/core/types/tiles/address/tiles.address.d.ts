@@ -6,7 +6,6 @@ export declare class TileAddress implements ITileAddress {
     static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void;
     static IsValidLod(lod: number, metrics: ITileMetrics): boolean;
     static ClampLod(levelOfDetail: number, metrics: ITileMetrics): number;
-    static GetLodScale(lod: number): number;
     static ToParentKey(key: string): string;
     static ToChildsKey(key: string): string[];
     static ToNeigborsKey(key: string): Nullable<string>[];

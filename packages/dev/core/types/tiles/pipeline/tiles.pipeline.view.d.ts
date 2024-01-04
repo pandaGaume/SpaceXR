@@ -17,7 +17,7 @@ export declare class TileView implements ITileView {
     _metrics: ITileMetrics;
     _links: Array<ITilePipelineLink<ITileAddress>>;
     _id: string;
-    constructor(id: string, display?: Nullable<ITileDisplay>, metrics?: ITileMetrics, state?: ITileNavigationState, zoffset?: number);
+    constructor(id: string, metrics?: ITileMetrics, display?: Nullable<ITileDisplay>, state?: ITileNavigationState, zoffset?: number);
     get zoffset(): number;
     set zoffset(v: number);
     get name(): string;

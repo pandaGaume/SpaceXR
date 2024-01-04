@@ -4,10 +4,16 @@ import { ValidableBase } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ICartesian2, Cartesian2 } from "../../geometry";
 import { IGeo2, IsLocation, Bearing, Geo2 } from "../../geography";
-import { TileAddress } from "../address/tiles.address";
 import { EPSG3857 } from "../geography";
 
 export class TileNavigationState extends ValidableBase implements ITileNavigationState {
+    public static GetLodScale(lod: number): number {
+        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
+        // scale corresponding to the decimal part
+        let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
+        return scale;
+    }
+
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
 
@@ -17,20 +23,24 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
 
     // internal
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
+    _lod: number;
+    _scale: number;
 
     public constructor(metrics: ITileMetrics, center?: IGeo2, lod?: number, azimuth?: number) {
         super();
         this._lodf = 0;
         this._center = Geo2.Zero();
         this._azimuth = new Bearing(azimuth ?? 0);
+        this._lod = Math.round(this._lodf);
+        this._scale = TileNavigationState.GetLodScale(this._lodf);
     }
 
     public get lod(): number {
-        return Math.round(this._lodf);
+        return this._lod;
     }
 
     public get scale(): number {
-        return TileAddress.GetLodScale(this._lodf);
+        return this._scale;
     }
 
     public get center(): IGeo2 {
@@ -62,6 +72,8 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         if (this._lodf != lodf) {
             const old = this._lodf;
             this._lodf = lodf;
+            this._lod = Math.round(this._lodf);
+            this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
                 const e = new PropertyChangedEventArgs(this, old, this._lodf, "zoom");
@@ -115,12 +127,12 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     }
 
     public zoomIn(delta: number): TileNavigationState {
-        this.zoom += delta;
+        this.zoom = this._lodf + Math.abs(delta);
         return this;
     }
 
     public zoomOut(delta: number): TileNavigationState {
-        this.zoom -= delta;
+        this.zoom = this._lodf - Math.abs(delta);
         return this;
     }
 

@@ -31,7 +31,7 @@ export class TileView implements ITileView {
     // cached values
     _id: string;
 
-    public constructor(id: string, display: Nullable<ITileDisplay> = null, metrics?: ITileMetrics, state?: ITileNavigationState, zoffset: number = 0) {
+    public constructor(id: string, metrics?: ITileMetrics, display?: Nullable<ITileDisplay>, state?: ITileNavigationState, zoffset: number = 0) {
         this._id = id;
         this._metrics = metrics ?? EPSG3857.Shared;
         this._zoffset = zoffset;
@@ -232,8 +232,8 @@ export class TileView implements ITileView {
     }
 
     private getRectangle(center: ICartesian2, scale: number): IRectangle {
-        const w = this._display?.width ?? 0 / scale;
-        const h = this._display?.height ?? 0 / scale;
+        const w = (this._display?.width ?? 0) / scale;
+        const h = (this._display?.height ?? 0) / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
         let bounds = new Rectangle(x0, y0, w, h);

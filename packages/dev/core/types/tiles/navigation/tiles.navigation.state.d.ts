@@ -5,12 +5,15 @@ import { ITileMetrics } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry";
 import { IGeo2, Bearing } from "../../geography";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
+    static GetLodScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
     _cartesianCache: ICartesian2;
+    _lod: number;
+    _scale: number;
     constructor(metrics: ITileMetrics, center?: IGeo2, lod?: number, azimuth?: number);
     get lod(): number;
     get scale(): number;

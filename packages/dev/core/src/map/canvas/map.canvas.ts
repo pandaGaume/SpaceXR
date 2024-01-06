@@ -103,6 +103,11 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
             return;
         }
 
+        // cliping the canvas to the display
+        ctx.beginPath();
+        ctx.rect(res.x, res.y, res.width, res.height); // A rectangle as the clipping region
+        ctx.clip();
+
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
         ctx.translate(res.x + res.width / 2, res.y + res.height / 2);

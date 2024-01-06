@@ -197,6 +197,11 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         return this;
     }
 
+    public zooming(delta: number): TileMapBase<T> {
+        this._navigation.zooming(delta).validate();
+        return this;
+    }
+
     public zoomIn(delta: number): TileMapBase<T> {
         this._navigation.zoomIn(delta).validate();
         return this;

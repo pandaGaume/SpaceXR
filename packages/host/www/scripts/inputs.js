@@ -5,7 +5,7 @@ class MouseWheelInputs {
             event.preventDefault(); // prevent default scrolling behavior
             const deltaY = o.inc ? (event.deltaY < 0 ? -o.inc : o.inc) : event.deltaY; // get the amount of delta in the Y direction, assuming it's pixel.
             if (o.onwheel) {
-                o.onwheel(this, deltaY);
+                o.onwheel(this, -deltaY);
             }
         });
     }

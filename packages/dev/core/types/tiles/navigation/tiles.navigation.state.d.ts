@@ -31,6 +31,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     get stateChangedObservable(): Observable<ITileNavigationState>;
     setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState;
     zoomIn(delta: number): TileNavigationState;
+    zooming(delta: number): TileNavigationState;
     zoomOut(delta: number): TileNavigationState;
     translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
     translate(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;

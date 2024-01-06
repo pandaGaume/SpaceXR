@@ -31,6 +31,7 @@ export declare class TileMapBase<T> extends TileConsumerBase<T> implements ITile
     removeLayer(layer: ITileMapLayer<T>): void;
     dispose(): void;
     setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T>;
+    zooming(delta: number): TileMapBase<T>;
     zoomIn(delta: number): TileMapBase<T>;
     zoomOut(delta: number): TileMapBase<T>;
     translatePixel(tx: number, ty: number): TileMapBase<T>;

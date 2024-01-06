@@ -75,16 +75,7 @@
                 }
 
                 function onWheel(m, dz) {
-                    if (dz < 0) {
-                        // zoom in
-                        map.zoomIn(-dz);
-                        //console.log(`zoom in ${map.navigation.zoom}}`)
-
-                    } else {
-                        // zoom out
-                        map.zoomOut(dz);
-                        //console.log(`zoom out ${map.navigation.zoom}}`)                   }
-                    }
+                    map.zooming(dz);
                 }
                 
                 function updateCompassRotation(azimuth) {

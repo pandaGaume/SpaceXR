@@ -145,12 +145,17 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     }
 
     public zoomIn(delta: number): TileNavigationState {
+        this.zoom = this._lodf + Math.abs(delta);
+        return this;
+    }
+
+    public zooming(delta: number): TileNavigationState {
         this.zoom = this._lodf + delta;
         return this;
     }
 
     public zoomOut(delta: number): TileNavigationState {
-        this.zoom = this._lodf - delta;
+        this.zoom = this._lodf - Math.abs(delta);
         return this;
     }
 

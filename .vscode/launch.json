@@ -13,12 +13,8 @@
             "request": "launch",
             "name": "Launch Canvas Map on ms edge",
             "url": "http://localhost:1338/packages/host/www/canvasmap.html",
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-
-            "pathMapping": {
-                "/": "${workspaceFolder}/packages/dev/core/"
-            }
+            "webRoot": "${workspaceFolder}/packages/dev/core/",
+            "sourceMaps": true
         },
         {
             "type": "chrome",

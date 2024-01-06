@@ -91,6 +91,8 @@ export interface ITileSystemBounds {
     maxLatitude: number;
     minLongitude: number;
     maxLongitude: number;
+
+    unionInPlace(bounds: ITileSystemBounds): void;
 }
 
 export function IsTileSystemBounds(b: unknown): b is ITileSystemBounds {

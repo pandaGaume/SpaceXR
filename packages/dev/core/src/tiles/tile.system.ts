@@ -24,13 +24,7 @@ export class TileSystemBounds implements ITileSystemBounds {
 
     public constructor(p?: Partial<ITileSystemBounds>) {
         if (p) {
-            const definedProps = (Object.keys(p) as Array<keyof unknown>)
-                .filter((key) => p[key] !== undefined)
-                .reduce((obj: any, key) => {
-                    obj[key] = p[key];
-                    return obj;
-                }, {});
-            Object.assign(this, definedProps);
+            Object.assign(this, p);
         }
     }
 
@@ -39,6 +33,17 @@ export class TileSystemBounds implements ITileSystemBounds {
             this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>();
         }
         return this._propertyChangedObservable;
+    }
+
+    public unionInPlace(bounds: ITileSystemBounds): void {
+        if (bounds) {
+            this.minLOD = Math.min(this.minLOD, bounds.minLOD);
+            this.maxLOD = Math.max(this.maxLOD, bounds.maxLOD);
+            this.minLatitude = Math.min(this.minLatitude, bounds.minLatitude);
+            this.maxLatitude = Math.max(this.maxLatitude, bounds.maxLatitude);
+            this.minLongitude = Math.min(this.minLongitude, bounds.minLongitude);
+            this.maxLongitude = Math.max(this.maxLongitude, bounds.maxLongitude);
+        }
     }
 
     public get minLOD(): number {

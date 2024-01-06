@@ -1,10 +1,11 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileConsumerBase, TilePipelineBuilder, TileView, ITilePipeline, ITilePipelineBuilder, ITileView, IsTilePipelineBuilder } from "../pipeline";
-import { ITileDisplay } from "../tiles.interfaces";
+import { ITileDisplay, ITileSystemBounds } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
+import { TileSystemBounds } from "../tile.system";
 
 export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
@@ -103,7 +104,10 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
     }
 
     public *getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted: boolean = true): IterableIterator<ITileMapLayer<T>> {
-        if (sorted) return this.getOrderedLayers(predicate);
+        if (sorted) {
+            yield* this.getOrderedLayers(predicate);
+            return;
+        }
 
         if (this._layers) {
             if (predicate) {
@@ -146,9 +150,9 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
                     }
                 }
             }
-
             this._layers.set(layer.name, layer);
             this._addSortedLayer(layer);
+            this._updateNavigationBounds();
             this.invalidate();
             // we give the hand to other components
             this._onLayerAdded(layer);
@@ -163,6 +167,7 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
             this._layers.delete(layer.name);
             this._removeSortedLayer(layer);
             this._pipeline.producer.removeProvider(layer.provider.name);
+            this._updateNavigationBounds();
             this.invalidate();
             // we give the hand to other components
             this._onLayerRemoved(layer);
@@ -326,6 +331,27 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
         }
         this.invalidate();
         this._onNavigationUnbinded(nav);
+    }
+
+    private _updateNavigationBounds(): void {
+        // first get the overall bounds for all the layers
+        let b: Nullable<ITileSystemBounds> = null;
+        for (const layer of this.getLayers()) {
+            if (b === null) {
+                b = new TileSystemBounds(layer.provider.metrics);
+                continue;
+            }
+            b.unionInPlace(layer.provider.metrics);
+        }
+        // the assign the bounds to the navigation state
+        if (b != null) {
+            this._navigation.bounds.maxLOD = b.maxLOD;
+            this._navigation.bounds.minLOD = b.minLOD;
+            this._navigation.bounds.maxLatitude = b.maxLatitude;
+            this._navigation.bounds.minLatitude = b.minLatitude;
+            this._navigation.bounds.maxLongitude = b.maxLongitude;
+            this._navigation.bounds.minLongitude = b.minLongitude;
+        }
     }
 
     protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void {

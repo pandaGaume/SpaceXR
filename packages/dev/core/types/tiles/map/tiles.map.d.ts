@@ -47,6 +47,7 @@ export declare class TileMapBase<T> extends TileConsumerBase<T> implements ITile
     private _unbindDisplay;
     private _bindNavigation;
     private _unbindNavigation;
+    private _updateNavigationBounds;
     protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
     protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void;

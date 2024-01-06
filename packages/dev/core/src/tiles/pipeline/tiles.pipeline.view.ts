@@ -15,7 +15,7 @@ export class TileView implements ITileView {
 
     _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
     _state: Nullable<ITileNavigationState> = null;
-    _zoffset: Array<number>;
+    _zoffset: number;
     _stateObserver: Nullable<Observer<ITileNavigationState>> = null;
     _display: Nullable<ITileDisplay> = null;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>> = null;
@@ -31,33 +31,14 @@ export class TileView implements ITileView {
     public constructor(id: string, metrics?: ITileMetrics, display?: Nullable<ITileDisplay>, state?: ITileNavigationState, zoffset: number = 0) {
         this._id = id;
         this._metrics = metrics ?? EPSG3857.Shared;
-        this._zoffset = [zoffset];
+        this._zoffset = zoffset;
         // set the properties using defined setters
         this.display = display ?? null;
         this.state = state ?? null;
     }
 
-    public get zoffset(): Array<number> {
-        return [...this._zoffset]; // return a shallow copy to avoid modifications
-    }
-
-    public tryAddZOffset(v: number): boolean {
-        if (this._zoffset.indexOf(v) === -1) {
-            this._zoffset.push(v);
-            this._doValidateContext(this._state, true);
-            return true;
-        }
-        return false;
-    }
-
-    public tryRemoveZOffset(v: number): boolean {
-        const i = this._zoffset.indexOf(v);
-        if (i !== -1) {
-            this._zoffset.splice(i, 1);
-            this._doClearContext(this._state, true);
-            return true;
-        }
-        return false;
+    public get zoffset(): number {
+        return this._zoffset;
     }
 
     public get name(): string {
@@ -173,13 +154,11 @@ export class TileView implements ITileView {
     // ALSO : Find a way to limit the navigation state to a specific lod range, as a navigation state MAY be shared by several views or pipelines...
     private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
         if (state && this._display) {
-            for (const z of this._zoffset) {
-                this._doValidateContextWithZoom(state, z, dispatchEvent);
-            }
+            this._doValidateContextWithOffset(state, this._zoffset, dispatchEvent);
         }
     }
 
-    private _doValidateContextWithZoom(state: ITileNavigationState, zoomOffset: number, dispatchEvent: boolean) {
+    private _doValidateContextWithOffset(state: ITileNavigationState, zoomOffset: number, dispatchEvent: boolean) {
         const metrics = this.metrics;
         const lod = TileAddress.ClampLod(state.lod + zoomOffset, metrics);
         const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);

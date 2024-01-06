@@ -9,7 +9,7 @@ export declare class TileView implements ITileView {
     _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _activ: Map<string, ITileAddress>;
     _state: Nullable<ITileNavigationState>;
-    _zoffset: Array<number>;
+    _zoffset: number;
     _stateObserver: Nullable<Observer<ITileNavigationState>>;
     _display: Nullable<ITileDisplay>;
     _displayObserver: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
@@ -17,9 +17,7 @@ export declare class TileView implements ITileView {
     _links: Array<ITilePipelineLink<ITileAddress>>;
     _id: string;
     constructor(id: string, metrics?: ITileMetrics, display?: Nullable<ITileDisplay>, state?: ITileNavigationState, zoffset?: number);
-    get zoffset(): Array<number>;
-    tryAddZOffset(v: number): boolean;
-    tryRemoveZOffset(v: number): boolean;
+    get zoffset(): number;
     get name(): string;
     get metrics(): ITileMetrics;
     get state(): Nullable<ITileNavigationState>;
@@ -35,7 +33,7 @@ export declare class TileView implements ITileView {
     private _onStateChanged;
     private _onDisplayPropertyChanged;
     private _doValidateContext;
-    private _doValidateContextWithZoom;
+    private _doValidateContextWithOffset;
     private _doClearContext;
     private getRectangle;
     private rotatePointsArround;

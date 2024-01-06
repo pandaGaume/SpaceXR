@@ -1,18 +1,40 @@
-import { EventState } from "../../events/events.observable";
+import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IPipelineMessageType, ITileConsumer } from "./tiles.pipeline.interfaces";
 import { ITile } from "../tiles.interfaces";
 import { ValidableBase } from "../../types";
 
 export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<T> {
-    _id: string;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>> | undefined;
+
+    _name: string;
 
     public constructor(id: string) {
         super();
-        this._id = id;
+        this._name = id;
+    }
+
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>> {
+        if (!this._propertyChangedObservable) {
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<unknown, unknown>>();
+        }
+        return this._propertyChangedObservable;
     }
 
     public get name(): string {
-        return this._id;
+        return this._name;
+    }
+
+    public set name(name: string) {
+        if (this._name !== name) {
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                const oldValue = this._name;
+                this._name = name;
+                const args = new PropertyChangedEventArgs<unknown, unknown>(this, oldValue, this._name, "name");
+                this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+                return;
+            }
+            this._name = name;
+        }
     }
 
     /// begin ITargetBlock

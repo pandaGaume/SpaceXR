@@ -1,9 +1,9 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { ITileConsumer, ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
+import { ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
 import { ITileDisplay, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
-import { Nullable } from "../../types";
+import { IDisposable, IValidable, Nullable } from "../../types";
 
 export interface ITileMapLayerOptions {
     zindex: number;
@@ -12,11 +12,11 @@ export interface ITileMapLayerOptions {
     attribution?: string;
 }
 
-export interface ITileMapLayer<T> extends ITileMapLayerOptions, ITileMetricsProvider {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>>;
+export interface ITileMapLayer<T> extends ITileMapLayerOptions, ITileMetricsProvider, IValidable<unknown> {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
-    provider: ITileProvider<T>;
     enabled: boolean;
+    provider: ITileProvider<T>;
 
     addTo(map: ITileMap<T>): ITileMapLayer<T>;
 }
@@ -55,7 +55,7 @@ export function IsTileMapLayerBuilder<T>(b: unknown): b is ITileMapLayerBuilder<
 /// When removing a view, the map will clear the display and the navigation api of this view.
 /// Changing the display or the navigation api of a map will automatically update the display or the navigation api of all the views.
 /// </summary>
-export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknown> {
+export interface ITileMap<T> extends ITileNavigationApi<unknown>, IDisposable {
     // map related
     layerAddedObservable: Observable<ITileMapLayer<T>>;
     layerRemovedObservable: Observable<ITileMapLayer<T>>;
@@ -67,9 +67,6 @@ export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknow
 
     addLayer(layer: ITileMapLayer<T>): void;
     removeLayer(layer: ITileMapLayer<T>): void;
-
-    // flow related
-    pipeline: ITilePipeline<T>;
 }
 
 export interface ITileMapBuilder<T> {

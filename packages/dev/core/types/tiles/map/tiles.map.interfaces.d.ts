@@ -1,20 +1,20 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { ITileConsumer, ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
+import { ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
 import { ITileDisplay, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
-import { Nullable } from "../../types";
+import { IDisposable, IValidable, Nullable } from "../../types";
 export interface ITileMapLayerOptions {
     zindex: number;
     alpha: number;
     zoomOffset?: number;
     attribution?: string;
 }
-export interface ITileMapLayer<T> extends ITileMapLayerOptions, ITileMetricsProvider {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>>;
+export interface ITileMapLayer<T> extends ITileMapLayerOptions, ITileMetricsProvider, IValidable<unknown> {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
-    provider: ITileProvider<T>;
     enabled: boolean;
+    provider: ITileProvider<T>;
     addTo(map: ITileMap<T>): ITileMapLayer<T>;
 }
 export interface ITileMapLayerBuilder<T> {
@@ -30,7 +30,7 @@ export interface ITileMapLayerBuilder<T> {
     build(): ITileMapLayer<T>;
 }
 export declare function IsTileMapLayerBuilder<T>(b: unknown): b is ITileMapLayerBuilder<T>;
-export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknown> {
+export interface ITileMap<T> extends ITileNavigationApi<unknown>, IDisposable {
     layerAddedObservable: Observable<ITileMapLayer<T>>;
     layerRemovedObservable: Observable<ITileMapLayer<T>>;
     display: Nullable<ITileDisplay>;
@@ -38,7 +38,6 @@ export interface ITileMap<T> extends ITileConsumer<T>, ITileNavigationApi<unknow
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
     addLayer(layer: ITileMapLayer<T>): void;
     removeLayer(layer: ITileMapLayer<T>): void;
-    pipeline: ITilePipeline<T>;
 }
 export interface ITileMapBuilder<T> {
     withName(name: string): ITileMapBuilder<T>;

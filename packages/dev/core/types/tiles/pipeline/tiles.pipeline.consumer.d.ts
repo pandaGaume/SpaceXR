@@ -1,11 +1,14 @@
-import { EventState } from "../../events/events.observable";
+import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IPipelineMessageType, ITileConsumer } from "./tiles.pipeline.interfaces";
 import { ITile } from "../tiles.interfaces";
 import { ValidableBase } from "../../types";
 export declare class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<T> {
-    _id: string;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>> | undefined;
+    _name: string;
     constructor(id: string);
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
     get name(): string;
+    set name(name: string);
     added(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void;
     removed(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void;
     updated(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void;

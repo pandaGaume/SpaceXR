@@ -1,22 +1,21 @@
 import { IMemoryCache } from "core/cache";
-import { Observable, PropertyChangedEventArgs } from "../../events";
+import { Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, TileContent } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
-export declare class TileMapLayer<T> implements ITileMapLayer<T> {
-    _propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>> | undefined;
-    _name: string;
-    _provider: ITileProvider<T>;
+import { ITilePipeline, ITileView, TileConsumerBase } from "../pipeline";
+import { Nullable } from "../../types";
+export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
     _alpha: number;
     _zoomOffset?: number;
     _attribution?: string;
     _enabled: boolean;
+    protected _pipeline: ITilePipeline<T>;
+    _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
+    _provider: ITileProvider<T>;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean);
-    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>>;
-    get metrics(): ITileMetrics;
-    get name(): string;
-    set name(name: string);
     get provider(): ITileProvider<T>;
+    get metrics(): ITileMetrics;
     get zindex(): number;
     set zindex(zindex: number);
     get zoomOffset(): number;
@@ -28,5 +27,9 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     get enabled(): boolean;
     set enabled(enabled: boolean);
     addTo(map: ITileMap<T>): ITileMapLayer<T>;
+    dispose(): void;
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>): ITileProvider<T>;
+    protected _buildPipeline(provider: ITileProvider<T>): ITilePipeline<T>;
+    protected _buildView(): ITileView;
+    private _onPipelinePropertyChanged;
 }

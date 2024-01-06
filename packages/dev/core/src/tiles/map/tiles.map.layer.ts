@@ -1,66 +1,47 @@
 import { IMemoryCache } from "core/cache";
-import { Observable, PropertyChangedEventArgs } from "../../events";
+import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileProvider } from "../providers/tiles.provider";
 import { TileContentProvider } from "../providers/tiles.provider.content";
 
 import { ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
+import { ITilePipeline, ITileView, TileConsumerBase, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
+import { Nullable } from "../../types";
 
-export class TileMapLayer<T> implements ITileMapLayer<T> {
-    _propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>> | undefined;
-    _name: string;
-    _provider: ITileProvider<T>;
+export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
     _alpha: number;
     _zoomOffset?: number;
     _attribution?: string;
     _enabled: boolean;
 
-    public constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean) {
-        this._name = name;
-        if (IsTileDatasource<T, ITileAddress>(provider)) {
-            provider = this._buildProvider(provider);
-        }
-        if (!provider) throw new Error("Invalid provider or datasource");
+    protected _pipeline: ITilePipeline<T>;
+    _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
+    _provider: ITileProvider<T>;
 
-        this._provider = provider;
+    public constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean) {
+        super(name);
+        if (!provider) throw new Error("Invalid provider or datasource");
         this._zindex = options?.zindex ?? -1;
         this._alpha = options?.alpha !== undefined ? Math.min(Math.max(options?.alpha, 0), 1.0) : 1.0; // default is opaque
         this._zoomOffset = options?.zoomOffset !== undefined ? options?.zoomOffset : 0;
         this._attribution = options?.attribution;
         this._enabled = enabled ?? true; // default is enabled
-    }
 
-    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>> {
-        if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileMapLayer<T>, unknown>>();
-        }
-        return this._propertyChangedObservable;
-    }
+        this._provider = IsTileDatasource<T, ITileAddress>(provider) ? this._buildProvider(provider) : provider;
+        this._pipeline = this._buildPipeline(this._provider);
+        this._pipelinePropertyObserver = this._pipeline.propertyChangedObservable.add(this._onPipelinePropertyChanged.bind(this));
 
-    public get metrics(): ITileMetrics {
-        return this._provider.metrics;
-    }
-
-    public get name(): string {
-        return this._name;
-    }
-
-    public set name(name: string) {
-        if (this._name !== name) {
-            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                const oldValue = this._name;
-                this._name = name;
-                const args = new PropertyChangedEventArgs<ITileMapLayer<T>, unknown>(this, oldValue, this._name, "name");
-                this._propertyChangedObservable.notifyObservers(args, -1, this, this);
-                return;
-            }
-            this._name = name;
-        }
+        // as TileConsumer, link the map to the pipeline
+        this._pipeline.linkTo(this);
     }
 
     public get provider(): ITileProvider<T> {
         return this._provider;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._provider.metrics;
     }
 
     public get zindex(): number {
@@ -150,12 +131,40 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
     }
 
     public addTo(map: ITileMap<T>): ITileMapLayer<T> {
-        map.addLayer(this);
+        if (map) {
+            map.addLayer(this);
+            if (this._pipeline?.view) {
+                this._pipeline.view.display = map.display;
+                this._pipeline.view.state = map.navigation;
+            }
+        }
         return this;
+    }
+
+    public dispose() {
+        super.dispose();
+        // clear pipeline links
+        this._pipelinePropertyObserver?.disconnect();
+        this._pipeline.unlinkFrom(this);
+        this._pipeline.view?.dispose();
+        this._pipeline.producer?.dispose();
     }
 
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>): ITileProvider<T> {
         const contentProvider = new TileContentProvider<T>(provider, cache);
         return new TileProvider(contentProvider);
+    }
+
+    protected _buildPipeline(provider: ITileProvider<T>): ITilePipeline<T> {
+        const producer = new TileProducer(`${this.name}.producer`, provider);
+        return new TilePipelineBuilder<T>().withView(this._buildView()).withProducer(producer).build();
+    }
+
+    protected _buildView(): ITileView {
+        return new TileView(`${this.name}.view`, this.metrics, undefined, undefined, this.zoomOffset);
+    }
+
+    private _onPipelinePropertyChanged(event: PropertyChangedEventArgs<ITilePipeline<T>, unknown>, state: EventState): void {
+        // nothing to do - keep for debug
     }
 }

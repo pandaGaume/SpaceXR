@@ -1,10 +1,7 @@
 import { ITileDisplay } from "../../tiles/tiles.interfaces";
-
 import { Scalar } from "../../math/math";
 import { RGBAColor } from "../../math/math.color";
-
 import { TileMapBase } from "../../tiles/map/tiles.map";
-import { ITilePipeline } from "../../tiles/pipeline/tiles.pipeline.interfaces";
 import { ITileNavigationState } from "../../tiles/navigation/tiles.navigation.interfaces";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
@@ -69,14 +66,8 @@ export class CanvasTileMapOptionsBuilder {
 export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileContentType> {
     _options: CanvasTileMapOptions;
 
-    public constructor(
-        name: string,
-        display?: Nullable<ITileDisplay>,
-        pipeline?: ITilePipeline<CanvasTileContentType>,
-        options?: CanvasTileMapOptions,
-        nav?: ITileNavigationState
-    ) {
-        super(name, display, pipeline, nav);
+    public constructor(name: string, display?: Nullable<ITileDisplay>, options?: CanvasTileMapOptions, nav?: ITileNavigationState) {
+        super(name, display, nav);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
     }
 
@@ -121,7 +112,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         }
         // every tiles are supposed to got the same size here, using same metrics
         for (const l of this._orderedLayers ?? []) {
-            if (l.enabled && l.provider.enabled) {
+            if (l.enabled) {
                 ctx.globalAlpha = l.alpha;
                 this._drawLayer(ctx, l);
             }
@@ -181,17 +172,11 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
 export class CanvasMap extends AbstractContext2DTileMap {
     _context: Nullable<CanvasRenderingContext2D>;
 
-    public constructor(
-        name: string,
-        display: CanvasDisplay | HTMLCanvasElement,
-        pipeline?: ITilePipeline<CanvasTileContentType>,
-        options?: CanvasTileMapOptions,
-        nav?: ITileNavigationState
-    ) {
+    public constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: CanvasTileMapOptions, nav?: ITileNavigationState) {
         if (display instanceof HTMLCanvasElement) {
             display = new CanvasDisplay(display);
         }
-        super(name, display, pipeline, options, nav);
+        super(name, display, options, nav);
         this._context = display.getContext();
     }
 

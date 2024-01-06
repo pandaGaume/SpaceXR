@@ -1,10 +1,11 @@
-import { PropertyChangedEventArgs, Observable } from "../../events";
+import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { ValidableBase } from "../../types";
-import { ITileMetrics } from "../tiles.interfaces";
+import { Nullable, ValidableBase } from "../../types";
+import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2, Cartesian2 } from "../../geometry";
 import { IGeo2, IsLocation, Bearing, Geo2 } from "../../geography";
 import { EPSG3857 } from "../geography";
+import { TileSystemBounds } from "../tile.system";
 
 export class TileNavigationState extends ValidableBase implements ITileNavigationState {
     public static GetLodScale(lod: number): number {
@@ -20,19 +21,28 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
+    _bounds: ITileSystemBounds;
 
     // internal
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
     _lod: number;
     _scale: number;
+    _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
 
-    public constructor(center?: IGeo2, lod?: number, azimuth?: number) {
+    public constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds) {
         super();
         this._lodf = 0;
         this._center = Geo2.Zero();
         this._azimuth = new Bearing(azimuth ?? 0);
+        this._bounds = bounds ?? new TileSystemBounds();
+        this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
         this._lod = Math.round(this._lodf);
         this._scale = TileNavigationState.GetLodScale(this._lodf);
+    }
+
+    public dispose() {
+        this._boundsObserver?.disconnect;
+        this._boundsObserver = null;
     }
 
     public get lod(): number {
@@ -48,18 +58,21 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     }
 
     public set center(center: IGeo2) {
-        if (center && !this._center.equals(center)) {
+        center = center ?? Geo2.Zero();
+        const lat = Math.min(Math.max(center.lat, this._bounds.minLatitude), this._bounds.maxLatitude);
+        const lon = Math.min(Math.max(center.lon, this._bounds.minLongitude), this._bounds.maxLongitude);
+        if (this._center.lat != lat || this._center.lon != lon) {
             if (this._propertyChangedObservable?.hasObservers()) {
                 const old = this._center.clone();
-                this._center.lat = center.lat;
-                this._center.lon = center.lon;
-                const e = new PropertyChangedEventArgs(this, old, center, "center");
+                this._center.lat = lat;
+                this._center.lon = lon;
+                const e = new PropertyChangedEventArgs(this, old, this._center.clone(), "center");
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 this.invalidate();
                 return;
             }
-            this._center.lat = center.lat;
-            this._center.lon = center.lon;
+            this._center.lat = lat;
+            this._center.lon = lon;
             this.invalidate();
         }
     }
@@ -69,6 +82,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     }
 
     public set zoom(lodf: number) {
+        lodf = Math.min(Math.max(lodf, this._bounds.minLOD), this._bounds.maxLOD);
         if (this._lodf != lodf) {
             const old = this._lodf;
             this._lodf = lodf;
@@ -96,6 +110,10 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
+    }
+
+    public get bounds(): ITileSystemBounds {
+        return this._bounds;
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>> {
@@ -187,5 +205,9 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         r.x = x * this._azimuth.cos + y * this._azimuth.sin;
         r.y = -x * this._azimuth.sin + y * this._azimuth.cos;
         return <R>r;
+    }
+
+    private _boundsPropertyChanged(e: PropertyChangedEventArgs<unknown, unknown>, state: EventState) {
+        this.setView(this._center, this._lodf);
     }
 }

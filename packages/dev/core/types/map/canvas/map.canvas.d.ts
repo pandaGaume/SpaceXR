@@ -1,4 +1,4 @@
-import { ITileDisplay, ITileMetrics } from "../../tiles/tiles.interfaces";
+import { ITileDisplay } from "../../tiles/tiles.interfaces";
 import { RGBAColor } from "../../math/math.color";
 import { TileMapBase } from "../../tiles/map/tiles.map";
 import { ITilePipeline } from "../../tiles/pipeline/tiles.pipeline.interfaces";
@@ -24,7 +24,7 @@ export declare class CanvasTileMapOptionsBuilder {
 }
 export declare abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileContentType> {
     _options: CanvasTileMapOptions;
-    constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<CanvasTileContentType>, options?: CanvasTileMapOptions, nav?: ITileNavigationState | ITileMetrics);
+    constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<CanvasTileContentType>, options?: CanvasTileMapOptions, nav?: ITileNavigationState);
     protected _draw(ctx: CanvasRenderingContext2D): void;
     protected _drawLayer(ctx: CanvasRenderingContext2D, layer: ITileMapLayer<CanvasTileContentType>): void;
     protected _doValidate(): void;
@@ -32,6 +32,6 @@ export declare abstract class AbstractContext2DTileMap extends TileMapBase<Canva
 }
 export declare class CanvasMap extends AbstractContext2DTileMap {
     _context: Nullable<CanvasRenderingContext2D>;
-    constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, pipeline?: ITilePipeline<CanvasTileContentType>, options?: CanvasTileMapOptions, nav?: ITileNavigationState | ITileMetrics);
+    constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, pipeline?: ITilePipeline<CanvasTileContentType>, options?: CanvasTileMapOptions, nav?: ITileNavigationState);
     protected _getContext2D(): Nullable<CanvasRenderingContext2D>;
 }

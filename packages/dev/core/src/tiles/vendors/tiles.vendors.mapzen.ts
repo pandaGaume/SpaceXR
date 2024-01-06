@@ -1,7 +1,6 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { Float32TileCodec, ImageTileCodec, RGBATileCodec } from "../codecs/tiles.codecs.image";
-import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
@@ -33,8 +32,7 @@ export class MapZen {
     private static readonly KEY = "mapzen";
 
     public static MaxLevelOfDetail = 15;
-    public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(MapZen.MaxLevelOfDetail).build();
-    public static Metrics = new EPSG3857(MapZen.MetricsOptions);
+    public static Metrics = new EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
 
     public static ElevationsImagesClient(options?: TileWebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);

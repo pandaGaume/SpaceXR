@@ -1,8 +1,7 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileConsumerBase, TilePipelineBuilder, TileView, ITilePipeline, ITilePipelineBuilder, ITileView, IsTilePipelineBuilder } from "../pipeline";
-import { ITileDisplay, ITileMetrics } from "../tiles.interfaces";
-import { ITileNavigationState, IsTileNavigationState, TileNavigationState } from "../navigation";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
+import { ITileDisplay } from "../tiles.interfaces";
+import { ITileNavigationState, TileNavigationState } from "../navigation";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
@@ -140,12 +139,6 @@ export class TileMapBase<T> extends TileConsumerBase<T> implements ITileMap<T> {
             if (!view) {
                 this._pipeline.view = new TileView(`${this.name}.view`, layer.provider.metrics, undefined, undefined, layer.zoomOffset);
             } else {
-                // we have a view, we check if the metrics are the same
-                const metrics = layer.provider.metrics;
-                if (view.metrics !== metrics && !view.metrics.isCompatibleWith(metrics)) {
-                    this._pipeline.producer.removeProvider(layer.provider.name);
-                    throw new Error(`The layer ${layer.provider.name} is not compatible with the actual view.`);
-                }
                 if (layer.zoomOffset !== undefined) {
                     // we add the zoom offset to the view.
                     if (view.tryAddZOffset(layer.zoomOffset)) {

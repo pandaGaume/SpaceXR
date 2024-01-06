@@ -3,7 +3,6 @@ import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { Float32TileCodec, Float32TileCodecOptionsBuilder } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
-import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 
@@ -37,8 +36,7 @@ export class MapBox {
     public static MaxLevelOfDetail = 14;
 
     public static TerrainDemV1Client(token: string, options?: TileWebClientOptions) {
-        let mo = new TileMetricsOptionsBuilder().withTileSize(512).withMaxLOD(MapBox.MaxLevelOfDetail);
-        const metrics = new EPSG3857(mo.build());
+        const metrics = new EPSG3857({ maxLOD: MapBox.MaxLevelOfDetail, tileSize: 512 });
         const codecOptions = new Float32TileCodecOptionsBuilder().withInsets(1, Side.top).withInsets(1, Side.left).withInsets(1, Side.bottom).withInsets(1, Side.right).build();
         const elevationClient = new TileWebClient(
             `${MapBox.KEY}_elevation`,

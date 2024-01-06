@@ -1,7 +1,7 @@
-import { PropertyChangedEventArgs, Observable } from "../../events";
+import { PropertyChangedEventArgs, Observable, Observer } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { ValidableBase } from "../../types";
-import { ITileMetrics } from "../tiles.interfaces";
+import { Nullable, ValidableBase } from "../../types";
+import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry";
 import { IGeo2, Bearing } from "../../geography";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
@@ -11,10 +11,13 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
+    _bounds: ITileSystemBounds;
     _cartesianCache: ICartesian2;
     _lod: number;
     _scale: number;
-    constructor(metrics: ITileMetrics, center?: IGeo2, lod?: number, azimuth?: number);
+    _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
+    constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
+    dispose(): void;
     get lod(): number;
     get scale(): number;
     get center(): IGeo2;
@@ -23,6 +26,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     set zoom(lodf: number);
     get azimuth(): Bearing;
     set azimuth(r: Bearing);
+    get bounds(): ITileSystemBounds;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     get stateChangedObservable(): Observable<ITileNavigationState>;
     setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState;
@@ -33,4 +37,5 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     rotate(r: number): TileNavigationState;
     protected _doValidate(): void;
     private rotatePointInv;
+    private _boundsPropertyChanged;
 }

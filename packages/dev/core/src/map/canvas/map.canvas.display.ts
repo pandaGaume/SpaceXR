@@ -29,12 +29,12 @@ export class CanvasDisplay extends TileDisplay {
     _resizeObserver: ResizeObserver;
     _scale: number;
 
-    public constructor(public canvas: HTMLCanvasElement, x?: number, y?: number, w?: number, h?: number, scale?: number) {
+    public constructor(public canvas: HTMLCanvasElement, x?: number, y?: number, scale?: number) {
         // the canvas width and height are the buffer size of the cannvas. default values are width:300, height:150.
         // the canvas clientWidth and clientHeight are the size of the canvas in the browser window.
         // so we need to adapt the buffer size to the client size.
         CanvasDisplay.ResizeToDisplaySize(canvas, scale);
-        super(x ?? 0, y ?? 0, w ?? canvas.width, h ?? canvas.height);
+        super(x ?? 0, y ?? 0, canvas.width, canvas.height);
         this._scale = scale ?? 1;
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {

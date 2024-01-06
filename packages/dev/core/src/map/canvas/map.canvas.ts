@@ -1,4 +1,4 @@
-import { ITileDisplay, ITileMetrics } from "../../tiles/tiles.interfaces";
+import { ITileDisplay } from "../../tiles/tiles.interfaces";
 
 import { Scalar } from "../../math/math";
 import { RGBAColor } from "../../math/math.color";
@@ -74,7 +74,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         display?: Nullable<ITileDisplay>,
         pipeline?: ITilePipeline<CanvasTileContentType>,
         options?: CanvasTileMapOptions,
-        nav?: ITileNavigationState | ITileMetrics
+        nav?: ITileNavigationState
     ) {
         super(name, display, pipeline, nav);
         this._options = { ...CanvasTileMapOptions.Default, ...options };
@@ -181,7 +181,7 @@ export class CanvasMap extends AbstractContext2DTileMap {
         display: CanvasDisplay | HTMLCanvasElement,
         pipeline?: ITilePipeline<CanvasTileContentType>,
         options?: CanvasTileMapOptions,
-        nav?: ITileNavigationState | ITileMetrics
+        nav?: ITileNavigationState
     ) {
         if (display instanceof HTMLCanvasElement) {
             display = new CanvasDisplay(display);

@@ -74,7 +74,7 @@ export class TileCollection<T> implements ITileCollection<T> {
     }
 
     public remove(address: ITileAddress): void {
-        if (!this.has(address)) {
+        if (this.has(address)) {
             const index = this._items.findIndex((t) => TileAddress.IsEquals(t.address, address));
             this._items.splice(index, 1);
             this._bounds = undefined;

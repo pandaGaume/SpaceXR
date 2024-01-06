@@ -1,18 +1,16 @@
 import { AbstractTileMetrics } from "../tiles.metrics";
-import { IGeo2 } from "../../geography/geography.interfaces";
-import { ICartesian2 } from "../../geometry/geometry.interfaces";
+import { IGeo2, Geo2 } from "../../geography";
+import { ICartesian2, Cartesian2 } from "../../geometry";
 import { Ellipsoid } from "../../geodesy/geodesy.ellipsoid";
 import { Scalar } from "../../math/math";
-import { Geo2 } from "../../geography/geography.position";
-import { Cartesian2 } from "../../geometry/geometry.cartesian";
-import { ITileMetricsOptions } from "../tiles.interfaces";
+import { ITileMetrics } from "../tiles.interfaces";
 
 export class EPSG3857 extends AbstractTileMetrics {
     public static Shared = new EPSG3857();
 
     _ellipsoid: Ellipsoid;
 
-    public constructor(options?: ITileMetricsOptions, ellipsoid?: Ellipsoid) {
+    public constructor(options?: Partial<ITileMetrics>, ellipsoid?: Ellipsoid) {
         super(options);
         this._ellipsoid = ellipsoid || Ellipsoid.WGS84;
     }

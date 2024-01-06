@@ -17,7 +17,6 @@ export declare class GoogleMap2DUrlBuilder extends WebTileUrlBuilder {
 export declare class Google {
     private static readonly KEY;
     static MaxLevelOfDetail: number;
-    static MetricsOptions: import("..").ITileMetricsOptions;
     static Metrics: EPSG3857;
     static Attribution: string;
     static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;

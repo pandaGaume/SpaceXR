@@ -15,7 +15,6 @@ export declare class MapzenAltitudeDecoder implements IPixelDecoder {
 export declare class MapZen {
     private static readonly KEY;
     static MaxLevelOfDetail: number;
-    static MetricsOptions: import("..").ITileMetricsOptions;
     static Metrics: EPSG3857;
     static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;

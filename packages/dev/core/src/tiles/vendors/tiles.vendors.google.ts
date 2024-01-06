@@ -1,7 +1,6 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { ImageTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
-import { TileMetricsOptionsBuilder } from "../tiles.metrics";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 
 export enum GoogleMap2DLayerCode {
@@ -29,8 +28,8 @@ export class Google {
     private static readonly KEY = "google";
 
     public static MaxLevelOfDetail = 20;
-    public static MetricsOptions = new TileMetricsOptionsBuilder().withMaxLOD(Google.MaxLevelOfDetail).build();
-    public static Metrics = new EPSG3857(Google.MetricsOptions);
+    public static Metrics = new EPSG3857({ maxLOD: Google.MaxLevelOfDetail });
+
     public static Attribution = "Map data © Google";
 
     public static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: TileWebClientOptions) {

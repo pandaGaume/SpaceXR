@@ -54,30 +54,23 @@ export declare enum CellCoordinateReference {
     sw = "sw",
     se = "se"
 }
-export interface ITileMetricsOptions {
-    minLOD?: number;
-    maxLOD?: number;
-    minLatitude?: number;
-    maxLatitude?: number;
-    minLongitude?: number;
-    maxLongitude?: number;
-    tileSize?: number;
-    cellSize?: number;
-    cellCoordinateReference?: CellCoordinateReference;
-    overlap?: number;
-}
-export interface ITileMetrics {
+export interface ITileSystemBounds {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
     minLOD: number;
     maxLOD: number;
-    lodCount: number;
     minLatitude: number;
     maxLatitude: number;
     minLongitude: number;
     maxLongitude: number;
+}
+export declare function IsTileSystemBounds(b: unknown): b is ITileSystemBounds;
+export interface ITileSystem extends ITileSystemBounds {
     tileSize: number;
     cellSize: number;
     cellCoordinateReference: CellCoordinateReference;
     overlap: number;
+}
+export interface ITileMetrics extends ITileSystem {
     mapSize(levelOfDetail: number): number;
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     groundResolution(latitude: number, levelOfDetail: number): number;
@@ -87,7 +80,6 @@ export interface ITileMetrics {
     getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
     getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
     getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
-    isCompatibleWith(metrics: ITileMetrics): boolean;
 }
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;

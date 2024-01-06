@@ -1,6 +1,6 @@
 import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileConsumerBase, ITilePipeline, ITilePipelineBuilder, ITileView } from "../pipeline";
-import { ITileDisplay, ITileMetrics } from "../tiles.interfaces";
+import { ITileDisplay } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
@@ -16,7 +16,7 @@ export declare class TileMapBase<T> extends TileConsumerBase<T> implements ITile
     _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
-    constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationState | ITileMetrics);
+    constructor(name: string, display?: Nullable<ITileDisplay>, pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>, nav?: ITileNavigationState);
     protected _buildDefaultPipeline(): ITilePipeline<T>;
     get layerAddedObservable(): Observable<ITileMapLayer<T>>;
     get layerRemovedObservable(): Observable<ITileMapLayer<T>>;

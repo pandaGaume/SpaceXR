@@ -1,6 +1,6 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileDisplay, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileCollection, ITileDisplay, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 
 export type IPipelineMessageType<T> = Array<T>;
@@ -35,6 +35,10 @@ export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
 
+export interface ITileSelectionContext {
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean): void;
+}
+
 /// <summary>
 /// The View component is tasked with selecting appropriate tile addresses, guided by the Tile Metrics and navigation properties. Its role is expanded to include the following:
 /// - Tile Selection Based on Navigation Properties: Considers the geographic center, azimuth, and level of detail in tile selection, ensuring relevance and accuracy.
@@ -43,7 +47,7 @@ export interface ITilePipelineComponent extends IDisposable {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress> {
+export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress>, ITileSelectionContext {
     state: Nullable<ITileNavigationState>;
     display: Nullable<ITileDisplay>;
     zoffset: number; // return a shallow copy of the array
@@ -54,9 +58,11 @@ export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<I
     removeProvider(name: string): void;
 }
 
-export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {}
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>> {
+    getActiveTiles(): Nullable<ITileCollection<T>>;
+}
 
-export interface ITilePipeline<T> extends ISourceBlock<ITile<T>>, IDisposable {
+export interface ITilePipeline<T> extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;
 
     view?: ITileView;

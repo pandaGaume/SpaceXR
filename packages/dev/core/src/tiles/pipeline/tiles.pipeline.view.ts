@@ -63,7 +63,7 @@ export class TileView implements ITileView {
             this._state = state;
             if (this._state) {
                 this._stateObserver = this._state.stateChangedObservable.add(this._onStateChanged.bind(this));
-                this._doValidateContext(this._state, true); // force context to be validated if we change of api.
+                this._doValidateContext(this._state, this._display, true); // force context to be validated if we change of api.
             }
         }
     }
@@ -82,7 +82,7 @@ export class TileView implements ITileView {
             this._display = display;
             if (this._display) {
                 this._displayObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
-                this._doValidateContext(this._state, true); // force context to be validated if we change of api.
+                this._doValidateContext(this._state, this._display, true); // force context to be validated if we change of api.
             }
         }
     }
@@ -133,15 +133,19 @@ export class TileView implements ITileView {
         return undefined;
     }
 
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean): void {
+        this._doValidateContext(state, display, dispatchEvent);
+    }
+
     // INTERNALS
     private _onStateChanged(eventData: ITileNavigationState, eventState: EventState) {
-        this._doValidateContext(eventData, true);
+        this._doValidateContext(eventData, this._display, true);
     }
 
     private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case "size": {
-                this._doValidateContext(this._state, true);
+                this._doValidateContext(this._state, this._display, true);
                 break;
             }
             default: {
@@ -152,18 +156,18 @@ export class TileView implements ITileView {
 
     // TODO : Introduce lod context for each zoffset... the idea is to limit the zoom level for each zoffset at the metrics max & min lod.
     // ALSO : Find a way to limit the navigation state to a specific lod range, as a navigation state MAY be shared by several views or pipelines...
-    private _doValidateContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
+    private _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean = true) {
         if (state && this._display) {
-            this._doValidateContextWithOffset(state, this._zoffset, dispatchEvent);
+            this._doValidateContextWithOffset(state, display, this._zoffset, dispatchEvent);
         }
     }
 
-    private _doValidateContextWithOffset(state: ITileNavigationState, zoomOffset: number, dispatchEvent: boolean) {
+    private _doValidateContextWithOffset(state: ITileNavigationState, display: Nullable<ITileDisplay>, zoomOffset: number, dispatchEvent: boolean) {
         const metrics = this.metrics;
         const lod = TileAddress.ClampLod(state.lod + zoomOffset, metrics);
         const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
         const scale = state.scale;
-        const rect = this.getRectangle(pixelCenterXY, scale);
+        const rect = this.getRectangle(pixelCenterXY, display?.width ?? 0, display?.height ?? 0, scale);
 
         // compute the bounds of tile xy
         let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
@@ -226,9 +230,9 @@ export class TileView implements ITileView {
         }
     }
 
-    private getRectangle(center: ICartesian2, scale: number): IRectangle {
-        const w = (this._display?.width ?? 0) / scale;
-        const h = (this._display?.height ?? 0) / scale;
+    private getRectangle(center: ICartesian2, w: number, h: number, scale: number): IRectangle {
+        w = w / scale;
+        h = h / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
         let bounds = new Rectangle(x0, y0, w, h);

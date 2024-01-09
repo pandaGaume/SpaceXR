@@ -124,12 +124,12 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     /// Draw the layer on the canvas. This method is messaged from the draw method.
     /// </summary>
     protected _drawLayer(ctx: CanvasRenderingContext2D, layer: ITileMapLayer<CanvasTileContentType>): void {
-        const provider = layer.provider;
-        const tiles = provider.activTiles;
+        const tiles = layer.getActiveTiles();
         if (!tiles || !tiles.count) {
             return;
         }
-        const metrics = provider.metrics;
+
+        const metrics = layer.metrics;
         const center = metrics.getLatLonToPixelXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
         const tileSize = metrics.tileSize;
 

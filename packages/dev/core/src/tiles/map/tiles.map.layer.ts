@@ -1,9 +1,9 @@
-import { IMemoryCache } from "core/cache";
+import { IMemoryCache } from "../../cache";
 import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileProvider } from "../providers/tiles.provider";
 import { TileContentProvider } from "../providers/tiles.provider.content";
 
-import { ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
 import { Nullable } from "../../types";
@@ -33,7 +33,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         this._pipelinePropertyObserver = this._pipeline.propertyChangedObservable.add(this._onPipelinePropertyChanged.bind(this));
 
         // as TileConsumer, link the map to the pipeline
-        this._pipeline.linkTo(this);
+        this._pipeline.producer.linkTo(this);
     }
 
     public get provider(): ITileProvider<T> {
@@ -145,9 +145,13 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         super.dispose();
         // clear pipeline links
         this._pipelinePropertyObserver?.disconnect();
-        this._pipeline.unlinkFrom(this);
+        this._pipeline.producer.unlinkFrom(this);
         this._pipeline.view?.dispose();
         this._pipeline.producer?.dispose();
+    }
+
+    public getActiveTiles(): Nullable<ITileCollection<T>> {
+        return this._provider.activTiles;
     }
 
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>): ITileProvider<T> {

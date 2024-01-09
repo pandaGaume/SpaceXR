@@ -1,27 +1,11 @@
 import { Nullable } from "@babylonjs/core";
 
-export enum WeightUnits {
-    KG = "kg",
-    STONE = "stone",
-}
-
-export enum LengthUnits {
-    METER = "meter",
-    FURLONG = "furlong",
-}
-
-export interface IUnits {
-    weight: WeightUnits;
-    length: LengthUnits;
-}
-
 export interface IViewSkin {
     // TODO : add Build Property Block to skin
     name?: string;
     styles: any;
     dictionary: any;
     images: any;
-    units?: IUnits;
 }
 
 export class Skin implements IViewSkin {
@@ -29,7 +13,6 @@ export class Skin implements IViewSkin {
     styles: any;
     dictionary: any;
     images: any;
-    units?: IUnits;
 
     public constructor(p: Partial<IViewSkin>) {
         Object.assign(this, p);
@@ -40,7 +23,6 @@ export class SkinBuilder<T extends Skin> {
     public static readonly DefaultLang: string = "en";
 
     _url?: string;
-    _units?: IUnits;
     _name?: string;
     _styles: any;
     _dictionary: any;
@@ -52,11 +34,6 @@ export class SkinBuilder<T extends Skin> {
 
     public withName(name: string): SkinBuilder<T> {
         this._url = name;
-        return this;
-    }
-
-    public withUnits(units: IUnits): SkinBuilder<T> {
-        this._units = units;
         return this;
     }
 
@@ -90,7 +67,6 @@ export class SkinBuilder<T extends Skin> {
                 styles: this._styles,
                 dictionary: this._dictionary,
                 images: this._images,
-                units: this._units,
             });
         }
         if (rawData) {

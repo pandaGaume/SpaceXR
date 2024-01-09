@@ -126,7 +126,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this._stateChangedObservable;
     }
 
-    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
+    public setView(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
         if (center) {
             if (Array.isArray(center)) {
                 const lat = center.length > 0 ? center[0] : 0;

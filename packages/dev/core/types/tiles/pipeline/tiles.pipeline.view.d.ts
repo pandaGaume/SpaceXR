@@ -30,6 +30,7 @@ export declare class TileView implements ITileView {
     get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>>;
     linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions): void;
     unlinkFrom(target: ITargetBlock<ITileAddress>): ITilePipelineLink<ITileAddress> | undefined;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean): void;
     private _onStateChanged;
     private _onDisplayPropertyChanged;
     private _doValidateContext;

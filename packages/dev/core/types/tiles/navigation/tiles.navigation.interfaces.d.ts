@@ -2,7 +2,7 @@ import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { IValidable } from "../../types";
-export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState> {
+export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable<unknown> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     stateChangedObservable: Observable<ITileNavigationState>;
     center: IGeo2;
@@ -13,8 +13,8 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
     scale: number;
 }
 export declare function IsTileNavigationState(b: unknown): b is ITileNavigationState;
-export interface ITileNavigationApi<T> extends IValidable<unknown> {
-    setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): T;
+export interface ITileNavigationApi<T> {
+    setView(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): T;
     zooming(delta: number): T;
     zoomIn(delta: number): T;
     zoomOut(delta: number): T;

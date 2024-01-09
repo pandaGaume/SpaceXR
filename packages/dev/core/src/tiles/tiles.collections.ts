@@ -6,6 +6,10 @@ import { Envelope } from "../geography/geography.envelope";
 import { Rectangle } from "../geometry/geometry.rectangle";
 
 export class TileCollection<T> implements ITileCollection<T> {
+    public static Empty<T>(): ITileCollection<T> {
+        return new TileCollection<T>();
+    }
+
     private _index?: Map<string, ITile<T>>;
     private _items: Array<ITile<T>>;
     private _bounds?: IEnvelope;

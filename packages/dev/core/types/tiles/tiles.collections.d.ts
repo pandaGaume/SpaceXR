@@ -2,6 +2,7 @@ import { IRectangle } from "../geometry/geometry.interfaces";
 import { IEnvelope } from "../geography/geography.interfaces";
 import { ITile, ITileAddress, ITileCollection } from "./tiles.interfaces";
 export declare class TileCollection<T> implements ITileCollection<T> {
+    static Empty<T>(): ITileCollection<T>;
     private _index?;
     private _items;
     private _bounds?;

@@ -1,5 +1,4 @@
 import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileView } from "../pipeline";
 import { ITileDisplay } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
 import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
@@ -49,6 +48,4 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _onDisplayTranslated(display: ITileDisplay): void;
     protected _onLayerAdded(layer: ITileMapLayer<T>): void;
     protected _onLayerRemoved(layer: ITileMapLayer<T>): void;
-    protected _onViewUnbinded(view: ITileView): void;
-    protected _onViewBinded(view: ITileView): void;
 }

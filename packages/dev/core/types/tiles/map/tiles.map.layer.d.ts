@@ -1,9 +1,10 @@
 import { IMemoryCache } from "../../cache";
 import { Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContent } from "../tiles.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileDisplay, ITileMetrics, ITileProvider, TileContent } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
+import { ITileNavigationState } from "../navigation";
 export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
     _alpha: number;
@@ -14,7 +15,7 @@ export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITil
     _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
     _provider: ITileProvider<T>;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean);
-    get provider(): ITileProvider<T>;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent?: boolean): void;
     get metrics(): ITileMetrics;
     get zindex(): number;
     set zindex(zindex: number);

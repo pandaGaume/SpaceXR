@@ -82,11 +82,13 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
 
         // clear the canvas
         const res = this._display;
+        const x = 0;
+        const y = 0;
         if (this._options.background) {
             ctx.fillStyle = this._options.background.toString();
-            ctx.fillRect(res.x, res.y, res.width, res.height);
+            ctx.fillRect(x, y, res.width, res.height);
         } else {
-            ctx.clearRect(res.x, res.y, res.width, res.height);
+            ctx.clearRect(x, y, res.width, res.height);
         }
 
         if (!this._orderedLayers || !this._orderedLayers.length) {
@@ -94,14 +96,9 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
             return;
         }
 
-        // cliping the canvas to the display
-        ctx.beginPath();
-        ctx.rect(res.x, res.y, res.width, res.height); // A rectangle as the clipping region
-        ctx.clip();
-
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
-        ctx.translate(res.x + res.width / 2, res.y + res.height / 2);
+        ctx.translate(x + res.width / 2, y + res.height / 2);
         // we scale the canvas according the navigation scale
         ctx.scale(scale, scale);
         // we rotate the canvas according the navigation azimuth

@@ -26,7 +26,7 @@ export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent?: boolean): void;
 }
 export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress>, ITileSelectionContext {
     state: Nullable<ITileNavigationState>;

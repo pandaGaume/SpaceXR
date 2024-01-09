@@ -34,8 +34,9 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     rotate(r: number): TileMapBase<T>;
     private _addSortedLayer;
     private _removeSortedLayer;
-    private _onNavigationUpdated;
+    private _onNavigationUpdatedInternal;
     private _onDisplayPropertyChanged;
+    private _updateLayersContext;
     private _bindDisplay;
     private _bindNavigation;
     private _updateNavigationBounds;
@@ -44,6 +45,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void;
     protected _onNavigationBinded(nav?: ITileNavigationState): void;
+    protected _onNavigationUpdated(nav?: ITileNavigationState): void;
     protected _onDisplayResized(display: ITileDisplay): void;
     protected _onDisplayTranslated(display: ITileDisplay): void;
     protected _onLayerAdded(layer: ITileMapLayer<T>): void;

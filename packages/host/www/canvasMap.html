@@ -53,9 +53,8 @@
                 const tileClient = SPACEXR.Google.SatelliteClient2d() ;
                  
                 // construire la carte.
-                // display may be a canvas or a diplay object if we want to set x,y,scale.
-                const display = new SPACEXR.CanvasDisplay(canvas,0,0,1);
-                const map = new SPACEXR.CanvasMap("myMap", display).setView([27.98817689833976, 86.92491071824738], lod);
+                // display may be a canvas or a display object if we want to set scale or other options.
+                const map = new SPACEXR.CanvasMap("myMap", canvas).setView([27.98817689833976, 86.92491071824738], lod);
                 const layer = new SPACEXR.TileMapLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
                 
                 function onDrag(m, dx, dy, b) {

@@ -187,19 +187,23 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    private _onNavigationUpdated(event: ITileNavigationState, state: EventState): void {
+    private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
         this.invalidate();
+        this._updateLayersContext();
+        this._onNavigationUpdated(event);
     }
 
     private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case "size": {
                 this.invalidate();
+                this._updateLayersContext();
                 this._onDisplayResized(event.source);
                 break;
             }
             case "position": {
                 this.invalidate();
+                this._updateLayersContext();
                 this._onDisplayTranslated(event.source);
                 break;
             }
@@ -207,6 +211,12 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
                 break;
             }
         }
+    }
+
+    private _updateLayersContext(): void {
+        //for (const layer of this.getLayers()) {
+        //    layer.setContext(this._navigation, this._display);
+        //}
     }
 
     private _bindDisplay(display: Nullable<ITileDisplay>): void {
@@ -220,7 +230,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     private _bindNavigation(nav?: ITileNavigationState): void {
         if (nav) {
-            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdated.bind(this));
+            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
         }
         this.invalidate();
         this._onNavigationBinded(nav);
@@ -270,6 +280,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _onNavigationBinded(nav?: ITileNavigationState): void {
         /* nothing to do here - overrided by subclasses */
     }
+
+    protected _onNavigationUpdated(nav?: ITileNavigationState): void {
+        /* nothing to do here - overrided by subclasses */
+    }
+
     protected _onDisplayResized(display: ITileDisplay): void {
         /* nothing to do here - overrided by subclasses */
     }

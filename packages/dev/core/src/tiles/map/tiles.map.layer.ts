@@ -3,10 +3,11 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileProvider } from "../providers/tiles.provider";
 import { TileContentProvider } from "../providers/tiles.provider.content";
 
-import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileDisplay, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
 import { Nullable } from "../../types";
+import { ITileNavigationState } from "../navigation";
 
 export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
@@ -36,8 +37,8 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         this._pipeline.producer.linkTo(this);
     }
 
-    public get provider(): ITileProvider<T> {
-        return this._provider;
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean = true): void {
+        this._pipeline.view?.setContext(state, display, dispatchEvent);
     }
 
     public get metrics(): ITileMetrics {

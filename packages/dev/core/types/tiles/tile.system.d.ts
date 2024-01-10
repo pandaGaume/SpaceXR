@@ -19,6 +19,7 @@ export declare class TileSystemBounds implements ITileSystemBounds {
     constructor(p?: Partial<ITileSystemBounds>);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
     unionInPlace(bounds: ITileSystemBounds): void;
+    copyInPlace(bounds: ITileSystemBounds): void;
     get minLOD(): number;
     set minLOD(v: number);
     get maxLOD(): number;

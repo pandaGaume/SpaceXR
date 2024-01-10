@@ -32,12 +32,16 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     public constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds) {
         super();
         this._lodf = 0;
-        this._center = Geo2.Zero();
+        this._center = new Geo2(center?.lat ?? 0, center?.lon ?? 0);
         this._azimuth = new Bearing(azimuth ?? 0);
         this._bounds = bounds ?? new TileSystemBounds();
         this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
         this._lod = Math.round(this._lodf);
         this._scale = TileNavigationState.GetLodScale(this._lodf);
+    }
+
+    public clone(): ITileNavigationState {
+        return <any>new TileNavigationState(this._center, this._lod, this._azimuth.value, this._bounds);
     }
 
     public dispose() {
@@ -129,17 +133,20 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     public setView(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
         if (center) {
             if (Array.isArray(center)) {
-                const lat = center.length > 0 ? center[0] : 0;
-                const lon = center.length > 1 ? center[1] : 0;
-                center = new Geo2(lat, lon);
+                this.center.lat = center.length > 0 ? center[0] : 0;
+                this.center.lon = center.length > 1 ? center[1] : 0;
+            } else {
+                this.center.lat = center.lat;
+                this.center.lon = center.lon;
             }
-            this.center = center;
+            this.invalidate();
         }
         if (zoom !== undefined) {
             this.zoom = zoom;
         }
         if (rotation !== undefined) {
-            this.azimuth = new Bearing(rotation);
+            this.azimuth.value = rotation;
+            this.invalidate();
         }
         return this;
     }
@@ -196,6 +203,10 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     public rotate(r: number): TileNavigationState {
         this.azimuth = new Bearing(this._azimuth.value + r);
         return this;
+    }
+
+    public toString(): string {
+        return `center: ${this.center}, zoom: ${this.zoom}, azimuth: ${this.azimuth}`;
     }
 
     protected _doValidate() {

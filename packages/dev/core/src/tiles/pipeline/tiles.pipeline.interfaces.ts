@@ -1,6 +1,6 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileCollection, ITileDisplay, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileCollection, ITileDisplay, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 
 export type IPipelineMessageType<T> = Array<T>;
@@ -36,7 +36,7 @@ export interface ITilePipelineComponent extends IDisposable {
 }
 
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
 }
 
 /// <summary>
@@ -47,11 +47,7 @@ export interface ITileSelectionContext {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress>, ITileSelectionContext {
-    state: Nullable<ITileNavigationState>;
-    display: Nullable<ITileDisplay>;
-    zoffset: number; // return a shallow copy of the array
-}
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext {}
 
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
     addProvider(provider: ITileProvider<T>): void;
@@ -67,9 +63,11 @@ export interface ITilePipeline<T> extends IDisposable {
 
     view?: ITileView;
     producer: ITileProducer<T>;
+    consumer?: ITileConsumer<T>;
 }
 
 export interface ITilePipelineBuilder<T> {
+    withConsumer(consumer: ITileConsumer<T>): ITilePipelineBuilder<T>;
     withProducer(producer: ITileProducer<T>): ITilePipelineBuilder<T>;
     withView(view: ITileView): ITilePipelineBuilder<T>;
     build(): ITilePipeline<T>;
@@ -77,5 +75,10 @@ export interface ITilePipelineBuilder<T> {
 
 export function IsTilePipelineBuilder<T>(b: unknown): b is ITilePipelineBuilder<T> {
     if (b === null || typeof b !== "object") return false;
-    return (<ITilePipelineBuilder<T>>b).build !== undefined && (<ITilePipelineBuilder<T>>b).withProducer !== undefined && (<ITilePipelineBuilder<T>>b).withView !== undefined;
+    return (
+        (<ITilePipelineBuilder<T>>b).build !== undefined &&
+        (<ITilePipelineBuilder<T>>b).withProducer !== undefined &&
+        (<ITilePipelineBuilder<T>>b).withView !== undefined &&
+        (<ITilePipelineBuilder<T>>b).withConsumer !== undefined
+    );
 }

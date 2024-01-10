@@ -189,7 +189,6 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
         this.invalidate();
-        this._updateLayersContext();
         this._onNavigationUpdated(event);
     }
 
@@ -197,14 +196,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         switch (event.propertyName) {
             case "size": {
                 this.invalidate();
-                this._updateLayersContext();
                 this._onDisplayResized(event.source);
-                break;
-            }
-            case "position": {
-                this.invalidate();
-                this._updateLayersContext();
-                this._onDisplayTranslated(event.source);
                 break;
             }
             default: {
@@ -214,9 +206,9 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     private _updateLayersContext(): void {
-        //for (const layer of this.getLayers()) {
-        //    layer.setContext(this._navigation, this._display);
-        //}
+        for (const layer of this.getLayers()) {
+            layer.setContext(this._navigation, this._display);
+        }
     }
 
     private _bindDisplay(display: Nullable<ITileDisplay>): void {
@@ -257,11 +249,9 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    protected _doValidate(): void {
+    protected _beforeValidate(): void {
         if (this._display && this._navigation) {
-            for (const layer of this.getLayers()) {
-                layer.validate();
-            }
+            this._updateLayersContext();
         }
     }
 

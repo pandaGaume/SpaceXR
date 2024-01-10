@@ -271,6 +271,10 @@ export class Envelope implements IEnvelope {
             (alt === undefined || (this.hasAltitude && alt >= this._min.alt! && alt <= this._max.alt!))
         );
     }
+
+    public toString(): string {
+        return `Envelope(${this._min.toString()}, ${this._max.toString()})`;
+    }
 }
 
 export abstract class GeoBounded implements IGeoBounded {

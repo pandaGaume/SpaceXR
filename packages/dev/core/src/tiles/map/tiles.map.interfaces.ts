@@ -63,7 +63,6 @@ export interface ITileMap<T> extends ITileNavigationApi<unknown>, IDisposable {
     navigation: ITileNavigationState;
 
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
-
     addLayer(layer: ITileMapLayer<T>): void;
     removeLayer(layer: ITileMapLayer<T>): void;
 }

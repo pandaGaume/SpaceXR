@@ -50,7 +50,7 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
 
     public updated(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
         this.invalidate();
-        this._onTileRemoved(eventData, eventState);
+        this._onTileUpdated(eventData, eventState);
     }
     /// end ITargetBlock
 

@@ -37,6 +37,10 @@ export class Geo2 implements IGeo2 {
     public equals(other: IGeo2): boolean {
         return this._lat === other.lat && this._lon === other.lon;
     }
+
+    public toString(): string {
+        return `(${this._lat},${this._lon})`;
+    }
 }
 
 export class Geo3 extends Geo2 implements IGeo3 {
@@ -68,5 +72,8 @@ export class Geo3 extends Geo2 implements IGeo3 {
 
     public equals(other: IGeo3): boolean {
         return this._lat === other.lat && this._lon === other.lon && this._alt === other.alt;
+    }
+    public toString(): string {
+        return this.hasAltitude ? `(${this._lat}, ${this._lon}, ${this._alt})` : `(${this._lat}, ${this._lon})`;
     }
 }

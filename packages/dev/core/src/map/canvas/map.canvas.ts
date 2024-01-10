@@ -153,6 +153,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     /// This method is called when the map is validated.
     /// </summary>
     protected _doValidate(): void {
+        super._doValidate();
         const ctx = this._getContext2D();
         if (ctx) {
             this._draw(ctx);

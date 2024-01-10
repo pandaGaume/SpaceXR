@@ -63,6 +63,7 @@ export interface ITileSystemBounds {
     minLongitude: number;
     maxLongitude: number;
     unionInPlace(bounds: ITileSystemBounds): void;
+    copyInPlace(bounds: ITileSystemBounds): void;
 }
 export declare function IsTileSystemBounds(b: unknown): b is ITileSystemBounds;
 export interface ITileSystem extends ITileSystemBounds {

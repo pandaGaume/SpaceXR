@@ -1,6 +1,5 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipeline, ITilePipelineLink, ITileProducer, ITileView } from "./tiles.pipeline.interfaces";
-import { ITile } from "../tiles.interfaces";
+import { ITileConsumer, ITilePipeline, ITileProducer, ITileView } from "./tiles.pipeline.interfaces";
 import { TileProducer } from "./tiles.pipeline.producer";
 
 export class TilePipeline<T> implements ITilePipeline<T> {
@@ -8,11 +7,14 @@ export class TilePipeline<T> implements ITilePipeline<T> {
 
     private _view?: ITileView;
     private _producer: ITileProducer<T>;
+    private _consumer?: ITileConsumer<T>;
 
-    public constructor(producer?: ITileProducer<T>, view?: ITileView) {
+    public constructor(producer?: ITileProducer<T>, view?: ITileView, consumer?: ITileConsumer<T>) {
         this._view = view;
         this._producer = producer ?? new TileProducer<T>("");
+        this._consumer = consumer;
         this._view?.linkTo(this._producer);
+        if (this._consumer) this._producer.linkTo(this._consumer);
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>> {
@@ -42,27 +44,14 @@ export class TilePipeline<T> implements ITilePipeline<T> {
         return this._producer;
     }
 
+    public get consumer(): ITileConsumer<T> | undefined {
+        return this._consumer;
+    }
+
     dispose(): void {
         this._view?.unlinkFrom(this._producer);
-    }
-
-    public get addedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
-        return this._producer.addedObservable;
-    }
-
-    public get removedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
-        return this._producer.removedObservable!;
-    }
-
-    public get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
-        return this._producer.updatedObservable!;
-    }
-
-    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void {
-        this._producer.linkTo(target, options);
-    }
-
-    public unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined {
-        return this._producer.unlinkFrom(target);
+        if (this._consumer) {
+            this._producer.unlinkFrom(this._consumer);
+        }
     }
 }

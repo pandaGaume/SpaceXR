@@ -1,4 +1,7 @@
 export class Bearing {
+    public static Zero(): Bearing {
+        return new Bearing(0);
+    }
     /**
      * Keep an azimuth angle within the range of 0 to 360 degrees
      * @param a the azimuth value
@@ -30,6 +33,7 @@ export class Bearing {
     public set value(v: number) {
         const clamped = Bearing.ClampAzimuth(v);
         if (this._value !== clamped) {
+            this._value = clamped;
             const rad = (this._value * Math.PI) / 180;
             this._cos = Math.cos(rad);
             this._sin = Math.sin(rad);
@@ -42,5 +46,15 @@ export class Bearing {
 
     public get sin(): number {
         return this._sin;
+    }
+
+    public copyInPlace(other: Bearing): void {
+        this._value = other._value;
+        this._cos = other._cos;
+        this._sin = other._sin;
+    }
+
+    public toString(): string {
+        return `${this._value}°`;
     }
 }

@@ -7,7 +7,7 @@ import { ITileAddress, ITileCollection, ITileDatasource, ITileDisplay, ITileMetr
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
 import { Nullable } from "../../types";
-import { ITileNavigationState } from "../navigation";
+import { ITileNavigationState, TileNavigationState } from "../navigation";
 
 export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
@@ -19,6 +19,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
     protected _pipeline: ITilePipeline<T>;
     _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
     _provider: ITileProvider<T>;
+    _state: ITileNavigationState;
 
     public constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean) {
         super(name);
@@ -35,10 +36,14 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
 
         // as TileConsumer, link the map to the pipeline
         this._pipeline.producer.linkTo(this);
+        this._state = new TileNavigationState();
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent: boolean = true): void {
-        this._pipeline.view?.setContext(state, display, dispatchEvent);
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {
+        if (state) {
+            this._state.setView(state.center, state.zoom + this.zoomOffset, state.azimuth.value).validate();
+        }
+        this._pipeline.view?.setContext(this._state, display, metrics ?? this.metrics, dispatchEvent);
     }
 
     public get metrics(): ITileMetrics {
@@ -132,13 +137,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
     }
 
     public addTo(map: ITileMap<T>): ITileMapLayer<T> {
-        if (map) {
-            map.addLayer(this);
-            if (this._pipeline?.view) {
-                this._pipeline.view.display = map.display;
-                this._pipeline.view.state = map.navigation;
-            }
-        }
+        map?.addLayer(this);
         return this;
     }
 
@@ -146,7 +145,6 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         super.dispose();
         // clear pipeline links
         this._pipelinePropertyObserver?.disconnect();
-        this._pipeline.producer.unlinkFrom(this);
         this._pipeline.view?.dispose();
         this._pipeline.producer?.dispose();
     }
@@ -162,11 +160,11 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
 
     protected _buildPipeline(provider: ITileProvider<T>): ITilePipeline<T> {
         const producer = new TileProducer(`${this.name}.producer`, provider);
-        return new TilePipelineBuilder<T>().withView(this._buildView()).withProducer(producer).build();
+        return new TilePipelineBuilder<T>().withView(this._buildView()).withProducer(producer).withConsumer(this).build();
     }
 
     protected _buildView(): ITileView {
-        return new TileView(`${this.name}.view`, this.metrics, undefined, undefined, this.zoomOffset);
+        return new TileView(`${this.name}.view`);
     }
 
     private _onPipelinePropertyChanged(event: PropertyChangedEventArgs<ITilePipeline<T>, unknown>, state: EventState): void {

@@ -1,8 +1,8 @@
 import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
-import { IValidable } from "../../types";
-export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable<unknown> {
+import { ICloneable, IValidable } from "../../types";
+export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable<unknown>, ICloneable<ITileNavigationState> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     stateChangedObservable: Observable<ITileNavigationState>;
     center: IGeo2;

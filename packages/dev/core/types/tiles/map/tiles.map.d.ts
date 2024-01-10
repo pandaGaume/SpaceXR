@@ -40,7 +40,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     private _bindDisplay;
     private _bindNavigation;
     private _updateNavigationBounds;
-    protected _doValidate(): void;
+    protected _beforeValidate(): void;
     protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
     protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void;

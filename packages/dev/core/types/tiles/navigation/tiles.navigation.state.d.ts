@@ -17,6 +17,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _scale: number;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
+    clone(): ITileNavigationState;
     dispose(): void;
     get lod(): number;
     get scale(): number;
@@ -36,6 +37,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
     translate(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;
     rotate(r: number): TileNavigationState;
+    toString(): string;
     protected _doValidate(): void;
     private rotatePointInv;
     private _boundsPropertyChanged;

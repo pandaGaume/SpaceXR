@@ -1,6 +1,6 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileCollection, ITileDisplay, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileCollection, ITileDisplay, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 export type IPipelineMessageType<T> = Array<T>;
 export interface ITargetBlock<T> {
@@ -26,12 +26,9 @@ export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
 }
-export interface ITileView extends ITilePipelineComponent, ITileMetricsProvider, ISourceBlock<ITileAddress>, ITileSelectionContext {
-    state: Nullable<ITileNavigationState>;
-    display: Nullable<ITileDisplay>;
-    zoffset: number;
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext {
 }
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
     addProvider(provider: ITileProvider<T>): void;
@@ -44,8 +41,10 @@ export interface ITilePipeline<T> extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;
     view?: ITileView;
     producer: ITileProducer<T>;
+    consumer?: ITileConsumer<T>;
 }
 export interface ITilePipelineBuilder<T> {
+    withConsumer(consumer: ITileConsumer<T>): ITilePipelineBuilder<T>;
     withProducer(producer: ITileProducer<T>): ITilePipelineBuilder<T>;
     withView(view: ITileView): ITilePipelineBuilder<T>;
     build(): ITilePipeline<T>;

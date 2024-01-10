@@ -14,8 +14,9 @@ export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITil
     protected _pipeline: ITilePipeline<T>;
     _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
     _provider: ITileProvider<T>;
+    _state: ITileNavigationState;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean);
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
     get metrics(): ITileMetrics;
     get zindex(): number;
     set zindex(zindex: number);

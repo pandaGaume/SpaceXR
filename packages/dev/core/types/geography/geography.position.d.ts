@@ -11,6 +11,7 @@ export declare class Geo2 implements IGeo2 {
     set lon(v: number);
     clone(): IGeo2;
     equals(other: IGeo2): boolean;
+    toString(): string;
 }
 export declare class Geo3 extends Geo2 implements IGeo3 {
     static Zero(): Geo3;
@@ -21,4 +22,5 @@ export declare class Geo3 extends Geo2 implements IGeo3 {
     get hasAltitude(): boolean;
     clone(): IGeo3;
     equals(other: IGeo3): boolean;
+    toString(): string;
 }

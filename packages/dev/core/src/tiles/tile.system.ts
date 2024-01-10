@@ -46,6 +46,17 @@ export class TileSystemBounds implements ITileSystemBounds {
         }
     }
 
+    public copyInPlace(bounds: ITileSystemBounds): void {
+        if (bounds) {
+            this.minLOD = bounds.minLOD;
+            this.maxLOD = bounds.maxLOD;
+            this.minLatitude = bounds.minLatitude;
+            this.maxLatitude = bounds.maxLatitude;
+            this.minLongitude = bounds.minLongitude;
+            this.maxLongitude = bounds.maxLongitude;
+        }
+    }
+
     public get minLOD(): number {
         return this._minLOD;
     }

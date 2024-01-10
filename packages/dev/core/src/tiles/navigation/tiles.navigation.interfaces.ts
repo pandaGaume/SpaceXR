@@ -1,9 +1,9 @@
 import { IGeo2, IsLocation, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
-import { IValidable } from "../../types";
+import { ICloneable, IValidable } from "../../types";
 
-export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable<unknown> {
+export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable<unknown>, ICloneable<ITileNavigationState> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     stateChangedObservable: Observable<ITileNavigationState>;
 

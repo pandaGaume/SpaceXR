@@ -28,13 +28,12 @@ export declare enum Side {
     right = 2,
     bottom = 3
 }
-export declare function isSize2(b: unknown): b is ISize2;
 export interface ISize3 {
     height: number;
     width: number;
     thickness: number;
 }
-export declare function isSize3(b: unknown): b is ISize3;
+export declare function IsSize(b: unknown): b is ISize3 | ISize2;
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
     ymax: number;
     xmin: number;
@@ -48,7 +47,7 @@ export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> 
     toString(): string;
     points(): IterableIterator<ICartesian2>;
 }
-export declare function isRectangle(b: unknown): b is IRectangle;
+export declare function IsRectangle(b: unknown): b is IRectangle;
 export interface IBounded {
     rect?: IRectangle;
 }
@@ -65,4 +64,4 @@ export interface IBox extends ISize3, ICartesian3 {
     contains(x: number, y: number, z: number): boolean;
     toString(): string;
 }
-export declare function isBox(b: unknown): b is IBox;
+export declare function IsBox(b: unknown): b is IBox;

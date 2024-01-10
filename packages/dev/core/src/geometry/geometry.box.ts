@@ -1,5 +1,5 @@
 import { Cartesian3 } from "./geometry.cartesian";
-import { IBox, ICartesian3, ISize2, ISize3, isBox, isSize3 } from "./geometry.interfaces";
+import { IBox, ICartesian3, ISize2, ISize3, IsBox } from "./geometry.interfaces";
 
 export class Box implements IBox {
     public static Zero(): IBox {
@@ -59,13 +59,10 @@ export class Box implements IBox {
 
     public equals(other: IBox | ISize3 | ISize2 | undefined): boolean {
         if (other) {
-            if (isBox(other)) {
+            if (IsBox(other)) {
                 return this.x == other.x && this.y == other.y && this.z == other.z && this.width == other.width && this.height == other.height && this.thickness == other.thickness;
             }
-            if (isSize3(other)) {
-                return this.width == other.width && this.height == other.height && this.thickness == other.thickness;
-            }
-            return this.width == other.width && this.height == other.height;
+            return this.width == other.width && this.height == other.height && this.thickness == ((<ISize3>other).thickness ?? 0);
         }
         return false;
     }

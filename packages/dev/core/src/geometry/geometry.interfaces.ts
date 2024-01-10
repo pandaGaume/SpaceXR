@@ -38,20 +38,15 @@ export enum Side {
     bottom = 3,
 }
 
-export function isSize2(b: unknown): b is ISize2 {
-    if (typeof b !== "object" || b === null) return false;
-    return (<ISize2>b).height !== undefined && (<ISize2>b).width !== undefined;
-}
-
 export interface ISize3 {
     height: number;
     width: number;
     thickness: number;
 }
 
-export function isSize3(b: unknown): b is ISize3 {
+export function IsSize(b: unknown): b is ISize3 | ISize2 {
     if (typeof b !== "object" || b === null) return false;
-    return (<ISize3>b).height !== undefined && (<ISize3>b).width !== undefined && (<ISize3>b).thickness !== undefined;
+    return (<ISize3>b).height !== undefined && (<ISize3>b).width !== undefined;
 }
 
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
@@ -70,7 +65,7 @@ export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> 
     points(): IterableIterator<ICartesian2>;
 }
 
-export function isRectangle(b: unknown): b is IRectangle {
+export function IsRectangle(b: unknown): b is IRectangle {
     if (typeof b !== "object" || b === null) return false;
     return (<IRectangle>b).ymax !== undefined && (<IRectangle>b).xmin !== undefined && (<IRectangle>b).xmax !== undefined && (<IRectangle>b).ymin !== undefined;
 }
@@ -95,7 +90,7 @@ export interface IBox extends ISize3, ICartesian3 {
     toString(): string;
 }
 
-export function isBox(b: unknown): b is IBox {
+export function IsBox(b: unknown): b is IBox {
     if (typeof b !== "object" || b === null) return false;
     return (
         (<IBox>b).top !== undefined &&

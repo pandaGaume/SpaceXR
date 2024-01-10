@@ -1,7 +1,5 @@
-import { Observable } from "../../events/events.observable";
-import { PropertyChangedEventArgs } from "../../events/events.args";
-
-import { Size2 } from "../../geometry/geometry.size";
+import { Observable, PropertyChangedEventArgs } from "../../events";
+import { Size2, ISize2, ISize3, IsSize } from "../../geometry";
 import { ITileDisplay } from "../tiles.interfaces";
 
 export class TileDisplay implements ITileDisplay {
@@ -22,15 +20,20 @@ export class TileDisplay implements ITileDisplay {
         }
         return this._propertyChangedObservable;
     }
-    public get width(): number {
+    public get displayWidth(): number {
         return this._w;
     }
 
-    public get height(): number {
+    public get displayHeight(): number {
         return this._h;
     }
 
-    public resize(w: number, h: number): ITileDisplay {
+    public resize(w: number | ISize2 | ISize3, h?: number): ITileDisplay {
+        if (IsSize(w)) {
+            h = w.height;
+            w = w.width;
+        }
+        h = h ?? 0;
         if (this._w !== w || this._h != h) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const old = new Size2(this._w, this._h);

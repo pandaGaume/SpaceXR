@@ -86,7 +86,7 @@ export class TileView implements ITileView {
             const lod = TileAddress.ClampLod(state.lod, metrics);
             const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
             const scale = state.scale;
-            const rect = this.getRectangle(pixelCenterXY, display?.width ?? 0, display?.height ?? 0, scale, state.azimuth);
+            const rect = this.getRectangle(pixelCenterXY, display?.displayWidth ?? 0, display?.displayHeight ?? 0, scale, state.azimuth);
 
             // compute the bounds of tile xy
             let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);

@@ -86,9 +86,9 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         const y = 0;
         if (this._options.background) {
             ctx.fillStyle = this._options.background.toString();
-            ctx.fillRect(x, y, res.width, res.height);
+            ctx.fillRect(x, y, res.displayWidth, res.displayHeight);
         } else {
-            ctx.clearRect(x, y, res.width, res.height);
+            ctx.clearRect(x, y, res.displayWidth, res.displayHeight);
         }
 
         if (!this._orderedLayers || !this._orderedLayers.length) {
@@ -98,7 +98,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
 
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
-        ctx.translate(x + res.width / 2, y + res.height / 2);
+        ctx.translate(x + res.displayWidth / 2, y + res.displayHeight / 2);
         // we scale the canvas according the navigation scale
         ctx.scale(scale, scale);
         // we rotate the canvas according the navigation azimuth

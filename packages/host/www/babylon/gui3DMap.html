@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Exemple de dessin de tuiles a l'aide d'un control Babylon GUI 2D</title>
+        <title>Exemple de dessin de tuiles a l'aide d'un control Babylon GUI 3D</title>
         <script src="../libs/babylon.js"></script>
         <script src="../libs/babylon.gui.js"></script>
         <script src="../libs/babylon.inspector.bundle.js"></script>
@@ -57,14 +57,12 @@
                 center = center ?? defaultCenter;
                 lod = lod ?? defaultLod;
 
-                const m = new SPACEXR.GUI.MapControl(name).setView(center, lod);
                 const l = (layer ?? new SPACEXR.TileMapLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution })).addTo(m);
                 return m;
             }
 
             function createUI(scene) {
                 map = createMap("firstMap");
-                map.background = "red";
 
                 function updateCompassRotation(bearing) {
                     var compass = document.getElementById("compass");
@@ -113,21 +111,10 @@
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.7;
 
-                // Our built-in 'sphere' shape. Params: name, options, scene
-                var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2, segments: 32 }, scene);
-
-                // Move the sphere upward 1/2 its height
-                sphere.position.y = 1;
-
-                // Our built-in 'ground' shape. Params: name, options, scene
-                var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
-
-                // create the ui.
-                const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-                const ui = createUI(scene);
-                ui.width = "100%";
-                ui.height = "100%";
-                advancedTexture.addControl(ui);
+                // create the ui 3D.
+                const manager = new BABYLON.GUI.GUI3DManager(scene);
+                const ui = createUI(manager, scene);
+                manager.addControl(ui);
 
                 return scene;
             }

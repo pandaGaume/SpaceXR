@@ -3,10 +3,12 @@ import { EventState, Nullable, Observer, Vector2 } from "@babylonjs/core";
 import { IDisposable } from "core/types";
 import { InputsNavigationTarget } from "core/map";
 
+type SourceType = Control;
+
 /// <summary>
 /// Mouse input controller. Map basic mouse event and forward them to the target.
 /// </summary>
-export class ControlInputController<T extends Control> implements IDisposable {
+export class ControlInputController<T extends SourceType> implements IDisposable {
     _src: T;
     _target: InputsNavigationTarget<T>;
     _moveObserver?: Nullable<Observer<Vector2>>;

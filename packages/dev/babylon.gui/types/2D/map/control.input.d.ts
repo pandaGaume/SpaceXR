@@ -2,7 +2,8 @@ import { Control, Vector2WithInfo } from "@babylonjs/gui";
 import { EventState, Nullable, Observer, Vector2 } from "@babylonjs/core";
 import { IDisposable } from "core/types";
 import { InputsNavigationTarget } from "core/map";
-export declare class ControlInputController<T extends Control> implements IDisposable {
+type SourceType = Control;
+export declare class ControlInputController<T extends SourceType> implements IDisposable {
     _src: T;
     _target: InputsNavigationTarget<T>;
     _moveObserver?: Nullable<Observer<Vector2>>;
@@ -18,3 +19,4 @@ export declare class ControlInputController<T extends Control> implements IDispo
     protected _onPointerUp(v: Vector2WithInfo, e: EventState): void;
     protected _onWheel(v: Vector2, e: EventState): void;
 }
+export {};

@@ -34,6 +34,14 @@ export class Scalar {
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    public static ToHex(i: number): string {
+        const str = i.toString(16);
+        if (i <= 15) {
+            return ("0" + str).toUpperCase();
+        }
+        return str.toUpperCase();
+    }
 }
 
 export abstract class AbstractRange<T> {

@@ -11,6 +11,7 @@ export declare class Scalar {
     static Sign(value: number): 1 | -1;
     static Clamp(value: number, min: number, max: number): number;
     static GetRandomInt(min: number, max: number): number;
+    static ToHex(i: number): string;
 }
 export declare abstract class AbstractRange<T> {
     protected _min: T;

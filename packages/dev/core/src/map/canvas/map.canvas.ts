@@ -2,40 +2,13 @@ import { Scalar, RGBAColor } from "../../math";
 import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
+import { ICanvasRenderingContext } from "./map.canvas.interfaces";
 
 export type CanvasTileContentType = HTMLImageElement;
 
-export type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
-
-export class CanvasTileMapOptions {
-    public static DefaultBackground = RGBAColor.LightGray();
-    public static Default = new CanvasTileMapOptions({ background: CanvasTileMapOptions.DefaultBackground });
-
-    public background?: RGBAColor;
-    public fillEmpty?: FillRectFn;
-
-    public constructor(p: Partial<CanvasTileMapOptions>) {
-        Object.assign(this, p);
-    }
-}
-
-export class CanvasTileMapOptionsBuilder {
-    private _background?: RGBAColor;
-    public _fillEmpty?: FillRectFn;
-
-    public withBackground(v: RGBAColor | number, g?: number, b?: number): CanvasTileMapOptionsBuilder {
-        this._background = v instanceof RGBAColor ? v : new RGBAColor(v, g ?? 0, b ?? 0);
-        return this;
-    }
-
-    public withFillEmptyFn(v: FillRectFn): CanvasTileMapOptionsBuilder {
-        this._fillEmpty = v;
-        return this;
-    }
-
-    public build(): CanvasTileMapOptions {
-        return new CanvasTileMapOptions({ background: this._background, fillEmpty: this._fillEmpty });
-    }
+// we delegate the rendering options.
+export interface ICanvasRenderingOptions {
+    background?: string;
 }
 
 /// <summary>
@@ -60,17 +33,17 @@ export class CanvasTileMapOptionsBuilder {
 /// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
 /// </summary>
 export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileContentType> {
-    _options: CanvasTileMapOptions;
+    _renderOptions?: ICanvasRenderingOptions;
 
-    public constructor(name: string, display?: Nullable<ITileDisplay>, options?: CanvasTileMapOptions, nav?: ITileNavigationState) {
+    public constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
         super(name, display, nav);
-        this._options = { ...CanvasTileMapOptions.Default, ...options };
+        this._renderOptions = options;
     }
 
     /// <summary>
     /// Draw the map on the canvas.
     /// </summary>
-    protected _draw(ctx: CanvasRenderingContext2D): void {
+    protected _draw(ctx: ICanvasRenderingContext): void {
         if (!ctx || !this._display) {
             return;
         }
@@ -80,8 +53,8 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
         const res = this._display;
         const x = 0;
         const y = 0;
-        if (this._options.background) {
-            ctx.fillStyle = this._options.background.toString();
+        if (this._renderOptions?.background) {
+            ctx.fillStyle = this._renderOptions.background;
             ctx.fillRect(x, y, res.displayWidth, res.displayHeight);
         } else {
             ctx.clearRect(x, y, res.displayWidth, res.displayHeight);
@@ -116,7 +89,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     /// <summary>
     /// Draw the layer on the canvas. This method is messaged from the draw method.
     /// </summary>
-    protected _drawLayer(ctx: CanvasRenderingContext2D, layer: ITileMapLayer<CanvasTileContentType>): void {
+    protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void {
         const tiles = layer.getActiveTiles();
         if (!tiles || !tiles.count) {
             return;
@@ -124,7 +97,6 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
 
         const metrics = layer.metrics;
         const center = metrics.getLatLonToPixelXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
-        const tileSize = metrics.tileSize;
 
         for (const t of tiles) {
             if (t.rect) {
@@ -137,12 +109,27 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
                         continue;
                     }
                 }
-                // this is where we fill the empty or unknown tile
-                if (this._options?.fillEmpty) {
-                    this._options?.fillEmpty(ctx, x, y, tileSize, tileSize);
-                }
             }
         }
+    }
+}
+
+export class CanvasMap extends AbstractContext2DTileMap {
+    public static DefaultBackground = RGBAColor.LightGray();
+
+    public static DefaultOptions: ICanvasRenderingOptions = {
+        background: CanvasMap.DefaultBackground.toHexString(),
+    };
+
+    _context: Nullable<CanvasRenderingContext2D>;
+
+    public constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
+        if (display instanceof HTMLCanvasElement) {
+            display = new CanvasDisplay(display);
+        }
+        const o = { ...CanvasMap.DefaultOptions, ...options };
+        super(name, display, o, nav);
+        this._context = display.getContext();
     }
 
     /// <summary>
@@ -150,28 +137,10 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     /// </summary>
     protected _doValidate(): void {
         super._doValidate();
-        const ctx = this._getContext2D();
+        const ctx: ICanvasRenderingContext = this._getContext2D() as ICanvasRenderingContext;
         if (ctx) {
             this._draw(ctx);
         }
-    }
-
-    /// <summary>
-    /// Provide the underlying canvas context 2D.
-    /// <returns>the underlying canvas context 2D or null if not available.</returns>
-    /// </summary>
-    protected abstract _getContext2D(): Nullable<CanvasRenderingContext2D>;
-}
-
-export class CanvasMap extends AbstractContext2DTileMap {
-    _context: Nullable<CanvasRenderingContext2D>;
-
-    public constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: CanvasTileMapOptions, nav?: ITileNavigationState) {
-        if (display instanceof HTMLCanvasElement) {
-            display = new CanvasDisplay(display);
-        }
-        super(name, display, options, nav);
-        this._context = display.getContext();
     }
 
     protected _getContext2D(): Nullable<CanvasRenderingContext2D> {

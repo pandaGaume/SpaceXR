@@ -10,6 +10,7 @@ export declare class RGBAColor {
     static LightGray(): RGBAColor;
     static Gray(): RGBAColor;
     constructor(r: number, g: number, b: number, a?: number);
+    toHexString(): string;
     toHSL(): HSLColor;
     interpolate(color: RGBAColor, t: ParametricValue, keepAlpha?: boolean): RGBAColor;
     interpolateInPlace(color: RGBAColor, t: ParametricValue, keepAlpha?: boolean): RGBAColor;

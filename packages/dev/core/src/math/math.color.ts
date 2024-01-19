@@ -1,4 +1,4 @@
-import { ParametricValue } from "./math";
+import { ParametricValue, Scalar } from "./math";
 
 export class RGBAColor {
     public static White() {
@@ -22,6 +22,13 @@ export class RGBAColor {
     }
 
     public constructor(public r: number, public g: number, public b: number, public a: number = 1) {}
+
+    public toHexString(): string {
+        const intR = Math.round(this.r * 255);
+        const intG = Math.round(this.g * 255);
+        const intB = Math.round(this.b * 255);
+        return "#" + Scalar.ToHex(intR) + Scalar.ToHex(intG) + Scalar.ToHex(intB);
+    }
 
     public toHSL(): HSLColor {
         const r = this.r / 255;

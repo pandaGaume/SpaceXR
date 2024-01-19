@@ -3,16 +3,26 @@ import * as GUI from "@babylonjs/gui";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
-import { Context2DTileMap, ICanvasRenderingOptions } from "core/map";
+import { Context2DTileMap, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
 import { ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
 import { Nullable } from "core/types";
+import { ControlInputController } from "./control.input";
+import { RGBAColor } from "core/math";
 export type ControlTileContentType = HTMLImageElement;
-export declare class MapControl extends GUI.Container implements ITileDisplay, ICanvasRenderingOptions, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType> {
+export interface IMapControlOptions extends ICanvasRenderingOptions {
+    navigationManager?: InputsNavigationTarget<MapControl>;
+    inputController?: ControlInputController<MapControl>;
+}
+export declare class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType> {
+    static DefaultBackground: RGBAColor;
+    static DefaultOptions: ICanvasRenderingOptions;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     _map: Context2DTileMap;
     _mapValidationObserver: Nullable<Observer<boolean>>;
     _cachedMeasure: Size2;
-    constructor(name: string, nav?: ITileNavigationState);
+    _navigationManager: InputsNavigationTarget<MapControl>;
+    _inputController: ControlInputController<MapControl>;
+    constructor(name: string, options?: IMapControlOptions, nav?: ITileNavigationState);
     get displayHeight(): number;
     get displayWidth(): number;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;

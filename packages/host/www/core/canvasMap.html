@@ -55,6 +55,9 @@
                 // display may be a canvas or a display object if we want to set scale or other options.
                 const map = new SPACEXR.CanvasMap("myMap", canvas).setView([27.98817689833976, 86.92491071824738], lod);
                 const layer = new SPACEXR.TileMapLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+                
+                const navigationManager = new SPACEXR.InputsNavigationTarget(map);
+                const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);
 
                 function updateCompassRotation(bearing) {
                     var compass = document.getElementById('compass');

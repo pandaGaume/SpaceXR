@@ -3,23 +3,42 @@ import * as GUI from "@babylonjs/gui";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
-import { Context2DTileMap, ICanvasRenderingContext, ICanvasRenderingOptions } from "core/map";
+import { Context2DTileMap, ICanvasRenderingContext, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
 import { ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
 import { Nullable } from "core/types";
+import { ControlInputController } from "./control.input";
+import { RGBAColor } from "core/math";
 
 export type ControlTileContentType = HTMLImageElement;
 
-export class MapControl extends GUI.Container implements ITileDisplay, ICanvasRenderingOptions, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType> {
+export interface IMapControlOptions extends ICanvasRenderingOptions {
+    navigationManager?: InputsNavigationTarget<MapControl>;
+    inputController?: ControlInputController<MapControl>;
+}
+
+export class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType> {
+    public static DefaultBackground = RGBAColor.LightGray();
+
+    public static DefaultOptions: ICanvasRenderingOptions = {
+        background: MapControl.DefaultBackground.toHexString(),
+    };
+
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
 
     _map: Context2DTileMap;
     _mapValidationObserver: Nullable<Observer<boolean>>;
     _cachedMeasure: Size2 = Size2.Zero();
 
-    public constructor(name: string, nav?: ITileNavigationState) {
+    _navigationManager: InputsNavigationTarget<MapControl>;
+    _inputController: ControlInputController<MapControl>;
+
+    public constructor(name: string, options?: IMapControlOptions, nav?: ITileNavigationState) {
         super(name);
-        this._map = new Context2DTileMap(name, this, this, nav);
+        const o = { ...MapControl.DefaultOptions, ...options };
+        this._map = new Context2DTileMap(name, this, o, nav);
         this._mapValidationObserver = this._map.validationObservable.add(this.onMapValidation.bind(this));
+        this._navigationManager = o.navigationManager ?? new InputsNavigationTarget<MapControl>(this._map);
+        this._inputController = o.inputController ?? new ControlInputController<MapControl>(this, this._navigationManager);
     }
 
     public get displayHeight(): number {

@@ -116,8 +116,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
 }
 
 export interface ICanvasMapOptions extends ICanvasRenderingOptions {
-    navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
-    inputController: MouseInputController<HTMLCanvasElement>;
+    navigationManager?: InputsNavigationTarget<HTMLCanvasElement>;
+    inputController?: MouseInputController<HTMLCanvasElement>;
 }
 
 export class CanvasMap extends Context2DTileMap {

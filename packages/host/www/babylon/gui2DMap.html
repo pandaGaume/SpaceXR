@@ -65,6 +65,31 @@
             function createUI(advancedTexture, scene) {
                 map = createMap("firstMap");
                 map.background = "red";
+
+                function updateCompassRotation(bearing) {
+                    var compass = document.getElementById("compass");
+                    compass.style.transform = "rotate(" + bearing + "deg)";
+                }
+
+                // Function to handle the compass click event
+                function handleCompassClick(event) {
+                    map.setView(undefined, undefined, 0);
+                    updateCompassRotation(0);
+                }
+
+                // Get the compass element
+                var compass = document.getElementById("compass");
+
+                // Add a click event listener to the compass
+                compass.addEventListener("click", handleCompassClick);
+
+                // listen to azimuth change.
+                map.navigation.propertyChangedObservable.add((p, e) => {
+                    if (p.propertyName === "azimuth") {
+                        updateCompassRotation(p.newValue?.value ?? 0);
+                    }
+                });
+
                 return map;
             }
 
@@ -111,7 +136,7 @@
                 const canvas = document.getElementById("canvas3d"); // Get the canvas element
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = await createScene(canvas, engine); //Call the createScene function
-                scene.debugLayer.show();
+                // scene.debugLayer.show();
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {
                     scene.render();

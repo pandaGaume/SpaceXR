@@ -52,7 +52,6 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
             // mettre à jour les variables de décalage
             this._offsetX += dx;
             this._offsetY += dy;
-
             this.onDrag(src, dx, dy, this._button);
         }
     }

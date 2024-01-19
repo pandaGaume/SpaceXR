@@ -15,8 +15,8 @@ export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType>
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void;
 }
 export interface ICanvasMapOptions extends ICanvasRenderingOptions {
-    navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
-    inputController: MouseInputController<HTMLCanvasElement>;
+    navigationManager?: InputsNavigationTarget<HTMLCanvasElement>;
+    inputController?: MouseInputController<HTMLCanvasElement>;
 }
 export declare class CanvasMap extends Context2DTileMap {
     static DefaultBackground: RGBAColor;

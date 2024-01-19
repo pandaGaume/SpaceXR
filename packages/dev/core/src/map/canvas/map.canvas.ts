@@ -32,7 +32,7 @@ export interface ICanvasRenderingOptions {
 ///
 /// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
 /// </summary>
-export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileContentType> {
+export class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
     _renderOptions?: ICanvasRenderingOptions;
 
     public constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
@@ -43,7 +43,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     /// <summary>
     /// Draw the map on the canvas.
     /// </summary>
-    protected _draw(ctx: ICanvasRenderingContext): void {
+    public draw(ctx: ICanvasRenderingContext): void {
         if (!ctx || !this._display) {
             return;
         }
@@ -114,7 +114,7 @@ export abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileCon
     }
 }
 
-export class CanvasMap extends AbstractContext2DTileMap {
+export class CanvasMap extends Context2DTileMap {
     public static DefaultBackground = RGBAColor.LightGray();
 
     public static DefaultOptions: ICanvasRenderingOptions = {
@@ -139,7 +139,7 @@ export class CanvasMap extends AbstractContext2DTileMap {
         super._doValidate();
         const ctx: ICanvasRenderingContext = this._getContext2D() as ICanvasRenderingContext;
         if (ctx) {
-            this._draw(ctx);
+            this.draw(ctx);
         }
     }
 

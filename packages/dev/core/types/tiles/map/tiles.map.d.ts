@@ -1,4 +1,5 @@
 import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
+import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
 import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
@@ -32,7 +33,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     zooming(delta: number): TileMapBase<T>;
     zoomIn(delta: number): TileMapBase<T>;
     zoomOut(delta: number): TileMapBase<T>;
-    translatePixel(tx: number, ty: number): TileMapBase<T>;
+    translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T>;
     translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T>;
     rotate(r: number): TileMapBase<T>;
     private _addSortedLayer;

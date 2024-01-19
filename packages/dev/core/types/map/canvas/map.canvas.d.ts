@@ -7,13 +7,13 @@ export type CanvasTileContentType = HTMLImageElement;
 export interface ICanvasRenderingOptions {
     background?: string;
 }
-export declare abstract class AbstractContext2DTileMap extends TileMapBase<CanvasTileContentType> {
+export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
     _renderOptions?: ICanvasRenderingOptions;
     constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState);
-    protected _draw(ctx: ICanvasRenderingContext): void;
+    draw(ctx: ICanvasRenderingContext): void;
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void;
 }
-export declare class CanvasMap extends AbstractContext2DTileMap {
+export declare class CanvasMap extends Context2DTileMap {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;
     _context: Nullable<CanvasRenderingContext2D>;

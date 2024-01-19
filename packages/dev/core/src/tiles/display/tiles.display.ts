@@ -41,7 +41,7 @@ export class TileDisplay implements ITileDisplay {
                 this._w = w;
                 this._h = h;
                 const e = new PropertyChangedEventArgs(this, old, value, "size");
-                this._propertyChangedObservable.notifyObservers(e);
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 return this;
             }
             this._w = w;

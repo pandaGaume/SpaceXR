@@ -1,5 +1,5 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileSystemBounds } from "../tiles.interfaces";
+import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
 import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
@@ -150,8 +150,8 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this;
     }
 
-    public translatePixel(tx: number, ty: number): TileMapBase<T> {
-        this._navigation.translatePixel(tx, ty).validate();
+    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T> {
+        this._navigation.translatePixel(tx, ty, metrics).validate();
         return this;
     }
 
@@ -199,6 +199,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         switch (event.propertyName) {
             case "size": {
                 this.invalidate();
+                this._updateLayersWithDisplayAndNavigation();
                 this._onDisplayResized(event.source);
                 break;
             }

@@ -1,4 +1,4 @@
-import { TileDisplay } from "../../tiles/display/tiles.display";
+import { TileDisplay } from "../../tiles";
 export declare class CanvasDisplay extends TileDisplay {
     canvas: HTMLCanvasElement;
     static ResizeToDisplaySize(canvas: HTMLCanvasElement, scale?: number): boolean;

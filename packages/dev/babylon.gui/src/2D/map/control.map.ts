@@ -14,6 +14,7 @@ export class MapControl extends GUI.Container implements ITileDisplay, ICanvasRe
 
     _map: Context2DTileMap;
     _mapValidationObserver: Nullable<Observer<boolean>>;
+    _cachedMeasure: Size2 = Size2.Zero();
 
     public constructor(name: string, nav?: ITileNavigationState) {
         super(name);
@@ -108,10 +109,13 @@ export class MapControl extends GUI.Container implements ITileDisplay, ICanvasRe
 
     protected _additionalProcessing(parentMeasure: GUI.Measure, context: BABYLON.ICanvasRenderingContext): void {
         super._additionalProcessing(parentMeasure, context);
-        if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-            const value = new Size2(this._currentMeasure.width, this._currentMeasure.height);
-            const e = new PropertyChangedEventArgs(this, undefined, value, "size");
-            this._propertyChangedObservable.notifyObservers(e, -1,this,this);
+        if (this._cachedMeasure.width != this._currentMeasure.width || this._cachedMeasure.height != this._currentMeasure.height) {
+            this._cachedMeasure.width = this._currentMeasure.width;
+            this._cachedMeasure.height = this._currentMeasure.height;
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, undefined, this._cachedMeasure, "size");
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
         }
     }
 

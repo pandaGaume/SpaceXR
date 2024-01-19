@@ -2,6 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
+import { Size2 } from "core/geometry";
 import { Context2DTileMap, ICanvasRenderingOptions } from "core/map";
 import { ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
 import { Nullable } from "core/types";
@@ -10,6 +11,7 @@ export declare class MapControl extends GUI.Container implements ITileDisplay, I
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     _map: Context2DTileMap;
     _mapValidationObserver: Nullable<Observer<boolean>>;
+    _cachedMeasure: Size2;
     constructor(name: string, nav?: ITileNavigationState);
     get displayHeight(): number;
     get displayWidth(): number;

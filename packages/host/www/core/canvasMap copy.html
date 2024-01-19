@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../../../dev/core/bundles/spacexr.1.0.0.js"></script>
+        <script src="../scripts/inputs.js"></script>
         <style>
             html,
             body {
@@ -55,13 +56,34 @@
                 // display may be a canvas or a display object if we want to set scale or other options.
                 const map = new SPACEXR.CanvasMap("myMap", canvas).setView([27.98817689833976, 86.92491071824738], lod);
                 const layer = new SPACEXR.TileMapLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
-
-                function updateCompassRotation(bearing) {
-                    var compass = document.getElementById('compass');
-                    compass.style.transform = 'rotate(' + bearing + 'deg)';
+                
+                function onDrag(m, dx, dy, b) {
+                    switch (b) {
+                        case 0: {
+                            // translate the center of the map according the drag displacement
+                            // then we have to negate the drag displacement
+                            map.translatePixel(-dx, -dy);
+                            break;
+                        }
+                        case 2: {
+                            map.rotate(dx);
+                            updateCompassRotation(map.navigation.azimuth.value);
+                            break;
+                        }
+                    }
                 }
 
-                // Function to handle the compass click event
+                function onWheel(m, dz) {
+                    map.zooming(dz);
+                }
+                
+                function updateCompassRotation(azimuth) {
+                    var compass = document.getElementById('compass');
+                    compass.style.transform = 'rotate(' + azimuth + 'deg)';
+                }
+
+ 
+                    // Function to handle the compass click event
                 function handleCompassClick(event) {
                     map.setView(undefined, undefined, 0);
                     updateCompassRotation(0);
@@ -73,12 +95,10 @@
                 // Add a click event listener to the compass
                 compass.addEventListener('click', handleCompassClick);
 
-                // listen to azimuth change.
-                map.navigation.propertyChangedObservable.add((p,e)=> {
-                    if (p.propertyName === 'azimuth'){
-                       updateCompassRotation(p.newValue?.value??0);
-                    }
-                });
+                const translateManager = new MouseDragInputs(canvas, { ondrag: onDrag });
+
+                translateManager.attachControl(canvas);
+                const zoomManager = new MouseWheelInputs(canvas, { onwheel: onWheel, inc: 0.1 });
 
                 document.addEventListener('keydown', function(event) {
                     if (event.ctrlKey) {

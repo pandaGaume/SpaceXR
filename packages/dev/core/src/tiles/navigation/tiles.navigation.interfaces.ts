@@ -51,3 +51,4 @@ export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {
         (<ITileNavigationApi<T>>b).rotate !== undefined
     );
 }
+

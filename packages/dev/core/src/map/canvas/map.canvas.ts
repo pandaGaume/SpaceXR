@@ -3,6 +3,7 @@ import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState } from "
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext } from "./map.canvas.interfaces";
+import { InputsNavigationTarget, MouseInputController } from "../inputs";
 
 export type CanvasTileContentType = HTMLImageElement;
 
@@ -114,6 +115,11 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
     }
 }
 
+export interface ICanvasMapOptions extends ICanvasRenderingOptions {
+    navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
+    inputController: MouseInputController<HTMLCanvasElement>;
+}
+
 export class CanvasMap extends Context2DTileMap {
     public static DefaultBackground = RGBAColor.LightGray();
 
@@ -122,14 +128,19 @@ export class CanvasMap extends Context2DTileMap {
     };
 
     _context: Nullable<CanvasRenderingContext2D>;
+    _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
+    _inputController: MouseInputController<HTMLCanvasElement>;
 
-    public constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
+    public constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasMapOptions, nav?: ITileNavigationState) {
         if (display instanceof HTMLCanvasElement) {
             display = new CanvasDisplay(display);
         }
         const o = { ...CanvasMap.DefaultOptions, ...options };
         super(name, display, o, nav);
         this._context = display.getContext();
+
+        this._navigationManager = o.navigationManager ?? new InputsNavigationTarget<HTMLCanvasElement>(this);
+        this._inputController = o.inputController ?? new MouseInputController(display.canvas, this._navigationManager);
     }
 
     /// <summary>

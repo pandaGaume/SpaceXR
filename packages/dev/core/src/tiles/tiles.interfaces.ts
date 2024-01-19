@@ -1,6 +1,6 @@
 import { IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IRectangle, ISize2, ISize3 } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
@@ -161,14 +161,6 @@ export interface ITileCodec<T> {
 }
 
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}
-
-export interface ITileDisplay extends IDisposable {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
-
-    displayHeight: number;
-    displayWidth: number;
-    resize(w: number | ISize2 | ISize3, h: number): ITileDisplay;
-}
 
 /// <summary>
 /// Act as decorator arround ITileDatasource to provide address filtering, content generation and also caching capabilities

@@ -1,3 +1,4 @@
+import { Observable } from "./events";
 export type Nullable<T> = T | null;
 export type FloatArray = number[] | Float32Array;
 export type IndicesArray = number[] | Int32Array | Uint32Array | Uint16Array;
@@ -10,24 +11,10 @@ export interface IComparable<T> {
 export interface IDisposable {
     dispose(): void;
 }
-export interface IValidable<T> {
+export interface IValidable {
+    validationObservable?: Observable<boolean>;
     isValid: boolean;
-    invalidate(): T;
-    validate(force?: boolean): T;
-    revalidate(): T;
-}
-export declare class ValidableBase implements IValidable<unknown> {
-    _valid: boolean;
-    get isValid(): boolean;
-    invalidate(): ValidableBase;
-    validate(force?: boolean): ValidableBase;
-    revalidate(): ValidableBase;
-    protected _doInvalidateInternal(): void;
-    protected _doValidateInternal(): void;
-    protected _beforeInvalidate(): void;
-    protected _doInvalidate(): void;
-    protected _afterInvalidate(): void;
-    protected _beforeValidate(): void;
-    protected _doValidate(): void;
-    protected _afterValidate(): void;
+    invalidate(): void;
+    validate(force?: boolean): void;
+    revalidate(): void;
 }

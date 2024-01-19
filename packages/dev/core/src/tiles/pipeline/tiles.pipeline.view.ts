@@ -1,12 +1,13 @@
 import { Observable } from "../../events";
-import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
+import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
 import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
-import { Bearing } from "core/geography";
+import { Bearing } from "../../geography";
+import { ITileDisplay } from "../map";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -82,7 +83,6 @@ export class TileView implements ITileView {
     // ALSO : Find a way to limit the navigation state to a specific lod range, as a navigation state MAY be shared by several views or pipelines...
     private _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
         if (state && display) {
-            console.log("TileView._doValidateContext", state.toString(), display, metrics);
             const lod = TileAddress.ClampLod(state.lod, metrics);
             const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
             const scale = state.scale;

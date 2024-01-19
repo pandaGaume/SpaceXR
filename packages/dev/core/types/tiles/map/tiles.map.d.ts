@@ -1,16 +1,20 @@
 import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileDisplay } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
-import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
-import { Nullable, ValidableBase } from "../../types";
+import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
+import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
+import { ValidableBase } from "../../validable";
+interface ITileMapLayerContainer<T> {
+    layer: ITileMapLayer<T>;
+    validationObserver: Nullable<Observer<boolean>>;
+}
 export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
     _layerRemovedObservable?: Observable<ITileMapLayer<T>>;
     protected _name: string;
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
-    protected _layers?: Map<string, ITileMapLayer<T>>;
+    protected _layers?: Array<ITileMapLayerContainer<T>>;
     protected _orderedLayers?: ITileMapLayer<T>[];
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
@@ -19,7 +23,6 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     get layerRemovedObservable(): Observable<ITileMapLayer<T>>;
     get display(): Nullable<ITileDisplay>;
     get navigation(): ITileNavigationState;
-    validate(force?: boolean): ValidableBase;
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
     getOrderedLayers(predicate?: (l: ITileMapLayer<T>) => boolean): IterableIterator<ITileMapLayer<T>>;
     addLayer(layer: ITileMapLayer<T>): void;
@@ -35,11 +38,14 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     private _addSortedLayer;
     private _removeSortedLayer;
     private _onNavigationUpdatedInternal;
+    private _updateLayersWithDisplayAndNavigation;
     private _onDisplayPropertyChanged;
-    private _updateLayersContext;
     private _bindDisplay;
     private _bindNavigation;
     private _updateNavigationBounds;
+    private _onLayerAddedInternal;
+    private _onLayerRemovedInternal;
+    private _onLayerValidationChanged;
     protected _beforeValidate(): void;
     protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
     protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
@@ -51,3 +57,4 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _onLayerAdded(layer: ITileMapLayer<T>): void;
     protected _onLayerRemoved(layer: ITileMapLayer<T>): void;
 }
+export {};

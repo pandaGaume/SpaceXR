@@ -1,10 +1,16 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileDisplay, ITileSystemBounds } from "../tiles.interfaces";
+import { ITileSystemBounds } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
-import { Nullable, ValidableBase } from "../../types";
+import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
+import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
-import { TileSystemBounds } from "../tile.system";
+import { TileSystemBounds } from "../tiles.system";
+import { ValidableBase } from "../../validable";
+
+interface ITileMapLayerContainer<T> {
+    layer: ITileMapLayer<T>;
+    validationObserver: Nullable<Observer<boolean>>;
+}
 
 export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     _layerAddedObservable?: Observable<ITileMapLayer<T>>;
@@ -13,7 +19,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _name: string;
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
-    protected _layers?: Map<string, ITileMapLayer<T>>;
+    protected _layers?: Array<ITileMapLayerContainer<T>>;
 
     // internal
     protected _orderedLayers?: ITileMapLayer<T>[];
@@ -36,8 +42,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._bindDisplay(this._display);
 
         // build the navigation state according parameters
-        nav = nav ?? new TileNavigationState();
-        this._navigation = nav;
+        this._navigation = nav ?? new TileNavigationState();
         this._bindNavigation(this._navigation);
     }
 
@@ -59,33 +64,14 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this._navigation;
     }
 
-    /// <summary>
-    /// override the validation process to extends to layers
-    /// </summary>
-    public validate(force?: boolean): ValidableBase {
-        for (const layer of this.getLayers()) {
-            if (!layer.isValid) {
-                // ensure the map reflect the layer state
-                this.invalidate();
-            }
-            layer.validate(force);
-        }
-        return super.validate(force);
-    }
-
     public *getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted: boolean = true): IterableIterator<ITileMapLayer<T>> {
         if (sorted) {
             yield* this.getOrderedLayers(predicate);
             return;
         }
-
         if (this._layers) {
-            if (predicate) {
-                for (const layer of this._layers.values()) {
-                    if (predicate(layer)) yield layer;
-                }
-            } else {
-                yield* this._layers.values();
+            for (const item of this._layers) {
+                if (!predicate || predicate(item.layer)) yield item.layer;
             }
         }
     }
@@ -103,37 +89,44 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     public addLayer(layer: ITileMapLayer<T>): void {
-        if (!this._layers) this._layers = new Map<string, ITileMapLayer<T>>();
-        if (layer.name && !this._layers.has(layer.name)) {
-            this._layers.set(layer.name, layer);
-            this._addSortedLayer(layer);
-            this._updateNavigationBounds();
-            this.invalidate();
-            // we give the hand to other components
-            this._onLayerAdded(layer);
-            if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
-                this._layerAddedObservable.notifyObservers(layer, -1, this, this);
-            }
-        }
+        if (!this._layers) this._layers = [];
+        const container: ITileMapLayerContainer<T> = {
+            layer: layer,
+            validationObserver: layer.validationObservable?.add(this._onLayerValidationChanged.bind(this)) ?? null,
+        };
+        this._layers.push(container);
+        this._addSortedLayer(layer);
+
+        this._onLayerAddedInternal(layer);
     }
 
     public removeLayer(layer: ITileMapLayer<T>): void {
-        if (this._layers && layer.name && this._layers.has(layer.name)) {
-            this._layers.delete(layer.name);
-            this._removeSortedLayer(layer);
-            this._updateNavigationBounds();
-            this.invalidate();
-            // we give the hand to other components
-            this._onLayerRemoved(layer);
-            if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
-                this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
-            }
+        const index = this._layers?.findIndex((l) => l.layer === layer);
+        if (index == undefined || index == -1) {
+            return;
         }
+        const container = this._layers?.[index];
+        if (!container) {
+            return;
+        }
+        if (container.validationObserver) {
+            container.validationObserver.disconnect();
+            container.validationObserver = null;
+        }
+        this._layers?.splice(index, 1);
+        this._removeSortedLayer(layer);
+        this._onLayerRemovedInternal(layer);
     }
 
     public dispose() {
         this._navigationUpdatedObserver?.disconnect();
         this._displayPropertyObserver?.disconnect();
+        for (const container of this._layers ?? []) {
+            if (container.validationObserver) {
+                container.validationObserver.disconnect();
+                container.validationObserver = null;
+            }
+        }
     }
 
     // navigation proxy
@@ -171,6 +164,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._navigation.rotate(r).validate();
         return this;
     }
+
     // end navigation proxy
     private _addSortedLayer(layer: ITileMapLayer<T>): void {
         if (!this._orderedLayers) this._orderedLayers = [];
@@ -189,7 +183,16 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
         this.invalidate();
+        this._updateLayersWithDisplayAndNavigation();
         this._onNavigationUpdated(event);
+    }
+
+    private _updateLayersWithDisplayAndNavigation() {
+        for (const layer of this.getLayers()) {
+            if (this._display && this._navigation) {
+                layer.setContext(this._navigation, this._display);
+            }
+        }
     }
 
     private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
@@ -205,16 +208,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    private _updateLayersContext(): void {
-        for (const layer of this.getLayers()) {
-            layer.setContext(this._navigation, this._display);
-        }
-    }
-
     private _bindDisplay(display: Nullable<ITileDisplay>): void {
         if (display) {
             this._display = display;
-            this._displayPropertyObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
+            this._displayPropertyObserver = this._display.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
+            this._updateLayersWithDisplayAndNavigation();
         }
         this.invalidate();
         this._onDisplayBinded(display);
@@ -223,6 +221,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     private _bindNavigation(nav?: ITileNavigationState): void {
         if (nav) {
             this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
+            this._updateLayersWithDisplayAndNavigation();
         }
         this.invalidate();
         this._onNavigationBinded(nav);
@@ -249,9 +248,44 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
+    private _onLayerAddedInternal(layer: ITileMapLayer<T>): void {
+        // maintain the bounds
+        this._updateNavigationBounds();
+        // update the layer with current navigation and display
+        layer.setContext(this._navigation, this._display);
+        // invalidate the map
+        this.invalidate();
+        // we give the hand to other components
+        this._onLayerAdded(layer);
+        if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
+            this._layerAddedObservable.notifyObservers(layer, -1, this, this);
+        }
+    }
+
+    private _onLayerRemovedInternal(layer: ITileMapLayer<T>): void {
+        // maintain the bounds
+        this._updateNavigationBounds();
+        // invalidate the map
+        this.invalidate();
+        // we give the hand to other components
+        this._onLayerRemoved(layer);
+        if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
+            this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
+        }
+    }
+
+    // in response to layer validation process
+    private _onLayerValidationChanged(valid: boolean, state: EventState): void {
+        if (valid === false) {
+            this.invalidate();
+        }
+    }
+
     protected _beforeValidate(): void {
-        if (this._display && this._navigation) {
-            this._updateLayersContext();
+        if (this._layers) {
+            for (const container of this._layers) {
+                container.layer.validate();
+            }
         }
     }
 

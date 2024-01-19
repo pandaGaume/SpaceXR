@@ -1,6 +1,6 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
 import { Size2, ISize2, ISize3, IsSize } from "../../geometry";
-import { ITileDisplay } from "../tiles.interfaces";
+import { ITileDisplay } from "../map";
 
 export class TileDisplay implements ITileDisplay {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;

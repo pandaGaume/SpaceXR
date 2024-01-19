@@ -1,7 +1,7 @@
 import { IMemoryCache } from "../../cache";
 import { Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileAddress, ITileCollection, ITileDatasource, ITileDisplay, ITileMetrics, ITileProvider, TileContent } from "../tiles.interfaces";
-import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContent } from "../tiles.interfaces";
+import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";

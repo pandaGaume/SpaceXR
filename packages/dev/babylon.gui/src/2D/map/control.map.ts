@@ -1,21 +1,17 @@
 import { ICanvasRenderingContext } from "@babylonjs/core";
-import { Measure } from "@babylonjs/gui";
-import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core/events";
+import { Control, Measure } from "@babylonjs/gui";
+import { EventState, Observable, Observer } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Scalar } from "core/math";
-import { ITileDisplay, ITileNavigationState, ITileSystemBounds, TileNavigationState } from "core/tiles";
-import { ITileMap, ITileMapLayer } from "core/tiles/map";
-import { TileSystemBounds } from "core/tiles/tile.system";
+import { ITileNavigationState, ITileSystemBounds, TileNavigationState, ITileMap, ITileMapLayer, TileSystemBounds, ITileDisplay } from "core/tiles";
 import { Nullable } from "core/types";
-import { DisplayControl } from "./control.display";
 
 export type ControlTileContentType = HTMLImageElement;
 
-export class MapControl extends DisplayControl implements ITileMap<ControlTileContentType> {
+export class MapControl extends Control implements ITileMap<ControlTileContentType>, ITileDisplay {
     _layerAddedObservable?: Observable<ITileMapLayer<ControlTileContentType>>;
     _layerRemovedObservable?: Observable<ITileMapLayer<ControlTileContentType>>;
 
-    protected _display: Nullable<ITileDisplay> = null;
     protected _navigation: ITileNavigationState;
     protected _layers?: Map<string, ITileMapLayer<ControlTileContentType>>;
 
@@ -24,7 +20,6 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
     protected _background = "";
 
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
-    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
 
     /// <summary>
     /// Create a new tile map.
@@ -36,12 +31,19 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
     /// </summary>
     public constructor(name: string, nav?: ITileNavigationState) {
         super(name);
-        this._bindDisplay(this);
 
         // build the navigation state according parameters
         nav = nav ?? new TileNavigationState();
         this._navigation = nav;
         this._bindNavigation(this._navigation);
+    }
+
+    public get displayHeight(): number {
+        return this._currentMeasure.height;
+    }
+
+    public get displayWidth(): number {
+        return this._currentMeasure.width;
     }
 
     public get background(): string {
@@ -64,10 +66,6 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
     public get layerRemovedObservable(): Observable<ITileMapLayer<ControlTileContentType>> {
         if (!this._layerRemovedObservable) this._layerRemovedObservable = new Observable<ITileMapLayer<ControlTileContentType>>();
         return this._layerRemovedObservable;
-    }
-
-    public get display(): Nullable<ITileDisplay> {
-        return this._display;
     }
 
     public get navigation(): ITileNavigationState {
@@ -109,7 +107,12 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
             this._layers.set(layer.name, layer);
             this._addSortedLayer(layer);
             this._updateNavigationBounds();
-            this.markAsDirty();
+            layer.callback = (v) => {
+                if (!v) this.markAsDirty();
+            };
+            layer.setContext(this._navigation, this);
+            //this.markAsDirty();
+
             // we give the hand to other components
             this._onLayerAdded(layer);
             if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
@@ -123,6 +126,7 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
             this._layers.delete(layer.name);
             this._removeSortedLayer(layer);
             this._updateNavigationBounds();
+            layer.callback = undefined;
             this.markAsDirty();
             // we give the hand to other components
             this._onLayerRemoved(layer);
@@ -134,7 +138,6 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
 
     public dispose() {
         this._navigationUpdatedObserver?.disconnect();
-        this._displayPropertyObserver?.disconnect();
         super.dispose();
     }
 
@@ -189,40 +192,19 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
         }
     }
 
-    private _onNavigationUpdated(event: ITileNavigationState, state: EventState): void {
-        this.markAsDirty();
+    private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
+        this._updateLayersContext();
+        this._onNavigationUpdated(event);
     }
 
-    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
-        switch (event.propertyName) {
-            case "size": {
-                this.markAsDirty();
-                this._onDisplayResized(event.source);
-                break;
-            }
-            case "position": {
-                this.markAsDirty();
-                this._onDisplayTranslated(event.source);
-                break;
-            }
-            default: {
-                break;
-            }
+    private _updateLayersContext(): void {
+        for (const layer of this.getLayers()) {
+            layer.setContext(this._navigation, this);
         }
     }
-
-    private _bindDisplay(display: Nullable<ITileDisplay>): void {
-        if (display) {
-            this._display = display;
-            this._displayPropertyObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
-        }
-        this.markAsDirty();
-        this._onDisplayBinded(display);
-    }
-
     private _bindNavigation(nav?: ITileNavigationState): void {
         if (nav) {
-            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdated.bind(this));
+            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
         }
         this.markAsDirty();
         this._onNavigationBinded(nav);
@@ -253,18 +235,18 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
     /// Draw the map on the canvas.
     /// </summary>
     public _draw(ctx: ICanvasRenderingContext, invalidatedRectangle?: Nullable<Measure>): void {
-        if (!ctx || !this._display) {
+        if (!ctx) {
             return;
         }
         ctx.save();
 
         // clear the canvas
-        const res = this._display;
+        const res = this._currentMeasure;
         if (this._background) {
             ctx.fillStyle = this._background;
-            ctx.fillRect(res.x, res.y, res.width, res.height);
+            ctx.fillRect(res.left, res.top, res.width, res.height);
         } else {
-            ctx.clearRect(res.x, res.y, res.width, res.height);
+            ctx.clearRect(res.left, res.top, res.width, res.height);
         }
 
         if (!this._orderedLayers || !this._orderedLayers.length) {
@@ -274,7 +256,7 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
 
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
-        ctx.translate(res.x + res.width / 2, res.y + res.height / 2);
+        ctx.translate(res.left + res.width / 2, res.top + res.height / 2);
         // we scale the canvas according the navigation scale
         ctx.scale(scale, scale);
         // we rotate the canvas according the navigation azimuth
@@ -297,12 +279,11 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
     /// Draw the layer on the canvas. This method is messaged from the draw method.
     /// </summary>
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<ControlTileContentType>): void {
-        const provider = layer.provider;
-        const tiles = provider.activTiles;
+        const tiles = layer.getActiveTiles();
         if (!tiles || !tiles.count) {
             return;
         }
-        const metrics = provider.metrics;
+        const metrics = layer.metrics;
         const center = metrics.getLatLonToPixelXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
 
         for (const t of tiles) {
@@ -320,26 +301,11 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
         }
     }
 
-    protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void {
-        /* nothing to do here - overrided by subclasses */
-    }
-
-    protected _onDisplayBinded(display: Nullable<ITileDisplay>): void {
-        /* nothing to do here - overrided by subclasses */
-    }
-
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void {
         /* nothing to do here - overrided by subclasses */
     }
 
     protected _onNavigationBinded(nav?: ITileNavigationState): void {
-        /* nothing to do here - overrided by subclasses */
-    }
-    protected _onDisplayResized(display: ITileDisplay): void {
-        /* nothing to do here - overrided by subclasses */
-    }
-
-    protected _onDisplayTranslated(display: ITileDisplay): void {
         /* nothing to do here - overrided by subclasses */
     }
 
@@ -350,4 +316,6 @@ export class MapControl extends DisplayControl implements ITileMap<ControlTileCo
     protected _onLayerRemoved(layer: ITileMapLayer<ControlTileContentType>): void {
         /* nothing to do here - overrided by subclasses */
     }
+
+    protected _onNavigationUpdated(event: ITileNavigationState): void {}
 }

@@ -1,10 +1,7 @@
-import { ITileDisplay } from "../../tiles/tiles.interfaces";
-import { RGBAColor } from "../../math/math.color";
-import { TileMapBase } from "../../tiles/map/tiles.map";
-import { ITileNavigationState } from "../../tiles/navigation/tiles.navigation.interfaces";
+import { RGBAColor } from "../../math";
+import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ITileMapLayer } from "core/tiles";
 export type CanvasTileContentType = HTMLImageElement;
 export type FillRectFn = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) => void;
 export declare class CanvasTileMapOptions {

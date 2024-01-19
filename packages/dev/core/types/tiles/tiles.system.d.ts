@@ -1,0 +1,35 @@
+import { ITileSystemBounds } from "./tiles.interfaces";
+import { Observable, PropertyChangedEventArgs } from "../events";
+export declare class TileSystemBounds implements ITileSystemBounds {
+    static DefaultLOD: number;
+    static DefaultMinLOD: number;
+    static DefaultMaxLOD: number;
+    static DefaultMinLatitude: number;
+    static DefaultMaxLatitude: number;
+    static DefaultMinLongitude: number;
+    static DefaultMaxLongitude: number;
+    static Shared: TileSystemBounds;
+    _minLOD: number;
+    _maxLOD: number;
+    _minLatitude: number;
+    _maxLatitude: number;
+    _minLongitude: number;
+    _maxLongitude: number;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
+    constructor(p?: Partial<ITileSystemBounds>);
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
+    unionInPlace(bounds: ITileSystemBounds): void;
+    copyInPlace(bounds: ITileSystemBounds): void;
+    get minLOD(): number;
+    set minLOD(v: number);
+    get maxLOD(): number;
+    set maxLOD(v: number);
+    get minLatitude(): number;
+    set minLatitude(v: number);
+    get maxLatitude(): number;
+    set maxLatitude(v: number);
+    get minLongitude(): number;
+    set minLongitude(v: number);
+    get maxLongitude(): number;
+    set maxLongitude(v: number);
+}

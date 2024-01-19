@@ -59,6 +59,12 @@ module.exports = [
                 }
                 callback();
             },
+            ({ request }, callback) => {
+                if (request.match("core/")) {
+                    return callback(null, "SPACEXR");
+                }
+                callback();
+            },
         ],
     },
 ];

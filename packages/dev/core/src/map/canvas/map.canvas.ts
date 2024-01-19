@@ -1,11 +1,7 @@
-import { ITileDisplay } from "../../tiles/tiles.interfaces";
-import { Scalar } from "../../math/math";
-import { RGBAColor } from "../../math/math.color";
-import { TileMapBase } from "../../tiles/map/tiles.map";
-import { ITileNavigationState } from "../../tiles/navigation/tiles.navigation.interfaces";
+import { Scalar, RGBAColor } from "../../math";
+import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ITileMapLayer } from "core/tiles";
 
 export type CanvasTileContentType = HTMLImageElement;
 

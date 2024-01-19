@@ -3,8 +3,8 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileProvider } from "../providers/tiles.provider";
 import { TileContentProvider } from "../providers/tiles.provider.content";
 
-import { ITileAddress, ITileCollection, ITileDatasource, ITileDisplay, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
-import { ITileMap, ITileMapLayer, ITileMapLayerOptions } from "./tiles.map.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
+import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState, TileNavigationState } from "../navigation";

@@ -1,7 +1,6 @@
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITilePipeline, ITilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileDisplay } from "../tiles.interfaces";
-import { ITileMap, ITileMapBuilder, ITileMapLayer, ITileMapLayerBuilder } from "./tiles.map.interfaces";
+import { ITileDisplay, ITileMap, ITileMapBuilder, ITileMapLayer, ITileMapLayerBuilder } from "./tiles.map.interfaces";
 export declare abstract class AbstractTileMapBuilder<T> implements ITileMapBuilder<T> {
     protected _name?: string;
     protected _display?: ITileDisplay;

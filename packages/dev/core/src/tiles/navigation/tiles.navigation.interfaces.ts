@@ -3,7 +3,7 @@ import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IValidable } from "../../types";
 
-export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable<unknown>, ICloneable<ITileNavigationState> {
+export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     stateChangedObservable: Observable<ITileNavigationState>;
 

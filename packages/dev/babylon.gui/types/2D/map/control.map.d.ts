@@ -1,28 +1,25 @@
 import { ICanvasRenderingContext } from "@babylonjs/core";
-import { Measure } from "@babylonjs/gui";
-import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
+import { Control, Measure } from "@babylonjs/gui";
+import { Observable, Observer } from "core/events";
 import { IGeo2 } from "core/geography";
-import { ITileDisplay, ITileNavigationState } from "core/tiles";
-import { ITileMap, ITileMapLayer } from "core/tiles/map";
+import { ITileNavigationState, ITileMap, ITileMapLayer, ITileDisplay } from "core/tiles";
 import { Nullable } from "core/types";
-import { DisplayControl } from "./control.display";
 export type ControlTileContentType = HTMLImageElement;
-export declare class MapControl extends DisplayControl implements ITileMap<ControlTileContentType> {
+export declare class MapControl extends Control implements ITileMap<ControlTileContentType>, ITileDisplay {
     _layerAddedObservable?: Observable<ITileMapLayer<ControlTileContentType>>;
     _layerRemovedObservable?: Observable<ITileMapLayer<ControlTileContentType>>;
-    protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
     protected _layers?: Map<string, ITileMapLayer<ControlTileContentType>>;
     protected _orderedLayers?: ITileMapLayer<ControlTileContentType>[];
     protected _background: string;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
-    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
     constructor(name: string, nav?: ITileNavigationState);
+    get displayHeight(): number;
+    get displayWidth(): number;
     get background(): string;
     set background(value: string);
     get layerAddedObservable(): Observable<ITileMapLayer<ControlTileContentType>>;
     get layerRemovedObservable(): Observable<ITileMapLayer<ControlTileContentType>>;
-    get display(): Nullable<ITileDisplay>;
     get navigation(): ITileNavigationState;
     getLayers(predicate?: (l: ITileMapLayer<ControlTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<ControlTileContentType>>;
     getOrderedLayers(predicate?: (l: ITileMapLayer<ControlTileContentType>) => boolean): IterableIterator<ITileMapLayer<ControlTileContentType>>;
@@ -38,19 +35,15 @@ export declare class MapControl extends DisplayControl implements ITileMap<Contr
     rotate(r: number): MapControl;
     private _addSortedLayer;
     private _removeSortedLayer;
-    private _onNavigationUpdated;
-    private _onDisplayPropertyChanged;
-    private _bindDisplay;
+    private _onNavigationUpdatedInternal;
+    private _updateLayersContext;
     private _bindNavigation;
     private _updateNavigationBounds;
     _draw(ctx: ICanvasRenderingContext, invalidatedRectangle?: Nullable<Measure>): void;
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<ControlTileContentType>): void;
-    protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
-    protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void;
     protected _onNavigationBinded(nav?: ITileNavigationState): void;
-    protected _onDisplayResized(display: ITileDisplay): void;
-    protected _onDisplayTranslated(display: ITileDisplay): void;
     protected _onLayerAdded(layer: ITileMapLayer<ControlTileContentType>): void;
     protected _onLayerRemoved(layer: ITileMapLayer<ControlTileContentType>): void;
+    protected _onNavigationUpdated(event: ITileNavigationState): void;
 }

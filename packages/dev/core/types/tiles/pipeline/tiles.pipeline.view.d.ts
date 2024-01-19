@@ -1,8 +1,9 @@
 import { Observable } from "../../events";
-import { ITileAddress, ITileDisplay, ITileMetrics } from "../tiles.interfaces";
+import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
+import { ITileDisplay } from "../map";
 export declare class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;

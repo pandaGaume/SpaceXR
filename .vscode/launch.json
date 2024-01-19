@@ -4,16 +4,16 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Canvas Map on chrome",
-            "url": "http://localhost:1338/packages/host/www/canvasmap.html",
+            "url": "http://localhost:1338/packages/host/www/core/canvasmap.html",
             "webRoot": "${workspaceFolder}/packages/dev/core/",
             "sourceMaps": true
         },
         {
-            "type": "msedge",
+            "type": "chrome",
             "request": "launch",
-            "name": "Launch Canvas Map on ms edge",
-            "url": "http://localhost:1338/packages/host/www/canvasmap.html",
-            "webRoot": "${workspaceFolder}/packages/dev/core/",
+            "name": "GUI 2D on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/gui2DMap.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon.gui/",
             "sourceMaps": true
         },
         {
@@ -22,11 +22,7 @@
             "name": "Map on chrome",
             "url": "http://localhost:1338/packages/host/www/babylonmap.html",
             "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-            "pathMapping": {
-                "/core": "${workspaceFolder}/packages/dev/core/",
-                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
-            }
+            "sourceMaps": true
         },
         {
             "type": "chrome",
@@ -51,25 +47,6 @@
                 "/core": "${workspaceFolder}/packages/dev/core/",
                 "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
             }
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "GUI 2D on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylonGui2D.html",
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-            "pathMapping": {
-                "/core": "${workspaceFolder}/packages/dev/core/",
-                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
-            }
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Webgl test on chrome",
-            "url": "http://localhost:1338/packages/host/www/webgltrial.html",
-            "webRoot": "${workspaceFolder}"
         }
     ]
 }

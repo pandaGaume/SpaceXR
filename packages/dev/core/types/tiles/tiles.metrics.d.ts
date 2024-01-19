@@ -1,7 +1,7 @@
 import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, CellCoordinateReference } from "./tiles.interfaces";
-import { TileSystemBounds } from "./tile.system";
+import { TileSystemBounds } from "./tiles.system";
 export declare abstract class AbstractTileMetrics extends TileSystemBounds implements ITileMetrics {
     static DefaultTileSize: number;
     static DefaultCellSize: number;

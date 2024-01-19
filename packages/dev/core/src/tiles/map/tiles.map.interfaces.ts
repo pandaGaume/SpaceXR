@@ -1,9 +1,15 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileDisplay, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
-import { IDisposable, IValidable, Nullable } from "../../types";
+import { IDisposable, IValidable } from "../../types";
+
+export interface ITileDisplay extends IDisposable {
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    displayHeight: number;
+    displayWidth: number;
+}
 
 export interface ITileMapLayerOptions {
     zindex: number;
@@ -12,7 +18,7 @@ export interface ITileMapLayerOptions {
     attribution?: string;
 }
 
-export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable<unknown>, ITileSelectionContext {
+export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
@@ -59,7 +65,6 @@ export interface ITileMap<T> extends ITileNavigationApi<unknown>, IDisposable {
     layerAddedObservable: Observable<ITileMapLayer<T>>;
     layerRemovedObservable: Observable<ITileMapLayer<T>>;
 
-    display: Nullable<ITileDisplay>;
     navigation: ITileNavigationState;
 
     getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
@@ -69,7 +74,6 @@ export interface ITileMap<T> extends ITileNavigationApi<unknown>, IDisposable {
 
 export interface ITileMapBuilder<T> {
     withName(name: string): ITileMapBuilder<T>;
-    withDisplay(display: ITileDisplay): ITileMapBuilder<T>;
     withNavigation(navigation: ITileNavigationState | ITileMetrics): ITileMapBuilder<T>;
     withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T>;
     withLayer(...layer: Array<ITileMapLayer<T> | ITileMapLayerBuilder<T>>): ITileMapBuilder<T>;

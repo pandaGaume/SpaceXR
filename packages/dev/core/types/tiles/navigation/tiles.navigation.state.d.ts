@@ -1,6 +1,7 @@
 import { PropertyChangedEventArgs, Observable, Observer } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { Nullable, ValidableBase } from "../../types";
+import { Nullable } from "../../types";
+import { ValidableBase } from "../../validable";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry";
 import { IGeo2, Bearing } from "../../geography";

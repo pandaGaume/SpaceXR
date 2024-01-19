@@ -1,11 +1,12 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { Nullable, ValidableBase } from "../../types";
+import { Nullable } from "../../types";
+import { ValidableBase } from "../../validable";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2, Cartesian2 } from "../../geometry";
 import { IGeo2, IsLocation, Bearing, Geo2 } from "../../geography";
 import { EPSG3857 } from "../geography";
-import { TileSystemBounds } from "../tile.system";
+import { TileSystemBounds } from "../tiles.system";
 
 export class TileNavigationState extends ValidableBase implements ITileNavigationState {
     public static GetLodScale(lod: number): number {

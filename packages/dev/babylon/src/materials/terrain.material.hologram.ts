@@ -21,7 +21,6 @@ import { SurfaceMapDisplay, SurfaceTileMap, TerrainTile } from "../terrain";
 import { IDemInfos } from "core/dem";
 import { EventState, Observer } from "core/events";
 import { Nullable } from "core/types";
-import { ITilePoolTextureArea, TilePoolTexture, TilePoolTextureOptions } from "./textures/tilePoolTexture";
 import { ITileAddress, ITileClient, IsTileContentView, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { UpdateEventArgs, UpdateReason } from "core/tiles/tiles.mapview";
@@ -89,7 +88,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
     public static ShaderName: string = "tilemap";
 
     private _map: SurfaceTileMap<V, H>;
-    private _layerClient?: ITileClient<HTMLImageElement>;
 
     // tile bags is holding the area infrormation provided by TilePoolTexture for each activ tile.
     // This pattern is used to avoid creating a new derived class for each type of tile, or new Decorator class.
@@ -150,20 +148,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         this._buildTextures(TerrainHologramMaterialSampler.LayerKind, scene);
 
         this._buildClipSurfaces();
-    }
-
-    public get LayerClient(): ITileClient<HTMLImageElement> | undefined {
-        return this._layerClient;
-    }
-
-    public set LayerClient(v: ITileClient<HTMLImageElement> | undefined) {
-        if (this._layerClient !== v) {
-            this._layerClient = v;
-            if (v) {
-                this._updateLayer();
-                this.markAsDirty(Material.MiscDirtyFlag);
-            }
-        }
     }
 
     public override getClassName(): string {
@@ -347,10 +331,10 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
 
     // Override the dispose method
     public override dispose(forceDisposeEffect: boolean = false): void {
-        this._added?.dispose();
-        this._updated?.dispose();
-        this._removed?.dispose();
-        this._viewUpdated?.dispose();
+        this._added?.disconnect();
+        this._updated?.disconnect();
+        this._removed?.disconnect();
+        this._viewUpdated?.disconnect();
 
         for (var bag of this._tileBags.values()) {
             bag.elevationArea?.release();
@@ -661,28 +645,6 @@ export class TerrainHologramMaterial<V extends IDemInfos, H extends SurfaceMapDi
         }
     }
 
-    // load the layer content. It is questionable to let this method here, but it is the simplest way to do it.
-    private _loadLayer(tile: TerrainTile<V>): void {
-        const m = tile.surface;
-        if (m && !m.instancedBuffers.layerIds) {
-            m.instancedBuffers.layerIds = new Vector4(-1, -1, -1, -1);
-            this._loadLayerAreaAsync(tile.address)
-                .then((id) => {
-                    m.instancedBuffers.layerIds.x = id;
-                })
-                .catch((reason) => {
-                    // the lookup operation has failed - TODO describe a strategy
-                    console.log(reason);
-                });
-        }
-    }
-
-    private _updateLayer(): void {
-        Promise.all(Array.from(this._tileBags.values()).map((bag) => this._loadLayerAreaAsync(bag.address)))
-            .then((ids) => {})
-            .catch((reason) => {})
-            .finally(() => {});
-    }
 
     // TODO : move back the bag process to _loadLayer and _updateLayer
     private async _loadLayerAreaAsync(address: ITileAddress): Promise<number> {

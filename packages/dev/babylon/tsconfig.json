@@ -8,7 +8,9 @@
         "declarationDir": "./types",
         "skipLibCheck": true,
         "paths": {
-            "core/*": ["./dev/core/src/*"] // base url set in parent config
+            // base url set in parent config
+            "core/*": ["./dev/core/src/*"],
+            "babylon-ext/*": ["./dev/babylonExtensions/src/*"] // base url set in parent config
         }
     },
     "references": [{ "path": "../core" }],

@@ -9,8 +9,10 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
 
     _offsetX: number;
     _offsetY: number;
+    _offsetZ: number;
     _startX: number;
     _startY: number;
+    _startZ: number;
     _isDragging: boolean;
     _button: number;
 
@@ -18,8 +20,10 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
         this._target = target;
         this._offsetX = 0;
         this._offsetY = 0;
+        this._offsetZ = 0;
         this._startX = 0;
         this._startY = 0;
+        this._startZ = 0;
         this._button = 0;
         this._isDragging = false;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT;
@@ -43,44 +47,48 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
         this._target.zooming(delta);
     }
 
-    public onPointerMove(src: T, x: number, y: number): void {
+    public onPointerMove(src: T, x: number, y: number, z: number): void {
         if (this._isDragging) {
             // compute the offset
             const dx = x - this._offsetX;
             const dy = y - this._offsetY;
+            const dz = z - this._offsetY;
 
             // mettre à jour les variables de décalage
             this._offsetX += dx;
             this._offsetY += dy;
-            this.onDrag(src, dx, dy, this._button);
+            this._offsetZ += dz;
+            this.onDrag(src, dx, dy, dz, this._button);
         }
     }
 
-    public onPointerOut(src: T, x: number, y: number): void {
+    public onPointerOut(src: T, x: number, y: number, z: number): void {
         // we let the drag continue.
     }
 
-    public onPointerDown(src: T, x: number, y: number, buttonIndex: number): void {
+    public onPointerDown(src: T, x: number, y: number, z: number, buttonIndex: number): void {
         // regisyter start
         this._offsetX = this._startX = x;
         this._offsetY = this._startY = y;
+        this._offsetZ = this._startZ = z;
         this._button = buttonIndex;
         this._isDragging = true;
-        this.onBeginDrag(src, this._offsetX, this._offsetY, this._button);
+        this.onBeginDrag(src, this._offsetX, this._offsetY, this._offsetZ, this._button);
     }
 
-    public onPointerUp(src: T, x: number, y: number, buttonIndex: number): void {
+    public onPointerUp(src: T, x: number, y: number, z: number, buttonIndex: number): void {
         this._isDragging = false;
         // compute the offset
         const dx = x - this._offsetX;
         const dy = y - this._offsetY;
-        this.onEndDrag(src, dx, dy, this._button);
+        const dz = z - this._offsetZ;
+        this.onEndDrag(src, dx, dy, dz, this._button);
     }
 
-    public onPointerClick(src: T, x: number, y: number, buttonIndex: number): void {}
-    public onPointerEnter(src: T, x: number, y: number): void {}
-    public onBeginDrag(src: T, dx: number, dy: number, buttonIndex: number): void {}
-    public onDrag(src: T, dx: number, dy: number, buttonIndex: number): void {
+    public onPointerClick(src: T, x: number, y: number, z: number, buttonIndex: number): void {}
+    public onPointerEnter(src: T, x: number, y: number, z: number): void {}
+    public onBeginDrag(src: T, dx: number, dy: number, z: number, buttonIndex: number): void {}
+    public onDrag(src: T, dx: number, dy: number, z: number, buttonIndex: number): void {
         switch (buttonIndex) {
             case 0: {
                 // translate the center of the map according the drag displacement
@@ -94,5 +102,5 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
             }
         }
     }
-    public onEndDrag(src: T, dx: number, dy: number, buttonIndex: number): void {}
+    public onEndDrag(src: T, dx: number, dy: number, z: number, buttonIndex: number): void {}
 }

@@ -1,14 +1,20 @@
-import { ICartesian3, ISize3 } from "core/geometry/geometry.interfaces";
-import { Size3 } from "core/geometry/geometry.size";
 import { Matrix, Mesh, Scene, TmpVectors, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { ICartesian3, ICartesian4, ISize3, Size3 } from "core/geometry";
+import { IPointerSource } from "core/map/inputs";
+import { Observable } from "core/events";
 
 /**
- * The surface map display is a virtual surface holding the anchor and dimension of the map with :
- *  - Fixed physical sizes in meter, within the 3 axes
- *  - Resolution in pixel within the 3 axes
  *  This logical display will be used to be placed accordingly of a existing mesh surface into the scene.
  */
-export class VirtualDisplay extends Mesh {
+export class VirtualDisplay extends Mesh implements IPointerSource<VirtualDisplay> {
+    
+    public onPointerMoveObservable = new Observable<ICartesian4>();
+    public onPointerOutObservable = new Observable<VirtualDisplay>();
+    public onPointerDownObservable = new Observable<ICartesian4>();
+    public onPointerUpObservable = new Observable<ICartesian4>();
+    public onPointerClickObservable = new Observable<ICartesian4>();
+    public onPointerEnterObservable = new Observable<VirtualDisplay>();
+
     _context: TransformNode;
 
     _dimension: ISize3;

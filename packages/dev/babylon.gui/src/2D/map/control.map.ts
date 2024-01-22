@@ -6,7 +6,7 @@ import { Size2 } from "core/geometry";
 import { Context2DTileMap, ICanvasRenderingContext, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
 import { ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
 import { Nullable } from "core/types";
-import { ControlInputController } from "./control.input";
+import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
 
 export type ControlTileContentType = HTMLImageElement;

@@ -1,2 +1,2 @@
-export * from "./terrain.mapDisplay";
+export * from "./terrain.display";
 export * from "./terrain.map";

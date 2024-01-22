@@ -52,13 +52,13 @@ export class ControlInputController<T extends SourceType> implements IDisposable
     }
 
     protected _onPointerMove(v: Vector2, e: EventState) {
-        this._target?.onPointerMove(this._src, v.x, v.y);
+        this._target?.onPointerMove(this._src, v.x, v.y, 0);
     }
     protected _onPointerDown(v: Vector2WithInfo, e: EventState) {
-        this._target?.onPointerDown(this._src, v.x, v.y, v.buttonIndex);
+        this._target?.onPointerDown(this._src, v.x, v.y, 0, v.buttonIndex);
     }
     protected _onPointerUp(v: Vector2WithInfo, e: EventState) {
-        this._target?.onPointerUp(this._src, v.x, v.y, v.buttonIndex);
+        this._target?.onPointerUp(this._src, v.x, v.y, 0, v.buttonIndex);
     }
     protected _onWheel(v: Vector2, e: EventState) {
         this._target?.onWheel(this._src, v.y);

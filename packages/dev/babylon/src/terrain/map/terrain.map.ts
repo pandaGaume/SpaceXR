@@ -7,7 +7,7 @@ import { ITile, ITileAddress, ITileClient, ITileDatasource, IsTileContentView } 
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes/terrain.grid";
 import { IRectangle } from "core/geometry/geometry.interfaces";
 import { Size3 } from "core/geometry/geometry.size";
-import { SurfaceMapDisplay } from "./terrain.mapDisplay";
+import { SurfaceMapDisplay } from "./terrain.display";
 import { TerrainTile } from "../terrain.tile";
 import { IDemInfos } from "core/dem/dem.interfaces";
 import { TerrainHologramMaterial, TerrainHologramMaterialOptions } from "../../materials";

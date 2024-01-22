@@ -1,13 +1,12 @@
-import { Constants, InternalTexture, InternalTextureSource, Nullable, Scene, Texture, ThinEngine } from "@babylonjs/core";
-import { EPSG3857, ITileMetrics } from "../..";
-
 ///////////////////////////
 // Thin Engine Extension //
 ///////////////////////////
 
+import { Constants, InternalTexture, InternalTextureSource, Nullable, ThinEngine } from "@babylonjs/core";
+
 declare module "@babylonjs/core/Engines/thinEngine" {
     export interface ThinEngine {
-        __SpaceXR___updateSubRawTexture2DArray(
+        __SpaceXR__updateSubRawTexture2DArray(
             texture: InternalTexture,
             level: number,
             xoffset: number,
@@ -16,12 +15,12 @@ declare module "@babylonjs/core/Engines/thinEngine" {
             width: number,
             height: number,
             depth: number,
-            data: TilePoolData,
+            data: Nullable<ArrayBufferView> | TexImageSource,
             format: number,
             textureType: number
         ): void;
 
-        __SpaceXR___createRawTexture2DArray(
+        __SpaceXR__createRawTexture2DArray(
             width: number,
             height: number,
             depth: number,
@@ -44,7 +43,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
         width: number,
         height: number,
         depth: number,
-        data: TilePoolData,
+        data: Nullable<ArrayBufferView> | TexImageSource,
         format: number = Constants.TEXTUREFORMAT_RGBA,
         textureType: number = Constants.TEXTURETYPE_UNSIGNED_INT
     ): void {
@@ -89,7 +88,7 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D: boolean) {
     };
 }
 
-ThinEngine.prototype.__SpaceXR___updateSubRawTexture2DArray = _makeUpdateSubRawTexture2DArrayFunction(false);
+ThinEngine.prototype.__SpaceXR__updateSubRawTexture2DArray = _makeUpdateSubRawTexture2DArrayFunction(false);
 
 function _makeCreateRawTextureFunction(is3D: boolean) {
     return function (
@@ -163,150 +162,8 @@ function _makeCreateRawTextureFunction(is3D: boolean) {
     };
 }
 
-ThinEngine.prototype.__SpaceXR___createRawTexture2DArray = _makeCreateRawTextureFunction(false);
+ThinEngine.prototype.__SpaceXR__createRawTexture2DArray = _makeCreateRawTextureFunction(false);
 
 ///////////////////////////////
 // End Thin Engine Extension //
 ///////////////////////////////
-
-export type TilePoolData = Nullable<ArrayBufferView> | TexImageSource;
-
-export interface ITilePoolTextureArea {
-    id: number;
-    update(data: TilePoolData): void;
-    release(): void;
-}
-
-export interface ITilePoolTexture {
-    areaCount: number;
-    freeAreaCount: number;
-    usedAreaCount: number;
-    reserveArea(): Nullable<TilePoolTextureArea>;
-}
-
-export class TilePoolTextureOptions {
-    static Default = new TilePoolTextureOptions();
-
-    data: TilePoolData = null;
-    metrics: ITileMetrics = EPSG3857.Shared;
-    count: number = 1;
-    format: number = Constants.TEXTUREFORMAT_RGBA;
-    textureType: number = Constants.TEXTURETYPE_UNSIGNED_INT;
-    internalFormat?: number;
-
-    generateMipmap: boolean = false;
-    samplingMode: number = Texture.NEAREST_NEAREST;
-
-    public constructor(p?: Partial<TilePoolTextureOptions>) {
-        if (p) {
-            Object.assign(this, p);
-        }
-    }
-}
-
-class TilePoolTextureArea implements ITilePoolTextureArea {
-    _owner: TilePoolTexture;
-    _id: number;
-    private _released: boolean;
-
-    constructor(owner: TilePoolTexture, id: number) {
-        this._owner = owner;
-        this._id = id;
-        this._released = false;
-    }
-
-    public update(data: TilePoolData): void {
-        if (this._released) {
-            throw new Error("Invalid state, area has been released.");
-        }
-        this._owner._updateArea(this.id, data);
-    }
-
-    public release(): void {
-        if (!this._released) {
-            this._owner._releaseArea(this._id);
-            this._released = true;
-        }
-    }
-
-    public get id(): number {
-        return this._id;
-    }
-}
-
-export class TilePoolTexture extends Texture implements ITilePoolTexture {
-    _o: TilePoolTextureOptions;
-    _areas: Array<Nullable<TilePoolTextureArea>>;
-    _used: number;
-
-    public constructor(name: string, options: TilePoolTextureOptions, scene: Scene) {
-        const o = { ...TilePoolTextureOptions.Default, ...options };
-        super(null, scene, !o.generateMipmap, false);
-        this.name = name;
-
-        this._o = o;
-        this._areas = new Array<Nullable<TilePoolTextureArea>>(this.areaCount).fill(null);
-        this._used = 0;
-
-        const s = this._o.metrics.tileSize;
-        this._texture = scene
-            .getEngine()
-            .__SpaceXR___createRawTexture2DArray(s, s, this._o.count, this._o.format, this._o.samplingMode, this._o.textureType, this._o.internalFormat);
-        this.wrapU = Texture.CLAMP_ADDRESSMODE;
-        this.wrapV = Texture.CLAMP_ADDRESSMODE;
-    }
-
-    public reserveArea(): Nullable<TilePoolTextureArea> {
-        if (this.freeAreaCount) {
-            for (let i = 0; i != this._areas.length; i++) {
-                if (this._areas[i] === null) {
-                    const a = new TilePoolTextureArea(this, i);
-                    this._areas[i] = a;
-                    this._used++;
-                    return a;
-                }
-            }
-        }
-        return null;
-    }
-
-    public get areaCount(): number {
-        return this._o.count || 1;
-    }
-
-    public get freeAreaCount(): number {
-        return this.areaCount - this._used;
-    }
-
-    public get usedAreaCount(): number {
-        return this._used;
-    }
-
-    _releaseArea(i: number): void {
-        if (this._used > 0 && i >= 0 && i < this._areas.length && this._areas[i] !== null) {
-            this._areas[i] = null;
-            this._used--;
-        }
-    }
-
-    _updateArea(i: number, data: TilePoolData): void {
-        const engine = this._getEngine();
-        if (engine && this._texture) {
-            const s = this._o.metrics!.tileSize;
-
-            engine.__SpaceXR___updateSubRawTexture2DArray(
-                this._texture,
-                0, // specifying the level of detail - 0 is the base image
-                0, // ro where pixel data should go
-                0, // column where pixel data should go
-                i, // array "index" for pixels
-                s, // width of pixel data
-                s, // height of pixel data
-                1, // number of slice for this data
-                data,
-                this._texture.format, // data format of pixel data
-                this._texture.type // data type of pixel data
-            );
-        }
-    }
-}

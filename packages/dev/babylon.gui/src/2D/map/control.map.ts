@@ -140,6 +140,6 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
 
     protected _localDraw(context: BABYLON.ICanvasRenderingContext): void {
         this._map.validate();
-        this._map.draw(context as ICanvasRenderingContext);
+        this._map.draw(context as ICanvasRenderingContext, this._currentMeasure.left, this._currentMeasure.top);
     }
 }

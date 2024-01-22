@@ -44,7 +44,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
     /// <summary>
     /// Draw the map on the canvas.
     /// </summary>
-    public draw(ctx: ICanvasRenderingContext): void {
+    public draw(ctx: ICanvasRenderingContext, xoffset: number = 0, yoffset: number = 0): void {
         if (!ctx || !this._display) {
             return;
         }
@@ -52,8 +52,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
 
         // clear the canvas
         const res = this._display;
-        const x = 0;
-        const y = 0;
+        const x = xoffset;
+        const y = yoffset;
         if (this._renderOptions?.background) {
             ctx.fillStyle = this._renderOptions.background;
             ctx.fillRect(x, y, res.displayWidth, res.displayHeight);

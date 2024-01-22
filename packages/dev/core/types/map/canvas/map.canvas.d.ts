@@ -11,7 +11,7 @@ export interface ICanvasRenderingOptions {
 export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
     _renderOptions?: ICanvasRenderingOptions;
     constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState);
-    draw(ctx: ICanvasRenderingContext): void;
+    draw(ctx: ICanvasRenderingContext, xoffset?: number, yoffset?: number): void;
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void;
 }
 export interface ICanvasMapOptions extends ICanvasRenderingOptions {

@@ -1,7 +1,7 @@
 import { IMapDisplay } from "core/map";
 import { ISize3 } from "core/geometry/geometry.interfaces";
 import { Scene } from "@babylonjs/core";
-import { VirtualDisplay } from "../../holograms/holograms.display";
+import { VirtualDisplay } from "../../display/display.virtual";
 import { Size3 } from "../..";
 
 /**

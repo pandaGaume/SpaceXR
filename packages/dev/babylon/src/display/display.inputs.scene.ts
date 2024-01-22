@@ -1,5 +1,5 @@
 import { EventState, Nullable, Observer, PointerEventTypes, PointerInfo, Scene, Vector2, Vector3 } from "@babylonjs/core";
-import { VirtualDisplay } from "./holograms.display";
+import { VirtualDisplay } from "./display.virtual";
 import { Cartesian2WithInfos } from "core/map/inputs";
 
 export class SceneInputController {

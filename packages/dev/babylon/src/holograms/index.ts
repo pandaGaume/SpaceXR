@@ -1,1 +1,1 @@
-export * from "./virtualdisplay";
+export * from "./holograms.display";

@@ -24,13 +24,13 @@ export class MouseInputController<T extends HTMLElement> implements IDisposable 
             ev.stopPropagation();
         };
         this._mouseDown = ((ev: MouseEvent) => {
-            this._target?.onPointerDown(this._src, ev.clientX, ev.clientY, 0, ev.button);
+            this._target?.onPointerDown(this._src, ev.clientX, ev.clientY, ev.button);
         }).bind(this);
         this._mouseMove = ((ev: MouseEvent) => {
-            this._target?.onPointerMove(this._src, ev.clientX, ev.clientY,0);
+            this._target?.onPointerMove(this._src, ev.clientX, ev.clientY);
         }).bind(this);
         this._mouseUp = ((ev: MouseEvent) => {
-            this._target?.onPointerUp(this._src, ev.clientX, ev.clientY, 0,ev.button);
+            this._target?.onPointerUp(this._src, ev.clientX, ev.clientY, ev.button);
         }).bind(this);
         this._wheel = ((ev: WheelEvent) => {
             this._target?.onWheel(this._src, ev.deltaY);

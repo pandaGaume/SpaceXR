@@ -20,18 +20,18 @@ export class SpatialIndexOptions {
 
 export class SpatialIndexNode {
     _content?: IGeoBounded[];
-    _childrens: SpatialIndexNode[];
+    _children: SpatialIndexNode[];
     _parent?: SpatialIndexNode;
     _env: IEnvelope;
 
     public constructor(bounds: IEnvelope, parent?: SpatialIndexNode) {
         this._parent = parent;
         this._env = bounds;
-        this._childrens = [];
+        this._children = [];
     }
 
-    public get childrens(): SpatialIndexNode[] {
-        return this._childrens;
+    public get children(): SpatialIndexNode[] {
+        return this._children;
     }
 
     public bounds(): IEnvelope {
@@ -48,8 +48,8 @@ export class SpatialIndexNode {
             return this._content.length;
         }
         let result = 0;
-        if (this._childrens) {
-            for (const child of this._childrens) {
+        if (this._children) {
+            for (const child of this._children) {
                 result += child.count;
             }
         }
@@ -65,8 +65,8 @@ export class SpatialIndexNode {
             }
             return;
         }
-        if (this._childrens) {
-            for (const child of this._childrens) {
+        if (this._children) {
+            for (const child of this._children) {
                 yield* child.contents(predicate);
             }
         }
@@ -74,21 +74,25 @@ export class SpatialIndexNode {
 
     public add(item: IGeoBounded, options: SpatialIndexOptions): void {
         if (item && item.bounds?.intersectWith(this._env)) {
-            if (!this._childrens || this._childrens.length === 0) {
+            if (!this._children || this._children.length === 0) {
                 this._content = this._content || [];
-                if (this._content.length < options?.maxCount ?? SpatialIndexOptions.DefaultMaxCount) {
+                if ((this._content.length < options?.maxCount ?? SpatialIndexOptions.DefaultMaxCount)
+                    || this.depth === options.maxDepth) {
                     this._content.push(item);
+                    // console.log(`Item pushed into node content.`);
+                    // console.log('Item: ', item);
+                    // console.log('Node: ', this);
                     return;
                 }
                 // split
                 const type = options?.type ?? SpatialIndexOptions.DefaultType;
                 if (type === SpatialIndexType.QUADTREE) {
-                    this._childrens.push(...Envelope.Split2(this._env).map((e) => new SpatialIndexNode(e, this)));
+                    this._children.push(...Envelope.Split2(this._env).map((e) => new SpatialIndexNode(e, this)));
                 } else {
-                    this._childrens.push(...Envelope.Split3(this._env).map((e) => new SpatialIndexNode(e, this)));
+                    this._children.push(...Envelope.Split3(this._env).map((e) => new SpatialIndexNode(e, this)));
                 }
                 // disptach content
-                for (const child of this._childrens) {
+                for (const child of this._children) {
                     for (const content of this._content) {
                         child.add(content, options);
                     }
@@ -96,9 +100,13 @@ export class SpatialIndexNode {
                 this._content = [];
             }
             // disptach new item
-            for (const child of this._childrens) {
+            for (const child of this._children) {
                 child.add(item, options);
             }
+        } else {
+            // console.log(`Item doesnt intersects with bounds.`);
+            // console.log(item);
+            // console.log(this._env);
         }
     }
 
@@ -111,9 +119,9 @@ export class SpatialIndexNode {
                     return;
                 }
             }
-            if (this._childrens) {
+            if (this._children) {
                 let count = 0;
-                for (const child of this._childrens) {
+                for (const child of this._children) {
                     child.remove(item, options);
                     count += child.count;
                 }
@@ -122,13 +130,13 @@ export class SpatialIndexNode {
                 t = Math.min(t, max); // ensure t < max
                 if (max - count >= t) {
                     this._content = [];
-                    for (const child of this._childrens) {
+                    for (const child of this._children) {
                         for (const content of child.contents()) {
                             this._content.push(content);
                         }
                         child.clear();
                     }
-                    this._childrens = [];
+                    this._children = [];
                 }
             }
         }
@@ -144,7 +152,7 @@ export class SpatialIndexNode {
                     return this._content.filter((c) => c.bounds?.intersectWith(bounds));
                 }
                 const result: IGeoBounded[] = [];
-                for (const child of this._childrens) {
+                for (const child of this._children) {
                     result.push(...child.get(bounds));
                 }
                 return result;
@@ -155,8 +163,8 @@ export class SpatialIndexNode {
 
     public clear(): void {
         this._content = undefined;
-        if (this._childrens) {
-            for (const child of this._childrens) {
+        if (this._children) {
+            for (const child of this._children) {
                 child.clear();
             }
         }

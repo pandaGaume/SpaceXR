@@ -195,8 +195,8 @@ export class Envelope implements IEnvelope {
     }
 
     public get center(): IGeo3 {
-        const lat = this._min.lon + (this._max.lon - this._min.lon) / 2;
-        const lon = this._min.lat + (this._max.lat - this._min.lat) / 2;
+        const lon = this._min.lon + (this._max.lon - this._min.lon) / 2;
+        const lat = this._min.lat + (this._max.lat - this._min.lat) / 2;
         const alt = this.hasAltitude ? this._min.alt! + (this._max.alt! - this._min.alt!) / 2 : undefined;
         return new Geo3(lat, lon, alt);
     }

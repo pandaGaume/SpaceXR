@@ -169,6 +169,10 @@ export class SpatialIndexNode {
             }
         }
     }
+
+    isLeaf(): boolean {
+        return !this._children || this._children.length === 0;
+    }
 }
 
 export class SpatialIndex {
@@ -198,5 +202,46 @@ export class SpatialIndex {
 
     public get(bounds: IEnvelope | IGeoBounded | undefined): IGeoBounded[] {
         return this._root.get(bounds);
+    }
+
+    *iterateLeaves(node: SpatialIndexNode): Generator<SpatialIndexNode> {
+        if (!node.children?.length) {
+            yield node;
+        } else {
+            for (const child of node.children) {
+                if (child !== null) {
+                    yield* this.iterateLeaves(child);
+                }
+            }
+        }
+    }
+
+    static IterateNodes(
+        node: SpatialIndexNode,
+        predicate: (node: SpatialIndexNode, depth: number, x: number, y: number) => void,
+        depth: number = 0,
+        x: number = 0,
+        y: number = 0
+    ): void {
+        predicate(node, depth, x, y);
+        if (!node.isLeaf()) {
+            // const childSize = Math.pow(2, depth);
+            for (let i = 0; i < 4; i++) {
+                // // const childX = x + (i % 2) * childSize;
+                // const childX = x * childSize + (i % 2);
+                // // const childY = y + Math.floor(i / 2) * childSize;
+                // const childY = y * childSize + Math.floor(i / 2);
+                // number of nodes on the left
+                const offsetX = x * 2;
+                const offsetY = y * 2;
+
+                const childX = offsetX + (i % 2);
+                const childY = offsetY + Math.floor(i / 2);
+                const childNode = node.children[i];
+                if (childNode !== null) {
+                    SpatialIndex.IterateNodes(childNode, predicate, depth + 1, childX, childY);
+                }
+            }
+        }
     }
 }

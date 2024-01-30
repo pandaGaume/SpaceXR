@@ -12,6 +12,6 @@
         }
     },
 
-    "include": ["./src/**/*.ts"],
+    "include": ["./src/**/*.ts", "test/unit/tiles/geography.envelope.test.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

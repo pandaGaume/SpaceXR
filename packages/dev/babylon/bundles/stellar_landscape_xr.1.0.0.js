@@ -3946,8 +3946,8 @@ class Envelope {
         return this._min.hasAltitude && this._max.hasAltitude;
     }
     get center() {
-        const lat = this._min.lon + (this._max.lon - this._min.lon) / 2;
-        const lon = this._min.lat + (this._max.lat - this._min.lat) / 2;
+        const lon = this._min.lon + (this._max.lon - this._min.lon) / 2;
+        const lat = this._min.lat + (this._max.lat - this._min.lat) / 2;
         const alt = this.hasAltitude ? this._min.alt + (this._max.alt - this._min.alt) / 2 : undefined;
         return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat, lon, alt);
     }
@@ -4084,10 +4084,10 @@ class SpatialIndexNode {
     constructor(bounds, parent) {
         this._parent = parent;
         this._env = bounds;
-        this._childrens = [];
+        this._children = [];
     }
-    get childrens() {
-        return this._childrens;
+    get children() {
+        return this._children;
     }
     bounds() {
         return this._env;
@@ -4102,8 +4102,8 @@ class SpatialIndexNode {
             return this._content.length;
         }
         let result = 0;
-        if (this._childrens) {
-            for (const child of this._childrens) {
+        if (this._children) {
+            for (const child of this._children) {
                 result += child.count;
             }
         }
@@ -4118,37 +4118,40 @@ class SpatialIndexNode {
             }
             return;
         }
-        if (this._childrens) {
-            for (const child of this._childrens) {
+        if (this._children) {
+            for (const child of this._children) {
                 yield* child.contents(predicate);
             }
         }
     }
     add(item, options) {
         if (item && item.bounds?.intersectWith(this._env)) {
-            if (!this._childrens || this._childrens.length === 0) {
+            if (!this._children || this._children.length === 0) {
                 this._content = this._content || [];
-                if (this._content.length < options?.maxCount ?? SpatialIndexOptions.DefaultMaxCount) {
+                if ((this._content.length < options?.maxCount ?? SpatialIndexOptions.DefaultMaxCount)
+                    || this.depth === options.maxDepth) {
                     this._content.push(item);
                     return;
                 }
                 const type = options?.type ?? SpatialIndexOptions.DefaultType;
                 if (type === SpatialIndexType.QUADTREE) {
-                    this._childrens.push(..._geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.Split2(this._env).map((e) => new SpatialIndexNode(e, this)));
+                    this._children.push(..._geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.Split2(this._env).map((e) => new SpatialIndexNode(e, this)));
                 }
                 else {
-                    this._childrens.push(..._geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.Split3(this._env).map((e) => new SpatialIndexNode(e, this)));
+                    this._children.push(..._geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.Split3(this._env).map((e) => new SpatialIndexNode(e, this)));
                 }
-                for (const child of this._childrens) {
+                for (const child of this._children) {
                     for (const content of this._content) {
                         child.add(content, options);
                     }
                 }
                 this._content = [];
             }
-            for (const child of this._childrens) {
+            for (const child of this._children) {
                 child.add(item, options);
             }
+        }
+        else {
         }
     }
     remove(item, options) {
@@ -4160,9 +4163,9 @@ class SpatialIndexNode {
                     return;
                 }
             }
-            if (this._childrens) {
+            if (this._children) {
                 let count = 0;
-                for (const child of this._childrens) {
+                for (const child of this._children) {
                     child.remove(item, options);
                     count += child.count;
                 }
@@ -4171,13 +4174,13 @@ class SpatialIndexNode {
                 t = Math.min(t, max);
                 if (max - count >= t) {
                     this._content = [];
-                    for (const child of this._childrens) {
+                    for (const child of this._children) {
                         for (const content of child.contents()) {
                             this._content.push(content);
                         }
                         child.clear();
                     }
-                    this._childrens = [];
+                    this._children = [];
                 }
             }
         }
@@ -4192,7 +4195,7 @@ class SpatialIndexNode {
                     return this._content.filter((c) => c.bounds?.intersectWith(bounds));
                 }
                 const result = [];
-                for (const child of this._childrens) {
+                for (const child of this._children) {
                     result.push(...child.get(bounds));
                 }
                 return result;
@@ -4202,11 +4205,14 @@ class SpatialIndexNode {
     }
     clear() {
         this._content = undefined;
-        if (this._childrens) {
-            for (const child of this._childrens) {
+        if (this._children) {
+            for (const child of this._children) {
                 child.clear();
             }
         }
+    }
+    isLeaf() {
+        return !this._children || this._children.length === 0;
     }
 }
 class SpatialIndex {
@@ -4228,6 +4234,36 @@ class SpatialIndex {
     }
     get(bounds) {
         return this._root.get(bounds);
+    }
+    *iterateLeaves(node) {
+        if (!node.children?.length) {
+            yield node;
+        }
+        else {
+            for (const child of node.children) {
+                if (child !== null) {
+                    yield* this.iterateLeaves(child);
+                }
+            }
+        }
+    }
+    static IterateNodes(node, predicate, depth = 0, x = 0, y = 0) {
+        predicate(node, depth, x, y);
+        if (!node.isLeaf()) {
+            for (let i = 0; i < 4; i++) {
+                const offsetX = x * 2;
+                const offsetY = y * 2;
+                const childX = offsetX + (i % 2);
+                const childY = offsetY + Math.floor(i / 2);
+                const childNode = node.children[i];
+                if (childNode !== null) {
+                    SpatialIndex.IterateNodes(childNode, predicate, depth + 1, childX, childY);
+                }
+            }
+        }
+        else {
+            console.log('no leaf clover');
+        }
     }
 }
 //# sourceMappingURL=geography.index.js.map

@@ -15,11 +15,11 @@ export declare class SpatialIndexOptions {
 }
 export declare class SpatialIndexNode {
     _content?: IGeoBounded[];
-    _childrens: SpatialIndexNode[];
+    _children: SpatialIndexNode[];
     _parent?: SpatialIndexNode;
     _env: IEnvelope;
     constructor(bounds: IEnvelope, parent?: SpatialIndexNode);
-    get childrens(): SpatialIndexNode[];
+    get children(): SpatialIndexNode[];
     bounds(): IEnvelope;
     get depth(): number;
     get count(): number;
@@ -28,6 +28,7 @@ export declare class SpatialIndexNode {
     remove(item: IGeoBounded, options: SpatialIndexOptions): void;
     get(bounds: IEnvelope | IGeoBounded | undefined): IGeoBounded[];
     clear(): void;
+    isLeaf(): boolean;
 }
 export declare class SpatialIndex {
     _root: SpatialIndexNode;
@@ -38,4 +39,6 @@ export declare class SpatialIndex {
     add(item: IGeoBounded): void;
     remove(item: IGeoBounded): void;
     get(bounds: IEnvelope | IGeoBounded | undefined): IGeoBounded[];
+    iterateLeaves(node: SpatialIndexNode): Generator<SpatialIndexNode>;
+    static IterateNodes(node: SpatialIndexNode, predicate: (node: SpatialIndexNode, depth: number, x: number, y: number) => void, depth?: number, x?: number, y?: number): void;
 }

@@ -3,7 +3,7 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { TileProvider } from "../providers/tiles.provider";
 import { TileContentProvider } from "../providers/tiles.provider.content";
 
-import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContent } from "../tiles.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContentType } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
 import { Nullable } from "../../types";
@@ -153,7 +153,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         return this._provider.activTiles;
     }
 
-    protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>): ITileProvider<T> {
+    protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileProvider<T> {
         const contentProvider = new TileContentProvider<T>(provider, cache);
         return new TileProvider(contentProvider);
     }

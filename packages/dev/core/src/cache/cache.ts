@@ -1,4 +1,4 @@
-import { IDisposable } from "..";
+import { IDisposable } from "../types";
 
 export enum EvictionReason {
     user,

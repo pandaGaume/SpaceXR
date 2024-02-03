@@ -18,11 +18,11 @@ export interface ITileCruncher<T> {
     Upsampling(parent: T, sectionIndex: number): Nullable<T>;
 }
 export declare function IsTileContentView<T>(b: unknown): b is ITileSection;
-export type TileContent<T> = Nullable<T | ITileSection>;
+export type TileContentType<T> = Nullable<T | ITileSection>;
 export interface ITile<T> extends IGeoBounded, IBounded {
     namespace?: string;
     address: ITileAddress;
-    content: TileContent<T>;
+    content: TileContentType<T>;
     quadkey: string;
 }
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
@@ -43,7 +43,7 @@ export interface ITileProxy<T> {
 export interface ITileBuilder<T> {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: TileContent<T>): ITileBuilder<T>;
+    withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
@@ -116,7 +116,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
 }
 export interface ITileContentProviderBuilder<T> {
     withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
-    withCache(cache: IMemoryCache<string, TileContent<T>>): ITileContentProviderBuilder<T>;
+    withCache(cache: IMemoryCache<string, TileContentType<T>>): ITileContentProviderBuilder<T>;
     build(): ITileContentProvider<T>;
 }
 export declare function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T>;

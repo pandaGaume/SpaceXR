@@ -7,13 +7,14 @@
         "rootDir": "./src",
         "declarationDir": "./types",
         "skipLibCheck": true,
+        // paths are used to resolve modules
         "paths": {
-            // base url set in parent config
             "core/*": ["./dev/core/src/*"],
-            "babylon-ext/*": ["./dev/babylonExtensions/src/*"] // base url set in parent config
+            "babylon-ext/*": ["./dev/babylon-ext/src/*"]
         }
     },
-    "references": [{ "path": "../core" }],
+    // you MUST use reference to the core tsconfig and the babylon-ext tsconfig
+    "references": [{ "path": "../core" }, { "path": "../babylon-ext" }],
     "include": ["./src/**/*.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

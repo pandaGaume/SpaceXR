@@ -1,0 +1,24 @@
+{
+    "name": "spacexr-babylon-ext",
+    "version": "1.0.0",
+    "main": "dist/index",
+    "module": "dist/index",
+    "esnext": "dist/index",
+    "types": "dist/index",
+    "files": [
+        "src"
+    ],
+    "scripts": {
+        "clean:babylon-ext": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+        "build:babylon-ext:dev": "npm run clean:babylon-ext && npm run compile:babylon-ext",
+        "compile:babylon-ext": "npm run compile:babylon-ext:source",
+        "compile:babylon-ext:source": "tsc --project tsconfig.json",
+        "webpack:babylon-ext:dev": "webpack --mode development",
+        "publish:babylon-ext:dev": "npm run build:babylon-ext:dev && npm run webpack:babylon-ext:dev"
+    },
+    "sideEffects": false,
+    "devDependencies": {},
+    "dependencies": {
+        "path-scurry": "^1.10.1"
+    }
+}

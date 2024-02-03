@@ -1,4 +1,4 @@
-import { ICloneable } from "..";
+import { ICloneable } from "../types";
 
 export interface ICartesian2 {
     x: number;

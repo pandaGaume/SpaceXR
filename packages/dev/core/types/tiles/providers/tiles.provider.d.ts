@@ -1,7 +1,7 @@
 import { ITile, ITileAddress, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
-import { IRectangle } from "core/geometry/geometry.interfaces";
+import { IRectangle } from "../../geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collections";
 export declare class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;

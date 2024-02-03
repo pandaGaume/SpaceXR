@@ -1,6 +1,6 @@
 import { IMemoryCache } from "../../cache";
 import { Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContent } from "../tiles.interfaces";
+import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
 import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
@@ -31,7 +31,7 @@ export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITil
     addTo(map: ITileMap<T>): ITileMapLayer<T>;
     dispose(): void;
     getActiveTiles(): Nullable<ITileCollection<T>>;
-    protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContent<T>>): ITileProvider<T>;
+    protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileProvider<T>;
     protected _buildPipeline(provider: ITileProvider<T>): ITilePipeline<T>;
     protected _buildView(): ITileView;
     private _onPipelinePropertyChanged;

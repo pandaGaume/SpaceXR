@@ -1,5 +1,5 @@
-import { ICartesian3, ICartesian2, ICartesian4 } from "core/geometry/geometry.interfaces";
-import { IVerticesData } from "core/meshes/meshes.interfaces";
+import { ICartesian3, ICartesian2, ICartesian4 } from "core/geometry";
+import { IVerticesData } from "core/meshes";
 
 declare module "@babylonjs/core" {
     export interface VertexData extends IVerticesData {}

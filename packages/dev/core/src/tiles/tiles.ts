@@ -2,7 +2,7 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./address/tiles.address";
@@ -32,11 +32,11 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    private _value: TileContent<T>;
+    private _value: TileContentType<T>;
     private _env?: IEnvelope;
     private _rect?: IRectangle;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>) {
+    public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T>) {
         super(x, y, levelOfDetail);
         this._value = data;
     }
@@ -45,11 +45,11 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return this;
     }
 
-    public get content(): TileContent<T> {
+    public get content(): TileContentType<T> {
         return this._value;
     }
 
-    public set content(v: TileContent<T>) {
+    public set content(v: TileContentType<T>) {
         this._value = v;
     }
 

@@ -1,5 +1,5 @@
 import { IEnvelope } from "../geography/geography.interfaces";
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContent } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./address/tiles.address";
 export declare class Tile<T> extends TileAddress implements ITile<T> {
@@ -9,10 +9,10 @@ export declare class Tile<T> extends TileAddress implements ITile<T> {
     private _value;
     private _env?;
     private _rect?;
-    constructor(x: number, y: number, levelOfDetail: number, data: TileContent<T>);
+    constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T>);
     get address(): ITileAddress;
-    get content(): TileContent<T>;
-    set content(v: TileContent<T>);
+    get content(): TileContentType<T>;
+    set content(v: TileContentType<T>);
     get bounds(): IEnvelope | undefined;
     set bounds(e: IEnvelope | undefined);
     get rect(): IRectangle | undefined;

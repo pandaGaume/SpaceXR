@@ -1,17 +1,17 @@
-import { IMemoryCache } from "core/cache";
-import { ITileAddress, ITileContentProvider, ITileContentProviderBuilder, ITileDatasource, TileContent } from "../tiles.interfaces";
+import { IMemoryCache } from "../../cache";
+import { ITileAddress, ITileContentProvider, ITileContentProviderBuilder, ITileDatasource, TileContentType } from "../tiles.interfaces";
 import { TileContentProvider } from "./tiles.provider.content";
 
 export class TileContentProviderBuilder<T> implements ITileContentProviderBuilder<T> {
     _datasource?: ITileDatasource<T, ITileAddress>;
-    _cache?: IMemoryCache<string, TileContent<T>>;
+    _cache?: IMemoryCache<string, TileContentType<T>>;
 
     public withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T> {
         this._datasource = datasource;
         return this;
     }
 
-    public withCache(cache: IMemoryCache<string, TileContent<T>>): ITileContentProviderBuilder<T> {
+    public withCache(cache: IMemoryCache<string, TileContentType<T>>): ITileContentProviderBuilder<T> {
         this._cache = cache;
         return this;
     }

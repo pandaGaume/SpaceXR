@@ -7,9 +7,7 @@
         "rootDir": "./src",
         "declarationDir": "./types",
         "skipLibCheck": true,
-        "paths": {
-            "core/*": ["./dev/core/src/*"]
-        }
+        "paths": {}
     },
 
     "include": ["./src/**/*.ts"],

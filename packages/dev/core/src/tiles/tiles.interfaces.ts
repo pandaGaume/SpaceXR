@@ -34,12 +34,12 @@ export function IsTileContentView<T>(b: unknown): b is ITileSection {
     return (<any>b).source !== undefined && (<any>b).target !== undefined;
 }
 
-export type TileContent<T> = Nullable<T | ITileSection>;
+export type TileContentType<T> = Nullable<T | ITileSection>;
 
 export interface ITile<T> extends IGeoBounded, IBounded {
     namespace?: string;
     address: ITileAddress;
-    content: TileContent<T>;
+    content: TileContentType<T>;
     quadkey: string; // shortcut for address.quadkey
 }
 
@@ -69,7 +69,7 @@ export interface ITileProxy<T> {
 export interface ITileBuilder<T> {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
-    withData(d: TileContent<T>): ITileBuilder<T>;
+    withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     build(): ITile<T>;
 }
@@ -175,7 +175,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
 export interface ITileContentProviderBuilder<T> {
     // name and metrics are comming from data sourec
     withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
-    withCache(cache: IMemoryCache<string, TileContent<T>>): ITileContentProviderBuilder<T>;
+    withCache(cache: IMemoryCache<string, TileContentType<T>>): ITileContentProviderBuilder<T>;
     build(): ITileContentProvider<T>;
 }
 

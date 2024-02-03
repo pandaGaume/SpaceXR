@@ -4,7 +4,7 @@ import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { Context2DTileMap, ICanvasRenderingContext, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
-import { ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
+import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
@@ -16,7 +16,7 @@ export interface IMapControlOptions extends ICanvasRenderingOptions {
     inputController?: ControlInputController<MapControl>;
 }
 
-export class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType> {
+export class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer> {
     public static DefaultBackground = RGBAColor.LightGray();
 
     public static DefaultOptions: ICanvasRenderingOptions = {
@@ -99,23 +99,23 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
     }
 
     // map related
-    public get layerAddedObservable(): Observable<ITileMapLayer<ControlTileContentType>> {
+    public get layerAddedObservable(): Observable<IImageTileMapLayer> {
         return this._map.layerAddedObservable;
     }
 
-    public get layerRemovedObservable(): Observable<ITileMapLayer<ControlTileContentType>> {
+    public get layerRemovedObservable(): Observable<IImageTileMapLayer> {
         return this._map.layerRemovedObservable;
     }
 
-    public getLayers(predicate?: (l: ITileMapLayer<ControlTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<ControlTileContentType>> {
+    public getLayers(predicate?: (l: IImageTileMapLayer) => boolean, sorted?: boolean): IterableIterator<IImageTileMapLayer> {
         return this._map.getLayers(predicate, sorted);
     }
 
-    public addLayer(layer: ITileMapLayer<ControlTileContentType>): void {
+    public addLayer(layer: ImageLayer): void {
         this._map.addLayer(layer);
     }
 
-    public removeLayer(layer: ITileMapLayer<ControlTileContentType>): void {
+    public removeLayer(layer: ImageLayer): void {
         this._map.removeLayer(layer);
     }
 

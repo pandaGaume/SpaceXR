@@ -7,22 +7,22 @@ import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileSystemBounds } from "../tiles.system";
 import { ValidableBase } from "../../validable";
 
-interface ITileMapLayerContainer<T> {
-    layer: ITileMapLayer<T>;
+interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
+    layer: L;
     validationObserver: Nullable<Observer<boolean>>;
 }
 
-export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
-    _layerAddedObservable?: Observable<ITileMapLayer<T>>;
-    _layerRemovedObservable?: Observable<ITileMapLayer<T>>;
+export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMap<T, L> {
+    _layerAddedObservable?: Observable<L>;
+    _layerRemovedObservable?: Observable<L>;
 
     protected _name: string;
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
-    protected _layers?: Array<ITileMapLayerContainer<T>>;
+    protected _layers?: Array<ITileMapLayerContainer<T, L>>;
 
     // internal
-    protected _orderedLayers?: ITileMapLayer<T>[];
+    protected _orderedLayers?: L[];
 
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
@@ -46,13 +46,13 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._bindNavigation(this._navigation);
     }
 
-    public get layerAddedObservable(): Observable<ITileMapLayer<T>> {
-        if (!this._layerAddedObservable) this._layerAddedObservable = new Observable<ITileMapLayer<T>>();
+    public get layerAddedObservable(): Observable<L> {
+        if (!this._layerAddedObservable) this._layerAddedObservable = new Observable<L>();
         return this._layerAddedObservable;
     }
 
-    public get layerRemovedObservable(): Observable<ITileMapLayer<T>> {
-        if (!this._layerRemovedObservable) this._layerRemovedObservable = new Observable<ITileMapLayer<T>>();
+    public get layerRemovedObservable(): Observable<L> {
+        if (!this._layerRemovedObservable) this._layerRemovedObservable = new Observable<L>();
         return this._layerRemovedObservable;
     }
 
@@ -64,7 +64,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this._navigation;
     }
 
-    public *getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted: boolean = true): IterableIterator<ITileMapLayer<T>> {
+    public *getLayers(predicate?: (l: L) => boolean, sorted: boolean = true): IterableIterator<L> {
         if (sorted) {
             yield* this.getOrderedLayers(predicate);
             return;
@@ -76,7 +76,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    public *getOrderedLayers(predicate?: (l: ITileMapLayer<T>) => boolean): IterableIterator<ITileMapLayer<T>> {
+    public *getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L> {
         if (this._orderedLayers) {
             if (predicate) {
                 for (const layer of this._orderedLayers ?? []) {
@@ -88,9 +88,9 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    public addLayer(layer: ITileMapLayer<T>): void {
+    public addLayer(layer: L): void {
         if (!this._layers) this._layers = [];
-        const container: ITileMapLayerContainer<T> = {
+        const container: ITileMapLayerContainer<T, L> = {
             layer: layer,
             validationObserver: layer.validationObservable?.add(this._onLayerValidationChanged.bind(this)) ?? null,
         };
@@ -100,7 +100,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._onLayerAddedInternal(layer);
     }
 
-    public removeLayer(layer: ITileMapLayer<T>): void {
+    public removeLayer(layer: L): void {
         const index = this._layers?.findIndex((l) => l.layer === layer);
         if (index == undefined || index == -1) {
             return;
@@ -130,49 +130,49 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     // navigation proxy
-    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T> {
+    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L> {
         this._navigation.setView(center, zoom, rotation).validate();
         return this;
     }
 
-    public zooming(delta: number): TileMapBase<T> {
+    public zooming(delta: number): TileMapBase<T, L> {
         this._navigation.zooming(delta).validate();
         return this;
     }
 
-    public zoomIn(delta: number): TileMapBase<T> {
+    public zoomIn(delta: number): TileMapBase<T, L> {
         this._navigation.zoomIn(delta).validate();
         return this;
     }
 
-    public zoomOut(delta: number): TileMapBase<T> {
+    public zoomOut(delta: number): TileMapBase<T, L> {
         this._navigation.zoomOut(delta).validate();
         return this;
     }
 
-    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T> {
+    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L> {
         this._navigation.translatePixel(tx, ty, metrics).validate();
         return this;
     }
 
-    public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T> {
+    public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L> {
         this._navigation.translate(lat, lon).validate();
         return this;
     }
 
-    public rotate(r: number): TileMapBase<T> {
+    public rotate(r: number): TileMapBase<T, L> {
         this._navigation.rotate(r).validate();
         return this;
     }
 
     // end navigation proxy
-    private _addSortedLayer(layer: ITileMapLayer<T>): void {
+    private _addSortedLayer(layer: L): void {
         if (!this._orderedLayers) this._orderedLayers = [];
         this._orderedLayers.push(layer);
         this._orderedLayers.sort((a, b) => a.zindex - b.zindex); // sort by zindex
     }
 
-    private _removeSortedLayer(layer: ITileMapLayer<T>): void {
+    private _removeSortedLayer(layer: L): void {
         if (this._orderedLayers) {
             const index = this._orderedLayers.findIndex((l) => l === layer);
             if (index !== -1) {
@@ -249,7 +249,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    private _onLayerAddedInternal(layer: ITileMapLayer<T>): void {
+    private _onLayerAddedInternal(layer: L): void {
         // maintain the bounds
         this._updateNavigationBounds();
         // update the layer with current navigation and display
@@ -263,7 +263,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    private _onLayerRemovedInternal(layer: ITileMapLayer<T>): void {
+    private _onLayerRemovedInternal(layer: L): void {
         // maintain the bounds
         this._updateNavigationBounds();
         // invalidate the map

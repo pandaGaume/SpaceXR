@@ -11,7 +11,7 @@ import { ITileNavigationState, TileNavigationState } from "../navigation";
 
 export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
-    _alpha: number;
+
     _zoomOffset?: number;
     _attribution?: string;
     _enabled: boolean;
@@ -25,7 +25,6 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         super(name);
         if (!provider) throw new Error("Invalid provider or datasource");
         this._zindex = options?.zindex ?? -1;
-        this._alpha = options?.alpha !== undefined ? Math.min(Math.max(options?.alpha, 0), 1.0) : 1.0; // default is opaque
         this._zoomOffset = options?.zoomOffset !== undefined ? options?.zoomOffset : 0;
         this._attribution = options?.attribution;
         this._enabled = enabled ?? true; // default is enabled
@@ -101,24 +100,6 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         }
     }
 
-    public get alpha(): number {
-        return this._alpha;
-    }
-
-    public set alpha(alpha: number) {
-        const a = Math.min(Math.max(alpha, 0), 1.0);
-        if (this._alpha !== a) {
-            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                const oldValue = this._alpha;
-                this._alpha = a;
-                const args = new PropertyChangedEventArgs<ITileMapLayer<T>, unknown>(this, oldValue, this._alpha, "alpha");
-                this._propertyChangedObservable.notifyObservers(args, -1, this, this);
-                return;
-            }
-            this._alpha = a;
-        }
-    }
-
     public get enabled(): boolean {
         return this._enabled;
     }
@@ -136,7 +117,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         }
     }
 
-    public addTo(map: ITileMap<T>): ITileMapLayer<T> {
+    public addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T> {
         map?.addLayer(this);
         return this;
     }

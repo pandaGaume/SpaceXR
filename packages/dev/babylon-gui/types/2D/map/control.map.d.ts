@@ -4,7 +4,7 @@ import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { Context2DTileMap, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
-import { ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
+import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
@@ -13,7 +13,7 @@ export interface IMapControlOptions extends ICanvasRenderingOptions {
     navigationManager?: InputsNavigationTarget<MapControl>;
     inputController?: ControlInputController<MapControl>;
 }
-export declare class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType> {
+export declare class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer> {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
@@ -35,11 +35,11 @@ export declare class MapControl extends GUI.Container implements ITileDisplay, I
     translate(lat: IGeo2 | Array<number> | number, lon?: number): MapControl;
     rotate(r: number): MapControl;
     get navigation(): ITileNavigationState;
-    get layerAddedObservable(): Observable<ITileMapLayer<ControlTileContentType>>;
-    get layerRemovedObservable(): Observable<ITileMapLayer<ControlTileContentType>>;
-    getLayers(predicate?: (l: ITileMapLayer<ControlTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<ControlTileContentType>>;
-    addLayer(layer: ITileMapLayer<ControlTileContentType>): void;
-    removeLayer(layer: ITileMapLayer<ControlTileContentType>): void;
+    get layerAddedObservable(): Observable<IImageTileMapLayer>;
+    get layerRemovedObservable(): Observable<IImageTileMapLayer>;
+    getLayers(predicate?: (l: IImageTileMapLayer) => boolean, sorted?: boolean): IterableIterator<IImageTileMapLayer>;
+    addLayer(layer: ImageLayer): void;
+    removeLayer(layer: ImageLayer): void;
     private onMapValidation;
     protected _additionalProcessing(parentMeasure: GUI.Measure, context: BABYLON.ICanvasRenderingContext): void;
     protected _localDraw(context: BABYLON.ICanvasRenderingContext): void;

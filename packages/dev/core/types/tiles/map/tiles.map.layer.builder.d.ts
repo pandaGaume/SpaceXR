@@ -1,6 +1,6 @@
 import { ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerBuilder, ITileMapLayerOptions } from "./tiles.map.interfaces";
-export declare class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
+export declare abstract class AbstractTileMapLayerBuilder<T, L extends ITileMapLayer<T>> implements ITileMapLayerBuilder<T, L> {
     _name?: string;
     _provider?: ITileProvider<T> | ITileProviderBuilder<T>;
     _zindex?: number;
@@ -10,13 +10,13 @@ export declare class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
     _enabled?: boolean;
     constructor(name?: string, provider?: ITileProvider<T>);
     get name(): string;
-    withOptions(options?: ITileMapLayerOptions): ITileMapLayerBuilder<T>;
-    withName(name: string): ITileMapLayerBuilder<T>;
-    withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T>;
-    withZIndex(zindex: number): ITileMapLayerBuilder<T>;
-    withAlpha(alpha: number): ITileMapLayerBuilder<T>;
-    withEnabled(enabled: boolean): ITileMapLayerBuilder<T>;
-    withzoomOffset(value: number): ITileMapLayerBuilder<T>;
-    withAttribution(value: string): ITileMapLayerBuilder<T>;
-    build(): ITileMapLayer<T>;
+    withOptions(options?: ITileMapLayerOptions): ITileMapLayerBuilder<T, L>;
+    withName(name: string): ITileMapLayerBuilder<T, L>;
+    withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T, L>;
+    withZIndex(zindex: number): ITileMapLayerBuilder<T, L>;
+    withAlpha(alpha: number): ITileMapLayerBuilder<T, L>;
+    withEnabled(enabled: boolean): ITileMapLayerBuilder<T, L>;
+    withzoomOffset(value: number): ITileMapLayerBuilder<T, L>;
+    withAttribution(value: string): ITileMapLayerBuilder<T, L>;
+    abstract build(): L;
 }

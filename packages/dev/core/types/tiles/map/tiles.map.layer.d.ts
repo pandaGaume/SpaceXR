@@ -7,7 +7,6 @@ import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
 export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
-    _alpha: number;
     _zoomOffset?: number;
     _attribution?: string;
     _enabled: boolean;
@@ -24,11 +23,9 @@ export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITil
     set zoomOffset(zoomOffset: number);
     get attribution(): string | undefined;
     set attribution(attribution: string | undefined);
-    get alpha(): number;
-    set alpha(alpha: number);
     get enabled(): boolean;
     set enabled(enabled: boolean);
-    addTo(map: ITileMap<T>): ITileMapLayer<T>;
+    addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T>;
     dispose(): void;
     getActiveTiles(): Nullable<ITileCollection<T>>;
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileProvider<T>;

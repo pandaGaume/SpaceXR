@@ -58,7 +58,7 @@
                 lod = lod ?? defaultLod;
 
                 const m = new SPACEXR.GUI.MapControl(name).setView(center, lod);
-                const l = (layer ?? new SPACEXR.TileMapLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution })).addTo(m);
+                const l = (layer ?? new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution })).addTo(m);
                 return m;
             }
 

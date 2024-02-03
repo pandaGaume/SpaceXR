@@ -1,8 +1,7 @@
-import { ITileProvider, ITileProviderBuilder, IsTileProviderBuilder } from "../tiles.interfaces";
+import { ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerBuilder, ITileMapLayerOptions } from "./tiles.map.interfaces";
-import { TileMapLayer } from "./tiles.map.layer";
 
-export class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
+export abstract class AbstractTileMapLayerBuilder<T, L extends ITileMapLayer<T>> implements ITileMapLayerBuilder<T, L> {
     _name?: string;
     _provider?: ITileProvider<T> | ITileProviderBuilder<T>;
     _zindex?: number;
@@ -20,63 +19,47 @@ export class TileMapLayerBuilder<T> implements ITileMapLayerBuilder<T> {
         return this._name ?? "";
     }
 
-    public withOptions(options?: ITileMapLayerOptions): ITileMapLayerBuilder<T> {
+    public withOptions(options?: ITileMapLayerOptions): ITileMapLayerBuilder<T, L> {
         this._zindex = options?.zindex ?? -1;
-        this._alpha = options?.alpha !== undefined ? Math.min(Math.max(options?.alpha, 0), 1.0) : 1.0; // default is opaque
         this._zoomOffset = options?.zoomOffset !== undefined ? options?.zoomOffset : 0;
         this._attribution = options?.attribution;
         return this;
     }
 
-    public withName(name: string): ITileMapLayerBuilder<T> {
+    public withName(name: string): ITileMapLayerBuilder<T, L> {
         this._name = name;
         return this;
     }
 
-    public withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T> {
+    public withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T, L> {
         this._provider = provider;
         return this;
     }
 
-    public withZIndex(zindex: number): ITileMapLayerBuilder<T> {
+    public withZIndex(zindex: number): ITileMapLayerBuilder<T, L> {
         this._zindex = zindex;
         return this;
     }
 
-    public withAlpha(alpha: number): ITileMapLayerBuilder<T> {
+    public withAlpha(alpha: number): ITileMapLayerBuilder<T, L> {
         this._alpha = alpha;
         return this;
     }
 
-    public withEnabled(enabled: boolean): ITileMapLayerBuilder<T> {
+    public withEnabled(enabled: boolean): ITileMapLayerBuilder<T, L> {
         this._enabled = enabled;
         return this;
     }
 
-    public withzoomOffset(value: number): ITileMapLayerBuilder<T> {
+    public withzoomOffset(value: number): ITileMapLayerBuilder<T, L> {
         this._zoomOffset = value;
         return this;
     }
 
-    public withAttribution(value: string): ITileMapLayerBuilder<T> {
+    public withAttribution(value: string): ITileMapLayerBuilder<T, L> {
         this._attribution = value;
         return this;
     }
 
-    public build(): ITileMapLayer<T> {
-        if (!this._provider) {
-            throw new Error("No provider or provider builder defined");
-        }
-        const o = {
-            zindex: this._zindex ?? -1,
-            alpha: this._alpha ?? 1.0,
-            zoomOffset: this._zoomOffset,
-            attribution: this._attribution,
-        };
-        if (IsTileProviderBuilder<T>(this._provider)) {
-            const p = this._provider?.build();
-            return new TileMapLayer<T>(this._name ?? "", p, o, this._enabled);
-        }
-        return new TileMapLayer<T>(this._name ?? "", this._provider, o, this._enabled);
-    }
+    public abstract build(): L;
 }

@@ -1,5 +1,5 @@
 import { Scalar, RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState } from "../../tiles";
+import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext } from "./map.canvas.interfaces";
@@ -33,7 +33,7 @@ export interface ICanvasRenderingOptions {
 ///
 /// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
 /// </summary>
-export class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
+export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> {
     _renderOptions?: ICanvasRenderingOptions;
 
     public constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {

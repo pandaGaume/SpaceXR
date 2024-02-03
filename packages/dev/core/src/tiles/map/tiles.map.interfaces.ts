@@ -13,7 +13,6 @@ export interface ITileDisplay extends IDisposable {
 
 export interface ITileMapLayerOptions {
     zindex: number;
-    alpha: number;
     zoomOffset?: number;
     attribution?: string;
 }
@@ -23,30 +22,38 @@ export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions
     name: string;
     enabled: boolean;
 
-    addTo(map: ITileMap<T>): ITileMapLayer<T>;
+    addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T>;
 }
 
-export interface ITileMapLayerBuilder<T> {
+export interface IImageTileMapLayerOptions extends ITileMapLayerOptions {
+    alpha: number;
+}
+
+export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement>, IImageTileMapLayerOptions {}
+
+export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {}
+
+export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     name: string; // provide access to the underlying name for uniquely identify the intended layer
-    withName(name: string): ITileMapLayerBuilder<T>;
-    withOptions(options?: ITileMapLayerOptions): ITileMapLayerBuilder<T>;
-    withZIndex(zindex: number): ITileMapLayerBuilder<T>;
-    withAlpha(value: number): ITileMapLayerBuilder<T>;
-    withzoomOffset(value: number): ITileMapLayerBuilder<T>;
-    withAttribution(value: string): ITileMapLayerBuilder<T>;
-    withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T>;
-    withEnabled(enabled: boolean): ITileMapLayerBuilder<T>;
-    build(): ITileMapLayer<T>;
+    withName(name: string): ITileMapLayerBuilder<T, L>;
+    withOptions<O extends ITileMapLayerOptions>(options?: O): ITileMapLayerBuilder<T, L>;
+    withZIndex(zindex: number): ITileMapLayerBuilder<T, L>;
+    withAlpha(value: number): ITileMapLayerBuilder<T, L>;
+    withzoomOffset(value: number): ITileMapLayerBuilder<T, L>;
+    withAttribution(value: string): ITileMapLayerBuilder<T, L>;
+    withProvider(provider: ITileProvider<T> | ITileProviderBuilder<T>): ITileMapLayerBuilder<T, L>;
+    withEnabled(enabled: boolean): ITileMapLayerBuilder<T, L>;
+    build(): L;
 }
 
-export function IsTileMapLayerBuilder<T>(b: unknown): b is ITileMapLayerBuilder<T> {
+export function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown): b is ITileMapLayerBuilder<T, L> {
     if (b === null || typeof b !== "object") return false;
     return (
-        (<ITileMapLayerBuilder<T>>b).build !== undefined &&
-        (<ITileMapLayerBuilder<T>>b).withName !== undefined &&
-        (<ITileMapLayerBuilder<T>>b).withZIndex !== undefined &&
-        (<ITileMapLayerBuilder<T>>b).withProvider !== undefined &&
-        (<ITileMapLayerBuilder<T>>b).withEnabled !== undefined
+        (<ITileMapLayerBuilder<T, L>>b).build !== undefined &&
+        (<ITileMapLayerBuilder<T, L>>b).withName !== undefined &&
+        (<ITileMapLayerBuilder<T, L>>b).withZIndex !== undefined &&
+        (<ITileMapLayerBuilder<T, L>>b).withProvider !== undefined &&
+        (<ITileMapLayerBuilder<T, L>>b).withEnabled !== undefined
     );
 }
 
@@ -60,22 +67,22 @@ export function IsTileMapLayerBuilder<T>(b: unknown): b is ITileMapLayerBuilder<
 /// When removing a view, the map will clear the display and the navigation api of this view.
 /// Changing the display or the navigation api of a map will automatically update the display or the navigation api of all the views.
 /// </summary>
-export interface ITileMap<T> extends ITileNavigationApi<unknown>, IDisposable {
+export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, IDisposable {
     // map related
-    layerAddedObservable: Observable<ITileMapLayer<T>>;
-    layerRemovedObservable: Observable<ITileMapLayer<T>>;
+    layerAddedObservable: Observable<L>;
+    layerRemovedObservable: Observable<L>;
 
     navigation: ITileNavigationState;
 
-    getLayers(predicate?: (l: ITileMapLayer<T>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<T>>;
-    addLayer(layer: ITileMapLayer<T>): void;
-    removeLayer(layer: ITileMapLayer<T>): void;
+    getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
+    addLayer(layer: L): void;
+    removeLayer(layer: L): void;
 }
 
-export interface ITileMapBuilder<T> {
-    withName(name: string): ITileMapBuilder<T>;
-    withNavigation(navigation: ITileNavigationState | ITileMetrics): ITileMapBuilder<T>;
-    withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T>;
-    withLayer(...layer: Array<ITileMapLayer<T> | ITileMapLayerBuilder<T>>): ITileMapBuilder<T>;
-    build(): ITileMap<T> | undefined;
+export interface ITileMapBuilder<T, L extends ITileMapLayer<T>> {
+    withName(name: string): ITileMapBuilder<T, L>;
+    withNavigation(navigation: ITileNavigationState | ITileMetrics): ITileMapBuilder<T, L>;
+    withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T, L>;
+    withLayer(...layer: Array<L | ITileMapLayerBuilder<T, L>>): ITileMapBuilder<T, L>;
+    build(): ITileMap<T, L> | undefined;
 }

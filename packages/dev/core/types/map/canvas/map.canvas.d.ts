@@ -1,5 +1,5 @@
 import { RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState } from "../../tiles";
+import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext } from "./map.canvas.interfaces";
@@ -8,7 +8,7 @@ export type CanvasTileContentType = HTMLImageElement;
 export interface ICanvasRenderingOptions {
     background?: string;
 }
-export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType> {
+export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> {
     _renderOptions?: ICanvasRenderingOptions;
     constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState);
     draw(ctx: ICanvasRenderingContext, xoffset?: number, yoffset?: number): void;

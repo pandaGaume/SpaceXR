@@ -1,4 +1,5 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
+import { IGeoCalculator } from "../../geodesy";
 import { Size2, ISize2, ISize3, IsSize } from "../../geometry";
 import { DisplayUnit, ITileDisplay } from "../map";
 
@@ -7,11 +8,13 @@ export class TileDisplay implements ITileDisplay {
     _w: number;
     _h: number;
     _unit: DisplayUnit;
+    _geodesicCalculator?: IGeoCalculator;
 
-    public constructor(w?: number, h?: number, u?: DisplayUnit) {
+    public constructor(w?: number, h?: number, u?: DisplayUnit, _geodesicCalculator?: IGeoCalculator) {
         this._w = w ?? 0;
         this._h = h ?? 0;
         this._unit = u ?? DisplayUnit.Pixels;
+        this._geodesicCalculator = _geodesicCalculator ?? (this._unit != DisplayUnit.Pixels ? undefined : undefined);
     }
 
     public dispose(): void {}

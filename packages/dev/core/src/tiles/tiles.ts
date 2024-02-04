@@ -19,7 +19,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
             const size = new Size3(nw.lat - se.lat, se.lon - nw.lon, 0);
             const pos = new Geo3(se.lat, nw.lon);
-            return Envelope.FromSize(pos, size);
+            return Envelope.FromSizeAngles(pos, size);
         }
         return undefined;
     }

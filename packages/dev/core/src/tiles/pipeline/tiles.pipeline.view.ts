@@ -6,7 +6,7 @@ import { Nullable } from "../../types";
 import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
-import { Bearing } from "../../geography";
+import { Bearing, Geo2 } from "../../geography";
 import { DisplayUnit, ITileDisplay } from "../map";
 
 export class TileView implements ITileView {
@@ -82,20 +82,42 @@ export class TileView implements ITileView {
     private _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
         if (state && display) {
             const lod = TileAddress.ClampLod(state.lod, metrics);
-            const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
             const scale = state.scale;
 
             const nwTileXY = Cartesian2.Zero();
             const seTileXY = Cartesian2.Zero();
 
-            switch (display.displayUnit) {
-                case DisplayUnit.Pixels:
-                default: {
-                    const rect = this.getRectangle(pixelCenterXY, display?.displayWidth ?? 0, display?.displayHeight ?? 0, scale, state.azimuth);
+            const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
+            let w = display?.displayWidth ?? 0;
+            let h = display?.displayHeight ?? 0;
+
+            // enforce default unit.
+            const unit = display.displayUnit ?? DisplayUnit.Pixels;
+
+            switch (unit) {
+                case DisplayUnit.Meters: {
+                    // the we compute the width and heigt in pixel.
+                    // remember that the width will change with the latitude.
+                    const calculator = display.geodesicCalculator;
+                    const tmp = Geo2.Zero();
+                    const pixelTmp = Cartesian2.Zero();
+                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayHeight / 2, 0, tmp, true);
+                    metrics.getLatLonToPixelXYToRef(tmp.lat, tmp.lon, lod, pixelTmp);
+                    h = Math.abs(pixelTmp.y - pixelCenterXY.y) * 2;
+                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayWidth / 2, 90, tmp, true);
+                    metrics.getLatLonToPixelXYToRef(tmp.lat, tmp.lon, lod, pixelTmp);
+                    w = Math.abs(pixelTmp.x - pixelCenterXY.x) * 2;
+                }
+                case DisplayUnit.Pixels: {
+                    const rect = this.getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
                     // compute the bounds of tile xy
                     metrics.getPixelXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
                     metrics.getPixelXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
                     break;
+                }
+
+                default: {
+                    throw new Error(`Units ${display.displayUnit} not supported.`);
                 }
             }
 

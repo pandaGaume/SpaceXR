@@ -2,8 +2,10 @@
 import { Scalar } from "../math/math";
 import { IEnvelope, IGeo2, IGeo3, IGeoBounded, IsEnvelope, IsGeoBounded, IsLocation } from "./geography.interfaces";
 import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
-import { Geo3 } from "./geography.position";
+import { Geo2, Geo3 } from "./geography.position";
 import { Size3 } from "../geometry/geometry.size";
+import { Ellipsoid, IGeoCalculator } from "../geodesy";
+import { SphericalCalculator } from "../geodesy/geodesy.calculators.spherical";
 
 export class Envelope implements IEnvelope {
     public static MaxLongitude = 540;
@@ -75,7 +77,32 @@ export class Envelope implements IEnvelope {
         return [];
     }
 
-    public static FromSize(position: IGeo3 | IGeo2, size: ISize3 | ISize2) {
+    public static FromSizeMeters(position: IGeo3 | IGeo2, size: ISize3 | ISize2, calculator?: IGeoCalculator, ellipsoid?: Ellipsoid): IEnvelope {
+        const hasAlt = (<IGeo3>position).alt !== undefined && (<ISize3>size).thickness !== undefined;
+
+        const c = calculator || SphericalCalculator.Shared;
+        const h2 = size.height / 2;
+        const w2 = size.width / 2;
+        const tmp = Geo2.Zero();
+
+        c.getLocationAtDistanceAzimuthToRef(position, h2, 180, tmp, true);
+        let lat = Scalar.Clamp(tmp.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        c.getLocationAtDistanceAzimuthToRef(position, w2, 270, tmp, true);
+        let lon = Scalar.Clamp(tmp.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        let alt = hasAlt ? ((<IGeo3>position).alt ?? 0) - ((<ISize3>size).thickness ?? 0) : undefined;
+
+        const a = new Geo3(lat, lon, alt);
+
+        c.getLocationAtDistanceAzimuthToRef(position, h2, 0, tmp, true);
+        lat = Scalar.Clamp(tmp.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        c.getLocationAtDistanceAzimuthToRef(position, w2, 90, tmp, true);
+        lon = Scalar.Clamp(tmp.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        alt = hasAlt ? ((<IGeo3>position).alt ?? 0) + ((<ISize3>size).thickness ?? 0) : undefined;
+
+        return new Envelope(a, new Geo3(lat, lon, alt));
+    }
+
+    public static FromSizeAngles(position: IGeo3 | IGeo2, size: ISize3 | ISize2) {
         const hasAlt = (<IGeo3>position).alt !== undefined && (<ISize3>size).thickness !== undefined;
 
         const lat0 = Scalar.Clamp(position.lat, Envelope.MinLatitude, Envelope.MaxLatitude);

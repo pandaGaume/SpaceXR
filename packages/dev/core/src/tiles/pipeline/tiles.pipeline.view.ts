@@ -21,6 +21,8 @@ export class TileView implements ITileView {
 
     // cached values
     _id: string;
+    _geoTmp = Geo2.Zero();
+    _pixelTmp = Cartesian2.Zero();
 
     public constructor(id: string) {
         this._id = id;
@@ -99,14 +101,13 @@ export class TileView implements ITileView {
                     // the we compute the width and heigt in pixel.
                     // remember that the width will change with the latitude.
                     const calculator = display.geodesicCalculator;
-                    const tmp = Geo2.Zero();
-                    const pixelTmp = Cartesian2.Zero();
-                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayHeight / 2, 0, tmp, true);
-                    metrics.getLatLonToPixelXYToRef(tmp.lat, tmp.lon, lod, pixelTmp);
-                    h = Math.abs(pixelTmp.y - pixelCenterXY.y) * 2;
-                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayWidth / 2, 90, tmp, true);
-                    metrics.getLatLonToPixelXYToRef(tmp.lat, tmp.lon, lod, pixelTmp);
-                    w = Math.abs(pixelTmp.x - pixelCenterXY.x) * 2;
+                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayHeight / 2, 0, this._geoTmp, true);
+                    metrics.getLatLonToPixelXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
+                    h = Math.abs(this._pixelTmp.y - pixelCenterXY.y) * 2;
+                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayWidth / 2, 90, this._geoTmp, true);
+                    metrics.getLatLonToPixelXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
+                    w = Math.abs(this._pixelTmp.x - pixelCenterXY.x) * 2;
+                    // fall through pixels...
                 }
                 case DisplayUnit.Pixels: {
                     const rect = this.getRectangle(pixelCenterXY, w, h, scale, state.azimuth);

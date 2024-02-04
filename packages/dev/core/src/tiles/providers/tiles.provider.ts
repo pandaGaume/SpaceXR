@@ -3,7 +3,7 @@ import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IRectangle } from "../../geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collections";
-import { Tile } from "../tiles";
+import { TileBuilder } from "../tiles.builder";
 
 export class TileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
@@ -19,7 +19,7 @@ export class TileProvider<T> implements ITileProvider<T> {
 
     public constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled = true) {
         this._contentProvider = provider;
-        this._factory = (factory ?? Tile.Builder<T>()).withMetrics(provider.metrics); // ensure the factory has the right metrics to build bounds.
+        this._factory = (factory ?? this._buildFactory()).withMetrics(provider.metrics); // ensure the factory has the right metrics to build bounds.
         this._enabled = enabled;
         this._activTiles = new TileCollection<T>();
         this._callback = this._onContentFetched.bind(this);
@@ -127,5 +127,9 @@ export class TileProvider<T> implements ITileProvider<T> {
         if (this.updatedObservable?.hasObservers()) {
             this.updatedObservable.notifyObservers(tile, -1, this, this);
         }
+    }
+
+    protected _buildFactory(): ITileBuilder<T> {
+        return new TileBuilder<T>();
     }
 }

@@ -7,9 +7,24 @@ import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileSystemBounds } from "../tiles.system";
 import { ValidableBase } from "../../validable";
 
-interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
+export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     layer: L;
-    validationObserver: Nullable<Observer<boolean>>;
+    validationObserver?: Nullable<Observer<boolean>>;
+    clear(): void;
+}
+
+export class TileMapLayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLayerContainer<T, L> {
+    layer: L;
+    validationObserver?: Nullable<Observer<boolean>>;
+
+    public constructor(layer: L) {
+        this.layer = layer;
+    }
+
+    public clear(): void {
+        this.validationObserver?.disconnect();
+        this.validationObserver = null;
+    }
 }
 
 export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMap<T, L> {
@@ -90,14 +105,13 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
 
     public addLayer(layer: L): void {
         if (!this._layers) this._layers = [];
-        const container: ITileMapLayerContainer<T, L> = {
-            layer: layer,
-            validationObserver: layer.validationObservable?.add(this._onLayerValidationChanged.bind(this)) ?? null,
-        };
+        const container: ITileMapLayerContainer<T, L> = this._buildLayerContainer(layer);
+        container.validationObserver = layer.validationObservable?.add(this._onLayerValidationChanged.bind(this)) ?? null;
+
         this._layers.push(container);
         this._addSortedLayer(layer);
 
-        this._onLayerAddedInternal(layer);
+        this._onLayerAddedInternal(container);
     }
 
     public removeLayer(layer: L): void {
@@ -115,7 +129,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
         }
         this._layers?.splice(index, 1);
         this._removeSortedLayer(layer);
-        this._onLayerRemovedInternal(layer);
+        this._onLayerRemovedInternal(container);
     }
 
     public dispose() {
@@ -249,37 +263,41 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
         }
     }
 
-    private _onLayerAddedInternal(layer: L): void {
+    private _onLayerAddedInternal(container: ITileMapLayerContainer<T, L>): void {
         // maintain the bounds
         this._updateNavigationBounds();
         // update the layer with current navigation and display
-        layer.setContext(this._navigation, this._display);
+        container.layer.setContext(this._navigation, this._display);
         // invalidate the map
         this.invalidate();
         // we give the hand to other components
-        this._onLayerAdded(layer);
+        this._onLayerAdded(container);
         if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
-            this._layerAddedObservable.notifyObservers(layer, -1, this, this);
+            this._layerAddedObservable.notifyObservers(container.layer, -1, this, this);
         }
     }
 
-    private _onLayerRemovedInternal(layer: L): void {
+    private _onLayerRemovedInternal(container: ITileMapLayerContainer<T, L>): void {
         // maintain the bounds
         this._updateNavigationBounds();
         // invalidate the map
         this.invalidate();
         // we give the hand to other components
-        this._onLayerRemoved(layer);
+        this._onLayerRemoved(container);
         if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
-            this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
+            this._layerRemovedObservable.notifyObservers(container.layer, -1, this, this);
         }
     }
 
     // in response to layer validation process
-    private _onLayerValidationChanged(valid: boolean, state: EventState): void {
+    protected _onLayerValidationChanged(valid: boolean, state: EventState): void {
         if (valid === false) {
             this.invalidate();
         }
+    }
+
+    protected _buildLayerContainer(layer: L): ITileMapLayerContainer<T, L> {
+        return new TileMapLayerContainer<T, L>(layer);
     }
 
     protected _beforeValidate(): void {
@@ -318,11 +336,11 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onLayerAdded(layer: ITileMapLayer<T>): void {
+    protected _onLayerAdded(container: ITileMapLayerContainer<T, L>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onLayerRemoved(layer: ITileMapLayer<T>): void {
+    protected _onLayerRemoved(container: ITileMapLayerContainer<T, L>): void {
         /* nothing to do here - overrided by subclasses */
     }
 }

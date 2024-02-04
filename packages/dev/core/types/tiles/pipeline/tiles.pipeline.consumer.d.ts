@@ -5,8 +5,14 @@ import { ValidableBase } from "../../validable";
 import { Nullable } from "../../types";
 export declare class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<T> {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>> | undefined;
+    _updatedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _addedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _removedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _name: string;
     constructor(id: string);
+    get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
+    get addedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
+    get removedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
     get name(): string;
     set name(name: string);

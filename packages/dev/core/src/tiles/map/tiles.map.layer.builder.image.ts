@@ -23,10 +23,7 @@ export class ImageLayerBuilder extends AbstractTileMapLayerBuilder<HTMLImageElem
             zoomOffset: this._zoomOffset,
             attribution: this._attribution,
         };
-        if (IsTileProviderBuilder<HTMLImageElement>(this._provider)) {
-            const p = this._provider?.build();
-            return new ImageLayer(this._name ?? "", p, o, this._enabled);
-        }
-        return new ImageLayer(this._name ?? "", this._provider, o, this._enabled);
+        const p = IsTileProviderBuilder<HTMLImageElement>(this._provider) ? this._provider?.build() : this._provider;
+        return new ImageLayer(this._name ?? "", p, o, this._enabled);
     }
 }

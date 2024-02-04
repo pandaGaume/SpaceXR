@@ -27,4 +27,5 @@ export declare class TileProvider<T> implements ITileProvider<T> {
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
     protected _onContentFetched(tile: ITile<T>): void;
+    protected _buildFactory(): ITileBuilder<T>;
 }

@@ -27,8 +27,8 @@ export class TileProviderBuilder<T> implements ITileProviderBuilder<T> {
         }
         if (IsTileContentProviderBuilder<T>(this._contentProvider)) {
             const p = this._contentProvider?.build();
-            return new TileProvider<T>(p, this._factory ?? Tile.Builder<T>(), this._enabled);
+            return new TileProvider<T>(p, this._factory ?? Tile.SharedBuilder<T>(), this._enabled);
         }
-        return new TileProvider<T>(this._contentProvider, this._factory ?? Tile.Builder<T>(), this._enabled);
+        return new TileProvider<T>(this._contentProvider, this._factory ?? Tile.SharedBuilder<T>(), this._enabled);
     }
 }

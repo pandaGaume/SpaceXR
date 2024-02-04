@@ -6,6 +6,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
     _d?: TileContentType<T>;
     _m?: ITileMetrics;
+    _t?: new (...args: any[]) => ITile<T>;
 
     public withNamespace(namesapce: string): ITileBuilder<T> {
         this._ns = namesapce;
@@ -27,8 +28,14 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         return this;
     }
 
+    public withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T> {
+        this._t = type;
+        return this;
+    }
+
     public build(): ITile<T> {
-        const t = new Tile<T>(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
+        const type = this._t ?? Tile<T>;
+        const t = new type(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
             t.bounds = Tile.BuildEnvelope(t.address, this._m);
             t.rect = Tile.BuildBounds(t.address, this._m);

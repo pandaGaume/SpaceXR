@@ -1,6 +1,6 @@
 import { AbstractTileMetrics } from "../tiles.metrics";
-import { IGeo2, Geo2 } from "../../geography";
-import { ICartesian2, Cartesian2 } from "../../geometry";
+import { IGeo2 } from "../../geography";
+import { ICartesian2 } from "../../geometry";
 import { Ellipsoid } from "../../geodesy/geodesy.ellipsoid";
 import { Scalar } from "../../math/math";
 import { ITileMetrics } from "../tiles.interfaces";
@@ -20,8 +20,9 @@ export class EPSG3857 extends AbstractTileMetrics {
         return (Math.cos(latitude * Scalar.DEG2RAD) * 2 * Math.PI * this._ellipsoid.semiMajorAxis) / this.mapSize(levelOfDetail);
     }
 
-    public getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2 {
-        const t = tileXY || Cartesian2.Zero();
+    public getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void {
+        if (!tileXY) return;
+        const t = tileXY;
         latitude = Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
 
@@ -31,11 +32,11 @@ export class EPSG3857 extends AbstractTileMetrics {
         const y = Math.floor(((1 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2) * n);
         t.x = x;
         t.y = y;
-        return t;
     }
 
-    public getTileXYToLatLon(x: number, y: number, levelOfDetail: number, loc?: IGeo2): IGeo2 {
-        const l = loc || Geo2.Zero();
+    public getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, loc?: IGeo2): void {
+        if (!loc) return;
+        const l = loc;
         let n = Math.pow(2, levelOfDetail);
         const lon = -180 + (x / n) * 360;
         n = Math.PI - (2 * Math.PI * y) / n;
@@ -43,11 +44,11 @@ export class EPSG3857 extends AbstractTileMetrics {
 
         l.lat = lat;
         l.lon = lon;
-        return l;
     }
 
-    public getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2 {
-        const p = pixelXY || Cartesian2.Zero();
+    public getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY: ICartesian2): void {
+        if (!pixelXY) return;
+        const p = pixelXY;
         latitude = Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
 
@@ -62,33 +63,33 @@ export class EPSG3857 extends AbstractTileMetrics {
         // as required by the cell-centered convention
         p.x = Math.round(Scalar.Clamp(x * mapSize + 0.5, 0, mapSize - 1));
         p.y = Math.round(Scalar.Clamp(y * mapSize + 0.5, 0, mapSize - 1));
-        return p;
     }
 
-    public getPixelXYToLatLon(pixelX: number, pixelY: number, levelOfDetail: number, latLon?: IGeo2): IGeo2 {
-        const g = latLon || Geo2.Zero();
+    public getPixelXYToLatLonToRef(pixelX: number, pixelY: number, levelOfDetail: number, latLon: IGeo2): void {
+        if (!latLon) return;
+
+        const g = latLon;
         const mapSize = this.mapSize(levelOfDetail);
         const x = Scalar.Clamp(pixelX, 0, mapSize - 1) / mapSize - 0.5;
         const y = 0.5 - Scalar.Clamp(pixelY, 0, mapSize - 1) / mapSize;
 
         g.lat = 90 - (360 * Math.atan(Math.exp(-y * 2 * Math.PI))) / Math.PI;
         g.lon = 360 * x;
-        return g;
     }
 
-    public getTileXYToPixelXY(tileX: number, tileY: number, pixelXY?: ICartesian2): ICartesian2 {
-        const p = pixelXY || Cartesian2.Zero();
+    public getTileXYToPixelXYToRef(tileX: number, tileY: number, pixelXY: ICartesian2): void {
+        if (!pixelXY) return;
+        const p = pixelXY;
         const s = this.tileSize;
         p.x = tileX * s;
         p.y = tileY * s;
-        return p;
     }
 
-    public getPixelXYToTileXY(pixelX: number, pixelY: number, tileXY?: ICartesian2): ICartesian2 {
-        const t = tileXY || Cartesian2.Zero();
+    public getPixelXYToTileXYToRef(pixelX: number, pixelY: number, tileXY: ICartesian2): void {
+        if (!tileXY) return;
+        const t = tileXY;
         const s = this.tileSize;
         t.x = Math.floor(pixelX / s);
         t.y = Math.floor(pixelY / s);
-        return t;
     }
 }

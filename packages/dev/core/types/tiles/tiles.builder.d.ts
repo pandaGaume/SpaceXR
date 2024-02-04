@@ -4,9 +4,11 @@ export declare class TileBuilder<T> implements ITileBuilder<T> {
     _a?: ITileAddress;
     _d?: TileContentType<T>;
     _m?: ITileMetrics;
+    _t?: new (...args: any[]) => ITile<T>;
     withNamespace(namesapce: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
     build(): ITile<T>;
 }

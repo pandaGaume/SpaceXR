@@ -3,7 +3,7 @@ import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContentType } from
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./address/tiles.address";
 export declare class Tile<T> extends TileAddress implements ITile<T> {
-    static Builder<T>(): ITileBuilder<T>;
+    static SharedBuilder<T>(): ITileBuilder<T>;
     static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined;
     static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined;
     private _value;

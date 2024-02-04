@@ -9,7 +9,7 @@ import { TileAddress } from "./address/tiles.address";
 import { TileBuilder } from "./tiles.builder";
 
 export class Tile<T> extends TileAddress implements ITile<T> {
-    public static Builder<T>(): ITileBuilder<T> {
+    public static SharedBuilder<T>(): ITileBuilder<T> {
         return new TileBuilder<T>();
     }
 

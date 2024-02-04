@@ -23,10 +23,16 @@ export declare abstract class AbstractTileMetrics extends TileSystemBounds imple
     set overlap(v: number);
     mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number;
     abstract groundResolution(latitude: number, levelOfDetail: number): number;
-    abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
-    abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): IGeo2;
-    abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    abstract getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
-    abstract getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
+    getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
+    getTileXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
+    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
+    getPixelXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
+    getTileXYToPixelXY(x: number, y: number): ICartesian2;
+    getPixelXYToTileXY(x: number, y: number): ICartesian2;
+    abstract getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void;
+    abstract getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): void;
+    abstract getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): void;
+    abstract getPixelXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
+    abstract getTileXYToPixelXYToRef(x: number, y: number, pixelXY?: ICartesian2): void;
+    abstract getPixelXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }

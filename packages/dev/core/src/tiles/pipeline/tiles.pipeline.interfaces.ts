@@ -14,14 +14,16 @@ export interface ITargetBlock<T> {
 
 export interface ILinkOptions {}
 
-export interface ISourceBlock<T> {
+export interface ISourceEvent<T> {
     /// <summary> messaged when a tile is updated </summary>
     updatedObservable: Observable<IPipelineMessageType<T>>;
     /// <summary> messaged when a tile is added </summary>
     addedObservable: Observable<IPipelineMessageType<T>>;
     /// <summary> messaged when a tile is removed </summary>
     removedObservable: Observable<IPipelineMessageType<T>>;
+}
 
+export interface ISourceBlock<T> extends ISourceEvent<T> {
     linkTo(target: ITargetBlock<T>, options?: ILinkOptions): void;
     unlinkFrom(target: ITargetBlock<T>): ITilePipelineLink<T> | undefined;
 }
@@ -59,7 +61,7 @@ export interface ITileRepository<T> {
     getActiveTiles(): Nullable<ITileCollection<T>>;
 }
 
-export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ITileRepository<T> {}
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ITileRepository<T>, ISourceEvent<ITile<T>> {}
 
 export interface ITilePipeline<T> extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;

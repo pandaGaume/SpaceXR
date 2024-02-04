@@ -3,6 +3,8 @@ import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, CellCoordinateReference } from "./tiles.interfaces";
 import { TileSystemBounds } from "./tiles.system";
 import { PropertyChangedEventArgs } from "../events";
+import { Cartesian2 } from "../geometry";
+import { Geo2 } from "../geography";
 
 export abstract class AbstractTileMetrics extends TileSystemBounds implements ITileMetrics {
     public static DefaultTileSize = 256;
@@ -76,10 +78,42 @@ export abstract class AbstractTileMetrics extends TileSystemBounds implements IT
     }
 
     public abstract groundResolution(latitude: number, levelOfDetail: number): number;
-    public abstract getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
-    public abstract getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): IGeo2;
-    public abstract getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    public abstract getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    public abstract getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
-    public abstract getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
+
+    public getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2 {
+        const c = Cartesian2.Zero();
+        this.getLatLonToTileXYToRef(latitude, longitude, levelOfDetail, c);
+        return c;
+    }
+    public getTileXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2 {
+        const g = Geo2.Zero();
+        this.getTileXYToLatLonToRef(x, y, levelOfDetail, g);
+        return g;
+    }
+    public getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2 {
+        const c = Cartesian2.Zero();
+        this.getLatLonToPixelXYToRef(latitude, longitude, levelOfDetail, c);
+        return c;
+    }
+    public getPixelXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2 {
+        const g = Geo2.Zero();
+        this.getPixelXYToLatLonToRef(x, y, levelOfDetail, g);
+        return g;
+    }
+    public getTileXYToPixelXY(x: number, y: number): ICartesian2 {
+        const c = Cartesian2.Zero();
+        this.getTileXYToPixelXYToRef(x, y, c);
+        return c;
+    }
+    public getPixelXYToTileXY(x: number, y: number): ICartesian2 {
+        const c = Cartesian2.Zero();
+        this.getPixelXYToTileXYToRef(x, y, c);
+        return c;
+    }
+
+    public abstract getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void;
+    public abstract getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): void;
+    public abstract getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): void;
+    public abstract getPixelXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
+    public abstract getTileXYToPixelXYToRef(x: number, y: number, pixelXY?: ICartesian2): void;
+    public abstract getPixelXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }

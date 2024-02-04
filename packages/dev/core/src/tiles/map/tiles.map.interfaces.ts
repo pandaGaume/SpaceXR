@@ -5,8 +5,15 @@ import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 
+export enum DisplayUnit {
+    Pixels = 0,
+    Meters = 1,
+    Degrees = 3,
+}
+
 export interface ITileDisplay extends IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    displayUnit?: DisplayUnit; // default is pixels
     displayHeight: number;
     displayWidth: number;
 }

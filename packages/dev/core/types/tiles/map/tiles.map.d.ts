@@ -1,13 +1,20 @@
-import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
+import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
 import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { ValidableBase } from "../../validable";
-interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
+export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     layer: L;
-    validationObserver: Nullable<Observer<boolean>>;
+    validationObserver?: Nullable<Observer<boolean>>;
+    clear(): void;
+}
+export declare class TileMapLayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLayerContainer<T, L> {
+    layer: L;
+    validationObserver?: Nullable<Observer<boolean>>;
+    constructor(layer: L);
+    clear(): void;
 }
 export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMap<T, L> {
     _layerAddedObservable?: Observable<L>;
@@ -46,7 +53,8 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends Validabl
     private _updateNavigationBounds;
     private _onLayerAddedInternal;
     private _onLayerRemovedInternal;
-    private _onLayerValidationChanged;
+    protected _onLayerValidationChanged(valid: boolean, state: EventState): void;
+    protected _buildLayerContainer(layer: L): ITileMapLayerContainer<T, L>;
     protected _beforeValidate(): void;
     protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
     protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
@@ -55,7 +63,6 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends Validabl
     protected _onNavigationUpdated(nav?: ITileNavigationState): void;
     protected _onDisplayResized(display: ITileDisplay): void;
     protected _onDisplayTranslated(display: ITileDisplay): void;
-    protected _onLayerAdded(layer: ITileMapLayer<T>): void;
-    protected _onLayerRemoved(layer: ITileMapLayer<T>): void;
+    protected _onLayerAdded(container: ITileMapLayerContainer<T, L>): void;
+    protected _onLayerRemoved(container: ITileMapLayerContainer<T, L>): void;
 }
-export {};

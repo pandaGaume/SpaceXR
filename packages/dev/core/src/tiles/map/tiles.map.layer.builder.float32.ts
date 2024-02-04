@@ -16,10 +16,7 @@ export class Float32LayerBuilder extends AbstractTileMapLayerBuilder<Float32Arra
             zoomOffset: this._zoomOffset,
             attribution: this._attribution,
         };
-        if (IsTileProviderBuilder<Float32Array>(this._provider)) {
-            const p = this._provider?.build();
-            return new Float32Layer(this._name ?? "", p, o, this._enabled);
-        }
-        return new Float32Layer(this._name ?? "", this._provider, o, this._enabled);
+        const p = IsTileProviderBuilder<Float32Array>(this._provider) ? this._provider?.build() : this._provider;
+        return new Float32Layer(this._name ?? "", p, o, this._enabled);
     }
 }

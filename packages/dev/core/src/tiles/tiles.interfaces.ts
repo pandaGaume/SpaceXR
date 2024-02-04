@@ -71,6 +71,7 @@ export interface ITileBuilder<T> {
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
     build(): ITile<T>;
 }
 
@@ -120,12 +121,19 @@ export interface ITileMetrics extends ITileSystem {
     mapScale(latitude: number, levelOfDetail: number, dpi: number): number;
     groundResolution(latitude: number, levelOfDetail: number): number;
 
-    getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2): ICartesian2;
-    getTileXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    getPixelXYToLatLon(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    getTileXYToPixelXY(x: number, y: number, pixelXY?: ICartesian2): ICartesian2;
-    getPixelXYToTileXY(x: number, y: number, tileXY?: ICartesian2): ICartesian2;
+    getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
+    getTileXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
+    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
+    getPixelXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
+    getTileXYToPixelXY(x: number, y: number): ICartesian2;
+    getPixelXYToTileXY(x: number, y: number): ICartesian2;
+
+    getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2): void;
+    getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
+    getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): void;
+    getPixelXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
+    getTileXYToPixelXYToRef(x: number, y: number, pixelXY?: ICartesian2): void;
+    getPixelXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }
 
 export interface ITileMetricsProvider {

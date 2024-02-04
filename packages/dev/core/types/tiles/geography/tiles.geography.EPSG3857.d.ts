@@ -8,10 +8,10 @@ export declare class EPSG3857 extends AbstractTileMetrics {
     _ellipsoid: Ellipsoid;
     constructor(options?: Partial<ITileMetrics>, ellipsoid?: Ellipsoid);
     groundResolution(latitude: number, levelOfDetail: number): number;
-    getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): ICartesian2;
-    getTileXYToLatLon(x: number, y: number, levelOfDetail: number, loc?: IGeo2): IGeo2;
-    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): ICartesian2;
-    getPixelXYToLatLon(pixelX: number, pixelY: number, levelOfDetail: number, latLon?: IGeo2): IGeo2;
-    getTileXYToPixelXY(tileX: number, tileY: number, pixelXY?: ICartesian2): ICartesian2;
-    getPixelXYToTileXY(pixelX: number, pixelY: number, tileXY?: ICartesian2): ICartesian2;
+    getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void;
+    getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, loc?: IGeo2): void;
+    getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY: ICartesian2): void;
+    getPixelXYToLatLonToRef(pixelX: number, pixelY: number, levelOfDetail: number, latLon: IGeo2): void;
+    getTileXYToPixelXYToRef(tileX: number, tileY: number, pixelXY: ICartesian2): void;
+    getPixelXYToTileXYToRef(pixelX: number, pixelY: number, tileXY: ICartesian2): void;
 }

@@ -148,7 +148,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         return new TileView(`${this.name}.view`);
     }
 
-    private _onPipelinePropertyChanged(event: PropertyChangedEventArgs<ITilePipeline<T>, unknown>, state: EventState): void {
+    protected _onPipelinePropertyChanged(event: PropertyChangedEventArgs<ITilePipeline<T>, unknown>, state: EventState): void {
         // nothing to do - keep for debug
     }
 }

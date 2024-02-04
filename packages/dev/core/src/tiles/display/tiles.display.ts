@@ -1,15 +1,17 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
 import { Size2, ISize2, ISize3, IsSize } from "../../geometry";
-import { ITileDisplay } from "../map";
+import { DisplayUnit, ITileDisplay } from "../map";
 
 export class TileDisplay implements ITileDisplay {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     _w: number;
     _h: number;
+    _unit: DisplayUnit;
 
-    public constructor(w?: number, h?: number) {
+    public constructor(w?: number, h?: number, u?: DisplayUnit) {
         this._w = w ?? 0;
         this._h = h ?? 0;
+        this._unit = u ?? DisplayUnit.Pixels;
     }
 
     public dispose(): void {}
@@ -26,6 +28,10 @@ export class TileDisplay implements ITileDisplay {
 
     public get displayHeight(): number {
         return this._h;
+    }
+
+    public get displayUnit(): DisplayUnit {
+        return this._unit;
     }
 
     public resize(w: number | ISize2 | ISize3, h?: number): ITileDisplay {

@@ -7,7 +7,7 @@ import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 import { Bearing } from "../../geography";
-import { ITileDisplay } from "../map";
+import { DisplayUnit, ITileDisplay } from "../map";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -79,18 +79,25 @@ export class TileView implements ITileView {
         this._doValidateContext(state, display, metrics, dispatchEvent);
     }
 
-    // TODO : Introduce lod context for each zoffset... the idea is to limit the zoom level for each zoffset at the metrics max & min lod.
-    // ALSO : Find a way to limit the navigation state to a specific lod range, as a navigation state MAY be shared by several views or pipelines...
     private _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
         if (state && display) {
             const lod = TileAddress.ClampLod(state.lod, metrics);
             const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
             const scale = state.scale;
-            const rect = this.getRectangle(pixelCenterXY, display?.displayWidth ?? 0, display?.displayHeight ?? 0, scale, state.azimuth);
 
-            // compute the bounds of tile xy
-            let nwTileXY = metrics.getPixelXYToTileXY(rect.xmin, rect.ymin);
-            let seTileXY = metrics.getPixelXYToTileXY(rect.xmax, rect.ymax);
+            const nwTileXY = Cartesian2.Zero();
+            const seTileXY = Cartesian2.Zero();
+
+            switch (display.displayUnit) {
+                case DisplayUnit.Pixels:
+                default: {
+                    const rect = this.getRectangle(pixelCenterXY, display?.displayWidth ?? 0, display?.displayHeight ?? 0, scale, state.azimuth);
+                    // compute the bounds of tile xy
+                    metrics.getPixelXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
+                    metrics.getPixelXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
+                    break;
+                }
+            }
 
             const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
             const x0 = Math.max(0, nwTileXY.x);

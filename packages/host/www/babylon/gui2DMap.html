@@ -63,8 +63,7 @@
             }
 
             function createUI(scene) {
-                map = createMap("firstMap");
-                map.background = "red";
+                map = createMap("Map2DUI");
 
                 function updateCompassRotation(bearing) {
                     var compass = document.getElementById("compass");
@@ -127,6 +126,11 @@
                 const ui = createUI(scene);
                 ui.width = "50%";
                 ui.height = "50%";
+                ui.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                ui.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                ui.top = "20px";
+                ui.left = "20px";
+
                 advancedTexture.addControl(ui);
 
                 return scene;

@@ -4,16 +4,8 @@ import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionConte
 import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
-import { IGeoCalculator } from "../../geodesy";
-export declare enum DisplayUnit {
-    Pixels = 0,
-    Meters = 1,
-    Degrees = 3
-}
 export interface ITileDisplay extends IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
-    displayUnit?: DisplayUnit;
-    geodesicCalculator?: IGeoCalculator;
     displayHeight: number;
     displayWidth: number;
 }

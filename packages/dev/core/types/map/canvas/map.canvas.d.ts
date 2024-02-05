@@ -8,9 +8,11 @@ export type CanvasTileContentType = HTMLImageElement;
 export interface ICanvasRenderingOptions {
     background?: string;
 }
-export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> {
-    _renderOptions?: ICanvasRenderingOptions;
+export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
+    _background?: string;
     constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState);
+    get background(): string | undefined;
+    set background(v: string | undefined);
     draw(ctx: ICanvasRenderingContext, xoffset?: number, yoffset?: number): void;
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void;
 }

@@ -7,7 +7,7 @@ import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 import { Bearing, Geo2 } from "../../geography";
-import { DisplayUnit, ITileDisplay } from "../map";
+import { ITileDisplay } from "../map";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -93,35 +93,10 @@ export class TileView implements ITileView {
             let w = display?.displayWidth ?? 0;
             let h = display?.displayHeight ?? 0;
 
-            // enforce default unit.
-            const unit = display.displayUnit ?? DisplayUnit.Pixels;
-
-            switch (unit) {
-                case DisplayUnit.Meters: {
-                    // the we compute the width and heigt in pixel.
-                    // remember that the width will change with the latitude.
-                    // TODO : Check behaviors at the poles and the date line.
-                    const calculator = display.geodesicCalculator;
-                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayHeight / 2, 0, this._geoTmp, true);
-                    metrics.getLatLonToPointXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
-                    h = Math.abs(this._pixelTmp.y - pixelCenterXY.y) * 2;
-                    calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayWidth / 2, 90, this._geoTmp, true);
-                    metrics.getLatLonToPointXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
-                    w = Math.abs(this._pixelTmp.x - pixelCenterXY.x) * 2;
-                    // fall through pixels...
-                }
-                case DisplayUnit.Pixels: {
-                    const rect = this.getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
-                    // compute the bounds of tile xy
-                    metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
-                    metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
-                    break;
-                }
-
-                default: {
-                    throw new Error(`Units ${display.displayUnit} not supported.`);
-                }
-            }
+            const rect = this.getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
+            // compute the bounds of tile xy
+            metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
+            metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
 
             const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
             const x0 = Math.max(0, nwTileXY.x);

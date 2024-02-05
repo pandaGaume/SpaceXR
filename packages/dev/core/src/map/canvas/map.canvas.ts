@@ -33,12 +33,23 @@ export interface ICanvasRenderingOptions {
 ///
 /// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
 /// </summary>
-export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> {
-    _renderOptions?: ICanvasRenderingOptions;
+export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
+    _background?: string;
 
     public constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
         super(name, display, nav);
-        this._renderOptions = options;
+        this._background = options?.background;
+    }
+
+    public get background(): string | undefined {
+        return this._background;
+    }
+
+    public set background(v: string | undefined) {
+        if (this._background !== v) {
+            this._background = v;
+            this.invalidate();
+        }
     }
 
     /// <summary>
@@ -54,8 +65,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         const res = this._display;
         const x = xoffset;
         const y = yoffset;
-        if (this._renderOptions?.background) {
-            ctx.fillStyle = this._renderOptions.background;
+        if (this._background) {
+            ctx.fillStyle = this._background;
             ctx.fillRect(x, y, res.displayWidth, res.displayHeight);
         } else {
             ctx.clearRect(x, y, res.displayWidth, res.displayHeight);
@@ -106,7 +117,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
                 const item = t.content ?? null; // trick to address erroness tile.
                 if (item) {
                     if (item instanceof HTMLImageElement) {
-                        ctx.drawImage(item, x, y);
+                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width, item.height);
                         continue;
                     }
                 }

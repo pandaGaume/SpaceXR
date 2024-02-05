@@ -46,9 +46,9 @@ export class EPSG3857 extends AbstractTileMetrics {
         l.lon = lon;
     }
 
-    public getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY: ICartesian2): void {
-        if (!pixelXY) return;
-        const p = pixelXY;
+    public getLatLonToPointXYToRef(latitude: number, longitude: number, levelOfDetail: number, pointXY: ICartesian2): void {
+        if (!pointXY) return;
+        const p = pointXY;
         latitude = Scalar.Clamp(latitude, this.minLatitude, this.maxLatitude);
         longitude = Scalar.Clamp(longitude, this.minLongitude, this.maxLongitude);
 
@@ -59,37 +59,37 @@ export class EPSG3857 extends AbstractTileMetrics {
         const mapSize = this.mapSize(levelOfDetail);
         // The reason for adding 0.5 before casting to an integer is to round the floating-point value to the nearest integer.
         // Without this step, the cast to an integer would truncate the fractional component of the floating-point value towards zero.
-        // This rounding step is necessary to ensure that the resulting pixel coordinates are centered on the cell,
+        // This rounding step is necessary to ensure that the resulting point coordinates are centered on the cell,
         // as required by the cell-centered convention
         p.x = Math.round(Scalar.Clamp(x * mapSize + 0.5, 0, mapSize - 1));
         p.y = Math.round(Scalar.Clamp(y * mapSize + 0.5, 0, mapSize - 1));
     }
 
-    public getPixelXYToLatLonToRef(pixelX: number, pixelY: number, levelOfDetail: number, latLon: IGeo2): void {
+    public getPointXYToLatLonToRef(pointX: number, pointY: number, levelOfDetail: number, latLon: IGeo2): void {
         if (!latLon) return;
 
         const g = latLon;
         const mapSize = this.mapSize(levelOfDetail);
-        const x = Scalar.Clamp(pixelX, 0, mapSize - 1) / mapSize - 0.5;
-        const y = 0.5 - Scalar.Clamp(pixelY, 0, mapSize - 1) / mapSize;
+        const x = Scalar.Clamp(pointX, 0, mapSize - 1) / mapSize - 0.5;
+        const y = 0.5 - Scalar.Clamp(pointY, 0, mapSize - 1) / mapSize;
 
         g.lat = 90 - (360 * Math.atan(Math.exp(-y * 2 * Math.PI))) / Math.PI;
         g.lon = 360 * x;
     }
 
-    public getTileXYToPixelXYToRef(tileX: number, tileY: number, pixelXY: ICartesian2): void {
-        if (!pixelXY) return;
-        const p = pixelXY;
+    public getTileXYToPointXYToRef(tileX: number, tileY: number, pointXY: ICartesian2): void {
+        if (!pointXY) return;
+        const p = pointXY;
         const s = this.tileSize;
         p.x = tileX * s;
         p.y = tileY * s;
     }
 
-    public getPixelXYToTileXYToRef(pixelX: number, pixelY: number, tileXY: ICartesian2): void {
+    public getPointXYToTileXYToRef(pointX: number, pointY: number, tileXY: ICartesian2): void {
         if (!tileXY) return;
         const t = tileXY;
         const s = this.tileSize;
-        t.x = Math.floor(pixelX / s);
-        t.y = Math.floor(pixelY / s);
+        t.x = Math.floor(pointX / s);
+        t.y = Math.floor(pointY / s);
     }
 }

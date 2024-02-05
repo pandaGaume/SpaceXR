@@ -175,10 +175,10 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
             ty = p.y;
         }
         const lod = Math.round(this._lodf);
-        const pixelCenterXY = m.getLatLonToPixelXY(this._center.lat, this._center.lon, lod);
+        const pixelCenterXY = m.getLatLonToPointXY(this._center.lat, this._center.lon, lod);
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
-        this.center = m.getPixelXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
+        this.center = m.getPointXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
         return this;
     }
 

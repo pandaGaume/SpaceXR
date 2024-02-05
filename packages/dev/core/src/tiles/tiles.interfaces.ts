@@ -123,17 +123,17 @@ export interface ITileMetrics extends ITileSystem {
 
     getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
-    getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
-    getPixelXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
-    getTileXYToPixelXY(x: number, y: number): ICartesian2;
-    getPixelXYToTileXY(x: number, y: number): ICartesian2;
+    getLatLonToPointXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
+    getPointXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
+    getTileXYToPointXY(x: number, y: number): ICartesian2;
+    getPointXYToTileXY(x: number, y: number): ICartesian2;
 
     getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2): void;
     getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
-    getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): void;
-    getPixelXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
-    getTileXYToPixelXYToRef(x: number, y: number, pixelXY?: ICartesian2): void;
-    getPixelXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
+    getLatLonToPointXYToRef(latitude: number, longitude: number, levelOfDetail: number, pointXY?: ICartesian2): void;
+    getPointXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
+    getTileXYToPointXYToRef(x: number, y: number, pointXY?: ICartesian2): void;
+    getPointXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }
 
 export interface ITileMetricsProvider {

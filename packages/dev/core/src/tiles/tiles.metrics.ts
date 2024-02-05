@@ -89,31 +89,31 @@ export abstract class AbstractTileMetrics extends TileSystemBounds implements IT
         this.getTileXYToLatLonToRef(x, y, levelOfDetail, g);
         return g;
     }
-    public getLatLonToPixelXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2 {
+    public getLatLonToPointXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2 {
         const c = Cartesian2.Zero();
-        this.getLatLonToPixelXYToRef(latitude, longitude, levelOfDetail, c);
+        this.getLatLonToPointXYToRef(latitude, longitude, levelOfDetail, c);
         return c;
     }
-    public getPixelXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2 {
+    public getPointXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2 {
         const g = Geo2.Zero();
-        this.getPixelXYToLatLonToRef(x, y, levelOfDetail, g);
+        this.getPointXYToLatLonToRef(x, y, levelOfDetail, g);
         return g;
     }
-    public getTileXYToPixelXY(x: number, y: number): ICartesian2 {
+    public getTileXYToPointXY(x: number, y: number): ICartesian2 {
         const c = Cartesian2.Zero();
-        this.getTileXYToPixelXYToRef(x, y, c);
+        this.getTileXYToPointXYToRef(x, y, c);
         return c;
     }
-    public getPixelXYToTileXY(x: number, y: number): ICartesian2 {
+    public getPointXYToTileXY(x: number, y: number): ICartesian2 {
         const c = Cartesian2.Zero();
-        this.getPixelXYToTileXYToRef(x, y, c);
+        this.getPointXYToTileXYToRef(x, y, c);
         return c;
     }
 
     public abstract getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void;
     public abstract getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): void;
-    public abstract getLatLonToPixelXYToRef(latitude: number, longitude: number, levelOfDetail: number, pixelXY?: ICartesian2): void;
-    public abstract getPixelXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
-    public abstract getTileXYToPixelXYToRef(x: number, y: number, pixelXY?: ICartesian2): void;
-    public abstract getPixelXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
+    public abstract getLatLonToPointXYToRef(latitude: number, longitude: number, levelOfDetail: number, pointXY?: ICartesian2): void;
+    public abstract getPointXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
+    public abstract getTileXYToPointXYToRef(x: number, y: number, pointXY?: ICartesian2): void;
+    public abstract getPointXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }

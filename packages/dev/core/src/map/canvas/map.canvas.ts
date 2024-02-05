@@ -97,7 +97,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         }
 
         const metrics = layer.metrics;
-        const center = metrics.getLatLonToPixelXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+        const center = metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
 
         for (const t of tiles) {
             if (t.rect) {

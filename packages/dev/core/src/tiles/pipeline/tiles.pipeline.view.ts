@@ -89,7 +89,7 @@ export class TileView implements ITileView {
             const nwTileXY = Cartesian2.Zero();
             const seTileXY = Cartesian2.Zero();
 
-            const pixelCenterXY = metrics.getLatLonToPixelXY(state.center.lat, state.center.lon, lod);
+            const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
             let w = display?.displayWidth ?? 0;
             let h = display?.displayHeight ?? 0;
 
@@ -100,20 +100,21 @@ export class TileView implements ITileView {
                 case DisplayUnit.Meters: {
                     // the we compute the width and heigt in pixel.
                     // remember that the width will change with the latitude.
+                    // TODO : Check behaviors at the poles and the date line.
                     const calculator = display.geodesicCalculator;
                     calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayHeight / 2, 0, this._geoTmp, true);
-                    metrics.getLatLonToPixelXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
+                    metrics.getLatLonToPointXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
                     h = Math.abs(this._pixelTmp.y - pixelCenterXY.y) * 2;
                     calculator?.getLocationAtDistanceAzimuthToRef(state.center, display.displayWidth / 2, 90, this._geoTmp, true);
-                    metrics.getLatLonToPixelXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
+                    metrics.getLatLonToPointXYToRef(this._geoTmp.lat, this._geoTmp.lon, lod, this._pixelTmp);
                     w = Math.abs(this._pixelTmp.x - pixelCenterXY.x) * 2;
                     // fall through pixels...
                 }
                 case DisplayUnit.Pixels: {
                     const rect = this.getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
                     // compute the bounds of tile xy
-                    metrics.getPixelXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
-                    metrics.getPixelXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
+                    metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
+                    metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
                     break;
                 }
 

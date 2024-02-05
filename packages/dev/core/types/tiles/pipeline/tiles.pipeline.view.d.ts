@@ -2,7 +2,9 @@ import { Observable } from "../../events";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
+import { Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
+import { Geo2 } from "../../geography";
 import { ITileDisplay } from "../map";
 export declare class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -11,6 +13,8 @@ export declare class TileView implements ITileView {
     _activ: Map<string, ITileAddress>;
     _links: Array<ITilePipelineLink<ITileAddress>>;
     _id: string;
+    _geoTmp: Geo2;
+    _pixelTmp: Cartesian2;
     constructor(id: string);
     get name(): string;
     dispose(): void;

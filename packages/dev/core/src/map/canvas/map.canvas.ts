@@ -102,14 +102,14 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
         ctx.translate(x + res.displayWidth / 2, y + res.displayHeight / 2);
-        // we scale the canvas according the navigation scale
-        ctx.scale(scale, scale);
         // we rotate the canvas according the navigation azimuth
         if (this.navigation.azimuth?.value) {
             // convert azimuth to canvas rotation, which is clockwize, and cartesian
             const angle = this.navigation.azimuth.value * Scalar.DEG2RAD;
             ctx.rotate(angle);
         }
+        // we scale the canvas according the navigation scale
+        ctx.scale(scale, scale);
         // every tiles are supposed to got the same size here, using same metrics
         for (const l of this._orderedLayers ?? []) {
             if (l.enabled) {
@@ -139,7 +139,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
                 const item = t.content ?? null; // trick to address erroness tile.
                 if (item) {
                     if (item instanceof HTMLImageElement) {
-                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width, item.height);
+                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
                         continue;
                     }
                 }

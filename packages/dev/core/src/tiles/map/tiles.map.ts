@@ -79,6 +79,12 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
         return this._navigation;
     }
 
+    public set navigation(nav: ITileNavigationState) {
+        if (nav && this._navigation !== nav) {
+            this._bindNavigation(nav);
+        }
+    }
+
     public *getLayers(predicate?: (l: L) => boolean, sorted: boolean = true): IterableIterator<L> {
         if (sorted) {
             yield* this.getOrderedLayers(predicate);
@@ -234,6 +240,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
     }
 
     private _bindNavigation(nav?: ITileNavigationState): void {
+        this._navigationUpdatedObserver?.disconnect();
         if (nav) {
             this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
             this._updateLayersWithDisplayAndNavigation();

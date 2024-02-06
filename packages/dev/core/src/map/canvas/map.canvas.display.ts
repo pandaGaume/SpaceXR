@@ -28,19 +28,26 @@ export class CanvasDisplay extends TileDisplay {
 
     _resizeObserver: ResizeObserver;
     _scale: number;
+    _resizeToFitClient: boolean;
 
-    public constructor(public canvas: HTMLCanvasElement, scale?: number) {
-        // the canvas width and height are the buffer size of the cannvas. default values are width:300, height:150.
-        // the canvas clientWidth and clientHeight are the size of the canvas in the browser window.
-        // so we need to adapt the buffer size to the client size.
-        CanvasDisplay.ResizeToDisplaySize(canvas, scale);
+    public constructor(public canvas: HTMLCanvasElement, scale?: number, resizeToFitClient?: boolean) {
+        const f = resizeToFitClient == undefined || resizeToFitClient == true;
+        if (f) {
+            // the canvas width and height are the buffer size of the canvas. default values are width:300, height:150.
+            // the canvas clientWidth and clientHeight are the size of the canvas in the browser window.
+            // so we need to adapt the buffer size to the client size.
+            CanvasDisplay.ResizeToDisplaySize(canvas, scale);
+        }
         super(canvas.width, canvas.height);
         this._scale = scale ?? 1;
+        this._resizeToFitClient = f;
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
                 // Check if the resized element is our canvas
                 if (entry.target === canvas) {
-                    CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
+                    if (f) {
+                        CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
+                    }
                     this.resize(canvas.width, canvas.height);
                 }
             }

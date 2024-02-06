@@ -1,11 +1,12 @@
 import { PropertyChangedEventArgs, Observable, Observer } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { Nullable } from "../../types";
+import { IDisposable, Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry";
 import { IGeo2, Bearing } from "../../geography";
-export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
+import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
+export declare class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
     static GetLodScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _stateChangedObservable?: Observable<ITileNavigationState>;
@@ -17,6 +18,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _lod: number;
     _scale: number;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
+    _sync: Nullable<TileNavigationStateSynchronizer>;
     constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
     clone(): ITileNavigationState;
     dispose(): void;
@@ -38,6 +40,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
     translate(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;
     rotate(r: number): TileNavigationState;
+    syncWith(state: ITileNavigationState): TileNavigationState;
     toString(): string;
     protected _doValidate(): void;
     private rotatePointInv;

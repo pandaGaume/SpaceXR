@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Exemple de dessin de tuiles sur une texture dynamique BABYLON JS</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/babylon.inspector.bundle.js"></script>
+
+        <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+        <style>
+            html,
+            body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #tileCanvas {
+                position: absolute;
+
+                width: 50%;
+                height: 100%;
+                top: 0px;
+                left: 50%;
+
+                touch-action: none;
+            }
+            #canvas3d {
+                position: absolute;
+
+                width: 50%;
+                height: 100%;
+                top: 0px;
+                left: 0px;
+
+                position: absolute;
+            }
+            #compass {
+                position: absolute;
+                top: 20px; /* Adjust this to position the compass */
+                right: 20px; /* Adjust this to position the compass */
+                width: 200px; /* Adjust this according to your compass image size */
+                height: 200px; /* Adjust this according to your compass image size */
+                transform-origin: center;
+            }
+
+            #compassImage {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapcontainer">
+            <canvas id="tileCanvas"></canvas>
+            <canvas id="canvas3d"></canvas>
+            <div id="compass">
+                <img id="compassImage" src="../images/compass.png" alt="Compass" />
+            </div>
+        </div>
+        <script>
+            const defaultCenter = [27.98817689833976, 86.92491071824738]; // everest
+            const defaultLod = 12;
+
+            function create2DMap() {
+                // Récupérer le canvas
+                const canvas = document.getElementById("tileCanvas");
+
+                // definir la source de donnée.
+                const tileClient = SPACEXR.Google.SatelliteClient2d();
+
+                // construire la carte.
+                // display may be a canvas or a display object if we want to set scale or other options.
+                const map = new SPACEXR.CanvasMap("myMap", canvas).setView(defaultCenter, defaultLod);
+                const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution: SPACEXR.Google.Attribution }).addTo(map);
+
+                const navigationManager = new SPACEXR.InputsNavigationTarget(map);
+                const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);
+
+                function updateCompassRotation(bearing) {
+                    var compass = document.getElementById("compass");
+                    compass.style.transform = "rotate(" + bearing + "deg)";
+                }
+
+                // Function to handle the compass click event
+                function handleCompassClick(event) {
+                    map.setView(undefined, undefined, 0);
+                    updateCompassRotation(0);
+                }
+
+                // Get the compass element
+                var compass = document.getElementById("compass");
+
+                // Add a click event listener to the compass
+                compass.addEventListener("click", handleCompassClick);
+
+                // listen to azimuth change.
+                map.navigation.propertyChangedObservable.add((p, e) => {
+                    if (p.propertyName === "azimuth") {
+                        updateCompassRotation(p.newValue?.value ?? 0);
+                    }
+                });
+
+                document.addEventListener("keydown", function (event) {
+                    if (event.ctrlKey) {
+                        console.log("DOWN");
+                    }
+                });
+
+                document.addEventListener("keyup", function (event) {
+                    if (event.key === "Control" || event.key === "Meta") {
+                        console.log("UP");
+                    }
+                });
+                return map;
+            }
+
+            function createTextureMap(scene) {
+                const options = SPACEXR.MapTexture.OptionsHD();
+                options.background = "blue";
+                options.alpha = 0.8;
+                options.invertY = true;
+                const name = "MapTexture";
+                var map = new SPACEXR.MapTexture(name, options, scene).setView(defaultCenter, defaultLod);
+                const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.StreetClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(map);
+                return map;
+            }
+
+            async function createScene(canvas, engine, map2d) {
+                var scene = new BABYLON.Scene(engine);
+
+                // This creates and positions a free camera (non-mesh)
+                var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+
+                // This targets the camera to scene origin
+                camera.setTarget(BABYLON.Vector3.Zero());
+
+                // This attaches the camera to the canvas
+                camera.attachControl(canvas, true);
+
+                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+                var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+
+                // Default intensity is 1. Let's dim the light a small amount
+                light.intensity = 0.7;
+
+                // Our built-in 'sphere' shape. Params: name, options, scene
+                var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2, segments: 32 }, scene);
+
+                // Move the sphere upward 1/2 its height
+                sphere.position.y = 1;
+
+                const material = new BABYLON.StandardMaterial("mapMaterial", scene);
+                const texture = createTextureMap(scene);
+                material.diffuseTexture = texture;
+
+                // Our built-in 'ground' shape. Params: name, options, scene
+                const ratio = texture.display?.ratio ?? 1;
+                const dimension = 6;
+                var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: dimension, height: dimension / ratio }, scene);
+
+                ground.material = material;
+
+                texture.navigation.syncWith(map2d.navigation);
+
+                scene.onBeforeRenderObservable.add(() => {
+                    map2d.validate();
+                });
+
+                return scene;
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("canvas3d"); // Get the canvas element
+                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+                const map2d = create2DMap();
+                const scene = await createScene(canvas, engine, map2d); //Call the createScene function
+
+                // scene.debugLayer.show();
+                // Register a render loop to repeatedly render the scene
+                engine.runRenderLoop(function () {
+                    scene.render();
+                });
+
+                // Watch for browser/canvas resize events
+                window.addEventListener("resize", function () {
+                    engine.resize();
+                });
+            };
+        </script>
+    </body>
+</html>

@@ -10,5 +10,6 @@ export declare class TileDisplay implements ITileDisplay {
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     get displayWidth(): number;
     get displayHeight(): number;
+    get ratio(): number;
     resize(w: number | ISize2 | ISize3, h?: number): ITileDisplay;
 }

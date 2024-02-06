@@ -12,6 +12,7 @@ export interface ITileDisplay extends IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     displayHeight: number;
     displayWidth: number;
+    ratio: number;
 }
 
 export interface ITileMapLayerOptions {

@@ -14,6 +14,8 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
 
     lod: number; // Math.round(zoom)
     scale: number; // scale corresponding to the decimal part of zoom
+
+    syncWith(state: ITileNavigationState): void;
 }
 
 export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
@@ -51,4 +53,3 @@ export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {
         (<ITileNavigationApi<T>>b).rotate !== undefined
     );
 }
-

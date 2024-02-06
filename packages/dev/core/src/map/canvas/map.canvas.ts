@@ -10,6 +10,7 @@ export type CanvasTileContentType = HTMLImageElement;
 // we delegate the rendering options.
 export interface ICanvasRenderingOptions {
     background?: string;
+    alpha?: number;
 }
 
 /// <summary>
@@ -34,11 +35,19 @@ export interface ICanvasRenderingOptions {
 /// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
 /// </summary>
 export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
+    public static DefaultBackground = RGBAColor.LightGray();
+
+    public static DefaultOptions: ICanvasRenderingOptions = {
+        background: Context2DTileMap.DefaultBackground.toHexString(),
+    };
+
     _background?: string;
+    _alpha: number;
 
     public constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
         super(name, display, nav);
         this._background = options?.background;
+        this._alpha = options?.alpha ?? 1;
     }
 
     public get background(): string | undefined {
@@ -52,6 +61,17 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         }
     }
 
+    public get alpha(): number {
+        return this._alpha;
+    }
+
+    public set alpha(v: number) {
+        if (this._alpha !== v) {
+            this._alpha = v;
+            this.invalidate();
+        }
+    }
+
     /// <summary>
     /// Draw the map on the canvas.
     /// </summary>
@@ -60,6 +80,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
             return;
         }
         ctx.save();
+
+        ctx.globalAlpha = this._alpha;
 
         // clear the canvas
         const res = this._display;
@@ -132,12 +154,6 @@ export interface ICanvasMapOptions extends ICanvasRenderingOptions {
 }
 
 export class CanvasMap extends Context2DTileMap {
-    public static DefaultBackground = RGBAColor.LightGray();
-
-    public static DefaultOptions: ICanvasRenderingOptions = {
-        background: CanvasMap.DefaultBackground.toHexString(),
-    };
-
     _context: Nullable<CanvasRenderingContext2D>;
     _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
     _inputController: MouseInputController<HTMLCanvasElement>;
@@ -146,7 +162,7 @@ export class CanvasMap extends Context2DTileMap {
         if (display instanceof HTMLCanvasElement) {
             display = new CanvasDisplay(display);
         }
-        const o = { ...CanvasMap.DefaultOptions, ...options };
+        const o = { ...Context2DTileMap.DefaultOptions, ...options };
         super(name, display, o, nav);
         this._context = display.getContext();
 

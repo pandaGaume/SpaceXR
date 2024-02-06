@@ -36,7 +36,7 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
         super(name);
         const o = { ...MapControl.DefaultOptions, ...options };
         this._map = new Context2DTileMap(name, this, o, nav);
-        this._mapValidationObserver = this._map.validationObservable.add(this.onMapValidation.bind(this));
+        this._mapValidationObserver = this._map.validationObservable.add(this._onMapValidation.bind(this));
         this._navigationManager = o.navigationManager ?? new InputsNavigationTarget<MapControl>(this._map);
         this._inputController = o.inputController ?? new ControlInputController<MapControl>(this, this._navigationManager);
     }
@@ -120,7 +120,7 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
     }
 
     // rendering related
-    private onMapValidation(valid: boolean, eventState: EventState): void {
+    private _onMapValidation(valid: boolean, eventState: EventState): void {
         if (!valid) {
             this.markAsDirty();
         }

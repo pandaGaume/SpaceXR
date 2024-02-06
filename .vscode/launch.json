@@ -13,40 +13,16 @@
             "request": "launch",
             "name": "GUI 2D on chrome",
             "url": "http://localhost:1338/packages/host/www/babylon/gui2DMap.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon.gui/",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon-gui/",
             "sourceMaps": true
         },
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Map on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylonmap.html",
-            "webRoot": "${workspaceFolder}",
+            "name": "Launch Texture Map on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/dynamictexturemap.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "MapMaterial on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylonmapmaterial.html",
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-            "pathMapping": {
-                "/core": "${workspaceFolder}/packages/dev/core/",
-                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
-            }
-        },
-        {
-            "type": "msedge",
-            "request": "launch",
-            "name": "Launch Babylon Map on ms edge",
-            "url": "http://localhost:1338/packages/host/www/babylonmapmaterial.html",
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-            "pathMapping": {
-                "/core": "${workspaceFolder}/packages/dev/core/",
-                "/SpaceXR": "${workspaceFolder}/packages/dev/babylon/"
-            }
         }
     ]
 }

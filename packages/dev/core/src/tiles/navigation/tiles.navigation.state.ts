@@ -1,14 +1,15 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { Nullable } from "../../types";
+import { IDisposable, Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2, Cartesian2 } from "../../geometry";
 import { IGeo2, IsLocation, Bearing, Geo2 } from "../../geography";
 import { EPSG3857 } from "../geography";
 import { TileSystemBounds } from "../tiles.system";
+import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
 
-export class TileNavigationState extends ValidableBase implements ITileNavigationState {
+export class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
     public static GetLodScale(lod: number): number {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
         // scale corresponding to the decimal part
@@ -29,6 +30,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _lod: number;
     _scale: number;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
+    _sync: Nullable<TileNavigationStateSynchronizer>;
 
     public constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds) {
         super();
@@ -39,6 +41,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
         this._lod = Math.round(this._lodf);
         this._scale = TileNavigationState.GetLodScale(this._lodf);
+        this._sync = null;
     }
 
     public clone(): ITileNavigationState {
@@ -48,6 +51,10 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     public dispose() {
         this._boundsObserver?.disconnect;
         this._boundsObserver = null;
+        if (this._sync) {
+            this._sync.dispose();
+            this._sync = null;
+        }
     }
 
     public get lod(): number {
@@ -133,21 +140,23 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
 
     public setView(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
         if (center) {
+            let lat = 0;
+            let lon = 0;
+
             if (Array.isArray(center)) {
-                this.center.lat = center.length > 0 ? center[0] : 0;
-                this.center.lon = center.length > 1 ? center[1] : 0;
+                lat = center.length > 0 ? center[0] : 0;
+                lon = center.length > 1 ? center[1] : 0;
             } else {
-                this.center.lat = center.lat;
-                this.center.lon = center.lon;
+                lat = center.lat;
+                lon = center.lon;
             }
-            this.invalidate();
+            this.center = new Geo2(lat, lon);
         }
         if (zoom !== undefined) {
             this.zoom = zoom;
         }
         if (rotation !== undefined) {
-            this.azimuth.value = rotation;
-            this.invalidate();
+            this.azimuth = new Bearing(rotation);
         }
         return this;
     }
@@ -203,6 +212,17 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
 
     public rotate(r: number): TileNavigationState {
         this.azimuth = new Bearing(this._azimuth.value + r);
+        return this;
+    }
+
+    public syncWith(state: ITileNavigationState): TileNavigationState {
+        if (this._sync) {
+            this._sync.dispose();
+            this._sync = null;
+        }
+        if (state) {
+            this._sync = new TileNavigationStateSynchronizer(state, this);
+        }
         return this;
     }
 

@@ -28,6 +28,10 @@ export class TileDisplay implements ITileDisplay {
         return this._h;
     }
 
+    public get ratio(): number {
+        return this._w / this._h;
+    }
+
     public resize(w: number | ISize2 | ISize3, h?: number): ITileDisplay {
         if (IsSize(w)) {
             h = w.height;

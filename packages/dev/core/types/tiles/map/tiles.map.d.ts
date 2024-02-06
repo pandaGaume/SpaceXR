@@ -31,6 +31,7 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends Validabl
     get layerRemovedObservable(): Observable<L>;
     get display(): Nullable<ITileDisplay>;
     get navigation(): ITileNavigationState;
+    set navigation(nav: ITileNavigationState);
     getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
     getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L>;
     addLayer(layer: L): void;

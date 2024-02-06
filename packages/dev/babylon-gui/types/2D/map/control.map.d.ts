@@ -40,7 +40,7 @@ export declare class MapControl extends GUI.Container implements ITileDisplay, I
     getLayers(predicate?: (l: IImageTileMapLayer) => boolean, sorted?: boolean): IterableIterator<IImageTileMapLayer>;
     addLayer(layer: ImageLayer): void;
     removeLayer(layer: ImageLayer): void;
-    private onMapValidation;
+    private _onMapValidation;
     protected _additionalProcessing(parentMeasure: GUI.Measure, context: BABYLON.ICanvasRenderingContext): void;
     protected _localDraw(context: BABYLON.ICanvasRenderingContext): void;
 }

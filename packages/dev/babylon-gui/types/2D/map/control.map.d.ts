@@ -26,6 +26,7 @@ export declare class MapControl extends GUI.Container implements ITileDisplay, I
     get displayHeight(): number;
     get displayWidth(): number;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    get ratio(): number;
     dispose(): void;
     setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): MapControl;
     zooming(delta: number): MapControl;

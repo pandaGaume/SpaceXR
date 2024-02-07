@@ -56,6 +56,10 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
         return this._propertyChangedObservable;
     }
 
+    public get ratio(): number {
+        return this.displayWidth / this.displayHeight;
+    }
+
     public dispose(): void {
         this._mapValidationObserver?.disconnect();
         this._map.dispose();

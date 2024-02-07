@@ -174,7 +174,6 @@ export class CanvasMap extends Context2DTileMap {
     /// This method is called when the map is validated.
     /// </summary>
     protected _doValidate(): void {
-        super._doValidate();
         const ctx: ICanvasRenderingContext = this._getContext2D() as ICanvasRenderingContext;
         if (ctx) {
             this.draw(ctx);

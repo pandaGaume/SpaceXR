@@ -53,6 +53,10 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
         return this._zindex;
     }
 
+    public get navigation(): ITileNavigationState {
+        return this._state;
+    }
+
     public set zindex(zindex: number) {
         if (this._zindex !== zindex) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {

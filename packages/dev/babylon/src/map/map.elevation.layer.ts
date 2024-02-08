@@ -1,26 +1,56 @@
-import { AbstractMesh, EventState, Material, Mesh, Nullable, Scene, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { IMemoryCache } from "core/cache";
 import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
-import { ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileProvider, Tile, TileContentProvider, TileContentType, TileProvider } from "core/tiles";
+import {
+    ITile,
+    ITileAddress,
+    ITileDatasource,
+    ITileMapLayerOptions,
+    ITileNavigationState,
+    ITileProvider,
+    Tile,
+    TileContentProvider,
+    TileContentType,
+    TileProvider,
+} from "core/tiles";
 import { TileBuilder } from "core/tiles/tiles.builder";
+import { ICartesian2, ICartesian3 } from "core/geometry";
+import { PropertyChangedEventArgs, EventState } from "core/events";
+import { IGeo2 } from "core/geography";
 
-export class ElevationTile extends Tile<IDemInfos> {
+export interface IElevationTile extends ITile<IDemInfos> {
+    surface: Nullable<AbstractMesh>;
+}
+
+/// <summary>
+/// A tile for elevation data. The tile serve as hos for elevation data and therefore the instanced mesh used to display the elevation.
+/// </summary>
+export class ElevationTile extends Tile<IDemInfos> implements ElevationTile {
     _surface: Nullable<AbstractMesh>; // may be a mesh or an instance.
     public constructor(x: number, y: number, levelOfDetail: number, data: IDemInfos) {
         super(x, y, levelOfDetail, data);
         this._surface = null;
     }
+
+    public get surface(): Nullable<AbstractMesh> {
+        return this._surface;
+    }
 }
 
+/// <summary>
+/// Options for elevation tiles.
+/// </summary>
 export interface IElevationTileOptions extends ITileMapLayerOptions {
     exageration?: number;
     gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
     material?: Material;
+    insets?: ICartesian3;
 }
 
 ///<summary>
 /// A layer for elevation data. The layer serve as hos for elevation tiles and therefore the grid model used to display the elevation.
+/// </summary>
 export class ElevationLayer extends DemLayer {
     private static InitZ(column: number, row: number, w: number, h: number): number {
         let i = column == w - 1 ? 1 : 0;
@@ -37,22 +67,41 @@ export class ElevationLayer extends DemLayer {
     _grid: VertexData;
     _template: Mesh;
     _exageration?: number;
+    _insets?: ICartesian3;
     _gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
     _material: Nullable<Material>;
+    _root: TransformNode;
+    _tilesRoot: TransformNode;
+    // cached cartesian center
+    _cartesianCenter: Nullable<ICartesian2>;
 
     public constructor(name: string, source: ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationTileOptions, enabled?: boolean) {
         super(name, source, options, enabled);
         this._exageration = options?.exageration ?? 1.0;
         this._gridOptions = options?.gridOptions;
         this._material = options?.material ?? null;
+        this._insets = options?.insets;
+
+        this._root = new TransformNode(this._buildNameWithSuffix("root"));
+
+        this._tilesRoot = new TransformNode(this._buildNameWithSuffix("layers"));
+        this._tilesRoot.parent = this._root;
+
         this._grid = this._buildTopology();
         this._template = this._buildMesh(name);
+        this._cartesianCenter = null;
+        this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+    }
+
+    public get root(): TransformNode {
+        return this._root;
     }
 
     protected _buildMesh(name: string, scene?: Nullable<Scene>): Mesh {
-        const mesh = new Mesh(name, scene);
+        const mesh = new Mesh(this._buildNameWithSuffix("template"), scene);
         this._grid.applyToMesh(mesh, true);
-        this._template.material = this._material;
+        mesh.material = this._material;
+        mesh.isVisible = false;
         return mesh;
     }
 
@@ -60,7 +109,66 @@ export class ElevationLayer extends DemLayer {
         const instance = this._template.createInstance(name);
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
         instance.scaling.z = 1.0;
+        const cc = this._cartesianCenter;
+        if (cc) {
+            this._setTilePosition(tile, cc, this._insets);
+        }
         return instance;
+    }
+
+    protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
+        switch (event.propertyName) {
+            case "center": {
+                const geo = event.newValue as IGeo2;
+                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._state.lod);
+                this._onCenterChanged(this._cartesianCenter);
+                break;
+            }
+            case "zoom": {
+                this._onZoomChanged(event.source.scale);
+                break;
+            }
+            case "azimuth": {
+                this._onAzimuthChanged(event.newValue as number);
+                break;
+            }
+        }
+    }
+
+    protected _onZoomChanged(scale: number): void {
+        this._tilesRoot.scaling.x = this._tilesRoot.scaling.y = scale;
+        this._tilesRoot.scaling.z = (this._exageration ?? 1.0) * scale;
+    }
+
+    protected _onAzimuthChanged(azimuth: number): void {
+        this._tilesRoot.rotation.z = azimuth;
+    }
+
+    protected _onCenterChanged(center: Nullable<ICartesian2>): void {
+        if (center) {
+            const tiles = this.getActiveTiles();
+            if (!tiles || !tiles.count) {
+                return;
+            }
+            for (const tile of tiles) {
+                if (tile instanceof ElevationTile && tile.rect && tile.surface) {
+                    this._setTilePosition(tile, center, this._insets);
+                }
+            }
+        }
+    }
+
+    protected _setTilePosition(tile: ElevationTile, center: ICartesian2, offset?: ICartesian3): void {
+        if (tile instanceof ElevationTile && tile.rect && tile.surface) {
+            const c = tile.rect.center;
+            const s = tile.surface;
+            const x = c.x - center.x + (offset?.x ?? 0);
+            const y = c.y - center.y + (offset?.y ?? 0);
+            const p = s.position;
+            p.x = x;
+            p.y = y;
+            p.z = offset?.z ?? 0;
+        }
     }
 
     protected _buildProvider(source: ITileDatasource<IDemInfos, ITileAddress>, cache?: IMemoryCache<string, TileContentType<IDemInfos>>): ITileProvider<IDemInfos> {
@@ -81,7 +189,7 @@ export class ElevationLayer extends DemLayer {
             return new TerrainGridOptionsBuilder()
                 .withColumns(s + 1) // add one column to fill the gap
                 .withRows(s + 1) // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
-                .withScale(1, -1) // we consider a grid of "texel" or "pixel" oriented as an image is oriented in display
+                .withScale(1, -1) // we consider a grid of "texel" oriented as an image is oriented in display
                 .withInvertIndices(true) //  we need to invert indices as we reverse y
                 .withZInitializer(ElevationLayer.InitZ) // register the z initializer, which serve as referencing the texture depth
                 .withUvs(true) // generate uvs.
@@ -97,7 +205,8 @@ export class ElevationLayer extends DemLayer {
     protected _onTileAdded(eventData: Array<ElevationTile>, eventState: EventState): void {
         super._onTileAdded(eventData, eventState);
         for (const tile of eventData) {
-            tile._surface = this._buildInstance(this._buildMeshName(tile), tile);
+            tile._surface = this._buildInstance(this._buildNameWithSuffix(tile.quadkey), tile);
+            tile._surface.parent = this._tilesRoot;
         }
     }
 
@@ -109,7 +218,7 @@ export class ElevationLayer extends DemLayer {
         }
     }
 
-    protected _buildMeshName(tile: ElevationTile): string {
-        return `${this.name}-${tile.quadkey}`;
+    protected _buildNameWithSuffix(suffix: string): string {
+        return `${this.name}.${suffix}`;
     }
 }

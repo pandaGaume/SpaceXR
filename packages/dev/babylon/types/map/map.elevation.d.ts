@@ -1,11 +1,10 @@
 import { IDemInfos } from "core/dem";
-import { IPipelineMessageType, ITile, ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
-import { ElevationLayer } from "./map.elevation.layer";
+import { ITile, ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 export type ElevationTileContentType = IDemInfos | HTMLImageElement;
-export type ElevationLayerType = ImageLayer | ElevationLayer;
 export declare class ElevationMap extends TransformNode implements ITileNavigationApi<ElevationMap>, ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>> {
     private _map;
     constructor(name: string, display?: ITileDisplay);
@@ -24,17 +23,17 @@ export declare class ElevationMap extends TransformNode implements ITileNavigati
     removeLayer(layer: ITileMapLayer<ElevationTileContentType>): void;
     dispose(): void;
     get display(): Nullable<ITileDisplay>;
-    added(eventData: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    removed(eventData: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    updated(eventData: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
+    added(eventData: Array<ElevationTile> | Array<ITile<HTMLImageElement>>, eventState: EventState): void;
+    removed(eventData: Array<ElevationTile> | Array<ITile<HTMLImageElement>>, eventState: EventState): void;
+    updated(eventData: Array<ElevationTile> | Array<ITile<HTMLImageElement>>, eventState: EventState): void;
     protected _onElevationLayerAdded(layer: ElevationLayer): void;
-    protected _onElevationLayerRemoved(container: ElevationLayer): void;
-    protected _onTextureLayerAdded(container: ImageLayer): void;
-    protected _onTextureLayerRemoved(container: ImageLayer): void;
-    protected _onElevationAdded(data: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    protected _onElevationRemoved(data: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    protected _onElevationUpdated(data: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    protected _onTextureAdded(data: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    protected _onTextureRemoved(data: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
-    protected _onTextureUpdated(data: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void;
+    protected _onElevationLayerRemoved(layer: ElevationLayer): void;
+    protected _onTextureLayerAdded(layer: ImageLayer): void;
+    protected _onTextureLayerRemoved(layer: ImageLayer): void;
+    protected _onElevationAdded(tile: ElevationTile): void;
+    protected _onElevationRemoved(tile: ElevationTile): void;
+    protected _onElevationUpdated(tile: ElevationTile): void;
+    protected _onTextureAdded(tile: ITile<HTMLImageElement>): void;
+    protected _onTextureRemoved(tile: ITile<HTMLImageElement>): void;
+    protected _onTextureUpdated(tile: ITile<HTMLImageElement>): void;
 }

@@ -18,6 +18,7 @@ export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITil
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
     get metrics(): ITileMetrics;
     get zindex(): number;
+    get navigation(): ITileNavigationState;
     set zindex(zindex: number);
     get zoomOffset(): number;
     set zoomOffset(zoomOffset: number);

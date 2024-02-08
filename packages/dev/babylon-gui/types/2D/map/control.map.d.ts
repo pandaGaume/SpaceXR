@@ -1,10 +1,10 @@
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
-import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core/events";
+import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { Context2DTileMap, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
-import { IImageTileMapLayer, IPipelineMessageType, ITile, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
@@ -44,10 +44,4 @@ export declare class MapControl extends GUI.Container implements ITileDisplay, I
     private _onMapValidation;
     protected _additionalProcessing(parentMeasure: GUI.Measure, context: BABYLON.ICanvasRenderingContext): void;
     protected _localDraw(context: BABYLON.ICanvasRenderingContext): void;
-    added(eventData: IPipelineMessageType<ITile<ControlTileContentType>>, eventState: EventState): void;
-    removed(eventData: IPipelineMessageType<ITile<ControlTileContentType>>, eventState: EventState): void;
-    updated(eventData: IPipelineMessageType<ITile<ControlTileContentType>>, eventState: EventState): void;
-    protected _onTileAdded(eventData: Array<ITile<ControlTileContentType>>, eventState: EventState): void;
-    protected _onTileRemoved(eventData: Array<ITile<ControlTileContentType>>, eventState: EventState): void;
-    protected _onTileUpdated(eventData: Array<ITile<ControlTileContentType>>, eventState: EventState): void;
 }

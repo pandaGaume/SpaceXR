@@ -4,7 +4,7 @@ import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { Context2DTileMap, ICanvasRenderingContext, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
-import { IImageTileMapLayer, IPipelineMessageType, ITile, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
@@ -37,7 +37,6 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
         const o = { ...MapControl.DefaultOptions, ...options };
         this._map = new Context2DTileMap(name, this, o, nav);
         this._mapValidationObserver = this._map.validationObservable.add(this._onMapValidation.bind(this));
-        this._map.linkTo(this, {});
         this._navigationManager = o.navigationManager ?? new InputsNavigationTarget<MapControl>(this._map);
         this._inputController = o.inputController ?? new ControlInputController<MapControl>(this, this._navigationManager);
     }
@@ -146,29 +145,5 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
     protected _localDraw(context: BABYLON.ICanvasRenderingContext): void {
         this._map.validate();
         this._map.draw(context as ICanvasRenderingContext, this._currentMeasure.left, this._currentMeasure.top);
-    }
-
-    /// begin ITargetBlock
-    public added(eventData: IPipelineMessageType<ITile<ControlTileContentType>>, eventState: EventState): void {
-        this._onTileAdded(eventData, eventState);
-    }
-
-    public removed(eventData: IPipelineMessageType<ITile<ControlTileContentType>>, eventState: EventState): void {
-        this._onTileRemoved(eventData, eventState);
-    }
-
-    public updated(eventData: IPipelineMessageType<ITile<ControlTileContentType>>, eventState: EventState): void {
-        this._onTileUpdated(eventData, eventState);
-    }
-    /// end ITargetBlock
-
-    protected _onTileAdded(eventData: Array<ITile<ControlTileContentType>>, eventState: EventState): void {
-        /* nothing to do here, may be override by subclass */
-    }
-    protected _onTileRemoved(eventData: Array<ITile<ControlTileContentType>>, eventState: EventState): void {
-        /* nothing to do here, may be override by subclass */
-    }
-    protected _onTileUpdated(eventData: Array<ITile<ControlTileContentType>>, eventState: EventState): void {
-        /* nothing to do here, may be override by subclass */
     }
 }

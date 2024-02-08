@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { ITargetBlock, ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { ITile, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
+import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 
@@ -71,7 +71,7 @@ export function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown)
 /// When removing a view, the map will clear the display and the navigation api of this view.
 /// Changing the display or the navigation api of a map will automatically update the display or the navigation api of all the views.
 /// </summary>
-export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, ITargetBlock<ITile<T>>, IDisposable {
+export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, IDisposable {
     // map related
     layerAddedObservable: Observable<L>;
     layerRemovedObservable: Observable<L>;

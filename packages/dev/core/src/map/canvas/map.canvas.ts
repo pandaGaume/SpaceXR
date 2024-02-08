@@ -13,27 +13,7 @@ export interface ICanvasRenderingOptions {
     alpha?: number;
 }
 
-/// <summary>
-/// Abstract class for a tile map using a canvas as display. The flow is the following:
-/// - the map is updated by the pipeline, then the map is invalidated
-/// - the map is asked for rendering, so validated: If the map is invalid, so the validable data flow is triggered and the map draw is called.
-/// So this map is not automatically redrawed, it is only redrawed when asked for validation.
-/// This is a design choice, because we want to be able to control the rendering flow. This is usefull for example when we want to render the map into a rendering pipleline, 2D or 3D
-/// One way is using RequestAnimationFrame to trigger the rendering.
-///  function updateFrame() {
-///    // Update the animation frame
-///    map.validate();
-///
-///    // Recursively request another frame update
-///    requestAnimationFrame(updateFrame);
-///  }
-///  // Start the animation
-///  requestAnimationFrame(updateFrame);
-///
-/// Additionaly, we may also use the Map in 3D rendering pipeline which obey to the same rule. The map May be a texture of a 3D object.
-///
-/// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
-/// </summary>
+// intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
 export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
     public static DefaultBackground = RGBAColor.LightGray();
 
@@ -153,6 +133,27 @@ export interface ICanvasMapOptions extends ICanvasRenderingOptions {
     inputController?: MouseInputController<HTMLCanvasElement>;
 }
 
+/// <summary>
+/// Base class for a tile map using a canvas context like for rendering. The flow is the following:
+/// - the map is updated by the pipeline, then the map is invalidated
+/// - the map is asked for rendering, so validated: If the map is invalid, so the validable data flow is triggered and the map draw is called.
+/// So this map is not automatically redrawed, it is only redrawed when asked for validation.
+/// This is a design choice, because we want to be able to control the rendering flow. This is usefull for example when we want to render the map into a rendering pipleline, 2D or 3D
+/// One way is using RequestAnimationFrame to trigger the rendering.
+///  function updateFrame() {
+///    // Update the animation frame
+///    map.validate();
+///
+///    // Recursively request another frame update
+///    requestAnimationFrame(updateFrame);
+///  }
+///  // Start the animation
+///  requestAnimationFrame(updateFrame);
+///
+/// Additionaly, we may also use the Map in 3D rendering pipeline which obey to the same rule. The map May be a texture of a 3D object.
+///
+/// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
+/// </summary>
 export class CanvasMap extends Context2DTileMap {
     _context: Nullable<CanvasRenderingContext2D>;
     _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;

@@ -61,7 +61,7 @@ export interface ITileRepository<T> {
     getActiveTiles(): Nullable<ITileCollection<T>>;
 }
 
-export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ITileRepository<T>, ISourceEvent<ITile<T>> {}
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ITileRepository<T>, ISourceBlock<ITile<T>> {}
 
 export interface ITilePipeline<T> extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;

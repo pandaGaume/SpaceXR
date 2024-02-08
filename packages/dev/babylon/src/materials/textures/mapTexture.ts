@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { CanvasDisplay, CanvasMap, ICanvasRenderingOptions } from "core/map/canvas";
-import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { IImageTileMapLayer, IPipelineMessageType, ITile, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 
 import { ISize2 } from "core/geometry";
 import { IGeo2 } from "core/geography";
@@ -66,6 +66,7 @@ export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<Ma
                 this._texture = engine.createDynamicTexture(options.width, options.height, o.generateMipMaps!, o.samplingMode!);
                 this._display = new CanvasDisplay(canvas as HTMLCanvasElement, 1, false); // do NOT automatically resize the canvas to the client size.
                 this._map = new CanvasMap(name, this._display, o, nav);
+                this._map.linkTo(this, {});
                 this._renderObserver = scene.onBeforeCameraRenderObservable.add(this._checkUpdate.bind(this));
             }
         }
@@ -165,5 +166,29 @@ export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<Ma
                 this._getEngine()!.updateDynamicTexture(this._texture, this._display.canvas, this._invertY, false, this._format || undefined, undefined, false);
             }
         }
+    }
+
+    /// begin ITargetBlock
+    public added(eventData: IPipelineMessageType<ITile<HTMLImageElement>>, eventState: EventState): void {
+        this._onTileAdded(eventData, eventState);
+    }
+
+    public removed(eventData: IPipelineMessageType<ITile<HTMLImageElement>>, eventState: EventState): void {
+        this._onTileRemoved(eventData, eventState);
+    }
+
+    public updated(eventData: IPipelineMessageType<ITile<HTMLImageElement>>, eventState: EventState): void {
+        this._onTileUpdated(eventData, eventState);
+    }
+    /// end ITargetBlock
+
+    protected _onTileAdded(eventData: Array<ITile<HTMLImageElement>>, eventState: EventState): void {
+        /* nothing to do here, may be override by subclass */
+    }
+    protected _onTileRemoved(eventData: Array<ITile<HTMLImageElement>>, eventState: EventState): void {
+        /* nothing to do here, may be override by subclass */
+    }
+    protected _onTileUpdated(eventData: Array<ITile<HTMLImageElement>>, eventState: EventState): void {
+        /* nothing to do here, may be override by subclass */
     }
 }

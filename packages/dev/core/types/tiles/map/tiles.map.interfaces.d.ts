@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { ITargetBlock, ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
+import { ITile, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 export interface ITileDisplay extends IDisposable {
@@ -41,7 +41,7 @@ export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     build(): L;
 }
 export declare function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown): b is ITileMapLayerBuilder<T, L>;
-export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, IDisposable {
+export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, ITargetBlock<ITile<T>>, IDisposable {
     layerAddedObservable: Observable<L>;
     layerRemovedObservable: Observable<L>;
     navigation: ITileNavigationState;

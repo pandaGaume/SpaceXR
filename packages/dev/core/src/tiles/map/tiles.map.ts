@@ -5,7 +5,7 @@ import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileSystemBounds } from "../tiles.system";
-import { ValidableBase } from "../../validable";
+import { TileConsumerBase } from "../pipeline";
 
 export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     layer: L;
@@ -27,11 +27,10 @@ export class TileMapLayerContainer<T, L extends ITileMapLayer<T>> implements ITi
     }
 }
 
-export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMap<T, L> {
+export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
 
-    protected _name: string;
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
     protected _layers?: Array<ITileMapLayerContainer<T, L>>;
@@ -51,8 +50,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
     //  </param>
     /// </summary>
     public constructor(name: string, display?: Nullable<ITileDisplay>, nav?: ITileNavigationState) {
-        super();
-        this._name = name ?? "";
+        super(name);
         this._display = display ?? null;
         this._bindDisplay(this._display);
 
@@ -113,6 +111,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
         if (!this._layers) this._layers = [];
         const container: ITileMapLayerContainer<T, L> = this._buildLayerContainer(layer);
         container.validationObserver = layer.validationObservable?.add(this._onLayerValidationChanged.bind(this)) ?? null;
+        layer.linkTo(this);
 
         this._layers.push(container);
         this._addSortedLayer(layer);
@@ -129,6 +128,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase im
         if (!container) {
             return;
         }
+        layer.unlinkFrom(this);
         if (container.validationObserver) {
             container.validationObserver.disconnect();
             container.validationObserver = null;

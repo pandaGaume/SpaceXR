@@ -4,7 +4,7 @@ import { ITileNavigationState } from "../navigation";
 import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
-import { ValidableBase } from "../../validable";
+import { TileConsumerBase } from "../pipeline";
 export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     layer: L;
     validationObserver?: Nullable<Observer<boolean>>;
@@ -16,10 +16,9 @@ export declare class TileMapLayerContainer<T, L extends ITileMapLayer<T>> implem
     constructor(layer: L);
     clear(): void;
 }
-export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMap<T, L> {
+export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
-    protected _name: string;
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
     protected _layers?: Array<ITileMapLayerContainer<T, L>>;

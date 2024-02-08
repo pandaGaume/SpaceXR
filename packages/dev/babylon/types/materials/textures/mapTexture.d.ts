@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { CanvasDisplay, CanvasMap, ICanvasRenderingOptions } from "core/map/canvas";
-import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { IImageTileMapLayer, IPipelineMessageType, ITile, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { ISize2 } from "core/geometry";
 import { IGeo2 } from "core/geography";
 import { EventState, Observable } from "core/events";
@@ -38,4 +38,10 @@ export declare class MapTexture extends BABYLON.Texture implements ITileNavigati
     removeLayer(layer: ImageLayer): void;
     dispose(): void;
     protected _checkUpdate(camera: BABYLON.Camera, eventState: EventState): void;
+    added(eventData: IPipelineMessageType<ITile<HTMLImageElement>>, eventState: EventState): void;
+    removed(eventData: IPipelineMessageType<ITile<HTMLImageElement>>, eventState: EventState): void;
+    updated(eventData: IPipelineMessageType<ITile<HTMLImageElement>>, eventState: EventState): void;
+    protected _onTileAdded(eventData: Array<ITile<HTMLImageElement>>, eventState: EventState): void;
+    protected _onTileRemoved(eventData: Array<ITile<HTMLImageElement>>, eventState: EventState): void;
+    protected _onTileUpdated(eventData: Array<ITile<HTMLImageElement>>, eventState: EventState): void;
 }

@@ -1,5 +1,5 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
-import { IPipelineMessageType, ITileConsumer } from "./tiles.pipeline.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITileConsumer, ITilePipelineLink } from "./tiles.pipeline.interfaces";
 import { ITile, ITileCollection } from "../tiles.interfaces";
 import { ValidableBase } from "../../validable";
 import { Nullable } from "../../types";
@@ -8,11 +8,14 @@ export declare class TileConsumerBase<T> extends ValidableBase implements ITileC
     _updatedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _addedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _removedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
+    _links: Array<ITilePipelineLink<ITile<T>>>;
     _name: string;
     constructor(id: string);
     get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
     get addedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
     get removedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
+    linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void;
+    unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
     get name(): string;
     set name(name: string);

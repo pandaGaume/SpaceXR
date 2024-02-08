@@ -74,7 +74,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
             ctx.clearRect(x, y, res.displayWidth, res.displayHeight);
         }
 
-        if (!this._orderedLayers || !this._orderedLayers.length) {
+        if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
             ctx.restore();
             return;
         }
@@ -91,7 +91,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         // we scale the canvas according the navigation scale
         ctx.scale(scale, scale);
         // every tiles are supposed to got the same size here, using same metrics
-        for (const l of this._orderedLayers ?? []) {
+        for (const l of this._zIndexOrderedLayers ?? []) {
             if (l.enabled) {
                 ctx.globalAlpha = l.alpha;
                 this._drawLayer(ctx, l);

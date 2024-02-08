@@ -73,7 +73,7 @@
 
                 // construire la carte.
                 // display may be a canvas or a display object if we want to set scale or other options.
-                const map = new SPACEXR.CanvasMap("myMap", canvas).setView(defaultCenter, defaultLod);
+                const map = new SPACEXR.CanvasMap("myMap", canvas).setViewMap(defaultCenter, defaultLod);
                 const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution: SPACEXR.Google.Attribution }).addTo(map);
 
                 const navigationManager = new SPACEXR.InputsNavigationTarget(map);
@@ -86,7 +86,7 @@
 
                 // Function to handle the compass click event
                 function handleCompassClick(event) {
-                    map.setView(undefined, undefined, 0);
+                    map.setViewMap(undefined, undefined, 0);
                     updateCompassRotation(0);
                 }
 
@@ -123,7 +123,7 @@
                 options.alpha = 0.8;
                 options.invertY = true;
                 const name = "MapTexture";
-                var map = new SPACEXR.MapTexture(name, options, scene).setView(defaultCenter, defaultLod);
+                var map = new SPACEXR.MapTexture(name, options, scene);
                 const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.StreetClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(map);
                 return map;
             }

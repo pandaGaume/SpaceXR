@@ -57,7 +57,7 @@
                 center = center ?? defaultCenter;
                 lod = lod ?? defaultLod;
 
-                const m = new SPACEXR.GUI.MapControl(name).setView(center, lod);
+                const m = new SPACEXR.GUI.MapControl(name).setViewMap(center, lod);
                 const l = (layer ?? new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution })).addTo(m);
                 return m;
             }
@@ -72,7 +72,7 @@
 
                 // Function to handle the compass click event
                 function handleCompassClick(event) {
-                    map.setView(undefined, undefined, 0);
+                    map.setViewMap(undefined, undefined, 0);
                     updateCompassRotation(0);
                 }
 

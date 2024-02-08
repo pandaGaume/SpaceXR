@@ -75,41 +75,41 @@ export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<Ma
         return this._map;
     }
     // navigation related
-    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): MapTexture {
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.setView(center, zoom, rotation);
+        this._map.setViewMap(center, zoom, rotation);
         return this;
     }
 
-    public zooming(delta: number): MapTexture {
+    public zoomMap(delta: number): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.zooming(delta);
+        this._map.zoomMap(delta);
         return this;
     }
 
-    public zoomIn(delta: number): MapTexture {
+    public zoomInMap(delta: number): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.zoomIn(delta);
+        this._map.zoomInMap(delta);
         return this;
     }
-    public zoomOut(delta: number): MapTexture {
+    public zoomOutMap(delta: number): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.zoomOut(delta);
+        this._map.zoomOutMap(delta);
         return this;
     }
-    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): MapTexture {
+    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.translatePixel(tx, ty, metrics);
+        this._map.translatePixelMap(tx, ty, metrics);
         return this;
     }
-    public translate(lat: IGeo2 | Array<number> | number, lon?: number): MapTexture {
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.translate(lat, lon);
+        this._map.translateMap(lat, lon);
         return this;
     }
-    public rotate(r: number): MapTexture {
+    public rotateMap(r: number): MapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.rotate(r);
+        this._map.rotateMap(r);
         return this;
     }
 

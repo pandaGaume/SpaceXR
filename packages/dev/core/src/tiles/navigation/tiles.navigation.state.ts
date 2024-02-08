@@ -138,7 +138,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this._stateChangedObservable;
     }
 
-    public setView(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
+    public setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
         if (center) {
             let lat = 0;
             let lon = 0;
@@ -161,22 +161,22 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this;
     }
 
-    public zoomIn(delta: number): TileNavigationState {
+    public zoomInMap(delta: number): TileNavigationState {
         this.zoom = this._lodf + Math.abs(delta);
         return this;
     }
 
-    public zooming(delta: number): TileNavigationState {
+    public zoomMap(delta: number): TileNavigationState {
         this.zoom = this._lodf + delta;
         return this;
     }
 
-    public zoomOut(delta: number): TileNavigationState {
+    public zoomOutMap(delta: number): TileNavigationState {
         this.zoom = this._lodf - Math.abs(delta);
         return this;
     }
 
-    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState {
+    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState {
         const m = metrics ?? EPSG3857.Shared;
         if (this._azimuth) {
             const p = this.rotatePointInv(tx, ty, this._cartesianCache);
@@ -191,7 +191,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this;
     }
 
-    public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState {
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState {
         if (lat) {
             let dlat;
             let dlon;
@@ -210,7 +210,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this;
     }
 
-    public rotate(r: number): TileNavigationState {
+    public rotateMap(r: number): TileNavigationState {
         this.azimuth = new Bearing(this._azimuth.value + r);
         return this;
     }
@@ -221,6 +221,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
             this._sync = null;
         }
         if (state) {
+            this.setViewMap(state.center, state.zoom, state.azimuth.value).validate();
             this._sync = new TileNavigationStateSynchronizer(state, this);
         }
         return this;
@@ -245,6 +246,6 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     }
 
     private _boundsPropertyChanged(e: PropertyChangedEventArgs<unknown, unknown>, state: EventState) {
-        this.setView(this._center, this._lodf);
+        this.setViewMap(this._center, this._lodf);
     }
 }

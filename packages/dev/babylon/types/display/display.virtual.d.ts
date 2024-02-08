@@ -1,0 +1,38 @@
+import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
+import { ICartesian2, ICartesian3, ISize3 } from "core/geometry";
+import { ICartesian2WithInfos, IPointerSource } from "core/map/inputs";
+import { Observable } from "core/events";
+import { VirtualDisplayInputsControllers } from "./display.inputs.scene";
+export declare class VirtualDisplay extends Mesh implements IPointerSource<VirtualDisplay> {
+    _onPointerMoveObservable?: Observable<ICartesian2>;
+    _onPointerOutObservable?: Observable<VirtualDisplay>;
+    _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerClickObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerEnterObservable?: Observable<VirtualDisplay>;
+    _onWheelObservable?: Observable<number>;
+    _inputsController: VirtualDisplayInputsControllers;
+    _worldTransform: TransformNode;
+    _dimension: ISize3;
+    _halfDimension: ISize3;
+    _resolution: ISize3;
+    _ppu: Vector3;
+    _inverseWorldMatrix?: Matrix;
+    constructor(name: string, dimension: ISize3, resolution: ISize3, scene?: Scene);
+    get onPointerMoveObservable(): Observable<ICartesian2>;
+    get onPointerOutObservable(): Observable<VirtualDisplay>;
+    get onPointerDownObservable(): Observable<ICartesian2WithInfos>;
+    get onPointerUpObservable(): Observable<ICartesian2WithInfos>;
+    get onPointerClickObservable(): Observable<ICartesian2WithInfos>;
+    get onPointerEnterObservable(): Observable<VirtualDisplay>;
+    get onWheelObservable(): Observable<number>;
+    get context(): TransformNode;
+    get resolution(): ISize3;
+    get dimension(): ISize3;
+    get pixelPerUnit(): ICartesian3;
+    getInverseWorldMatrix(): Matrix;
+    getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2;
+    getXYZWorldVectors(): Array<Vector3>;
+    dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void;
+    private _setupPointers;
+}

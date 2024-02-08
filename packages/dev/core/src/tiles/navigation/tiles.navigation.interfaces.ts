@@ -33,23 +33,23 @@ export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
 }
 
 export interface ITileNavigationApi<T> {
-    setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): T;
-    zooming(delta: number): T;
-    zoomIn(delta: number): T;
-    zoomOut(delta: number): T;
-    translatePixel(tx: number, ty: number, metrics?: ITileMetrics): T;
-    translate(lat: IGeo2 | Array<number> | number, lon?: number): T;
-    rotate(r: number): T;
+    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): T;
+    zoomMap(delta: number): T;
+    zoomInMap(delta: number): T;
+    zoomOutMap(delta: number): T;
+    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): T;
+    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): T;
+    rotateMap(r: number): T;
 }
 
 export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {
     if (b === null || typeof b !== "object") return false;
     return (
-        (<ITileNavigationApi<T>>b).setView !== undefined &&
-        (<ITileNavigationApi<T>>b).zoomIn !== undefined &&
-        (<ITileNavigationApi<T>>b).zoomOut !== undefined &&
-        (<ITileNavigationApi<T>>b).translatePixel !== undefined &&
-        (<ITileNavigationApi<T>>b).translate !== undefined &&
-        (<ITileNavigationApi<T>>b).rotate !== undefined
+        (<ITileNavigationApi<T>>b).setViewMap !== undefined &&
+        (<ITileNavigationApi<T>>b).zoomInMap !== undefined &&
+        (<ITileNavigationApi<T>>b).zoomOutMap !== undefined &&
+        (<ITileNavigationApi<T>>b).translatePixelMap !== undefined &&
+        (<ITileNavigationApi<T>>b).translateMap !== undefined &&
+        (<ITileNavigationApi<T>>b).rotateMap !== undefined
     );
 }

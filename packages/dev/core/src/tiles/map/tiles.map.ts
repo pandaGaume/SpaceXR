@@ -7,36 +7,17 @@ import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileSystemBounds } from "../tiles.system";
 import { TileConsumerBase } from "../pipeline";
 
-export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
-    layer: L;
-    validationObserver?: Nullable<Observer<boolean>>;
-    clear(): void;
-}
-
-export class TileMapLayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLayerContainer<T, L> {
-    layer: L;
-    validationObserver?: Nullable<Observer<boolean>>;
-
-    public constructor(layer: L) {
-        this.layer = layer;
-    }
-
-    public clear(): void {
-        this.validationObserver?.disconnect();
-        this.validationObserver = null;
-    }
-}
-
 export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
 
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
-    protected _layers?: Array<ITileMapLayerContainer<T, L>>;
+    protected _layers?: Array<L>;
 
     // internal
-    protected _orderedLayers?: L[];
+    // layer ordered by zindex
+    protected _zIndexOrderedLayers?: Array<L>;
 
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
@@ -90,37 +71,34 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
         if (this._layers) {
             for (const item of this._layers) {
-                if (!predicate || predicate(item.layer)) yield item.layer;
+                if (!predicate || predicate(item)) yield item;
             }
         }
     }
 
     public *getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L> {
-        if (this._orderedLayers) {
+        if (this._zIndexOrderedLayers) {
             if (predicate) {
-                for (const layer of this._orderedLayers ?? []) {
+                for (const layer of this._zIndexOrderedLayers ?? []) {
                     if (predicate(layer)) yield layer;
                 }
             } else {
-                yield* this._orderedLayers ?? [];
+                yield* this._zIndexOrderedLayers ?? [];
             }
         }
     }
 
     public addLayer(layer: L): void {
         if (!this._layers) this._layers = [];
-        const container: ITileMapLayerContainer<T, L> = this._buildLayerContainer(layer);
-        container.validationObserver = layer.validationObservable?.add(this._onLayerValidationChanged.bind(this)) ?? null;
         layer.linkTo(this);
 
-        this._layers.push(container);
+        this._layers.push(layer);
         this._addSortedLayer(layer);
-
-        this._onLayerAddedInternal(container);
+        this._onLayerAddedInternal(layer);
     }
 
     public removeLayer(layer: L): void {
-        const index = this._layers?.findIndex((l) => l.layer === layer);
+        const index = this._layers?.findIndex((l) => l === layer);
         if (index == undefined || index == -1) {
             return;
         }
@@ -129,74 +107,65 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
             return;
         }
         layer.unlinkFrom(this);
-        if (container.validationObserver) {
-            container.validationObserver.disconnect();
-            container.validationObserver = null;
-        }
         this._layers?.splice(index, 1);
         this._removeSortedLayer(layer);
         this._onLayerRemovedInternal(container);
     }
 
     public dispose() {
+        super.dispose();
         this._navigationUpdatedObserver?.disconnect();
         this._displayPropertyObserver?.disconnect();
-        for (const container of this._layers ?? []) {
-            if (container.validationObserver) {
-                container.validationObserver.disconnect();
-                container.validationObserver = null;
-            }
-        }
     }
 
     // navigation proxy
-    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L> {
-        this._navigation.setView(center, zoom, rotation).validate();
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L> {
+        this._navigation.setViewMap(center, zoom, rotation).validate();
         return this;
     }
 
-    public zooming(delta: number): TileMapBase<T, L> {
-        this._navigation.zooming(delta).validate();
+    public zoomMap(delta: number): TileMapBase<T, L> {
+        this._navigation.zoomMap(delta).validate();
         return this;
     }
 
-    public zoomIn(delta: number): TileMapBase<T, L> {
-        this._navigation.zoomIn(delta).validate();
+    public zoomInMap(delta: number): TileMapBase<T, L> {
+        this._navigation.zoomInMap(delta).validate();
         return this;
     }
 
-    public zoomOut(delta: number): TileMapBase<T, L> {
-        this._navigation.zoomOut(delta).validate();
+    public zoomOutMap(delta: number): TileMapBase<T, L> {
+        this._navigation.zoomOutMap(delta).validate();
         return this;
     }
 
-    public translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L> {
-        this._navigation.translatePixel(tx, ty, metrics).validate();
+    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L> {
+        this._navigation.translatePixelMap(tx, ty, metrics).validate();
         return this;
     }
 
-    public translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L> {
-        this._navigation.translate(lat, lon).validate();
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L> {
+        this._navigation.translateMap(lat, lon).validate();
         return this;
     }
 
-    public rotate(r: number): TileMapBase<T, L> {
-        this._navigation.rotate(r).validate();
+    public rotateMap(r: number): TileMapBase<T, L> {
+        this._navigation.rotateMap(r).validate();
         return this;
     }
 
     // end navigation proxy
     private _addSortedLayer(layer: L): void {
-        if (!this._orderedLayers) this._orderedLayers = [];
-        this._orderedLayers.push(layer);
-        this._orderedLayers.sort((a, b) => a.zindex - b.zindex); // sort by zindex
+        if (!this._zIndexOrderedLayers) this._zIndexOrderedLayers = [];
+        this._zIndexOrderedLayers.push(layer);
+        this._zIndexOrderedLayers.sort((a, b) => a.zindex - b.zindex); // sort by zindex
     }
 
     private _removeSortedLayer(layer: L): void {
-        if (this._orderedLayers) {
-            const index = this._orderedLayers.findIndex((l) => l === layer);
+        if (this._zIndexOrderedLayers) {
+            const index = this._zIndexOrderedLayers.findIndex((l) => l === layer);
             if (index !== -1) {
-                this._orderedLayers.splice(index, 1);
+                this._zIndexOrderedLayers.splice(index, 1);
             }
         }
     }
@@ -270,29 +239,29 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    private _onLayerAddedInternal(container: ITileMapLayerContainer<T, L>): void {
+    private _onLayerAddedInternal(layer: L): void {
         // maintain the bounds
         this._updateNavigationBounds();
         // update the layer with current navigation and display
-        container.layer.setContext(this._navigation, this._display);
+        layer.setContext(this._navigation, this._display);
         // invalidate the map
         this.invalidate();
         // we give the hand to other components
-        this._onLayerAdded(container);
+        this._onLayerAdded(layer);
         if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
-            this._layerAddedObservable.notifyObservers(container.layer, -1, this, this);
+            this._layerAddedObservable.notifyObservers(layer, -1, this, this);
         }
     }
 
-    private _onLayerRemovedInternal(container: ITileMapLayerContainer<T, L>): void {
+    private _onLayerRemovedInternal(layer: L): void {
         // maintain the bounds
         this._updateNavigationBounds();
         // invalidate the map
         this.invalidate();
         // we give the hand to other components
-        this._onLayerRemoved(container);
+        this._onLayerRemoved(layer);
         if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
-            this._layerRemovedObservable.notifyObservers(container.layer, -1, this, this);
+            this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
         }
     }
 
@@ -303,14 +272,10 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    protected _buildLayerContainer(layer: L): ITileMapLayerContainer<T, L> {
-        return new TileMapLayerContainer<T, L>(layer);
-    }
-
     protected _beforeValidate(): void {
         if (this._layers) {
-            for (const container of this._layers) {
-                container.layer.validate();
+            for (const layer of this._layers) {
+                layer.validate();
             }
         }
     }
@@ -343,11 +308,11 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onLayerAdded(container: ITileMapLayerContainer<T, L>): void {
+    protected _onLayerAdded(layer: L): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onLayerRemoved(container: ITileMapLayerContainer<T, L>): void {
+    protected _onLayerRemoved(layer: L): void {
         /* nothing to do here - overrided by subclasses */
     }
 }

@@ -44,7 +44,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
     public onWheel(src: T, delta: number): void {
         // replace delta by zoomIncrement if defined
         delta = this._zoomIncrement ? (delta < 0 ? this._zoomIncrement : -this._zoomIncrement) : delta;
-        this._target.zooming(delta);
+        this._target.zoomMap(delta);
     }
 
     public onPointerMove(src: T, x: number, y: number): void {
@@ -89,11 +89,11 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
             case 0: {
                 // translate the center of the map according the drag displacement
                 // then we have to negate the drag displacement
-                this._target.translatePixel(-dx, -dy);
+                this._target.translatePixelMap(-dx, -dy);
                 break;
             }
             case 2: {
-                this._target.rotate(dx);
+                this._target.rotateMap(dx);
                 break;
             }
         }

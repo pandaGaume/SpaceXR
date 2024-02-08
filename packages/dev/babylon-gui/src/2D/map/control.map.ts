@@ -67,34 +67,34 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
     }
 
     // navigation related
-    public setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): MapControl {
-        this._map.setView(center, zoom, rotation);
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): MapControl {
+        this._map.setViewMap(center, zoom, rotation);
         return this;
     }
 
-    public zooming(delta: number): MapControl {
-        this._map.zooming(delta);
+    public zoomMap(delta: number): MapControl {
+        this._map.zoomMap(delta);
         return this;
     }
 
-    zoomIn(delta: number): MapControl {
-        this._map.zoomIn(delta);
+    zoomInMap(delta: number): MapControl {
+        this._map.zoomInMap(delta);
         return this;
     }
-    zoomOut(delta: number): MapControl {
-        this._map.zoomOut(delta);
+    zoomOutMap(delta: number): MapControl {
+        this._map.zoomOutMap(delta);
         return this;
     }
-    translatePixel(tx: number, ty: number, metrics?: ITileMetrics): MapControl {
-        this._map.translatePixel(tx, ty, metrics);
+    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): MapControl {
+        this._map.translatePixelMap(tx, ty, metrics);
         return this;
     }
-    translate(lat: IGeo2 | Array<number> | number, lon?: number): MapControl {
-        this._map.translate(lat, lon);
+    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): MapControl {
+        this._map.translateMap(lat, lon);
         return this;
     }
-    rotate(r: number): MapControl {
-        this._map.rotate(r);
+    rotateMap(r: number): MapControl {
+        this._map.rotateMap(r);
         return this;
     }
 

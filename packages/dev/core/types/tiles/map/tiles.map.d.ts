@@ -5,24 +5,13 @@ import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileConsumerBase } from "../pipeline";
-export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
-    layer: L;
-    validationObserver?: Nullable<Observer<boolean>>;
-    clear(): void;
-}
-export declare class TileMapLayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLayerContainer<T, L> {
-    layer: L;
-    validationObserver?: Nullable<Observer<boolean>>;
-    constructor(layer: L);
-    clear(): void;
-}
 export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
     protected _display: Nullable<ITileDisplay>;
     protected _navigation: ITileNavigationState;
-    protected _layers?: Array<ITileMapLayerContainer<T, L>>;
-    protected _orderedLayers?: L[];
+    protected _layers?: Array<L>;
+    protected _zIndexOrderedLayers?: Array<L>;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
     constructor(name: string, display?: Nullable<ITileDisplay>, nav?: ITileNavigationState);
@@ -36,13 +25,13 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileCons
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
     dispose(): void;
-    setView(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L>;
-    zooming(delta: number): TileMapBase<T, L>;
-    zoomIn(delta: number): TileMapBase<T, L>;
-    zoomOut(delta: number): TileMapBase<T, L>;
-    translatePixel(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L>;
-    translate(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L>;
-    rotate(r: number): TileMapBase<T, L>;
+    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L>;
+    zoomMap(delta: number): TileMapBase<T, L>;
+    zoomInMap(delta: number): TileMapBase<T, L>;
+    zoomOutMap(delta: number): TileMapBase<T, L>;
+    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L>;
+    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L>;
+    rotateMap(r: number): TileMapBase<T, L>;
     private _addSortedLayer;
     private _removeSortedLayer;
     private _onNavigationUpdatedInternal;
@@ -54,7 +43,6 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileCons
     private _onLayerAddedInternal;
     private _onLayerRemovedInternal;
     protected _onLayerValidationChanged(valid: boolean, state: EventState): void;
-    protected _buildLayerContainer(layer: L): ITileMapLayerContainer<T, L>;
     protected _beforeValidate(): void;
     protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
     protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
@@ -63,6 +51,6 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileCons
     protected _onNavigationUpdated(nav?: ITileNavigationState): void;
     protected _onDisplayResized(display: ITileDisplay): void;
     protected _onDisplayTranslated(display: ITileDisplay): void;
-    protected _onLayerAdded(container: ITileMapLayerContainer<T, L>): void;
-    protected _onLayerRemoved(container: ITileMapLayerContainer<T, L>): void;
+    protected _onLayerAdded(layer: L): void;
+    protected _onLayerRemoved(layer: L): void;
 }

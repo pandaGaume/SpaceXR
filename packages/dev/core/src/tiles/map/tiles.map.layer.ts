@@ -40,7 +40,7 @@ export class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLaye
 
     public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {
         if (state) {
-            this._state.setView(state.center, state.zoom + this.zoomOffset, state.azimuth.value).validate();
+            this._state.setViewMap(state.center, state.zoom + this.zoomOffset, state.azimuth.value).validate();
         }
         this._pipeline.view?.setContext(this._state, display, metrics ?? this.metrics, dispatchEvent);
     }

@@ -16,7 +16,7 @@ export declare class InputsNavigationTarget<T> implements IPointerTarget<T>, IWh
     set zoomIncrement(value: number | undefined);
     onWheel(src: T, delta: number): void;
     onPointerMove(src: T, x: number, y: number): void;
-    onPointerOut(src: T, x: number, y: number): void;
+    onPointerExit(src: T, x: number, y: number): void;
     onPointerDown(src: T, x: number, y: number, buttonIndex: number): void;
     onPointerUp(src: T, x: number, y: number, buttonIndex: number): void;
     onPointerClick(src: T, x: number, y: number, buttonIndex: number): void;

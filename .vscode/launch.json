@@ -23,6 +23,22 @@
             "url": "http://localhost:1338/packages/host/www/babylon/dynamictexturemap.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Virtual Display test on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/virtualScreen.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Virtual Display with map on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/virtualScreenWithMap.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
         }
     ]
 }

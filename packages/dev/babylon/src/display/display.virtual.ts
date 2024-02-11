@@ -1,26 +1,17 @@
 import { Matrix, Mesh, Scene, TmpVectors, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
-import { ICartesian2, ICartesian3, ISize3, Size3 } from "core/geometry";
-import { ICartesian2WithInfos, IPointerSource } from "core/map/inputs";
-import { Observable } from "core/events";
-import { VirtualDisplayInputsControllers } from "./display.inputs.scene";
+import { ICartesian3, ISize3, Size3 } from "core/geometry";
+import { IPointerSource } from "core/map/inputs";
 
-export class VirtualDisplay extends Mesh implements IPointerSource<VirtualDisplay> {
-    _onPointerMoveObservable?: Observable<ICartesian2>;
-    _onPointerOutObservable?: Observable<VirtualDisplay>;
-    _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerClickObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerEnterObservable?: Observable<VirtualDisplay>;
-    _onWheelObservable?: Observable<number>;
+import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 
-    _inputsController: VirtualDisplayInputsControllers;
-
+export class VirtualDisplay extends Mesh {
     _worldTransform: TransformNode;
 
     _dimension: ISize3;
     _halfDimension: ISize3;
     _resolution: ISize3;
     _ppu: Vector3;
+    _pointerSource: IPointerSource<VirtualDisplayInputsSource>;
 
     // cached
     _inverseWorldMatrix?: Matrix;
@@ -32,70 +23,31 @@ export class VirtualDisplay extends Mesh implements IPointerSource<VirtualDispla
         this._resolution = resolution;
         this._ppu = new Vector3(resolution.width / dimension.width, resolution.height / dimension.height, resolution.thickness / dimension.thickness);
 
+        const data = this._buildVertexData();
+        data.applyToMesh(this);
+        this.scaling.x = this.scaling.y = -1;
+        this._worldTransform = new TransformNode(`${name}_context`, scene);
+        this._worldTransform.parent = this;
+        this.isPickable = true; // enable pointer events
+        this._pointerSource = new VirtualDisplayInputsSource(this);
+    }
+
+    public get pointerSource(): IPointerSource<VirtualDisplayInputsSource> {
+        return this._pointerSource;
+    }
+
+    protected _buildVertexData(): VertexData {
         const data = new VertexData();
         const sx = this.dimension.width;
         const sy = this.dimension.height;
 
         data.positions = [-0.5 * sx, 0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
         data.indices = [2, 3, 0, 0, 1, 2];
-        data.applyToMesh(this);
-        this.scaling.x = this.scaling.y = -1;
-        this._worldTransform = new TransformNode(`${name}_context`, scene);
-        this._worldTransform.parent = this;
-        this._setupPointers(this.getScene());
-        this._inputsController = new VirtualDisplayInputsControllers(this);
+        data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
+        return data;
     }
 
-    public get onPointerMoveObservable(): Observable<ICartesian2> {
-        if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new Observable<ICartesian2>();
-        }
-        return this._onPointerMoveObservable;
-    }
-
-    public get onPointerOutObservable(): Observable<VirtualDisplay> {
-        if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new Observable<VirtualDisplay>();
-        }
-        return this._onPointerOutObservable;
-    }
-
-    public get onPointerDownObservable(): Observable<ICartesian2WithInfos> {
-        if (!this._onPointerDownObservable) {
-            this._onPointerDownObservable = new Observable<ICartesian2WithInfos>();
-        }
-        return this._onPointerDownObservable;
-    }
-
-    public get onPointerUpObservable(): Observable<ICartesian2WithInfos> {
-        if (!this._onPointerUpObservable) {
-            this._onPointerUpObservable = new Observable<ICartesian2WithInfos>();
-        }
-        return this._onPointerUpObservable;
-    }
-
-    public get onPointerClickObservable(): Observable<ICartesian2WithInfos> {
-        if (!this._onPointerClickObservable) {
-            this._onPointerClickObservable = new Observable<ICartesian2WithInfos>();
-        }
-        return this._onPointerClickObservable;
-    }
-
-    public get onPointerEnterObservable(): Observable<VirtualDisplay> {
-        if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new Observable<VirtualDisplay>();
-        }
-        return this._onPointerEnterObservable;
-    }
-
-    public get onWheelObservable(): Observable<number> {
-        if (!this._onWheelObservable) {
-            this._onWheelObservable = new Observable<number>();
-        }
-        return this._onWheelObservable;
-    }
-
-    public get context(): TransformNode {
+    public get context3D(): TransformNode {
         return this._worldTransform;
     }
 
@@ -146,20 +98,6 @@ export class VirtualDisplay extends Mesh implements IPointerSource<VirtualDispla
 
     public dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void {
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
-
-        this._inputsController.dispose();
-
         this._worldTransform.dispose(doNotRecurse, disposeMaterialAndTextures);
-        this._onPointerMoveObservable?.clear();
-        this._onPointerOutObservable?.clear();
-        this._onPointerDownObservable?.clear();
-        this._onPointerUpObservable?.clear();
-        this._onPointerClickObservable?.clear();
-        this._onPointerEnterObservable?.clear();
-        this._onWheelObservable?.clear();
-    }
-
-    private _setupPointers(scene: Scene): void {
-        this.isPickable = true; // enable pointer events
     }
 }

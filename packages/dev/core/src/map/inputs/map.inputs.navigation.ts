@@ -60,7 +60,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
         }
     }
 
-    public onPointerOut(src: T, x: number, y: number): void {
+    public onPointerExit(src: T, x: number, y: number): void {
         // we let the drag continue.
     }
 
@@ -93,6 +93,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
                 break;
             }
             case 2: {
+                // rotate the map according the drag displacement
                 this._target.rotateMap(dx);
                 break;
             }

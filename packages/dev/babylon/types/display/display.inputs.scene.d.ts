@@ -1,17 +1,36 @@
-import { IDisposable, Nullable, Observer, PointerInfo, Scene, Vector2, Vector3 } from "@babylonjs/core";
+import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-export declare class VirtualDisplayInputsControllers implements IDisposable {
+import { ICartesian2WithInfos, IPointerSource } from "core/map/inputs";
+import { Observable } from "core/events";
+import { ICartesian2 } from "core/geometry";
+export declare class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplayInputsSource>, BABYLON.IDisposable {
+    _onPointerMoveObservable?: Observable<ICartesian2>;
+    _onPointerOutObservable?: Observable<VirtualDisplayInputsSource>;
+    _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerClickObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerEnterObservable?: Observable<VirtualDisplayInputsSource>;
+    _onWheelObservable?: Observable<number>;
     _display: VirtualDisplay;
-    _scenePointerObserver: Nullable<Observer<PointerInfo>>;
-    _currentPosition: Nullable<Vector2>;
+    _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
+    _currentPosition: BABYLON.Nullable<BABYLON.Vector2>;
     constructor(display: VirtualDisplay);
     get display(): VirtualDisplay;
+    protected _attach(): void;
+    protected _onPrePointer(pi: BABYLON.PointerInfoPre): void;
+    get onPointerMoveObservable(): Observable<ICartesian2>;
+    get onPointerOutObservable(): Observable<VirtualDisplayInputsSource>;
+    get onPointerDownObservable(): Observable<ICartesian2WithInfos>;
+    get onPointerUpObservable(): Observable<ICartesian2WithInfos>;
+    get onPointerClickObservable(): Observable<ICartesian2WithInfos>;
+    get onPointerEnterObservable(): Observable<VirtualDisplayInputsSource>;
+    get onWheelObservable(): Observable<number>;
     dispose(): void;
-    private onPointerEvent;
     private _onPointerDown;
     private _onPointerUp;
     private _onPointerMove;
-    protected _getDisplayPosition(): Nullable<Vector3>;
-    protected _pickFilter(mesh: Nullable<any>): boolean;
-    protected _getScene(): Scene;
+    private _onPointerWheel;
+    protected _getDisplayPosition(): BABYLON.Nullable<BABYLON.Vector3>;
+    protected _pickFilter(mesh: BABYLON.Nullable<any>): boolean;
+    protected _getScene(): BABYLON.Scene;
 }

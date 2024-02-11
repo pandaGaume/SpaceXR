@@ -4,17 +4,17 @@ export interface IWheelTarget<T> {
     onWheel(src: T, d: number): void;
 }
 export interface IPointerTarget<T> {
-    onPointerMove(src: T, x: number, y: number): void;
-    onPointerOut(src: T, x: number, y: number): void;
-    onPointerDown(src: T, x: number, y: number, buttonIndex: number): void;
-    onPointerUp(src: T, x: number, y: number, buttonIndex: number): void;
-    onPointerClick(src: T, x: number, y: number, buttonIndex: number): void;
-    onPointerEnter(src: T, x: number, y: number): void;
+    onPointerMove(src: T, x: number, y: number, id?: number): void;
+    onPointerExit(src: T, x: number, y: number, id?: number): void;
+    onPointerDown(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
+    onPointerUp(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
+    onPointerClick(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
+    onPointerEnter(src: T, x: number, y: number, id?: number): void;
 }
 export interface IDragTarget<T> {
-    onBeginDrag(src: T, dx: number, dy: number, buttonIndex: number): void;
-    onDrag(src: T, dx: number, dy: number, buttonIndex: number): void;
-    onEndDrag(src: T, dx: number, dy: number, buttonIndex: number): void;
+    onBeginDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
+    onDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
+    onEndDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
 }
 export interface ICartesian2WithInfos extends ICartesian2 {
     buttonIndex: number;

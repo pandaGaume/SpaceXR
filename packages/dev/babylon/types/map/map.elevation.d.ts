@@ -5,16 +5,16 @@ import { EventState, Observable } from "core/events";
 import { Nullable, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 export type ElevationTileContentType = IDemInfos | HTMLImageElement;
-export declare class ElevationMap extends TransformNode implements ITileNavigationApi<ElevationMap>, ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>> {
+export declare class Map3D extends TransformNode implements ITileNavigationApi<Map3D>, ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>> {
     private _map;
     constructor(name: string, display?: ITileDisplay);
-    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): ElevationMap;
-    zoomMap(delta: number): ElevationMap;
-    zoomInMap(delta: number): ElevationMap;
-    zoomOutMap(delta: number): ElevationMap;
-    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): ElevationMap;
-    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): ElevationMap;
-    rotateMap(r: number): ElevationMap;
+    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3D;
+    zoomMap(delta: number): Map3D;
+    zoomInMap(delta: number): Map3D;
+    zoomOutMap(delta: number): Map3D;
+    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): Map3D;
+    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): Map3D;
+    rotateMap(r: number): Map3D;
     get navigation(): ITileNavigationState;
     get layerAddedObservable(): Observable<ITileMapLayer<ElevationTileContentType>>;
     get layerRemovedObservable(): Observable<ITileMapLayer<ElevationTileContentType>>;

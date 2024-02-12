@@ -25,7 +25,6 @@ export class VirtualDisplay extends Mesh {
 
         const data = this._buildVertexData();
         data.applyToMesh(this);
-        this.scaling.x = this.scaling.y = -1;
         this._worldTransform = new TransformNode(`${name}_context`, scene);
         this._worldTransform.parent = this;
         this.isPickable = true; // enable pointer events
@@ -41,8 +40,8 @@ export class VirtualDisplay extends Mesh {
         const sx = this.dimension.width;
         const sy = this.dimension.height;
 
-        data.positions = [-0.5 * sx, 0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
-        data.indices = [2, 3, 0, 0, 1, 2];
+        data.positions = [0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0];
+        data.indices = [2, 0, 3, 0, 2, 1];
         data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
         return data;
     }

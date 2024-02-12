@@ -52,10 +52,9 @@
                 const options = SPACEXR.MapTexture.OptionsHD();
                 options.background = "blue";
                 options.alpha = 0.8;
-                options.invertY = true;
                 const name = "MapTexture";
                 var texture = new SPACEXR.MapTexture(name, options, scene).setViewMap(defaultCenter, defaultLod);
-                const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(texture);
+                const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.StreetClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(texture);
                 return texture;
             }
 
@@ -89,8 +88,8 @@
                     scene
                 );
                 display.position.y = 90;
-                display.rotation.x = -Math.PI / 2;
-                display.rotation.z = -Math.PI / 2;
+                //display.rotation.x = -Math.PI / 2;
+                //display.rotation.z = -Math.PI / 2;
 
                 const material = new BABYLON.StandardMaterial("mapMaterial", scene);
                 const texture = createTextureMap(scene);
@@ -102,9 +101,17 @@
                 const target = new SPACEXR.InputsNavigationTarget(texture);
                 const controller = new SPACEXR.PointerController(source, target);
 
+                source.onPointerMoveObservable.add((p) => console.log(`x:${p.x}, y:${p.y}`));
                 display.freezeWorldMatrix();
 
                 camera.setTarget(display);
+
+                const axes = new BABYLON.Debug.AxesViewer(scene, w / 10);
+                axes.xAxis.parent = display;
+                axes.yAxis.parent = display;
+                axes.zAxis.parent = display;
+
+                const mainaxes = new BABYLON.Debug.AxesViewer(scene, w / 10);
 
                 return scene;
             }

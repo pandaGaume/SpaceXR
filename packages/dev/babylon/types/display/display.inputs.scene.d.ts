@@ -16,8 +16,6 @@ export declare class VirtualDisplayInputsSource implements IPointerSource<Virtua
     _currentPosition: BABYLON.Nullable<BABYLON.Vector2>;
     constructor(display: VirtualDisplay);
     get display(): VirtualDisplay;
-    protected _attach(): void;
-    protected _onPrePointer(pi: BABYLON.PointerInfoPre): void;
     get onPointerMoveObservable(): Observable<ICartesian2>;
     get onPointerOutObservable(): Observable<VirtualDisplayInputsSource>;
     get onPointerDownObservable(): Observable<ICartesian2WithInfos>;
@@ -26,11 +24,13 @@ export declare class VirtualDisplayInputsSource implements IPointerSource<Virtua
     get onPointerEnterObservable(): Observable<VirtualDisplayInputsSource>;
     get onWheelObservable(): Observable<number>;
     dispose(): void;
+    protected _attach(): void;
+    protected _onPrePointer(pi: BABYLON.PointerInfoPre): void;
     private _onPointerDown;
     private _onPointerUp;
     private _onPointerMove;
     private _onPointerWheel;
-    protected _getDisplayPosition(): BABYLON.Nullable<BABYLON.Vector3>;
+    protected _getDisplayPosition(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.Vector3>;
     protected _pickFilter(mesh: BABYLON.Nullable<any>): boolean;
     protected _getScene(): BABYLON.Scene;
 }

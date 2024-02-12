@@ -29,38 +29,6 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
         return this._display;
     }
 
-    protected _attach(): void {
-        const scene = this._getScene();
-        if (!scene) {
-            return;
-        }
-        this._prePointerObserver = scene.onPrePointerObservable.add(this._onPrePointer.bind(this));
-    }
-
-    protected _onPrePointer(pi: BABYLON.PointerInfoPre): void {
-        switch (pi.type) {
-            case BABYLON.PointerEventTypes.POINTERMOVE: {
-                this._onPointerMove(pi);
-                break;
-            }
-            case BABYLON.PointerEventTypes.POINTERUP: {
-                this._onPointerUp(pi);
-                break;
-            }
-            case BABYLON.PointerEventTypes.POINTERDOWN: {
-                this._onPointerDown(pi);
-                break;
-            }
-            case BABYLON.PointerEventTypes.POINTERWHEEL: {
-                this._onPointerWheel(pi);
-                break;
-            }
-            default: {
-                return;
-            }
-        }
-    }
-
     public get onPointerMoveObservable(): Observable<ICartesian2> {
         if (!this._onPointerMoveObservable) {
             this._onPointerMoveObservable = new Observable<ICartesian2>();
@@ -126,6 +94,38 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
         this._onWheelObservable?.clear();
     }
 
+    protected _attach(): void {
+        const scene = this._getScene();
+        if (!scene) {
+            return;
+        }
+        this._prePointerObserver = scene.onPrePointerObservable.add(this._onPrePointer.bind(this));
+    }
+
+    protected _onPrePointer(pi: BABYLON.PointerInfoPre): void {
+        switch (pi.type) {
+            case BABYLON.PointerEventTypes.POINTERMOVE: {
+                this._onPointerMove(pi);
+                break;
+            }
+            case BABYLON.PointerEventTypes.POINTERUP: {
+                this._onPointerUp(pi);
+                break;
+            }
+            case BABYLON.PointerEventTypes.POINTERDOWN: {
+                this._onPointerDown(pi);
+                break;
+            }
+            case BABYLON.PointerEventTypes.POINTERWHEEL: {
+                this._onPointerWheel(pi);
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+    }
+
     private _onPointerDown(pointerInfo: BABYLON.PointerInfoPre): void {
         if (this._currentPosition) {
             const pixelXY = this._currentPosition; //this._display.getPixelToRef(pickedPoint);
@@ -147,12 +147,17 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
     }
 
     private _onPointerMove(pointerInfo: BABYLON.PointerInfoPre): void {
-        var meshUnderPointer = this._getScene().meshUnderPointer;
+        var scene = this._getScene();
+        if (!scene) {
+            return;
+        }
+
+        var meshUnderPointer = scene.meshUnderPointer;
         if (meshUnderPointer && meshUnderPointer !== this._display) {
             return;
         }
 
-        const current = this._getDisplayPosition();
+        const current = this._getDisplayPosition(scene);
         if (current) {
             if (this._currentPosition) {
                 pointerInfo.skipOnPointerObservable = true;
@@ -168,7 +173,7 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
             pointerInfo.skipOnPointerObservable = true;
             // enter
             if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
-                this._onPointerEnterObservable.notifyObservers(this, -1, this, this._display);
+                this._onPointerEnterObservable.notifyObservers(this, -1, this._display, this);
             }
             // then move
             const pixelXY = this._display.getPixelToRef(current);
@@ -195,9 +200,7 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
         }
     }
 
-    protected _getDisplayPosition(): BABYLON.Nullable<BABYLON.Vector3> {
-        var scene = this._getScene();
-
+    protected _getDisplayPosition(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.Vector3> {
         var pickinfo = scene.pick(scene.pointerX, scene.pointerY, this._pickFilter.bind(this));
         if (pickinfo.hit) {
             return pickinfo.pickedPoint;

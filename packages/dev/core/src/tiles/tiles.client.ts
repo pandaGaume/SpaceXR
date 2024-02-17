@@ -2,6 +2,7 @@ import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, IT
 import { Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { TileAddress } from "./address/tiles.address";
+import { IGeoBounded } from "../geography";
 
 export class TileWebClientOptions {
     public static Default = new TileWebClientOptions({ maxRetry: 3, initialDelay: 1000 });
@@ -79,7 +80,7 @@ export class TileWebClient<T> implements ITileClient<T> {
         return this._metrics;
     }
 
-    public async fetchAsync(request: ITileAddress, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
+    public async fetchAsync(request: ITileAddress, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
         if (!request) {
             throw new FetchError(`invalid request parameter.`);
         }

@@ -4,13 +4,13 @@ import { Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource } from "core/
 import { Observable } from "core/events";
 import { ICartesian2 } from "core/geometry";
 
-export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplayInputsSource>, BABYLON.IDisposable {
+export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisposable {
     _onPointerMoveObservable?: Observable<ICartesian2>;
-    _onPointerOutObservable?: Observable<VirtualDisplayInputsSource>;
+    _onPointerOutObservable?: Observable<IPointerSource>;
     _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
     _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
     _onPointerClickObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerEnterObservable?: Observable<VirtualDisplayInputsSource>;
+    _onPointerEnterObservable?: Observable<IPointerSource>;
     _onWheelObservable?: Observable<number>;
 
     _display: VirtualDisplay;
@@ -36,9 +36,9 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
         return this._onPointerMoveObservable;
     }
 
-    public get onPointerOutObservable(): Observable<VirtualDisplayInputsSource> {
+    public get onPointerOutObservable(): Observable<IPointerSource> {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new Observable<VirtualDisplayInputsSource>();
+            this._onPointerOutObservable = new Observable<IPointerSource>();
         }
         return this._onPointerOutObservable;
     }
@@ -64,9 +64,9 @@ export class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplay
         return this._onPointerClickObservable;
     }
 
-    public get onPointerEnterObservable(): Observable<VirtualDisplayInputsSource> {
+    public get onPointerEnterObservable(): Observable<IPointerSource> {
         if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new Observable<VirtualDisplayInputsSource>();
+            this._onPointerEnterObservable = new Observable<IPointerSource>();
         }
         return this._onPointerEnterObservable;
     }

@@ -3,13 +3,13 @@ import { VirtualDisplay } from "./display.virtual";
 import { ICartesian2WithInfos, IPointerSource } from "core/map/inputs";
 import { Observable } from "core/events";
 import { ICartesian2 } from "core/geometry";
-export declare class VirtualDisplayInputsSource implements IPointerSource<VirtualDisplayInputsSource>, BABYLON.IDisposable {
+export declare class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisposable {
     _onPointerMoveObservable?: Observable<ICartesian2>;
-    _onPointerOutObservable?: Observable<VirtualDisplayInputsSource>;
+    _onPointerOutObservable?: Observable<IPointerSource>;
     _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
     _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
     _onPointerClickObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerEnterObservable?: Observable<VirtualDisplayInputsSource>;
+    _onPointerEnterObservable?: Observable<IPointerSource>;
     _onWheelObservable?: Observable<number>;
     _display: VirtualDisplay;
     _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
@@ -17,11 +17,11 @@ export declare class VirtualDisplayInputsSource implements IPointerSource<Virtua
     constructor(display: VirtualDisplay);
     get display(): VirtualDisplay;
     get onPointerMoveObservable(): Observable<ICartesian2>;
-    get onPointerOutObservable(): Observable<VirtualDisplayInputsSource>;
+    get onPointerOutObservable(): Observable<IPointerSource>;
     get onPointerDownObservable(): Observable<ICartesian2WithInfos>;
     get onPointerUpObservable(): Observable<ICartesian2WithInfos>;
     get onPointerClickObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerEnterObservable(): Observable<VirtualDisplayInputsSource>;
+    get onPointerEnterObservable(): Observable<IPointerSource>;
     get onWheelObservable(): Observable<number>;
     dispose(): void;
     protected _attach(): void;

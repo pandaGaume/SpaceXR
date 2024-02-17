@@ -2,6 +2,7 @@ import { Nullable } from "../types";
 import { FetchResult, ITileAddress, ITileClient, ITileMetrics } from "../tiles/tiles.interfaces";
 import { IDemInfos } from "./dem.interfaces";
 import { DemInfos } from "./dem.infos";
+import { IGeoBounded } from "../geography";
 
 export class DemTileWebClient implements ITileClient<IDemInfos> {
     _name: string;
@@ -31,11 +32,11 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         return this._elevationsDataSource.metrics;
     }
 
-    public async fetchAsync(request: ITileAddress, ...userArgs: unknown[]): Promise<FetchResult<Nullable<IDemInfos>>> {
+    public async fetchAsync(request: ITileAddress, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<Nullable<IDemInfos>>> {
         const requests: Array<Promise<FetchResult<Nullable<Float32Array> | Nullable<Uint8ClampedArray> | Nullable<HTMLImageElement>>>> = [];
-        requests.push(this._elevationsDataSource.fetchAsync(request, ...userArgs));
+        requests.push(this._elevationsDataSource.fetchAsync(request, env, ...userArgs));
         if (this._normalsDataSource) {
-            requests.push(this._normalsDataSource.fetchAsync(request, ...userArgs));
+            requests.push(this._normalsDataSource.fetchAsync(request, env, ...userArgs));
         }
 
         const results = await Promise.allSettled(requests);

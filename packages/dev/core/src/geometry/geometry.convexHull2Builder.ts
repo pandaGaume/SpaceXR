@@ -1,26 +1,23 @@
 import { Nullable } from "../types";
 
-export class ConvexHullBuilder {
-    _hull: Array<number>;
+export class ConvexHull2Builder {
     _positions: Float32Array;
     _stride: number;
     _n: number;
 
     public constructor(positions: Float32Array, stride: number = 2) {
+        if (stride < 2) throw new Error("stride must be greater than 1");
         this._positions = positions;
         this._stride = stride;
         this._n = this._positions.length / this._stride;
-        this._hull = [];
     }
 
-    public get ConvexHull(): Array<number> | undefined {
-        return this._hull;
-    }
-
-    public withPositions(positions: Float32Array, stride: number = 2) {
+    public withPositions(positions: Float32Array, stride: number = 2): ConvexHull2Builder {
+        if (stride < 2) throw new Error("stride must be greater than 1");
         this._positions = positions;
         this._stride = stride;
         this._n = this._positions.length / this._stride;
+        return this;
     }
 
     public build(): Nullable<Array<number>> {
@@ -28,7 +25,8 @@ export class ConvexHullBuilder {
             return null;
         }
 
-        this._hull = this._hull.length ? [] : this._hull;
+        // re-init the hull
+        const hull: Array<number> = [];
 
         // Finding the point with minimum and
         // maximum x-coordinate
@@ -42,14 +40,14 @@ export class ConvexHullBuilder {
         // Recursively find convex hull points on
         // one side of line joining a[min_x] and
         // a[max_x]
-        this.quickHull(min_x, max_x, 1);
+        this.quickHull(min_x, max_x, 1, hull);
 
         // Recursively find convex hull points on
         // other side of line joining a[min_x] and
         // a[max_x]
-        this.quickHull(min_x, max_x, -1);
+        this.quickHull(min_x, max_x, -1, hull);
 
-        return this._hull;
+        return hull;
     }
 
     // Returns the side of point p with respect to line
@@ -71,7 +69,7 @@ export class ConvexHullBuilder {
 
     // End points of line L are p1 and p2. side can have value
     // 1 or -1 specifying each of the parts made by the line L
-    private quickHull(p1: number, p2: number, side: number) {
+    private quickHull(p1: number, p2: number, side: number, hull: Array<number>) {
         let ind = -1;
         let max_dist = 0;
 
@@ -88,12 +86,12 @@ export class ConvexHullBuilder {
         // If no point is found, add the end points
         // of L to the convex hull.
         if (ind == -1) {
-            this._hull.push(this._positions[p1], this._positions[p1 + 1], this._positions[p2], this._positions[p2 + 1]);
+            hull.push(this._positions[p1], this._positions[p1 + 1], this._positions[p2], this._positions[p2 + 1]);
             return;
         }
 
         // Recur for the two parts divided by a[ind]
-        this.quickHull(ind, p1, -this.findSide(ind, p1, p2));
-        this.quickHull(ind, p2, -this.findSide(ind, p2, p1));
+        this.quickHull(ind, p1, -this.findSide(ind, p1, p2), hull);
+        this.quickHull(ind, p2, -this.findSide(ind, p2, p1), hull);
     }
 }

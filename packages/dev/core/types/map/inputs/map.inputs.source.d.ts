@@ -10,17 +10,17 @@ export declare class Cartesian2WithInfos extends Cartesian2 implements ICartesia
     constructor(x: number, y: number, buttonIndex?: number);
     get buttonIndex(): number;
 }
-export declare class PointerController<T extends IPointerSource<T>> implements IDisposable {
-    _src: T;
-    _target: InputsNavigationTarget<T>;
+export declare class PointerController<S extends IPointerSource> implements IDisposable {
+    _src: S;
+    _target: InputsNavigationTarget<S>;
     _moveObserver?: Nullable<Observer<ICartesian2>>;
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
-    constructor(src: T, target: InputsNavigationTarget<T>);
+    constructor(src: S, target: InputsNavigationTarget<S>);
     dispose(): void;
-    protected _attachControl(src: T): void;
-    protected _detachControl(src: T): void;
+    protected _attachControl(src: S): void;
+    protected _detachControl(src: S): void;
     protected _onPointerMove(v: ICartesian2, e: EventState): void;
     protected _onPointerDown(v: ICartesian2WithInfos, e: EventState): void;
     protected _onPointerUp(v: ICartesian2WithInfos, e: EventState): void;

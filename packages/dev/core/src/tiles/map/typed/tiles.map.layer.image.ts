@@ -1,7 +1,7 @@
-import { PropertyChangedEventArgs } from "../../events";
-import { ITileAddress, ITileDatasource, ITileProvider } from "../tiles.interfaces";
-import { IImageTileMapLayer, IImageTileMapLayerOptions } from "./tiles.map.interfaces";
-import { TileMapLayer } from "./tiles.map.layer";
+import { PropertyChangedEventArgs } from "../../../events";
+import { ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
+import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
+import { TileMapLayer } from "../tiles.map.layer";
 
 export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImageTileMapLayer {
     _alpha: number;

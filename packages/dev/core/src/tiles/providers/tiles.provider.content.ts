@@ -61,7 +61,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         this._cache.set(cacheKey, c);
 
         // then try to get it from the datasource
-        this._datasource.fetchAsync(address).then(
+        this._datasource.fetchAsync(address, tile).then(
             (result) => {
                 this._cache.set(this.buildCacheKey(address.quadkey), result.content);
                 tile.content = result.content;

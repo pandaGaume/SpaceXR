@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { ITileAddress, ITileDatasource, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 
@@ -29,9 +29,14 @@ export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions
     addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T>;
 }
 
+export interface ICompoundLayerDataSource<T> extends ITileDatasource<T, ITileAddress> {
+    layers: Array<ITileMapLayer<T>>;
+}
+
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions {
     alpha: number;
 }
+
 
 export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement>, IImageTileMapLayerOptions {}
 

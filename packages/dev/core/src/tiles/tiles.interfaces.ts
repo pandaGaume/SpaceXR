@@ -152,7 +152,7 @@ export class FetchResult<T> {
 
 export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
-    fetchAsync(address: A, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }
 
 export function IsTileDatasource<T, A extends ITileAddress>(b: unknown): b is ITileDatasource<T, A> {

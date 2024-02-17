@@ -1,6 +1,6 @@
-import { ITileProvider, IsTileProviderBuilder } from "../tiles.interfaces";
-import { IImageTileMapLayerOptions } from "./tiles.map.interfaces";
-import { AbstractTileMapLayerBuilder } from "./tiles.map.layer.builder";
+import { ITileProvider, IsTileProviderBuilder } from "../../tiles.interfaces";
+import { IImageTileMapLayerOptions } from "../tiles.map.interfaces";
+import { AbstractTileMapLayerBuilder } from "../tiles.map.layer.builder";
 import { ImageLayer } from "./tiles.map.layer.image";
 
 export class ImageLayerBuilder extends AbstractTileMapLayerBuilder<HTMLImageElement, ImageLayer> {

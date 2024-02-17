@@ -1,5 +1,5 @@
-import { ITileProvider, IsTileProviderBuilder } from "../tiles.interfaces";
-import { AbstractTileMapLayerBuilder } from "./tiles.map.layer.builder";
+import { ITileProvider, IsTileProviderBuilder } from "../../tiles.interfaces";
+import { AbstractTileMapLayerBuilder } from "../tiles.map.layer.builder";
 import { Float32Layer } from "./tiles.map.layer.float32";
 
 export class Float32LayerBuilder extends AbstractTileMapLayerBuilder<Float32Array, Float32Layer> {

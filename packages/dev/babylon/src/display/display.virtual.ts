@@ -1,27 +1,26 @@
 import { Matrix, Mesh, Scene, TmpVectors, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
-import { ICartesian3, ISize3, Size3 } from "core/geometry";
-import { IPointerSource } from "core/map/inputs";
+import { ICartesian3, ISize2, Size2 } from "core/geometry";
 
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 
 export class VirtualDisplay extends Mesh {
     _worldTransform: TransformNode;
 
-    _dimension: ISize3;
-    _halfDimension: ISize3;
-    _resolution: ISize3;
+    _dimension: ISize2;
+    _halfDimension: ISize2;
+    _resolution: ISize2;
     _ppu: Vector3;
-    _pointerSource: IPointerSource<VirtualDisplayInputsSource>;
+    _pointerSource: VirtualDisplayInputsSource;
 
     // cached
     _inverseWorldMatrix?: Matrix;
 
-    public constructor(name: string, dimension: ISize3, resolution: ISize3, scene?: Scene) {
+    public constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene) {
         super(name, scene);
         this._dimension = dimension;
-        this._halfDimension = new Size3(dimension.width / 2, dimension.height / 2, dimension.thickness / 2);
+        this._halfDimension = new Size2(dimension.width / 2, dimension.height / 2);
         this._resolution = resolution;
-        this._ppu = new Vector3(resolution.width / dimension.width, resolution.height / dimension.height, resolution.thickness / dimension.thickness);
+        this._ppu = new Vector3(resolution.width / dimension.width, resolution.height / dimension.height);
 
         const data = this._buildVertexData();
         data.applyToMesh(this);
@@ -31,7 +30,7 @@ export class VirtualDisplay extends Mesh {
         this._pointerSource = new VirtualDisplayInputsSource(this);
     }
 
-    public get pointerSource(): IPointerSource<VirtualDisplayInputsSource> {
+    public get pointerSource(): VirtualDisplayInputsSource {
         return this._pointerSource;
     }
 
@@ -50,11 +49,11 @@ export class VirtualDisplay extends Mesh {
         return this._worldTransform;
     }
 
-    public get resolution(): ISize3 {
+    public get resolution(): ISize2 {
         return this._resolution;
     }
 
-    public get dimension(): ISize3 {
+    public get dimension(): ISize2 {
         return this._dimension;
     }
 

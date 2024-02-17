@@ -19,12 +19,12 @@ export interface IDragTarget<T> {
 export interface ICartesian2WithInfos extends ICartesian2 {
     buttonIndex: number;
 }
-export interface IPointerSource<T> {
+export interface IPointerSource {
     onPointerMoveObservable: Observable<ICartesian2>;
-    onPointerOutObservable: Observable<T>;
+    onPointerOutObservable: Observable<IPointerSource>;
     onPointerDownObservable: Observable<ICartesian2WithInfos>;
     onPointerUpObservable: Observable<ICartesian2WithInfos>;
     onPointerClickObservable: Observable<ICartesian2WithInfos>;
-    onPointerEnterObservable: Observable<T>;
+    onPointerEnterObservable: Observable<IPointerSource>;
     onWheelObservable: Observable<number>;
 }

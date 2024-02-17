@@ -2,8 +2,6 @@ export * from "./tiles.map";
 export * from "./tiles.map.builder";
 export * from "./tiles.map.interfaces";
 export * from "./tiles.map.layer";
-export * from "./tiles.map.layer.float32";
-export * from "./tiles.map.layer.image";
+export * from "./typed/index";
 export * from "./tiles.map.layer.builder";
-export * from "./tiles.map.layer.builder.float32";
-export * from "./tiles.map.layer.builder.image";
+

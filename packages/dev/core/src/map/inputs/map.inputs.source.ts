@@ -21,15 +21,15 @@ export class Cartesian2WithInfos extends Cartesian2 implements ICartesian2WithIn
 /// <summary>
 /// Pointer input controller. Map basic pointer source event and forward them to the target.
 /// </summary>
-export class PointerController<T extends IPointerSource<T>> implements IDisposable {
-    _src: T;
-    _target: InputsNavigationTarget<T>;
+export class PointerController<S extends IPointerSource> implements IDisposable {
+    _src: S;
+    _target: InputsNavigationTarget<S>;
     _moveObserver?: Nullable<Observer<ICartesian2>>;
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
 
-    public constructor(src: T, target: InputsNavigationTarget<T>) {
+    public constructor(src: S, target: InputsNavigationTarget<S>) {
         this._src = src;
         this._target = target;
         this._attachControl(this._src);
@@ -41,14 +41,14 @@ export class PointerController<T extends IPointerSource<T>> implements IDisposab
         }
     }
 
-    protected _attachControl(src: T) {
+    protected _attachControl(src: S) {
         this._moveObserver = src.onPointerMoveObservable.add(this._onPointerMove.bind(this));
         this._downObserver = src.onPointerDownObservable.add(this._onPointerDown.bind(this));
         this._upObserver = src.onPointerUpObservable.add(this._onPointerUp.bind(this));
         this._wheelObserver = src.onWheelObservable.add(this._onWheel.bind(this));
     }
 
-    protected _detachControl(src: T) {
+    protected _detachControl(src: S) {
         if (this._moveObserver) {
             src.onPointerMoveObservable.remove(this._moveObserver);
         }

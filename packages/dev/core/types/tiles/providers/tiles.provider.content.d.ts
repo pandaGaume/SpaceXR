@@ -12,8 +12,8 @@ export declare class TileContentProvider<T> implements ITileContentProvider<T> {
     get metrics(): ITileMetrics;
     dispose(): void;
     fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T>;
-    protected buildTemporaryContent(address: ITileAddress): TileContentType<T>;
-    protected buildAlternativContent(address: ITileAddress): TileContentType<T>;
+    protected _buildTemporaryContent(address: ITileAddress): TileContentType<T>;
+    protected _buildAlternativContent(address: ITileAddress): TileContentType<T>;
     protected _buildPrefix(): string;
-    private buildCacheKey;
+    private _buildCacheKey;
 }

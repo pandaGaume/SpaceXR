@@ -46,7 +46,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
 
     public fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T> {
         const address = tile.address;
-        const cacheKey = this.buildCacheKey(address.quadkey);
+        const cacheKey = this._buildCacheKey(address.quadkey);
 
         // first have a look in cache
         if (this._cache.contains(cacheKey)) {
@@ -55,7 +55,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         }
 
         // then try to build a temporary content using alternative method
-        let c = this.buildTemporaryContent(address);
+        let c = this._buildTemporaryContent(address);
 
         // store the content, either null or not. This flag the address as beeing processed.
         this._cache.set(cacheKey, c);
@@ -63,7 +63,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         // then try to get it from the datasource
         this._datasource.fetchAsync(address, tile).then(
             (result) => {
-                this._cache.set(this.buildCacheKey(address.quadkey), result.content);
+                this._cache.set(this._buildCacheKey(address.quadkey), result.content);
                 tile.content = result.content;
                 callback?.(tile);
             },
@@ -75,12 +75,12 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return tile;
     }
 
-    protected buildTemporaryContent(address: ITileAddress): TileContentType<T> {
+    protected _buildTemporaryContent(address: ITileAddress): TileContentType<T> {
         // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
         // in oder to avoid empty tile to be displayed during pan and zoom operation.
         return null;
     }
-    protected buildAlternativContent(address: ITileAddress): TileContentType<T> {
+    protected _buildAlternativContent(address: ITileAddress): TileContentType<T> {
         // TODO : implement a strategy to build an alternativ content
         // this could be used when the datasource is not available or when the lookup operation has failed
         // or when the content is unavailable on purpose such as a 404 error for sea based tile
@@ -95,7 +95,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return p;
     }
 
-    private buildCacheKey(key: string): string {
+    private _buildCacheKey(key: string): string {
         return this._prefix ? `${key}` : `${this._prefix}${key}`;
     }
 }

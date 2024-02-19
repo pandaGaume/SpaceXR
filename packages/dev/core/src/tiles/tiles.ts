@@ -2,16 +2,13 @@ import { IEnvelope } from "../geography/geography.interfaces";
 import { Size3 } from "../geometry/geometry.size";
 import { Geo3 } from "../geography/geography.position";
 import { Envelope } from "../geography/geography.envelope";
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContentType } from "./tiles.interfaces";
+import { ITile, ITileAddress, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./address/tiles.address";
-import { TileBuilder } from "./tiles.builder";
 
 export class Tile<T> extends TileAddress implements ITile<T> {
-    public static SharedBuilder<T>(): ITileBuilder<T> {
-        return new TileBuilder<T>();
-    }
+
 
     public static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
         if (metrics) {
@@ -35,10 +32,19 @@ export class Tile<T> extends TileAddress implements ITile<T> {
     private _value: TileContentType<T>;
     private _env?: IEnvelope;
     private _rect?: IRectangle;
+    private _ns?: string;
 
     public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T>) {
         super(x, y, levelOfDetail);
         this._value = data;
+    }
+
+    public get namespace(): string {
+        return this._ns || "";
+    }
+
+    public set namespace(v: string) {
+        this._ns = v;
     }
 
     public get address(): ITileAddress {

@@ -14,9 +14,18 @@ export class TileCollection<T> implements ITileCollection<T> {
     private _items: Array<ITile<T>>;
     private _bounds?: IEnvelope;
     private _rect?: IRectangle;
+    private _ns?: string;
 
     public constructor(...items: Array<ITile<T>>) {
         this._items = items;
+    }
+
+    public get namespace(): string {
+        return this._ns ?? "";
+    }
+
+    public set namespace(ns: string) {
+        this._ns = ns;
     }
 
     public get count(): number {

@@ -1,5 +1,5 @@
 import { IDisposable, Nullable } from "../types";
-import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
+import { IEnvelope, IGeo2, IGeoBounded, IsGeoBounded } from "../geography/geography.interfaces";
 import { IBounded, ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
@@ -43,6 +43,22 @@ export interface ITile<T> extends IGeoBounded, IBounded {
     quadkey: string; // shortcut for address.quadkey
 }
 
+export function IsTile<T>(b: unknown): b is ITile<T> {
+    if (typeof b !== "object" || b === null) return false;
+    return IsGeoBounded(b) && (<any>b).address !== undefined && (<any>b).content !== undefined;
+}
+
+export interface ICompoundTile<T> extends ITile<Array<ITileCollection<T>>> {
+    childTiles: Array<ITileCollection<T>>;
+    addChildTiles(...children: Array<ITile<T>>): void;
+    removeChildTiles(...children: Array<ITile<T>>): void;
+}
+
+export function IsCompoundTile<T>(b: unknown): b is ICompoundTile<T> {
+    if (typeof b !== "object" || b === null) return false;
+    return IsTile(b) && (<any>b).children !== undefined;
+}
+
 /// <summary>
 /// The TileCollection is a collection of tiles, it is used to store the active tiles of a provider
 /// Tile are stored using a quadkey index, this allow fast access to a tile using its address only.
@@ -50,6 +66,7 @@ export interface ITile<T> extends IGeoBounded, IBounded {
 /// The collection also provide the overall bounds (geographical and pixel) of the tiles it contains.
 /// </summary>
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
+    namespace?: string;
     count: number;
     has(address: ITileAddress): boolean;
     get(address: ITileAddress): ITile<T> | undefined;
@@ -62,6 +79,22 @@ export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBo
     intersect(bounds?: IRectangle | IEnvelope): IterableIterator<ITile<T>>;
 }
 
+export function IsTileCollection<T>(b: unknown): b is ITileCollection<T> {
+    if (typeof b !== "object" || b === null) return false;
+    return (
+        (<any>b).count !== undefined &&
+        (<any>b).has !== undefined &&
+        (<any>b).get !== undefined &&
+        (<any>b).getAll !== undefined &&
+        (<any>b).add !== undefined &&
+        (<any>b).addAll !== undefined &&
+        (<any>b).remove !== undefined &&
+        (<any>b).removeAll !== undefined &&
+        (<any>b).clear !== undefined &&
+        (<any>b).intersect !== undefined
+    );
+}
+
 export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
@@ -72,7 +105,7 @@ export interface ITileBuilder<T> {
     withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
-    build(): ITile<T>;
+    build(): ITile<T> | ICompoundTile<T>;
 }
 
 export enum CellCoordinateReference {
@@ -177,7 +210,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     name: string; // usually shortcut for datasource?.name
     datasource: ITileDatasource<T, ITileAddress>; // the underlying data source
     accept(address: ITileAddress): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
-    fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
+    fetchContent(tile: ITile<T> | ICompoundTile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
 }
 
 export interface ITileContentProviderBuilder<T> {

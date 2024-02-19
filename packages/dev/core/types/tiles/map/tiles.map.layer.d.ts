@@ -1,32 +1,18 @@
 import { IMemoryCache } from "../../cache";
 import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
-import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
-import { ITilePipeline, ITileView, TileConsumerBase } from "../pipeline";
+import { ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
+import { ITilePipeline, ITileView } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
-export declare class TileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
-    _zindex: number;
-    _zoomOffset?: number;
-    _attribution?: string;
-    _enabled: boolean;
+import { AbstractTileMapLayer } from "./tiles.map.layer.abstract";
+export declare class TileMapLayer<T> extends AbstractTileMapLayer<T> implements ITileMapLayer<T> {
     protected _pipeline: ITilePipeline<T>;
     _pipelinePropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>>;
     _provider: ITileProvider<T>;
-    _state: ITileNavigationState;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean);
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
     get metrics(): ITileMetrics;
-    get zindex(): number;
-    get navigation(): ITileNavigationState;
-    set zindex(zindex: number);
-    get zoomOffset(): number;
-    set zoomOffset(zoomOffset: number);
-    get attribution(): string | undefined;
-    set attribution(attribution: string | undefined);
-    get enabled(): boolean;
-    set enabled(enabled: boolean);
-    addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T>;
     dispose(): void;
     getActiveTiles(): Nullable<ITileCollection<T>>;
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileProvider<T>;

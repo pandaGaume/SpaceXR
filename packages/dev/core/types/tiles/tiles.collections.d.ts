@@ -7,7 +7,10 @@ export declare class TileCollection<T> implements ITileCollection<T> {
     private _items;
     private _bounds?;
     private _rect?;
+    private _ns?;
     constructor(...items: Array<ITile<T>>);
+    get namespace(): string;
+    set namespace(ns: string);
     get count(): number;
     get index(): Map<string, ITile<T>>;
     get bounds(): IEnvelope | undefined;

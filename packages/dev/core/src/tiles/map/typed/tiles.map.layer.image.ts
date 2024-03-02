@@ -1,3 +1,4 @@
+import { ICanvasRenderingContext } from "@babylonjs/core/Engines/ICanvas";
 import { PropertyChangedEventArgs } from "../../../events";
 import { ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
@@ -31,6 +32,29 @@ export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImage
                 return;
             }
             this._alpha = a;
+        }
+    }
+    public draw(ctx: ICanvasRenderingContext): void {
+        const tiles = this.activTiles;
+        if (!tiles || !tiles.count) {
+            return;
+        }
+
+        const metrics = this.metrics;
+        const center = metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+
+        for (const t of tiles) {
+            if (t.rect) {
+                const x = t.rect.x - center.x;
+                const y = t.rect.y - center.y;
+                const item = t.content ?? null; // trick to address erroness tile.
+                if (item) {
+                    if (item instanceof HTMLImageElement) {
+                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
+                        continue;
+                    }
+                }
+            }
         }
     }
 }

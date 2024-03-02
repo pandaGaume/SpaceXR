@@ -1,8 +1,8 @@
 import { Scalar, RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
+import { TileMapBase, ITileDisplay, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ICanvasRenderingContext } from "./map.canvas.interfaces";
+import { ICanvasRenderingContext } from "../../engine/icanvas";
 import { InputsNavigationTarget, MouseInputController } from "../inputs";
 
 export type CanvasTileContentType = HTMLImageElement;
@@ -94,37 +94,10 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         for (const l of this._zIndexOrderedLayers ?? []) {
             if (l.enabled) {
                 ctx.globalAlpha = l.alpha;
-                this._drawLayer(ctx, l);
+                l.draw(ctx);
             }
         }
         ctx.restore();
-    }
-
-    /// <summary>
-    /// Draw the layer on the canvas. This method is messaged from the draw method.
-    /// </summary>
-    protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void {
-        const tiles = layer.activTiles;
-        if (!tiles || !tiles.count) {
-            return;
-        }
-
-        const metrics = layer.metrics;
-        const center = metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
-
-        for (const t of tiles) {
-            if (t.rect) {
-                const x = t.rect.x - center.x;
-                const y = t.rect.y - center.y;
-                const item = t.content ?? null; // trick to address erroness tile.
-                if (item) {
-                    if (item instanceof HTMLImageElement) {
-                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
-                        continue;
-                    }
-                }
-            }
-        }
     }
 }
 

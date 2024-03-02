@@ -1,9 +1,10 @@
 import { Observable } from "../../events/events.observable";
-import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
+import { IHasNavigationState, ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
 import { IHasActivTiles, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
+import { ICanvasRenderingContext } from "../../engine/icanvas";
 export interface ITileDisplay extends IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     displayHeight: number;
@@ -15,7 +16,7 @@ export interface ITileMapLayerOptions {
     zoomOffset?: number;
     attribution?: string;
 }
-export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext {
+export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext, IHasNavigationState {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
@@ -25,6 +26,7 @@ export interface IImageTileMapLayerOptions extends ITileMapLayerOptions {
     alpha: number;
 }
 export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement>, IImageTileMapLayerOptions {
+    draw(ctx: ICanvasRenderingContext): void;
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
 }
@@ -41,10 +43,9 @@ export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     build(): L;
 }
 export declare function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown): b is ITileMapLayerBuilder<T, L>;
-export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileNavigationApi<S>, IDisposable {
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileNavigationApi<S>, IHasNavigationState, IDisposable {
     layerAddedObservable: Observable<L>;
     layerRemovedObservable: Observable<L>;
-    navigation: ITileNavigationState;
     getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
     addLayer(layer: L): void;
     removeLayer(layer: L): void;

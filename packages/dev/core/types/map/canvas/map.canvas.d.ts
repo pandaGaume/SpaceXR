@@ -1,8 +1,8 @@
 import { RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplay, ITileMapLayer, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
+import { TileMapBase, ITileDisplay, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ICanvasRenderingContext } from "./map.canvas.interfaces";
+import { ICanvasRenderingContext } from "../../engine/icanvas";
 import { InputsNavigationTarget, MouseInputController } from "../inputs";
 export type CanvasTileContentType = HTMLImageElement;
 export interface ICanvasRenderingOptions {
@@ -20,7 +20,6 @@ export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType,
     get alpha(): number;
     set alpha(v: number);
     draw(ctx: ICanvasRenderingContext, xoffset?: number, yoffset?: number): void;
-    protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void;
 }
 export interface ICanvasMapOptions extends ICanvasRenderingOptions {
     navigationManager?: InputsNavigationTarget<HTMLCanvasElement>;

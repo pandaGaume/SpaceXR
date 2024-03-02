@@ -3,11 +3,12 @@ import * as GUI from "@babylonjs/gui";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
-import { Context2DTileMap, ICanvasRenderingContext, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
+import { Context2DTileMap, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
 import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
+import { ICanvasRenderingContext } from "core/engine/icanvas";
 
 export type ControlTileContentType = HTMLImageElement;
 

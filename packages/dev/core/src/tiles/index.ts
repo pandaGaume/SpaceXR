@@ -16,4 +16,3 @@ export * from "./tiles.urlBuilder";
 export * from "./tiles.section";
 export * from "./tiles.collections";
 export * from "./tiles.system";
-export * from "./tiles.compound";

@@ -26,12 +26,6 @@ export interface ITile<T> extends IGeoBounded, IBounded {
     quadkey: string;
 }
 export declare function IsTile<T>(b: unknown): b is ITile<T>;
-export interface ICompoundTile<T> extends ITile<Array<ITileCollection<T>>> {
-    childTiles: Array<ITileCollection<T>>;
-    addChildTiles(...children: Array<ITile<T>>): void;
-    removeChildTiles(...children: Array<ITile<T>>): void;
-}
-export declare function IsCompoundTile<T>(b: unknown): b is ICompoundTile<T>;
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
     namespace?: string;
     count: number;
@@ -49,13 +43,13 @@ export declare function IsTileCollection<T>(b: unknown): b is ITileCollection<T>
 export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
-export interface ITileBuilder<T> {
+export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
-    build(): ITile<T> | ICompoundTile<T>;
+    build(): ITile<T>;
 }
 export declare enum CellCoordinateReference {
     center = "center",
@@ -128,7 +122,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     name: string;
     datasource: ITileDatasource<T, ITileAddress>;
     accept(address: ITileAddress): boolean;
-    fetchContent(tile: ITile<T> | ICompoundTile<T>, callback: (a: ITile<T>) => void): ITile<T>;
+    fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>;
 }
 export interface ITileContentProviderBuilder<T> {
     withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
@@ -136,19 +130,21 @@ export interface ITileContentProviderBuilder<T> {
     build(): ITileContentProvider<T>;
 }
 export declare function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T>;
+export interface IHasNamespace {
+    namespace: string;
+}
 export interface IHasActivTiles<T> {
     activTiles: ITileCollection<T>;
 }
-export interface ITileProvider<T> extends IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
-    updatedObservable: Observable<ITile<T>>;
-    enabledObservable: Observable<ITileProvider<T>>;
-    name: string;
-    contentProvider: ITileContentProvider<T>;
-    factory: ITileBuilder<T>;
-    enabled: boolean;
-    activTiles: ITileCollection<T>;
+export interface IActivateTiles<T> {
     activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
     deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
+}
+export interface ITileProvider<T> extends IHasNamespace, IHasActivTiles<T>, IActivateTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+    updatedObservable: Observable<ITile<T>>;
+    enabledObservable: Observable<ITileProvider<T>>;
+    factory: ITileBuilder<T>;
+    enabled: boolean;
 }
 export declare function IsTileProvider<T>(b: unknown): b is ITileProvider<T>;
 export interface ITileProviderBuilder<T> {

@@ -105,22 +105,22 @@ export class TileProducer<T> implements ITileProducer<T> {
     }
 
     public addProvider(provider: ITileProvider<T>): void {
-        TileProducer.AssertValidName(provider?.name);
+        TileProducer.AssertValidName(provider?.namespace);
         this._items = this._items ?? new Map<string, ITileProducerItem<T>>();
-        if (this._items.has(provider.name)) {
+        if (this._items.has(provider.namespace)) {
             // remove previous provider with same name
-            const old = this._items.get(provider.name);
+            const old = this._items.get(provider.namespace);
             if (old?.provider === provider) {
                 return; // nothing to do, already in.
             }
-            this.removeProvider(provider.name);
+            this.removeProvider(provider.namespace);
         }
         const item: ITileProducerItem<T> = {
             provider: provider,
             updateObserver: provider.updatedObservable.add(this._onTileUpdated.bind(this)),
             enabledObserver: provider.enabledObservable.add(this._onProviderEnablePropertyChanged.bind(this)),
         };
-        this._items.set(provider.name, item);
+        this._items.set(provider.namespace, item);
         if (provider.enabled) {
             provider.activateTile(); // add all tiles if already in.
         }

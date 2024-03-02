@@ -5,11 +5,10 @@ import { IRectangle } from "../../geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collections";
 import { TileBuilder } from "../tiles.builder";
 
-export class TileProvider<T> implements ITileProvider<T> {
+export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
     _enabledObservable?: Observable<ITileProvider<T>>;
 
-    _contentProvider: ITileContentProvider<T>;
     _factory: ITileBuilder<T>;
     _activTiles: TileCollection<T>;
     _enabled: boolean;
@@ -17,9 +16,8 @@ export class TileProvider<T> implements ITileProvider<T> {
     // internal
     _callback: (t: ITile<T>) => void;
 
-    public constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled = true) {
-        this._contentProvider = provider;
-        this._factory = (factory ?? this._buildFactory()).withMetrics(provider.metrics); // ensure the factory has the right metrics to build bounds.
+    public constructor(factory?: ITileBuilder<T>, enabled = true) {
+        this._factory = factory ?? this._buildFactory();
         this._enabled = enabled;
         this._activTiles = new TileCollection<T>();
         this._callback = this._onContentFetched.bind(this);
@@ -57,20 +55,17 @@ export class TileProvider<T> implements ITileProvider<T> {
     }
 
     public get metrics(): ITileMetrics {
-        return this._contentProvider.metrics;
+        return this.factory.metrics;
     }
 
-    public get name(): string {
-        return this._contentProvider.name;
-    }
-
-    public get contentProvider(): ITileContentProvider<T> {
-        return this._contentProvider;
+    public get namespace(): string {
+        return this.factory.namespace;
     }
 
     public get factory(): ITileBuilder<T> {
         return this._factory;
     }
+
     public dispose() {
         this._activTiles?.clear();
     }
@@ -88,14 +83,14 @@ export class TileProvider<T> implements ITileProvider<T> {
                 tiles.push(t);
                 continue;
             }
-            const factory = this._factory.withNamespace(this._contentProvider.name).withAddress(a);
+            const factory = this._factory.withAddress(a);
             try {
                 let tile = factory.build();
                 if (tile) {
                     // fetch content, possibiliy generate alterative content
                     // if underlying async operation are performed, then the callback will be messaged when the content
                     // is available.
-                    tile = this._contentProvider.fetchContent(tile, this._callback);
+                    tile = this._fetchContent(tile, this._callback);
                     // add to collection
                     this._activTiles?.add(tile);
                     // push to result
@@ -131,5 +126,21 @@ export class TileProvider<T> implements ITileProvider<T> {
 
     protected _buildFactory(): ITileBuilder<T> {
         return new TileBuilder<T>();
+    }
+
+    public abstract _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T>;
+}
+
+export class TileProvider<T> extends AbstractTileProvider<T> {
+    _contentProvider: ITileContentProvider<T>;
+
+    public constructor(provider: ITileContentProvider<T>, factory?: ITileBuilder<T>, enabled = true) {
+        super(factory, enabled);
+        this.factory.withMetrics(provider.metrics).withNamespace(provider.name); // ensure the factory has the right metrics and namespace to build bounds.
+        this._contentProvider = provider;
+    }
+
+    public _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T> {
+        return this._contentProvider.fetchContent(tile, callback);
     }
 }

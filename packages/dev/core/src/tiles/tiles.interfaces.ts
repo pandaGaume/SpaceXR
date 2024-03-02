@@ -48,17 +48,6 @@ export function IsTile<T>(b: unknown): b is ITile<T> {
     return IsGeoBounded(b) && (<any>b).address !== undefined && (<any>b).content !== undefined;
 }
 
-export interface ICompoundTile<T> extends ITile<Array<ITileCollection<T>>> {
-    childTiles: Array<ITileCollection<T>>;
-    addChildTiles(...children: Array<ITile<T>>): void;
-    removeChildTiles(...children: Array<ITile<T>>): void;
-}
-
-export function IsCompoundTile<T>(b: unknown): b is ICompoundTile<T> {
-    if (typeof b !== "object" || b === null) return false;
-    return IsTile(b) && (<any>b).children !== undefined;
-}
-
 /// <summary>
 /// The TileCollection is a collection of tiles, it is used to store the active tiles of a provider
 /// Tile are stored using a quadkey index, this allow fast access to a tile using its address only.
@@ -99,13 +88,13 @@ export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
 
-export interface ITileBuilder<T> {
+export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
     withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
-    build(): ITile<T> | ICompoundTile<T>;
+    build(): ITile<T>;
 }
 
 export enum CellCoordinateReference {
@@ -210,7 +199,7 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     name: string; // usually shortcut for datasource?.name
     datasource: ITileDatasource<T, ITileAddress>; // the underlying data source
     accept(address: ITileAddress): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
-    fetchContent(tile: ITile<T> | ICompoundTile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
+    fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
 }
 
 export interface ITileContentProviderBuilder<T> {
@@ -229,8 +218,17 @@ export function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentPr
     );
 }
 
+export interface IHasNamespace {
+    namespace: string;
+}
+
 export interface IHasActivTiles<T> {
     activTiles: ITileCollection<T>;
+}
+
+export interface IActivateTiles<T> {
+    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
+    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }
 
 /// <summary>
@@ -239,18 +237,11 @@ export interface IHasActivTiles<T> {
 /// The main interaction is done usin activateTile and deactivateTile methods which are messaging the datasource and content provider and also
 /// managing the local cache
 /// </summary>
-export interface ITileProvider<T> extends IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
-    updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated by the data source or the content provider
+export interface ITileProvider<T> extends IHasNamespace, IHasActivTiles<T>, IActivateTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+    updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
-
-    name: string; // usually shortcut for contentProvider?.name
-    contentProvider: ITileContentProvider<T>; // the underlying data source
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
     enabled: boolean; // enable/disable the provider
-    activTiles: ITileCollection<T>; // return all active tiles
-
-    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
-    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
 }
 
 export function IsTileProvider<T>(b: unknown): b is ITileProvider<T> {

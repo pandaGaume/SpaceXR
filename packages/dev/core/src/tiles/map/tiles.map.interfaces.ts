@@ -26,11 +26,7 @@ export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions
     name: string;
     enabled: boolean;
 
-    addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T>;
-}
-
-export interface ICompoundLayerProvider<T> extends ITileProvider<T> {
-    layers: Array<ITileMapLayer<T>>;
+    addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T>;
 }
 
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions {
@@ -75,7 +71,7 @@ export function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown)
 /// When removing a view, the map will clear the display and the navigation api of this view.
 /// Changing the display or the navigation api of a map will automatically update the display or the navigation api of all the views.
 /// </summary>
-export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, IDisposable {
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileNavigationApi<S>, IDisposable {
     // map related
     layerAddedObservable: Observable<L>;
     layerRemovedObservable: Observable<L>;
@@ -92,5 +88,5 @@ export interface ITileMapBuilder<T, L extends ITileMapLayer<T>> {
     withNavigation(navigation: ITileNavigationState | ITileMetrics): ITileMapBuilder<T, L>;
     withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T, L>;
     withLayer(...layer: Array<L | ITileMapLayerBuilder<T, L>>): ITileMapBuilder<T, L>;
-    build(): ITileMap<T, L> | undefined;
+    build(): ITileMap<T, L, unknown> | undefined;
 }

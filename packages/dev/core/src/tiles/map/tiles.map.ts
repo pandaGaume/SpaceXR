@@ -7,7 +7,7 @@ import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileSystemBounds } from "../tiles.system";
 import { TileConsumerBase } from "../pipeline";
 
-export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L> {
+export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L, TileMapBase<T, L>> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
 

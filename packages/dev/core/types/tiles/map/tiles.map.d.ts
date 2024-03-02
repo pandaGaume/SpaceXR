@@ -5,7 +5,7 @@ import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileConsumerBase } from "../pipeline";
-export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L> {
+export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L, TileMapBase<T, L>> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
     protected _display: Nullable<ITileDisplay>;

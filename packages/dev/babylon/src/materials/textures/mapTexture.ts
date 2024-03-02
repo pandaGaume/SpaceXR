@@ -13,7 +13,7 @@ export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
     invertY?: boolean;
 }
 
-export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<MapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer> {
+export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<MapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer, MapTexture> {
     static readonly DefaultOptions: IMapTextureOptions = {
         width: 1024,
         height: 768,

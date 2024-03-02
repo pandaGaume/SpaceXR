@@ -13,7 +13,7 @@ export interface IMapControlOptions extends ICanvasRenderingOptions {
     navigationManager?: InputsNavigationTarget<MapControl>;
     inputController?: ControlInputController<MapControl>;
 }
-export declare class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer> {
+export declare class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer, MapControl> {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;

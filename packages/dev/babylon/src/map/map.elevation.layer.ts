@@ -24,7 +24,7 @@ export interface IElevationTile extends ITile<IDemInfos> {
 }
 
 /// <summary>
-/// A tile for elevation data. The tile serve as hos for elevation data and therefore the instanced mesh used to display the elevation.
+/// A tile for elevation data. The tile serve as host for elevation data and therefore the instanced mesh used to display the elevation.
 /// </summary>
 export class ElevationTile extends Tile<IDemInfos> implements ElevationTile {
     _surface: Nullable<AbstractMesh>; // may be a mesh or an instance.
@@ -49,7 +49,7 @@ export interface IElevationTileOptions extends ITileMapLayerOptions {
 }
 
 ///<summary>
-/// A layer for elevation data. The layer serve as hos for elevation tiles and therefore the grid model used to display the elevation.
+/// A layer for elevation data. The layer serve as host for elevation tiles and therefore the grid model used to display the elevation.
 /// </summary>
 export class ElevationLayer extends DemLayer {
     private static InitZ(column: number, row: number, w: number, h: number): number {

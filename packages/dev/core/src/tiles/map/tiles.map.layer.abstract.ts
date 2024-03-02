@@ -101,7 +101,7 @@ export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implem
         }
     }
 
-    public addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T> {
+    public addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T> {
         map?.addLayer(this);
         return this;
     }

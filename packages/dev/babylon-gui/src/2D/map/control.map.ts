@@ -16,7 +16,7 @@ export interface IMapControlOptions extends ICanvasRenderingOptions {
     inputController?: ControlInputController<MapControl>;
 }
 
-export class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer> {
+export class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer, MapControl> {
     public static DefaultBackground = RGBAColor.LightGray();
 
     public static DefaultOptions: ICanvasRenderingOptions = {

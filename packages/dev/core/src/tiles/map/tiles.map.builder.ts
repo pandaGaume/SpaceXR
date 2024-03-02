@@ -53,5 +53,5 @@ export abstract class AbstractTileMapBuilder<T, L extends ITileMapLayer<T>> impl
     /// <summary>
     /// Build the tile map. This is where all the logic is implemented to build specific use case map, 2D, 3D with DEM or not, etc.
     /// </summary>
-    public abstract build(): ITileMap<T, L> | undefined;
+    public abstract build(): ITileMap<T, L, unknown> | undefined;
 }

@@ -10,7 +10,7 @@ export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
     format?: number;
     invertY?: boolean;
 }
-export declare class MapTexture extends BABYLON.Texture implements ITileNavigationApi<MapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer> {
+export declare class MapTexture extends BABYLON.Texture implements ITileNavigationApi<MapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer, MapTexture> {
     static readonly DefaultOptions: IMapTextureOptions;
     static Options(o?: Partial<IMapTextureOptions>): IMapTextureOptions;
     static OptionsHD(o?: Partial<IMapTextureOptions>): IMapTextureOptions;

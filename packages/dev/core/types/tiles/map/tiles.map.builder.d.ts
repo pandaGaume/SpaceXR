@@ -13,5 +13,5 @@ export declare abstract class AbstractTileMapBuilder<T, L extends ITileMapLayer<
     withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T, L>;
     withLayer(...layer: (L | ITileMapLayerBuilder<T, L>)[]): ITileMapBuilder<T, L>;
     get pipeline(): ITilePipeline<T> | undefined;
-    abstract build(): ITileMap<T, L> | undefined;
+    abstract build(): ITileMap<T, L, unknown> | undefined;
 }

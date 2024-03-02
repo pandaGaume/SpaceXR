@@ -1,11 +1,11 @@
 import { IDemInfos } from "core/dem";
-import { ITile, ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { ITile, ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationState, ImageLayer } from "core/tiles";
 import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 export type ElevationTileContentType = IDemInfos | HTMLImageElement;
-export declare class Map3D extends TransformNode implements ITileNavigationApi<Map3D>, ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>> {
+export declare class Map3D extends TransformNode implements ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>, Map3D> {
     private _map;
     constructor(name: string, display?: ITileDisplay);
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3D;

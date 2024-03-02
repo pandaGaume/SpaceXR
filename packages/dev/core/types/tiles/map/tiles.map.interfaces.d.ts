@@ -19,10 +19,7 @@ export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
-    addTo(map: ITileMap<T, ITileMapLayer<T>>): ITileMapLayer<T>;
-}
-export interface ICompoundLayerProvider<T> extends ITileProvider<T> {
-    layers: Array<ITileMapLayer<T>>;
+    addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T>;
 }
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions {
     alpha: number;
@@ -44,7 +41,7 @@ export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     build(): L;
 }
 export declare function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown): b is ITileMapLayerBuilder<T, L>;
-export interface ITileMap<T, L extends ITileMapLayer<T>> extends ITileNavigationApi<unknown>, IDisposable {
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileNavigationApi<S>, IDisposable {
     layerAddedObservable: Observable<L>;
     layerRemovedObservable: Observable<L>;
     navigation: ITileNavigationState;
@@ -57,5 +54,5 @@ export interface ITileMapBuilder<T, L extends ITileMapLayer<T>> {
     withNavigation(navigation: ITileNavigationState | ITileMetrics): ITileMapBuilder<T, L>;
     withPipeline(pipeline: ITilePipeline<T> | ITilePipelineBuilder<T>): ITileMapBuilder<T, L>;
     withLayer(...layer: Array<L | ITileMapLayerBuilder<T, L>>): ITileMapBuilder<T, L>;
-    build(): ITileMap<T, L> | undefined;
+    build(): ITileMap<T, L, unknown> | undefined;
 }

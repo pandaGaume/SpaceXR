@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { IHasActivTiles, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 
@@ -21,7 +21,7 @@ export interface ITileMapLayerOptions {
     attribution?: string;
 }
 
-export interface ITileMapLayer<T> extends ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext {
+export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;

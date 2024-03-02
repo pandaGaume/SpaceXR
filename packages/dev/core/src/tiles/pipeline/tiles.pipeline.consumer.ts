@@ -1,8 +1,7 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITileConsumer, ITilePipelineLink } from "./tiles.pipeline.interfaces";
-import { ITile, ITileCollection } from "../tiles.interfaces";
+import { ITile } from "../tiles.interfaces";
 import { ValidableBase } from "../../validable";
-import { Nullable } from "../../types";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 
 export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<T> {
@@ -111,10 +110,6 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
             l.dispose();
         }
         this._links = [];
-    }
-
-    public getActiveTiles(): Nullable<ITileCollection<T>> {
-        return null;
     }
 
     protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {

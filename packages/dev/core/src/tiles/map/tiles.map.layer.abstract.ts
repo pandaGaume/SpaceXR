@@ -110,6 +110,6 @@ export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implem
         super.dispose();
     }
 
-    public abstract getActiveTiles(): Nullable<ITileCollection<T>>;
     public abstract get metrics(): ITileMetrics;
+    public abstract get activTiles(): ITileCollection<T>;
 }

@@ -136,7 +136,10 @@ export interface ITileContentProviderBuilder<T> {
     build(): ITileContentProvider<T>;
 }
 export declare function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T>;
-export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+export interface IHasActivTiles<T> {
+    activTiles: ITileCollection<T>;
+}
+export interface ITileProvider<T> extends IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     updatedObservable: Observable<ITile<T>>;
     enabledObservable: Observable<ITileProvider<T>>;
     name: string;

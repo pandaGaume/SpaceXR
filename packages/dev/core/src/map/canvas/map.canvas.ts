@@ -104,7 +104,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
     /// Draw the layer on the canvas. This method is messaged from the draw method.
     /// </summary>
     protected _drawLayer(ctx: ICanvasRenderingContext, layer: ITileMapLayer<CanvasTileContentType>): void {
-        const tiles = layer.getActiveTiles();
+        const tiles = layer.activTiles;
         if (!tiles || !tiles.count) {
             return;
         }

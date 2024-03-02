@@ -1,6 +1,6 @@
 import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITile, ITileAddress, ITileCollection, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileDisplay } from "../map";
 
@@ -57,11 +57,7 @@ export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<I
     removeProvider(name: string): void;
 }
 
-export interface ITileRepository<T> {
-    getActiveTiles(): Nullable<ITileCollection<T>>;
-}
-
-export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ITileRepository<T>, ISourceBlock<ITile<T>> {}
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ISourceBlock<ITile<T>> {}
 
 export interface ITilePipeline<T> extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;

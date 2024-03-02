@@ -22,6 +22,6 @@ export declare abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T
     set enabled(enabled: boolean);
     addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T>;
     dispose(): void;
-    abstract getActiveTiles(): Nullable<ITileCollection<T>>;
     abstract get metrics(): ITileMetrics;
+    abstract get activTiles(): ITileCollection<T>;
 }

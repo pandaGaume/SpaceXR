@@ -14,7 +14,7 @@ export declare class TileMapLayer<T> extends AbstractTileMapLayer<T> implements 
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
     get metrics(): ITileMetrics;
     dispose(): void;
-    getActiveTiles(): Nullable<ITileCollection<T>>;
+    get activTiles(): ITileCollection<T>;
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileProvider<T>;
     protected _buildPipeline(provider: ITileProvider<T>): ITilePipeline<T>;
     protected _buildView(): ITileView;

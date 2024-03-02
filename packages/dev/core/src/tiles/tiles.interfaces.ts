@@ -229,13 +229,17 @@ export function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentPr
     );
 }
 
+export interface IHasActivTiles<T> {
+    activTiles: ITileCollection<T>;
+}
+
 /// <summary>
 /// Used as entry point to Tile Data source. It is responsible for managing the lifecycle of the datasource and the content provider
 /// plus dealing with the asynchronous nature of the data source, by providing update notification.
 /// The main interaction is done usin activateTile and deactivateTile methods which are messaging the datasource and content provider and also
 /// managing the local cache
 /// </summary>
-export interface ITileProvider<T> extends ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+export interface ITileProvider<T> extends IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated by the data source or the content provider
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
 

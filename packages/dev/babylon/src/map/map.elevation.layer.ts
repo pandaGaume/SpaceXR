@@ -146,7 +146,7 @@ export class ElevationLayer extends DemLayer {
 
     protected _onCenterChanged(center: Nullable<ICartesian2>): void {
         if (center) {
-            const tiles = this.getActiveTiles();
+            const tiles = this.activTiles;
             if (!tiles || !tiles.count) {
                 return;
             }

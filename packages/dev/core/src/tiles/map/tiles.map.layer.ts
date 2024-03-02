@@ -44,7 +44,7 @@ export class TileMapLayer<T> extends AbstractTileMapLayer<T> implements ITileMap
         this._pipeline.producer?.dispose();
     }
 
-    public getActiveTiles(): Nullable<ITileCollection<T>> {
+    public get activTiles(): ITileCollection<T> {
         return this._provider.activTiles;
     }
 

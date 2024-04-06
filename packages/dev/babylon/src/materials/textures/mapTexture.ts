@@ -1,10 +1,11 @@
 import * as BABYLON from "@babylonjs/core";
-import { CanvasDisplay, CanvasMap, ICanvasRenderingOptions } from "core/map/canvas";
+import { CanvasDisplay, CanvasMap } from "core/map/canvas";
 import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 
 import { ISize2 } from "core/geometry";
 import { IGeo2 } from "core/geography";
 import { EventState, Observable } from "core/events";
+import { ICanvasRenderingOptions } from "core/engine";
 
 export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
     generateMipMaps?: boolean;

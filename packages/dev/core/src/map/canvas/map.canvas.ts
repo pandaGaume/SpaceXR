@@ -2,16 +2,12 @@ import { Scalar, RGBAColor } from "../../math";
 import { TileMapBase, ITileDisplay, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ICanvasRenderingContext } from "../../engine/icanvas";
+import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { InputsNavigationTarget, MouseInputController } from "../inputs";
 
 export type CanvasTileContentType = HTMLImageElement;
 
 // we delegate the rendering options.
-export interface ICanvasRenderingOptions {
-    background?: string;
-    alpha?: number;
-}
 
 // intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
 export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
@@ -61,18 +57,18 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         }
         ctx.save();
 
-        ctx.globalAlpha = this._alpha;
-
+ 
         // clear the canvas
         const res = this._display;
         const x = xoffset;
         const y = yoffset;
-        if (this._background) {
-            ctx.fillStyle = this._background;
-            ctx.fillRect(x, y, res.displayWidth, res.displayHeight);
-        } else {
-            ctx.clearRect(x, y, res.displayWidth, res.displayHeight);
-        }
+        const w = res.displayWidth;
+        const h = res.displayHeight;
+        const a = this._alpha ?? 1
+        const b = this._background ?? Context2DTileMap.DefaultBackground.toHexString();
+
+        ctx.globalAlpha = a;
+        ctx.fillStyle = b;
 
         if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
             ctx.restore();
@@ -81,7 +77,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
 
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
-        ctx.translate(x + res.displayWidth / 2, y + res.displayHeight / 2);
+        ctx.translate(x + w / 2, y + h / 2);
         // we rotate the canvas according the navigation azimuth
         if (this.navigation.azimuth?.value) {
             // convert azimuth to canvas rotation, which is clockwize, and cartesian
@@ -93,7 +89,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         // every tiles are supposed to got the same size here, using same metrics
         for (const l of this._zIndexOrderedLayers ?? []) {
             if (l.enabled) {
-                ctx.globalAlpha = l.alpha;
+                ctx.globalAlpha = l.alpha ?? a;
+                ctx.fillStyle = l.background ?? b; 
                 l.draw(ctx);
             }
         }

@@ -2,13 +2,9 @@ import { RGBAColor } from "../../math";
 import { TileMapBase, ITileDisplay, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ICanvasRenderingContext } from "../../engine/icanvas";
+import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { InputsNavigationTarget, MouseInputController } from "../inputs";
 export type CanvasTileContentType = HTMLImageElement;
-export interface ICanvasRenderingOptions {
-    background?: string;
-    alpha?: number;
-}
 export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;

@@ -1,3 +1,7 @@
+export interface ICanvasRenderingOptions {
+    background?: string;
+    alpha?: number;
+}
 export interface ICanvas {
     width: number;
     height: number;

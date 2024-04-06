@@ -2,28 +2,11 @@ import { Nullable, TransformNode } from "@babylonjs/core";
 import { IEnvelope } from "core/geography";
 import { ITile3DContent, ITile3DContentGroup, RefinementStrategy } from "./tile3d.interfaces";
 
-export class Tile3DContentGroup implements ITile3DContentGroup {
-    _name: string;
-    _enabled: boolean;
+export class Tile3DContentGroup extends TransformNode implements ITile3DContentGroup {
     _envelope?: IEnvelope;
 
     public constructor(name: string) {
-        this._name = name;
-        this._enabled = true;
-    }
-
-    public get name(): string {
-        return this._name;
-    }
-
-    public get enabled(): boolean {
-        return this._enabled;
-    }
-
-    public set enabled(v: boolean) {
-        if (v !== this._enabled) {
-            this._enabled = v;
-        }
+        super(name);
     }
 
     public get bounds(): IEnvelope | undefined {

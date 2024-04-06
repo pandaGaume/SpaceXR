@@ -9,7 +9,7 @@ import { Geo2 } from "../geography";
 export abstract class AbstractTileMetrics extends TileSystemBounds implements ITileMetrics {
     public static DefaultTileSize = 256;
     public static DefaultCellSize = 1;
-    public static DefaultCoordinateReference = CellCoordinateReference.center;
+    public static DefaultCoordinateReference = CellCoordinateReference.CENTER;
     public static DefaultOverlap = 0;
 
     _tileSize: number = AbstractTileMetrics.DefaultTileSize;

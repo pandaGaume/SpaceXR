@@ -1,20 +1,8 @@
-import { AbstractMesh, Material, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { IMemoryCache } from "core/cache";
 import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
-import {
-    ITile,
-    ITileAddress,
-    ITileDatasource,
-    ITileMapLayerOptions,
-    ITileNavigationState,
-    ITileProvider,
-    Tile,
-    TileContentProvider,
-    TileContentType,
-    TileProvider,
-} from "core/tiles";
-import { TileBuilder } from "core/tiles/tiles.builder";
+import { ITile, ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileNavigationState, ITileProvider, Tile, TileContentType } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState } from "core/events";
 import { IGeo2 } from "core/geography";
@@ -44,7 +32,6 @@ export class ElevationTile extends Tile<IDemInfos> implements ElevationTile {
 export interface IElevationTileOptions extends ITileMapLayerOptions {
     exageration?: number;
     gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
-    material?: Material;
     insets?: ICartesian3;
 }
 
@@ -69,7 +56,6 @@ export class ElevationLayer extends DemLayer {
     _exageration?: number;
     _insets?: ICartesian3;
     _gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
-    _material: Nullable<Material>;
     _root: TransformNode;
     _tilesRoot: TransformNode;
     // cached cartesian center
@@ -79,7 +65,6 @@ export class ElevationLayer extends DemLayer {
         super(name, source, options, enabled);
         this._exageration = options?.exageration ?? 1.0;
         this._gridOptions = options?.gridOptions;
-        this._material = options?.material ?? null;
         this._insets = options?.insets;
 
         this._root = new TransformNode(this._buildNameWithSuffix("root"));
@@ -100,7 +85,6 @@ export class ElevationLayer extends DemLayer {
     protected _buildMesh(name: string, scene?: Nullable<Scene>): Mesh {
         const mesh = new Mesh(this._buildNameWithSuffix("template"), scene);
         this._grid.applyToMesh(mesh, true);
-        mesh.material = this._material;
         mesh.isVisible = false;
         return mesh;
     }
@@ -171,10 +155,13 @@ export class ElevationLayer extends DemLayer {
         }
     }
 
-    protected _buildProvider(source: ITileDatasource<IDemInfos, ITileAddress>, cache?: IMemoryCache<string, TileContentType<IDemInfos>>): ITileProvider<IDemInfos> {
-        const contentProvider = new TileContentProvider<IDemInfos>(source, cache);
-        const factory = new TileBuilder<IDemInfos>().withMetrics(source.metrics).withType(ElevationTile);
-        return new TileProvider(contentProvider, factory);
+    // override in order to build the correct tile type
+    protected _buildProvider(
+        source: ITileDatasource<IDemInfos, ITileAddress>,
+        cache?: IMemoryCache<string, TileContentType<IDemInfos>>,
+        type?: new (...args: any[]) => ITile<IDemInfos>
+    ): ITileProvider<IDemInfos> {
+        return super._buildProvider(source, cache, type ?? ElevationTile);
     }
 
     protected _buildTopology(): VertexData {

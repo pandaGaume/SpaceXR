@@ -1,3 +1,8 @@
+export interface ICanvasRenderingOptions {
+    background?: string;
+    alpha?: number;
+}
+
 /**
  * Class used to abstract a canvas
  */

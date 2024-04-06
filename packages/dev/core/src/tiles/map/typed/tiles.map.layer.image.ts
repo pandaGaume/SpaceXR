@@ -1,11 +1,12 @@
 import { ICanvasRenderingContext } from "@babylonjs/core/Engines/ICanvas";
 import { PropertyChangedEventArgs } from "../../../events";
-import { ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
 
 export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImageTileMapLayer {
     _alpha: number;
+    _background?: string;
 
     public constructor(
         name: string,
@@ -34,9 +35,27 @@ export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImage
             this._alpha = a;
         }
     }
-    public draw(ctx: ICanvasRenderingContext): void {
-        const tiles = this.activTiles;
-        if (!tiles || !tiles.count) {
+
+    public get background(): string | undefined {
+        return this._background;
+    }
+
+    public set background(b: string | undefined) {
+        if (this._background !== b) {
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                const oldValue = this._background;
+                this._background = b;
+                const args = new PropertyChangedEventArgs<ImageLayer, unknown>(this, oldValue, this._alpha, "background");
+                this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+                return;
+            }
+            this._background = b;
+        }
+    }
+
+    public draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>): void {
+        tiles = tiles ?? this.activTiles;
+        if (tiles == null || undefined) {
             return;
         }
 
@@ -53,6 +72,8 @@ export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImage
                         ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
                         continue;
                     }
+                } else {
+                    ctx.fillRect(x, y, metrics.tileSize, metrics.tileSize);
                 }
             }
         }

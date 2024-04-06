@@ -1,10 +1,10 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { IHasActivTiles, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { IHasActivTiles, ITile, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
-import { ICanvasRenderingContext } from "../../engine/icanvas";
+import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 export interface ITileDisplay extends IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
     displayHeight: number;
@@ -22,11 +22,10 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, I
     enabled: boolean;
     addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T>;
 }
-export interface IImageTileMapLayerOptions extends ITileMapLayerOptions {
-    alpha: number;
+export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvasRenderingOptions {
 }
 export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement>, IImageTileMapLayerOptions {
-    draw(ctx: ICanvasRenderingContext): void;
+    draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>): void;
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
 }

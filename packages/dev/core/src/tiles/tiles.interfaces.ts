@@ -98,11 +98,11 @@ export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
 }
 
 export enum CellCoordinateReference {
-    center = "center",
-    nw = "nw",
-    ne = "ne",
-    sw = "sw",
-    se = "se",
+    CENTER,
+    NW,
+    NE,
+    SW,
+    SE,
 }
 
 export interface ITileSystemBounds {

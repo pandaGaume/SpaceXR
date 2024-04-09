@@ -77,12 +77,21 @@ export abstract class AbstractRange<T> {
         }
         return this._d;
     }
-
     protected abstract computeDelta(a: T, b?: T): T;
 }
 
 export class Range extends AbstractRange<number> {
+    public static Zero(): Range {
+        return new Range(0, 0);
+    }
+    public static Max(): Range {
+        return new Range(Number.MIN_VALUE, Number.MAX_VALUE);
+    }
     protected computeDelta(a: number, b?: number): number {
         return a && b ? b - a : Number.POSITIVE_INFINITY;
+    }
+
+    public clone(): Range {
+        return new Range(this._min, this._max);
     }
 }

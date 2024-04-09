@@ -8,7 +8,7 @@ import { IGeo2 } from "core/geography";
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type ElevationTileContentType = IDemInfos | HTMLImageElement;
 
-export class Map3D extends TransformNode implements ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>, Map3D> {
+export class Map3d extends TransformNode implements ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>, Map3d> {
     private _map: TileMapBase<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>>;
 
     public constructor(name: string, display?: ITileDisplay) {
@@ -18,31 +18,31 @@ export class Map3D extends TransformNode implements ITileMap<ElevationTileConten
     }
 
     // TILE map API
-    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3D {
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3d {
         this._map.setViewMap(center, zoom, rotation);
         return this;
     }
-    public zoomMap(delta: number): Map3D {
+    public zoomMap(delta: number): Map3d {
         this._map.zoomMap(delta);
         return this;
     }
-    public zoomInMap(delta: number): Map3D {
+    public zoomInMap(delta: number): Map3d {
         this._map.zoomInMap(delta);
         return this;
     }
-    public zoomOutMap(delta: number): Map3D {
+    public zoomOutMap(delta: number): Map3d {
         this._map.zoomOutMap(delta);
         return this;
     }
-    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): Map3D {
+    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): Map3d {
         this._map.translatePixelMap(tx, ty, metrics);
         return this;
     }
-    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): Map3D {
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): Map3d {
         this._map.translateMap(lat, lon);
         return this;
     }
-    public rotateMap(r: number): Map3D {
+    public rotateMap(r: number): Map3d {
         this._map.rotateMap(r);
         return this;
     }

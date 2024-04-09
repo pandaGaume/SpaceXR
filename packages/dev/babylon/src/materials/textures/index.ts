@@ -1,1 +1,1 @@
-export * from "./mapTexture";
+export * from "./textures.mapTexture";

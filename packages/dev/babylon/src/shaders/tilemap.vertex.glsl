@@ -18,6 +18,9 @@ in vec4 layerIds; // the depth of the layer textures. ids[0] is the current, whi
 // this is declaration to clip map along the hologram sides
 #include<clipVertexDeclaration>
 
+// this is the declaration of the function to compute geometry related to elevation data.
+#inclide<elevationDeclaration>
+
 // Uniforms
 uniform mat4 viewProjection; // babylon build in
 
@@ -68,10 +71,7 @@ void main(void) {
     // So we need to restore them to their original range by multply by 255
     
     vec4 pixel = texture(normals, v);
-    float x = (2.0 * pixel.r) - 1.0;
-    float y = (2.0 * pixel.g) - 1.0;
-    float z = (pixel.b * 255.0 - 128.0) / 127.0;
-    vNormal = vec3(x,z,y);
+    vNormal = elevation_rgbaToNormal(pixel)
  
     depth = layerIds[0] ;
     vUvs = vec3(position.xy + 0.5, depth);

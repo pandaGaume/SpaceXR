@@ -1,0 +1,13 @@
+import { Map3dMaterial } from "./materials.map3d";
+
+/**
+ * The `WebMapMaterial` class represents a special material used for rendering map tiles.
+ * It utilizes the Web Mercator projection to map these tiles onto a 3D elevation terrain,
+ * which is represented as Plane Geometry. This material is specifically designed to
+ * function within a `Map3D` object, rendering the map content as a plane with rectangular
+ * boundaries.
+ */
+export class WebMapMaterial extends Map3dMaterial {
+    public static ClassName: string = "WebMapMaterial";
+    public static ShaderName: string = "webmap";
+}

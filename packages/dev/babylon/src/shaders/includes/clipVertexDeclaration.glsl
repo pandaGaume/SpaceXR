@@ -13,6 +13,8 @@ uniform Plane northClip;
 uniform Plane southClip;
 uniform Plane eastClip;
 uniform Plane westClip;
+uniform Plane topClip;
+uniform Plane bottomClip;
 
 varying vec4 vfClipDistance;
 

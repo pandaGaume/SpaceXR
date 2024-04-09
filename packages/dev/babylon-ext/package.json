@@ -6,7 +6,7 @@
     "esnext": "dist/index",
     "types": "dist/index",
     "files": [
-        "src"
+        "./src"
     ],
     "scripts": {
         "clean:babylon-ext": "rimraf dist && rimraf tsconfig.tsbuildinfo",
@@ -17,8 +17,7 @@
         "publish:babylon-ext:dev": "npm run build:babylon-ext:dev && npm run webpack:babylon-ext:dev"
     },
     "sideEffects": false,
-    "devDependencies": {},
-    "dependencies": {
-        "path-scurry": "^1.10.1"
+    "devDependencies": {
+        "rimraf": "^4.4.1"
     }
 }

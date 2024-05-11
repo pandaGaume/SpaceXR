@@ -7,7 +7,7 @@ import { Texture3 } from "babylon-ext/materials";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
-export type ElevationTileContentType = IDemInfos | HTMLImageElement;
+export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 
 export class Map3dMaterialDefines extends MaterialDefines {
     constructor() {
@@ -15,10 +15,15 @@ export class Map3dMaterialDefines extends MaterialDefines {
         this.rebuild();
     }
 }
+
 /**
- * Base class for Map3D related materials.
+ * Base class for Map3D related materials. This class is intended to be used as a base class for
+ * different materials that are used to render 3D maps such as EllipsoidMaterial and WebMapMaterial.
+ * Thus materials are related to a specific geometry which are implemented into the vertex shader.
+ * Commons properties and methods are implemented in this class, such as data samplers (elevation, normals and layer)
+ * and clip planes.
  */
-export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<ElevationTileContentType>> {
+export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Map3dTileContentType>> {
     public static ElevationKind: string = "altitudes";
     public static NormalKind: string = "normals";
     public static LayerKind: string = "layer";
@@ -29,7 +34,6 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<El
     private _layerSampler: Nullable<Texture3>;
 
     // the elevation related properties.
-    private _elevationScale: number;
     private _elevationOffset: number;
     private _elevationRange: Range;
 
@@ -44,7 +48,6 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<El
         this._layerSampler = null;
 
         this._elevationOffset = 0.0;
-        this._elevationScale = 1.0;
         this._elevationRange = Range.Zero();
 
         this._clipPlanes = [null, null, null, null, null, null];
@@ -69,17 +72,6 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<El
         return this._elevationRange.clone();
     }
 
-    public get elevationScale(): number {
-        return this._elevationScale;
-    }
-
-    public set elevationScale(value: number) {
-        if (this._elevationScale !== value) {
-            this._elevationScale = value;
-            this.markAsDirty(Material.AttributesDirtyFlag);
-        }
-    }
-
     public get elevationOffset(): number {
         return this._elevationOffset;
     }
@@ -96,9 +88,9 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<El
         return super.isReadyForSubMesh(mesh, subMesh, useInstances);
     }
 
-    public added(eventData: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void {}
-    public removed(eventData: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void {}
-    public updated(eventData: IPipelineMessageType<ITile<ElevationTileContentType>>, eventState: EventState): void {}
+    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {}
+    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {}
+    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {}
 
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene) {
         switch (kind) {

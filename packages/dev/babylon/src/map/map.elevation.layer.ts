@@ -82,11 +82,23 @@ export class ElevationLayer extends DemLayer {
         return this._root;
     }
 
+    /**
+     * The mesh used as template for the elevation tiles. This mesh is intended to be decorated with specific material.
+     * @returns the mesh used as template for the elevation tiles.
+     */
+    public get mesh(): Mesh {
+        return this._template;
+    }
+
     protected _buildMesh(name: string, scene?: Nullable<Scene>): Mesh {
-        const mesh = new Mesh(this._buildNameWithSuffix("template"), scene);
+        const mesh = this._createMesh(this._buildNameWithSuffix("template"), scene);
         this._grid.applyToMesh(mesh, true);
         mesh.isVisible = false;
         return mesh;
+    }
+
+    protected _createMesh(name: string, scene?: Nullable<Scene>): Mesh {
+        return new Mesh(name, scene);
     }
 
     protected _buildInstance(name: string, tile: ElevationTile): AbstractMesh {

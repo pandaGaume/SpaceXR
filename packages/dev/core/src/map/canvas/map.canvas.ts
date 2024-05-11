@@ -57,18 +57,14 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         }
         ctx.save();
 
- 
         // clear the canvas
         const res = this._display;
         const x = xoffset;
         const y = yoffset;
         const w = res.displayWidth;
         const h = res.displayHeight;
-        const a = this._alpha ?? 1
+        const a = this._alpha ?? 1;
         const b = this._background ?? Context2DTileMap.DefaultBackground.toHexString();
-
-        ctx.globalAlpha = a;
-        ctx.fillStyle = b;
 
         if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
             ctx.restore();
@@ -78,6 +74,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         const scale = this.navigation.scale;
         // we move the reference to the center of the display
         ctx.translate(x + w / 2, y + h / 2);
+        // we clear the canvas
+        ctx.clearRect(-w / 2, -h / 2, w, h);
         // we rotate the canvas according the navigation azimuth
         if (this.navigation.azimuth?.value) {
             // convert azimuth to canvas rotation, which is clockwize, and cartesian
@@ -90,7 +88,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         for (const l of this._zIndexOrderedLayers ?? []) {
             if (l.enabled) {
                 ctx.globalAlpha = l.alpha ?? a;
-                ctx.fillStyle = l.background ?? b; 
+                ctx.fillStyle = l.background ?? b;
                 l.draw(ctx);
             }
         }

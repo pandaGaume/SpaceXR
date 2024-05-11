@@ -71,7 +71,7 @@
                 const t = 100;
 
                 // create a 2D display of dimension 170x270 cm with 4K definition.
-                const display = new SPACEXR.MapDisplay("display", { height: h, width: w }, SPACEXR.MapTexture.Options4K(), scene);
+                const display = new SPACEXR.MapDisplay("display", { height: h, width: w }, SPACEXR.WebMapTexture.Options4K(), scene);
                 const map = display.map.setViewMap(defaultCenter, defaultLod);
                 const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(map);
 

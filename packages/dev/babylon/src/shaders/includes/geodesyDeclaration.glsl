@@ -24,5 +24,8 @@
     uniform mat4 enuTransform;
 
     uniform sampler2D altitudes;
+
+    // the following two textures are used to store the trigonometric values of the latitude and longitude
+    // for the current tile. This is necessary to avoid poor accuracy of the trigonometric GPU functions.
     uniform sampler2D lonLT;
     uniform sampler2D latLT;

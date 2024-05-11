@@ -41,8 +41,8 @@ export interface ITileNavigationApi<T> {
     zoomMap(delta: number): T;
     zoomInMap(delta: number): T;
     zoomOutMap(delta: number): T;
-    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): T;
-    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): T;
+    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): T;
+    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number): T;
     rotateMap(r: number): T;
 }
 
@@ -52,7 +52,7 @@ export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {
         (<ITileNavigationApi<T>>b).setViewMap !== undefined &&
         (<ITileNavigationApi<T>>b).zoomInMap !== undefined &&
         (<ITileNavigationApi<T>>b).zoomOutMap !== undefined &&
-        (<ITileNavigationApi<T>>b).translatePixelMap !== undefined &&
+        (<ITileNavigationApi<T>>b).translateUnitsMap !== undefined &&
         (<ITileNavigationApi<T>>b).translateMap !== undefined &&
         (<ITileNavigationApi<T>>b).rotateMap !== undefined
     );

@@ -19,7 +19,7 @@ in vec4 layerIds; // the depth of the layer textures. ids[0] is the current, whi
 #include<clipVertexDeclaration>
 
 // this is the declaration of the function to compute geometry related to elevation data.
-#inclide<elevationDeclaration>
+#include<elevationDeclaration>
 
 // Uniforms
 uniform mat4 viewProjection; // babylon build in

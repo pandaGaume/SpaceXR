@@ -89,7 +89,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
             case 0: {
                 // translate the center of the map according the drag displacement
                 // then we have to negate the drag displacement
-                this._target.translatePixelMap(-dx, -dy);
+                this._target.translateUnitsMap(-dx, -dy);
                 break;
             }
             case 2: {

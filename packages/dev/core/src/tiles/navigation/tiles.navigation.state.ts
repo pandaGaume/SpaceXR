@@ -176,7 +176,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this;
     }
 
-    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState {
+    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState {
         const m = metrics ?? EPSG3857.Shared;
         if (this._azimuth) {
             const p = this.rotatePointInv(tx, ty, this._cartesianCache);

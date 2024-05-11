@@ -4,15 +4,29 @@ import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
+import { Map3dMaterial } from "../materials";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
-export type ElevationTileContentType = IDemInfos | HTMLImageElement;
+export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 
-export class Map3d extends TransformNode implements ITileMap<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>, Map3d> {
-    private _map: TileMapBase<ElevationTileContentType, ITileMapLayer<ElevationTileContentType>>;
+// Idea behind the map3d is to provide a 3D map with elevation and texture layers. Texture layers are images which will be combined
+// into a single texture per elevation tile. For the purpose we will use WebMapTexture approach to create a texture layer for each elevation tile.
+// This texture will be then ehanced to allow layer (surface drawing) beeing added dynamically and also adaptative resolution based on the distance from camera.
+// This adapdative resolution will be based on the distance from camera and the resolution of the texture ans MUST be optional. User may update his own attenuation
+// formula to adapt the resolution based on his own needs. Default is no attenuation.
+// Same logic applies to the elevation layer where the resolution of the elevation tile will be adapted based on the distance from camera. This Implies that the elevation
+// mesh beeing adapted with connection triangle from one resolution to another one. Default is no attenuation.
+// The shape of the elevation mesh will be defined by the shader, which will transform the point based on Web Mercator or spherical projection (using ENU coordinate).
+// for both, the coordinate are still limites to Web Mercator limits which are +/- 85.051129 degrees latitude and +/- 180 degrees longitude.
+export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
+    // the map logic. This is the main entry point for the map API.
+    private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
+    // only meshes have materials, we will use this material to apply to the elevation layer which own a mesh.
+    private _material: Nullable<Map3dMaterial>;
 
-    public constructor(name: string, display?: ITileDisplay) {
+    public constructor(name: string, display?: ITileDisplay, material: Nullable<Map3dMaterial> = null) {
         super(name);
+        this._material = material;
         this._map = new TileMapBase(name, display);
         this._map.linkTo(this);
     }
@@ -34,8 +48,8 @@ export class Map3d extends TransformNode implements ITileMap<ElevationTileConten
         this._map.zoomOutMap(delta);
         return this;
     }
-    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): Map3d {
-        this._map.translatePixelMap(tx, ty, metrics);
+    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): Map3d {
+        this._map.translateUnitsMap(tx, ty, metrics);
         return this;
     }
     public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): Map3d {
@@ -49,16 +63,16 @@ export class Map3d extends TransformNode implements ITileMap<ElevationTileConten
     public get navigation(): ITileNavigationState {
         return this._map.navigation;
     }
-    public get layerAddedObservable(): Observable<ITileMapLayer<ElevationTileContentType>> {
+    public get layerAddedObservable(): Observable<ITileMapLayer<Map3dTileContentType>> {
         return this._map.layerAddedObservable;
     }
-    public get layerRemovedObservable(): Observable<ITileMapLayer<ElevationTileContentType>> {
+    public get layerRemovedObservable(): Observable<ITileMapLayer<Map3dTileContentType>> {
         return this._map.layerRemovedObservable;
     }
-    public getLayers(predicate?: (l: ITileMapLayer<ElevationTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<ElevationTileContentType>> {
+    public getLayers(predicate?: (l: ITileMapLayer<Map3dTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<Map3dTileContentType>> {
         return this._map.getLayers(predicate, sorted);
     }
-    public addLayer(layer: ITileMapLayer<ElevationTileContentType>): void {
+    public addLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
         this._map.addLayer(layer);
         if (layer instanceof ElevationLayer) {
             this._onElevationLayerAdded(layer);
@@ -68,7 +82,7 @@ export class Map3d extends TransformNode implements ITileMap<ElevationTileConten
             this._onTextureLayerAdded(layer);
         }
     }
-    public removeLayer(layer: ITileMapLayer<ElevationTileContentType>): void {
+    public removeLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
         this._map.removeLayer(layer);
         if (layer instanceof ElevationLayer) {
             this._onElevationLayerRemoved(layer);
@@ -133,11 +147,15 @@ export class Map3d extends TransformNode implements ITileMap<ElevationTileConten
     protected _onElevationLayerAdded(layer: ElevationLayer): void {
         // register the root of the layer under the map
         layer.root.parent = this;
+        if (this._material) {
+            layer.mesh.material = this._material;
+        }
     }
 
     protected _onElevationLayerRemoved(layer: ElevationLayer): void {
         // unregister the root of the layer from the map
         layer.root.parent = null;
+        layer.mesh.material = null;
     }
 
     protected _onTextureLayerAdded(layer: ImageLayer): void {

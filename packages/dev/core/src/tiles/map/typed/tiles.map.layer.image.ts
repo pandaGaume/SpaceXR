@@ -3,6 +3,7 @@ import { PropertyChangedEventArgs } from "../../../events";
 import { ITile, ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
+import { ICartesian2 } from "dev/core/src/geometry";
 
 export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImageTileMapLayer {
     _alpha: number;
@@ -53,14 +54,14 @@ export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImage
         }
     }
 
-    public draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>): void {
+    public draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>, center?: ICartesian2): void {
         tiles = tiles ?? this.activTiles;
         if (tiles == null || undefined) {
             return;
         }
 
         const metrics = this.metrics;
-        const center = metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+        center = center ?? metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
 
         for (const t of tiles) {
             if (t.rect) {

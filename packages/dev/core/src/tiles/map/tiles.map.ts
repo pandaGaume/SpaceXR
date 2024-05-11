@@ -139,8 +139,8 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         return this;
     }
 
-    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L> {
-        this._navigation.translatePixelMap(tx, ty, metrics).validate();
+    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L> {
+        this._navigation.translateUnitsMap(tx, ty, metrics).validate();
         return this;
     }
 

@@ -1,1 +1,1 @@
-export * from "./textures.mapTexture";
+export * from "./textures.webMapTexture";

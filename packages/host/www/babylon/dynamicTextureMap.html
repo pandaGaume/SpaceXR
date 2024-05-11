@@ -123,7 +123,7 @@
                 options.alpha = 0.8;
                 options.invertY = true;
                 const name = "MapTexture";
-                var map = new SPACEXR.MapTexture(name, options, scene);
+                var map = new SPACEXR.WebMapTexture(name, options, scene);
                 const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.StreetClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(map);
                 return map;
             }

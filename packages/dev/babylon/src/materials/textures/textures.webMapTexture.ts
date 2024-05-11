@@ -14,7 +14,10 @@ export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
     invertY?: boolean;
 }
 
-export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<MapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer, MapTexture> {
+/**
+ * Provide Babylon js Texture implementation for a 2D WebMap (Web Mercator projection).
+ */
+export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi<WebMapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer, WebMapTexture> {
     static readonly DefaultOptions: IMapTextureOptions = {
         width: 1024,
         height: 768,
@@ -25,19 +28,19 @@ export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<Ma
     };
 
     public static Options(o?: Partial<IMapTextureOptions>): IMapTextureOptions {
-        return { ...MapTexture.DefaultOptions, ...(o ?? {}) };
+        return { ...WebMapTexture.DefaultOptions, ...(o ?? {}) };
     }
     public static OptionsHD(o?: Partial<IMapTextureOptions>): IMapTextureOptions {
-        return { ...MapTexture.DefaultOptions, ...(o ?? {}), width: 1280, height: 720 };
+        return { ...WebMapTexture.DefaultOptions, ...(o ?? {}), width: 1280, height: 720 };
     }
     public static OptionsFullHD(o?: Partial<IMapTextureOptions>): IMapTextureOptions {
-        return { ...MapTexture.DefaultOptions, ...(o ?? {}), width: 1980, height: 1080 };
+        return { ...WebMapTexture.DefaultOptions, ...(o ?? {}), width: 1980, height: 1080 };
     }
     public static Options4K(o?: Partial<IMapTextureOptions>): IMapTextureOptions {
-        return { ...MapTexture.DefaultOptions, ...(o ?? {}), width: 3840, height: 2160 };
+        return { ...WebMapTexture.DefaultOptions, ...(o ?? {}), width: 3840, height: 2160 };
     }
     public static Options8K(o?: Partial<IMapTextureOptions>): IMapTextureOptions {
-        return { ...MapTexture.DefaultOptions, ...(o ?? {}), width: 7680, height: 4320 };
+        return { ...WebMapTexture.DefaultOptions, ...(o ?? {}), width: 7680, height: 4320 };
     }
 
     _display: BABYLON.Nullable<CanvasDisplay>;
@@ -45,7 +48,7 @@ export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<Ma
     _renderObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.Camera>>;
 
     public constructor(name: string, options: IMapTextureOptions, scene: BABYLON.Scene, nav?: ITileNavigationState) {
-        const o = { ...MapTexture.DefaultOptions, ...options };
+        const o = { ...WebMapTexture.DefaultOptions, ...options };
 
         super(null, scene, !o.generateMipMaps, o.invertY, o.samplingMode, undefined, undefined, undefined, undefined, o.format);
 
@@ -75,40 +78,41 @@ export class MapTexture extends BABYLON.Texture implements ITileNavigationApi<Ma
     public get map(): BABYLON.Nullable<CanvasMap> {
         return this._map;
     }
+
     // navigation related
-    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): MapTexture {
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
         this._map.setViewMap(center, zoom, rotation);
         return this;
     }
 
-    public zoomMap(delta: number): MapTexture {
+    public zoomMap(delta: number): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
         this._map.zoomMap(delta);
         return this;
     }
 
-    public zoomInMap(delta: number): MapTexture {
+    public zoomInMap(delta: number): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
         this._map.zoomInMap(delta);
         return this;
     }
-    public zoomOutMap(delta: number): MapTexture {
+    public zoomOutMap(delta: number): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
         this._map.zoomOutMap(delta);
         return this;
     }
-    public translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): MapTexture {
+    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
-        this._map.translatePixelMap(tx, ty, metrics);
+        this._map.translateUnitsMap(tx, ty, metrics);
         return this;
     }
-    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): MapTexture {
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
         this._map.translateMap(lat, lon);
         return this;
     }
-    public rotateMap(r: number): MapTexture {
+    public rotateMap(r: number): WebMapTexture {
         if (!this._map) throw new Error("Invalid State");
         this._map.rotateMap(r);
         return this;

@@ -1,10 +1,12 @@
 import { AbstractMesh, Constants, Effect, Material, MaterialDefines, Nullable, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
 import { EventState } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile } from "core/tiles";
+import { IPipelineMessageType, ITargetBlock, ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
-import { Map3dTileContentType } from "../map";
+import { ElevationLayer, Map3dTileContentType } from "../map";
 import { Texture3 } from "babylon_ext/Materials";
+import { Map3dTexture } from "./textures";
+import { IDemInfos } from "core/dem";
 
 export class Map3dMaterialDefines extends MaterialDefines {
     constructor() {
@@ -28,7 +30,7 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Ma
     // the samplers for the elevation, normal and layer textures.
     private _elevationSampler: Nullable<Texture3>;
     private _normalSampler: Nullable<Texture3>;
-    private _layerSampler: Nullable<Texture3>;
+    private _layerSampler: Nullable<Map3dTexture>;
 
     // the elevation related properties.
     private _elevationOffset: number;
@@ -85,9 +87,65 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Ma
         return super.isReadyForSubMesh(mesh, subMesh, useInstances);
     }
 
-    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {}
-    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {}
-    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {}
+    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
+        for (let tile of eventData) {
+            // this is Layer
+            if (tile.content instanceof HTMLImageElement) {
+                this._imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
+                continue;
+            }
+            // this is DEM
+            this._demAdded(eventState.target, <ITile<IDemInfos>>tile);
+        }
+    }
+
+    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
+        for (let tile of eventData) {
+            // this is Layer
+            if (tile.content instanceof HTMLImageElement) {
+                this._imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
+                continue;
+            }
+            // this is DEM
+            this._demRemoved(eventState.target, <ITile<IDemInfos>>tile);
+        }
+    }
+
+    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
+        for (let tile of eventData) {
+            // this is Layer
+            if (tile.content instanceof HTMLImageElement) {
+                this._imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
+                continue;
+            }
+            // this is DEM
+            this._demUpdated(eventState.target, <ITile<IDemInfos>>tile);
+        }
+    }
+
+    protected _demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+        this._layerSampler?.demAdded(src, eventData);
+    }
+
+    protected _demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+        this._layerSampler?.demRemoved(src, eventData);
+    }
+
+    protected _demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+        this._layerSampler?.demUpdated(src, eventData);
+    }
+
+    protected _imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+        this._layerSampler?.imageAdded(src, eventData);
+    }
+
+    protected _imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+        this._layerSampler?.imageRemoved(src, eventData);
+    }
+
+    protected _imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+        this._layerSampler?.imageUpdated(src, eventData);
+    }
 
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene) {
         switch (kind) {
@@ -130,7 +188,8 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Ma
                     internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
                     generateMipMap: generateMipMap,
                 };
-                this._layerSampler = new Texture3(scene, options);
+                // this is where we leverage the Map3dTexture class to handle the layer texture
+                this._layerSampler = new Map3dTexture(scene, options);
                 break;
             }
             default: {

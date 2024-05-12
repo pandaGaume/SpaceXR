@@ -1,13 +1,12 @@
 import { ITexture3CreationOptions, ITexture3Layer, Texture3 } from "babylon_ext/Materials";
-import { IPipelineMessageType, ITargetBlock } from "core/tiles/pipeline";
-import { EventState, ICanvas, Nullable, Scene } from "@babylonjs/core";
+import { ICanvas, Nullable, Scene } from "@babylonjs/core";
 import { ITile, ITileMetrics, ITileNavigationState, ImageLayer } from "core/tiles";
 import { IDemInfos } from "core/dem";
 import { IDisposable } from "core/types";
 import { ICanvasRenderingContext } from "core/engine";
 import { CanvasDisplay } from "core/map";
 import { ICartesian2 } from "core/geometry";
-import { ElevationLayer, Map3dTileContentType } from "../../map";
+import { ElevationLayer } from "../../map";
 import { IGeo2 } from "core/geography";
 import { Observable } from "core/events";
 declare class ImageLayerView {
@@ -44,27 +43,24 @@ export declare class ElevationTileAddedEventArgs {
     depth: number;
     constructor(tile: ITile<IDemInfos>, depth: number);
 }
-export declare class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTileContentType>> {
+export declare class Map3dTexture extends Texture3 {
     _items: Map<string, Map3dTextureItem>;
     _sharedDisplay?: CanvasDisplay;
     _beforeRenderMethod: () => void;
     _elevationTileReady?: Observable<ElevationTileAddedEventArgs>;
     constructor(scene: Scene, options: ITexture3CreationOptions);
     elevationTileReadyObservable(): Observable<ElevationTileAddedEventArgs>;
-    added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void;
-    removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void;
-    updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void;
     dispose(): void;
     getTextureDepth(quadkey: string): number;
-    protected _demAdded(layer: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
+    imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
+    imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
+    protected _selectItems(delegate?: (i: Map3dTextureItem) => boolean): IterableIterator<Map3dTextureItem>;
+    protected _beforeRender(): void;
     protected _createDisplay(canvas?: ICanvas): CanvasDisplay | undefined;
     protected _createCanvas(): ICanvas | undefined;
-    protected _demRemoved(eventData: ITile<IDemInfos>): void;
-    protected _demUpdated(eventData: ITile<IDemInfos>): void;
-    protected _imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
-    protected _selectItems(delegate?: (i: Map3dTextureItem) => boolean): IterableIterator<Map3dTextureItem>;
-    protected _imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
-    protected _imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
-    protected _beforeRender(): void;
 }
 export {};

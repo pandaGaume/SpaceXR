@@ -1,13 +1,12 @@
 import { ITexture3CreationOptions, ITexture3Layer, Texture3 } from "babylon_ext/Materials";
-import { IPipelineMessageType, ITargetBlock } from "core/tiles/pipeline";
-import { EventState, ICanvas, Nullable, Scene } from "@babylonjs/core";
+import { ICanvas, Nullable, Scene } from "@babylonjs/core";
 import { ITile, ITileMetrics, ITileNavigationState, ImageLayer } from "core/tiles";
 import { IDemInfos } from "core/dem";
 import { IDisposable } from "core/types";
 import { ICanvasRenderingContext } from "core/engine";
 import { CanvasDisplay, Context2DTileMap } from "core/map";
 import { ICartesian2 } from "core/geometry";
-import { ElevationLayer, Map3dTileContentType } from "../../map";
+import { ElevationLayer } from "../../map";
 import { IGeo2 } from "core/geography";
 import { Observable } from "core/events";
 
@@ -170,7 +169,7 @@ export class ElevationTileAddedEventArgs {
 /// The texture is listening the elevation layer to bind a sub texture item to the elevation tile.
 /// The texture is listening the texture layer to update the sub texture item when the texture layer is updated.
 /// </summary>
-export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTileContentType>> {
+export class Map3dTexture extends Texture3 {
     _items: Map<string, Map3dTextureItem>;
     _sharedDisplay?: CanvasDisplay;
     _beforeRenderMethod: () => void;
@@ -188,42 +187,6 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
             this._elevationTileReady = new Observable<ElevationTileAddedEventArgs>();
         }
         return this._elevationTileReady;
-    }
-
-    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (let tile of eventData) {
-            // this is Layer
-            if (tile.content instanceof HTMLImageElement) {
-                this._imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
-                continue;
-            }
-            // this is DEM
-            this._demAdded(eventState.target, <ITile<IDemInfos>>tile);
-        }
-    }
-
-    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (let tile of eventData) {
-            // this is Layer
-            if (tile.content instanceof HTMLImageElement) {
-                this._imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
-                continue;
-            }
-            // this is DEM
-            this._demRemoved(<ITile<IDemInfos>>tile);
-        }
-    }
-
-    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (let tile of eventData) {
-            // this is Layer
-            if (tile.content instanceof HTMLImageElement) {
-                this._imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
-                continue;
-            }
-            // this is DEM
-            this._demUpdated(<ITile<IDemInfos>>tile);
-        }
     }
 
     public dispose(): void {
@@ -245,7 +208,7 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         return -1;
     }
 
-    protected _demAdded(layer: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         const target = this.reserve();
         if (!target) {
             throw `Unable to reserve a layer for the elevation tile ${eventData.address.quadkey}`;
@@ -255,7 +218,7 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         if (!this._sharedDisplay) {
             throw `Unable to create a display for the elevation tile ${eventData.address.quadkey}`;
         }
-        let item = new Map3dTextureItem(layer, eventData, target, this._sharedDisplay);
+        let item = new Map3dTextureItem(src, eventData, target, this._sharedDisplay);
         this._items.set(eventData.address.quadkey, item);
         // this is where we notify the observers that the elevation tile is ready, along with the depth of the texture.
         // the depth of the texture will be used as instance attribute to select the right texture value in the shader (u,v,depth)
@@ -263,18 +226,7 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         this._elevationTileReady?.notifyObservers(new ElevationTileAddedEventArgs(eventData, target.depth), -1, this, this);
     }
 
-    protected _createDisplay(canvas?: ICanvas): CanvasDisplay | undefined {
-        if (canvas instanceof HTMLCanvasElement) {
-            return new CanvasDisplay(canvas);
-        }
-        return undefined;
-    }
-
-    protected _createCanvas(): ICanvas | undefined {
-        return this.getScene()?.getEngine().createCanvas(this.width, this.height);
-    }
-
-    protected _demRemoved(eventData: ITile<IDemInfos>): void {
+    public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         const i = this._items.get(eventData.address.quadkey);
         if (i) {
             this._items.delete(eventData.address.quadkey);
@@ -282,11 +234,11 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         }
     }
 
-    protected _demUpdated(eventData: ITile<IDemInfos>): void {
+    public demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         /* nothing to do */
     }
 
-    protected _imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+    public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // select the items that are impacted by the layer using the bounding box
         let impactedItems = this._selectItems((item) => {
             // check if the layer is in the bounding box of the elevation
@@ -301,15 +253,7 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         }
     }
 
-    protected *_selectItems(delegate?: (i: Map3dTextureItem) => boolean): IterableIterator<Map3dTextureItem> {
-        for (let item of this._items.values()) {
-            if (delegate === undefined || delegate(item)) {
-                yield item;
-            }
-        }
-    }
-
-    protected _imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+    public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // select the items it's already own the data
         let impactedItems = this._selectItems((item) => {
             return item.views.find((layer) => layer.source === src) != undefined;
@@ -320,7 +264,7 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         }
     }
 
-    protected _imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+    public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // select the items it's already own the data
         let impactedItems = this._selectItems((item) => {
             return item.views.find((layer) => layer.source === src) != undefined;
@@ -331,10 +275,28 @@ export class Map3dTexture extends Texture3 implements ITargetBlock<ITile<Map3dTi
         }
     }
 
+    protected *_selectItems(delegate?: (i: Map3dTextureItem) => boolean): IterableIterator<Map3dTextureItem> {
+        for (let item of this._items.values()) {
+            if (delegate === undefined || delegate(item)) {
+                yield item;
+            }
+        }
+    }
+
     // this method is called before the render loop to validate the texture
     protected _beforeRender() {
         for (let item of this._items.values()) {
             item.validate();
         }
+    }
+    protected _createDisplay(canvas?: ICanvas): CanvasDisplay | undefined {
+        if (canvas instanceof HTMLCanvasElement) {
+            return new CanvasDisplay(canvas);
+        }
+        return undefined;
+    }
+
+    protected _createCanvas(): ICanvas | undefined {
+        return this.getScene()?.getEngine().createCanvas(this.width, this.height);
     }
 }

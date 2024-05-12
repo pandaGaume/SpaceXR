@@ -10,11 +10,11 @@
         // paths are used to resolve modules
         "paths": {
             "core/*": ["./dev/core/src/*"],
-            "babylon-ext/*": ["./dev/babylon-ext/src/*"]
+            "babylon_ext/*": ["./dev/babylon_ext/src/*"]
         }
     },
     // you MUST use reference to the core tsconfig and the babylon-ext tsconfig
-    "references": [{ "path": "../core" }, { "path": "../babylon-ext" }],
+    "references": [{ "path": "../core" }, { "path": "../babylon_ext" }],
     "include": ["./src/**/*.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

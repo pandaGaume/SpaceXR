@@ -52,11 +52,11 @@ export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
     build(): ITile<T>;
 }
 export declare enum CellCoordinateReference {
-    center = "center",
-    nw = "nw",
-    ne = "ne",
-    sw = "sw",
-    se = "se"
+    CENTER = 0,
+    NW = 1,
+    NE = 2,
+    SW = 3,
+    SE = 4
 }
 export interface ITileSystemBounds {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;

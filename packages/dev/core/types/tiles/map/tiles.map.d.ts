@@ -29,7 +29,7 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileCons
     zoomMap(delta: number): TileMapBase<T, L>;
     zoomInMap(delta: number): TileMapBase<T, L>;
     zoomOutMap(delta: number): TileMapBase<T, L>;
-    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L>;
+    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T, L>;
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L>;
     rotateMap(r: number): TileMapBase<T, L>;
     private _addSortedLayer;

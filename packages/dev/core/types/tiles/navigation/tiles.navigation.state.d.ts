@@ -37,7 +37,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     zoomInMap(delta: number): TileNavigationState;
     zoomMap(delta: number): TileNavigationState;
     zoomOutMap(delta: number): TileNavigationState;
-    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
+    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;
     rotateMap(r: number): TileNavigationState;
     syncWith(state: ITileNavigationState): TileNavigationState;

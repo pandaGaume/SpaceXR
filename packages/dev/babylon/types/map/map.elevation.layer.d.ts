@@ -1,4 +1,4 @@
-import { AbstractMesh, Material, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { IMemoryCache } from "core/cache";
 import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
@@ -16,7 +16,6 @@ export declare class ElevationTile extends Tile<IDemInfos> implements ElevationT
 export interface IElevationTileOptions extends ITileMapLayerOptions {
     exageration?: number;
     gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
-    material?: Material;
     insets?: ICartesian3;
 }
 export declare class ElevationLayer extends DemLayer {
@@ -27,20 +26,21 @@ export declare class ElevationLayer extends DemLayer {
     _exageration?: number;
     _insets?: ICartesian3;
     _gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
-    _material: Nullable<Material>;
     _root: TransformNode;
     _tilesRoot: TransformNode;
     _cartesianCenter: Nullable<ICartesian2>;
     constructor(name: string, source: ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationTileOptions, enabled?: boolean);
     get root(): TransformNode;
+    get mesh(): Mesh;
     protected _buildMesh(name: string, scene?: Nullable<Scene>): Mesh;
+    protected _createMesh(name: string, scene?: Nullable<Scene>): Mesh;
     protected _buildInstance(name: string, tile: ElevationTile): AbstractMesh;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _onZoomChanged(scale: number): void;
     protected _onAzimuthChanged(azimuth: number): void;
     protected _onCenterChanged(center: Nullable<ICartesian2>): void;
     protected _setTilePosition(tile: ElevationTile, center: ICartesian2, offset?: ICartesian3): void;
-    protected _buildProvider(source: ITileDatasource<IDemInfos, ITileAddress>, cache?: IMemoryCache<string, TileContentType<IDemInfos>>): ITileProvider<IDemInfos>;
+    protected _buildProvider(source: ITileDatasource<IDemInfos, ITileAddress>, cache?: IMemoryCache<string, TileContentType<IDemInfos>>, type?: new (...args: any[]) => ITile<IDemInfos>): ITileProvider<IDemInfos>;
     protected _buildTopology(): VertexData;
     protected _buildTerrainOptions(options?: TerrainGridOptions | TerrainGridOptionsBuilder): TerrainGridOptions;
     protected _onTileAdded(eventData: Array<ElevationTile>, eventState: EventState): void;

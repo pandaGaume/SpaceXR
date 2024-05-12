@@ -1,14 +1,9 @@
 import { Nullable, TransformNode } from "@babylonjs/core";
 import { IEnvelope } from "core/geography";
 import { ITile3DContent, ITile3DContentGroup, RefinementStrategy } from "./tile3d.interfaces";
-export declare class Tile3DContentGroup implements ITile3DContentGroup {
-    _name: string;
-    _enabled: boolean;
+export declare class Tile3DContentGroup extends TransformNode implements ITile3DContentGroup {
     _envelope?: IEnvelope;
     constructor(name: string);
-    get name(): string;
-    get enabled(): boolean;
-    set enabled(v: boolean);
     get bounds(): IEnvelope | undefined;
     set bounds(v: IEnvelope | undefined);
     [Symbol.iterator](predicate?: (n: Nullable<Node>) => boolean): IterableIterator<Nullable<Node>>;

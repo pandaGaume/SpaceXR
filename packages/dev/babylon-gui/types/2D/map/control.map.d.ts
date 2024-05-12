@@ -3,11 +3,12 @@ import * as GUI from "@babylonjs/gui";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
-import { Context2DTileMap, ICanvasRenderingOptions, InputsNavigationTarget } from "core/map";
+import { Context2DTileMap, InputsNavigationTarget } from "core/map";
 import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
+import { ICanvasRenderingOptions } from "core/engine/icanvas";
 export type ControlTileContentType = HTMLImageElement;
 export interface IMapControlOptions extends ICanvasRenderingOptions {
     navigationManager?: InputsNavigationTarget<MapControl>;
@@ -32,7 +33,7 @@ export declare class MapControl extends GUI.Container implements ITileDisplay, I
     zoomMap(delta: number): MapControl;
     zoomInMap(delta: number): MapControl;
     zoomOutMap(delta: number): MapControl;
-    translatePixelMap(tx: number, ty: number, metrics?: ITileMetrics): MapControl;
+    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): MapControl;
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): MapControl;
     rotateMap(r: number): MapControl;
     get navigation(): ITileNavigationState;

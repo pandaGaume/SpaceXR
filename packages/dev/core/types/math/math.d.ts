@@ -26,5 +26,8 @@ export declare abstract class AbstractRange<T> {
     protected abstract computeDelta(a: T, b?: T): T;
 }
 export declare class Range extends AbstractRange<number> {
+    static Zero(): Range;
+    static Max(): Range;
     protected computeDelta(a: number, b?: number): number;
+    clone(): Range;
 }

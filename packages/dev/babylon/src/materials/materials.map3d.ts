@@ -1,13 +1,10 @@
 import { AbstractMesh, Constants, Effect, Material, MaterialDefines, Nullable, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
-import { IDemInfos } from "core/dem";
 import { EventState } from "core/events";
 import { IPipelineMessageType, ITargetBlock, ITile } from "core/tiles";
 import { Range } from "core/math";
-import { Texture3 } from "babylon-ext/materials";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
-
-// we use type of IDemInfos for elevation and rgb images for the texture.
-export type Map3dTileContentType = IDemInfos | HTMLImageElement;
+import { Map3dTileContentType } from "../map";
+import { Texture3 } from "babylon_ext/Materials";
 
 export class Map3dMaterialDefines extends MaterialDefines {
     constructor() {

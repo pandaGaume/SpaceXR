@@ -47,6 +47,7 @@ module.exports = [
         resolve: {
             alias: {
                 core: `${__dirname}/../core/dist`,
+                babylon_ext: `${__dirname}/../babylon_ext/dist`,
             },
         },
         externals: [

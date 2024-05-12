@@ -2,6 +2,7 @@ import { ICanvasRenderingContext } from "@babylonjs/core/Engines/ICanvas";
 import { ITile, ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
+import { ICartesian2 } from "dev/core/src/geometry";
 export declare class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImageTileMapLayer {
     _alpha: number;
     _background?: string;
@@ -10,5 +11,5 @@ export declare class ImageLayer extends TileMapLayer<HTMLImageElement> implement
     set alpha(alpha: number);
     get background(): string | undefined;
     set background(b: string | undefined);
-    draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>): void;
+    draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>, center?: ICartesian2): void;
 }

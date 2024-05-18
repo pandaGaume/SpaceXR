@@ -1,9 +1,9 @@
 import { AbstractMesh, Constants, Effect, Material, MaterialDefines, Nullable, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
-import { EventState } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile, ImageLayer } from "core/tiles";
+
+import { ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
-import { ElevationLayer, Map3dTileContentType } from "../map";
+import { ElevationLayer } from "../map";
 import { Texture3 } from "babylon_ext/Materials";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
@@ -22,7 +22,7 @@ export class Map3dMaterialDefines extends MaterialDefines {
  * Commons properties and methods are implemented in this class, such as data samplers (elevation, normals and layer)
  * and clip planes.
  */
-export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Map3dTileContentType>> {
+export class Map3dMaterial extends PushMaterial {
     public static ElevationKind: string = "altitudes";
     public static NormalKind: string = "normals";
     public static LayerKind: string = "layer";
@@ -39,7 +39,7 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Ma
     // the clip planes used by the material, if any
     private _clipPlanes: Nullable<ClipPlaneDefinition>[];
 
-    constructor(name: string, scene: Scene) {
+    constructor(name: string, scene?: Scene) {
         super(name, scene);
 
         this._elevationSampler = null;
@@ -87,64 +87,34 @@ export class Map3dMaterial extends PushMaterial implements ITargetBlock<ITile<Ma
         return super.isReadyForSubMesh(mesh, subMesh, useInstances);
     }
 
-    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (let tile of eventData) {
-            // this is Layer
-            if (tile.content instanceof HTMLImageElement) {
-                this._imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
-                continue;
-            }
-            // this is DEM
-            this._demAdded(eventState.target, <ITile<IDemInfos>>tile);
-        }
-    }
-
-    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (let tile of eventData) {
-            // this is Layer
-            if (tile.content instanceof HTMLImageElement) {
-                this._imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
-                continue;
-            }
-            // this is DEM
-            this._demRemoved(eventState.target, <ITile<IDemInfos>>tile);
-        }
-    }
-
-    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (let tile of eventData) {
-            // this is Layer
-            if (tile.content instanceof HTMLImageElement) {
-                this._imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
-                continue;
-            }
-            // this is DEM
-            this._demUpdated(eventState.target, <ITile<IDemInfos>>tile);
-        }
-    }
-
-    protected _demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         this._layerSampler?.demAdded(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         this._layerSampler?.demRemoved(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    public demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         this._layerSampler?.demUpdated(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+    public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         this._layerSampler?.imageAdded(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+    public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         this._layerSampler?.imageRemoved(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+    public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         this._layerSampler?.imageUpdated(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene) {

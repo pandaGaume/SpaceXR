@@ -1,13 +1,30 @@
 import { IDemInfos } from "core/dem";
-import { ITile, ITileDisplay, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationState, ImageLayer, TileMapBase } from "core/tiles";
+import {
+    IPipelineMessageType,
+    ITile,
+    ITileDisplayBounds,
+    ITileMap,
+    ITileMapLayer,
+    ITileMetrics,
+    ITileNavigationState,
+    ImageLayer,
+    TileDisplayBounds,
+    TileMapBase,
+} from "core/tiles";
 import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
-import { Nullable, TransformNode } from "@babylonjs/core";
+import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Map3dMaterial } from "../materials";
+import { ISize2, IsSize } from "core/geometry";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
+
+export interface IMap3dOptions {
+    textureSize?: number;
+    material?: Map3dMaterial;
+}
 
 // Idea behind the map3d is to provide a 3D map with elevation and texture layers. Texture layers are images which will be combined
 // into a single texture per elevation tile. For the purpose we will use WebMapTexture approach to create a texture layer for each elevation tile.
@@ -19,16 +36,22 @@ export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 // The shape of the elevation mesh will be defined by the shader, which will transform the point based on Web Mercator or spherical projection (using ENU coordinate).
 // for both, the coordinate are still limites to Web Mercator limits which are +/- 85.051129 degrees latitude and +/- 180 degrees longitude.
 export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
+    public static DefaultTextureSize: number = 1024;
+
     // the map logic. This is the main entry point for the map API.
     private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
     // only meshes have materials, we will use this material to apply to the elevation layer which own a mesh.
     private _material: Nullable<Map3dMaterial>;
 
-    public constructor(name: string, display?: ITileDisplay, material: Nullable<Map3dMaterial> = null) {
-        super(name);
-        this._material = material;
+    public constructor(name: string, display: ITileDisplayBounds | ISize2, options?: IMap3dOptions, scene?: Scene) {
+        super(name, scene);
+        display = IsSize(display) ? new TileDisplayBounds(display) : display;
         this._map = new TileMapBase(name, display);
-        this._map.linkTo(this);
+        this._material = options?.material ?? new Map3dMaterial(name + "_material", scene);
+    }
+
+    public get material(): Nullable<Map3dMaterial> {
+        return this._material;
     }
 
     // TILE map API
@@ -79,7 +102,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
             return;
         }
         if (layer instanceof ImageLayer) {
-            this._onTextureLayerAdded(layer);
+            this._onImageLayerAdded(layer);
         }
     }
     public removeLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
@@ -89,7 +112,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
             return;
         }
         if (layer instanceof ImageLayer) {
-            this._onTextureLayerRemoved(layer);
+            this._onImageLayerRemoved(layer);
         }
     }
     // END TILE map API
@@ -99,46 +122,47 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         this._map?.dispose();
     }
 
-    public get display(): Nullable<ITileDisplay> {
+    public get display(): Nullable<ITileDisplayBounds> {
         return this._map.display;
     }
 
     /// TargetBlock
-    public added(eventData: Array<ElevationTile> | Array<ITile<HTMLImageElement>>, eventState: EventState): void {
+    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
             if (!tile) {
                 continue;
             }
             if (tile instanceof ElevationTile) {
-                this._onElevationAdded(tile);
+                this._onDemAdded(eventState.target, tile);
                 continue;
             }
+            this._onImageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
+        }
+    }
 
-            this._onTextureAdded(tile);
-        }
-    }
-    public removed(eventData: Array<ElevationTile> | Array<ITile<HTMLImageElement>>, eventState: EventState): void {
+    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
             if (!tile) {
                 continue;
             }
             if (tile instanceof ElevationTile) {
-                this._onElevationRemoved(tile);
+                this._onDemRemoved(eventState.target, tile);
                 continue;
             }
-            this._onTextureRemoved(tile);
+            this._onImageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
-    public updated(eventData: Array<ElevationTile> | Array<ITile<HTMLImageElement>>, eventState: EventState): void {
+
+    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
             if (!tile) {
                 continue;
             }
             if (tile instanceof ElevationTile) {
-                this._onElevationUpdated(tile);
+                this._onDemUpdated(eventState.target, tile);
                 continue;
             }
-            this._onTextureUpdated(tile);
+            this._onImageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
     /// End TargetBlock
@@ -147,46 +171,48 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     protected _onElevationLayerAdded(layer: ElevationLayer): void {
         // register the root of the layer under the map
         layer.root.parent = this;
-        if (this._material) {
+        if (this._material && !layer.mesh.material) {
             layer.mesh.material = this._material;
         }
+        layer.linkTo(this);
     }
 
     protected _onElevationLayerRemoved(layer: ElevationLayer): void {
+        layer.unlinkFrom(this);
         // unregister the root of the layer from the map
         layer.root.parent = null;
         layer.mesh.material = null;
     }
 
-    protected _onTextureLayerAdded(layer: ImageLayer): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onImageLayerAdded(layer: ImageLayer): void {
+        layer.linkTo(this);
     }
 
-    protected _onTextureLayerRemoved(layer: ImageLayer): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onImageLayerRemoved(layer: ImageLayer): void {
+        layer.unlinkFrom(this);
     }
 
-    protected _onElevationAdded(tile: ElevationTile): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onDemAdded(src: ElevationLayer, tile: ElevationTile): void {
+        this._material?.demAdded(src, tile);
     }
 
-    protected _onElevationRemoved(tile: ElevationTile): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onDemRemoved(src: ElevationLayer, tile: ElevationTile): void {
+        this._material?.demRemoved(src, tile);
     }
 
-    protected _onElevationUpdated(tile: ElevationTile): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onDemUpdated(src: ElevationLayer, tile: ElevationTile): void {
+        this._material?.demUpdated(src, tile);
     }
 
-    protected _onTextureAdded(tile: ITile<HTMLImageElement>): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onImageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
+        this._material?.imageAdded(src, tile);
     }
 
-    protected _onTextureRemoved(tile: ITile<HTMLImageElement>): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onImageRemoved(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
+        this._material?.imageRemoved(src, tile);
     }
 
-    protected _onTextureUpdated(tile: ITile<HTMLImageElement>): void {
-        /* nothing to do here - overrided by subclasses */
+    protected _onImageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
+        this._material?.imageUpdated(src, tile);
     }
 }

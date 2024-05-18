@@ -33,6 +33,7 @@ export class MapZen {
 
     public static MaxLevelOfDetail = 15;
     public static Metrics = new EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
+    public static Attribution = "Freely provided by MapZen - with thanks.";
 
     public static ElevationsImagesClient(options?: TileWebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);

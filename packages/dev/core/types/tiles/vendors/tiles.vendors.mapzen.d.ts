@@ -16,6 +16,7 @@ export declare class MapZen {
     private static readonly KEY;
     static MaxLevelOfDetail: number;
     static Metrics: EPSG3857;
+    static Attribution: string;
     static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
     static NormalsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;

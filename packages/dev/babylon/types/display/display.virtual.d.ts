@@ -2,6 +2,10 @@ import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexData } from
 import { ICartesian3, ISize2 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 export declare class VirtualDisplay extends Mesh {
+    static HD: ISize2;
+    static FullHD: ISize2;
+    static UltraHD: ISize2;
+    static UltraHD_2: ISize2;
     _worldTransform: TransformNode;
     _dimension: ISize2;
     _halfDimension: ISize2;

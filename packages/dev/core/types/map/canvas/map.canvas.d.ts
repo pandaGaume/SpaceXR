@@ -1,5 +1,5 @@
 import { RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplay, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
+import { TileMapBase, ITileDisplayBounds, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
@@ -10,7 +10,7 @@ export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType,
     static DefaultOptions: ICanvasRenderingOptions;
     _background?: string;
     _alpha: number;
-    constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState);
+    constructor(name: string, display?: Nullable<ITileDisplayBounds>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState);
     get background(): string | undefined;
     set background(v: string | undefined);
     get alpha(): number;

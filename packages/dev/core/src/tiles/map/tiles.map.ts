@@ -1,7 +1,7 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
+import { ITileDisplayBounds, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileSystemBounds } from "../tiles.system";
@@ -11,7 +11,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
 
-    protected _display: Nullable<ITileDisplay>;
+    protected _display: Nullable<ITileDisplayBounds>;
     protected _navigation: ITileNavigationState;
     protected _layers?: Array<L>;
 
@@ -20,7 +20,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
     protected _zIndexOrderedLayers?: Array<L>;
 
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
-    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
+    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>>;
 
     /// <summary>
     /// Create a new tile map.
@@ -30,7 +30,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
     /// <param name="nav">The optional navigation api. May be a NavigationAPI object or a ITileMetrics object. In the second case, it will build a new TileNavigation(metrics).
     //  </param>
     /// </summary>
-    public constructor(name: string, display?: Nullable<ITileDisplay>, nav?: ITileNavigationState) {
+    public constructor(name: string, display?: Nullable<ITileDisplayBounds>, nav?: ITileNavigationState) {
         super(name);
         this._display = display ?? null;
         this._bindDisplay(this._display);
@@ -50,7 +50,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         return this._layerRemovedObservable;
     }
 
-    public get display(): Nullable<ITileDisplay> {
+    public get display(): Nullable<ITileDisplayBounds> {
         return this._display;
     }
 
@@ -184,7 +184,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplay, unknown>, state: EventState): void {
+    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplayBounds, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case "size": {
                 this.invalidate();
@@ -198,7 +198,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    private _bindDisplay(display: Nullable<ITileDisplay>): void {
+    private _bindDisplay(display: Nullable<ITileDisplayBounds>): void {
         if (display) {
             this._display = display;
             this._displayPropertyObserver = this._display.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
@@ -280,11 +280,11 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void {
+    protected _onDisplayUnbinded(display: Nullable<ITileDisplayBounds>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayBinded(display: Nullable<ITileDisplay>): void {
+    protected _onDisplayBinded(display: Nullable<ITileDisplayBounds>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
@@ -300,11 +300,11 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayResized(display: ITileDisplay): void {
+    protected _onDisplayResized(display: ITileDisplayBounds): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayTranslated(display: ITileDisplay): void {
+    protected _onDisplayTranslated(display: ITileDisplayBounds): void {
         /* nothing to do here - overrided by subclasses */
     }
 

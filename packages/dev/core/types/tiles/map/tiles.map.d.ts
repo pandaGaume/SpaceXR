@@ -1,23 +1,23 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
-import { ITileDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
+import { ITileDisplayBounds, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { TileConsumerBase } from "../pipeline";
 export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L, TileMapBase<T, L>> {
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
-    protected _display: Nullable<ITileDisplay>;
+    protected _display: Nullable<ITileDisplayBounds>;
     protected _navigation: ITileNavigationState;
     protected _layers?: Array<L>;
     protected _zIndexOrderedLayers?: Array<L>;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
-    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplay, unknown>>>;
-    constructor(name: string, display?: Nullable<ITileDisplay>, nav?: ITileNavigationState);
+    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>>;
+    constructor(name: string, display?: Nullable<ITileDisplayBounds>, nav?: ITileNavigationState);
     get layerAddedObservable(): Observable<L>;
     get layerRemovedObservable(): Observable<L>;
-    get display(): Nullable<ITileDisplay>;
+    get display(): Nullable<ITileDisplayBounds>;
     get navigation(): ITileNavigationState;
     set navigation(nav: ITileNavigationState);
     getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
@@ -44,13 +44,13 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileCons
     private _onLayerRemovedInternal;
     protected _onLayerValidationChanged(valid: boolean, state: EventState): void;
     protected _beforeValidate(): void;
-    protected _onDisplayUnbinded(display: Nullable<ITileDisplay>): void;
-    protected _onDisplayBinded(display: Nullable<ITileDisplay>): void;
+    protected _onDisplayUnbinded(display: Nullable<ITileDisplayBounds>): void;
+    protected _onDisplayBinded(display: Nullable<ITileDisplayBounds>): void;
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void;
     protected _onNavigationBinded(nav?: ITileNavigationState): void;
     protected _onNavigationUpdated(nav?: ITileNavigationState): void;
-    protected _onDisplayResized(display: ITileDisplay): void;
-    protected _onDisplayTranslated(display: ITileDisplay): void;
+    protected _onDisplayResized(display: ITileDisplayBounds): void;
+    protected _onDisplayTranslated(display: ITileDisplayBounds): void;
     protected _onLayerAdded(layer: L): void;
     protected _onLayerRemoved(layer: L): void;
 }

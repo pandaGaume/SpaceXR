@@ -6,7 +6,7 @@ export declare class ConvexHull2Builder {
     constructor(positions: Float32Array, stride?: number);
     withPositions(positions: Float32Array, stride?: number): ConvexHull2Builder;
     build(): Nullable<Array<number>>;
-    private findSide;
-    private lineDist;
-    private quickHull;
+    private _findSide;
+    private _lineDist;
+    private _quickHullToRef;
 }

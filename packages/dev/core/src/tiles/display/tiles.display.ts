@@ -1,22 +1,26 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
 import { Size2, ISize2, ISize3, IsSize } from "../../geometry";
-import { ITileDisplay } from "../map";
+import { ITileDisplayBounds } from "../map";
 
-export class TileDisplay implements ITileDisplay {
-    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+export class TileDisplayBounds implements ITileDisplayBounds {
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
     _w: number;
     _h: number;
 
-    public constructor(w?: number, h?: number) {
+    public constructor(w?: number | ISize2, h?: number) {
+        if (IsSize(w)) {
+            h = w.height;
+            w = w.width;
+        }
         this._w = w ?? 0;
         this._h = h ?? 0;
     }
 
     public dispose(): void {}
 
-    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, unknown>> {
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>> {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>();
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>();
         }
         return this._propertyChangedObservable;
     }
@@ -32,7 +36,7 @@ export class TileDisplay implements ITileDisplay {
         return this._w / this._h;
     }
 
-    public resize(w: number | ISize2 | ISize3, h?: number): ITileDisplay {
+    public resize(w: number | ISize2 | ISize3, h?: number): ITileDisplayBounds {
         if (IsSize(w)) {
             h = w.height;
             w = w.width;

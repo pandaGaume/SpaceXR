@@ -1,4 +1,4 @@
-import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData, Material } from "@babylonjs/core";
 import { IMemoryCache } from "core/cache";
 import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
@@ -33,6 +33,7 @@ export interface IElevationTileOptions extends ITileMapLayerOptions {
     exageration?: number;
     gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
     insets?: ICartesian3;
+    material?: Material;
 }
 
 ///<summary>
@@ -74,6 +75,7 @@ export class ElevationLayer extends DemLayer {
 
         this._grid = this._buildTopology();
         this._template = this._buildMesh(name);
+        this._template.material = options?.material ?? null;
         this._cartesianCenter = null;
         this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
     }

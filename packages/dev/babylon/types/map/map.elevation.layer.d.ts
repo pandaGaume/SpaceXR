@@ -1,4 +1,4 @@
-import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData, Material } from "@babylonjs/core";
 import { IMemoryCache } from "core/cache";
 import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
@@ -17,6 +17,7 @@ export interface IElevationTileOptions extends ITileMapLayerOptions {
     exageration?: number;
     gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
     insets?: ICartesian3;
+    material?: Material;
 }
 export declare class ElevationLayer extends DemLayer {
     private static InitZ;

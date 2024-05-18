@@ -1,5 +1,5 @@
 import { Scalar, RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplay, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
+import { TileMapBase, ITileDisplayBounds, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
@@ -20,7 +20,7 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
     _background?: string;
     _alpha: number;
 
-    public constructor(name: string, display?: Nullable<ITileDisplay>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
+    public constructor(name: string, display?: Nullable<ITileDisplayBounds>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
         super(name, display, nav);
         this._background = options?.background;
         this._alpha = options?.alpha ?? 1;

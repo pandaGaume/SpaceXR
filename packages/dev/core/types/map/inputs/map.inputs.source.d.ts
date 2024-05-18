@@ -3,6 +3,7 @@ import { Cartesian2, ICartesian2 } from "../../geometry";
 import { InputsNavigationTarget } from "./map.inputs.navigation";
 import { ICartesian2WithInfos, IPointerSource } from "./map.inputs.interfaces";
 import { EventState, Observer } from "../../events";
+import { ITileNavigationApi } from "../../tiles";
 export declare class Cartesian2WithInfos extends Cartesian2 implements ICartesian2WithInfos {
     x: number;
     y: number;
@@ -17,7 +18,7 @@ export declare class PointerController<S extends IPointerSource> implements IDis
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
-    constructor(src: S, target: InputsNavigationTarget<S>);
+    constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi<unknown>);
     dispose(): void;
     protected _attachControl(src: S): void;
     protected _detachControl(src: S): void;

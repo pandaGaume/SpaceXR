@@ -9,8 +9,8 @@ import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/i
 /// <summary>
 /// Provide Unitless target size
 /// </summary>
-export interface ITileDisplay extends IDisposable {
-    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+export interface ITileDisplayBounds extends IDisposable {
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
     displayHeight: number;
     displayWidth: number;
     ratio: number;

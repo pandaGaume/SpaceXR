@@ -7,7 +7,7 @@ import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 import { Bearing, Geo2 } from "../../geography";
-import { ITileDisplay } from "../map";
+import { ITileDisplayBounds } from "../map";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -73,7 +73,7 @@ export class TileView implements ITileView {
         return undefined;
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
         if (!state || !display) {
             this._doClearContext(state, dispatchEvent);
             return;
@@ -81,7 +81,7 @@ export class TileView implements ITileView {
         this._doValidateContext(state, display, metrics, dispatchEvent);
     }
 
-    private _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
+    protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
         if (state && display) {
             const lod = TileAddress.ClampLod(state.lod, metrics);
             const scale = state.scale;
@@ -156,23 +156,23 @@ export class TileView implements ITileView {
         }
     }
 
-    private getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth: Bearing): IRectangle {
+    protected getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth: Bearing): IRectangle {
         w = w / scale;
         h = h / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
         let bounds = new Rectangle(x0, y0, w, h);
         // bounds.points is returning a new set of points, so we need to rotate them if azimuth is non zero.
-        return azimuth ? Rectangle.FromPoints(...this.rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        return azimuth ? Rectangle.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
 
-    private *rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
+    protected *_rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2> {
         for (const p of points) {
-            yield this.rotatePointArround(p.x, p.y, center, azimuth, p);
+            yield this._rotatePointArround(p.x, p.y, center, azimuth, p);
         }
     }
 
-    private rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, azimuth: Bearing, target?: R): R {
+    protected _rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, azimuth: Bearing, target?: R): R {
         const r = target || Cartesian2.Zero();
         const translatedX = x - center.x;
         const translatedY = y - center.y;

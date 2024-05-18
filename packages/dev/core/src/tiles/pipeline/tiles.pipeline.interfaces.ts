@@ -2,7 +2,7 @@ import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
 import { ITile, ITileAddress, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { ITileDisplay } from "../map";
+import { ITileDisplayBounds } from "../map";
 
 export type IPipelineMessageType<T> = Array<T>;
 
@@ -39,7 +39,7 @@ export interface ITilePipelineComponent extends IDisposable {
 }
 
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
 }
 
 /// <summary>

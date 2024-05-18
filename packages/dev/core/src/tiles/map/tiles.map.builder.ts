@@ -1,10 +1,10 @@
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITilePipeline, ITilePipelineBuilder, IsTilePipelineBuilder } from "../pipeline/tiles.pipeline.interfaces";
-import { ITileDisplay, ITileMap, ITileMapBuilder, ITileMapLayer, ITileMapLayerBuilder, IsTileMapLayerBuilder } from "./tiles.map.interfaces";
+import { ITileDisplayBounds, ITileMap, ITileMapBuilder, ITileMapLayer, ITileMapLayerBuilder, IsTileMapLayerBuilder } from "./tiles.map.interfaces";
 
 export abstract class AbstractTileMapBuilder<T, L extends ITileMapLayer<T>> implements ITileMapBuilder<T, L> {
     protected _name?: string;
-    protected _display?: ITileDisplay;
+    protected _display?: ITileDisplayBounds;
     protected _navigation?: ITileNavigationState;
     protected _pipeline?: ITilePipeline<T> | ITilePipelineBuilder<T>;
     protected _layers?: Map<string, L>;
@@ -14,7 +14,7 @@ export abstract class AbstractTileMapBuilder<T, L extends ITileMapLayer<T>> impl
         return this;
     }
 
-    public withDisplay(display: ITileDisplay): ITileMapBuilder<T, L> {
+    public withDisplay(display: ITileDisplayBounds): ITileMapBuilder<T, L> {
         this._display = display;
         return this;
     }

@@ -3,6 +3,7 @@ import { Cartesian2, ICartesian2 } from "../../geometry";
 import { InputsNavigationTarget } from "./map.inputs.navigation";
 import { ICartesian2WithInfos, IPointerSource } from "./map.inputs.interfaces";
 import { EventState, Observer } from "../../events";
+import { ITileNavigationApi } from "../../tiles";
 
 export class Cartesian2WithInfos extends Cartesian2 implements ICartesian2WithInfos {
     /** defines the current mouse button index */
@@ -29,9 +30,9 @@ export class PointerController<S extends IPointerSource> implements IDisposable 
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
 
-    public constructor(src: S, target: InputsNavigationTarget<S>) {
+    public constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi<unknown>) {
         this._src = src;
-        this._target = target;
+        this._target = target instanceof InputsNavigationTarget ? target : new InputsNavigationTarget(target);
         this._attachControl(this._src);
     }
 

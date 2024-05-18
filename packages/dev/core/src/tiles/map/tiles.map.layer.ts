@@ -4,7 +4,7 @@ import { TileProvider } from "../providers/tiles.provider";
 import { TileContentProvider } from "../providers/tiles.provider.content";
 
 import { ITile, ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, IsTileDatasource, TileContentType } from "../tiles.interfaces";
-import { ITileMapLayer, ITileMapLayerOptions, ITileDisplay } from "./tiles.map.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds } from "./tiles.map.interfaces";
 import { ITilePipeline, ITileView, TilePipelineBuilder, TileProducer, TileView } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
@@ -27,7 +27,7 @@ export class TileMapLayer<T> extends AbstractTileMapLayer<T> implements ITileMap
         this._pipeline.producer.linkTo(this);
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {
         super.setContext(state, display, metrics, dispatchEvent);
         this._pipeline.view?.setContext(this._state, display, metrics ?? this.metrics, dispatchEvent);
     }

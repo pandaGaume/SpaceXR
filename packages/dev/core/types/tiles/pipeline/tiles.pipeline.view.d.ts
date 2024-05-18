@@ -2,10 +2,10 @@ import { Observable } from "../../events";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
-import { Cartesian2 } from "../../geometry";
+import { ICartesian2, IRectangle, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
-import { Geo2 } from "../../geography";
-import { ITileDisplay } from "../map";
+import { Bearing, Geo2 } from "../../geography";
+import { ITileDisplayBounds } from "../map";
 export declare class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -23,10 +23,10 @@ export declare class TileView implements ITileView {
     get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>>;
     linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions): void;
     unlinkFrom(target: ITargetBlock<ITileAddress>): ITilePipelineLink<ITileAddress> | undefined;
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
-    private _doValidateContext;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
+    protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
     private _doClearContext;
-    private getRectangle;
-    private rotatePointsArround;
-    private rotatePointArround;
+    protected getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth: Bearing): IRectangle;
+    protected _rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2>;
+    protected _rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, azimuth: Bearing, target?: R): R;
 }

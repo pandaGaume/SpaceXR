@@ -5,8 +5,8 @@ import { IHasActivTiles, ITile, ITileMetrics, ITileMetricsProvider, ITileProvide
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
-export interface ITileDisplay extends IDisposable {
-    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+export interface ITileDisplayBounds extends IDisposable {
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
     displayHeight: number;
     displayWidth: number;
     ratio: number;

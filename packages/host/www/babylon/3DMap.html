@@ -96,7 +96,7 @@
                 const mapOptions = {};
 
                 // build the map
-                const map = new SPACEXR.Map3d("map", display.resolution, mapOptions, scene).setViewMap(defaultCenter, defaultLod);
+                const map = new SPACEXR.Map3d("map", display.resolution, mapOptions, scene).setViewMap(defaultCenter, defaultLod).withPointerControl(display.pointerSource);
                 map.position.y = 10; // set the map at 10 cm over the display
                 map.parent = display; // and attach to parent.
 
@@ -107,8 +107,6 @@
 
                 // build layer and add it to the map
                 const l = new SPACEXR.ElevationLayer(`${name}.layer`, SPACEXR.MapZen.DemClient(), layerOptions).addTo(map);
-
-                const mouseControl = new SPACEXR.PointerController(display.pointerSource, map);
 
                 const showAxes = true;
                 if (showAxes) {

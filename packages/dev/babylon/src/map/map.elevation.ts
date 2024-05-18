@@ -17,6 +17,7 @@ import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Map3dMaterial } from "../materials";
 import { ISize2, IsSize } from "core/geometry";
+import { IPointerSource, PointerController } from "core/map";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
@@ -42,16 +43,26 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
     // only meshes have materials, we will use this material to apply to the elevation layer which own a mesh.
     private _material: Nullable<Map3dMaterial>;
+    private _controller: Nullable<PointerController<IPointerSource>>;
 
     public constructor(name: string, display: ITileDisplayBounds | ISize2, options?: IMap3dOptions, scene?: Scene) {
         super(name, scene);
         display = IsSize(display) ? new TileDisplayBounds(display) : display;
         this._map = new TileMapBase(name, display);
         this._material = options?.material ?? new Map3dMaterial(name + "_material", scene);
+        this._controller = null;
     }
 
     public get material(): Nullable<Map3dMaterial> {
         return this._material;
+    }
+
+    public withPointerControl(controller: PointerController<IPointerSource> | IPointerSource) : Map3d{
+        if (this._controller) {
+            this._controller.dispose();
+        }
+        this._controller = controller instanceof PointerController ? controller : new PointerController(controller, this);
+        return this;
     }
 
     // TILE map API

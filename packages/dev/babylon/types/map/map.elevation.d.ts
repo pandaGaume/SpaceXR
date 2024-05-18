@@ -6,6 +6,7 @@ import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Map3dMaterial } from "../materials";
 import { ISize2 } from "core/geometry";
+import { IPointerSource, PointerController } from "core/map";
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 export interface IMap3dOptions {
     textureSize?: number;
@@ -15,8 +16,10 @@ export declare class Map3d extends TransformNode implements ITileMap<Map3dTileCo
     static DefaultTextureSize: number;
     private _map;
     private _material;
+    private _controller;
     constructor(name: string, display: ITileDisplayBounds | ISize2, options?: IMap3dOptions, scene?: Scene);
     get material(): Nullable<Map3dMaterial>;
+    withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3d;
     zoomMap(delta: number): Map3d;
     zoomInMap(delta: number): Map3d;

@@ -38,15 +38,15 @@ export declare class JulianDate {
     toDays(): number;
 }
 export declare class CelestialTracker {
-    private static EarthObliquity;
-    private static EarthObliquity_Sin;
-    private static EarthObliquity_Cos;
+    static EarthObliquity: number;
+    static EarthObliquity_Sin: number;
+    static EarthObliquity_Cos: number;
     static SunTrajectories: SunTrajectoryConfig[];
-    private static ApproxTransit;
-    private static SolarTransitJ;
-    private static HourAngle;
-    private static ObserverAngle;
-    private static GetSetJ;
+    private static _ApproxTransit;
+    private static _SolarTransitJ;
+    private static _HourAngle;
+    private static _ObserverAngle;
+    private static _GetSetJ;
     static Azimuth(H: number, phi: number, dec: number): number;
     static Altitude(H: number, phi: number, dec: number): number;
     static SiderealTime(d: number, lw: number): number;
@@ -57,10 +57,10 @@ export declare class CelestialTracker {
     static SunCoords(d: number): EquatorialVector;
     static GetSunTimes(date: Date, lat: number, lng: number, height: number): any;
     static GetSunPosition(date: Date, lat: number, lon: number): HorizonVector;
-    private static MoonCoords;
-    private static AstroRefraction;
+    private static _MoonCoords;
+    private static _AstroRefraction;
     static GetMoonPosition(date: Date, lat: number, lon: number): HorizonVector;
     static GetMoonIllumination: (date: Date) => MoonState;
-    private static HoursLater;
+    private static _HoursLater;
     static GetMoonTimes: (date: Date, lat: number, lng: number, inUTC: boolean) => any;
 }

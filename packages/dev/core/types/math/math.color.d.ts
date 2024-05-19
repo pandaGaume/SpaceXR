@@ -6,9 +6,11 @@ export declare class RGBAColor {
     a: number;
     static White(): RGBAColor;
     static Black(): RGBAColor;
-    static NeonBlue(): RGBAColor;
     static LightGray(): RGBAColor;
     static Gray(): RGBAColor;
+    static CoolSteelBlue(): RGBAColor;
+    static ElectricBlue(): RGBAColor;
+    static NeonBlue(): RGBAColor;
     constructor(r: number, g: number, b: number, a?: number);
     toHexString(): string;
     toHSL(): HSLColor;

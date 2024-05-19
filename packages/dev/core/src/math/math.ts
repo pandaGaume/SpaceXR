@@ -91,6 +91,21 @@ export class Range extends AbstractRange<number> {
         return a && b ? b - a : Number.POSITIVE_INFINITY;
     }
 
+    public constructor(min: number, max?: number) {
+        super(min, max);
+    }
+
+    public union(min: number | Range, max?: number) {
+        if (min instanceof Range) {
+            this.union(min.min, min.max);
+            return;
+        }
+        this._min = Math.min(this._min, min);
+        if (this._max !== undefined) {
+            this._max = Math.max(this._max, max ?? min);
+        }
+    }
+
     public clone(): Range {
         return new Range(this._min, this._max);
     }

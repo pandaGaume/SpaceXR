@@ -9,16 +9,24 @@ export class RGBAColor {
         return new RGBAColor(0, 0, 0);
     }
 
-    public static NeonBlue() {
-        return new RGBAColor(77, 77, 255);
-    }
-
     public static LightGray() {
         return new RGBAColor(211, 211, 211);
     }
 
     public static Gray() {
         return new RGBAColor(128, 128, 128);
+    }
+
+    public static CoolSteelBlue() {
+        return new RGBAColor(70, 130, 180);
+    }
+
+    public static ElectricBlue() {
+        return new RGBAColor(0, 191, 255);
+    }
+
+    public static NeonBlue() {
+        return new RGBAColor(77, 77, 255);
     }
 
     public constructor(public r: number, public g: number, public b: number, public a: number = 1) {}

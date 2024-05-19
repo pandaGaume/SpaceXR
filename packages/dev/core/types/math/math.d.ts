@@ -29,5 +29,7 @@ export declare class Range extends AbstractRange<number> {
     static Zero(): Range;
     static Max(): Range;
     protected computeDelta(a: number, b?: number): number;
+    constructor(min: number, max?: number);
+    union(min: number | Range, max?: number): void;
     clone(): Range;
 }

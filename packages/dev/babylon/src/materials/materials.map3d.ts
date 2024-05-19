@@ -1,18 +1,63 @@
-import { AbstractMesh, Constants, Effect, Material, MaterialDefines, Nullable, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
+import {
+    AbstractMesh,
+    Color4,
+    Constants,
+    Effect,
+    HemisphericLight,
+    Light,
+    Material,
+    MaterialDefines,
+    Nullable,
+    Observer,
+    PointLight,
+    PushMaterial,
+    Scene,
+    SpotLight,
+    SubMesh,
+} from "@babylonjs/core";
 
-import { ITile, ImageLayer } from "core/tiles";
+import { ITile, ITileAddress, ImageLayer, IsTileContentView } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 import { ElevationLayer } from "../map";
-import { Texture3 } from "babylon_ext/Materials";
+import { ITexture3Layer, Texture3 } from "babylon_ext/Materials";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
+
+export enum Map3dShadingMode {
+    // In flat shading, a single color is computed per polygon face,
+    // and all pixels within that face are assigned the same color.
+    // This can give a faceted look to the 3D model. This is the default shading mode when no texture layers are used.
+    // OpenGL function: glShadeModel(GL_FLAT);
+    FLAT,
+    // In Gouraud shading, lighting calculations are done at the vertices,
+    // and the resulting vertex colors are interpolated across the surface of the polygon.
+    // This can produce smoother transitions between colors on the surface.
+    // OpenGL function: glShadeModel(GL_SMOOTH);
+    GOUREAUD,
+    // n Phong shading, lighting calculations are performed per pixel (fragment).
+    // The normal vectors are interpolated across the surface of the polygon, and the lighting
+    // equation is applied to each pixel. This produces a smoother and more realistic shading
+    // effect compared to Gouraud shading.
+    // Phong shading is not directly supported by the fixed-function pipeline in legacy OpenGL
+    // but can be implemented using GLSL (OpenGL Shading Language).
+    PHONG,
+    // A variant of Phong shading that uses a different approach to calculate the specular highlight.
+    // It is often preferred because it can be more efficient.
+    // Like Phong shading, Blinn-Phong shading is implemented using GLSL.
+    BLINN_PHONG,
+}
 
 export class Map3dMaterialDefines extends MaterialDefines {
     constructor() {
         super();
         this.rebuild();
     }
+}
+
+// internal class used to hold the tile pool texture areas
+class TileBag {
+    public constructor(public address: ITileAddress, public elevationArea: Nullable<ITexture3Layer> = null, public normalArea: Nullable<ITexture3Layer> = null) {}
 }
 
 /**
@@ -23,33 +68,49 @@ export class Map3dMaterialDefines extends MaterialDefines {
  * and clip planes.
  */
 export class Map3dMaterial extends PushMaterial {
+    public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 1); // cool steel blue
+
     public static ElevationKind: string = "altitudes";
     public static NormalKind: string = "normals";
     public static LayerKind: string = "layer";
 
+    // the properties used by the material
+
+    // the terrain color if no texture defined
+    public _terrainColor: Nullable<Color4> = Map3dMaterial.DefaultTerrainColor;
+    // the shading mode used by the material if no texture defined
+    public _shadingMode: Map3dShadingMode = Map3dShadingMode.FLAT;
+
+    // the properties of tiles
+    public _bags: Map<string, TileBag> = new Map<string, TileBag>();
+
     // the samplers for the elevation, normal and layer textures.
-    private _elevationSampler: Nullable<Texture3>;
-    private _normalSampler: Nullable<Texture3>;
-    private _layerSampler: Nullable<Map3dTexture>;
+    private _elevationSampler: Nullable<Texture3> = null;
+    private _normalSampler: Nullable<Texture3> = null;
+    private _layerSampler: Nullable<Map3dTexture> = null;
 
     // the elevation related properties.
-    private _elevationOffset: number;
-    private _elevationRange: Range;
+    private _elevationOffset: number = 0.0;
+    private _elevationRange: Nullable<Range> = null;
 
     // the clip planes used by the material, if any
-    private _clipPlanes: Nullable<ClipPlaneDefinition>[];
+    private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [null, null, null, null, null, null];
+
+    // the light filter used by the material, if any
+    private _lightFilter: Nullable<(light: Light) => boolean> = null;
+    private _lightAddedObserver: Nullable<Observer<Light>> = null;
+    private _lightRemovedObserver: Nullable<Observer<Light>> = null;
 
     constructor(name: string, scene?: Scene) {
         super(name, scene);
+        // setting up the light filter and observers
+        this._lightFilter = this._acceptLight.bind(this);
+        this._lightAddedObserver = this.getScene().onNewLightAddedObservable.add(this._lightAdded.bind(this));
+        this._lightRemovedObserver = this.getScene().onLightRemovedObservable.add(this._lightRemoved.bind(this));
+    }
 
-        this._elevationSampler = null;
-        this._normalSampler = null;
-        this._layerSampler = null;
-
-        this._elevationOffset = 0.0;
-        this._elevationRange = Range.Zero();
-
-        this._clipPlanes = [null, null, null, null, null, null];
+    public getLights(): Light[] {
+        return this._lightFilter ? this.getScene().lights.filter(this._lightFilter) : this.getScene().lights;
     }
 
     public addClipPlane(...clipPlanes: ClipPlaneDefinition[]): void {
@@ -68,7 +129,7 @@ export class Map3dMaterial extends PushMaterial {
 
     public get elevationRange(): Range {
         // we clone the range to avoid modification of the original range used by the shader
-        return this._elevationRange.clone();
+        return this._elevationRange ? this._elevationRange.clone() : Range.Zero();
     }
 
     public get elevationOffset(): number {
@@ -87,34 +148,116 @@ export class Map3dMaterial extends PushMaterial {
         return super.isReadyForSubMesh(mesh, subMesh, useInstances);
     }
 
+    // called when dem tile added
     public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        this._layerSampler?.demAdded(src, eventData);
+        // we do not process if there is no content
+        if (eventData.content === null) return;
+
+        if (IsTileContentView(eventData.content)) {
+            // we do not process content view yet
+        } else {
+            // we process the dem content and update the elevation range
+            if (this._elevationRange === null) {
+                this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
+            } else {
+                this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
+            }
+
+            // we reserve the texture areas for the tile
+            const bag = new TileBag(eventData.address);
+            // for the elevation.
+            if (eventData.content.elevations) {
+                const elevationArea = this._elevationSampler?.reserve();
+                if (elevationArea) {
+                    elevationArea?.update(eventData.content.elevations);
+                    bag.elevationArea = elevationArea;
+                }
+            }
+            // and for the normal
+            if (eventData.content.normals) {
+                const normalArea = this._normalSampler?.reserve();
+                if (normalArea) {
+                    normalArea?.update(eventData.content.normals);
+                    bag.normalArea = normalArea;
+                }
+            }
+
+            // we store the bag for the tile
+            this._bags.set(eventData.address.quadkey, bag);
+            // we call the layer sampler to create the layer texture support.
+            // remember that the layer texture is a special texture that is used to draw dynamically
+            // the image layers on a kind of dynamic texture- this allow to add layer with an LOD offset.
+            this._layerSampler?.demAdded(src, eventData);
+        }
+
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        this._layerSampler?.demRemoved(src, eventData);
+        // we do not process if there is no content
+        if (eventData.content === null) return;
+        if (IsTileContentView(eventData.content)) {
+            // we do not process content view yet
+        } else {
+            const qk = eventData.address.quadkey;
+            const bag = this._bags.get(qk);
+            if (bag) {
+                bag.elevationArea?.release();
+                bag.normalArea?.release();
+                this._bags.delete(qk);
+            }
+            this._layerSampler?.demRemoved(src, eventData);
+        }
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        this._layerSampler?.demUpdated(src, eventData);
+        // we do not process if there is no content
+        if (eventData.content === null) return;
+        if (IsTileContentView(eventData.content)) {
+            // we do not process content view yet
+        } else {
+            const bag = this._bags.get(eventData.address.quadkey);
+            if (bag) {
+                if (eventData.content.elevations) {
+                    bag.elevationArea?.update(eventData.content.elevations);
+                }
+                if (eventData.content.normals) {
+                    bag.normalArea?.update(eventData.content.normals);
+                }
+            }
+            this._layerSampler?.demUpdated(src, eventData);
+        }
+
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+        // all the logic is done in the underlyng texture
         this._layerSampler?.imageAdded(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+        // all the logic is done in the underlyng texture
         this._layerSampler?.imageRemoved(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
+        // all the logic is done in the underlyng texture
         this._layerSampler?.imageUpdated(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
+    }
+
+    public dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void {
+        super.dispose(forceDisposeEffect, forceDisposeTextures, notBoundToMesh);
+        this._bags.clear();
+        this._elevationSampler?.dispose();
+        this._normalSampler?.dispose();
+        this._layerSampler?.dispose();
+        this._lightAddedObserver?.remove();
+        this._lightRemovedObserver?.remove();
     }
 
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene) {
@@ -172,5 +315,21 @@ export class Map3dMaterial extends PushMaterial {
         effect.setTexture(Map3dMaterial.ElevationKind, this._elevationSampler);
         effect.setTexture(Map3dMaterial.NormalKind, this._normalSampler);
         effect.setTexture(Map3dMaterial.LayerKind, this._layerSampler);
+    }
+
+    protected _acceptLight(light: Light): boolean {
+        return light !== undefined && (light instanceof PointLight || light instanceof HemisphericLight || light instanceof SpotLight);
+    }
+
+    protected _lightAdded(light: Light): void {
+        if (!this._lightFilter || this._lightFilter(light)) {
+            this.markAsDirty(Material.LightDirtyFlag);
+        }
+    }
+
+    protected _lightRemoved(light: Light): void {
+        if (!this._lightFilter || this._lightFilter(light)) {
+            this.markAsDirty(Material.LightDirtyFlag);
+        }
     }
 }

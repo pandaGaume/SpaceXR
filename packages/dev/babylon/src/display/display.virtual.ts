@@ -4,7 +4,10 @@ import { ICartesian3, ISize2, Size2 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 
 export class VirtualDisplay extends Mesh {
+    public static SD: ISize2 = new Size2(640, 480);
+    public static QHD: ISize2 = new Size2(960, 540);
     public static HD: ISize2 = new Size2(1280, 720);
+    public static WXGA: ISize2 = new Size2(1280, 800);
     public static FullHD: ISize2 = new Size2(1980, 1080);
     public static UltraHD: ISize2 = new Size2(3840, 2160);
     public static UltraHD_2: ISize2 = new Size2(7680, 4320);

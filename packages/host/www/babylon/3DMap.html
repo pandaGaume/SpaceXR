@@ -85,8 +85,10 @@
                     height: 170,
                 };
 
+                const resolution = SPACEXR.VirtualDisplay.SD;
+
                 // set the virtual display
-                const display = new SPACEXR.VirtualDisplay("holographicDisplay", size, SPACEXR.VirtualDisplay.UltraHD, scene);
+                const display = new SPACEXR.VirtualDisplay("holographicDisplay", size, resolution, scene);
                 display.material = createGlassMaterial(scene);
                 display.rotation.x = -Math.PI / 2;
                 display.freezeWorldMatrix();
@@ -106,15 +108,18 @@
                 const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withPointerControl(display.pointerSource);
                 map.parent = display; // and attach to parent.
 
+                const defaultTileMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+                defaultTileMaterial.wireframe = true;
+
                 // build layer options
                 const layerOptions = {
                     zindex: 0,
-                    zoomOffset: -3,
+                    zoomOffset: 0,
                     attribution: SPACEXR.MapZen.Attribution,
                     exageration: 1.5,
                     gridOptions: undefined,
                     insets: new BABYLON.Vector3(0, 0, 10),
-                    material: new BABYLON.StandardMaterial("elevationMaterial", scene),
+                    material: defaultTileMaterial,
                 };
 
                 // build layer and add it to the map

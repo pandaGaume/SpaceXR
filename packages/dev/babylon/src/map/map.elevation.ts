@@ -51,7 +51,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         const display = new TileDisplayBounds(m.resolution.width, m.resolution.height);
         this._map = new TileMapBase(name, display);
         // TODO : this is not the place for scaling ....
-        this.scaling.set(m.dimension.width / m.resolution.width, m.dimension.height / m.resolution.height, 1);
+        this.scaling.set(m.dimension.width / display.displayWidth, m.dimension.height / display.displayHeight, 1);
         this._material = options?.material ?? this._createDefaultMaterial();
         this._controller = null;
     }

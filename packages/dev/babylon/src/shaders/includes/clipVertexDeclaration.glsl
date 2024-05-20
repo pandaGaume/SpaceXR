@@ -16,6 +16,6 @@ uniform Plane westClip;
 uniform Plane topClip;
 uniform Plane bottomClip;
 
-varying vec4 vfClipDistance;
+out vec4 vfClipDistance;
 
 

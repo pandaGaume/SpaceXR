@@ -1,3 +1,4 @@
+import { Scene } from "@babylonjs/core";
 import { Map3dMaterial } from "./materials.map3d";
 
 /**
@@ -10,4 +11,13 @@ import { Map3dMaterial } from "./materials.map3d";
 export class WebMapMaterial extends Map3dMaterial {
     public static ClassName: string = "WebMapMaterial";
     public static ShaderName: string = "webmap";
+
+    /**
+     * Creates a new `WebMapMaterial` object.
+     * @param name The name of the material.
+     * @param scene The scene the material belongs to.
+     */
+    public constructor(name: string, scene: Scene) {
+        super(name, WebMapMaterial.ShaderName, scene);
+    }
 }

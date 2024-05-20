@@ -15,27 +15,27 @@ import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
-import { Map3dMaterial } from "../materials";
-import { ISize2, IsSize } from "core/geometry";
+import { Map3dMaterial, WebMapMaterial } from "../materials";
+import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 
-export interface IMap3dOptions {
-    textureSize?: number;
-    material?: Map3dMaterial;
+export interface IMap3DMetrics {
+    resolution: Size2;
+    dimension: Size2;
+    scale: number;
+    spatialResolution: Size2;
+
+    getLevelOfDetail(center: IGeo2, metrics: ITileMetrics): number;
 }
 
-// Idea behind the map3d is to provide a 3D map with elevation and texture layers. Texture layers are images which will be combined
-// into a single texture per elevation tile. For the purpose we will use WebMapTexture approach to create a texture layer for each elevation tile.
-// This texture will be then ehanced to allow layer (surface drawing) beeing added dynamically and also adaptative resolution based on the distance from camera.
-// This adapdative resolution will be based on the distance from camera and the resolution of the texture ans MUST be optional. User may update his own attenuation
-// formula to adapt the resolution based on his own needs. Default is no attenuation.
-// Same logic applies to the elevation layer where the resolution of the elevation tile will be adapted based on the distance from camera. This Implies that the elevation
-// mesh beeing adapted with connection triangle from one resolution to another one. Default is no attenuation.
-// The shape of the elevation mesh will be defined by the shader, which will transform the point based on Web Mercator or spherical projection (using ENU coordinate).
-// for both, the coordinate are still limites to Web Mercator limits which are +/- 85.051129 degrees latitude and +/- 180 degrees longitude.
+export interface IMap3dOptions {
+    metrics: IMap3DMetrics;
+    material?: Map3dMaterial; // default is WebMapMaterial.
+}
+
 export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
     public static DefaultTextureSize: number = 1024;
 
@@ -45,11 +45,14 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     private _material: Nullable<Map3dMaterial>;
     private _controller: Nullable<PointerController<IPointerSource>>;
 
-    public constructor(name: string, display: ITileDisplayBounds | ISize2, options?: IMap3dOptions, scene?: Scene) {
+    public constructor(name: string, options: IMap3dOptions, scene: Scene) {
         super(name, scene);
-        display = IsSize(display) ? new TileDisplayBounds(display) : display;
+        const m = options.metrics;
+        const display = new TileDisplayBounds(m.resolution.width, m.resolution.height);
         this._map = new TileMapBase(name, display);
-        this._material = options?.material ?? new Map3dMaterial(name + "_material", scene);
+        // TODO : this is not the place for scaling ....
+        this.scaling.set(m.dimension.width / m.resolution.width, m.dimension.height / m.resolution.height, 1);
+        this._material = options?.material ?? this._createDefaultMaterial();
         this._controller = null;
     }
 
@@ -57,7 +60,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         return this._material;
     }
 
-    public withPointerControl(controller: PointerController<IPointerSource> | IPointerSource) : Map3d{
+    public withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d {
         if (this._controller) {
             this._controller.dispose();
         }
@@ -225,5 +228,13 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
 
     protected _onImageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
         this._material?.imageUpdated(src, tile);
+    }
+
+    protected _createDefaultMaterial() {
+        return new WebMapMaterial(this._createDefaulMaterialName(), this.getScene());
+    }
+
+    protected _createDefaulMaterialName() {
+        return `${this.name}_material`;
     }
 }

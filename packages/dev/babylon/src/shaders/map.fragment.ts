@@ -2,7 +2,7 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-const name = "webmapFragmentShader";
+const name = "mapFragmentShader";
 const shader = `#include<lightFragmentDeclaration>
 uniform vec3 uTerrainColor;void main(void) {#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
 gl_FragColor=vColor;#elif defined(PHONG_SHADING) || defined(BLINN_PHONG_SHADING)
@@ -12,4 +12,4 @@ vec3 lightColor=calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLi
 gl_FragColor=vec4(lightColor,1.);#endif
 }`;
 ShaderStore.ShadersStore[name] = shader;
-/** @internal */ export const webmapFragmentShader = { name, shader };
+/** @internal */ export const mapFragmentShader = { name, shader };

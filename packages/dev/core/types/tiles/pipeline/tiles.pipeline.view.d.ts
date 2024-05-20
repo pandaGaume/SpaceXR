@@ -26,7 +26,8 @@ export declare class TileView implements ITileView {
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
     protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
     private _doClearContext;
-    protected getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth: Bearing): IRectangle;
+    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IRectangle;
+    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IRectangle;
     protected _rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2>;
     protected _rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, azimuth: Bearing, target?: R): R;
 }

@@ -30,6 +30,10 @@ export class Bearing {
         return this._value;
     }
 
+    public get radian(): number {
+        return (this._value * Math.PI) / 180;
+    }
+
     public set value(v: number) {
         const clamped = Bearing.ClampAzimuth(v);
         if (this._value !== clamped) {
@@ -46,6 +50,10 @@ export class Bearing {
 
     public get sin(): number {
         return this._sin;
+    }
+
+    public additiveInverse(): Bearing {
+        return new Bearing(-this._value);
     }
 
     public copyInPlace(other: Bearing): void {

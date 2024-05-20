@@ -5,7 +5,7 @@ import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBui
 import { ITile, ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileNavigationState, ITileProvider, Tile, TileContentType } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState } from "core/events";
-import { IGeo2 } from "core/geography";
+import { Bearing, IGeo2 } from "core/geography";
 
 export interface IElevationTile extends ITile<IDemInfos> {
     surface: Nullable<AbstractMesh>;
@@ -69,8 +69,11 @@ export class ElevationLayer extends DemLayer {
         this._insets = options?.insets;
 
         this._root = new TransformNode(this._buildNameWithSuffix("root"));
+        if (this._insets) {
+            this._root.position.set(this._insets.x, this._insets.y, this._insets.z);
+        }
 
-        this._tilesRoot = new TransformNode(this._buildNameWithSuffix("layers"));
+        this._tilesRoot = new TransformNode(this._buildNameWithSuffix("tiles"));
         this._tilesRoot.parent = this._root;
 
         this._grid = this._buildTopology();
@@ -106,11 +109,7 @@ export class ElevationLayer extends DemLayer {
     protected _buildInstance(name: string, tile: ElevationTile): AbstractMesh {
         const instance = this._template.createInstance(name);
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
-        instance.scaling.z = 1.0;
-        const cc = this._cartesianCenter;
-        if (cc) {
-            this._setTilePosition(tile, cc, this._insets);
-        }
+        instance.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
         return instance;
     }
 
@@ -123,11 +122,14 @@ export class ElevationLayer extends DemLayer {
                 break;
             }
             case "zoom": {
+                const geo = this._state.center;
+                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._state.lod);
+                this._onCenterChanged(this._cartesianCenter);
                 this._onZoomChanged(event.source.scale);
                 break;
             }
             case "azimuth": {
-                this._onAzimuthChanged(event.newValue as number);
+                this._onAzimuthChanged(event.newValue as Bearing);
                 break;
             }
         }
@@ -138,8 +140,8 @@ export class ElevationLayer extends DemLayer {
         this._tilesRoot.scaling.z = (this._exageration ?? 1.0) * scale;
     }
 
-    protected _onAzimuthChanged(azimuth: number): void {
-        this._tilesRoot.rotation.z = azimuth;
+    protected _onAzimuthChanged(azimuth: Bearing): void {
+        this._tilesRoot.rotation.z = azimuth.radian;
     }
 
     protected _onCenterChanged(center: Nullable<ICartesian2>): void {
@@ -149,23 +151,23 @@ export class ElevationLayer extends DemLayer {
                 return;
             }
             for (const tile of tiles) {
-                if (tile instanceof ElevationTile && tile.rect && tile.surface) {
-                    this._setTilePosition(tile, center, this._insets);
+                if (tile instanceof ElevationTile) {
+                    this._setTilePosition(tile, center);
                 }
             }
         }
     }
 
-    protected _setTilePosition(tile: ElevationTile, center: ICartesian2, offset?: ICartesian3): void {
-        if (tile instanceof ElevationTile && tile.rect && tile.surface) {
+    protected _setTilePosition(tile: ElevationTile, center: ICartesian2): void {
+        if (tile.rect && tile.surface) {
             const c = tile.rect.center;
             const s = tile.surface;
-            const x = c.x - center.x + (offset?.x ?? 0);
-            const y = c.y - center.y + (offset?.y ?? 0);
+            const x = c.x - center.x;
+            const y = c.y - center.y;
             const p = s.position;
-            p.x = x;
-            p.y = y;
-            p.z = offset?.z ?? 0;
+            p.x = -x;
+            p.y = -y;
+            p.z = 0;
         }
     }
 
@@ -207,6 +209,9 @@ export class ElevationLayer extends DemLayer {
         super._onTileAdded(eventData, eventState);
         for (const tile of eventData) {
             tile._surface = this._buildInstance(this._buildNameWithSuffix(tile.quadkey), tile);
+            if (this._cartesianCenter) {
+                this._setTilePosition(tile, this._cartesianCenter);
+            }
             tile._surface.parent = this._tilesRoot;
         }
     }

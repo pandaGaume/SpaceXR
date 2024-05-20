@@ -4,7 +4,6 @@ precision highp float;
 in vec3 position; // babylon build in
 in vec2 uv; // babylon build in
 
-in vec4 demIds; // the depth of the dem textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
 in vec4 layerIds; // the depth of the layer textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors
 
 // wireframe support
@@ -23,12 +22,6 @@ in vec4 layerIds; // the depth of the layer textures. ids[0] is the current, whi
 
 // Uniforms
 uniform mat4 viewProjection; // babylon build in
-
-uniform highp sampler2DArray altitudes;
-uniform highp sampler2DArray normals;
-uniform highp float minAlt;
-uniform highp float mapscale;
-uniform highp float exageration;
 
 // Varying
 out vec4 vPosition;

@@ -93,7 +93,10 @@ export class TileView implements ITileView {
             let w = display?.displayWidth ?? 0;
             let h = display?.displayHeight ?? 0;
 
-            const rect = this.getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
+            let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
+            // if azimuth is set, then we need to keep reference of the original rectangle to optimize the tile selection.
+            let testRect = state.azimuth?.value ? this._getRectangle(pixelCenterXY, w, h, scale) : null;
+
             // compute the bounds of tile xy
             metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
             metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
@@ -110,6 +113,14 @@ export class TileView implements ITileView {
             const tmp = new TileAddress(0, 0, lod);
             for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
                 for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
+                    // if the azimuth is set, we test each address against the test rectangle, if it does not intersect, we skip the address.
+                    // this save a huge amount of data to be processed.
+                    if (testRect) {
+                        const tileRect = this._getTileRectangle(tmp, metrics, pixelCenterXY, state.azimuth);
+                        if (testRect.intersect(tileRect) == false) {
+                            continue;
+                        }
+                    }
                     const key = tmp.quadkey;
                     const activ = this._activ.get(key);
                     if (activ) {
@@ -156,14 +167,24 @@ export class TileView implements ITileView {
         }
     }
 
-    protected getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth: Bearing): IRectangle {
+    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IRectangle {
         w = w / scale;
         h = h / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        let bounds = new Rectangle(x0, y0, w, h);
+        const bounds = new Rectangle(x0, y0, w, h);
         // bounds.points is returning a new set of points, so we need to rotate them if azimuth is non zero.
-        return azimuth ? Rectangle.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        return azimuth?.value ? Rectangle.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+    }
+
+    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IRectangle {
+        const points = [
+            metrics.getTileXYToPointXY(a.x, a.y),
+            metrics.getTileXYToPointXY(a.x + 1, a.y),
+            metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
+            metrics.getTileXYToPointXY(a.x, a.y + 1),
+        ];
+        return Rectangle.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
     }
 
     protected *_rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2> {

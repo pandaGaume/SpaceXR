@@ -69,7 +69,7 @@
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
 
                 camera.setTarget(new BABYLON.Vector3(0, 50, 0));
-                camera.wheelPrecision = 20;
+                camera.wheelPrecision = 10;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, true);
@@ -90,25 +90,38 @@
                 display.material = createGlassMaterial(scene);
                 display.rotation.x = -Math.PI / 2;
                 display.freezeWorldMatrix();
+
                 camera.setTarget(display);
 
                 // build the map options
-                const mapOptions = {};
+                const mapOptions = {
+                    metrics: {
+                        resolution: display.resolution,
+                        dimension: display.dimension,
+                        scale: 25000.0,
+                    },
+                };
 
                 // build the map
-                const map = new SPACEXR.Map3d("map", display.resolution, mapOptions, scene).setViewMap(defaultCenter, defaultLod).withPointerControl(display.pointerSource);
-                map.position.y = 10; // set the map at 10 cm over the display
+                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withPointerControl(display.pointerSource);
                 map.parent = display; // and attach to parent.
 
                 // build layer options
                 const layerOptions = {
+                    zindex: 0,
+                    zoomOffset: -3,
                     attribution: SPACEXR.MapZen.Attribution,
+                    exageration: 1.5,
+                    gridOptions: undefined,
+                    insets: new BABYLON.Vector3(0, 0, 10),
+                    material: new BABYLON.StandardMaterial("elevationMaterial", scene),
                 };
 
                 // build layer and add it to the map
-                const l = new SPACEXR.ElevationLayer(`${name}.layer`, SPACEXR.MapZen.DemClient(), layerOptions).addTo(map);
+                const client = SPACEXR.MapZen.DemClient();
+                const l = new SPACEXR.ElevationLayer(`${client.name}`, client, layerOptions).addTo(map);
 
-                const showAxes = true;
+                const showAxes = false;
                 if (showAxes) {
                     const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
                     axes.xAxis.parent = display;

@@ -1,8 +1,14 @@
 import { Nullable } from "../../types";
 import { Scalar } from "../../math/math";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
+import { IRectangle, Rectangle } from "../../geometry";
 
 export class TileAddress implements ITileAddress {
+    public static ToBounds(a: ITileAddress, metrics: ITileMetrics): IRectangle {
+        const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
+        return Rectangle.FromPoints(...points);
+    }
+
     public static IsEquals(a: ITileAddress, b: ITileAddress): boolean {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
     }

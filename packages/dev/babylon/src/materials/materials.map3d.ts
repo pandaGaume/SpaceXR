@@ -3,10 +3,14 @@ import {
     Color4,
     Constants,
     Effect,
+    EffectFallbacks,
     HemisphericLight,
+    IEffectCreationOptions,
     Light,
     Material,
     MaterialDefines,
+    MaterialHelper,
+    Mesh,
     Nullable,
     Observer,
     PointLight,
@@ -14,6 +18,7 @@ import {
     Scene,
     SpotLight,
     SubMesh,
+    VertexBuffer,
 } from "@babylonjs/core";
 
 import { ITile, ITileAddress, ImageLayer, IsTileContentView } from "core/tiles";
@@ -48,13 +53,6 @@ export enum Map3dShadingMode {
     BLINN_PHONG,
 }
 
-export class Map3dMaterialDefines extends MaterialDefines {
-    constructor() {
-        super();
-        this.rebuild();
-    }
-}
-
 // internal class used to hold the tile pool texture areas
 class TileBag {
     public constructor(public address: ITileAddress, public elevationArea: Nullable<ITexture3Layer> = null, public normalArea: Nullable<ITexture3Layer> = null) {}
@@ -70,19 +68,29 @@ class TileBag {
 export class Map3dMaterial extends PushMaterial {
     public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 1); // cool steel blue
 
+    public static DemInfosAttName: string = "demInfos";
+    public static DemIdsAttName: string = "demIds";
+    public static LayerIdsAttName: string = "layerIds";
+
     public static ElevationKind: string = "altitudes";
     public static NormalKind: string = "normals";
     public static LayerKind: string = "layer";
 
     // the properties used by the material
+    protected _shaderName: Nullable<string> = null;
 
     // the terrain color if no texture defined
-    public _terrainColor: Nullable<Color4> = Map3dMaterial.DefaultTerrainColor;
-    // the shading mode used by the material if no texture defined
-    public _shadingMode: Map3dShadingMode = Map3dShadingMode.FLAT;
+    protected _terrainColor: Nullable<Color4> = Map3dMaterial.DefaultTerrainColor;
+    // the shininess of the material if no texture defined
+    protected _shininess: number = 0.0;
+    // shading mode used by the material if no texture defined
+    protected _shadingMode: Map3dShadingMode = Map3dShadingMode.BLINN_PHONG;
+    // the max number of lights used by the material
+    protected _maxSpotLights: number = 3;
+    protected _maxPointLights: number = 3;
 
     // the properties of tiles
-    public _bags: Map<string, TileBag> = new Map<string, TileBag>();
+    protected _bags: Map<string, TileBag> = new Map<string, TileBag>();
 
     // the samplers for the elevation, normal and layer textures.
     private _elevationSampler: Nullable<Texture3> = null;
@@ -94,19 +102,19 @@ export class Map3dMaterial extends PushMaterial {
     private _elevationRange: Nullable<Range> = null;
 
     // the clip planes used by the material, if any
-    private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [null, null, null, null, null, null];
+    private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [];
 
     // the light filter used by the material, if any
-    private _lightFilter: Nullable<(light: Light) => boolean> = null;
-    private _lightAddedObserver: Nullable<Observer<Light>> = null;
-    private _lightRemovedObserver: Nullable<Observer<Light>> = null;
+    protected _lightFilter: Nullable<(light: Light) => boolean> = null;
+    protected _lightAddedObserver: Nullable<Observer<Light>> = null;
+    protected _lightRemovedObserver: Nullable<Observer<Light>> = null;
 
-    constructor(name: string, scene?: Scene) {
+    constructor(name: string, shaderName: string, scene?: Scene) {
         super(name, scene);
+        if (!shaderName) throw new Error("shaderName is required");
+        this._shaderName = shaderName;
         // setting up the light filter and observers
-        this._lightFilter = this._acceptLight.bind(this);
-        this._lightAddedObserver = this.getScene().onNewLightAddedObservable.add(this._lightAdded.bind(this));
-        this._lightRemovedObserver = this.getScene().onLightRemovedObservable.add(this._lightRemoved.bind(this));
+        this._setupLights();
     }
 
     public getLights(): Light[] {
@@ -145,7 +153,104 @@ export class Map3dMaterial extends PushMaterial {
 
     // Override the isReady method
     public isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean {
-        return super.isReadyForSubMesh(mesh, subMesh, useInstances);
+        if (this.isFrozen) {
+            if (subMesh.effect && subMesh.effect._wasPreviouslyReady && subMesh.effect._wasPreviouslyUsingInstances === useInstances) {
+                return true;
+            }
+        }
+
+        const defines: MaterialDefines = new MaterialDefines();
+        const scene = this.getScene();
+
+        if (this._isReadyForSubMesh(subMesh)) {
+            return true;
+        }
+
+        const attribs = [VertexBuffer.PositionKind, VertexBuffer.UVKind, Map3dMaterial.DemIdsAttName];
+
+        const uniforms = [
+            // babylon related
+            "world",
+            "viewProjection",
+            // elevations
+            "uMapscale",
+            "uExageration",
+            "uMinAlt",
+            // lights and colors
+            "uTerrainColor",
+            "uHemiLight",
+            "uPointLights",
+            "uSpotLights",
+            "uNumPointLights",
+            "uNumSpotLights",
+        ];
+        const samplers = ["uAltitudes", "uNormals"];
+        const uniformBuffers = new Array<string>();
+        const fallbacks = new EffectFallbacks();
+        const engine = scene.getEngine();
+
+        switch (this._shadingMode) {
+            case Map3dShadingMode.FLAT:
+                defines.FLAT_SHADING = true;
+                break;
+            case Map3dShadingMode.GOUREAUD:
+                defines.GOUREAUD_SHADING = true;
+                break;
+            case Map3dShadingMode.PHONG:
+                defines.PHONG_SHADING = true;
+                break;
+            case Map3dShadingMode.BLINN_PHONG:
+                defines.BLINN_PHONG_SHADING = true;
+                break;
+        }
+
+        if (this._maxSpotLights) {
+            defines.MAX_SPOT_LIGHTS = this._maxSpotLights;
+        }
+
+        if (this._maxPointLights) {
+            defines.MAX_POINT_LIGHTS = this._maxPointLights;
+        }
+
+        if (this._shininess > 0.0) {
+            defines.SPECULAR = true;
+            uniforms.push("uShininess");
+        }
+
+        // we heavily rely on instances
+        if (useInstances) {
+            defines.INSTANCES = true;
+            MaterialHelper.PushAttributesForInstances(attribs);
+        }
+
+        subMesh.setEffect(
+            engine.createEffect(
+                this._shaderName,
+                <IEffectCreationOptions>{
+                    attributes: attribs,
+                    uniformsNames: uniforms,
+                    uniformBuffersNames: uniformBuffers,
+                    samplers: samplers,
+                    defines: defines.toString(),
+                    fallbacks: fallbacks,
+                    onCompiled: this.onCompiled,
+                    onError: this.onError,
+                },
+                engine
+            ),
+            defines,
+            this._materialContext
+        );
+
+        if (!subMesh.effect || !subMesh.effect.isReady()) {
+            return false;
+        }
+
+        defines._renderId = scene.getRenderId();
+        subMesh.effect._wasPreviouslyReady = true;
+        subMesh.effect._wasPreviouslyUsingInstances = !!useInstances;
+
+        return true;
     }
 
     // called when dem tile added
@@ -184,6 +289,7 @@ export class Map3dMaterial extends PushMaterial {
 
             // we store the bag for the tile
             this._bags.set(eventData.address.quadkey, bag);
+
             // we call the layer sampler to create the layer texture support.
             // remember that the layer texture is a special texture that is used to draw dynamically
             // the image layers on a kind of dynamic texture- this allow to add layer with an LOD offset.
@@ -331,5 +437,17 @@ export class Map3dMaterial extends PushMaterial {
         if (!this._lightFilter || this._lightFilter(light)) {
             this.markAsDirty(Material.LightDirtyFlag);
         }
+    }
+
+    protected _setupLights() {
+        this._lightFilter = this._acceptLight.bind(this);
+        this._lightAddedObserver = this.getScene().onNewLightAddedObservable.add(this._lightAdded.bind(this));
+        this._lightRemovedObserver = this.getScene().onLightRemovedObservable.add(this._lightRemoved.bind(this));
+    }
+
+    protected _registerInstanceBuffers(target: Mesh): void {
+        target.registerInstancedBuffer(Map3dMaterial.DemInfosAttName, 4);
+        target.registerInstancedBuffer(Map3dMaterial.DemIdsAttName, 4);
+        target.registerInstancedBuffer(Map3dMaterial.LayerIdsAttName, 4);
     }
 }

@@ -1,4 +1,4 @@
-import { AbstractMesh, Color4, Effect, Light, MaterialDefines, Nullable, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
+import { AbstractMesh, Color4, Effect, Light, Mesh, Nullable, Observer, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
 import { ITile, ITileAddress, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
@@ -11,9 +11,6 @@ export declare enum Map3dShadingMode {
     PHONG = 2,
     BLINN_PHONG = 3
 }
-export declare class Map3dMaterialDefines extends MaterialDefines {
-    constructor();
-}
 declare class TileBag {
     address: ITileAddress;
     elevationArea: Nullable<ITexture3Layer>;
@@ -22,22 +19,29 @@ declare class TileBag {
 }
 export declare class Map3dMaterial extends PushMaterial {
     static DefaultTerrainColor: Color4;
+    static DemInfosAttName: string;
+    static DemIdsAttName: string;
+    static LayerIdsAttName: string;
     static ElevationKind: string;
     static NormalKind: string;
     static LayerKind: string;
-    _terrainColor: Nullable<Color4>;
-    _shadingMode: Map3dShadingMode;
-    _bags: Map<string, TileBag>;
+    protected _shaderName: Nullable<string>;
+    protected _terrainColor: Nullable<Color4>;
+    protected _shininess: number;
+    protected _shadingMode: Map3dShadingMode;
+    protected _maxSpotLights: number;
+    protected _maxPointLights: number;
+    protected _bags: Map<string, TileBag>;
     private _elevationSampler;
     private _normalSampler;
     private _layerSampler;
     private _elevationOffset;
     private _elevationRange;
     private _clipPlanes;
-    private _lightFilter;
-    private _lightAddedObserver;
-    private _lightRemovedObserver;
-    constructor(name: string, scene?: Scene);
+    protected _lightFilter: Nullable<(light: Light) => boolean>;
+    protected _lightAddedObserver: Nullable<Observer<Light>>;
+    protected _lightRemovedObserver: Nullable<Observer<Light>>;
+    constructor(name: string, shaderName: string, scene?: Scene);
     getLights(): Light[];
     addClipPlane(...clipPlanes: ClipPlaneDefinition[]): void;
     removeClipPlane(...indices: ClipIndex[]): void;
@@ -57,5 +61,7 @@ export declare class Map3dMaterial extends PushMaterial {
     protected _acceptLight(light: Light): boolean;
     protected _lightAdded(light: Light): void;
     protected _lightRemoved(light: Light): void;
+    protected _setupLights(): void;
+    protected _registerInstanceBuffers(target: Mesh): void;
 }
 export {};

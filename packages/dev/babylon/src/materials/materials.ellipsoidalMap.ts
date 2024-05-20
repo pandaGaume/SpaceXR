@@ -1,3 +1,4 @@
+import { Scene } from "@babylonjs/core";
 import { Map3dMaterial } from "./materials.map3d";
 
 /**
@@ -11,4 +12,12 @@ import { Map3dMaterial } from "./materials.map3d";
 export class EllipsoidalMapMaterial extends Map3dMaterial {
     public static ClassName: string = "EllipsoidalMapMaterial";
     public static ShaderName: string = "ellipsoidalmap";
+    /**
+     * Creates a new `EllipsoidalMapMaterial` object.
+     * @param name The name of the material.
+     * @param scene The scene the material belongs to.
+     */
+    public constructor(name: string, scene: Scene) {
+        super(name, EllipsoidalMapMaterial.ShaderName, scene);
+    }
 }

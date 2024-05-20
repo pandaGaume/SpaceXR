@@ -6,9 +6,11 @@ export declare class Bearing {
     private _sin;
     constructor(value: number);
     get value(): number;
+    get radian(): number;
     set value(v: number);
     get cos(): number;
     get sin(): number;
+    additiveInverse(): Bearing;
     copyInPlace(other: Bearing): void;
     toString(): string;
 }

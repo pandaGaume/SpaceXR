@@ -5,6 +5,7 @@ import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
 import { ITile, ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileNavigationState, ITileProvider, Tile, TileContentType } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState } from "core/events";
+import { Bearing } from "core/geography";
 export interface IElevationTile extends ITile<IDemInfos> {
     surface: Nullable<AbstractMesh>;
 }
@@ -38,9 +39,9 @@ export declare class ElevationLayer extends DemLayer {
     protected _buildInstance(name: string, tile: ElevationTile): AbstractMesh;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _onZoomChanged(scale: number): void;
-    protected _onAzimuthChanged(azimuth: number): void;
+    protected _onAzimuthChanged(azimuth: Bearing): void;
     protected _onCenterChanged(center: Nullable<ICartesian2>): void;
-    protected _setTilePosition(tile: ElevationTile, center: ICartesian2, offset?: ICartesian3): void;
+    protected _setTilePosition(tile: ElevationTile, center: ICartesian2): void;
     protected _buildProvider(source: ITileDatasource<IDemInfos, ITileAddress>, cache?: IMemoryCache<string, TileContentType<IDemInfos>>, type?: new (...args: any[]) => ITile<IDemInfos>): ITileProvider<IDemInfos>;
     protected _buildTopology(): VertexData;
     protected _buildTerrainOptions(options?: TerrainGridOptions | TerrainGridOptionsBuilder): TerrainGridOptions;

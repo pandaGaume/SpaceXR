@@ -4,12 +4,19 @@ import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
-import { Map3dMaterial } from "../materials";
-import { ISize2 } from "core/geometry";
+import { Map3dMaterial, WebMapMaterial } from "../materials";
+import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
+export interface IMap3DMetrics {
+    resolution: Size2;
+    dimension: Size2;
+    scale: number;
+    spatialResolution: Size2;
+    getLevelOfDetail(center: IGeo2, metrics: ITileMetrics): number;
+}
 export interface IMap3dOptions {
-    textureSize?: number;
+    metrics: IMap3DMetrics;
     material?: Map3dMaterial;
 }
 export declare class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
@@ -17,7 +24,7 @@ export declare class Map3d extends TransformNode implements ITileMap<Map3dTileCo
     private _map;
     private _material;
     private _controller;
-    constructor(name: string, display: ITileDisplayBounds | ISize2, options?: IMap3dOptions, scene?: Scene);
+    constructor(name: string, options: IMap3dOptions, scene: Scene);
     get material(): Nullable<Map3dMaterial>;
     withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3d;
@@ -48,4 +55,6 @@ export declare class Map3d extends TransformNode implements ITileMap<Map3dTileCo
     protected _onImageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void;
     protected _onImageRemoved(src: ImageLayer, tile: ITile<HTMLImageElement>): void;
     protected _onImageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void;
+    protected _createDefaultMaterial(): WebMapMaterial;
+    protected _createDefaulMaterialName(): string;
 }

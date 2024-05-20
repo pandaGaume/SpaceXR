@@ -1,39 +1,69 @@
+// babylon specific
+#include<instancesDeclaration>
+
+// this is declaration to clip map along the hologram sides
+#include<clipVertexDeclaration>
+
+// this is where to include lights.
+#include<lightVertexDeclaration>
+
+// this is the declaration of the function to compute geometry related to elevation data.
+#include<elevationVertexDeclaration>
+
+// build in
 uniform mat4 world;
-uniform mat4 worldViewProjection; 
-uniform vec3 terrainColor;
+uniform mat4 viewProjection; 
 in vec3 position; 
-in vec3 normal;
+in vec2 uv; 
+// end build in
 
-#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING) 
-    #include<lightDefinition>
-    #include<lightDeclaration>
-#endif
-
-#if defined(FLAT_SHADING)
-    flat varying vec4 vColor;
-#endif
-
-#if defined(GOUREAUD_SHADING)
-    varying vec4 vColor;
-#endif
-
-#if defined(PHONG_SHADING)
-    varying vec3 vNormal;
-    varying vec3 vPosition;
-#endif
+uniform vec3 uTerrainColor;
 
 void main(void) {
-    vec4 p = vec4(position, 1.);
-    vec3 wp = (world * p).xyz;
-    vec4 n = vec4(normal, 1.);
-    vec3 wn = normalize((world * n).xyz);
+
+    // babylon specific
+    #include<instancesVertex>
+
+    // we choose the index using the value stored into the z of the position.
+    // this value will be [0,3] to index one value into the ids vector. 
+    // we assume the value is already clamped.
+    float depth = demIds[int(position.z)] ;
+    vec3 v = vec3(uv.xy, depth);
+    if( depth < 0.0) {
+        v.x = v.x == 0.0 ? 1.0 : v.x;
+        v.y = v.y == 0.0 ? 1.0 : v.y;   
+        v.z = demIds[0];
+    } 
+  
+    // get the position
+    float alt0 = float(texture(uAltitudes, v))  ;
+    float alt = (alt0 - uMinAlt) * uMapscale * uExageration;
+    vec4 p = world * vec4(position.xy, alt ,1.0);
+    vec3 worldpos = (world * p).xyz;
+
+    // get the normal
+    vec4 pixel = texture(uNormals, v);
+    n = vec4(elevation_rgbaToNormal(pixel),1.0);
+    vec3 worldnormal = normalize((world * n).xyz);
+
+    // compute lights
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
-        vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, wn, wp);
-        vColor=vec4(terrainColor*lightColor,1.);
+        #if defined(SPECULAR)
+            vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldnormal, worldpos, uViewPosition, uShininess);
+        #else
+            vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldnormal, worldPos);
+        #endif
+        vColor=vec4(uTerrainColor*lightColor,1.);
     #endif
     #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
-        vNormal = wn;
-        vPosition = wp;
+        vNormal = worldnormal;
+        vPosition = worldpos;
     #endif
-    gl_Position = worldViewProjection * p;
+
+    // clip map    
+    #include<clipVertex>
+    
+    // finally set the position
+    gl_Position = viewProjection * worldpos;
+    
 }

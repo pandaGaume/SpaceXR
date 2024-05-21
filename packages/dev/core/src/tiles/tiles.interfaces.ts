@@ -1,6 +1,6 @@
 import { IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded, IsGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
@@ -15,26 +15,7 @@ export interface ITileAddress extends ICartesian2 {
     quadkey: string;
 }
 
-export interface ITileSection extends ICartesian2, ISize2 {
-    address: ITileAddress;
-}
-
-export function IsTileSection(b: unknown): b is ITileSection {
-    if (b === null || typeof b !== "object") return false;
-    return (<ITileSection>b).address !== undefined && (<ITileSection>b).width !== undefined && (<ITileSection>b).height !== undefined;
-}
-
-export interface ITileCruncher<T> {
-    Downsampling(childs: T[]): Nullable<T>;
-    Upsampling(parent: T, sectionIndex: number): Nullable<T>;
-}
-
-export function IsTileContentView<T>(b: unknown): b is ITileSection {
-    if (typeof b !== "object" || b === null) return false;
-    return (<any>b).source !== undefined && (<any>b).target !== undefined;
-}
-
-export type TileContentType<T> = Nullable<T | ITileSection>;
+export type TileContentType<T> = Nullable<T>;
 
 export interface ITile<T> extends IGeoBounded, IBounded {
     namespace?: string;

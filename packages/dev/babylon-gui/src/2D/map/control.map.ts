@@ -4,7 +4,7 @@ import { EventState, Observable, Observer, PropertyChangedEventArgs } from "core
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { Context2DTileMap, InputsNavigationTarget } from "core/map";
-import { IImageTileMapLayer, ITileDisplay, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { IImageTileMapLayer, ITileDisplayBounds, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import { ControlInputController } from "./control.inputs";
 import { RGBAColor } from "core/math";
@@ -17,14 +17,14 @@ export interface IMapControlOptions extends ICanvasRenderingOptions {
     inputController?: ControlInputController<MapControl>;
 }
 
-export class MapControl extends GUI.Container implements ITileDisplay, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer, MapControl> {
+export class MapControl extends GUI.Container implements ITileDisplayBounds, ITileNavigationApi<MapControl>, ITileMap<ControlTileContentType, IImageTileMapLayer, MapControl> {
     public static DefaultBackground = RGBAColor.LightGray();
 
     public static DefaultOptions: ICanvasRenderingOptions = {
         background: MapControl.DefaultBackground.toHexString(),
     };
 
-    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
 
     _map: Context2DTileMap;
     _mapValidationObserver: Nullable<Observer<boolean>>;
@@ -50,9 +50,9 @@ export class MapControl extends GUI.Container implements ITileDisplay, ITileNavi
         return this._currentMeasure.width;
     }
 
-    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplay, unknown>> {
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>> {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileDisplay, unknown>>();
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>();
         }
         return this._propertyChangedObservable;
     }

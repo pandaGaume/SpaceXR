@@ -1,6 +1,6 @@
 import { Nullable } from "../../types";
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITile, ITileAddress, ITileMetrics, ITileProvider, ITileSection } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileProducer } from "./tiles.pipeline.interfaces";
 interface ITileProducerItem<T> {
     provider: ITileProvider<T>;
@@ -32,9 +32,9 @@ export declare class TileProducer<T> implements ITileProducer<T> {
     getProviderByName(name: string): ITileProvider<T> | undefined;
     dispose(): void;
     protected _onTileAddressesAdded(eventData: ITileAddress[], eventState: EventState): void;
-    protected _onTileAddressAdded(item: ITileProducerItem<T>, address: ITileAddress | ITileSection, buffer: ITile<T>[], metrics?: ITileMetrics): void;
+    protected _onTileAddressAdded(item: ITileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[], metrics?: ITileMetrics): void;
     protected _onTileAddressesRemoved(eventData: ITileAddress[], eventState: EventState): void;
-    protected _onTileAddressRemoved(item: ITileProducerItem<T>, address: ITileAddress | ITileSection, buffer: ITile<T>[], metrics?: ITileMetrics): void;
+    protected _onTileAddressRemoved(item: ITileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[], metrics?: ITileMetrics): void;
     protected _onTileUpdated(eventData: ITile<T>, eventState: EventState): void;
     protected _onProviderEnablePropertyChanged(eventData: ITileProvider<T>, eventState: EventState): void;
 }

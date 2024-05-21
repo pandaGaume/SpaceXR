@@ -1,6 +1,6 @@
 import { Nullable } from "../../types";
 import { EventState, Observable, Observer } from "../../events/events.observable";
-import { ITile, ITileAddress, ITileMetrics, ITileProvider, ITileSection, IsTileSection } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileProducer } from "./tiles.pipeline.interfaces";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 
@@ -179,10 +179,7 @@ export class TileProducer<T> implements ITileProducer<T> {
         }
     }
 
-    protected _onTileAddressAdded(item: ITileProducerItem<T>, address: ITileAddress | ITileSection, buffer: ITile<T>[], metrics?: ITileMetrics): void {
-        if (IsTileSection(address)) {
-            address = address.address;
-        }
+    protected _onTileAddressAdded(item: ITileProducerItem<T>, address: ITileAddress, buffer: ITile<T>[], metrics?: ITileMetrics): void {
         buffer.push(...item.provider.activateTile(address));
     }
 
@@ -202,10 +199,7 @@ export class TileProducer<T> implements ITileProducer<T> {
         }
     }
 
-    protected _onTileAddressRemoved(item: ITileProducerItem<T>, address: ITileAddress | ITileSection, buffer: ITile<T>[], metrics?: ITileMetrics): void {
-        if (IsTileSection(address)) {
-            address = address.address;
-        }
+    protected _onTileAddressRemoved(item: ITileProducerItem<T>, address: ITileAddress , buffer: ITile<T>[], metrics?: ITileMetrics): void {
         buffer.push(...item.provider.deactivateTile(address));
     }
 

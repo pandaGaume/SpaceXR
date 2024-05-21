@@ -23,7 +23,7 @@ import {
     VertexBuffer,
 } from "@babylonjs/core";
 
-import { ITile, ITileAddress, ImageLayer, IsTileContentView } from "core/tiles";
+import { ITile, ITileAddress, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
@@ -299,43 +299,39 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
         this._ensureLayerReady(src, eventData);
 
-        if (IsTileContentView(eventData.content)) {
-            // we do not process content view yet
+        // we process the dem content and update the elevation range
+        if (this._elevationRange === null) {
+            this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
         } else {
-            // we process the dem content and update the elevation range
-            if (this._elevationRange === null) {
-                this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
-            } else {
-                this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
-            }
-
-            // we reserve the texture areas for the tile
-            const bag = new TileBag(eventData.address);
-            // for the elevation.
-            if (eventData.content.elevations) {
-                const elevationArea = this._elevationSampler?.reserve();
-                if (elevationArea) {
-                    elevationArea?.update(eventData.content.elevations);
-                    bag.elevationArea = elevationArea;
-                }
-            }
-            // and for the normal
-            if (eventData.content.normals) {
-                const normalArea = this._normalSampler?.reserve();
-                if (normalArea) {
-                    normalArea?.update(eventData.content.normals);
-                    bag.normalArea = normalArea;
-                }
-            }
-
-            // we store the bag for the tile
-            this._bags.set(eventData.address.quadkey, bag);
-
-            // we call the layer sampler to create the layer texture support.
-            // remember that the layer texture is a special texture that is used to draw dynamically
-            // the image layers on a kind of dynamic texture- this allow to add layer with an LOD offset.
-            this._layerSampler?.demAdded(src, eventData);
+            this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
         }
+
+        // we reserve the texture areas for the tile
+        const bag = new TileBag(eventData.address);
+        // for the elevation.
+        if (eventData.content.elevations) {
+            const elevationArea = this._elevationSampler?.reserve();
+            if (elevationArea) {
+                elevationArea?.update(eventData.content.elevations);
+                bag.elevationArea = elevationArea;
+            }
+        }
+        // and for the normal
+        if (eventData.content.normals) {
+            const normalArea = this._normalSampler?.reserve();
+            if (normalArea) {
+                normalArea?.update(eventData.content.normals);
+                bag.normalArea = normalArea;
+            }
+        }
+
+        // we store the bag for the tile
+        this._bags.set(eventData.address.quadkey, bag);
+
+        // we call the layer sampler to create the layer texture support.
+        // remember that the layer texture is a special texture that is used to draw dynamically
+        // the image layers on a kind of dynamic texture- this allow to add layer with an LOD offset.
+        this._layerSampler?.demAdded(src, eventData);
 
         this.markAsDirty(Material.TextureDirtyFlag);
     }
@@ -343,38 +339,33 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         // we do not process if there is no content
         if (eventData.content === null) return;
-        if (IsTileContentView(eventData.content)) {
-            // we do not process content view yet
-        } else {
-            const qk = eventData.address.quadkey;
-            const bag = this._bags.get(qk);
-            if (bag) {
-                bag.elevationArea?.release();
-                bag.normalArea?.release();
-                this._bags.delete(qk);
-            }
-            this._layerSampler?.demRemoved(src, eventData);
+
+        const qk = eventData.address.quadkey;
+        const bag = this._bags.get(qk);
+        if (bag) {
+            bag.elevationArea?.release();
+            bag.normalArea?.release();
+            this._bags.delete(qk);
         }
+        this._layerSampler?.demRemoved(src, eventData);
+
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         // we do not process if there is no content
         if (eventData.content === null) return;
-        if (IsTileContentView(eventData.content)) {
-            // we do not process content view yet
-        } else {
-            const bag = this._bags.get(eventData.address.quadkey);
-            if (bag) {
-                if (eventData.content.elevations) {
-                    bag.elevationArea?.update(eventData.content.elevations);
-                }
-                if (eventData.content.normals) {
-                    bag.normalArea?.update(eventData.content.normals);
-                }
+
+        const bag = this._bags.get(eventData.address.quadkey);
+        if (bag) {
+            if (eventData.content.elevations) {
+                bag.elevationArea?.update(eventData.content.elevations);
             }
-            this._layerSampler?.demUpdated(src, eventData);
+            if (eventData.content.normals) {
+                bag.normalArea?.update(eventData.content.normals);
+            }
         }
+        this._layerSampler?.demUpdated(src, eventData);
 
         this.markAsDirty(Material.TextureDirtyFlag);
     }

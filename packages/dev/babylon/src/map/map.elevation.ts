@@ -191,7 +191,6 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         }
     }
     /// End TargetBlock
-
     public demAdded(src: ElevationLayer, tile: ElevationTile): void {}
 
     public demRemoved(src: ElevationLayer, tile: ElevationTile): void {}
@@ -242,7 +241,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     }
 
     protected *getElevationLayers(): IterableIterator<ElevationLayer> {
-        for (const layer of this._map.getLayers((l) => l instanceof ElevationLayer)) {
+        for (const layer of this._map.getLayers((l) => l.enabled && l instanceof ElevationLayer)) {
             yield <ElevationLayer>layer;
         }
     }

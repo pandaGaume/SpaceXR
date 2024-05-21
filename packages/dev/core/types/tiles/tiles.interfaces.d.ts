@@ -1,6 +1,6 @@
 import { IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IRectangle, ISize2 } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
@@ -9,16 +9,7 @@ export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export interface ITileSection extends ICartesian2, ISize2 {
-    address: ITileAddress;
-}
-export declare function IsTileSection(b: unknown): b is ITileSection;
-export interface ITileCruncher<T> {
-    Downsampling(childs: T[]): Nullable<T>;
-    Upsampling(parent: T, sectionIndex: number): Nullable<T>;
-}
-export declare function IsTileContentView<T>(b: unknown): b is ITileSection;
-export type TileContentType<T> = Nullable<T | ITileSection>;
+export type TileContentType<T> = Nullable<T>;
 export interface ITile<T> extends IGeoBounded, IBounded {
     namespace?: string;
     address: ITileAddress;

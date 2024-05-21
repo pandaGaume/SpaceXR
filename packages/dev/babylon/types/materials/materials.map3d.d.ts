@@ -1,5 +1,5 @@
 import { AbstractMesh, Color4, Effect, Light, Matrix, Mesh, Nullable, Observer, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
-import { ITile, ITileAddress, ImageLayer } from "core/tiles";
+import { ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
@@ -13,10 +13,11 @@ export declare enum Map3dShadingMode {
     BLINN_PHONG = 3
 }
 declare class TileBag {
-    address: ITileAddress;
+    tile: ITile<IDemInfos>;
     elevationArea: Nullable<ITexture3Layer>;
     normalArea: Nullable<ITexture3Layer>;
-    constructor(address: ITileAddress, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>);
+    AdjacentIds: Array<number>;
+    constructor(tile: ITile<IDemInfos>, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
 }
 export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget {
     static DefaultTerrainColor: Color4;
@@ -73,6 +74,9 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     set elevationOffset(value: number);
     isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
     demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    protected _updateAdjacentIds(bag: TileBag): void;
+    protected _getAdjacentIds(quadkey: Nullable<string>, index?: number): number;
+    protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id?: number): void;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
@@ -95,5 +99,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     protected _buildElevationSamplers(layer: ElevationLayer): void;
     protected _getElevationSamplerDepth(layer: ElevationLayer): number;
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture>;
+    protected _onEffectCompiled(effect: Effect): void;
+    protected _onEffectError(effect: Effect, errors: string): void;
 }
 export {};

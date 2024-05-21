@@ -11,6 +11,7 @@
 #include<elevationVertexDeclaration>
 
 // build in
+uniform mat4 world;
 uniform mat4 viewProjection; 
 in vec3 position; 
 in vec2 uv; 

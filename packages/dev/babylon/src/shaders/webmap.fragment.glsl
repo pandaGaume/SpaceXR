@@ -12,5 +12,5 @@ void main(void) {
             vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, normalize(vNormal), vPosition);
         #endif
         gl_FragColor=vec4(lightColor,1.);
-        #endif
+    #endif
 }

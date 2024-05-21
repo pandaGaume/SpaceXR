@@ -23,7 +23,7 @@ import {
     VertexBuffer,
 } from "@babylonjs/core";
 
-import { ITile, ITileAddress, ImageLayer } from "core/tiles";
+import { ITile, ImageLayer, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
@@ -57,7 +57,12 @@ export enum Map3dShadingMode {
 
 // internal class used to hold the tile pool texture areas
 class TileBag {
-    public constructor(public address: ITileAddress, public elevationArea: Nullable<ITexture3Layer> = null, public normalArea: Nullable<ITexture3Layer> = null) {}
+    public constructor(
+        public tile: ITile<IDemInfos>,
+        public elevationArea: Nullable<ITexture3Layer> = null,
+        public normalArea: Nullable<ITexture3Layer> = null,
+        public AdjacentIds: Array<number> = [-1, -1, -1, -1]
+    ) {}
 }
 
 /**
@@ -262,6 +267,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             MaterialHelper.PushAttributesForInstances(attribs);
         }
 
+        defines.rebuild();
+
         subMesh.setEffect(
             engine.createEffect(
                 this._shaderName,
@@ -272,7 +279,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
                     samplers: samplers,
                     defines: defines.toString(),
                     fallbacks: fallbacks,
-                    onCompiled: this.onCompiled,
+                    onCompiled: this._onEffectCompiled.bind(this),
                     onError: this.onError,
                 },
                 engine
@@ -297,7 +304,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         this._ensureLayerReady(src, eventData);
 
         // we reserve the texture areas for the tile
-        const bag = new TileBag(eventData.address);
+        const bag = new TileBag(eventData);
 
         // we process the dem content and update the elevation range
         if (eventData.content) {
@@ -306,13 +313,15 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             } else {
                 this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
             }
+            this.markAsDirty(Material.AttributesDirtyFlag);
         }
 
         // prepare the elevation sampler.
         const elevationArea = this._elevationSampler?.reserve();
         if (elevationArea) {
             bag.elevationArea = elevationArea;
-
+            // prepare the adjacent ids.
+            this._updateAdjacentIds(bag);
             if (eventData.content?.elevations) {
                 elevationArea.update(eventData.content.elevations);
             }
@@ -336,6 +345,39 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         this._layerSampler?.demAdded(src, eventData);
 
         this.markAsDirty(Material.TextureDirtyFlag);
+    }
+
+    protected _updateAdjacentIds(bag: TileBag): void {
+        const area = bag.elevationArea;
+        if (!area) return;
+        const depth = area.depth;
+        const quadkey = bag.tile.address.quadkey;
+        bag.AdjacentIds[0] = depth;
+        const keys = TileAddress.ToNeigborsKey(quadkey);
+        bag.AdjacentIds[1] = this._getAdjacentIds(keys[5]);
+        bag.AdjacentIds[2] = this._getAdjacentIds(keys[7]);
+        bag.AdjacentIds[3] = this._getAdjacentIds(keys[8]);
+
+        // update the attribute
+
+        this._setAdjacentIds(keys[3], 1, depth);
+        this._setAdjacentIds(keys[1], 2, depth);
+        this._setAdjacentIds(keys[0], 3, depth);
+    }
+
+    protected _getAdjacentIds(quadkey: Nullable<string>, index: number = 0): number {
+        if (!quadkey) return -1;
+        const bag = this._bags.get(quadkey);
+        return bag?.AdjacentIds[index] ?? -1;
+    }
+
+    protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id: number = -1): void {
+        if (!quadkey) return;
+        const bag = this._bags.get(quadkey);
+        if (!bag) return;
+        bag.AdjacentIds[index] = id;
+
+        // update the attribute
     }
 
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
@@ -388,6 +430,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         this._bags.clear();
         this._elevationSampler?.dispose();
         this._normalSampler?.dispose();
+        this._layerSampler?.dispose();
         this._layerSampler?.dispose();
         this._lightAddedObserver?.remove();
         this._lightRemovedObserver?.remove();
@@ -599,6 +642,22 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             default: {
                 return null;
             }
+        }
+    }
+
+    protected _onEffectCompiled(effect: Effect): void {
+        console.log("DEFINES:", effect.defines);
+        console.log("VERTEX:", effect.vertexSourceCode);
+        console.log("FRAGMENT:", effect.fragmentSourceCode);
+        if (this.onCompiled) {
+            this.onCompiled(effect);
+        }
+    }
+
+    protected _onEffectError(effect: Effect, errors: string): void {
+        console.error("ERRORS:", errors);
+        if (this.onError) {
+            this.onError(effect, errors);
         }
     }
 }

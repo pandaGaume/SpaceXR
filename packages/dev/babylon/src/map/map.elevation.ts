@@ -11,8 +11,8 @@ import {
     TileDisplayBounds,
     TileMapBase,
 } from "core/tiles";
-import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
-import { EventState, Observable } from "core/events";
+import { ElevationLayer } from "./map.elevation.layer";
+import { EventState, Observable, Observer } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
@@ -54,18 +54,25 @@ export interface IMap3dOptions {
     metrics: IMap3DMetrics;
 }
 
-export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dElevationTarget, IMap3dImageTarget {
+export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dImageTarget {
     public static DefaultTextureSize: number = 1024;
 
     // the map logic. This is the main entry point for the map API.
     private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
     private _controller: Nullable<PointerController<IPointerSource>>;
+    private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
+    private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
 
     public constructor(name: string, options: IMap3dOptions, scene: Scene) {
         super(name, scene);
         const m = options.metrics;
         const display = new TileDisplayBounds(m.resolution.width, m.resolution.height);
+
+        // create the map
         this._map = new TileMapBase(name, display);
+        this._addLayerObserver = this._map.layerAddedObservable.add(this._onLayerAdded.bind(this));
+        this._removeLayerObserver = this._map.layerRemovedObservable.add(this._onLayerRemoved.bind(this));
+
         // TODO : this is not the place for scaling ....
         this.scaling.set(m.dimension.width / display.displayWidth, m.dimension.height / display.displayHeight, 1);
         this._controller = null;
@@ -117,34 +124,26 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     public get layerRemovedObservable(): Observable<ITileMapLayer<Map3dTileContentType>> {
         return this._map.layerRemovedObservable;
     }
+
     public getLayers(predicate?: (l: ITileMapLayer<Map3dTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<Map3dTileContentType>> {
         return this._map.getLayers(predicate, sorted);
     }
+
     public addLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
         this._map.addLayer(layer);
-        if (layer instanceof ElevationLayer) {
-            this._onElevationLayerAdded(layer);
-            return;
-        }
-        if (layer instanceof ImageLayer) {
-            this._onImageLayerAdded(layer);
-        }
     }
+
     public removeLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
         this._map.removeLayer(layer);
-        if (layer instanceof ElevationLayer) {
-            this._onElevationLayerRemoved(layer);
-            return;
-        }
-        if (layer instanceof ImageLayer) {
-            this._onImageLayerRemoved(layer);
-        }
     }
     // END TILE map API
 
     public dispose() {
         super.dispose();
-        this._map?.dispose();
+        this._map.dispose();
+        this._controller?.dispose();
+        this._addLayerObserver?.disconnect();
+        this._removeLayerObserver?.disconnect();
     }
 
     public get display(): Nullable<ITileDisplayBounds> {
@@ -154,48 +153,28 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     /// TargetBlock
     public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
-            if (!tile) {
-                continue;
+            if (tile && tile.content instanceof HTMLImageElement) {
+                this.imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
             }
-            if (tile instanceof ElevationTile) {
-                this.demAdded(eventState.target, tile);
-                continue;
-            }
-            this.imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
 
     public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
-            if (!tile) {
-                continue;
+            if (tile && tile.content instanceof HTMLImageElement) {
+                this.imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
             }
-            if (tile instanceof ElevationTile) {
-                this.demRemoved(eventState.target, tile);
-                continue;
-            }
-            this.imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
 
     public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
-            if (!tile) {
-                continue;
+            if (tile && tile.content instanceof HTMLImageElement) {
+                this.imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
             }
-            if (tile instanceof ElevationTile) {
-                this.demUpdated(eventState.target, tile);
-                continue;
-            }
-            this.imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
     /// End TargetBlock
-    public demAdded(src: ElevationLayer, tile: ElevationTile): void {}
-
-    public demRemoved(src: ElevationLayer, tile: ElevationTile): void {}
-
-    public demUpdated(src: ElevationLayer, tile: ElevationTile): void {}
 
     public imageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
         // looking for every dem enabled layer to forward the image
@@ -219,6 +198,27 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     }
 
     /// handlers
+
+    protected _onLayerAdded(layer: ITileMapLayer<Map3dTileContentType>): void {
+        if (layer instanceof ElevationLayer) {
+            this._onElevationLayerAdded(layer);
+            return;
+        }
+        if (layer instanceof ImageLayer) {
+            this._onImageLayerAdded(layer);
+        }
+    }
+
+    protected _onLayerRemoved(layer: ITileMapLayer<Map3dTileContentType>): void {
+        if (layer instanceof ElevationLayer) {
+            this._onElevationLayerRemoved(layer);
+            return;
+        }
+        if (layer instanceof ImageLayer) {
+            this._onImageLayerRemoved(layer);
+        }
+    }
+
     protected _onElevationLayerAdded(layer: ElevationLayer): void {
         // register the root of the layer under the map
         layer.root.parent = this;

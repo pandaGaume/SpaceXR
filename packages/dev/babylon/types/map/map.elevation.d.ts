@@ -1,6 +1,6 @@
 import { IDemInfos } from "core/dem";
 import { IPipelineMessageType, ITile, ITileDisplayBounds, ITileMap, ITileMapLayer, ITileMetrics, ITileNavigationState, ImageLayer } from "core/tiles";
-import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
+import { ElevationLayer } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
@@ -29,10 +29,12 @@ export interface IMap3DMetrics {
 export interface IMap3dOptions {
     metrics: IMap3DMetrics;
 }
-export declare class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dElevationTarget, IMap3dImageTarget {
+export declare class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dImageTarget {
     static DefaultTextureSize: number;
     private _map;
     private _controller;
+    private _addLayerObserver;
+    private _removeLayerObserver;
     constructor(name: string, options: IMap3dOptions, scene: Scene);
     withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3d;
@@ -53,12 +55,11 @@ export declare class Map3d extends TransformNode implements ITileMap<Map3dTileCo
     added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void;
     removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void;
     updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void;
-    demAdded(src: ElevationLayer, tile: ElevationTile): void;
-    demRemoved(src: ElevationLayer, tile: ElevationTile): void;
-    demUpdated(src: ElevationLayer, tile: ElevationTile): void;
     imageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void;
     imageRemoved(src: ImageLayer, tile: ITile<HTMLImageElement>): void;
     imageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void;
+    protected _onLayerAdded(layer: ITileMapLayer<Map3dTileContentType>): void;
+    protected _onLayerRemoved(layer: ITileMapLayer<Map3dTileContentType>): void;
     protected _onElevationLayerAdded(layer: ElevationLayer): void;
     protected _onElevationLayerRemoved(layer: ElevationLayer): void;
     protected _onImageLayerAdded(layer: ImageLayer): void;

@@ -4,8 +4,8 @@ struct Plane {
     vec3 normal;
 };
 
-float clipDistance(vec4 worldPos, Plane plane ){
-    vec3 p = worldPos.xyz - plane.point ;
+float clipDistance(vec3 worldPos, Plane plane ){
+    vec3 p = worldPos - plane.point ;
     return dot(p,plane.normal);
 } 
 

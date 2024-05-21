@@ -9,12 +9,11 @@
         "skipLibCheck": true,
         // paths are used to resolve modules
         "paths": {
-            "core/*": ["./dev/core/src/*"],
-            "babylon_ext/*": ["./dev/babylon_ext/src/*"]
+            "core/*": ["./dev/core/src/*"]
         }
     },
     // you MUST use reference to the core tsconfig and the babylon-ext tsconfig
-    "references": [{ "path": "../core" }, { "path": "../babylon_ext" }],
+    "references": [{ "path": "../core" }],
     "include": ["./src/**/*.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

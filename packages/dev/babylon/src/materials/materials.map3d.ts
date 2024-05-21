@@ -27,7 +27,7 @@ import { ITile, ITileAddress, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
-import { ITexture3Layer, Texture3 } from "babylon_ext/Materials";
+import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
 
@@ -294,34 +294,36 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
     // called when dem tile added
     public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        // we do not process if there is no content
-        if (eventData.content === null) return;
-
         this._ensureLayerReady(src, eventData);
-
-        // we process the dem content and update the elevation range
-        if (this._elevationRange === null) {
-            this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
-        } else {
-            this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
-        }
 
         // we reserve the texture areas for the tile
         const bag = new TileBag(eventData.address);
-        // for the elevation.
-        if (eventData.content.elevations) {
-            const elevationArea = this._elevationSampler?.reserve();
-            if (elevationArea) {
-                elevationArea?.update(eventData.content.elevations);
-                bag.elevationArea = elevationArea;
+
+        // we process the dem content and update the elevation range
+        if (eventData.content) {
+            if (this._elevationRange === null) {
+                this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
+            } else {
+                this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
             }
         }
-        // and for the normal
-        if (eventData.content.normals) {
-            const normalArea = this._normalSampler?.reserve();
-            if (normalArea) {
+
+        // prepare the elevation sampler.
+        const elevationArea = this._elevationSampler?.reserve();
+        if (elevationArea) {
+            bag.elevationArea = elevationArea;
+
+            if (eventData.content?.elevations) {
+                elevationArea.update(eventData.content.elevations);
+            }
+        }
+
+        // prepare the normal sampler
+        const normalArea = this._normalSampler?.reserve();
+        if (normalArea) {
+            bag.normalArea = normalArea;
+            if (eventData.content?.normals) {
                 normalArea?.update(eventData.content.normals);
-                bag.normalArea = normalArea;
             }
         }
 
@@ -337,9 +339,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        // we do not process if there is no content
-        if (eventData.content === null) return;
-
         const qk = eventData.address.quadkey;
         const bag = this._bags.get(qk);
         if (bag) {
@@ -353,15 +352,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     public demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        // we do not process if there is no content
-        if (eventData.content === null) return;
-
         const bag = this._bags.get(eventData.address.quadkey);
         if (bag) {
-            if (eventData.content.elevations) {
+            if (eventData.content?.elevations) {
                 bag.elevationArea?.update(eventData.content.elevations);
             }
-            if (eventData.content.normals) {
+            if (eventData.content?.normals) {
                 bag.normalArea?.update(eventData.content.normals);
             }
         }
@@ -550,8 +546,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         const height = layer.metrics.tileSize;
         const generateMipMap = false;
         const scene = this.getScene();
-        this._elevationSampler = this._buildSampler(Map3dMaterial.ElevationKind, width, height, maxDepth, generateMipMap, scene);
-        this._normalSampler = this._buildSampler(Map3dMaterial.NormalKind, width, height, maxDepth, generateMipMap, scene);
+        this._elevationSampler = <Texture3>this._buildSampler(Map3dMaterial.ElevationKind, width, height, maxDepth, generateMipMap, scene);
+        this._normalSampler = <Texture3>this._buildSampler(Map3dMaterial.NormalKind, width, height, maxDepth, generateMipMap, scene);
     }
 
     protected _getElevationSamplerDepth(layer: ElevationLayer): number {

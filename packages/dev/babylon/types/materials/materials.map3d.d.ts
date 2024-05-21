@@ -3,7 +3,7 @@ import { ITile, ITileAddress, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
 import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
-import { ITexture3Layer, Texture3 } from "babylon_ext/Materials";
+import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
 export declare enum Map3dShadingMode {

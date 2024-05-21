@@ -10,9 +10,9 @@
 // divided by the maximum possible value for the respective data type.
 // So we need to restore them to their original range by multply by 255
 vec3 elevation_rgbaToNormal(vec4 rgba) {
-    float x = (2.0 * pixel.r) - 1.0;
-    float y = (2.0 * pixel.g) - 1.0;
-    float z = (pixel.b * 255.0 - 128.0) / 127.0;
+    float x = (2.0 * rgba.r) - 1.0;
+    float y = (2.0 * rgba.g) - 1.0;
+    float z = (rgba.b * 255.0 - 128.0) / 127.0;
     return vec3(x,z,y);    
 }
 

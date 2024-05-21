@@ -1,4 +1,3 @@
-import { ITexture3CreationOptions, ITexture3Layer, Texture3 } from "babylon_ext/Materials";
 import { ICanvas, Nullable, Scene } from "@babylonjs/core";
 import { ITile, ITileMetrics, ITileNavigationState, ImageLayer } from "core/tiles";
 import { IDemInfos } from "core/dem";
@@ -9,6 +8,7 @@ import { ICartesian2 } from "core/geometry";
 import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../../map";
 import { IGeo2 } from "core/geography";
 import { Observable } from "core/events";
+import { ITexture3CreationOptions, ITexture3Layer, Texture3 } from "./texture.texture3";
 declare class ImageLayerView {
     source: ImageLayer;
     tiles: Array<ITile<HTMLImageElement>>;

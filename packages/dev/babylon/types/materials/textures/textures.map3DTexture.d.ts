@@ -6,7 +6,7 @@ import { IDisposable } from "core/types";
 import { ICanvasRenderingContext } from "core/engine";
 import { CanvasDisplay } from "core/map";
 import { ICartesian2 } from "core/geometry";
-import { ElevationLayer } from "../../map";
+import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../../map";
 import { IGeo2 } from "core/geography";
 import { Observable } from "core/events";
 declare class ImageLayerView {
@@ -43,7 +43,7 @@ export declare class ElevationTileAddedEventArgs {
     depth: number;
     constructor(tile: ITile<IDemInfos>, depth: number);
 }
-export declare class Map3dTexture extends Texture3 {
+export declare class Map3dTexture extends Texture3 implements IMap3dElevationTarget, IMap3dImageTarget {
     _items: Map<string, Map3dTextureItem>;
     _sharedDisplay?: CanvasDisplay;
     _beforeRenderMethod: () => void;

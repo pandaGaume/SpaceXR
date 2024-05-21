@@ -1,6 +1,6 @@
 
-vfClipDistance.x = clipDistance(worldPos, northClip);
-vfClipDistance.y = clipDistance(worldPos, southClip);
-vfClipDistance.z = clipDistance(worldPos, eastClip);
-vfClipDistance.w = clipDistance(worldPos, westClip);
+vfClipDistance.x = clipDistance(worldPos, uNorthClip);
+vfClipDistance.y = clipDistance(worldPos, uSouthClip);
+vfClipDistance.z = clipDistance(worldPos, uEastClip);
+vfClipDistance.w = clipDistance(worldPos, uWestClip);
 

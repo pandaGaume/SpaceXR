@@ -37,7 +37,7 @@ void main(void) {
   
     // get the position
     float alt0 = float(texture(uAltitudes, v))  ;
-    float alt = (alt0 - uMinAlt) * uMapscale * uExageration;
+    float alt = (alt0 - uAltRange.x) ;
     vec4 p = world * vec4(position.xy, alt ,1.0);
     vec3 worldpos = (world * p).xyz;
 

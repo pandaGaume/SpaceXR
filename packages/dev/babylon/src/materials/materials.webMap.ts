@@ -17,7 +17,7 @@ export class WebMapMaterial extends Map3dMaterial {
      * @param name The name of the material.
      * @param scene The scene the material belongs to.
      */
-    public constructor(name: string, scene: Scene) {
+    public constructor(name: string, scene?: Scene) {
         super(name, WebMapMaterial.ShaderName, scene);
     }
 }

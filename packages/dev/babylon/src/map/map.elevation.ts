@@ -15,12 +15,31 @@ import { ElevationLayer, ElevationTile } from "./map.elevation.layer";
 import { EventState, Observable } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
-import { Map3dMaterial, WebMapMaterial } from "../materials";
 import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
+
+export function IsMap3dImageTarget(target: any): target is IMap3dImageTarget {
+    return target.imageAdded !== undefined && target.imageRemoved !== undefined && target.imageUpdated !== undefined;
+}
+
+export function IsMap3dElevationTarget(target: any): target is IMap3dElevationTarget {
+    return target.demAdded !== undefined && target.demRemoved !== undefined && target.demUpdated !== undefined;
+}
+
+export interface IMap3dElevationTarget {
+    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+}
+
+export interface IMap3dImageTarget {
+    imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
+    imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
+    imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
+}
 
 export interface IMap3DMetrics {
     resolution: Size2;
@@ -33,16 +52,13 @@ export interface IMap3DMetrics {
 
 export interface IMap3dOptions {
     metrics: IMap3DMetrics;
-    material?: Map3dMaterial; // default is WebMapMaterial.
 }
 
-export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
+export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dElevationTarget, IMap3dImageTarget {
     public static DefaultTextureSize: number = 1024;
 
     // the map logic. This is the main entry point for the map API.
     private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
-    // only meshes have materials, we will use this material to apply to the elevation layer which own a mesh.
-    private _material: Nullable<Map3dMaterial>;
     private _controller: Nullable<PointerController<IPointerSource>>;
 
     public constructor(name: string, options: IMap3dOptions, scene: Scene) {
@@ -52,12 +68,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         this._map = new TileMapBase(name, display);
         // TODO : this is not the place for scaling ....
         this.scaling.set(m.dimension.width / display.displayWidth, m.dimension.height / display.displayHeight, 1);
-        this._material = options?.material ?? this._createDefaultMaterial();
         this._controller = null;
-    }
-
-    public get material(): Nullable<Map3dMaterial> {
-        return this._material;
     }
 
     public withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d {
@@ -147,10 +158,10 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
                 continue;
             }
             if (tile instanceof ElevationTile) {
-                this._onDemAdded(eventState.target, tile);
+                this.demAdded(eventState.target, tile);
                 continue;
             }
-            this._onImageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
+            this.imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
 
@@ -160,10 +171,10 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
                 continue;
             }
             if (tile instanceof ElevationTile) {
-                this._onDemRemoved(eventState.target, tile);
+                this.demRemoved(eventState.target, tile);
                 continue;
             }
-            this._onImageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
+            this.imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
 
@@ -173,21 +184,45 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
                 continue;
             }
             if (tile instanceof ElevationTile) {
-                this._onDemUpdated(eventState.target, tile);
+                this.demUpdated(eventState.target, tile);
                 continue;
             }
-            this._onImageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
+            this.imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
         }
     }
     /// End TargetBlock
+
+    public demAdded(src: ElevationLayer, tile: ElevationTile): void {}
+
+    public demRemoved(src: ElevationLayer, tile: ElevationTile): void {}
+
+    public demUpdated(src: ElevationLayer, tile: ElevationTile): void {}
+
+    public imageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
+        // looking for every dem enabled layer to forward the image
+        for (const layer of this.getElevationLayers()) {
+            layer.imageAdded(src, tile);
+        }
+    }
+
+    public imageRemoved(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
+        // looking for every dem enabled layer to forward the image
+        for (const layer of this.getElevationLayers()) {
+            layer.imageRemoved(src, tile);
+        }
+    }
+
+    public imageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
+        // looking for every dem enabled layer to forward the image
+        for (const layer of this.getElevationLayers()) {
+            layer.imageUpdated(src, tile);
+        }
+    }
 
     /// handlers
     protected _onElevationLayerAdded(layer: ElevationLayer): void {
         // register the root of the layer under the map
         layer.root.parent = this;
-        if (this._material && !layer.mesh.material) {
-            layer.mesh.material = this._material;
-        }
         layer.linkTo(this);
     }
 
@@ -206,35 +241,9 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         layer.unlinkFrom(this);
     }
 
-    protected _onDemAdded(src: ElevationLayer, tile: ElevationTile): void {
-        this._material?.demAdded(src, tile);
-    }
-
-    protected _onDemRemoved(src: ElevationLayer, tile: ElevationTile): void {
-        this._material?.demRemoved(src, tile);
-    }
-
-    protected _onDemUpdated(src: ElevationLayer, tile: ElevationTile): void {
-        this._material?.demUpdated(src, tile);
-    }
-
-    protected _onImageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
-        this._material?.imageAdded(src, tile);
-    }
-
-    protected _onImageRemoved(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
-        this._material?.imageRemoved(src, tile);
-    }
-
-    protected _onImageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
-        this._material?.imageUpdated(src, tile);
-    }
-
-    protected _createDefaultMaterial() {
-        return new WebMapMaterial(this._createDefaulMaterialName(), this.getScene());
-    }
-
-    protected _createDefaulMaterialName() {
-        return `${this.name}_material`;
+    protected *getElevationLayers(): IterableIterator<ElevationLayer> {
+        for (const layer of this._map.getLayers((l) => l instanceof ElevationLayer)) {
+            yield <ElevationLayer>layer;
+        }
     }
 }

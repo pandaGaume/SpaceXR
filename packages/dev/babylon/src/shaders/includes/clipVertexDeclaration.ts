@@ -3,6 +3,6 @@
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
 const name = "clipVertexDeclaration";
-const shader = `struct Plane {vec3 point;vec3 normal;};float clipDistance(vec4 worldPos,Plane plane ){vec3 p=worldPos.xyz-plane.point ;return dot(p,plane.normal);} uniform Plane northClip;uniform Plane southClip;uniform Plane eastClip;uniform Plane westClip;uniform Plane topClip;uniform Plane bottomClip;out vec4 vfClipDistance;`;
+const shader = `struct Plane {vec3 point;vec3 normal;};float clipDistance(vec4 worldPos,Plane plane ){vec3 p=worldPos.xyz-plane.point ;return dot(p,plane.normal);} uniform Plane uNorthClip;uniform Plane uSouthClip;uniform Plane uEastClip;uniform Plane uWestClip;uniform Plane uTopClip;uniform Plane uBottomClip;out vec4 vfClipDistance;`;
 ShaderStore.IncludesShadersStore[name] = shader;
 /** @internal */ export const clipVertexDeclaration = { name, shader };

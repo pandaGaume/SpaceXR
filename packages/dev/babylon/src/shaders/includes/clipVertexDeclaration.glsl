@@ -9,12 +9,12 @@ float clipDistance(vec4 worldPos, Plane plane ){
     return dot(p,plane.normal);
 } 
 
-uniform Plane northClip;
-uniform Plane southClip;
-uniform Plane eastClip;
-uniform Plane westClip;
-uniform Plane topClip;
-uniform Plane bottomClip;
+uniform Plane uNorthClip;
+uniform Plane uSouthClip;
+uniform Plane uEastClip;
+uniform Plane uWestClip;
+uniform Plane uTopClip;
+uniform Plane uBottomClip;
 
 out vec4 vfClipDistance;
 

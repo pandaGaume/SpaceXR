@@ -6,7 +6,7 @@ import { IDisposable } from "core/types";
 import { ICanvasRenderingContext } from "core/engine";
 import { CanvasDisplay, Context2DTileMap } from "core/map";
 import { ICartesian2 } from "core/geometry";
-import { ElevationLayer } from "../../map";
+import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../../map";
 import { IGeo2 } from "core/geography";
 import { Observable } from "core/events";
 
@@ -169,7 +169,7 @@ export class ElevationTileAddedEventArgs {
 /// The texture is listening the elevation layer to bind a sub texture item to the elevation tile.
 /// The texture is listening the texture layer to update the sub texture item when the texture layer is updated.
 /// </summary>
-export class Map3dTexture extends Texture3 {
+export class Map3dTexture extends Texture3 implements IMap3dElevationTarget, IMap3dImageTarget {
     _items: Map<string, Map3dTextureItem>;
     _sharedDisplay?: CanvasDisplay;
     _beforeRenderMethod: () => void;

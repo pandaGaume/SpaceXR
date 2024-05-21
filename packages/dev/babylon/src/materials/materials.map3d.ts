@@ -10,6 +10,7 @@ import {
     Material,
     MaterialDefines,
     MaterialHelper,
+    Matrix,
     Mesh,
     Nullable,
     Observer,
@@ -18,13 +19,14 @@ import {
     Scene,
     SpotLight,
     SubMesh,
+    Vector2,
     VertexBuffer,
 } from "@babylonjs/core";
 
 import { ITile, ITileAddress, ImageLayer, IsTileContentView } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
-import { ElevationLayer } from "../map";
+import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "babylon_ext/Materials";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
@@ -64,17 +66,45 @@ class TileBag {
  * Thus materials are related to a specific geometry which are implemented into the vertex shader.
  * Commons properties and methods are implemented in this class, such as data samplers (elevation, normals and layer)
  * and clip planes.
+ * Support ONLY ONE dem layer and ONE layer texture.
  */
-export class Map3dMaterial extends PushMaterial {
+export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget {
     public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 1); // cool steel blue
 
     public static DemInfosAttName: string = "demInfos";
     public static DemIdsAttName: string = "demIds";
     public static LayerIdsAttName: string = "layerIds";
 
+    public static WorldMatrixUniformName: string = "world";
+    public static ViewProjectionMatrixUniformName: string = "viewProjection";
+
+    public static TerrainColorUniformName: string = "uTerrainColor";
+    public static ShininessUniformName: string = "uShininess";
+    public static HemiLightUniformName: string = "uHemiLight";
+    public static PointLightsUniformName: string = "uPointLights";
+    public static SpotLightsUniformName: string = "uSpotLights";
+    public static NumPointLightsUniformName: string = "uNumPointLights";
+    public static NumSpotLightsUniformName: string = "uNumSpotLights";
+    public static AmbientLightUniformName: string = "uAmbientLight";
+
+    public static AltRangeUniformName: string = "uAltRange";
+
+    public static ElevationSamplerUniformName: string = "uAltitudes";
+    public static NormalSamplerUniformName: string = "uNormals";
+    public static SpecularMapSamplerUniformName: string = "uSpecularMap";
+    public static TextureSamplerUniformName: string = "uTexture";
+
+    public static NorthClipPlaneUniformName: string = "uNorthClip";
+    public static SouthClipPlaneUniformName: string = "uSouthClip";
+    public static EastClipPlaneUniformName: string = "UEastClip";
+    public static WestClipPlaneUniformName: string = "uWestClip";
+    public static TopClipPlaneUniformName: string = "uTopClip";
+    public static BottomClipPlaneUniformName: string = "uBottomClip";
+
     public static ElevationKind: string = "altitudes";
     public static NormalKind: string = "normals";
-    public static LayerKind: string = "layer";
+    public static LayerKind: string = "texture";
+    public static SpecularMapKind: string = "specularMap";
 
     // the properties used by the material
     protected _shaderName: Nullable<string> = null;
@@ -170,21 +200,30 @@ export class Map3dMaterial extends PushMaterial {
 
         const uniforms = [
             // babylon related
-            "world",
-            "viewProjection",
+            Map3dMaterial.WorldMatrixUniformName,
+            Map3dMaterial.ViewProjectionMatrixUniformName,
+
+            // clip planes
+            Map3dMaterial.NorthClipPlaneUniformName,
+            Map3dMaterial.SouthClipPlaneUniformName,
+            Map3dMaterial.EastClipPlaneUniformName,
+            Map3dMaterial.WestClipPlaneUniformName,
+            Map3dMaterial.TopClipPlaneUniformName,
+            Map3dMaterial.BottomClipPlaneUniformName,
+
             // elevations
-            "uMapscale",
-            "uExageration",
-            "uMinAlt",
+            Map3dMaterial.AltRangeUniformName,
+
             // lights and colors
-            "uTerrainColor",
-            "uHemiLight",
-            "uPointLights",
-            "uSpotLights",
-            "uNumPointLights",
-            "uNumSpotLights",
+            Map3dMaterial.TerrainColorUniformName,
+            Map3dMaterial.HemiLightUniformName,
+            Map3dMaterial.PointLightsUniformName,
+            Map3dMaterial.SpotLightsUniformName,
+            Map3dMaterial.NumPointLightsUniformName,
+            Map3dMaterial.NumSpotLightsUniformName,
         ];
-        const samplers = ["uAltitudes", "uNormals"];
+
+        const samplers = [Map3dMaterial.ElevationSamplerUniformName, Map3dMaterial.NormalSamplerUniformName];
         const uniformBuffers = new Array<string>();
         const fallbacks = new EffectFallbacks();
         const engine = scene.getEngine();
@@ -214,7 +253,7 @@ export class Map3dMaterial extends PushMaterial {
 
         if (this._shininess > 0.0) {
             defines.SPECULAR = true;
-            uniforms.push("uShininess");
+            uniforms.push(Map3dMaterial.ShininessUniformName);
         }
 
         // we heavily rely on instances
@@ -257,6 +296,8 @@ export class Map3dMaterial extends PushMaterial {
     public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         // we do not process if there is no content
         if (eventData.content === null) return;
+
+        this._ensureLayerReady(src, eventData);
 
         if (IsTileContentView(eventData.content)) {
             // we do not process content view yet
@@ -357,70 +398,118 @@ export class Map3dMaterial extends PushMaterial {
     }
 
     public dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void {
-        super.dispose(forceDisposeEffect, forceDisposeTextures, notBoundToMesh);
         this._bags.clear();
         this._elevationSampler?.dispose();
         this._normalSampler?.dispose();
         this._layerSampler?.dispose();
         this._lightAddedObserver?.remove();
         this._lightRemovedObserver?.remove();
+
+        super.dispose(forceDisposeEffect, forceDisposeTextures, notBoundToMesh);
     }
 
-    protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene) {
-        switch (kind) {
-            case Map3dMaterial.ElevationKind: {
-                const options = {
-                    width: width,
-                    height: height,
-                    depth: depth,
-                    format: Constants.TEXTUREFORMAT_R,
-                    textureType: Constants.TEXTURETYPE_FLOAT,
-                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-                    internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
-                    generateMipMap: generateMipMap,
-                };
-                this._elevationSampler = new Texture3(scene, options);
-                break;
+    public bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void {
+        const scene = this.getScene();
+
+        const defines = subMesh.materialDefines;
+        if (!defines) {
+            return;
+        }
+
+        const effect = subMesh.effect;
+        if (!effect) {
+            return;
+        }
+
+        this._activeEffect = effect;
+
+        // Matrices
+        this._bindMatrix(effect, world, scene);
+
+        if (scene.isCachedMaterialInvalid(this, effect)) {
+            // Clip planes
+            this._bindClipPlanes(effect);
+            // samplers
+            this._bindSamplers(effect);
+            // Elevations.
+            this._bindElevations(effect);
+            // lights
+            this._bindLights(effect);
+        }
+    }
+
+    protected _bindLights(effect: Effect): void {
+        let pointLightCount = 0;
+        let spotLightCount = 0;
+        const scene = this.getScene();
+        if (scene.ambientColor) {
+            effect.setColor3(Map3dMaterial.AmbientLightUniformName, scene.ambientColor);
+        }
+        for (let l of this.getLights()) {
+            if (l instanceof HemisphericLight) {
+                effect.setColor3(`${Map3dMaterial.HemiLightUniformName}.skyColor`, l.diffuse);
+                effect.setColor3(`${Map3dMaterial.HemiLightUniformName}.groundColor`, l.groundColor);
+                effect.setVector3(`${Map3dMaterial.HemiLightUniformName}.direction`, l.direction);
+                effect.setFloat(`${Map3dMaterial.HemiLightUniformName}.intensity`, l.intensity);
+                continue;
             }
-            case Map3dMaterial.NormalKind: {
-                const options = {
-                    width: width,
-                    height: height,
-                    depth: depth,
-                    format: Constants.TEXTUREFORMAT_RGB,
-                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
-                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
-                    generateMipMap: generateMipMap,
-                };
-                this._normalSampler = new Texture3(scene, options);
-                break;
+            if (l instanceof PointLight) {
+                effect.setVector3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].position`, l.position);
+                effect.setColor3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].color`, l.diffuse);
+                effect.setFloat(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].intensity`, l.intensity);
+                pointLightCount++;
+                continue;
             }
-            case Map3dMaterial.LayerKind: {
-                const options = {
-                    width: width,
-                    height: height,
-                    depth: depth,
-                    format: Constants.TEXTUREFORMAT_RGB,
-                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
-                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
-                    generateMipMap: generateMipMap,
-                };
-                // this is where we leverage the Map3dTexture class to handle the layer texture
-                this._layerSampler = new Map3dTexture(scene, options);
-                break;
+            if (l instanceof SpotLight) {
+                effect.setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].position`, l.position);
+                effect.setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].direction`, l.direction);
+                effect.setColor3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].color`, l.diffuse);
+                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].intensity`, l.intensity);
+
+                const innerCutoff = Math.cos(l.angle / 2.0); // Inner cutoff
+                const outerCutoff = Math.cos((l.angle * 1.5) / 2.0); // Outer cutoff, slightly larger angle for smooth transition
+
+                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].innerCutoff`, innerCutoff);
+                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].outerCutoff`, outerCutoff);
+                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].exponent`, l.exponent);
+
+                spotLightCount++;
+                continue;
             }
-            default: {
-                break;
-            }
+        }
+        effect.setInt(Map3dMaterial.NumPointLightsUniformName, pointLightCount);
+        effect.setInt(Map3dMaterial.NumSpotLightsUniformName, spotLightCount);
+    }
+
+    protected _bindElevations(effect: Effect): void {
+        effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(this._elevationRange?.min ?? 0.0, this._elevationRange?.max ?? 0.0));
+    }
+
+    protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
+        effect.setMatrix(Map3dMaterial.WorldMatrixUniformName, world);
+        effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
+    }
+
+    protected _bindClipPlanes(effect: Effect): void {
+        if (this._clipPlanes) {
+            this._bindClipPlane(effect, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);
+            this._bindClipPlane(effect, Map3dMaterial.SouthClipPlaneUniformName, ClipIndex.South);
+            this._bindClipPlane(effect, Map3dMaterial.EastClipPlaneUniformName, ClipIndex.East);
+            this._bindClipPlane(effect, Map3dMaterial.WestClipPlaneUniformName, ClipIndex.West);
+        }
+    }
+
+    protected _bindClipPlane(effect: Effect, name: string, index: number): void {
+        let clipPlane = this._clipPlanes[index];
+        if (clipPlane) {
+            effect.setVector3(`${name}.point`, clipPlane.point);
+            effect.setVector3(`${name}.normal`, clipPlane.normal);
         }
     }
 
     protected _bindSamplers(effect: Effect): void {
-        effect.setTexture(Map3dMaterial.ElevationKind, this._elevationSampler);
-        effect.setTexture(Map3dMaterial.NormalKind, this._normalSampler);
-        effect.setTexture(Map3dMaterial.LayerKind, this._layerSampler);
+        effect.setTexture(Map3dMaterial.ElevationSamplerUniformName, this._elevationSampler);
+        effect.setTexture(Map3dMaterial.NormalSamplerUniformName, this._normalSampler);
     }
 
     protected _acceptLight(light: Light): boolean {
@@ -448,6 +537,81 @@ export class Map3dMaterial extends PushMaterial {
     protected _registerInstanceBuffers(target: Mesh): void {
         target.registerInstancedBuffer(Map3dMaterial.DemInfosAttName, 4);
         target.registerInstancedBuffer(Map3dMaterial.DemIdsAttName, 4);
-        target.registerInstancedBuffer(Map3dMaterial.LayerIdsAttName, 4);
+    }
+
+    protected _ensureLayerReady(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+        // ensure the samplers are ready (altitude and normal)
+        // actually we ONLY support ONE dem layer. This is a limitation of the current implementation
+        if (!this._elevationSampler) {
+            this._buildElevationSamplers(src);
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    protected _buildElevationSamplers(layer: ElevationLayer) {
+        // the challenge here is to create the elevation sampler with the right depth.
+        // which mean we need to know how many tiles we may have in the pool.
+        // the pool is created with the max number of tiles that can be displayed at once.
+        // another strategy is to increase decrease the pool size dynamically.
+        // this point is crucial for the performance.
+        const maxDepth = this._getElevationSamplerDepth(layer);
+        const width = layer.metrics.tileSize;
+        const height = layer.metrics.tileSize;
+        const generateMipMap = false;
+        const scene = this.getScene();
+        this._elevationSampler = this._buildSampler(Map3dMaterial.ElevationKind, width, height, maxDepth, generateMipMap, scene);
+        this._normalSampler = this._buildSampler(Map3dMaterial.NormalKind, width, height, maxDepth, generateMipMap, scene);
+    }
+
+    protected _getElevationSamplerDepth(layer: ElevationLayer): number {
+        return 16; // for dev purpose we set a fixed number of tiles
+    }
+
+    protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture> {
+        switch (kind) {
+            case Map3dMaterial.ElevationKind: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: Constants.TEXTUREFORMAT_R,
+                    textureType: Constants.TEXTURETYPE_FLOAT,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
+                    generateMipMap: generateMipMap,
+                };
+                return new Texture3(scene, options);
+            }
+            case Map3dMaterial.NormalKind: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: Constants.TEXTUREFORMAT_RGB,
+                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
+                    generateMipMap: generateMipMap,
+                };
+                return new Texture3(scene, options);
+            }
+            case Map3dMaterial.LayerKind: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: Constants.TEXTUREFORMAT_RGB,
+                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
+                    generateMipMap: generateMipMap,
+                };
+                // this is where we leverage the Map3dTexture class to handle the layer texture
+                return new Map3dTexture(scene, options);
+            }
+            default: {
+                return null;
+            }
+        }
     }
 }

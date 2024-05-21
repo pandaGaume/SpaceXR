@@ -18,8 +18,6 @@ vec3 elevation_rgbaToNormal(vec4 rgba) {
 
 uniform highp sampler2DArray uAltitudes;
 uniform highp sampler2DArray uNormals;
-uniform highp float uMinAlt;
-uniform highp float uMapscale;
-uniform highp float uExageration;
+uniform highp vec2 uAltRange;
     
 in vec4 demIds; // the depth of the dem textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors

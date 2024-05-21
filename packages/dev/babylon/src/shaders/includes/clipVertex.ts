@@ -3,6 +3,6 @@
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
 const name = "clipVertex";
-const shader = `vfClipDistance.x=clipDistance(worldPos,northClip);vfClipDistance.y=clipDistance(worldPos,southClip);vfClipDistance.z=clipDistance(worldPos,eastClip);vfClipDistance.w=clipDistance(worldPos,westClip);`;
+const shader = `vfClipDistance.x=clipDistance(worldPos,uNorthClip);vfClipDistance.y=clipDistance(worldPos,uSouthClip);vfClipDistance.z=clipDistance(worldPos,uEastClip);vfClipDistance.w=clipDistance(worldPos,uWestClip);`;
 ShaderStore.IncludesShadersStore[name] = shader;
 /** @internal */ export const clipVertex = { name, shader };

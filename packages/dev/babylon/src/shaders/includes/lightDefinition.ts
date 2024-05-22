@@ -7,7 +7,7 @@ const shader = `struct PointLight {vec3 position;vec3 color;float intensity;
 vec3 calculatePhongSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float shininess,vec3 lightColor) {vec3 reflectDir=reflect(-lightDir,normal);float spec=pow(max(dot(viewDir,reflectDir),0.0),shininess);return lightColor*spec;}vec3 calculateBlinnPhongSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float shininess,vec3 lightColor) {vec3 halfDir=normalize(lightDir+viewDir);float spec=pow(max(dot(normal,halfDir),0.0),shininess);return lightColor*spec;}#endif
 vec3 calculateHemisphericLight( HemisphericLight light,vec3 normal#if defined(SPECULAR)
 ,vec3 viewDir,float shininess#endif 
-) {vec3 nLightDir=normalize(light.direction);float hemiLightFactor=max(dot(normal,nLightDir),0.0);vec3 diffuse=mix(light.groundColor,light.skyColor,hemiLightFactor) ;#if defined(SPECULAR)
+) {vec3 nLightDir=normalize(light.direction);float hemiLightFactor= max(dot(normal,nLightDir),0.0);vec3 diffuse=mix(light.groundColor,light.skyColor,hemiLightFactor) ;#if defined(SPECULAR)
 #if defined(BLINN_PHONG_SHADING)
 return (diffuse+calculateBlinnPhongSpecular(normal,nLightDir,viewDir,shininess,light.skyColor))*light.intensity;#elif defined(PHONG_SHADING)
 return (diffuse+calculatePhongSpecular(normal,nLightDir,viewDir,shininess,light.skyColor))*light.intensity;#endif

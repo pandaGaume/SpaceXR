@@ -41,7 +41,7 @@ vec3 calculateHemisphericLight( HemisphericLight light,
                                 #endif  
                             ) {
     vec3 nLightDir = normalize(light.direction);
-    float hemiLightFactor=max(dot(normal,nLightDir),0.0);
+    float hemiLightFactor= max(dot(normal,nLightDir),0.0);
     vec3 diffuse = mix(light.groundColor,light.skyColor,hemiLightFactor) ;
     
     #if defined(SPECULAR)

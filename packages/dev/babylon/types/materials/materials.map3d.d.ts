@@ -2,7 +2,7 @@ import { AbstractMesh, Color4, Effect, Light, Matrix, Mesh, Nullable, Observer, 
 import { ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
-import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
+import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
@@ -13,11 +13,11 @@ export declare enum Map3dShadingMode {
     BLINN_PHONG = 3
 }
 declare class TileBag {
-    tile: ITile<IDemInfos>;
+    tile: ElevationTile;
     elevationArea: Nullable<ITexture3Layer>;
     normalArea: Nullable<ITexture3Layer>;
     AdjacentIds: Array<number>;
-    constructor(tile: ITile<IDemInfos>, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
+    constructor(tile: ElevationTile, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
 }
 export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget {
     static DefaultTerrainColor: Color4;
@@ -72,11 +72,13 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     get elevationRange(): Range;
     get elevationOffset(): number;
     set elevationOffset(value: number);
+    protected _declareStructs(name: string, ...properties: Array<string>): Array<string>;
     isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
     demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     protected _updateAdjacentIds(bag: TileBag): void;
     protected _getAdjacentIds(quadkey: Nullable<string>, index?: number): number;
     protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id?: number): void;
+    protected _setAdjacentIdsFromBag(bag: TileBag, index: number, id?: number): void;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
@@ -85,6 +87,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void;
     bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void;
     protected _bindLights(effect: Effect): void;
+    protected _bindTerrainMatter(effect: Effect): void;
     protected _bindElevations(effect: Effect): void;
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void;
     protected _bindClipPlanes(effect: Effect): void;

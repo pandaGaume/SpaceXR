@@ -26,7 +26,7 @@ import {
 import { ITile, ImageLayer, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
-import { ElevationLayer, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
+import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
@@ -58,7 +58,7 @@ export enum Map3dShadingMode {
 // internal class used to hold the tile pool texture areas
 class TileBag {
     public constructor(
-        public tile: ITile<IDemInfos>,
+        public tile: ElevationTile,
         public elevationArea: Nullable<ITexture3Layer> = null,
         public normalArea: Nullable<ITexture3Layer> = null,
         public AdjacentIds: Array<number> = [-1, -1, -1, -1]
@@ -74,7 +74,7 @@ class TileBag {
  * Support ONLY ONE dem layer and ONE layer texture.
  */
 export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget {
-    public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 1); // cool steel blue
+    public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 255); // cool steel blue
 
     public static DemInfosAttName: string = "demInfos";
     public static DemIdsAttName: string = "demIds";
@@ -186,6 +186,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         }
     }
 
+    protected _declareStructs(name: string, ...properties: Array<string>): Array<string> {
+        return properties.map((p) => `${name}.${p}`);
+    }
+
     // Override the isReady method
     public isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean {
         if (this.isFrozen) {
@@ -205,25 +209,27 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
         const uniforms = [
             // babylon related
-            Map3dMaterial.WorldMatrixUniformName,
             Map3dMaterial.ViewProjectionMatrixUniformName,
 
             // clip planes
-            Map3dMaterial.NorthClipPlaneUniformName,
-            Map3dMaterial.SouthClipPlaneUniformName,
-            Map3dMaterial.EastClipPlaneUniformName,
-            Map3dMaterial.WestClipPlaneUniformName,
-            Map3dMaterial.TopClipPlaneUniformName,
-            Map3dMaterial.BottomClipPlaneUniformName,
+            ...this._declareStructs(Map3dMaterial.NorthClipPlaneUniformName, "point", "normal"),
+            ...this._declareStructs(Map3dMaterial.SouthClipPlaneUniformName, "point", "normal"),
+            ...this._declareStructs(Map3dMaterial.EastClipPlaneUniformName, "point", "normal"),
+            ...this._declareStructs(Map3dMaterial.WestClipPlaneUniformName, "point", "normal"),
+            ...this._declareStructs(Map3dMaterial.TopClipPlaneUniformName, "point", "normal"),
+            ...this._declareStructs(Map3dMaterial.BottomClipPlaneUniformName, "point", "normal"),
 
             // elevations
             Map3dMaterial.AltRangeUniformName,
 
             // lights and colors
             Map3dMaterial.TerrainColorUniformName,
-            Map3dMaterial.HemiLightUniformName,
-            Map3dMaterial.PointLightsUniformName,
-            Map3dMaterial.SpotLightsUniformName,
+
+            ...this._declareStructs(Map3dMaterial.HemiLightUniformName, "skyColor", "groundColor", "direction", "intensity"),
+
+            //Map3dMaterial.HemiLightUniformName,
+            ...this._declareStructs(Map3dMaterial.PointLightsUniformName, "position", "color", "intensity"),
+            ...this._declareStructs(Map3dMaterial.SpotLightsUniformName, "position", "direction", "color", "innerCutoff", "outerCutoff", "exponent", "intensity"),
             Map3dMaterial.NumPointLightsUniformName,
             Map3dMaterial.NumSpotLightsUniformName,
         ];
@@ -303,8 +309,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         this._ensureLayerReady(src, eventData);
 
+        const elevationTile = eventData as ElevationTile;
+
         // we reserve the texture areas for the tile
-        const bag = new TileBag(eventData);
+        const bag = new TileBag(elevationTile);
 
         // we process the dem content and update the elevation range
         if (eventData.content) {
@@ -352,13 +360,13 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         if (!area) return;
         const depth = area.depth;
         const quadkey = bag.tile.address.quadkey;
-        bag.AdjacentIds[0] = depth;
         const keys = TileAddress.ToNeigborsKey(quadkey);
+
         bag.AdjacentIds[1] = this._getAdjacentIds(keys[5]);
         bag.AdjacentIds[2] = this._getAdjacentIds(keys[7]);
         bag.AdjacentIds[3] = this._getAdjacentIds(keys[8]);
 
-        // update the attribute
+        this._setAdjacentIdsFromBag(bag, 0, depth);
 
         this._setAdjacentIds(keys[3], 1, depth);
         this._setAdjacentIds(keys[1], 2, depth);
@@ -375,9 +383,15 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         if (!quadkey) return;
         const bag = this._bags.get(quadkey);
         if (!bag) return;
-        bag.AdjacentIds[index] = id;
+        this._setAdjacentIdsFromBag(bag, index, id);
+    }
 
+    protected _setAdjacentIdsFromBag(bag: TileBag, index: number, id: number = -1): void {
+        bag.AdjacentIds[index] = id;
         // update the attribute
+        if (bag.tile.surface) {
+            bag.tile.surface.instancedBuffers.demIds = bag.AdjacentIds;
+        }
     }
 
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
@@ -465,6 +479,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             this._bindElevations(effect);
             // lights
             this._bindLights(effect);
+            // matter
+            this._bindTerrainMatter(effect);
         }
     }
 
@@ -472,43 +488,57 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         let pointLightCount = 0;
         let spotLightCount = 0;
         const scene = this.getScene();
-        if (scene.ambientColor) {
+        if (scene.ambientColor && (scene.ambientColor.r !== 0 || scene.ambientColor.g !== 0 || scene.ambientColor.b !== 0)) {
             effect.setColor3(Map3dMaterial.AmbientLightUniformName, scene.ambientColor);
         }
         for (let l of this.getLights()) {
             if (l instanceof HemisphericLight) {
-                effect.setColor3(`${Map3dMaterial.HemiLightUniformName}.skyColor`, l.diffuse);
-                effect.setColor3(`${Map3dMaterial.HemiLightUniformName}.groundColor`, l.groundColor);
-                effect.setVector3(`${Map3dMaterial.HemiLightUniformName}.direction`, l.direction);
-                effect.setFloat(`${Map3dMaterial.HemiLightUniformName}.intensity`, l.intensity);
+                effect
+                    .setColor3(`${Map3dMaterial.HemiLightUniformName}.skyColor`, l.diffuse)
+                    .setColor3(`${Map3dMaterial.HemiLightUniformName}.groundColor`, l.groundColor)
+                    .setVector3(`${Map3dMaterial.HemiLightUniformName}.direction`, l.direction)
+                    .setFloat(`${Map3dMaterial.HemiLightUniformName}.intensity`, l.intensity);
                 continue;
             }
             if (l instanceof PointLight) {
-                effect.setVector3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].position`, l.position);
-                effect.setColor3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].color`, l.diffuse);
-                effect.setFloat(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].intensity`, l.intensity);
+                effect
+                    .setVector3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].position`, l.position)
+                    .setColor3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].color`, l.diffuse)
+                    .setFloat(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].intensity`, l.intensity);
                 pointLightCount++;
                 continue;
             }
             if (l instanceof SpotLight) {
-                effect.setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].position`, l.position);
-                effect.setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].direction`, l.direction);
-                effect.setColor3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].color`, l.diffuse);
-                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].intensity`, l.intensity);
+                effect
+                    .setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].position`, l.position)
+                    .setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].direction`, l.direction)
+                    .setColor3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].color`, l.diffuse)
+                    .setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].intensity`, l.intensity);
 
                 const innerCutoff = Math.cos(l.angle / 2.0); // Inner cutoff
                 const outerCutoff = Math.cos((l.angle * 1.5) / 2.0); // Outer cutoff, slightly larger angle for smooth transition
 
-                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].innerCutoff`, innerCutoff);
-                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].outerCutoff`, outerCutoff);
-                effect.setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].exponent`, l.exponent);
+                effect
+                    .setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].innerCutoff`, innerCutoff)
+                    .setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].outerCutoff`, outerCutoff)
+                    .setFloat(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].exponent`, l.exponent);
 
                 spotLightCount++;
                 continue;
             }
         }
-        effect.setInt(Map3dMaterial.NumPointLightsUniformName, pointLightCount);
-        effect.setInt(Map3dMaterial.NumSpotLightsUniformName, spotLightCount);
+        effect.setInt(Map3dMaterial.NumPointLightsUniformName, pointLightCount).setInt(Map3dMaterial.NumSpotLightsUniformName, spotLightCount);
+    }
+
+    protected _bindTerrainMatter(effect: Effect): void {
+        if (this._terrainColor) {
+            effect.setColor4(Map3dMaterial.TerrainColorUniformName, this._terrainColor, this._terrainColor.a);
+        } else {
+            effect.setColor4(Map3dMaterial.TerrainColorUniformName, Map3dMaterial.DefaultTerrainColor, 1.0);
+        }
+        if (this._shininess > 0.0) {
+            effect.setFloat(Map3dMaterial.ShininessUniformName, this._shininess);
+        }
     }
 
     protected _bindElevations(effect: Effect): void {
@@ -516,7 +546,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
-        effect.setMatrix(Map3dMaterial.WorldMatrixUniformName, world);
         effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
     }
 
@@ -565,7 +594,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     protected _registerInstanceBuffers(target: Mesh): void {
-        target.registerInstancedBuffer(Map3dMaterial.DemInfosAttName, 4);
+        //target.registerInstancedBuffer(Map3dMaterial.DemInfosAttName, 4);
         target.registerInstancedBuffer(Map3dMaterial.DemIdsAttName, 4);
     }
 
@@ -573,6 +602,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         // ensure the samplers are ready (altitude and normal)
         // actually we ONLY support ONE dem layer. This is a limitation of the current implementation
         if (!this._elevationSampler) {
+            this._registerInstanceBuffers(src.mesh);
             this._buildElevationSamplers(src);
             this.markAsDirty(Material.TextureDirtyFlag);
         }

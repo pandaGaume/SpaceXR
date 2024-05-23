@@ -35,6 +35,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     static NumSpotLightsUniformName: string;
     static AmbientLightUniformName: string;
     static AltRangeUniformName: string;
+    static MapScaleUniformName: string;
     static ElevationSamplerUniformName: string;
     static NormalSamplerUniformName: string;
     static SpecularMapSamplerUniformName: string;
@@ -61,6 +62,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     private _layerSampler;
     private _elevationOffset;
     private _elevationRange;
+    private _mapScale;
     private _clipPlanes;
     protected _lightFilter: Nullable<(light: Light) => boolean>;
     protected _lightAddedObserver: Nullable<Observer<Light>>;
@@ -69,6 +71,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     getLights(): Light[];
     addClipPlane(...clipPlanes: ClipPlaneDefinition[]): void;
     removeClipPlane(...indices: ClipIndex[]): void;
+    get mapScale(): number;
+    set mapScale(value: number);
     get elevationRange(): Range;
     get elevationOffset(): number;
     set elevationOffset(value: number);

@@ -93,6 +93,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     public static AmbientLightUniformName: string = "uAmbientLight";
 
     public static AltRangeUniformName: string = "uAltRange";
+    public static MapScaleUniformName: string = "uMapScale";
 
     public static ElevationSamplerUniformName: string = "uAltitudes";
     public static NormalSamplerUniformName: string = "uNormals";
@@ -135,6 +136,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     // the elevation related properties.
     private _elevationOffset: number = 0.0;
     private _elevationRange: Nullable<Range> = null;
+    private _mapScale: number = 1.0;
 
     // the clip planes used by the material, if any
     private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [];
@@ -144,7 +146,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     protected _lightAddedObserver: Nullable<Observer<Light>> = null;
     protected _lightRemovedObserver: Nullable<Observer<Light>> = null;
 
-    constructor(name: string, shaderName: string, scene?: Scene) {
+    public constructor(name: string, shaderName: string, scene?: Scene) {
         super(name, scene);
         if (!shaderName) throw new Error("shaderName is required");
         this._shaderName = shaderName;
@@ -170,6 +172,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         this.markAsDirty(Material.MiscDirtyFlag);
     }
 
+    public get mapScale(): number {
+        return this._mapScale;
+    }
+
+    public set mapScale(value: number) {
+        if (this._mapScale !== value) {
+            this._mapScale = value;
+            this.markAsDirty(Material.AttributesDirtyFlag);
+        }
+    }
+
     public get elevationRange(): Range {
         // we clone the range to avoid modification of the original range used by the shader
         return this._elevationRange ? this._elevationRange.clone() : Range.Zero();
@@ -192,8 +205,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
     // Override the isReady method
     public isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean {
+        const drawWrapper = subMesh._drawWrapper;
+
         if (this.isFrozen) {
-            if (subMesh.effect && subMesh.effect._wasPreviouslyReady && subMesh.effect._wasPreviouslyUsingInstances === useInstances) {
+            if (drawWrapper._wasPreviouslyReady && drawWrapper._wasPreviouslyUsingInstances === useInstances) {
                 return true;
             }
         }
@@ -221,6 +236,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
             // elevations
             Map3dMaterial.AltRangeUniformName,
+            Map3dMaterial.MapScaleUniformName,
 
             // lights and colors
             Map3dMaterial.TerrainColorUniformName,
@@ -299,8 +315,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         }
 
         defines._renderId = scene.getRenderId();
-        subMesh.effect._wasPreviouslyReady = true;
-        subMesh.effect._wasPreviouslyUsingInstances = !!useInstances;
+        drawWrapper._wasPreviouslyReady = true;
+        drawWrapper._wasPreviouslyUsingInstances = !!useInstances;
 
         return true;
     }
@@ -470,7 +486,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         // Matrices
         this._bindMatrix(effect, world, scene);
 
-        if (scene.isCachedMaterialInvalid(this, effect)) {
+        if (this._mustRebind(scene, effect, subMesh)) {
             // Clip planes
             this._bindClipPlanes(effect);
             // samplers
@@ -543,6 +559,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
     protected _bindElevations(effect: Effect): void {
         effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(this._elevationRange?.min ?? 0.0, this._elevationRange?.max ?? 0.0));
+        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale);
     }
 
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {

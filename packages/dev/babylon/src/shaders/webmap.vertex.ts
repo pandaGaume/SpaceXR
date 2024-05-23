@@ -5,6 +5,7 @@ import { ShaderStore } from "@babylonjs/core";
 const name = "webmapVertexShader";
 const shader = `#include<instancesDeclaration>
 #include<lightVertexDeclaration>
+#include<elevationVertexDeclaration>
 uniform mat4 viewProjection; in vec3 position; in vec2 uv; #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
 uniform vec4 uTerrainColor;#endif
 void main(void) {#include<instancesVertex>

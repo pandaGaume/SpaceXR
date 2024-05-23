@@ -8,7 +8,7 @@
 #include<lightVertexDeclaration>
 
 // this is the declaration of the function to compute geometry related to elevation data.
-//#include<elevationVertexDeclaration>
+#include<elevationVertexDeclaration>
 
 // build in
 uniform mat4 viewProjection; 
@@ -38,7 +38,7 @@ void main(void) {
   
     // get the position
 //    float alt0 = float(texture(uAltitudes, v))  ;
-    float alt = 0.0; //(alt0 - uAltRange.x) ;
+    float alt = 0.0; //(alt0 - uAltRange.x) * uMapScale;
     vec4 pos = vec4(position.xy, alt ,1.0);
     vec4 worldPosition = finalWorld * pos;
 

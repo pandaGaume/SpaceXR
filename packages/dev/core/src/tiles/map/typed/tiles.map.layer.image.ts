@@ -1,4 +1,4 @@
-import { ICanvasRenderingContext } from "@babylonjs/core/Engines/ICanvas";
+import { ICanvasRenderingContext } from "dev/core/src/engine";
 import { PropertyChangedEventArgs } from "../../../events";
 import { ITile, ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";

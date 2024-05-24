@@ -4,6 +4,7 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "webmapVertexShader";
 const shader = `#include<instancesDeclaration>
+#include<clipVertexDeclaration>
 #include<lightVertexDeclaration>
 #include<elevationVertexDeclaration>
 uniform mat4 viewProjection; in vec3 position; in vec2 uv; #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
@@ -16,6 +17,7 @@ vec3 lightColor=calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLi
 vColor=uTerrainColor* vec4(lightColor,1.);#endif
 #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
 vNormal=worldNormal.xyz;vPosition=worldPosition.xyz;#endif
+#include<clipVertex>
 gl_Position=viewProjection*worldPosition;}`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const webmapVertexShader = { name, shader };

@@ -4,9 +4,11 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "webmapFragmentShader";
 const shader = `#include<lightFragmentDeclaration>
+#include<clipFragmentDeclaration>
 #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
 uniform vec4 uTerrainColor;#endif
-void main(void) {#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
+void main(void) {#include<clipFragment>
+#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
 gl_FragColor=vColor;#elif defined(PHONG_SHADING) || defined(BLINN_PHONG_SHADING)
 #if defined(SPECULAR)
 vec3 lightColor=calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights,normalize(vNormal),vPosition,uViewPosition,shininess);#else

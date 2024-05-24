@@ -6,6 +6,7 @@ import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
+import { ClipPlaneDefinition, VirtualDisplay } from "../display";
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 export declare function IsMap3dImageTarget(target: any): target is IMap3dImageTarget;
 export declare function IsMap3dElevationTarget(target: any): target is IMap3dElevationTarget;
@@ -32,10 +33,14 @@ export interface IMap3dOptions {
 export declare class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dImageTarget {
     static DefaultTextureSize: number;
     private _map;
-    private _controller;
     private _addLayerObserver;
     private _removeLayerObserver;
+    private _targetDisplay;
+    private _controller;
+    private _ownController;
     constructor(name: string, options: IMap3dOptions, scene: Scene);
+    withDisplay(display: VirtualDisplay): Map3d;
+    protected _prepareClipPlanes(layer: ElevationLayer, clips: Nullable<ClipPlaneDefinition[]>): void;
     withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3d;
     zoomMap(delta: number): Map3d;

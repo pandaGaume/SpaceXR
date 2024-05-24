@@ -2,7 +2,7 @@
 #include<instancesDeclaration>
 
 // this is declaration to clip map along the hologram sides
-//#include<clipVertexDeclaration>
+#include<clipVertexDeclaration>
 
 // this is where to include lights.
 #include<lightVertexDeclaration>
@@ -64,7 +64,7 @@ void main(void) {
     #endif
 
     // clip map    
-    //#include<clipVertex>
+    #include<clipVertex>
     
     // finally set the position
     gl_Position = viewProjection * worldPosition;

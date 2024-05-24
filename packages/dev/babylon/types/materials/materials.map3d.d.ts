@@ -1,7 +1,7 @@
 import { AbstractMesh, Color4, Effect, Light, Matrix, Mesh, Nullable, Observer, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
 import { ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
-import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IClipableContent } from "../display/display.clipPlane";
 import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
@@ -19,7 +19,7 @@ declare class TileBag {
     AdjacentIds: Array<number>;
     constructor(tile: ElevationTile, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
 }
-export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget {
+export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IClipableContent {
     static DefaultTerrainColor: Color4;
     static DemInfosAttName: string;
     static DemIdsAttName: string;
@@ -69,8 +69,9 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     protected _lightRemovedObserver: Nullable<Observer<Light>>;
     constructor(name: string, shaderName: string, scene?: Scene);
     getLights(): Light[];
-    addClipPlane(...clipPlanes: ClipPlaneDefinition[]): void;
-    removeClipPlane(...indices: ClipIndex[]): void;
+    addClipPlane(...clipPlanes: ClipPlaneDefinition[]): Map3dMaterial;
+    clearClipPlanes(): Map3dMaterial;
+    removeClipPlane(...indices: ClipIndex[]): Map3dMaterial;
     get mapScale(): number;
     set mapScale(value: number);
     get elevationRange(): Range;

@@ -86,7 +86,8 @@
                 const resolution = SPACEXR.VirtualDisplay.SD;
 
                 // set the virtual display
-                const display = new SPACEXR.VirtualDisplay("holographicDisplay", size, resolution, scene);
+                const buildClipPlane = true;
+                const display = new SPACEXR.VirtualDisplay("holographicDisplay", size, resolution, buildClipPlane, scene);
                 display.material = createGlassMaterial(scene);
                 display.rotation.x = -Math.PI / 2;
                 display.freezeWorldMatrix();
@@ -103,7 +104,7 @@
                 };
 
                 // build the map
-                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withPointerControl(display.pointerSource);
+                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
                 map.parent = display; // and attach to parent.
 
                 const defaultTileMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);

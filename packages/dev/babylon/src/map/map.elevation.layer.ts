@@ -8,6 +8,7 @@ import { PropertyChangedEventArgs, EventState } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
 import { WebMapMaterial } from "../materials";
 import { IMap3dImageTarget, IsMap3dElevationTarget, IsMap3dImageTarget } from "./map.elevation";
+import { ClipIndex, ClipPlaneDefinition, IClipableContent, isClipableContent } from "../display";
 
 export interface IElevationTile extends ITile<IDemInfos> {
     surface: Nullable<AbstractMesh>;
@@ -41,7 +42,7 @@ export interface IElevationTileOptions extends ITileMapLayerOptions {
 ///<summary>
 /// A layer for elevation data. The layer serve as host for elevation tiles and therefore the grid model used to display the elevation.
 /// </summary>
-export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
+export class ElevationLayer extends DemLayer implements IMap3dImageTarget, IClipableContent {
     private static InitZ(column: number, row: number, w: number, h: number): number {
         let i = column == w - 1 ? 1 : 0;
         let j = row == h - 1 ? 2 : 0;
@@ -82,6 +83,33 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
         this._template = this._buildMesh(name, options?.material ?? null);
         this._cartesianCenter = null;
         this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+    }
+
+    public addClipPlane(...clipPlanes: ClipPlaneDefinition[]): IClipableContent {
+        // we forward the cliplane operation to the material
+        const material = this._template.material;
+        if (material && isClipableContent(material)) {
+            material.addClipPlane(...clipPlanes);
+        }
+        return this;
+    }
+
+    public removeClipPlane(...indices: ClipIndex[]): IClipableContent {
+        // we forward the cliplane opertation to the material
+        const material = this._template.material;
+        if (material && isClipableContent(material)) {
+            material.removeClipPlane(...indices);
+        }
+        return this;
+    }
+
+    public clearClipPlanes(): IClipableContent {
+        // we forward the cliplane operation to the material
+        const material = this._template.material;
+        if (material && isClipableContent(material)) {
+            material.clearClipPlanes();
+        }
+        return this;
     }
 
     public get root(): TransformNode {

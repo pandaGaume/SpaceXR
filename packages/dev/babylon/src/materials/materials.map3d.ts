@@ -25,7 +25,7 @@ import {
 
 import { ITile, ImageLayer, TileAddress } from "core/tiles";
 import { Range } from "core/math";
-import { ClipIndex, ClipPlaneDefinition } from "./materials.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IClipableContent } from "../display/display.clipPlane";
 import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
@@ -73,7 +73,7 @@ class TileBag {
  * and clip planes.
  * Support ONLY ONE dem layer and ONE layer texture.
  */
-export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget {
+export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IClipableContent {
     public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 255); // cool steel blue
 
     public static DemInfosAttName: string = "demInfos";
@@ -139,7 +139,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     private _mapScale: number = 1.0;
 
     // the clip planes used by the material, if any
-    private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [];
+    private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [null, null, null, null, null, null];
 
     // the light filter used by the material, if any
     protected _lightFilter: Nullable<(light: Light) => boolean> = null;
@@ -158,18 +158,26 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         return this._lightFilter ? this.getScene().lights.filter(this._lightFilter) : this.getScene().lights;
     }
 
-    public addClipPlane(...clipPlanes: ClipPlaneDefinition[]): void {
+    public addClipPlane(...clipPlanes: ClipPlaneDefinition[]): Map3dMaterial {
         for (let cp of clipPlanes) {
             this._clipPlanes[cp.index] = cp;
         }
         this.markAsDirty(Material.MiscDirtyFlag);
+        return this;
     }
 
-    public removeClipPlane(...indices: ClipIndex[]): void {
+    public clearClipPlanes(): Map3dMaterial {
+        this._clipPlanes = [];
+        this.markAsDirty(Material.MiscDirtyFlag);
+        return this;
+    }
+
+    public removeClipPlane(...indices: ClipIndex[]): Map3dMaterial {
         for (let i of indices) {
             this._clipPlanes[i] = null;
         }
         this.markAsDirty(Material.MiscDirtyFlag);
+        return this;
     }
 
     public get mapScale(): number {
@@ -226,14 +234,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             // babylon related
             Map3dMaterial.ViewProjectionMatrixUniformName,
 
-            // clip planes
-            ...this._declareStructs(Map3dMaterial.NorthClipPlaneUniformName, "point", "normal"),
-            ...this._declareStructs(Map3dMaterial.SouthClipPlaneUniformName, "point", "normal"),
-            ...this._declareStructs(Map3dMaterial.EastClipPlaneUniformName, "point", "normal"),
-            ...this._declareStructs(Map3dMaterial.WestClipPlaneUniformName, "point", "normal"),
-            ...this._declareStructs(Map3dMaterial.TopClipPlaneUniformName, "point", "normal"),
-            ...this._declareStructs(Map3dMaterial.BottomClipPlaneUniformName, "point", "normal"),
-
             // elevations
             Map3dMaterial.AltRangeUniformName,
             Map3dMaterial.MapScaleUniformName,
@@ -242,10 +242,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             Map3dMaterial.TerrainColorUniformName,
 
             ...this._declareStructs(Map3dMaterial.HemiLightUniformName, "skyColor", "groundColor", "direction", "intensity"),
-
-            //Map3dMaterial.HemiLightUniformName,
             ...this._declareStructs(Map3dMaterial.PointLightsUniformName, "position", "color", "intensity"),
             ...this._declareStructs(Map3dMaterial.SpotLightsUniformName, "position", "direction", "color", "innerCutoff", "outerCutoff", "exponent", "intensity"),
+
             Map3dMaterial.NumPointLightsUniformName,
             Map3dMaterial.NumSpotLightsUniformName,
         ];
@@ -281,6 +280,18 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         if (this._shininess > 0.0) {
             defines.SPECULAR = true;
             uniforms.push(Map3dMaterial.ShininessUniformName);
+        }
+
+        if (this._clipPlanes && this._clipPlanes.length > 0) {
+            defines.CLIP_PLANES = true;
+            const properties = ["point", "normal"];
+            uniforms.push(
+                // clip planes
+                ...this._declareStructs(Map3dMaterial.NorthClipPlaneUniformName, ...properties),
+                ...this._declareStructs(Map3dMaterial.SouthClipPlaneUniformName, ...properties),
+                ...this._declareStructs(Map3dMaterial.EastClipPlaneUniformName, ...properties),
+                ...this._declareStructs(Map3dMaterial.WestClipPlaneUniformName, ...properties)
+            );
         }
 
         // we heavily rely on instances
@@ -567,7 +578,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     protected _bindClipPlanes(effect: Effect): void {
-        if (this._clipPlanes) {
+        if (this._clipPlanes && this._clipPlanes.length > 0) {
             this._bindClipPlane(effect, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);
             this._bindClipPlane(effect, Map3dMaterial.SouthClipPlaneUniformName, ClipIndex.South);
             this._bindClipPlane(effect, Map3dMaterial.EastClipPlaneUniformName, ClipIndex.East);

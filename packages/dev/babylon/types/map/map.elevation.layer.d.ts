@@ -7,6 +7,7 @@ import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState } from "core/events";
 import { Bearing } from "core/geography";
 import { IMap3dImageTarget } from "./map.elevation";
+import { ClipIndex, ClipPlaneDefinition, IClipableContent } from "../display";
 export interface IElevationTile extends ITile<IDemInfos> {
     surface: Nullable<AbstractMesh>;
 }
@@ -21,7 +22,7 @@ export interface IElevationTileOptions extends ITileMapLayerOptions {
     insets?: ICartesian3;
     material?: Material;
 }
-export declare class ElevationLayer extends DemLayer implements IMap3dImageTarget {
+export declare class ElevationLayer extends DemLayer implements IMap3dImageTarget, IClipableContent {
     private static InitZ;
     private static InitUV;
     _grid: VertexData;
@@ -33,6 +34,9 @@ export declare class ElevationLayer extends DemLayer implements IMap3dImageTarge
     _tilesRoot: TransformNode;
     _cartesianCenter: Nullable<ICartesian2>;
     constructor(name: string, source: ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationTileOptions, enabled?: boolean);
+    addClipPlane(...clipPlanes: ClipPlaneDefinition[]): IClipableContent;
+    removeClipPlane(...indices: ClipIndex[]): IClipableContent;
+    clearClipPlanes(): IClipableContent;
     get root(): TransformNode;
     get mesh(): Mesh;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;

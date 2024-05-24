@@ -9,7 +9,7 @@ export declare class MapDisplay extends VirtualDisplay {
     _map: WebMapTexture;
     _target: InputsNavigationTarget<VirtualDisplayInputsSource>;
     _controller: PointerController<IPointerSource>;
-    constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene);
+    constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, buildClipPlanes?: boolean, scene?: Scene);
     get map(): WebMapTexture;
     protected _createTextureMap(name: string, options: IMapTextureOptions, scene: Scene): WebMapTexture;
     protected _createMaterial(name: string, texture: WebMapTexture, scene: Scene): Material;

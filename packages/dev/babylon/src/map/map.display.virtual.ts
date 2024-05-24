@@ -12,9 +12,9 @@ export class MapDisplay extends VirtualDisplay {
     _target: InputsNavigationTarget<VirtualDisplayInputsSource>;
     _controller: PointerController<IPointerSource>;
 
-    constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene) {
+    constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, buildClipPlanes: boolean = false, scene?: Scene) {
         options = options ?? WebMapTexture.OptionsHD();
-        super(name, dimension, options, scene);
+        super(name, dimension, options, buildClipPlanes, scene);
         this._map = this._createTextureMap(name, options, scene ?? this.getScene());
         this.material = this._createMaterial(name, this._map, scene ?? this.getScene());
         this._target = new InputsNavigationTarget(this._map);

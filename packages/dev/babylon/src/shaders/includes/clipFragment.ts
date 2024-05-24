@@ -3,6 +3,8 @@
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
 const name = "clipFragment";
-const shader = `bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}`;
+const shader = `#if defined(CLIP_PLANES)
+bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}#endif
+`;
 ShaderStore.IncludesShadersStore[name] = shader;
 /** @internal */ export const clipFragment = { name, shader };

@@ -1,10 +1,14 @@
 #include<lightFragmentDeclaration>
+#include<clipFragmentDeclaration>
 
 #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
 uniform vec4 uTerrainColor;
 #endif
 
 void main(void) {
+    
+    #include<clipFragment>
+    
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
         gl_FragColor=vColor;
     #elif defined(PHONG_SHADING) || defined(BLINN_PHONG_SHADING)

@@ -1,4 +1,5 @@
 
+#if defined(CLIP_PLANES)
 struct Plane {
     vec3 point;
     vec3 normal;
@@ -17,5 +18,5 @@ uniform Plane uTopClip;
 uniform Plane uBottomClip;
 
 out vec4 vfClipDistance;
-
+#endif
 

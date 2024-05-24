@@ -17,6 +17,7 @@ import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
+import { ClipPlaneDefinition, VirtualDisplay } from "../display";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
@@ -59,9 +60,12 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
 
     // the map logic. This is the main entry point for the map API.
     private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
-    private _controller: Nullable<PointerController<IPointerSource>>;
     private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
     private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
+
+    private _targetDisplay: Nullable<VirtualDisplay>;
+    private _controller: Nullable<PointerController<IPointerSource>>;
+    private _ownController = false;
 
     public constructor(name: string, options: IMap3dOptions, scene: Scene) {
         super(name, scene);
@@ -76,13 +80,34 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         // TODO : this is not the place for scaling ....
         this.scaling.set(m.dimension.width / display.displayWidth, m.dimension.height / display.displayHeight, 1);
         this._controller = null;
+        this._targetDisplay = null;
+    }
+
+    public withDisplay(display: VirtualDisplay): Map3d {
+        this._targetDisplay = display;
+        for (var l of this.getElevationLayers()) {
+            this._prepareClipPlanes(l, this._targetDisplay.clipPlanesWorld);
+        }
+        return this.withPointerControl(this._targetDisplay.pointerSource);
+    }
+
+    protected _prepareClipPlanes(layer: ElevationLayer, clips: Nullable<ClipPlaneDefinition[]>): void {
+        if (clips && clips.length > 0) {
+            layer.clearClipPlanes();
+            layer.addClipPlane(...clips);
+        }
     }
 
     public withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d {
-        if (this._controller) {
+        if (this._controller && this._ownController) {
             this._controller.dispose();
         }
-        this._controller = controller instanceof PointerController ? controller : new PointerController(controller, this);
+        if (controller instanceof PointerController) {
+            this._controller = controller;
+        } else {
+            this._controller = new PointerController(controller, this);
+            this._ownController = true;
+        }
         return this;
     }
 
@@ -223,6 +248,9 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         // register the root of the layer under the map
         layer.root.parent = this;
         layer.linkTo(this);
+        if (this._targetDisplay) {
+            this._prepareClipPlanes(layer, this._targetDisplay.clipPlanesWorld);
+        }
     }
 
     protected _onElevationLayerRemoved(layer: ElevationLayer): void {

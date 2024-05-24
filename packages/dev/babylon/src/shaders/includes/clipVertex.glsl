@@ -1,6 +1,8 @@
 
-vfClipDistance.x = clipDistance(worldPos, uNorthClip);
-vfClipDistance.y = clipDistance(worldPos, uSouthClip);
-vfClipDistance.z = clipDistance(worldPos, uEastClip);
-vfClipDistance.w = clipDistance(worldPos, uWestClip);
+#if defined(CLIP_PLANES)
+vfClipDistance.x = clipDistance(worldPosition.xyz, uNorthClip);
+vfClipDistance.y = clipDistance(worldPosition.xyz, uSouthClip);
+vfClipDistance.z = clipDistance(worldPosition.xyz, uEastClip);
+vfClipDistance.w = clipDistance(worldPosition.xyz, uWestClip);
+#endif
 

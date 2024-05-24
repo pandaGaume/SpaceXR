@@ -64,12 +64,13 @@
                 const h = 170;
                 const w = 270;
                 const t = 100;
-
+                const buildClipPlane = false;
                 // create an hologram display reference with a 96 dpi
                 const display = new SPACEXR.VirtualDisplay(
                     "display",
                     { height: h, width: w, thickness: t },
                     { width: 320, height: 180, thickness: 720 }, // in 'pixel', ratio of 16/9
+                    buildClipPlane,
                     scene
                 );
                 display.position.y = 90;

@@ -14,8 +14,7 @@ uniform Plane uNorthClip;
 uniform Plane uSouthClip;
 uniform Plane uEastClip;
 uniform Plane uWestClip;
-uniform Plane uTopClip;
-uniform Plane uBottomClip;
+
 
 out vec4 vfClipDistance;
 #endif

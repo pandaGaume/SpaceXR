@@ -125,7 +125,7 @@
                 const client = SPACEXR.MapZen.DemClient();
                 const l = new SPACEXR.ElevationLayer(`${client.name}`, client, layerOptions).addTo(map);
 
-                const showAxes = false;
+                const showAxes = true;
                 if (showAxes) {
                     const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
                     axes.xAxis.parent = display;

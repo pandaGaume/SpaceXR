@@ -102,10 +102,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
     public static NorthClipPlaneUniformName: string = "uNorthClip";
     public static SouthClipPlaneUniformName: string = "uSouthClip";
-    public static EastClipPlaneUniformName: string = "UEastClip";
+    public static EastClipPlaneUniformName: string = "uEastClip";
     public static WestClipPlaneUniformName: string = "uWestClip";
-    public static TopClipPlaneUniformName: string = "uTopClip";
-    public static BottomClipPlaneUniformName: string = "uBottomClip";
 
     public static ElevationKind: string = "altitudes";
     public static NormalKind: string = "normals";

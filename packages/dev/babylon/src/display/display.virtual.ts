@@ -23,10 +23,10 @@ export class VirtualDisplay extends Mesh implements IClipableContent {
         const nEast = new Vector3(1, 0, 0);
         const nWest = new Vector3(-1, 0, 0);
 
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.North, display.position.add(nNorth.scale(halfHeight)), nNorth));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.South, display.position.add(nSouth.scale(halfHeight)), nSouth));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.East, display.position.add(nEast.scale(halfWidth)), nEast));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.West, display.position.add(nWest.scale(halfWidth)), nWest));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.North, display.position.add(nNorth.scale(halfHeight)), nSouth));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.South, display.position.add(nSouth.scale(halfHeight)), nNorth));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.East, display.position.add(nEast.scale(halfWidth)), nWest));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.West, display.position.add(nWest.scale(halfWidth)), nEast));
 
         return clipPlanes;
     }

@@ -44,8 +44,6 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     static SouthClipPlaneUniformName: string;
     static EastClipPlaneUniformName: string;
     static WestClipPlaneUniformName: string;
-    static TopClipPlaneUniformName: string;
-    static BottomClipPlaneUniformName: string;
     static ElevationKind: string;
     static NormalKind: string;
     static LayerKind: string;

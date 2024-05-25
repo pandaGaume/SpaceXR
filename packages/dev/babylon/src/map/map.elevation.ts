@@ -17,8 +17,7 @@ import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
-import { hasHolographicBounds, HolographicDisplay } from "../display";
-
+import { HolographicDisplay } from "../display";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
@@ -90,10 +89,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
             if (l.enabled == false) {
                 continue;
             }
-            var m = l.mesh.material;
-            if (m && hasHolographicBounds(m)) {
-                m.holographicBounds = display;
-            }
+            l.bindDisplay(display);
         }
         return this.withPointerControl(this._targetDisplay.pointerSource);
     }
@@ -249,18 +245,15 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         layer.root.parent = this;
         layer.linkTo(this);
         if (this._targetDisplay) {
-            var m = layer.mesh.material;
-            if (m && hasHolographicBounds(m)) {
-                m.holographicBounds = this._targetDisplay;
-            }
+            layer.bindDisplay(this._targetDisplay);
         }
     }
 
     protected _onElevationLayerRemoved(layer: ElevationLayer): void {
         layer.unlinkFrom(this);
         // unregister the root of the layer from the map
+        layer.bindDisplay();
         layer.root.parent = null;
-        layer.mesh.material = null;
     }
 
     protected _onImageLayerAdded(layer: ImageLayer): void {

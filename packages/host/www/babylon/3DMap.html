@@ -43,7 +43,7 @@
         </div>
         <script>
             const defaultCenter = [27.98817689833976, 86.92491071824738]; // everest
-            const defaultLod = 12;
+            const defaultLod = 10;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
                 // Create a PBR material
@@ -72,15 +72,17 @@
                 camera.attachControl(canvas, true);
 
                 // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 1), scene);
+                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.8;
                 light.diffuse = new BABYLON.Color3(1, 1, 1);
 
+                scene.ambientColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+
                 // create a basic table (in centimeter)
                 const size = {
-                    width: 270,
-                    height: 170,
+                    width: 320,
+                    height: 240,
                 };
 
                 const resolution = SPACEXR.VirtualDisplay.SD;
@@ -125,7 +127,7 @@
                 const client = SPACEXR.MapZen.DemClient();
                 const l = new SPACEXR.ElevationLayer(`${client.name}`, client, layerOptions).addTo(map);
 
-                const showAxes = true;
+                const showAxes = false;
                 if (showAxes) {
                     const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
                     axes.xAxis.parent = display;

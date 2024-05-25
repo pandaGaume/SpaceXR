@@ -4,10 +4,12 @@ import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
 import { ITile, ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileNavigationState, ITileProvider, ImageLayer, Tile, TileContentType } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
-import { PropertyChangedEventArgs, EventState } from "core/events";
+import { PropertyChangedEventArgs, EventState, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
 import { WebMapMaterial } from "../materials";
 import { IMap3dImageTarget, IsMap3dElevationTarget, IsMap3dImageTarget } from "./map.elevation";
+import { Map3dScaleController, hasMapScale } from "./map.scale.controller";
+import { HolographicDisplay, hasHolographicBounds } from "../display";
 
 export interface IElevationTile extends ITile<IDemInfos> {
     surface: Nullable<AbstractMesh>;
@@ -61,8 +63,13 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
     _gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
     _root: TransformNode;
     _tilesRoot: TransformNode;
+
     // cached cartesian center
     _cartesianCenter: Nullable<ICartesian2>;
+
+    // scale controller
+    _scaleController: Nullable<Map3dScaleController> = null;
+    _scaleObserver: Nullable<Observer<ICartesian3>> = null;
 
     public constructor(name: string, source: ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationTileOptions, enabled?: boolean) {
         super(name, source, options, enabled);
@@ -86,6 +93,39 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
 
     public get root(): TransformNode {
         return this._root;
+    }
+
+    public bindDisplay(display?: HolographicDisplay): void {
+        if (this._scaleController) {
+            this._scaleController.dispose();
+            this._scaleController = null;
+        }
+        if (this._scaleObserver) {
+            this._scaleObserver.disconnect();
+            this._scaleObserver = null;
+        }
+        var m = this.mesh.material;
+        if (m && hasHolographicBounds(m)) {
+            m.holographicBounds = null;
+        }
+
+        if (display) {
+            this._scaleController = new Map3dScaleController(display, this.navigation, this.metrics);
+            this._scaleObserver = this._scaleController.scaleChangedObservable.add(this._onScaleChanged.bind(this));
+            this._onScaleChanged(Map3dScaleController.GetScale(display, this.navigation, this.metrics));
+
+            var m = this.mesh.material;
+            if (m && hasHolographicBounds(m)) {
+                m.holographicBounds = display;
+            }
+        }
+    }
+
+    protected _onScaleChanged(scale: ICartesian3): void {
+        const material = this._template.material;
+        if (material && hasMapScale(material)) {
+            material.mapScale = scale;
+        }
     }
 
     /**

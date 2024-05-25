@@ -18,6 +18,7 @@ export class VirtualDisplay extends Mesh {
     _halfDimension: ISize3;
     _resolution: ISize3;
     _ppu: Vector3;
+    _ratio: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
 
     // cached
@@ -33,7 +34,7 @@ export class VirtualDisplay extends Mesh {
             this._resolution.height / this._dimension.height,
             this._dimension.thickness ? this._resolution.thickness / this._dimension.thickness : 0
         );
-
+        this._ratio = new Vector3(this._ppu.x / this._ppu.y, this._ppu.z / this._ppu.y, this._ppu.z / this._ppu.x);
         const data = this._buildVertexData();
         data.applyToMesh(this);
         this._worldTransform = new TransformNode(`${name}_context`, scene);
@@ -75,6 +76,10 @@ export class VirtualDisplay extends Mesh {
 
     public get pixelPerUnit(): ICartesian3 {
         return this._ppu;
+    }
+
+    public get aspectRatio(): ICartesian3 {
+        return this._ratio;
     }
 
     public getInverseWorldMatrix(): Matrix {

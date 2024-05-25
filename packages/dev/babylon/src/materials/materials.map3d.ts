@@ -20,16 +20,19 @@ import {
     SpotLight,
     SubMesh,
     Vector2,
+    Vector3,
+    Vector4,
     VertexBuffer,
 } from "@babylonjs/core";
 
 import { ITile, ImageLayer, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
-import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
+import { ElevationLayer, ElevationTile, IHasMapScale, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
+import { ICartesian3 } from "core/geometry";
 
 export enum Map3dShadingMode {
     // In flat shading, a single color is computed per polygon face,
@@ -65,6 +68,8 @@ class TileBag {
     ) {}
 }
 
+export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {}
+
 /**
  * Base class for Map3D related materials. This class is intended to be used as a base class for
  * different materials that are used to render 3D maps such as EllipsoidMaterial and WebMapMaterial.
@@ -73,7 +78,7 @@ class TileBag {
  * and clip planes.
  * Support ONLY ONE dem layer and ONE layer texture.
  */
-export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds {
+export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 255); // cool steel blue
 
     public static DemInfosAttName: string = "demInfos";
@@ -118,7 +123,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     // the shininess of the material if no texture defined
     protected _shininess: number = 0.0;
     // shading mode used by the material if no texture defined
-    protected _shadingMode: Map3dShadingMode = Map3dShadingMode.BLINN_PHONG;
+    protected _shadingMode: Map3dShadingMode = Map3dShadingMode.GOUREAUD;
     // the max number of lights used by the material
     protected _maxSpotLights: number = 3;
     protected _maxPointLights: number = 3;
@@ -132,9 +137,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     private _layerSampler: Nullable<Map3dTexture> = null;
 
     // the elevation related properties.
-    private _elevationOffset: number = 0.0;
     private _elevationRange: Nullable<Range> = null;
-    private _mapScale: number = 1.0;
+    private _mapScale: ICartesian3 = Vector3.One();
 
     // the optional display where the material is used
     private _holoBounds: Nullable<IHolographicBounds> = null;
@@ -166,29 +170,13 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         return this._lightFilter ? this.getScene().lights.filter(this._lightFilter) : this.getScene().lights;
     }
 
-    public get mapScale(): number {
+    public get mapScale(): ICartesian3 {
         return this._mapScale;
     }
 
-    public set mapScale(value: number) {
+    public set mapScale(value: ICartesian3) {
         if (this._mapScale !== value) {
             this._mapScale = value;
-            this.markAsDirty(Material.AttributesDirtyFlag);
-        }
-    }
-
-    public get elevationRange(): Range {
-        // we clone the range to avoid modification of the original range used by the shader
-        return this._elevationRange ? this._elevationRange.clone() : Range.Zero();
-    }
-
-    public get elevationOffset(): number {
-        return this._elevationOffset;
-    }
-
-    public set elevationOffset(value: number) {
-        if (this._elevationOffset !== value) {
-            this._elevationOffset = value;
             this.markAsDirty(Material.AttributesDirtyFlag);
         }
     }
@@ -226,6 +214,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
             // lights and colors
             Map3dMaterial.TerrainColorUniformName,
+            Map3dMaterial.AmbientLightUniformName,
 
             ...this._declareStructs(Map3dMaterial.HemiLightUniformName, "skyColor", "groundColor", "direction", "intensity"),
             ...this._declareStructs(Map3dMaterial.PointLightsUniformName, "position", "color", "intensity"),
@@ -326,16 +315,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
         // we reserve the texture areas for the tile
         const bag = new TileBag(elevationTile);
+        // we store the bag for the tile
+        this._bags.set(eventData.address.quadkey, bag);
 
         // we process the dem content and update the elevation range
-        if (eventData.content) {
-            if (this._elevationRange === null) {
-                this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
-            } else {
-                this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
-            }
-            this.markAsDirty(Material.AttributesDirtyFlag);
-        }
+        this._updateElevationRange(eventData);
 
         // prepare the elevation sampler.
         const elevationArea = this._elevationSampler?.reserve();
@@ -356,9 +340,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
                 normalArea?.update(eventData.content.normals);
             }
         }
-
-        // we store the bag for the tile
-        this._bags.set(eventData.address.quadkey, bag);
 
         // we call the layer sampler to create the layer texture support.
         // remember that the layer texture is a special texture that is used to draw dynamically
@@ -403,7 +384,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         bag.AdjacentIds[index] = id;
         // update the attribute
         if (bag.tile.surface) {
-            bag.tile.surface.instancedBuffers.demIds = bag.AdjacentIds;
+            bag.tile.surface.instancedBuffers.demIds = Vector4.FromArray(bag.AdjacentIds);
         }
     }
 
@@ -414,6 +395,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             bag.elevationArea?.release();
             bag.normalArea?.release();
             this._bags.delete(qk);
+            this._elevationRange = null;
         }
         this._layerSampler?.demRemoved(src, eventData);
 
@@ -425,11 +407,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         if (bag) {
             if (eventData.content?.elevations) {
                 // we update the elevation range
-                if (this._elevationRange === null) {
-                    this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
-                } else {
-                    this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
-                }
+                this._updateElevationRange(eventData);
                 bag.elevationArea?.update(eventData.content.elevations);
             }
             if (eventData.content?.normals) {
@@ -561,7 +539,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
 
     protected _bindElevations(effect: Effect): void {
         effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(this._elevationRange?.min ?? 0.0, this._elevationRange?.max ?? 0.0));
-        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale);
+        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.x);
+        console.log("Map3dMaterial._bindElevations", this._elevationRange?.min, this._elevationRange?.max, this._mapScale.x);
     }
 
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
@@ -646,7 +625,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     protected _getElevationSamplerDepth(layer: ElevationLayer): number {
-        return 16; // for dev purpose we set a fixed number of tiles
+        return 24; // for dev purpose we set a fixed number of tiles
     }
 
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture> {
@@ -710,6 +689,32 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         console.error("ERRORS:", errors);
         if (this.onError) {
             this.onError(effect, errors);
+        }
+    }
+
+    protected _buildElevationRange(): Range {
+        let range: Nullable<Range> = null;
+        for (let b of this._bags.values()) {
+            if (b.tile.content) {
+                if (range === null) {
+                    range = new Range(b.tile.content.min.z, b.tile.content.max.z);
+                    continue;
+                }
+                range.union(b.tile.content.min.z, b.tile.content.max.z);
+            }
+        }
+        return range ?? new Range(0, 0);
+    }
+
+    protected _updateElevationRange(elevationTile: ITile<IDemInfos>): void {
+        if (elevationTile.content) {
+            if (this._elevationRange === null) {
+                this._elevationRange = this._buildElevationRange();
+            } else {
+                // TODO : optimize to mark as dirty only when necessary
+                this._elevationRange.union(elevationTile.content.min.z, elevationTile.content.max.z);
+            }
+            this.markAsDirty(Material.AttributesDirtyFlag);
         }
     }
 }

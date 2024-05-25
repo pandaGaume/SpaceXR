@@ -35,7 +35,7 @@ void main(void) {
     // we choose the index using the value stored into the z of the position.
     // this value will be [0,3] to index one value into the ids vector. 
     // we assume the value is already clamped.
-    float depth = demIds[int(position.z)] ;
+    float depth = 0;//demIds[int(position.z)] ;
     vec3 v = vec3(uv.xy, depth);
     if( depth < 0.0) {
         v.x = v.x == 0.0 ? 1.0 : v.x;

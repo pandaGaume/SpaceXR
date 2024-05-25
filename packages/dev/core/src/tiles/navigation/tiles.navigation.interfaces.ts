@@ -7,6 +7,11 @@ export interface IHasNavigationState {
     navigation: ITileNavigationState;
 }
 
+export function hasNavigationState(obj: unknown): obj is IHasNavigationState {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IHasNavigationState>obj).navigation !== undefined;
+}
+
 export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     stateChangedObservable: Observable<ITileNavigationState>;

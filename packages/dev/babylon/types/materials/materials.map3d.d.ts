@@ -2,10 +2,11 @@ import { AbstractMesh, Color4, Effect, Light, Matrix, Mesh, Nullable, Observer, 
 import { ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
-import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
+import { ElevationLayer, ElevationTile, IHasMapScale, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
+import { ICartesian3 } from "core/geometry";
 export declare enum Map3dShadingMode {
     FLAT = 0,
     GOUREAUD = 1,
@@ -19,7 +20,9 @@ declare class TileBag {
     AdjacentIds: Array<number>;
     constructor(tile: ElevationTile, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
 }
-export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds {
+export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {
+}
+export declare class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     static DefaultTerrainColor: Color4;
     static DemInfosAttName: string;
     static DemIdsAttName: string;
@@ -58,7 +61,6 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     private _elevationSampler;
     private _normalSampler;
     private _layerSampler;
-    private _elevationOffset;
     private _elevationRange;
     private _mapScale;
     private _holoBounds;
@@ -69,11 +71,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     get holographicBounds(): Nullable<IHolographicBounds>;
     set holographicBounds(value: Nullable<IHolographicBounds>);
     getLights(): Light[];
-    get mapScale(): number;
-    set mapScale(value: number);
-    get elevationRange(): Range;
-    get elevationOffset(): number;
-    set elevationOffset(value: number);
+    get mapScale(): ICartesian3;
+    set mapScale(value: ICartesian3);
     protected _declareStructs(name: string, ...properties: Array<string>): Array<string>;
     isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
     demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
@@ -106,5 +105,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture>;
     protected _onEffectCompiled(effect: Effect): void;
     protected _onEffectError(effect: Effect, errors: string): void;
+    protected _buildElevationRange(): Range;
+    protected _updateElevationRange(elevationTile: ITile<IDemInfos>): void;
 }
 export {};

@@ -74,7 +74,10 @@ export abstract class AbstractTileMetrics extends TileSystemBounds implements IT
     }
 
     public mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number {
-        return 1 / (this.groundResolution(latitude, levelOfDetail) * pixelPerUnit);
+        if (pixelPerUnit === 0) return Infinity;
+        const d = this.groundResolution(latitude, levelOfDetail);
+        if (d === 0) return Infinity;
+        return 1 / (d * pixelPerUnit);
     }
 
     public abstract groundResolution(latitude: number, levelOfDetail: number): number;

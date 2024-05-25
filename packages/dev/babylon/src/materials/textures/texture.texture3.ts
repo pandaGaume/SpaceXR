@@ -129,6 +129,7 @@ export class Texture3 extends BaseTexture implements ITexture3 {
                 }
             }
         }
+        //console.log(`reserved layer ${a?.depth} used: ${this.count} / ${this.depth}`);
         return a;
     }
 
@@ -158,6 +159,7 @@ export class Texture3 extends BaseTexture implements ITexture3 {
             this._count--;
             layer.release(); // release the layer internally
         }
+        //console.log(`released layer ${depth} used: ${this.count} / ${this.depth}`);
     }
 
     protected _buildLayer(z: number): ITexture3Layer {

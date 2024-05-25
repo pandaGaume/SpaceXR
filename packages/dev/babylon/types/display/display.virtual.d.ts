@@ -14,6 +14,7 @@ export declare class VirtualDisplay extends Mesh {
     _halfDimension: ISize3;
     _resolution: ISize3;
     _ppu: Vector3;
+    _ratio: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
     _inverseWorldMatrix?: Matrix;
     constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene);
@@ -24,6 +25,7 @@ export declare class VirtualDisplay extends Mesh {
     get dimension(): ISize3;
     get halfDimension(): ISize3;
     get pixelPerUnit(): ICartesian3;
+    get aspectRatio(): ICartesian3;
     getInverseWorldMatrix(): Matrix;
     getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2;
     getXYZWorldVectors(): Array<Vector3>;

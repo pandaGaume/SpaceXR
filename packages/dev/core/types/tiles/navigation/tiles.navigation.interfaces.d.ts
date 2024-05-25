@@ -5,6 +5,7 @@ import { ICloneable, IValidable } from "../../types";
 export interface IHasNavigationState {
     navigation: ITileNavigationState;
 }
+export declare function hasNavigationState(obj: unknown): obj is IHasNavigationState;
 export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     stateChangedObservable: Observable<ITileNavigationState>;

@@ -144,11 +144,11 @@ export class TileView implements ITileView {
             }
 
             if (dispatchEvent) {
-                if (added.length && this._addedObservable?.hasObservers()) {
-                    this._addedObservable.notifyObservers(added, -1, this, this);
-                }
                 if (deleted.length && this._removedObservable?.hasObservers()) {
                     this._removedObservable.notifyObservers(deleted, -1, this, this);
+                }
+                if (added.length && this._addedObservable?.hasObservers()) {
+                    this._addedObservable.notifyObservers(added, -1, this, this);
                 }
             }
         }

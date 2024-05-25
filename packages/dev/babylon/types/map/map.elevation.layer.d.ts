@@ -4,9 +4,11 @@ import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
 import { ITile, ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileNavigationState, ITileProvider, ImageLayer, Tile, TileContentType } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
-import { PropertyChangedEventArgs, EventState } from "core/events";
+import { PropertyChangedEventArgs, EventState, Observer } from "core/events";
 import { Bearing } from "core/geography";
 import { IMap3dImageTarget } from "./map.elevation";
+import { Map3dScaleController } from "./map.scale.controller";
+import { HolographicDisplay } from "../display";
 export interface IElevationTile extends ITile<IDemInfos> {
     surface: Nullable<AbstractMesh>;
 }
@@ -32,8 +34,12 @@ export declare class ElevationLayer extends DemLayer implements IMap3dImageTarge
     _root: TransformNode;
     _tilesRoot: TransformNode;
     _cartesianCenter: Nullable<ICartesian2>;
+    _scaleController: Nullable<Map3dScaleController>;
+    _scaleObserver: Nullable<Observer<ICartesian3>>;
     constructor(name: string, source: ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationTileOptions, enabled?: boolean);
     get root(): TransformNode;
+    bindDisplay(display?: HolographicDisplay): void;
+    protected _onScaleChanged(scale: ICartesian3): void;
     get mesh(): Mesh;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
     imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;

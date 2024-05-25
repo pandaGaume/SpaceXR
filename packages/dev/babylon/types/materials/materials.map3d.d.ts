@@ -1,7 +1,7 @@
 import { AbstractMesh, Color4, Effect, Light, Matrix, Mesh, Nullable, Observer, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
 import { ITile, ImageLayer } from "core/tiles";
 import { Range } from "core/math";
-import { ClipIndex, ClipPlaneDefinition, IClipableContent } from "../display/display.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
 import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
@@ -19,7 +19,7 @@ declare class TileBag {
     AdjacentIds: Array<number>;
     constructor(tile: ElevationTile, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
 }
-export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IClipableContent {
+export declare class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds {
     static DefaultTerrainColor: Color4;
     static DemInfosAttName: string;
     static DemIdsAttName: string;
@@ -61,15 +61,14 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     private _elevationOffset;
     private _elevationRange;
     private _mapScale;
-    private _clipPlanes;
+    private _holoBounds;
     protected _lightFilter: Nullable<(light: Light) => boolean>;
     protected _lightAddedObserver: Nullable<Observer<Light>>;
     protected _lightRemovedObserver: Nullable<Observer<Light>>;
     constructor(name: string, shaderName: string, scene?: Scene);
+    get holographicBounds(): Nullable<IHolographicBounds>;
+    set holographicBounds(value: Nullable<IHolographicBounds>);
     getLights(): Light[];
-    addClipPlane(...clipPlanes: ClipPlaneDefinition[]): Map3dMaterial;
-    clearClipPlanes(): Map3dMaterial;
-    removeClipPlane(...indices: ClipIndex[]): Map3dMaterial;
     get mapScale(): number;
     set mapScale(value: number);
     get elevationRange(): Range;
@@ -94,7 +93,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dElevati
     protected _bindElevations(effect: Effect): void;
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void;
     protected _bindClipPlanes(effect: Effect): void;
-    protected _bindClipPlane(effect: Effect, name: string, index: number): void;
+    protected _bindClipPlane(effect: Effect, planes: Array<ClipPlaneDefinition>, name: string, index: ClipIndex): void;
     protected _bindSamplers(effect: Effect): void;
     protected _acceptLight(light: Light): boolean;
     protected _lightAdded(light: Light): void;

@@ -10,7 +10,8 @@ export declare class Size2 implements ISize2 {
 export declare class Size3 extends Size2 implements ISize3 {
     thickness: number;
     static Zero(): Size3;
-    constructor(width: number, height: number, thickness: number);
+    static FromSize(size: ISize2 | ISize3): Size3;
+    constructor(width: number, height: number, thickness?: number);
     get hasThickness(): boolean;
     clone(): ISize3;
     equals(other: ISize3): boolean;

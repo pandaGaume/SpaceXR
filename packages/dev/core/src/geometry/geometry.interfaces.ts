@@ -49,6 +49,10 @@ export function IsSize(b: unknown): b is ISize3 | ISize2 {
     return (<ISize3>b).height !== undefined && (<ISize3>b).width !== undefined;
 }
 
+export function IsSize3(size: ISize2 | ISize3): size is ISize3 {
+    return IsSize(size) && (size as ISize3).thickness !== undefined;
+}
+
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
     ymax: number;
     xmin: number;

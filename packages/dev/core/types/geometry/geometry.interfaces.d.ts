@@ -34,6 +34,7 @@ export interface ISize3 {
     thickness: number;
 }
 export declare function IsSize(b: unknown): b is ISize3 | ISize2;
+export declare function IsSize3(size: ISize2 | ISize3): size is ISize3;
 export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
     ymax: number;
     xmin: number;

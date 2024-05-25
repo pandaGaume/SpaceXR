@@ -1,8 +1,7 @@
-import { Matrix, Mesh, Nullable, Observable, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
-import { ICartesian3, ISize2 } from "core/geometry";
+import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
-import { ClipIndex, ClipPlaneDefinition, IClipableContent } from "./display.clipPlane";
-export declare class VirtualDisplay extends Mesh implements IClipableContent {
+export declare class VirtualDisplay extends Mesh {
     static SD: ISize2;
     static QHD: ISize2;
     static HD: ISize2;
@@ -10,33 +9,23 @@ export declare class VirtualDisplay extends Mesh implements IClipableContent {
     static FullHD: ISize2;
     static UltraHD: ISize2;
     static UltraHD_2: ISize2;
-    static BuildCardinalClipPlanes(display: VirtualDisplay): Array<ClipPlaneDefinition>;
-    private _clipPlanesAddedObservable?;
-    private _clipPlanesRemovedObservable?;
-    private _clipPlanes;
     _worldTransform: TransformNode;
-    _dimension: ISize2;
-    _halfDimension: ISize2;
-    _resolution: ISize2;
+    _dimension: ISize3;
+    _halfDimension: ISize3;
+    _resolution: ISize3;
     _ppu: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
     _inverseWorldMatrix?: Matrix;
-    constructor(name: string, dimension: ISize2, resolution: ISize2, buildClipPlanes?: boolean, scene?: Scene);
+    constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene);
     get pointerSource(): VirtualDisplayInputsSource;
     protected _buildVertexData(): VertexData;
     get context3D(): TransformNode;
-    get resolution(): ISize2;
-    get dimension(): ISize2;
+    get resolution(): ISize3;
+    get dimension(): ISize3;
+    get halfDimension(): ISize3;
     get pixelPerUnit(): ICartesian3;
     getInverseWorldMatrix(): Matrix;
     getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2;
     getXYZWorldVectors(): Array<Vector3>;
     dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void;
-    get clipPlanesAddedObservable(): Observable<Array<ClipPlaneDefinition>>;
-    get clipPlanesRemovedObservable(): Observable<Array<ClipPlaneDefinition>>;
-    get clipPlanes(): Nullable<Array<ClipPlaneDefinition>>;
-    get clipPlanesWorld(): Nullable<Array<ClipPlaneDefinition>>;
-    addClipPlane(...clipPlanes: ClipPlaneDefinition[]): IClipableContent;
-    removeClipPlane(...indices: ClipIndex[]): IClipableContent;
-    clearClipPlanes(): IClipableContent;
 }

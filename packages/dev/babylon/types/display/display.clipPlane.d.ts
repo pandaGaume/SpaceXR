@@ -1,4 +1,4 @@
-import { Vector3 } from "@babylonjs/core";
+import { Nullable, Vector3 } from "@babylonjs/core";
 export declare enum ClipIndex {
     North = 0,
     South = 1,
@@ -13,9 +13,11 @@ export declare class ClipPlaneDefinition {
     normal: Vector3;
     constructor(index: ClipIndex, point: Vector3, normal: Vector3);
 }
-export declare function isClipableContent(content: any): content is IClipableContent;
-export interface IClipableContent {
-    addClipPlane(...clipPlanes: ClipPlaneDefinition[]): IClipableContent;
-    removeClipPlane(...indices: ClipIndex[]): IClipableContent;
-    clearClipPlanes(): IClipableContent;
+export interface IHolographicBounds {
+    clipPlanes: Nullable<Array<ClipPlaneDefinition>>;
+    clipPlanesWorld: Nullable<Array<ClipPlaneDefinition>>;
+}
+export declare function hasHolographicBounds(obj: unknown): obj is IHasHolographicBounds;
+export interface IHasHolographicBounds {
+    holographicBounds: Nullable<IHolographicBounds>;
 }

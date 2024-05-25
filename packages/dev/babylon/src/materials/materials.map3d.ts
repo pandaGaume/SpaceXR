@@ -25,7 +25,7 @@ import {
 
 import { ITile, ImageLayer, TileAddress } from "core/tiles";
 import { Range } from "core/math";
-import { ClipIndex, ClipPlaneDefinition, IClipableContent } from "../display/display.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
 import { ElevationLayer, ElevationTile, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Map3dTexture } from "./textures";
@@ -73,7 +73,7 @@ class TileBag {
  * and clip planes.
  * Support ONLY ONE dem layer and ONE layer texture.
  */
-export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IClipableContent {
+export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds {
     public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 255); // cool steel blue
 
     public static DemInfosAttName: string = "demInfos";
@@ -136,8 +136,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     private _elevationRange: Nullable<Range> = null;
     private _mapScale: number = 1.0;
 
-    // the clip planes used by the material, if any
-    private _clipPlanes: Nullable<ClipPlaneDefinition>[] = [null, null, null, null, null, null];
+    // the optional display where the material is used
+    private _holoBounds: Nullable<IHolographicBounds> = null;
 
     // the light filter used by the material, if any
     protected _lightFilter: Nullable<(light: Light) => boolean> = null;
@@ -152,30 +152,18 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         this._setupLights();
     }
 
+    public get holographicBounds(): Nullable<IHolographicBounds> {
+        return this._holoBounds;
+    }
+
+    public set holographicBounds(value: Nullable<IHolographicBounds>) {
+        if (this._holoBounds === value) return;
+        this._holoBounds = value;
+        this.markAsDirty(Material.AttributesDirtyFlag);
+    }
+
     public getLights(): Light[] {
         return this._lightFilter ? this.getScene().lights.filter(this._lightFilter) : this.getScene().lights;
-    }
-
-    public addClipPlane(...clipPlanes: ClipPlaneDefinition[]): Map3dMaterial {
-        for (let cp of clipPlanes) {
-            this._clipPlanes[cp.index] = cp;
-        }
-        this.markAsDirty(Material.MiscDirtyFlag);
-        return this;
-    }
-
-    public clearClipPlanes(): Map3dMaterial {
-        this._clipPlanes = [];
-        this.markAsDirty(Material.MiscDirtyFlag);
-        return this;
-    }
-
-    public removeClipPlane(...indices: ClipIndex[]): Map3dMaterial {
-        for (let i of indices) {
-            this._clipPlanes[i] = null;
-        }
-        this.markAsDirty(Material.MiscDirtyFlag);
-        return this;
     }
 
     public get mapScale(): number {
@@ -280,7 +268,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             uniforms.push(Map3dMaterial.ShininessUniformName);
         }
 
-        if (this._clipPlanes && this._clipPlanes.length > 0) {
+        if (this._holoBounds) {
             defines.CLIP_PLANES = true;
             const properties = ["point", "normal"];
             uniforms.push(
@@ -436,6 +424,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
         const bag = this._bags.get(eventData.address.quadkey);
         if (bag) {
             if (eventData.content?.elevations) {
+                // we update the elevation range
+                if (this._elevationRange === null) {
+                    this._elevationRange = new Range(eventData.content.min.z, eventData.content.max.z);
+                } else {
+                    this._elevationRange.union(eventData.content.min.z, eventData.content.max.z);
+                }
                 bag.elevationArea?.update(eventData.content.elevations);
             }
             if (eventData.content?.normals) {
@@ -443,7 +437,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
             }
         }
         this._layerSampler?.demUpdated(src, eventData);
-
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
@@ -576,16 +569,19 @@ export class Map3dMaterial extends PushMaterial implements IMap3dElevationTarget
     }
 
     protected _bindClipPlanes(effect: Effect): void {
-        if (this._clipPlanes && this._clipPlanes.length > 0) {
-            this._bindClipPlane(effect, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);
-            this._bindClipPlane(effect, Map3dMaterial.SouthClipPlaneUniformName, ClipIndex.South);
-            this._bindClipPlane(effect, Map3dMaterial.EastClipPlaneUniformName, ClipIndex.East);
-            this._bindClipPlane(effect, Map3dMaterial.WestClipPlaneUniformName, ClipIndex.West);
+        if (this._holoBounds) {
+            const clips = this._holoBounds.clipPlanesWorld;
+            if (clips) {
+                this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);
+                this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, ClipIndex.South);
+                this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, ClipIndex.East);
+                this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, ClipIndex.West);
+            }
         }
     }
 
-    protected _bindClipPlane(effect: Effect, name: string, index: number): void {
-        let clipPlane = this._clipPlanes[index];
+    protected _bindClipPlane(effect: Effect, planes: Array<ClipPlaneDefinition>, name: string, index: ClipIndex): void {
+        let clipPlane = planes[index];
         if (clipPlane) {
             effect.setVector3(`${name}.point`, clipPlane.point);
             effect.setVector3(`${name}.normal`, clipPlane.normal);

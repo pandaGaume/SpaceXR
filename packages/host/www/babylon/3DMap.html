@@ -87,7 +87,7 @@
 
                 // set the virtual display
                 const buildClipPlane = true;
-                const display = new SPACEXR.VirtualDisplay("holographicDisplay", size, resolution, buildClipPlane, scene);
+                const display = new SPACEXR.HolographicDisplay("holographicDisplay", size, resolution, scene);
                 display.material = createGlassMaterial(scene);
                 display.rotation.x = -Math.PI / 2;
                 display.freezeWorldMatrix();

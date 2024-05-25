@@ -17,7 +17,8 @@ import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
-import { ClipPlaneDefinition, VirtualDisplay } from "../display";
+import { hasHolographicBounds, HolographicDisplay } from "../display";
+
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
@@ -63,7 +64,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
     private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
 
-    private _targetDisplay: Nullable<VirtualDisplay>;
+    private _targetDisplay: Nullable<HolographicDisplay>;
     private _controller: Nullable<PointerController<IPointerSource>>;
     private _ownController = false;
 
@@ -83,19 +84,18 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         this._targetDisplay = null;
     }
 
-    public withDisplay(display: VirtualDisplay): Map3d {
+    public withDisplay(display: HolographicDisplay): Map3d {
         this._targetDisplay = display;
         for (var l of this.getElevationLayers()) {
-            this._prepareClipPlanes(l, this._targetDisplay.clipPlanesWorld);
+            if (l.enabled == false) {
+                continue;
+            }
+            var m = l.mesh.material;
+            if (m && hasHolographicBounds(m)) {
+                m.holographicBounds = display;
+            }
         }
         return this.withPointerControl(this._targetDisplay.pointerSource);
-    }
-
-    protected _prepareClipPlanes(layer: ElevationLayer, clips: Nullable<ClipPlaneDefinition[]>): void {
-        if (clips && clips.length > 0) {
-            layer.clearClipPlanes();
-            layer.addClipPlane(...clips);
-        }
     }
 
     public withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d {
@@ -249,7 +249,10 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         layer.root.parent = this;
         layer.linkTo(this);
         if (this._targetDisplay) {
-            this._prepareClipPlanes(layer, this._targetDisplay.clipPlanesWorld);
+            var m = layer.mesh.material;
+            if (m && hasHolographicBounds(m)) {
+                m.holographicBounds = this._targetDisplay;
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { ISize2, ISize3 } from "./geometry.interfaces";
+import { ISize2, ISize3, IsSize3 } from "./geometry.interfaces";
 
 export class Size2 implements ISize2 {
     public static Zero() {
@@ -15,12 +15,20 @@ export class Size2 implements ISize2 {
         return this.height === other.height && this.width === other.width;
     }
 }
+
 export class Size3 extends Size2 implements ISize3 {
     public static Zero() {
         return new Size3(0, 0, 0);
     }
 
-    public constructor(width: number, height: number, public thickness: number) {
+    public static FromSize(size: ISize2 | ISize3): Size3 {
+        if (IsSize3(size)) {
+            return new Size3(size.width, size.height, size.thickness);
+        }
+        return new Size3(size.width, size.height);
+    }
+
+    public constructor(width: number, height: number, public thickness: number = 0) {
         super(width, height);
     }
 

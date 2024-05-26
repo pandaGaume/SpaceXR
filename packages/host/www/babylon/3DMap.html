@@ -115,11 +115,9 @@
                 defaultTileMaterial.wireframe = true;
 
                 // build layer options
-                const layerOptions = {
-                    zindex: 0,
-                    zoomOffset: 0,
+                const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
-                    exageration: 1.5,
+                    exageration: 1,
                     gridOptions: undefined,
                     insets: new BABYLON.Vector3(0, 0, 10),
                     //material: defaultTileMaterial,
@@ -127,10 +125,14 @@
 
                 // build layer and add it to the map
                 let client = SPACEXR.MapZen.DemClient();
-                const l = new SPACEXR.ElevationLayer(`${client.name}`, client, layerOptions).addTo(map);
+                const l = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);
 
+                const imageLayerOptions = {
+                    alpha: 1.0,
+                    background: "rgb(.5,.5,.5)",
+                };
                 client = SPACEXR.Google.TerrainClient2d();
-                const t = new SPACEXR.ImageLayer(`${client.name}`, client); //.addTo(map);
+                const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
                 const showAxes = false;
                 if (showAxes) {

@@ -175,7 +175,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
             if (tile && tile.content instanceof HTMLImageElement) {
-                this.imageAdded(eventState.target, <ITile<HTMLImageElement>>tile);
+                this.imageAdded(eventState.currentTarget.source, <ITile<HTMLImageElement>>tile);
             }
         }
     }
@@ -183,7 +183,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
             if (tile && tile.content instanceof HTMLImageElement) {
-                this.imageRemoved(eventState.target, <ITile<HTMLImageElement>>tile);
+                this.imageRemoved(eventState.currentTarget.source, <ITile<HTMLImageElement>>tile);
             }
         }
     }
@@ -191,7 +191,7 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
     public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
         for (const tile of eventData) {
             if (tile && tile.content instanceof HTMLImageElement) {
-                this.imageUpdated(eventState.target, <ITile<HTMLImageElement>>tile);
+                this.imageUpdated(eventState.currentTarget.source, <ITile<HTMLImageElement>>tile);
             }
         }
     }

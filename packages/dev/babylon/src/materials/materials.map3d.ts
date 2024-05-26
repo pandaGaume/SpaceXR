@@ -478,20 +478,23 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        this._textureSampler?.imageAdded(src, eventData);
-        this.markAsDirty(Material.TextureDirtyFlag);
+        // this._textureSampler?.imageAdded(src, eventData);
+        //this.markAsDirty(Material.TextureDirtyFlag);
+        console.log("Image added", src, eventData);
     }
 
     public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        this._textureSampler?.imageRemoved(src, eventData);
-        this.markAsDirty(Material.TextureDirtyFlag);
+        //this._textureSampler?.imageRemoved(src, eventData);
+        //this.markAsDirty(Material.TextureDirtyFlag);
+        console.log("Image Removed", src, eventData);
     }
 
     public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        this._textureSampler?.imageUpdated(src, eventData);
-        this.markAsDirty(Material.TextureDirtyFlag);
+        //this._textureSampler?.imageUpdated(src, eventData);
+        //this.markAsDirty(Material.TextureDirtyFlag);
+        console.log("Image Updated", src, eventData);
     }
 
     public dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void {

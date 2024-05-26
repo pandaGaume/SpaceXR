@@ -67,23 +67,26 @@ class AreaInfos {
     }
 }
 
-// internal class used to hold the tile pool texture areas
-class TileBag {
-    public constructor(
-        public tile: ElevationTile,
-        public elevationArea: Nullable<AreaInfos> = null,
-        public normalArea: Nullable<AreaInfos> = null,
-        public textureArea: Nullable<AreaInfos> = null
-    ) {}
-}
-
-export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {}
-
 export enum Map3dLayerKind {
     Elevation = 0,
     Normal = 1,
     Texture = 2,
 }
+
+// internal class used to hold the tile pool texture areas
+class TileBag {
+    public constructor(public tile: ElevationTile, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
+
+    getArea(kind: Map3dLayerKind): Nullable<AreaInfos> {
+        return this.areas[kind];
+    }
+
+    setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void {
+        this.areas[kind] = value;
+    }
+}
+
+export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {}
 
 /**
  * Base class for Map3D related materials. This class is intended to be used as a base class for
@@ -357,9 +360,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // prepare the elevation sampler.
         const elevationArea = this._elevationSampler?.reserve();
         if (elevationArea) {
-            bag.elevationArea = new AreaInfos(elevationArea);
+            bag.setArea(Map3dLayerKind.Elevation, new AreaInfos(elevationArea));
             // prepare the adjacent ids.
-            this._updateAdjacentIds(bag);
+            this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
             if (eventData.content?.elevations) {
                 elevationArea.update(eventData.content.elevations);
             }
@@ -368,7 +371,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // prepare the normal sampler
         const normalArea = this._normalSampler?.reserve();
         if (normalArea) {
-            bag.normalArea = new AreaInfos(normalArea);
+            bag.setArea(Map3dLayerKind.Normal, new AreaInfos(normalArea));
             if (eventData.content?.normals) {
                 normalArea?.update(eventData.content.normals);
             }
@@ -382,43 +385,44 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _updateAdjacentIds(bag: TileBag): void {
-        const area = bag.elevationArea;
+    protected _updateAdjacentIds(bag: TileBag, kind: Map3dLayerKind): void {
+        const area = bag.getArea(kind);
         if (!area) return;
         const depth = area.layer.depth;
         const quadkey = bag.tile.address.quadkey;
         const keys = TileAddress.ToNeigborsKey(quadkey);
 
-        area.adjacentIds[1] = this._getAdjacentIds(keys[5]);
-        area.adjacentIds[2] = this._getAdjacentIds(keys[7]);
-        area.adjacentIds[3] = this._getAdjacentIds(keys[8]);
+        area.adjacentIds[1] = this._getAdjacentIds(keys[5], kind);
+        area.adjacentIds[2] = this._getAdjacentIds(keys[7], kind);
+        area.adjacentIds[3] = this._getAdjacentIds(keys[8], kind);
 
-        this._setAdjacentIdsFromBag(bag, 0, depth);
+        this._setAdjacentIdsFromBag(bag, 0, kind, depth);
 
-        this._setAdjacentIds(keys[3], 1, depth);
-        this._setAdjacentIds(keys[1], 2, depth);
-        this._setAdjacentIds(keys[0], 3, depth);
+        this._setAdjacentIds(keys[3], 1, kind, depth);
+        this._setAdjacentIds(keys[1], 2, kind, depth);
+        this._setAdjacentIds(keys[0], 3, kind, depth);
     }
 
-    protected _getAdjacentIds(quadkey: Nullable<string>, index: number = 0): number {
+    protected _getAdjacentIds(quadkey: Nullable<string>, kind: Map3dLayerKind, index: number = 0): number {
         if (!quadkey) return -1;
         const bag = this._bags.get(quadkey);
-        return bag?.elevationArea?.adjacentIds[index] ?? -1;
+        return bag?.getArea(kind)?.adjacentIds[index] ?? -1;
     }
 
-    protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id: number = -1): void {
+    protected _setAdjacentIds(quadkey: Nullable<string>, index: number, kind: Map3dLayerKind, id: number = -1): void {
         if (!quadkey) return;
         const bag = this._bags.get(quadkey);
         if (!bag) return;
-        this._setAdjacentIdsFromBag(bag, index, id);
+        this._setAdjacentIdsFromBag(bag, index, kind, id);
     }
 
-    protected _setAdjacentIdsFromBag(bag: TileBag, index: number, id: number = -1): void {
-        if (bag.elevationArea) {
-            bag.elevationArea.adjacentIds[index] = id;
+    protected _setAdjacentIdsFromBag(bag: TileBag, index: number, kind: Map3dLayerKind, id: number = -1): void {
+        const area = bag.getArea(kind);
+        if (area) {
+            area.adjacentIds[index] = id;
             // update the attribute
             if (bag.tile.surface) {
-                bag.tile.surface.instancedBuffers.demIds = Vector4.FromArray(bag.elevationArea.adjacentIds);
+                bag.tile.surface.instancedBuffers.demIds = Vector4.FromArray(area.adjacentIds);
             }
         }
     }
@@ -434,9 +438,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         if (bag) {
             // Create a zero-filled buffer
             const zero = this._createZeroBuffer(eventData.content?.elevations?.byteLength ?? 0);
-            bag.elevationArea?.layer.update(zero);
-            bag.elevationArea?.layer.release();
-            bag.normalArea?.layer.release();
+            bag.getArea(Map3dLayerKind.Elevation)?.layer.update(zero);
+            bag.getArea(Map3dLayerKind.Elevation)?.layer.release();
+            bag.getArea(Map3dLayerKind.Normal)?.layer.release();
             this._bags.delete(qk);
             this._elevationRange = null;
         }
@@ -451,10 +455,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             if (eventData.content?.elevations) {
                 // we update the elevation range
                 this._updateElevationRange(eventData);
-                bag.elevationArea?.layer.update(eventData.content.elevations);
+                bag.getArea(Map3dLayerKind.Elevation)?.layer.update(eventData.content.elevations);
             }
             if (eventData.content?.normals) {
-                bag.normalArea?.layer.update(eventData.content.normals);
+                bag.getArea(Map3dLayerKind.Normal)?.layer.update(eventData.content.normals);
             }
         }
         this._textureSampler?.demUpdated(src, eventData);

@@ -18,19 +18,19 @@ declare class AreaInfos {
     adjacentIds: Array<number>;
     constructor(layer: ITexture3Layer);
 }
-declare class TileBag {
-    tile: ElevationTile;
-    elevationArea: Nullable<AreaInfos>;
-    normalArea: Nullable<AreaInfos>;
-    textureArea: Nullable<AreaInfos>;
-    constructor(tile: ElevationTile, elevationArea?: Nullable<AreaInfos>, normalArea?: Nullable<AreaInfos>, textureArea?: Nullable<AreaInfos>);
-}
-export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {
-}
 export declare enum Map3dLayerKind {
     Elevation = 0,
     Normal = 1,
     Texture = 2
+}
+declare class TileBag {
+    tile: ElevationTile;
+    areas: Array<Nullable<AreaInfos>>;
+    constructor(tile: ElevationTile, areas?: Array<Nullable<AreaInfos>>);
+    getArea(kind: Map3dLayerKind): Nullable<AreaInfos>;
+    setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void;
+}
+export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {
 }
 export declare class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     static DefaultTerrainColor: Color4;
@@ -84,10 +84,10 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _prepareArrayOfUniforms(name: string, count: number, ...properties: string[]): string[];
     protected _isReady(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
     demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
-    protected _updateAdjacentIds(bag: TileBag): void;
-    protected _getAdjacentIds(quadkey: Nullable<string>, index?: number): number;
-    protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id?: number): void;
-    protected _setAdjacentIdsFromBag(bag: TileBag, index: number, id?: number): void;
+    protected _updateAdjacentIds(bag: TileBag, kind: Map3dLayerKind): void;
+    protected _getAdjacentIds(quadkey: Nullable<string>, kind: Map3dLayerKind, index?: number): number;
+    protected _setAdjacentIds(quadkey: Nullable<string>, index: number, kind: Map3dLayerKind, id?: number): void;
+    protected _setAdjacentIdsFromBag(bag: TileBag, index: number, kind: Map3dLayerKind, id?: number): void;
     protected _createZeroBuffer(size: number): Uint8Array;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;

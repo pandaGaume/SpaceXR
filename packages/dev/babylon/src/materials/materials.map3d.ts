@@ -58,17 +58,32 @@ export enum Map3dShadingMode {
     BLINN_PHONG,
 }
 
+class AreaInfos {
+    layer: ITexture3Layer;
+    adjacentIds: Array<number> = [-1, -1, -1, -1];
+
+    public constructor(layer: ITexture3Layer) {
+        this.layer = layer;
+    }
+}
+
 // internal class used to hold the tile pool texture areas
 class TileBag {
     public constructor(
         public tile: ElevationTile,
-        public elevationArea: Nullable<ITexture3Layer> = null,
-        public normalArea: Nullable<ITexture3Layer> = null,
-        public AdjacentIds: Array<number> = [-1, -1, -1, -1]
+        public elevationArea: Nullable<AreaInfos> = null,
+        public normalArea: Nullable<AreaInfos> = null,
+        public textureArea: Nullable<AreaInfos> = null
     ) {}
 }
 
 export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {}
+
+export enum Map3dLayerKind {
+    Elevation = 0,
+    Normal = 1,
+    Texture = 2,
+}
 
 /**
  * Base class for Map3D related materials. This class is intended to be used as a base class for
@@ -110,11 +125,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static EastClipPlaneUniformName: string = "uEastClip";
     public static WestClipPlaneUniformName: string = "uWestClip";
 
-    public static ElevationKind: string = "altitudes";
-    public static NormalKind: string = "normals";
-    public static LayerKind: string = "texture";
-    public static SpecularMapKind: string = "specularMap";
-
     // the properties used by the material
     protected _shaderName: Nullable<string> = null;
 
@@ -134,7 +144,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     // the samplers for the elevation, normal and layer textures.
     private _elevationSampler: Nullable<Texture3> = null;
     private _normalSampler: Nullable<Texture3> = null;
-    private _layerSampler: Nullable<Map3dTexture> = null;
+    private _textureSampler: Nullable<Map3dTexture> = null;
 
     // the elevation related properties.
     private _elevationRange: Nullable<Range> = null;
@@ -247,7 +257,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             Map3dMaterial.NumSpotLightsUniformName,
         ];
 
-        const samplers = [Map3dMaterial.ElevationSamplerUniformName, Map3dMaterial.NormalSamplerUniformName];
+        const samplers = [Map3dMaterial.ElevationSamplerUniformName, Map3dMaterial.NormalSamplerUniformName, Map3dMaterial.TextureSamplerUniformName];
         const uniformBuffers = new Array<string>();
         const fallbacks = new EffectFallbacks();
         const engine = scene.getEngine();
@@ -332,7 +342,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     // called when dem tile added
     public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
-        this._ensureLayerReady(src, eventData);
+        this._ensureElevationLayerReady(src, eventData);
 
         const elevationTile = eventData as ElevationTile;
 
@@ -347,7 +357,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // prepare the elevation sampler.
         const elevationArea = this._elevationSampler?.reserve();
         if (elevationArea) {
-            bag.elevationArea = elevationArea;
+            bag.elevationArea = new AreaInfos(elevationArea);
             // prepare the adjacent ids.
             this._updateAdjacentIds(bag);
             if (eventData.content?.elevations) {
@@ -358,7 +368,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // prepare the normal sampler
         const normalArea = this._normalSampler?.reserve();
         if (normalArea) {
-            bag.normalArea = normalArea;
+            bag.normalArea = new AreaInfos(normalArea);
             if (eventData.content?.normals) {
                 normalArea?.update(eventData.content.normals);
             }
@@ -367,7 +377,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // we call the layer sampler to create the layer texture support.
         // remember that the layer texture is a special texture that is used to draw dynamically
         // the image layers on a kind of dynamic texture- this allow to add layer with an LOD offset.
-        this._layerSampler?.demAdded(src, eventData);
+        this._textureSampler?.demAdded(src, eventData);
 
         this.markAsDirty(Material.TextureDirtyFlag);
     }
@@ -375,13 +385,13 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _updateAdjacentIds(bag: TileBag): void {
         const area = bag.elevationArea;
         if (!area) return;
-        const depth = area.depth;
+        const depth = area.layer.depth;
         const quadkey = bag.tile.address.quadkey;
         const keys = TileAddress.ToNeigborsKey(quadkey);
 
-        bag.AdjacentIds[1] = this._getAdjacentIds(keys[5]);
-        bag.AdjacentIds[2] = this._getAdjacentIds(keys[7]);
-        bag.AdjacentIds[3] = this._getAdjacentIds(keys[8]);
+        area.adjacentIds[1] = this._getAdjacentIds(keys[5]);
+        area.adjacentIds[2] = this._getAdjacentIds(keys[7]);
+        area.adjacentIds[3] = this._getAdjacentIds(keys[8]);
 
         this._setAdjacentIdsFromBag(bag, 0, depth);
 
@@ -393,7 +403,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _getAdjacentIds(quadkey: Nullable<string>, index: number = 0): number {
         if (!quadkey) return -1;
         const bag = this._bags.get(quadkey);
-        return bag?.AdjacentIds[index] ?? -1;
+        return bag?.elevationArea?.adjacentIds[index] ?? -1;
     }
 
     protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id: number = -1): void {
@@ -404,23 +414,33 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _setAdjacentIdsFromBag(bag: TileBag, index: number, id: number = -1): void {
-        bag.AdjacentIds[index] = id;
-        // update the attribute
-        if (bag.tile.surface) {
-            bag.tile.surface.instancedBuffers.demIds = Vector4.FromArray(bag.AdjacentIds);
+        if (bag.elevationArea) {
+            bag.elevationArea.adjacentIds[index] = id;
+            // update the attribute
+            if (bag.tile.surface) {
+                bag.tile.surface.instancedBuffers.demIds = Vector4.FromArray(bag.elevationArea.adjacentIds);
+            }
         }
+    }
+
+    protected _createZeroBuffer(size: number): Uint8Array {
+        // Create a zero-filled buffer
+        return new Uint8Array(size); // Initializes to 0 by default
     }
 
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         const qk = eventData.address.quadkey;
         const bag = this._bags.get(qk);
         if (bag) {
-            bag.elevationArea?.release();
-            bag.normalArea?.release();
+            // Create a zero-filled buffer
+            const zero = this._createZeroBuffer(eventData.content?.elevations?.byteLength ?? 0);
+            bag.elevationArea?.layer.update(zero);
+            bag.elevationArea?.layer.release();
+            bag.normalArea?.layer.release();
             this._bags.delete(qk);
             this._elevationRange = null;
         }
-        this._layerSampler?.demRemoved(src, eventData);
+        this._textureSampler?.demRemoved(src, eventData);
 
         this.markAsDirty(Material.TextureDirtyFlag);
     }
@@ -431,31 +451,31 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             if (eventData.content?.elevations) {
                 // we update the elevation range
                 this._updateElevationRange(eventData);
-                bag.elevationArea?.update(eventData.content.elevations);
+                bag.elevationArea?.layer.update(eventData.content.elevations);
             }
             if (eventData.content?.normals) {
-                bag.normalArea?.update(eventData.content.normals);
+                bag.normalArea?.layer.update(eventData.content.normals);
             }
         }
-        this._layerSampler?.demUpdated(src, eventData);
+        this._textureSampler?.demUpdated(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        this._layerSampler?.imageAdded(src, eventData);
+        this._textureSampler?.imageAdded(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        this._layerSampler?.imageRemoved(src, eventData);
+        this._textureSampler?.imageRemoved(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
     public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        this._layerSampler?.imageUpdated(src, eventData);
+        this._textureSampler?.imageUpdated(src, eventData);
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
@@ -463,8 +483,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this._bags.clear();
         this._elevationSampler?.dispose();
         this._normalSampler?.dispose();
-        this._layerSampler?.dispose();
-        this._layerSampler?.dispose();
+        this._textureSampler?.dispose();
         this._lightAddedObserver?.remove();
         this._lightRemovedObserver?.remove();
 
@@ -519,7 +538,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                     .setFloat(`${Map3dMaterial.HemiLightUniformName}.intensity`, l.intensity);
                 continue;
             }
-            if (l instanceof PointLight) {
+            if (l instanceof PointLight && pointLightCount < this._maxPointLights) {
                 effect
                     .setVector3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].position`, l.position)
                     .setColor3(`${Map3dMaterial.PointLightsUniformName}[${pointLightCount}].color`, l.diffuse)
@@ -527,7 +546,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 pointLightCount++;
                 continue;
             }
-            if (l instanceof SpotLight) {
+            if (l instanceof SpotLight && spotLightCount < this._maxSpotLights) {
                 effect
                     .setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].position`, l.position)
                     .setVector3(`${Map3dMaterial.SpotLightsUniformName}[${spotLightCount}].direction`, l.direction)
@@ -623,38 +642,41 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         target.registerInstancedBuffer(Map3dMaterial.DemIdsAttName, 4);
     }
 
-    protected _ensureLayerReady(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    protected _ensureElevationLayerReady(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
         // ensure the samplers are ready (altitude and normal)
         // actually we ONLY support ONE dem layer. This is a limitation of the current implementation
         if (!this._elevationSampler) {
             this._registerInstanceBuffers(src.mesh);
-            this._buildElevationSamplers(src);
+            this._buildSamplers(src);
             this.markAsDirty(Material.TextureDirtyFlag);
         }
     }
 
-    protected _buildElevationSamplers(layer: ElevationLayer) {
-        // the challenge here is to create the elevation sampler with the right depth.
-        // which mean we need to know how many tiles we may have in the pool.
-        // the pool is created with the max number of tiles that can be displayed at once.
-        // another strategy is to increase decrease the pool size dynamically.
-        // this point is crucial for the performance.
+    protected _buildSamplers(layer: ElevationLayer) {
         const maxDepth = this._getElevationSamplerDepth(layer);
         const width = layer.metrics.tileSize;
         const height = layer.metrics.tileSize;
         const generateMipMap = false;
         const scene = this.getScene();
-        this._elevationSampler = <Texture3>this._buildSampler(Map3dMaterial.ElevationKind, width, height, maxDepth, generateMipMap, scene);
-        this._normalSampler = <Texture3>this._buildSampler(Map3dMaterial.NormalKind, width, height, maxDepth, generateMipMap, scene);
+        this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, maxDepth, generateMipMap, scene);
+        this._normalSampler = <Texture3>this._buildSampler(Map3dLayerKind.Normal, width, height, maxDepth, generateMipMap, scene);
+        this._textureSampler = <Map3dTexture>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
     }
 
     protected _getElevationSamplerDepth(layer: ElevationLayer): number {
         return 24; // for dev purpose we set a fixed number of tiles
     }
 
-    protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture> {
+    protected _buildSampler(
+        kind: Map3dLayerKind,
+        width: number,
+        height: number,
+        depth: number,
+        generateMipMap: boolean,
+        scene: Scene
+    ): Nullable<Texture3> | Nullable<Map3dTexture> {
         switch (kind) {
-            case Map3dMaterial.ElevationKind: {
+            case Map3dLayerKind.Elevation: {
                 const options = {
                     width: width,
                     height: height,
@@ -667,7 +689,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 };
                 return new Texture3(scene, options);
             }
-            case Map3dMaterial.NormalKind: {
+            case Map3dLayerKind.Normal: {
                 const options = {
                     width: width,
                     height: height,
@@ -680,7 +702,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 };
                 return new Texture3(scene, options);
             }
-            case Map3dMaterial.LayerKind: {
+            case Map3dLayerKind.Texture: {
                 const options = {
                     width: width,
                     height: height,

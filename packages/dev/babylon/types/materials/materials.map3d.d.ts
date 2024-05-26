@@ -13,14 +13,24 @@ export declare enum Map3dShadingMode {
     PHONG = 2,
     BLINN_PHONG = 3
 }
+declare class AreaInfos {
+    layer: ITexture3Layer;
+    adjacentIds: Array<number>;
+    constructor(layer: ITexture3Layer);
+}
 declare class TileBag {
     tile: ElevationTile;
-    elevationArea: Nullable<ITexture3Layer>;
-    normalArea: Nullable<ITexture3Layer>;
-    AdjacentIds: Array<number>;
-    constructor(tile: ElevationTile, elevationArea?: Nullable<ITexture3Layer>, normalArea?: Nullable<ITexture3Layer>, AdjacentIds?: Array<number>);
+    elevationArea: Nullable<AreaInfos>;
+    normalArea: Nullable<AreaInfos>;
+    textureArea: Nullable<AreaInfos>;
+    constructor(tile: ElevationTile, elevationArea?: Nullable<AreaInfos>, normalArea?: Nullable<AreaInfos>, textureArea?: Nullable<AreaInfos>);
 }
 export interface IMap3dMaterial extends IMap3dElevationTarget, IMap3dImageTarget, IHasHolographicBounds, IHasMapScale {
+}
+export declare enum Map3dLayerKind {
+    Elevation = 0,
+    Normal = 1,
+    Texture = 2
 }
 export declare class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     static DefaultTerrainColor: Color4;
@@ -47,10 +57,6 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     static SouthClipPlaneUniformName: string;
     static EastClipPlaneUniformName: string;
     static WestClipPlaneUniformName: string;
-    static ElevationKind: string;
-    static NormalKind: string;
-    static LayerKind: string;
-    static SpecularMapKind: string;
     protected _shaderName: Nullable<string>;
     protected _terrainColor: Nullable<Color4>;
     protected _shininess: number;
@@ -60,7 +66,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _bags: Map<string, TileBag>;
     private _elevationSampler;
     private _normalSampler;
-    private _layerSampler;
+    private _textureSampler;
     private _elevationRange;
     private _mapScale;
     private _holoBounds;
@@ -82,6 +88,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _getAdjacentIds(quadkey: Nullable<string>, index?: number): number;
     protected _setAdjacentIds(quadkey: Nullable<string>, index: number, id?: number): void;
     protected _setAdjacentIdsFromBag(bag: TileBag, index: number, id?: number): void;
+    protected _createZeroBuffer(size: number): Uint8Array;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
@@ -101,10 +108,10 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _lightRemoved(light: Light): void;
     protected _setupLights(): void;
     protected _registerInstanceBuffers(target: Mesh): void;
-    protected _ensureLayerReady(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
-    protected _buildElevationSamplers(layer: ElevationLayer): void;
+    protected _ensureElevationLayerReady(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    protected _buildSamplers(layer: ElevationLayer): void;
     protected _getElevationSamplerDepth(layer: ElevationLayer): number;
-    protected _buildSampler(kind: string, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture>;
+    protected _buildSampler(kind: Map3dLayerKind, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> | Nullable<Map3dTexture>;
     protected _onEffectCompiled(effect: Effect): void;
     protected _onEffectError(effect: Effect, errors: string): void;
     protected _buildElevationRange(): Range;

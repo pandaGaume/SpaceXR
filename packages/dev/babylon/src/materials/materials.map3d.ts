@@ -123,7 +123,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     // the shininess of the material if no texture defined
     protected _shininess: number = 0.0;
     // shading mode used by the material if no texture defined
-    protected _shadingMode: Map3dShadingMode = Map3dShadingMode.GOUREAUD;
+    protected _shadingMode: Map3dShadingMode = Map3dShadingMode.BLINN_PHONG;
     // the max number of lights used by the material
     protected _maxSpotLights: number = 3;
     protected _maxPointLights: number = 3;
@@ -181,12 +181,25 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    protected _declareStructs(name: string, ...properties: Array<string>): Array<string> {
+    public isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean {
+        return this._isReady(mesh, subMesh, useInstances);
+    }
+
+    protected _prepareUniforms(name: string, ...properties: string[]): string[] {
         return properties.map((p) => `${name}.${p}`);
     }
 
-    // Override the isReady method
-    public isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean {
+    protected _prepareArrayOfUniforms(name: string, count: number, ...properties: string[]): string[] {
+        const result = new Array<string>();
+        for (let i = 0; i < count; i++) {
+            for (let p of properties) {
+                result.push(`${name}[${i}].${p}`);
+            }
+        }
+        return result;
+    }
+
+    protected _isReady(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean {
         const drawWrapper = subMesh._drawWrapper;
 
         if (this.isFrozen) {
@@ -216,9 +229,19 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             Map3dMaterial.TerrainColorUniformName,
             Map3dMaterial.AmbientLightUniformName,
 
-            ...this._declareStructs(Map3dMaterial.HemiLightUniformName, "skyColor", "groundColor", "direction", "intensity"),
-            ...this._declareStructs(Map3dMaterial.PointLightsUniformName, "position", "color", "intensity"),
-            ...this._declareStructs(Map3dMaterial.SpotLightsUniformName, "position", "direction", "color", "innerCutoff", "outerCutoff", "exponent", "intensity"),
+            Map3dMaterial.HemiLightUniformName,
+            ...this._prepareArrayOfUniforms(Map3dMaterial.PointLightsUniformName, this._maxPointLights, "position", "color", "intensity"),
+            ...this._prepareArrayOfUniforms(
+                Map3dMaterial.SpotLightsUniformName,
+                this._maxSpotLights,
+                "position",
+                "direction",
+                "color",
+                "intensity",
+                "innerCutoff",
+                "outerCutoff",
+                "exponent"
+            ),
 
             Map3dMaterial.NumPointLightsUniformName,
             Map3dMaterial.NumSpotLightsUniformName,
@@ -262,10 +285,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             const properties = ["point", "normal"];
             uniforms.push(
                 // clip planes
-                ...this._declareStructs(Map3dMaterial.NorthClipPlaneUniformName, ...properties),
-                ...this._declareStructs(Map3dMaterial.SouthClipPlaneUniformName, ...properties),
-                ...this._declareStructs(Map3dMaterial.EastClipPlaneUniformName, ...properties),
-                ...this._declareStructs(Map3dMaterial.WestClipPlaneUniformName, ...properties)
+                ...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties),
+                ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties),
+                ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties),
+                ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties)
             );
         }
 

@@ -73,8 +73,10 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     getLights(): Light[];
     get mapScale(): ICartesian3;
     set mapScale(value: ICartesian3);
-    protected _declareStructs(name: string, ...properties: Array<string>): Array<string>;
     isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
+    protected _prepareUniforms(name: string, ...properties: string[]): string[];
+    protected _prepareArrayOfUniforms(name: string, count: number, ...properties: string[]): string[];
+    protected _isReady(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
     demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     protected _updateAdjacentIds(bag: TileBag): void;
     protected _getAdjacentIds(quadkey: Nullable<string>, index?: number): number;

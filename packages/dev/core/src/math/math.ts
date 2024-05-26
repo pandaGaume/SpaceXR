@@ -95,9 +95,9 @@ export class Range extends AbstractRange<number> {
         super(min, max);
     }
 
-    public union(min: number | Range, max?: number) {
+    public unionInPlace(min: number | Range, max?: number) {
         if (min instanceof Range) {
-            this.union(min.min, min.max);
+            this.unionInPlace(min.min, min.max);
             return;
         }
         this._min = Math.min(this._min, min);

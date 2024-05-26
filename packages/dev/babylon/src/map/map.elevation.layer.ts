@@ -255,8 +255,8 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
             return new TerrainGridOptionsBuilder()
                 .withColumns(s + 1) // add one column to fill the gap
                 .withRows(s + 1) // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
-                .withScale(1, -1) // we consider a grid of "texel" oriented as an image is oriented in display
-                .withInvertIndices(true) //  we need to invert indices as we reverse y
+                .withScale(-1, 1) // we consider a grid oriented with babylonjs coordinate system
+                .withInvertIndices(true) //  we need to invert indices as we reverse x
                 .withZInitializer(ElevationLayer.InitZ) // register the z initializer, which serve as referencing the texture depth
                 .withUvs(true) // generate uvs.
                 .withUVInitializer(ElevationLayer.InitUV) // register the uv initializer, which serve as referencing the texture coordinate used in conjunction with depth

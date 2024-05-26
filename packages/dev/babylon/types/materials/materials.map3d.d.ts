@@ -107,5 +107,6 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _onEffectError(effect: Effect, errors: string): void;
     protected _buildElevationRange(): Range;
     protected _updateElevationRange(elevationTile: ITile<IDemInfos>): void;
+    protected _getElevationRange(): Range;
 }
 export {};

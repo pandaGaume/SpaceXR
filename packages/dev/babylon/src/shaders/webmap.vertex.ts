@@ -10,7 +10,7 @@ const shader = `#include<instancesDeclaration>
 uniform mat4 viewProjection; in vec3 position; in vec2 uv; #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
 uniform vec4 uTerrainColor;#endif
 void main(void) {#include<instancesVertex>
-float depth=demIds[int(position.z)] ;vec3 v=vec3(1.0-uv.x,1.0-uv.y,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(uAltitudes,v)) ;float alt=(alt0 -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt ,1.0);vec4 worldPosition=finalWorld*pos;vec4 pixel=texture(uNormals,v);vec4 n=vec4(elevation_rgbaToNormal(pixel),1.0);vec4 worldNormal=n; #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
+float depth=demIds[int(position.z)] ;vec3 v=vec3(uv.xy,depth);if( depth<0.0) {v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=demIds[0];} float alt0=float(texture(uAltitudes,v)) ;float alt=(alt0 -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt ,1.0);vec4 worldPosition=finalWorld*pos;vec4 pixel=texture(uNormals,v);vec4 n=vec4(elevation_rgbaToNormal(pixel),1.0);vec4 worldNormal=n; #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
 #if defined(SPECULAR)
 vec3 lightColor=calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights,worldNormal.xyz,worldPosition.xyz,uViewPosition,uShininess);#else
 vec3 lightColor=calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights,worldNormal.xyz,worldPosition.xyz);#endif

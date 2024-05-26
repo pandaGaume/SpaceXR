@@ -538,9 +538,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _bindElevations(effect: Effect): void {
-        effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(this._elevationRange?.min ?? 0.0, this._elevationRange?.max ?? 0.0));
+        const r = this._getElevationRange();
+        effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(r.min, r.max));
         effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.x);
-        console.log("Map3dMaterial._bindElevations", this._elevationRange?.min, this._elevationRange?.max, this._mapScale.x);
+        //console.log("Map3dMaterial._bindElevations", this._elevationRange?.min, this._elevationRange?.max, this._mapScale.x);
     }
 
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
@@ -700,7 +701,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                     range = new Range(b.tile.content.min.z, b.tile.content.max.z);
                     continue;
                 }
-                range.union(b.tile.content.min.z, b.tile.content.max.z);
+                range.unionInPlace(b.tile.content.min.z, b.tile.content.max.z);
             }
         }
         return range ?? new Range(0, 0);
@@ -708,13 +709,15 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     protected _updateElevationRange(elevationTile: ITile<IDemInfos>): void {
         if (elevationTile.content) {
-            if (this._elevationRange === null) {
-                this._elevationRange = this._buildElevationRange();
-            } else {
-                // TODO : optimize to mark as dirty only when necessary
-                this._elevationRange.union(elevationTile.content.min.z, elevationTile.content.max.z);
-            }
+            this._getElevationRange().unionInPlace(elevationTile.content.min.z, elevationTile.content.max.z);
             this.markAsDirty(Material.AttributesDirtyFlag);
         }
+    }
+
+    protected _getElevationRange(): Range {
+        if (this._elevationRange === null) {
+            this._elevationRange = this._buildElevationRange();
+        }
+        return this._elevationRange;
     }
 }

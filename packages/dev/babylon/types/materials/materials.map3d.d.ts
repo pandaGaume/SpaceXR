@@ -118,5 +118,6 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _buildElevationRange(): Range;
     protected _updateElevationRange(elevationTile: ITile<IDemInfos>): void;
     protected _getElevationRange(): Range;
+    protected _growSamplersDepth(): void;
 }
 export {};

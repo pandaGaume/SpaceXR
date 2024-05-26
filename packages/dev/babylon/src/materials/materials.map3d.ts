@@ -355,16 +355,20 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // we store the bag for the tile
         this._bags.set(eventData.address.quadkey, bag);
 
-        // we process the dem content and update the elevation range
-        this._updateElevationRange(eventData);
-
         // prepare the elevation sampler.
-        const elevationArea = this._elevationSampler?.reserve();
+        let elevationArea = this._elevationSampler?.reserve();
+        if (!elevationArea) {
+            // this is the place where we need to reallocate some depth into the samplers
+            this._growSamplersDepth();
+            elevationArea = this._elevationSampler?.reserve();
+        }
         if (elevationArea) {
             bag.setArea(Map3dLayerKind.Elevation, new AreaInfos(elevationArea));
             // prepare the adjacent ids.
             this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
             if (eventData.content?.elevations) {
+                // we process the dem content and update the elevation range
+                this._updateElevationRange(eventData);
                 elevationArea.update(eventData.content.elevations);
             } else {
                 elevationTile.surface?.setEnabled(false);
@@ -594,7 +598,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const r = this._getElevationRange();
         effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(r.min, r.max));
         effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.x);
-        //console.log("Map3dMaterial._bindElevations", this._elevationRange?.min, this._elevationRange?.max, this._mapScale.x);
     }
 
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
@@ -775,5 +778,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             this._elevationRange = this._buildElevationRange();
         }
         return this._elevationRange;
+    }
+
+    protected _growSamplersDepth(): void {
+        // this is the place we gonna grow the depth of the samplers
+        // TODO
     }
 }

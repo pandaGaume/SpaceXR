@@ -101,7 +101,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     public static DemInfosAttName: string = "demInfos";
     public static DemIdsAttName: string = "demIds";
-    public static LayerIdsAttName: string = "layerIds";
+    public static NormalIdsAttName: string = "normalIds";
+    public static TextureIdsAttName: string = "textureIds";
 
     public static WorldMatrixUniformName: string = "world";
     public static ViewProjectionMatrixUniformName: string = "viewProjection";
@@ -120,8 +121,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     public static ElevationSamplerUniformName: string = "uAltitudes";
     public static NormalSamplerUniformName: string = "uNormals";
-    public static SpecularMapSamplerUniformName: string = "uSpecularMap";
     public static TextureSamplerUniformName: string = "uTexture";
+    public static SpecularMapSamplerUniformName: string = "uSpecularMap";
 
     public static NorthClipPlaneUniformName: string = "uNorthClip";
     public static SouthClipPlaneUniformName: string = "uSouthClip";

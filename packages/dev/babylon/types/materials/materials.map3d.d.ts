@@ -36,7 +36,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     static DefaultTerrainColor: Color4;
     static DemInfosAttName: string;
     static DemIdsAttName: string;
-    static LayerIdsAttName: string;
+    static NormalIdsAttName: string;
+    static TextureIdsAttName: string;
     static WorldMatrixUniformName: string;
     static ViewProjectionMatrixUniformName: string;
     static TerrainColorUniformName: string;
@@ -51,8 +52,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     static MapScaleUniformName: string;
     static ElevationSamplerUniformName: string;
     static NormalSamplerUniformName: string;
-    static SpecularMapSamplerUniformName: string;
     static TextureSamplerUniformName: string;
+    static SpecularMapSamplerUniformName: string;
     static NorthClipPlaneUniformName: string;
     static SouthClipPlaneUniformName: string;
     static EastClipPlaneUniformName: string;

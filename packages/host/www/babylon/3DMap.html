@@ -42,8 +42,8 @@
             <canvas id="mapcanvas3d"></canvas>
         </div>
         <script>
-            const defaultCenter = [27.98817689833976, 86.92491071824738]; // everest
-            const defaultLod = 10;
+            const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc; // everest
+            const defaultLod = 11;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
                 // Create a PBR material
@@ -126,8 +126,11 @@
                 };
 
                 // build layer and add it to the map
-                const client = SPACEXR.MapZen.DemClient();
+                let client = SPACEXR.MapZen.DemClient();
                 const l = new SPACEXR.ElevationLayer(`${client.name}`, client, layerOptions).addTo(map);
+
+                //client = SPACEXR.Google.TerrainClient2d();
+                //const t = new SPACEXR.ImageLayer(`${client.name}`, client).addTo(map);
 
                 const showAxes = false;
                 if (showAxes) {

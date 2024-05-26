@@ -366,6 +366,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
             if (eventData.content?.elevations) {
                 elevationArea.update(eventData.content.elevations);
+            } else {
+                elevationTile.surface?.setEnabled(false);
             }
         }
 
@@ -428,9 +430,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    protected _createZeroBuffer(size: number): Uint8Array {
-        // Create a zero-filled buffer
-        return new Uint8Array(size); // Initializes to 0 by default
+    protected _createZeroBuffer(n: number): ArrayBufferView {
+        const buffer = new ArrayBuffer(n);
+        return new Float32Array(buffer);
     }
 
     public demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
@@ -438,8 +440,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const bag = this._bags.get(qk);
         if (bag) {
             // Create a zero-filled buffer
-            const zero = this._createZeroBuffer(eventData.content?.elevations?.byteLength ?? 0);
-            bag.getArea(Map3dLayerKind.Elevation)?.layer.update(zero);
+            const size = eventData.content?.elevations?.buffer.byteLength ?? 0;
+            if (size) {
+                const zero = this._createZeroBuffer(size);
+                bag.getArea(Map3dLayerKind.Elevation)?.layer.update(zero);
+            }
             bag.getArea(Map3dLayerKind.Elevation)?.layer.release();
             bag.getArea(Map3dLayerKind.Normal)?.layer.release();
             this._bags.delete(qk);
@@ -456,6 +461,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             if (eventData.content?.elevations) {
                 // we update the elevation range
                 this._updateElevationRange(eventData);
+                bag.tile.surface?.setEnabled(true);
                 bag.getArea(Map3dLayerKind.Elevation)?.layer.update(eventData.content.elevations);
             }
             if (eventData.content?.normals) {

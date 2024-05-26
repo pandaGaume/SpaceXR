@@ -89,7 +89,7 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _getAdjacentIds(quadkey: Nullable<string>, kind: Map3dLayerKind, index?: number): number;
     protected _setAdjacentIds(quadkey: Nullable<string>, index: number, kind: Map3dLayerKind, id?: number): void;
     protected _setAdjacentIdsFromBag(bag: TileBag, index: number, kind: Map3dLayerKind, id?: number): void;
-    protected _createZeroBuffer(size: number): Uint8Array;
+    protected _createZeroBuffer(n: number): ArrayBufferView;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;

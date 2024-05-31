@@ -1,6 +1,13 @@
 import { TileDisplayBounds } from "../../tiles";
 
 export class CanvasDisplay extends TileDisplayBounds {
+    public static CreateCanvas(width: number, height: number): HTMLCanvasElement {
+        const canvas = <HTMLCanvasElement>document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+
     /**
      * Check what size that element is being displayed (clientWidth & clientHeight properties) and then adjust
      * its drawingbuffer size (width & height properties) to match.

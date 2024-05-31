@@ -42,12 +42,15 @@ export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     build(): L;
 }
 export declare function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown): b is ITileMapLayerBuilder<T, L>;
-export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileNavigationApi<S>, IHasNavigationState, IDisposable {
+export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     layerAddedObservable: Observable<L>;
     layerRemovedObservable: Observable<L>;
     getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
+    getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L>;
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
+}
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T, L>, ITileNavigationApi<S>, IHasNavigationState, IDisposable {
 }
 export interface ITileMapBuilder<T, L extends ITileMapLayer<T>> {
     withName(name: string): ITileMapBuilder<T, L>;

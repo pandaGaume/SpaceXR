@@ -1,0 +1,53 @@
+import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine";
+import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
+import { IEnvelope } from "../../geography";
+import { RGBAColor } from "../../math";
+import { ITile, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
+import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
+import { Nullable } from "../../types";
+import { CanvasTileContentType } from "./map.canvas";
+import { CanvasDisplay } from "./map.canvas.display";
+type CanvasProducerContentType = HTMLImageElement | ImageData;
+declare class LayerView {
+    layer: ITileMapLayer<CanvasTileContentType>;
+    tiles: TileCollection<CanvasTileContentType>;
+    propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
+    constructor(layer: ITileMapLayer<CanvasTileContentType>, tiles: TileCollection<CanvasTileContentType>, propertyChangedObserver?: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>);
+}
+export declare class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>> extends TileConsumerBase<CanvasProducerContentType> implements ICanvasRenderingOptions, ITileMetricsProvider {
+    static DefaultBackground: RGBAColor;
+    static DefaultOptions: ICanvasRenderingOptions;
+    _target: ITile<ImageData>;
+    _metrics: ITileMetrics;
+    _layers: ITileMapLayerContainer<CanvasTileContentType, L>;
+    _layerAddedObservable?: Nullable<Observer<L>>;
+    _layerRemovedObservable?: Nullable<Observer<L>>;
+    _activeTiles: Array<LayerView>;
+    _display: CanvasDisplay;
+    _context: Nullable<CanvasRenderingContext2D>;
+    _background?: string;
+    _alpha: number;
+    constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasRenderingOptions);
+    get metrics(): ITileMetrics;
+    get background(): string | undefined;
+    set background(v: string | undefined);
+    get alpha(): number;
+    set alpha(v: number);
+    get bounds(): IEnvelope | undefined;
+    protected _onLayerAdded(layer: L): void;
+    protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void;
+    protected _onLayerRemoved(layer: L): void;
+    dispose(): void;
+    protected _onBeforeTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _onTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _onBeforeTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _onTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _onBeforeTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _onTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _doValidate(): void;
+    protected _afterValidate(): void;
+    protected _getContext2D(): Nullable<CanvasRenderingContext2D>;
+    protected _draw(ctx: ICanvasRenderingContext, xoffset?: number, yoffset?: number): void;
+    protected _buildDisplay(canvas?: HTMLCanvasElement): CanvasDisplay;
+}
+export {};

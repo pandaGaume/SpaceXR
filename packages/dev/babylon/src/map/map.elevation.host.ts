@@ -1,34 +1,13 @@
 import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData, Material } from "@babylonjs/core";
-import { IMemoryCache } from "core/cache";
-import { IDemInfos, DemLayer } from "core/dem";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
-import { ITile, ITileAddress, ITileDatasource, ITileMapLayerOptions, ITileNavigationState, ITileProvider, ImageLayer, Tile, TileContentType } from "core/tiles";
+import { IPipelineMessageType, ITargetBlock, ITile, ITileMapLayer, ITileMapLayerOptions, ITileMetrics, ITileNavigationState, Tile } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
 import { WebMapMaterial } from "../materials";
-import { IMap3dImageTarget, IsMap3dElevationTarget, IsMap3dImageTarget } from "./map.elevation";
 import { Map3dScaleController, hasMapScale } from "./map.scale.controller";
 import { HolographicDisplay, hasHolographicBounds } from "../display";
-
-export interface IElevationTile extends ITile<IDemInfos> {
-    surface: Nullable<AbstractMesh>;
-}
-
-/// <summary>
-/// A tile for elevation data. The tile serve as host for elevation data and therefore the instanced mesh used to display the elevation.
-/// </summary>
-export class ElevationTile extends Tile<IDemInfos> implements ElevationTile {
-    _surface: Nullable<AbstractMesh>; // may be a mesh or an instance.
-    public constructor(x: number, y: number, levelOfDetail: number, data: IDemInfos) {
-        super(x, y, levelOfDetail, data);
-        this._surface = null;
-    }
-
-    public get surface(): Nullable<AbstractMesh> {
-        return this._surface;
-    }
-}
+import { IElevationMesh } from "./map.elevation.tile";
 
 /// <summary>
 /// Options for elevation tiles.
@@ -43,7 +22,7 @@ export interface IElevationTileOptions extends ITileMapLayerOptions {
 ///<summary>
 /// A layer for elevation data. The layer serve as host for elevation tiles and therefore the grid model used to display the elevation.
 /// </summary>
-export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
+export class ElevationHost implements ITargetBlock<ITile<IElevationMesh>> {
     private static InitZ(column: number, row: number, w: number, h: number): number {
         let i = column == w - 1 ? 1 : 0;
         let j = row == h - 1 ? 2 : 0;
@@ -56,6 +35,7 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
         return [u, v];
     }
 
+    _layer: ITileMapLayer<IElevationMesh>;
     _grid: VertexData;
     _template: Mesh;
     _exageration?: number;
@@ -71,29 +51,55 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
     _scaleController: Nullable<Map3dScaleController> = null;
     _scaleObserver: Nullable<Observer<ICartesian3>> = null;
 
-    public constructor(name: string, source: ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationTileOptions, enabled?: boolean) {
-        super(name, source, options, enabled);
+    public constructor(name: string, layer: ITileMapLayer<IElevationMesh>, options?: IElevationTileOptions, enabled?: boolean) {
+        this._layer = layer;
+        this._layer.linkTo(this);
         this._exageration = options?.exageration ?? 1.0;
         this._gridOptions = options?.gridOptions;
         this._insets = options?.insets;
-
         this._root = new TransformNode(this._buildNameWithSuffix("root"));
         if (this._insets) {
             this._root.position.set(this._insets.x, this._insets.y, this._insets.z);
         }
-
         this._tilesRoot = new TransformNode(this._buildNameWithSuffix("tiles"));
         this._tilesRoot.parent = this._root;
-
         this._grid = this._buildTopology();
         this._template = this._buildMesh(name, options?.material ?? null);
         this._cartesianCenter = null;
         this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
     }
 
+    name?: string | undefined;
+
+    public get navigation(): ITileNavigationState {
+        return this._layer.navigation;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._layer.metrics;
+    }
+
     public get root(): TransformNode {
         return this._root;
     }
+
+    //#region ITargetBlock
+    public added(eventData: IPipelineMessageType<ITile<IElevationMesh>>, eventState: EventState): void {
+        for (const tile of eventData) {
+            this._onTileAdded(tile, eventState);
+        }
+    }
+    public removed(eventData: IPipelineMessageType<ITile<IElevationMesh>>, eventState: EventState): void {
+        for (const tile of eventData) {
+            this._onTileRemoved(tile, eventState);
+        }
+    }
+    public updated(eventData: IPipelineMessageType<ITile<IElevationMesh>>, eventState: EventState): void {
+        for (const tile of eventData) {
+            this._onTileUpdated(tile, eventState);
+        }
+    }
+    //#endregion
 
     public bindDisplay(display?: HolographicDisplay): void {
         if (this._scaleController) {
@@ -136,27 +142,6 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
         return this._template;
     }
 
-    public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
-        const material = this._template.material;
-        if (material && IsMap3dImageTarget(material)) {
-            material.imageAdded(src, eventData);
-        }
-    }
-
-    public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
-        const material = this._template.material;
-        if (material && IsMap3dImageTarget(material)) {
-            material.imageRemoved(src, eventData);
-        }
-    }
-
-    public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
-        const material = this._template.material;
-        if (material && IsMap3dImageTarget(material)) {
-            material.imageUpdated(src, eventData);
-        }
-    }
-
     protected _buildMesh(name: string, material: Nullable<Material>, scene?: Scene): Mesh {
         const mesh = this._createMesh(this._buildNameWithSuffix("template"), scene);
         this._grid.applyToMesh(mesh, true);
@@ -169,7 +154,7 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
         return new Mesh(name, scene);
     }
 
-    protected _buildInstance(name: string, tile: ElevationTile): AbstractMesh {
+    protected _buildInstance(name: string, tile: ITile<IElevationMesh>): AbstractMesh {
         const instance = this._template.createInstance(name);
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
         instance.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
@@ -180,13 +165,13 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
         switch (event.propertyName) {
             case "center": {
                 const geo = event.newValue as IGeo2;
-                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._state.lod);
+                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
                 this._onCenterChanged(this._cartesianCenter);
                 break;
             }
             case "zoom": {
-                const geo = this._state.center;
-                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._state.lod);
+                const geo = event.source.center;
+                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
                 this._onCenterChanged(this._cartesianCenter);
                 this._onZoomChanged(event.source.scale);
                 break;
@@ -209,22 +194,20 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
 
     protected _onCenterChanged(center: Nullable<ICartesian2>): void {
         if (center) {
-            const tiles = this.activTiles;
+            const tiles = this._layer.activTiles;
             if (!tiles || !tiles.count) {
                 return;
             }
             for (const tile of tiles) {
-                if (tile instanceof ElevationTile) {
-                    this._setTilePosition(tile, center);
-                }
+                this._setTilePosition(tile, center);
             }
         }
     }
 
-    protected _setTilePosition(tile: ElevationTile, center: ICartesian2): void {
-        if (tile.rect && tile.surface) {
+    protected _setTilePosition(tile: ITile<IElevationMesh>, center: ICartesian2): void {
+        if (tile.rect && tile.content?.surface) {
             const c = tile.rect.center;
-            const s = tile.surface;
+            const s = tile.content?.surface;
             const x = c.x - center.x;
             const y = c.y - center.y;
             const p = s.position;
@@ -232,15 +215,6 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
             p.y = -y;
             p.z = 0;
         }
-    }
-
-    // override in order to build the correct tile type
-    protected _buildProvider(
-        source: ITileDatasource<IDemInfos, ITileAddress>,
-        cache?: IMemoryCache<string, TileContentType<IDemInfos>>,
-        type?: new (...args: any[]) => ITile<IDemInfos>
-    ): ITileProvider<IDemInfos> {
-        return super._buildProvider(source, cache, type ?? ElevationTile);
     }
 
     protected _buildTopology(): VertexData {
@@ -257,9 +231,9 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
                 .withRows(s + 1) // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
                 .withScale(-1, 1) // we consider a grid oriented with babylonjs coordinate system
                 .withInvertIndices(true) //  we need to invert indices as we reverse x
-                .withZInitializer(ElevationLayer.InitZ) // register the z initializer, which serve as referencing the texture depth
+                .withZInitializer(ElevationHost.InitZ) // register the z initializer, which serve as referencing the texture depth
                 .withUvs(true) // generate uvs.
-                .withUVInitializer(ElevationLayer.InitUV) // register the uv initializer, which serve as referencing the texture coordinate used in conjunction with depth
+                .withUVInitializer(ElevationHost.InitUV) // register the uv initializer, which serve as referencing the texture coordinate used in conjunction with depth
                 .build();
         }
         if (options instanceof TerrainGridOptionsBuilder) {
@@ -268,47 +242,24 @@ export class ElevationLayer extends DemLayer implements IMap3dImageTarget {
         return options;
     }
 
-    protected _onTileAdded(eventData: Array<ElevationTile>, eventState: EventState): void {
-        super._onTileAdded(eventData, eventState);
-        // just be prepared to forward the event to the material
-        const material = this._template.material;
-        const forward = material && IsMap3dElevationTarget(material);
-
-        for (const tile of eventData) {
-            tile._surface = this._buildInstance(this._buildNameWithSuffix(tile.quadkey), tile);
+    protected _onTileAdded(tile: ITile<IElevationMesh>, eventState: EventState): void {
+        if (tile.content) {
+            tile.content.surface = this._buildInstance(this._buildNameWithSuffix(tile.quadkey), tile);
             if (this._cartesianCenter) {
                 this._setTilePosition(tile, this._cartesianCenter);
             }
-            tile._surface.parent = this._tilesRoot;
-            if (forward) {
-                material.demAdded(this, tile);
-            }
+            tile.content.surface.parent = this._tilesRoot;
         }
     }
 
-    protected _onTileRemoved(eventData: Array<ElevationTile>, eventState: EventState): void {
-        super._onTileRemoved(eventData, eventState);
-        const material = this._template.material;
-        const forward = material && IsMap3dElevationTarget(material);
-        for (const tile of eventData) {
-            if (forward) {
-                material.demRemoved(this, tile);
-            }
-            tile._surface?.dispose();
-            tile._surface = null;
+    protected _onTileRemoved(tile: ITile<IElevationMesh>, eventState: EventState): void {
+        if (tile.content) {
+            tile.content.surface?.dispose();
+            tile.content.surface = null;
         }
     }
 
-    protected _onTileUpdated(eventData: Array<ElevationTile>, eventState: EventState): void {
-        super._onTileUpdated(eventData, eventState);
-        const material = this._template.material;
-        const forward = material && IsMap3dElevationTarget(material);
-        for (const tile of eventData) {
-            if (forward) {
-                material.demUpdated(this, tile);
-            }
-        }
-    }
+    protected _onTileUpdated(tile: ITile<IElevationMesh>, eventState: EventState): void {}
 
     protected _buildNameWithSuffix(suffix: string): string {
         return `${this.name}.${suffix}`;

@@ -80,24 +80,27 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
 
     /// begin ITargetBlock
     public added(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        this.invalidate();
+        this._onBeforeTileAdded(eventData, eventState);
         this._onTileAdded(eventData, eventState);
+        this._onAfterTileAdded(eventData, eventState);
         if (this._addedObservable && this._addedObservable.hasObservers()) {
             this._addedObservable.notifyObservers(eventData, -1, eventState.currentTarget, this);
         }
     }
 
     public removed(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        this.invalidate();
+        this._onBeforeTileRemoved(eventData, eventState);
         this._onTileRemoved(eventData, eventState);
+        this._onAfterTileRemoved(eventData, eventState);
         if (this._removedObservable && this._removedObservable.hasObservers()) {
             this._removedObservable.notifyObservers(eventData, -1, eventState.currentTarget, this);
         }
     }
 
     public updated(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        this.invalidate();
+        this._onBeforeTileUpdated(eventData, eventState);
         this._onTileUpdated(eventData, eventState);
+        this._onAfterTileUpdated(eventData, eventState);
         if (this._updatedObservable && this._updatedObservable.hasObservers()) {
             this._updatedObservable.notifyObservers(eventData, -1, eventState.currentTarget, this);
         }
@@ -112,6 +115,18 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
         this._links = [];
     }
 
+    protected _onBeforeTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
+        this.invalidate();
+    }
+
+    protected _onBeforeTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void {
+        this.invalidate();
+    }
+
+    protected _onBeforeTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void {
+        this.invalidate();
+    }
+
     protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
         /* nothing to do here, may be override by subclass */
     }
@@ -119,6 +134,18 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
         /* nothing to do here, may be override by subclass */
     }
     protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void {
+        /* nothing to do here, may be override by subclass */
+    }
+
+    protected _onAfterTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void {
+        /* nothing to do here, may be override by subclass */
+    }
+
+    protected _onAfterTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void {
+        /* nothing to do here, may be override by subclass */
+    }
+
+    protected _onAfterTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void {
         /* nothing to do here, may be override by subclass */
     }
 }

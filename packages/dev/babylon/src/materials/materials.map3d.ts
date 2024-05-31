@@ -121,7 +121,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     public static ElevationSamplerUniformName: string = "uAltitudes";
     public static NormalSamplerUniformName: string = "uNormals";
-    public static TextureSamplerUniformName: string = "uTexture";
+    public static TextureSamplerUniformName: string = "uTextures";
     public static SpecularMapSamplerUniformName: string = "uSpecularMap";
 
     public static NorthClipPlaneUniformName: string = "uNorthClip";
@@ -345,7 +345,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     // called when dem tile added
-    public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>, layers?: Array<ImageLayer>): void {
         this._ensureElevationLayerReady(src, eventData);
 
         const elevationTile = eventData as ElevationTile;
@@ -387,7 +387,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // we call the layer sampler to create the layer texture support.
         // remember that the layer texture is a special texture that is used to draw dynamically
         // the image layers on a kind of dynamic texture- this allow to add layer with an LOD offset.
-        this._textureSampler?.demAdded(src, eventData);
+        this._textureSampler?.demAdded(src, eventData, layers);
 
         this.markAsDirty(Material.TextureDirtyFlag);
     }
@@ -478,23 +478,23 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     public imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        // this._textureSampler?.imageAdded(src, eventData);
-        //this.markAsDirty(Material.TextureDirtyFlag);
-        console.log("Image added", src, eventData);
+        this._textureSampler?.imageAdded(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
+        //console.log("Image added", src, eventData);
     }
 
     public imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        //this._textureSampler?.imageRemoved(src, eventData);
-        //this.markAsDirty(Material.TextureDirtyFlag);
-        console.log("Image Removed", src, eventData);
+        this._textureSampler?.imageRemoved(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
+        //console.log("Image Removed", src, eventData);
     }
 
     public imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void {
         // all the logic is done in the underlyng texture
-        //this._textureSampler?.imageUpdated(src, eventData);
-        //this.markAsDirty(Material.TextureDirtyFlag);
-        console.log("Image Updated", src, eventData);
+        this._textureSampler?.imageUpdated(src, eventData);
+        this.markAsDirty(Material.TextureDirtyFlag);
+        //console.log("Image Updated", src, eventData);
     }
 
     public dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void {
@@ -630,6 +630,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _bindSamplers(effect: Effect): void {
         effect.setTexture(Map3dMaterial.ElevationSamplerUniformName, this._elevationSampler);
         effect.setTexture(Map3dMaterial.NormalSamplerUniformName, this._normalSampler);
+        effect.setTexture(Map3dMaterial.TextureSamplerUniformName, this._textureSampler);
     }
 
     protected _acceptLight(light: Light): boolean {

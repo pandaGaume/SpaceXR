@@ -272,7 +272,7 @@ export class Envelope implements IEnvelope {
         return this;
     }
 
-    public intersect(bounds: IEnvelope): boolean {
+    public intersects(bounds: IEnvelope): boolean {
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
             return false;
         }
@@ -283,6 +283,23 @@ export class Envelope implements IEnvelope {
             }
         }
 
+        return true;
+    }
+
+    public overlaps(bounds: IEnvelope): boolean {
+        // Check if there is overlap in latitude and longitude
+        if (this._min.lat >= bounds.north || this._max.lat <= bounds.south || this._min.lon >= bounds.east || this._max.lon <= bounds.west) {
+            return false;
+        }
+
+        // Check if altitude should be considered and if there is overlap in altitude
+        if (this.hasAltitude && bounds.hasAltitude) {
+            if (this._min.alt! >= bounds.top! || this._max.alt! <= bounds.bottom!) {
+                return false;
+            }
+        }
+
+        // If no separating conditions were met, the envelopes overlap
         return true;
     }
 

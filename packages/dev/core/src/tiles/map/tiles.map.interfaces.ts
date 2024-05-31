@@ -62,6 +62,17 @@ export function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown)
     );
 }
 
+export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
+    layerAddedObservable: Observable<L>;
+    layerRemovedObservable: Observable<L>;
+
+    getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
+    getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L>;
+
+    addLayer(layer: L): void;
+    removeLayer(layer: L): void;
+}
+
 /// <summary>
 /// Interface for a tile map. A logical tile map is caraterized by a display, a navigation api and a pipeline.
 /// The display is the target of the map, it is where the tiles are displayed.
@@ -72,15 +83,7 @@ export function IsTileMapLayerBuilder<T, L extends ITileMapLayer<T>>(b: unknown)
 /// When removing a view, the map will clear the display and the navigation api of this view.
 /// Changing the display or the navigation api of a map will automatically update the display or the navigation api of all the views.
 /// </summary>
-export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileNavigationApi<S>, IHasNavigationState, IDisposable {
-    // map related
-    layerAddedObservable: Observable<L>;
-    layerRemovedObservable: Observable<L>;
-
-    getLayers(predicate?: (l: L) => boolean, sorted?: boolean): IterableIterator<L>;
-    addLayer(layer: L): void;
-    removeLayer(layer: L): void;
-}
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T, L>, ITileNavigationApi<S>, IHasNavigationState, IDisposable {}
 
 export interface ITileMapBuilder<T, L extends ITileMapLayer<T>> {
     withName(name: string): ITileMapBuilder<T, L>;

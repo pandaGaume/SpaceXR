@@ -101,21 +101,20 @@ class Map3dTextureItem implements IDisposable {
     // draw the map - remember that the map is a texture. The navigation features, such scale and azimuth are
     // treated differently in the 3D map.
     // however the overall logic is the same as the 2D map.
-    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, w: number, h: number): void {
+    protected _draw(ctx: ICanvasRenderingContext, center: ICartesian2, x: number, y: number, w: number, h: number): void {
         ctx.save();
 
+        console.log(`draw elevation tile ${this.elevationTile.address.quadkey} at ${center.x}, ${center.y}`);
         // we move the reference to the center of the display
         ctx.translate(x + w / 2, y + h / 2);
 
         // create clipping
-        ctx.beginPath();
-        ctx.rect(-w / 2, -h / 2, w, h);
-        ctx.clip();
+        //ctx.beginPath();
+        //ctx.rect(-w / 2, -h / 2, w, h);
+        //ctx.clip();
 
         // clear the canvas
         ctx.clearRect(-w / 2, -h / 2, w, h);
-
-        const center = this._metrics.getLatLonToPointXY(this._geo.lat, this._geo.lon, this._nav.lod);
 
         for (let layer of this.views) {
             if (layer.source.enabled === false || layer.tiles.length === 0) {
@@ -130,11 +129,8 @@ class Map3dTextureItem implements IDisposable {
 
             ctx.restore();
         }
-        ctx.restore();
-    }
 
-    protected _getTileCenter(): ICartesian2 {
-        return { x: 0, y: 0 };
+        ctx.restore();
     }
 
     protected _doValidate(): void {
@@ -146,7 +142,11 @@ class Map3dTextureItem implements IDisposable {
             const w = res.displayWidth;
             const h = res.displayHeight;
 
-            this._draw(ctx, x, y, w, h);
+            console.log(`validate elevation tile ${this.elevationTile.address.quadkey} at ${this._geo.lat}, ${this._geo.lon}, ${this._nav.lod}`);
+            console.log(`validate elevation tile ${this.elevationTile.address.quadkey} with rect ${this.elevationTile.rect}`);
+            const center = this._metrics.getLatLonToPointXY(this._geo.lat, this._geo.lon, this._nav.lod);
+
+            this._draw(ctx, center, x, y, w, h);
             this.textureTarget.update(ctx.getImageData(x, y, w, h));
         }
     }
@@ -208,7 +208,7 @@ export class Map3dTexture extends Texture3 implements IMap3dElevationTarget, IMa
         return -1;
     }
 
-    public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void {
+    public demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>, layers?: Array<ImageLayer>): void {
         const target = this.reserve();
         if (!target) {
             throw `Unable to reserve a layer for the elevation tile ${eventData.address.quadkey}`;
@@ -220,6 +220,17 @@ export class Map3dTexture extends Texture3 implements IMap3dElevationTarget, IMa
         }
         let item = new Map3dTextureItem(src, eventData, target, this._sharedDisplay);
         this._items.set(eventData.address.quadkey, item);
+
+        if (layers) {
+            for (let layer of layers) {
+                for (let t of layer.activTiles) {
+                    if (item.elevationTile.bounds && t.bounds && item.elevationTile.bounds.intersects(t.bounds)) {
+                        item.addTile(layer, t);
+                    }
+                }
+            }
+        }
+
         // this is where we notify the observers that the elevation tile is ready, along with the depth of the texture.
         // the depth of the texture will be used as instance attribute to select the right texture value in the shader (u,v,depth)
         // as alternative, user may retrieve the depth using the getTextureDepth(quadkey) method.
@@ -243,7 +254,7 @@ export class Map3dTexture extends Texture3 implements IMap3dElevationTarget, IMa
         let impactedItems = this._selectItems((item) => {
             // check if the layer is in the bounding box of the elevation
             if (item.elevationTile.bounds && eventData.bounds) {
-                return item.elevationTile.bounds.intersect(eventData.bounds);
+                return item.elevationTile.bounds.intersects(eventData.bounds);
             }
             return false;
         });
@@ -291,7 +302,7 @@ export class Map3dTexture extends Texture3 implements IMap3dElevationTarget, IMa
     }
     protected _createDisplay(canvas?: ICanvas): CanvasDisplay | undefined {
         if (canvas instanceof HTMLCanvasElement) {
-            return new CanvasDisplay(canvas);
+            return new CanvasDisplay(canvas, 1, false);
         }
         return undefined;
     }

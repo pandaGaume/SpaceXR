@@ -11,7 +11,6 @@ import {
     TileDisplayBounds,
     TileMapBase,
 } from "core/tiles";
-import { ElevationLayer } from "./map.elevation.layer";
 import { EventState, Observable, Observer } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
@@ -21,26 +20,6 @@ import { HolographicDisplay } from "../display";
 
 // we use type of IDemInfos for elevation and rgb images for the texture.
 export type Map3dTileContentType = IDemInfos | HTMLImageElement;
-
-export function IsMap3dImageTarget(target: any): target is IMap3dImageTarget {
-    return target.imageAdded !== undefined && target.imageRemoved !== undefined && target.imageUpdated !== undefined;
-}
-
-export function IsMap3dElevationTarget(target: any): target is IMap3dElevationTarget {
-    return target.demAdded !== undefined && target.demRemoved !== undefined && target.demUpdated !== undefined;
-}
-
-export interface IMap3dElevationTarget {
-    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
-    demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
-    demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
-}
-
-export interface IMap3dImageTarget {
-    imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
-    imageRemoved(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
-    imageUpdated(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;
-}
 
 export interface IMap3DMetrics {
     resolution: Size2;
@@ -55,7 +34,7 @@ export interface IMap3dOptions {
     metrics: IMap3DMetrics;
 }
 
-export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d>, IMap3dImageTarget {
+export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
     public static DefaultTextureSize: number = 1024;
 
     // the map logic. This is the main entry point for the map API.

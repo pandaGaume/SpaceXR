@@ -1,40 +1,40 @@
 import { ParametricValue, Scalar } from "./math";
 
 export class RGBAColor {
-    public static White() {
+    public static White(): RGBAColor {
         return new RGBAColor(255, 255, 255);
     }
 
-    public static Black() {
+    public static Black(): RGBAColor {
         return new RGBAColor(0, 0, 0);
     }
 
-    public static LightGray() {
+    public static LightGray(): RGBAColor {
         return new RGBAColor(211, 211, 211);
     }
 
-    public static Gray() {
+    public static Gray(): RGBAColor {
         return new RGBAColor(128, 128, 128);
     }
 
-    public static CoolSteelBlue() {
+    public static CoolSteelBlue(): RGBAColor {
         return new RGBAColor(70, 130, 180);
     }
 
-    public static ElectricBlue() {
+    public static ElectricBlue(): RGBAColor {
         return new RGBAColor(0, 191, 255);
     }
 
-    public static NeonBlue() {
+    public static NeonBlue(): RGBAColor {
         return new RGBAColor(77, 77, 255);
     }
 
     public constructor(public r: number, public g: number, public b: number, public a: number = 1) {}
 
     public toHexString(): string {
-        const intR = Math.round(this.r * 255);
-        const intG = Math.round(this.g * 255);
-        const intB = Math.round(this.b * 255);
+        const intR = Math.round(this.r);
+        const intG = Math.round(this.g);
+        const intB = Math.round(this.b);
         return "#" + Scalar.ToHex(intR) + Scalar.ToHex(intG) + Scalar.ToHex(intB);
     }
 

@@ -19,6 +19,7 @@ in vec2 uv;
 #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
 uniform vec4 uTerrainColor;
 #endif
+out vec3 vUvs;
 
 void main(void) {
 
@@ -64,4 +65,5 @@ void main(void) {
     
     // finally set the position
     gl_Position = viewProjection * worldPosition;
+    vUvs = vec3(uv, depth);
 }

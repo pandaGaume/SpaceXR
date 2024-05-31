@@ -69,10 +69,8 @@ export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImage
                 const y = t.rect.y - center.y;
                 const item = t.content ?? null; // trick to address erroness tile.
                 if (item) {
-                    if (item instanceof HTMLImageElement) {
-                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
-                        continue;
-                    }
+                    ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
+                    continue;
                 } else {
                     ctx.fillRect(x, y, metrics.tileSize, metrics.tileSize);
                 }

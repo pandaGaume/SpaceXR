@@ -34,8 +34,7 @@ declare class Map3dTextureItem implements IDisposable {
     update(layer: ITile<HTMLImageElement>): void;
     dispose(): void;
     validate(): void;
-    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, w: number, h: number): void;
-    protected _getTileCenter(): ICartesian2;
+    protected _draw(ctx: ICanvasRenderingContext, center: ICartesian2, x: number, y: number, w: number, h: number): void;
     protected _doValidate(): void;
 }
 export declare class ElevationTileAddedEventArgs {
@@ -52,7 +51,7 @@ export declare class Map3dTexture extends Texture3 implements IMap3dElevationTar
     elevationTileReadyObservable(): Observable<ElevationTileAddedEventArgs>;
     dispose(): void;
     getTextureDepth(quadkey: string): number;
-    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>, layers?: Array<ImageLayer>): void;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     imageAdded(src: ImageLayer, eventData: ITile<HTMLImageElement>): void;

@@ -11,7 +11,7 @@ export type Map3dTileContentType = IDemInfos | HTMLImageElement;
 export declare function IsMap3dImageTarget(target: any): target is IMap3dImageTarget;
 export declare function IsMap3dElevationTarget(target: any): target is IMap3dElevationTarget;
 export interface IMap3dElevationTarget {
-    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
+    demAdded(src: ElevationLayer, eventData: ITile<IDemInfos>, layers?: Array<ImageLayer>): void;
     demRemoved(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
     demUpdated(src: ElevationLayer, eventData: ITile<IDemInfos>): void;
 }

@@ -22,7 +22,13 @@ export declare class TileConsumerBase<T> extends ValidableBase implements ITileC
     removed(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void;
     updated(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void;
     dispose(): void;
+    protected _onBeforeTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void;
+    protected _onBeforeTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void;
+    protected _onBeforeTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void;
     protected _onTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void;
     protected _onTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void;
     protected _onTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void;
+    protected _onAfterTileAdded(eventData: Array<ITile<T>>, eventState: EventState): void;
+    protected _onAfterTileRemoved(eventData: Array<ITile<T>>, eventState: EventState): void;
+    protected _onAfterTileUpdated(eventData: Array<ITile<T>>, eventState: EventState): void;
 }

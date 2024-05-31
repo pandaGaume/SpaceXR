@@ -1,6 +1,7 @@
 import { TileDisplayBounds } from "../../tiles";
 export declare class CanvasDisplay extends TileDisplayBounds {
     canvas: HTMLCanvasElement;
+    static CreateCanvas(width: number, height: number): HTMLCanvasElement;
     static ResizeToDisplaySize(canvas: HTMLCanvasElement, scale?: number): boolean;
     _resizeObserver: ResizeObserver;
     _scale: number;

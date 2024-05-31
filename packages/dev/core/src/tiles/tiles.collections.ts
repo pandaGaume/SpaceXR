@@ -116,14 +116,14 @@ export class TileCollection<T> implements ITileCollection<T> {
 
         if (IsEnvelope(bounds)) {
             // this is an envelope
-            if (this.bounds?.intersect(bounds)) {
+            if (this.bounds?.intersects(bounds)) {
                 // with a valid intersection with the collection
                 return {
                     next(): IteratorResult<ITile<T>> {
                         while (pointer < items.length) {
                             let item = items[pointer++];
                             let b = item.bounds;
-                            if (!b || bounds.intersect(b)) {
+                            if (!b || bounds.intersects(b)) {
                                 return {
                                     done: false,
                                     value: item,

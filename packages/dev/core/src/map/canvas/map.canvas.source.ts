@@ -239,21 +239,20 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         const y = yoffset;
         const w = res.displayWidth;
         const h = res.displayHeight;
-        const a = this._alpha ?? 1;
-        const b = this._background ?? CanvasTileSource.DefaultBackground.toHexString();
-
-        ctx.fillStyle = b;
-        ctx.globalAlpha = a;
 
         // we clear the canvas
-        ctx.fillRect(x, y, w, h);
+        ctx.clearRect(x, y, w, h);
 
         if (!this._activeTiles || !this._activeTiles.length) {
             ctx.restore();
             return;
         }
 
-        //ctx.fillStyle = b;
+        const a = this._alpha ?? 1;
+        const b = this._background ?? CanvasTileSource.DefaultBackground.toHexString();
+
+        ctx.fillStyle = b;
+        ctx.globalAlpha = a;
 
         for (const tiles of this._activeTiles) {
             if (!tiles.layer.enabled) {
@@ -265,7 +264,6 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const dlod = layerLod - tileLod;
 
             if (dlod == 0) {
-                ctx.scale(1, 1);
                 // fast track - rect is in pixel at given LOD.
                 const sx = this._target.rect?.x ?? 0;
                 const sy = this._target.rect?.y ?? 0;
@@ -299,8 +297,8 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
                 }
                 this.metrics.getLatLonToPointXYToRef(geo.north, geo.west, tileLod, ref);
 
-                const x = ref.x - sx - 1;
-                const y = ref.y - sy - 1;
+                const x = ref.x - sx;
+                const y = ref.y - sy;
                 const item = t.content ?? null; // trick to address erroness tile.
                 if (item) {
                     const w = Math.ceil(item.width * scale);

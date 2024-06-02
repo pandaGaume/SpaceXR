@@ -1,7 +1,7 @@
 import { PropertyChangedEventArgs } from "../../events";
 
 import { ITileCollection, ITileMetrics } from "../tiles.interfaces";
-import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds } from "./tiles.map.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds, ITileMapLayerContainer } from "./tiles.map.interfaces";
 import { TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
@@ -101,7 +101,7 @@ export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implem
         }
     }
 
-    public addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T> {
+    public addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T> {
         map?.addLayer(this);
         return this;
     }

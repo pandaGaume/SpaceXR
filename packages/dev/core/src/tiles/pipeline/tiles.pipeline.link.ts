@@ -49,17 +49,14 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
     }
 
     protected _onAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        eventState.currentTarget = this; // ensure the target is set
         this._target?.added(eventData, eventState);
     }
 
     protected _onRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        eventState.currentTarget = this; // ensure the target is set
         this._target?.removed(eventData, eventState);
     }
 
     protected _onUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        eventState.currentTarget = this; // ensure the target is set
         this._target?.updated(eventData, eventState);
     }
 }

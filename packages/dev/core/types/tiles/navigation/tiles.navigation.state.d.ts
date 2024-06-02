@@ -19,7 +19,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _scale: number;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
-    constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
+    constructor(center?: IGeo2 | Array<number>, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
     clone(): ITileNavigationState;
     dispose(): void;
     get lod(): number;

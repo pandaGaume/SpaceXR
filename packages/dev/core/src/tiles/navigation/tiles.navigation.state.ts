@@ -32,10 +32,10 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
 
-    public constructor(center?: IGeo2, lod?: number, azimuth?: number, bounds?: ITileSystemBounds) {
+    public constructor(center?: IGeo2 | Array<number>, lod?: number, azimuth?: number, bounds?: ITileSystemBounds) {
         super();
-        this._lodf = 0;
-        this._center = new Geo2(center?.lat ?? 0, center?.lon ?? 0);
+        this._lodf = lod ?? 0;
+        this._center = center ? (IsLocation(center) ? new Geo2(center?.lat ?? 0, center?.lon ?? 0) : new Geo2(center[0] ?? 0, center[1] ?? 0)) : Geo2.Zero();
         this._azimuth = new Bearing(azimuth ?? 0);
         this._bounds = bounds ?? new TileSystemBounds();
         this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));

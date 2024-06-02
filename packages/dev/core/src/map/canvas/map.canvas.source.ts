@@ -19,14 +19,14 @@ class LayerView {
     ) {}
 }
 
-export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
+export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
     extends TileConsumerBase<CanvasProducerContentType>
     implements ICanvasRenderingOptions, ITileMetricsProvider
 {
     public static DefaultBackground = RGBAColor.LightGray();
 
     public static DefaultOptions: ICanvasRenderingOptions = {
-        background: CanvasTileProducer.DefaultBackground.toHexString(),
+        background: CanvasTileSource.DefaultBackground.toHexString(),
     };
 
     _target: ITile<ImageData>;
@@ -48,13 +48,11 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
     _alpha: number;
 
     public constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasRenderingOptions) {
-        super(name);
+        super(name, false);
         this._layers = layers;
         this._layerAddedObservable = this._layers.layerAddedObservable.add(this._onLayerAdded.bind(this));
         this._layerRemovedObservable = this._layers.layerRemovedObservable.add(this._onLayerRemoved.bind(this));
-        for (const layer of this._layers.getLayers()) {
-            this._onLayerAdded(layer);
-        }
+
         this._target = target;
         this._metrics = metrics;
 
@@ -63,6 +61,11 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
 
         this._background = options?.background;
         this._alpha = options?.alpha ?? 1;
+
+        // finally add existing layers
+        for (const layer of this._layers.getLayers()) {
+            this._onLayerAdded(layer);
+        }
     }
 
     public get metrics(): ITileMetrics {
@@ -156,7 +159,7 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
     protected _onTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
         const bounds = this.bounds;
         if (bounds) {
-            const layer = this._activeTiles.find((v) => v.layer === eventState.target);
+            const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
             if (layer) {
                 for (const tile of eventData) {
                     if (tile.bounds && tile.bounds.overlaps(bounds)) {
@@ -174,7 +177,7 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
     }
 
     protected _onTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
-        const layer = this._activeTiles.find((v) => v.layer === eventState.target);
+        const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
         if (layer) {
             for (const tile of eventData) {
                 if (layer.tiles.has(tile.address)) {
@@ -190,7 +193,7 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
     }
 
     protected _onTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
-        const layer = this._activeTiles.find((v) => v.layer === eventState.target);
+        const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
         if (layer) {
             for (const tile of eventData) {
                 if (layer.tiles.has(tile.address)) {
@@ -237,18 +240,20 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
         const w = res.displayWidth;
         const h = res.displayHeight;
         const a = this._alpha ?? 1;
-        const b = this._background ?? CanvasTileProducer.DefaultBackground.toHexString();
+        const b = this._background ?? CanvasTileSource.DefaultBackground.toHexString();
+
+        ctx.fillStyle = b;
+        ctx.globalAlpha = a;
 
         // we clear the canvas
-        ctx.clearRect(x, y, w, h);
+        ctx.fillRect(x, y, w, h);
 
         if (!this._activeTiles || !this._activeTiles.length) {
             ctx.restore();
             return;
         }
 
-        ctx.fillStyle = b;
-        ctx.globalAlpha = a;
+        //ctx.fillStyle = b;
 
         for (const tiles of this._activeTiles) {
             if (!tiles.layer.enabled) {
@@ -260,6 +265,7 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
             const dlod = layerLod - tileLod;
 
             if (dlod == 0) {
+                ctx.scale(1, 1);
                 // fast track - rect is in pixel at given LOD.
                 const sx = this._target.rect?.x ?? 0;
                 const sy = this._target.rect?.y ?? 0;
@@ -271,18 +277,16 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
                         if (item) {
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
                             continue;
-                        } else {
-                            var size = tiles.layer.metrics.tileSize;
-                            ctx.fillRect(x, y, size, size);
                         }
+
+                        var size = tiles.layer.metrics.tileSize;
+                        ctx.fillRect(x, y, size, size);
                     }
-                    continue;
                 }
                 continue;
             }
 
             const scale = dlod < 0 ? 1 << dlod : 1 / (1 << dlod);
-            ctx.scale(scale, scale);
 
             const ref = Cartesian2.Zero();
             const sx = this._target.rect?.x ?? 0;
@@ -295,18 +299,17 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
                 }
                 this.metrics.getLatLonToPointXYToRef(geo.north, geo.west, tileLod, ref);
 
-                const x = ref.x - sx;
-                const y = ref.y - sy;
+                const x = ref.x - sx - 1;
+                const y = ref.y - sy - 1;
                 const item = t.content ?? null; // trick to address erroness tile.
                 if (item) {
-                    ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
+                    const w = Math.ceil(item.width * scale);
+                    const h = Math.ceil(item.height * scale);
+                    ctx.drawImage(item, 0, 0, item.width, item.height, x, y, w, h);
                     continue;
-                } else {
-                    var size = tiles.layer.metrics.tileSize;
-                    ctx.fillRect(x, y, size, size);
                 }
-
-                continue;
+                var size = tiles.layer.metrics.tileSize;
+                ctx.fillRect(x, y, size, size);
             }
         }
         ctx.restore();
@@ -314,6 +317,6 @@ export class CanvasTileProducer<L extends ITileMapLayer<CanvasTileContentType>>
 
     protected _buildDisplay(canvas?: HTMLCanvasElement): CanvasDisplay {
         canvas = canvas ?? CanvasDisplay.CreateCanvas(this._metrics.tileSize, this._metrics.tileSize);
-        return new CanvasDisplay(canvas as HTMLCanvasElement, 1, false); // do NOT automatically resize the canvas to the client size.
+        return new CanvasDisplay(canvas as HTMLCanvasElement, 1, false);
     }
 }

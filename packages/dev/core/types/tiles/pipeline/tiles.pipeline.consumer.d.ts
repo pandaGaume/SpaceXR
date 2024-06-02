@@ -9,10 +9,13 @@ export declare class TileConsumerBase<T> extends ValidableBase implements ITileC
     _removedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _links: Array<ITilePipelineLink<ITile<T>>>;
     _name: string;
-    constructor(id: string);
+    _forward: boolean;
+    constructor(id: string, forward?: boolean);
     get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
     get addedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
     get removedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
+    get isForward(): boolean;
+    set isForward(forward: boolean);
     linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void;
     unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;

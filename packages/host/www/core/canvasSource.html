@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Exemple de dessin de tuiles sur canvas</title>
+        <script src="../../../dev/core/bundles/spacexr.1.0.0.js"></script>
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+            .canvas-container {
+                display: flex;
+                margin: 0;
+                padding: 0;
+            }
+            .canvas-container canvas {
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="canvas-container">
+            <canvas id="tileCanvas"></canvas>
+            <canvas id="tileCanvas1"></canvas>
+        <script>
+            window.onload = () => {
+                let center = [27.98817689833976, 86.92491071824738]; // everest
+                const targetLod = 8;
+                const metrics = SPACEXR.Google.Metrics;
+
+                // define data source.
+                const tileClient = SPACEXR.Google.SatelliteClient2d() ;
+                
+                // setup a container and layer
+                const container = new SPACEXR.LayerContainer()
+                const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(container);
+
+                const targetXY = metrics.getLatLonToTileXY(center[0], center[1], targetLod);
+
+ 
+                // create the source and target
+                const targets = [   new SPACEXR.Tile(targetXY.x, targetXY.y, targetLod, null, metrics), 
+                                    new SPACEXR.Tile(targetXY.x+1, targetXY.y, targetLod, null, metrics)];
+                const sources = [   new SPACEXR.CanvasTileSource("mySourceA", container, targets[0], metrics, { background:"red"}), 
+                                    new SPACEXR.CanvasTileSource("mySourceB", container, targets[1], metrics, { background:"blue"})];
+
+                // set the nav parameters
+                const offset = 0;
+                const state = new SPACEXR.TileNavigationState([targets[0].bounds.south, targets[0].bounds.east], targetLod+offset);
+                const size = metrics.tileSize * (offset ? Math.pow(2, offset) : 1) * 2;
+                const bounds = new SPACEXR.TileDisplayBounds(size,size);
+                layer.setContext(state, bounds, metrics);
+               
+                const canvas = [document.getElementById("tileCanvas"), document.getElementById("tileCanvas1")];
+                for(let c of canvas) {
+                    c.width = 256;
+                    c.height = 256;
+                }
+
+                // this is where we transfert the ImageData to the visible canvas
+                // note there is no need to do that but it's for the sake of the example
+                // as we will use it later on with 3D engine and textures.
+                for(let i=0 ; i != sources.length; i++) {
+                    const index = i;
+                    sources[i].updatedObservable.add((tiles) => {
+                        // Get the canvas context
+                        const ctx = canvas[index].getContext("2d");
+                        ctx.fillStyle = "lightgray";
+                        // Clear the canvas
+                        ctx.fillRect(0, 0, canvas[i].width, canvas[i].height);
+                        // Draw the tile
+                        for(let tile of tiles) {
+                            // Draw the tile
+                            ctx.putImageData(tile.content, 0, 0);
+                        }
+                    });
+                }
+                
+                // Function to recursively update the animation frame
+                // This function is called every time the browser is ready to repaint the canvas
+                // This is the main animation loop
+                function updateFrame() {
+                    // Update the animation frame
+                    for(let source of sources){
+                        source.validate();
+                    }
+                    // Recursively request another frame update
+                    requestAnimationFrame(updateFrame);
+                }
+
+                // Start the animation
+                requestAnimationFrame(updateFrame);
+            };
+        </script>
+    </body>
+</html>

@@ -1,4 +1,4 @@
-import { IEnvelope } from "../geography/geography.interfaces";
+import { IEnvelope } from "../geography";
 import { ITile, ITileAddress, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./address/tiles.address";
@@ -9,7 +9,7 @@ export declare class Tile<T> extends TileAddress implements ITile<T> {
     private _env?;
     private _rect?;
     private _ns?;
-    constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T>);
+    constructor(x: number, y: number, levelOfDetail: number, data?: TileContentType<T>, metrics?: ITileMetrics);
     get namespace(): string;
     set namespace(v: string);
     get address(): ITileAddress;

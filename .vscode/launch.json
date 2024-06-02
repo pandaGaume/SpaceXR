@@ -11,6 +11,14 @@
         {
             "type": "chrome",
             "request": "launch",
+            "name": "Launch Canvas Source on chrome",
+            "url": "http://localhost:1338/packages/host/www/core/canvassource.html",
+            "webRoot": "${workspaceFolder}/packages/dev/core/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
             "name": "GUI 2D on chrome",
             "url": "http://localhost:1338/packages/host/www/babylon/gui2DMap.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon-gui/",

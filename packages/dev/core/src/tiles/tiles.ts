@@ -1,22 +1,15 @@
-import { IEnvelope } from "../geography/geography.interfaces";
-import { Size3 } from "../geometry/geometry.size";
-import { Geo3 } from "../geography/geography.position";
-import { Envelope } from "../geography/geography.envelope";
+import { IEnvelope, Envelope } from "../geography";
 import { ITile, ITileAddress, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { IRectangle } from "../geometry/geometry.interfaces";
 import { Rectangle } from "../geometry/geometry.rectangle";
 import { TileAddress } from "./address/tiles.address";
 
 export class Tile<T> extends TileAddress implements ITile<T> {
-
-
     public static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
         if (metrics) {
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
-            const size = new Size3(nw.lat - se.lat, se.lon - nw.lon, 0);
-            const pos = new Geo3(se.lat, nw.lon);
-            return Envelope.FromSizeAngles(pos, size);
+            return Envelope.FromPoints(nw, se);
         }
         return undefined;
     }
@@ -34,9 +27,13 @@ export class Tile<T> extends TileAddress implements ITile<T> {
     private _rect?: IRectangle;
     private _ns?: string;
 
-    public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T>) {
+    public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T> = null, metrics?: ITileMetrics) {
         super(x, y, levelOfDetail);
         this._value = data;
+        if (metrics) {
+            this._env = Tile.BuildEnvelope(this, metrics);
+            this._rect = Tile.BuildBounds(this, metrics);
+        }
     }
 
     public get namespace(): string {

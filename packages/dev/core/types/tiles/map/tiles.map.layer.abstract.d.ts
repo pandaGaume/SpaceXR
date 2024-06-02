@@ -1,5 +1,5 @@
 import { ITileCollection, ITileMetrics } from "../tiles.interfaces";
-import { ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds } from "./tiles.map.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds, ITileMapLayerContainer } from "./tiles.map.interfaces";
 import { TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
@@ -20,7 +20,7 @@ export declare abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T
     set attribution(attribution: string | undefined);
     get enabled(): boolean;
     set enabled(enabled: boolean);
-    addTo(map: ITileMap<T, ITileMapLayer<T>, unknown>): ITileMapLayer<T>;
+    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
     dispose(): void;
     abstract get metrics(): ITileMetrics;
     abstract get activTiles(): ITileCollection<T>;

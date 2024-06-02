@@ -6,17 +6,20 @@
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../../../dev/core/bundles/spacexr.1.0.0.js"></script>
         <style>
-            html,
             body {
-                height: 100%;
                 margin: 0;
+                padding: 0;
             }
             .canvas-container {
-                display: flex;
+                display: grid;
+                grid-template-columns: 256px 256px;
+                grid-template-rows: 256px 256px;
+                gap: 0;
                 margin: 0;
                 padding: 0;
             }
             .canvas-container canvas {
+                display: block;
                 margin: 0;
                 padding: 0;
             }
@@ -26,6 +29,8 @@
         <div class="canvas-container">
             <canvas id="tileCanvas"></canvas>
             <canvas id="tileCanvas1"></canvas>
+            <canvas id="tileCanvas2"></canvas>
+            <canvas id="tileCanvas3"></canvas>
         <script>
             window.onload = () => {
                 let center = [27.98817689833976, 86.92491071824738]; // everest
@@ -44,9 +49,13 @@
  
                 // create the source and target
                 const targets = [   new SPACEXR.Tile(targetXY.x, targetXY.y, targetLod, null, metrics), 
-                                    new SPACEXR.Tile(targetXY.x+1, targetXY.y, targetLod, null, metrics)];
+                                    new SPACEXR.Tile(targetXY.x+1, targetXY.y, targetLod, null, metrics),
+                                    new SPACEXR.Tile(targetXY.x, targetXY.y+1, targetLod, null, metrics),
+                                    new SPACEXR.Tile(targetXY.x+1, targetXY.y+1, targetLod, null, metrics)];
                 const sources = [   new SPACEXR.CanvasTileSource("mySourceA", container, targets[0], metrics, { background:"red"}), 
-                                    new SPACEXR.CanvasTileSource("mySourceB", container, targets[1], metrics, { background:"blue"})];
+                                    new SPACEXR.CanvasTileSource("mySourceB", container, targets[1], metrics, { background:"green"}),                                    
+                                    new SPACEXR.CanvasTileSource("mySourcec", container, targets[2], metrics, { background:"blue"}),
+                                    new SPACEXR.CanvasTileSource("mySourced", container, targets[3], metrics, { background:"yellow"})];
 
                 // set the nav parameters
                 const offset = 3;
@@ -55,7 +64,10 @@
                 const bounds = new SPACEXR.TileDisplayBounds(size,size);
                 layer.setContext(state, bounds, metrics);
                
-                const canvas = [document.getElementById("tileCanvas"), document.getElementById("tileCanvas1")];
+                const canvas = [document.getElementById("tileCanvas"), 
+                                document.getElementById("tileCanvas1"),
+                                document.getElementById("tileCanvas2"),
+                                document.getElementById("tileCanvas3")];
                 for(let c of canvas) {
                     c.width = 256;
                     c.height = 256;

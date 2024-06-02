@@ -49,7 +49,7 @@
                                     new SPACEXR.CanvasTileSource("mySourceB", container, targets[1], metrics, { background:"blue"})];
 
                 // set the nav parameters
-                const offset = 0;
+                const offset = 3;
                 const state = new SPACEXR.TileNavigationState([targets[0].bounds.south, targets[0].bounds.east], targetLod+offset);
                 const size = metrics.tileSize * (offset ? Math.pow(2, offset) : 1) * 2;
                 const bounds = new SPACEXR.TileDisplayBounds(size,size);

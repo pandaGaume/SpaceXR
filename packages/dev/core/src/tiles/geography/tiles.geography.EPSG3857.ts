@@ -57,12 +57,9 @@ export class EPSG3857 extends AbstractTileMetrics {
         const y = 0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI);
 
         const mapSize = this.mapSize(levelOfDetail);
-        // The reason for adding 0.5 before casting to an integer is to round the floating-point value to the nearest integer.
-        // Without this step, the cast to an integer would truncate the fractional component of the floating-point value towards zero.
-        // This rounding step is necessary to ensure that the resulting point coordinates are centered on the cell,
-        // as required by the cell-centered convention
-        p.x = Math.ceil(Scalar.Clamp(x * mapSize + 0.5, 0, mapSize - 1));
-        p.y = Math.ceil(Scalar.Clamp(y * mapSize + 0.5, 0, mapSize - 1));
+
+        p.x = Math.ceil(Scalar.Clamp(x * mapSize, 0, mapSize - 1));
+        p.y = Math.ceil(Scalar.Clamp(y * mapSize, 0, mapSize - 1));
     }
 
     public getPointXYToLatLonToRef(pointX: number, pointY: number, levelOfDetail: number, latLon: IGeo2): void {

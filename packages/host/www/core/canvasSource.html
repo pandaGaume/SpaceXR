@@ -6,9 +6,13 @@
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../../../dev/core/bundles/spacexr.1.0.0.js"></script>
         <style>
-            body {
+            .display {
                 margin: 0;
                 padding: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
             }
             .canvas-container {
                 display: grid;
@@ -40,11 +44,14 @@
             </p>
             <p>This means that the following reconstructed image is composed of 4 canvases, each displaying 4 tiles.</p>
         </header>
-        <div class="canvas-container">
-            <canvas id="tileCanvas0"></canvas>
-            <canvas id="tileCanvas1"></canvas>
-            <canvas id="tileCanvas2"></canvas>
-            <canvas id="tileCanvas3"></canvas>
+        <div class="display">
+            <div class="canvas-container">
+                <canvas id="tileCanvas0"></canvas>
+                <canvas id="tileCanvas1"></canvas>
+                <canvas id="tileCanvas2"></canvas>
+                <canvas id="tileCanvas3"></canvas>
+            </div>
+            <div id="copyright"></div>
         </div>
         <script>
             function getResolution() {
@@ -71,6 +78,7 @@
                 // setup a container and layer
                 const container = new SPACEXR.LayerContainer();
                 const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution: SPACEXR.Google.Attribution }).addTo(container);
+                document.getElementById("copyright").innerHTML = layer.attribution;
 
                 const targetXY = metrics.getLatLonToTileXY(center[0], center[1], targetLod);
 

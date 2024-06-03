@@ -20,7 +20,7 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, I
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
-    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
+    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
 }
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvasRenderingOptions {
 }
@@ -50,6 +50,10 @@ export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
 }
+export interface IHasTileMapLayerContainer<T, L extends ITileMapLayer<T>> {
+    layerContainer: ITileMapLayerContainer<T, L>;
+}
+export declare function IsTileMapLayerContainerProxy<T, L extends ITileMapLayer<T>>(b: unknown): b is IHasTileMapLayerContainer<T, L>;
 export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T, L>, ITileNavigationApi<S>, IHasNavigationState, IDisposable {
 }
 export interface ITileMapBuilder<T, L extends ITileMapLayer<T>> {

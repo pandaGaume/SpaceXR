@@ -1,7 +1,7 @@
 import { PropertyChangedEventArgs } from "../../events";
 
 import { ITileCollection, ITileMetrics } from "../tiles.interfaces";
-import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds, ITileMapLayerContainer } from "./tiles.map.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy } from "./tiles.map.interfaces";
 import { TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
@@ -101,8 +101,13 @@ export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implem
         }
     }
 
-    public addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T> {
-        map?.addLayer(this);
+    public addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T> {
+        if (map) {
+            if (IsTileMapLayerContainerProxy<T, ITileMapLayer<T>>(map)) {
+                map = map.layerContainer;
+            }
+            map?.addLayer(this);
+        }
         return this;
     }
 

@@ -1,5 +1,5 @@
 import { Scene } from "@babylonjs/core";
-import { Map3dMaterial } from "./materials.map3d";
+import { Map3dMaterial } from "./materials.elevation";
 
 /**
  * The `WebMapMaterial` class represents a special material used for rendering map tiles.

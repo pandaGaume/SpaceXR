@@ -28,9 +28,8 @@ import {
 import { ITile, ImageLayer, TileAddress } from "core/tiles";
 import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
-import { ElevationLayer, ElevationTile, IHasMapScale, IMap3dElevationTarget, IMap3dImageTarget } from "../map";
+import { ElevationTile, IHasMapScale } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
-import { Map3dTexture } from "./textures";
 import { IDemInfos } from "core/dem";
 import { ICartesian3 } from "core/geometry";
 
@@ -148,7 +147,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     // the samplers for the elevation, normal and layer textures.
     private _elevationSampler: Nullable<Texture3> = null;
     private _normalSampler: Nullable<Texture3> = null;
-    private _textureSampler: Nullable<Map3dTexture> = null;
+    private _textureSampler: Nullable<Texture3> = null;
 
     // the elevation related properties.
     private _elevationRange: Nullable<Range> = null;
@@ -678,21 +677,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const scene = this.getScene();
         this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, maxDepth, generateMipMap, scene);
         this._normalSampler = <Texture3>this._buildSampler(Map3dLayerKind.Normal, width, height, maxDepth, generateMipMap, scene);
-        this._textureSampler = <Map3dTexture>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
+        this._textureSampler = <Texture3>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
     }
 
     protected _getElevationSamplerDepth(layer: ElevationLayer): number {
         return 24; // for dev purpose we set a fixed number of tiles
     }
 
-    protected _buildSampler(
-        kind: Map3dLayerKind,
-        width: number,
-        height: number,
-        depth: number,
-        generateMipMap: boolean,
-        scene: Scene
-    ): Nullable<Texture3> | Nullable<Map3dTexture> {
+    protected _buildSampler(kind: Map3dLayerKind, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> {
         switch (kind) {
             case Map3dLayerKind.Elevation: {
                 const options = {
@@ -732,7 +724,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                     generateMipMap: generateMipMap,
                 };
                 // this is where we leverage the Map3dTexture class to handle the layer texture
-                return new Map3dTexture(scene, options);
+                return new Texture3(scene, options);
             }
             default: {
                 return null;

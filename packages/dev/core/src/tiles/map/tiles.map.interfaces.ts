@@ -27,7 +27,7 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, I
     name: string;
     enabled: boolean;
 
-    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
+    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
 }
 
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvasRenderingOptions {}
@@ -71,6 +71,15 @@ export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
 
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
+}
+
+export interface IHasTileMapLayerContainer<T, L extends ITileMapLayer<T>> {
+    layerContainer: ITileMapLayerContainer<T, L>;
+}
+
+export function IsTileMapLayerContainerProxy<T, L extends ITileMapLayer<T>>(b: unknown): b is IHasTileMapLayerContainer<T, L> {
+    if (b === null || typeof b !== "object") return false;
+    return (<IHasTileMapLayerContainer<T, L>>b).layerContainer !== undefined;
 }
 
 /// <summary>

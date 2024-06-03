@@ -51,7 +51,7 @@ export class ElevationHost implements ITargetBlock<ITile<IElevationMesh>> {
     _scaleController: Nullable<Map3dScaleController> = null;
     _scaleObserver: Nullable<Observer<ICartesian3>> = null;
 
-    public constructor(name: string, layer: ITileMapLayer<IElevationMesh>, options?: IElevationTileOptions, enabled?: boolean) {
+    public constructor(layer: ITileMapLayer<IElevationMesh>, options?: IElevationTileOptions, enabled?: boolean) {
         this._layer = layer;
         this._layer.linkTo(this);
         this._exageration = options?.exageration ?? 1.0;
@@ -64,7 +64,7 @@ export class ElevationHost implements ITargetBlock<ITile<IElevationMesh>> {
         this._tilesRoot = new TransformNode(this._buildNameWithSuffix("tiles"));
         this._tilesRoot.parent = this._root;
         this._grid = this._buildTopology();
-        this._template = this._buildMesh(name, options?.material ?? null);
+        this._template = this._buildMesh(layer.name, options?.material ?? null);
         this._cartesianCenter = null;
         this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
     }

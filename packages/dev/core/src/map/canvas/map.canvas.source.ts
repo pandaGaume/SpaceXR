@@ -1,7 +1,7 @@
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine";
 import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope } from "../../geography";
-import { Cartesian2 } from "../../geometry";
+import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
@@ -17,6 +17,11 @@ class LayerView {
         public tiles: TileCollection<CanvasTileContentType>,
         public propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null
     ) {}
+}
+
+export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
+    resolution?: ISize2;
+    display?: HTMLCanvasElement | CanvasDisplay;
 }
 
 export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
@@ -47,7 +52,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
     _background?: string;
     _alpha: number;
 
-    public constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasRenderingOptions) {
+    public constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasTileSourceOptions) {
         super(name, false);
         this._layers = layers;
         this._layerAddedObservable = this._layers.layerAddedObservable.add(this._onLayerAdded.bind(this));
@@ -56,7 +61,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         this._target = target;
         this._metrics = metrics;
 
-        this._display = this._buildDisplay();
+        this._display = this._buildDisplay(options);
         this._context = this._display.getContext();
 
         this._background = options?.background;
@@ -66,6 +71,10 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         for (const layer of this._layers.getLayers()) {
             this._onLayerAdded(layer);
         }
+    }
+
+    public get display(): CanvasDisplay {
+        return this._display;
     }
 
     public get metrics(): ITileMetrics {
@@ -254,6 +263,9 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         ctx.fillStyle = b;
         ctx.globalAlpha = a;
 
+        // here we need to adapt the scale between the desired resolution and the tile size.
+        ctx.scale(this.display.displayWidth / this.metrics.tileSize, this.display.displayHeight / this.metrics.tileSize);
+
         for (const tiles of this._activeTiles) {
             if (!tiles.layer.enabled) {
                 continue;
@@ -313,8 +325,14 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         ctx.restore();
     }
 
-    protected _buildDisplay(canvas?: HTMLCanvasElement): CanvasDisplay {
-        canvas = canvas ?? CanvasDisplay.CreateCanvas(this._metrics.tileSize, this._metrics.tileSize);
+    protected _buildDisplay(options?: ICanvasTileSourceOptions): CanvasDisplay {
+        if (options?.display) {
+            if (options.display instanceof CanvasDisplay) {
+                return options.display;
+            }
+            return new CanvasDisplay(options.display as HTMLCanvasElement, 1, false);
+        }
+        const canvas = CanvasDisplay.CreateCanvas(options?.resolution?.width ?? this._metrics.tileSize, options?.resolution?.height ?? this._metrics.tileSize);
         return new CanvasDisplay(canvas as HTMLCanvasElement, 1, false);
     }
 }

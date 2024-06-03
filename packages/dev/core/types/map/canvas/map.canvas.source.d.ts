@@ -1,6 +1,7 @@
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine";
 import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope } from "../../geography";
+import { ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
@@ -13,6 +14,10 @@ declare class LayerView {
     tiles: TileCollection<CanvasTileContentType>;
     propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
     constructor(layer: ITileMapLayer<CanvasTileContentType>, tiles: TileCollection<CanvasTileContentType>, propertyChangedObserver?: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>);
+}
+export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
+    resolution?: ISize2;
+    display?: HTMLCanvasElement | CanvasDisplay;
 }
 export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>> extends TileConsumerBase<CanvasProducerContentType> implements ICanvasRenderingOptions, ITileMetricsProvider {
     static DefaultBackground: RGBAColor;
@@ -27,7 +32,8 @@ export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentT
     _context: Nullable<CanvasRenderingContext2D>;
     _background?: string;
     _alpha: number;
-    constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasRenderingOptions);
+    constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasTileSourceOptions);
+    get display(): CanvasDisplay;
     get metrics(): ITileMetrics;
     get background(): string | undefined;
     set background(v: string | undefined);
@@ -48,6 +54,6 @@ export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentT
     protected _afterValidate(): void;
     protected _getContext2D(): Nullable<CanvasRenderingContext2D>;
     protected _draw(ctx: ICanvasRenderingContext, xoffset?: number, yoffset?: number): void;
-    protected _buildDisplay(canvas?: HTMLCanvasElement): CanvasDisplay;
+    protected _buildDisplay(options?: ICanvasTileSourceOptions): CanvasDisplay;
 }
 export {};

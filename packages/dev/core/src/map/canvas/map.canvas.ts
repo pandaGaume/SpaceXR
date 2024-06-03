@@ -86,10 +86,25 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         ctx.scale(scale, scale);
         // every tiles are supposed to got the same size here, using same metrics
         for (const l of this._zIndexOrderedLayers ?? []) {
-            if (l.enabled) {
+            if (l.enabled && l.activTiles) {
                 ctx.globalAlpha = l.alpha ?? a;
                 ctx.fillStyle = l.background ?? b;
-                l.draw(ctx);
+                const center = l.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+
+                for (const t of l.activTiles) {
+                    if (t.rect) {
+                        const x = t.rect.x - center.x;
+                        const y = t.rect.y - center.y;
+                        const item = t.content ?? null; // trick to address erroness tile.
+                        if (item) {
+                            ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
+                            continue;
+                        } else {
+                            const size = l.metrics.tileSize;
+                            ctx.fillRect(x, y, size, size);
+                        }
+                    }
+                }
             }
         }
         ctx.restore();

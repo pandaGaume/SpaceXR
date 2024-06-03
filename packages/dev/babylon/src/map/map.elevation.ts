@@ -1,17 +1,6 @@
 import { IDemInfos } from "core/dem";
-import {
-    IPipelineMessageType,
-    ITile,
-    ITileDisplayBounds,
-    ITileMap,
-    ITileMapLayer,
-    ITileMetrics,
-    ITileNavigationState,
-    ImageLayer,
-    TileDisplayBounds,
-    TileMapBase,
-} from "core/tiles";
-import { EventState, Observable, Observer } from "core/events";
+import { IHasTileMapLayerContainer, ITile, ITileMapLayer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi, ImageLayer, LayerContainer } from "core/tiles";
+import { Observer } from "core/events";
 import { Nullable, Scene, TransformNode } from "@babylonjs/core";
 import { IGeo2 } from "core/geography";
 import { Size2 } from "core/geometry";
@@ -34,42 +23,59 @@ export interface IMap3dOptions {
     metrics: IMap3DMetrics;
 }
 
-export class Map3d extends TransformNode implements ITileMap<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>, Map3d> {
+export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>, ITileNavigationApi<Map3d> {
     public static DefaultTextureSize: number = 1024;
 
     // the map logic. This is the main entry point for the map API.
-    private _map: TileMapBase<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
+    private _layers: ITileMapLayerContainer<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>;
     private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
     private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dTileContentType>>>;
 
-    private _targetDisplay: Nullable<HolographicDisplay>;
-    private _controller: Nullable<PointerController<IPointerSource>>;
+    private _targetDisplay: Nullable<HolographicDisplay> = null;
+    private _controller: Nullable<PointerController<IPointerSource>> = null;
     private _ownController = false;
 
     public constructor(name: string, options: IMap3dOptions, scene: Scene) {
         super(name, scene);
-        const m = options.metrics;
-        const display = new TileDisplayBounds(m.resolution.width, m.resolution.height);
 
-        // create the map
-        this._map = new TileMapBase(name, display);
-        this._addLayerObserver = this._map.layerAddedObservable.add(this._onLayerAdded.bind(this));
-        this._removeLayerObserver = this._map.layerRemovedObservable.add(this._onLayerRemoved.bind(this));
-
-        // TODO : this is not the place for scaling ....
-        this.scaling.set(m.dimension.width / display.displayWidth, m.dimension.height / display.displayHeight, 1);
-        this._controller = null;
-        this._targetDisplay = null;
+        // create the layer container
+        this._layers = new LayerContainer<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>>();
+        this._addLayerObserver = this._layers.layerAddedObservable.add(this._onLayerAdded.bind(this));
+        this._removeLayerObserver = this._layers.layerRemovedObservable.add(this._onLayerRemoved.bind(this));
     }
+
+    /// #region ITileNavigationApi
+    public setViewMap(center: IGeo2 | number[], zoom?: number | undefined, rotation?: number | undefined): Map3d {
+        return this;
+    }
+    public zoomMap(delta: number): Map3d {
+        return this;
+    }
+    public zoomInMap(delta: number): Map3d {
+        return this;
+    }
+    public zoomOutMap(delta: number): Map3d {
+        return this;
+    }
+    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics | undefined): Map3d {
+        return this;
+    }
+    public translateMap(dlat: number | IGeo2 | number[], dlon?: number | undefined): Map3d {
+        return this;
+    }
+    public rotateMap(r: number): Map3d {
+        return this;
+    }
+    /// #endregion ITileNavigationApi
+
+    /// #region IHasTileMapLayerContainer
+    public get layerContainer(): ITileMapLayerContainer<Map3dTileContentType, ITileMapLayer<Map3dTileContentType>> {
+        return this._layers;
+    }
+    /// #endregion IHasTileMapLayerContainer
 
     public withDisplay(display: HolographicDisplay): Map3d {
         this._targetDisplay = display;
-        for (var l of this.getElevationLayers()) {
-            if (l.enabled == false) {
-                continue;
-            }
-            l.bindDisplay(display);
-        }
         return this.withPointerControl(this._targetDisplay.pointerSource);
     }
 
@@ -86,119 +92,14 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
         return this;
     }
 
-    // TILE map API
-    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): Map3d {
-        this._map.setViewMap(center, zoom, rotation);
-        return this;
-    }
-    public zoomMap(delta: number): Map3d {
-        this._map.zoomMap(delta);
-        return this;
-    }
-    public zoomInMap(delta: number): Map3d {
-        this._map.zoomInMap(delta);
-        return this;
-    }
-    public zoomOutMap(delta: number): Map3d {
-        this._map.zoomOutMap(delta);
-        return this;
-    }
-    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): Map3d {
-        this._map.translateUnitsMap(tx, ty, metrics);
-        return this;
-    }
-    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): Map3d {
-        this._map.translateMap(lat, lon);
-        return this;
-    }
-    public rotateMap(r: number): Map3d {
-        this._map.rotateMap(r);
-        return this;
-    }
-    public get navigation(): ITileNavigationState {
-        return this._map.navigation;
-    }
-    public get layerAddedObservable(): Observable<ITileMapLayer<Map3dTileContentType>> {
-        return this._map.layerAddedObservable;
-    }
-    public get layerRemovedObservable(): Observable<ITileMapLayer<Map3dTileContentType>> {
-        return this._map.layerRemovedObservable;
-    }
-
-    public getLayers(predicate?: (l: ITileMapLayer<Map3dTileContentType>) => boolean, sorted?: boolean): IterableIterator<ITileMapLayer<Map3dTileContentType>> {
-        return this._map.getLayers(predicate, sorted);
-    }
-
-    public addLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
-        this._map.addLayer(layer);
-    }
-
-    public removeLayer(layer: ITileMapLayer<Map3dTileContentType>): void {
-        this._map.removeLayer(layer);
-    }
-    // END TILE map API
-
     public dispose() {
         super.dispose();
-        this._map.dispose();
         this._controller?.dispose();
         this._addLayerObserver?.disconnect();
         this._removeLayerObserver?.disconnect();
     }
 
-    public get display(): Nullable<ITileDisplayBounds> {
-        return this._map.display;
-    }
-
-    /// TargetBlock
-    public added(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (const tile of eventData) {
-            if (tile && tile.content instanceof HTMLImageElement) {
-                this.imageAdded(eventState.currentTarget.source, <ITile<HTMLImageElement>>tile);
-            }
-        }
-    }
-
-    public removed(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (const tile of eventData) {
-            if (tile && tile.content instanceof HTMLImageElement) {
-                this.imageRemoved(eventState.currentTarget.source, <ITile<HTMLImageElement>>tile);
-            }
-        }
-    }
-
-    public updated(eventData: IPipelineMessageType<ITile<Map3dTileContentType>>, eventState: EventState): void {
-        for (const tile of eventData) {
-            if (tile && tile.content instanceof HTMLImageElement) {
-                this.imageUpdated(eventState.currentTarget.source, <ITile<HTMLImageElement>>tile);
-            }
-        }
-    }
-    /// End TargetBlock
-
-    public imageAdded(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
-        // looking for every dem enabled layer to forward the image
-        for (const layer of this.getElevationLayers()) {
-            layer.imageAdded(src, tile);
-        }
-    }
-
-    public imageRemoved(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
-        // looking for every dem enabled layer to forward the image
-        for (const layer of this.getElevationLayers()) {
-            layer.imageRemoved(src, tile);
-        }
-    }
-
-    public imageUpdated(src: ImageLayer, tile: ITile<HTMLImageElement>): void {
-        // looking for every dem enabled layer to forward the image
-        for (const layer of this.getElevationLayers()) {
-            layer.imageUpdated(src, tile);
-        }
-    }
-
     /// handlers
-
     protected _onLayerAdded(layer: ITileMapLayer<Map3dTileContentType>): void {
         if (layer instanceof ElevationLayer) {
             this._onElevationLayerAdded(layer);
@@ -241,11 +142,5 @@ export class Map3d extends TransformNode implements ITileMap<Map3dTileContentTyp
 
     protected _onImageLayerRemoved(layer: ImageLayer): void {
         layer.unlinkFrom(this);
-    }
-
-    protected *getElevationLayers(): IterableIterator<ElevationLayer> {
-        for (const layer of this._map.getLayers((l) => l.enabled && l instanceof ElevationLayer)) {
-            yield <ElevationLayer>layer;
-        }
     }
 }

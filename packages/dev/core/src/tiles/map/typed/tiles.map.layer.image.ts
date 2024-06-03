@@ -1,9 +1,7 @@
-import { ICanvasRenderingContext } from "dev/core/src/engine";
 import { PropertyChangedEventArgs } from "../../../events";
-import { ITile, ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
+import { ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
-import { ICartesian2 } from "dev/core/src/geometry";
 
 export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImageTileMapLayer {
     _alpha: number;
@@ -51,30 +49,6 @@ export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImage
                 return;
             }
             this._background = b;
-        }
-    }
-
-    public draw(ctx: ICanvasRenderingContext, tiles?: Iterable<ITile<HTMLImageElement>>, center?: ICartesian2): void {
-        tiles = tiles ?? this.activTiles;
-        if (tiles == null || undefined) {
-            return;
-        }
-
-        const metrics = this.metrics;
-        center = center ?? metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
-
-        for (const t of tiles) {
-            if (t.rect) {
-                const x = t.rect.x - center.x;
-                const y = t.rect.y - center.y;
-                const item = t.content ?? null; // trick to address erroness tile.
-                if (item) {
-                    ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
-                    continue;
-                } else {
-                    ctx.fillRect(x, y, metrics.tileSize, metrics.tileSize);
-                }
-            }
         }
     }
 }

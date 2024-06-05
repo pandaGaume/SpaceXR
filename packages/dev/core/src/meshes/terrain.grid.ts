@@ -13,6 +13,7 @@ export class TerrainGridOptions {
     });
 
     public uvs?: boolean;
+    public normals?: boolean;
     public columns?: number;
     public rows?: number;
     public sx?: number;
@@ -33,6 +34,7 @@ export class TerrainGridOptions {
 
 export class TerrainGridOptionsBuilder {
     _uvs?: boolean;
+    _normals?: boolean;
     _cols?: number;
     _rows?: number;
     _sx?: number;
@@ -46,6 +48,10 @@ export class TerrainGridOptionsBuilder {
 
     public withUvs(flag: boolean): TerrainGridOptionsBuilder {
         this._uvs = flag;
+        return this;
+    }
+    public withNormals(flag: boolean): TerrainGridOptionsBuilder {
+        this._normals = flag;
         return this;
     }
     public withColumns(v?: number): TerrainGridOptionsBuilder {
@@ -90,6 +96,7 @@ export class TerrainGridOptionsBuilder {
     public build() {
         return new TerrainGridOptions({
             uvs: this._uvs,
+            normals: this._normals,
             columns: this._cols || this._rows,
             rows: this._rows || this._cols,
             sx: this._sx,
@@ -125,6 +132,7 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         const positions = [];
         const indices = [];
         const uvs: Nullable<FloatArray> = this._o?.uvs ? [] : null;
+        const normals: Nullable<FloatArray> = this._o?.normals ? [] : null;
 
         const dx = 1 / (w - 1);
         const dy = 1 / (h - 1);
@@ -144,6 +152,9 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
                 if (uvs) {
                     const uv: number[] = this._o?.uvInitializer ? <number[]>this._o.uvInitializer(column, row, w, h, ...params) : [u, v];
                     uvs.push(...uv);
+                }
+                if (normals) {
+                    normals.push(0, 0, 1);
                 }
             }
         }
@@ -178,6 +189,7 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         data.indices = indices;
         data.positions = positions;
         data.uvs = uvs;
+        data.normals = normals;
 
         return data;
     }

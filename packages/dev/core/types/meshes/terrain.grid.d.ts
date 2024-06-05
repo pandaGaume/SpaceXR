@@ -7,6 +7,7 @@ export declare class TerrainGridOptions {
     static DefaultScale: number;
     static Shared: TerrainGridOptions;
     uvs?: boolean;
+    normals?: boolean;
     columns?: number;
     rows?: number;
     sx?: number;
@@ -21,6 +22,7 @@ export declare class TerrainGridOptions {
 }
 export declare class TerrainGridOptionsBuilder {
     _uvs?: boolean;
+    _normals?: boolean;
     _cols?: number;
     _rows?: number;
     _sx?: number;
@@ -32,6 +34,7 @@ export declare class TerrainGridOptionsBuilder {
     _zInitializer?: VInitializerFn;
     _uvInitializer?: VInitializerFn;
     withUvs(flag: boolean): TerrainGridOptionsBuilder;
+    withNormals(flag: boolean): TerrainGridOptionsBuilder;
     withColumns(v?: number): TerrainGridOptionsBuilder;
     withRows(v?: number): TerrainGridOptionsBuilder;
     withInvertIndices(v?: boolean): TerrainGridOptionsBuilder;

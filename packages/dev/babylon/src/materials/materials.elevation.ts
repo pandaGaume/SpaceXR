@@ -195,6 +195,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
+    public get terrainColor(): Nullable<Color4> {
+        return this._terrainColor;
+    }
+
+    public set terrainColor(value: Nullable<Color4>) {
+        if (this._terrainColor !== value) {
+            this._terrainColor = value;
+            this.markAsDirty(Material.AttributesDirtyFlag);
+        }
+    }
+
     /// #region ITargetBlock
     public added(eventData: IPipelineMessageType<ElevationTile | ITile<ImageData>>, eventState: EventState): void {
         for (let tile of eventData) {

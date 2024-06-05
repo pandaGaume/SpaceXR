@@ -23,7 +23,7 @@ import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observable, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
 import { ElevationTile, IElevationMesh, IElevationTile } from "./map.elevation.tile";
-import { IElevationLayerOptions } from "./map.elevation.layer";
+import { ElevationLayer, IElevationLayerOptions, IElevationMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { Map3dTextureContentType } from "./map.elevation";
 import { CanvasTileSource } from "core/map";
@@ -61,9 +61,13 @@ export class Map3dElevationHost
     // internal pipeline links dedicated to ISourceBlock
     _links: Array<ITilePipelineLink<ITile<IElevationMesh>>> = [];
 
+    // observers
+    _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
+    _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null;
+
     // the data source
     _textureLayers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>;
-    _elevationSource: ITileMapLayer<IDemInfos>;
+    _elevationSource: ElevationLayer;
 
     // the grid model
     _grid: VertexData;
@@ -74,8 +78,8 @@ export class Map3dElevationHost
     _scaleObserver: Nullable<Observer<ICartesian3>> = null;
 
     // the options
-    _exageration?: number;
-    _insets?: ICartesian3;
+    _exageration: number;
+    _insets: ICartesian3;
     _gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
 
     // where the tiles are stored
@@ -90,29 +94,42 @@ export class Map3dElevationHost
     public constructor(
         name: string,
         layers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>,
-        source: ITileMapLayer<IDemInfos>,
+        source: ElevationLayer,
         options?: IElevationLayerOptions,
-        enabled?: boolean
+        enabled: boolean = true
     ) {
         super(name);
         this._textureLayers = layers;
         this._elevationSource = source;
         this._elevationSource.linkTo(this);
-        this._exageration = options?.exageration ?? 1.0;
-        this._insets = options?.insets;
+        this._layerObserver = this._elevationSource.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
+
+        this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
+        this.scaling.z = this._exageration;
+
+        this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
         if (this._insets) {
             this.position.set(this._insets.x, this._insets.y, this._insets.z);
         }
         this._tilesRoot = new TransformNode(this._buildNameWithSuffix(Map3dElevationHost.TileRootSuffix));
         this._tilesRoot.parent = this;
         this._grid = this._buildTopology();
-        this._template = this._buildMesh(options?.material);
-        this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+        // build the material
+        const material = this._buildMaterial(options, this.getScene());
+        if (IsTargetBlock<ElevationTile>(material)) {
+            // if the material is a target block for elevation tiles, we link it to the source, which is this.
+            // remember that the source is a layer of ITile<IDemInfos> (ElevationLayer as of now), which is transformed by this host to ITile<IElevationMesh> (ElevationTile as of now).
+            this.linkTo(material);
+        }
+
+        this._template = this._buildMesh(material);
+        this._navigationObserver = this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
         const geo = this.navigation.center;
         const lod = this.navigation.lod;
         this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, lod);
 
         this._activTiles = new TileCollection<IElevationMesh>();
+        this.setEnabled(enabled);
     }
 
     //#region IHasNavigationState
@@ -135,19 +152,16 @@ export class Map3dElevationHost
 
     //#region ITargetBlock<IDemInfos>
     public added(eventData: IPipelineMessageType<ITile<IDemInfos>>, eventState: EventState): void {
-        console.log("Map3dElevationHost.added");
         for (const tile of eventData) {
             this._onTileAdded(tile, eventState);
         }
     }
     public removed(eventData: IPipelineMessageType<ITile<IDemInfos>>, eventState: EventState): void {
-        console.log("Map3dElevationHost.removed");
         for (const tile of eventData) {
             this._onTileRemoved(tile, eventState);
         }
     }
     public updated(eventData: IPipelineMessageType<ITile<IDemInfos>>, eventState: EventState): void {
-        console.log("Map3dElevationHost.updated");
         for (const tile of eventData) {
             this._onTileUpdated(tile, eventState);
         }
@@ -221,6 +235,22 @@ export class Map3dElevationHost
         }
     }
 
+    public dispose(doNotRecurse?: boolean | undefined, disposeMaterialAndTextures?: boolean | undefined): void {
+        super.dispose(doNotRecurse, disposeMaterialAndTextures);
+        if (this._navigationObserver) {
+            this._navigationObserver.disconnect();
+            this._navigationObserver = null;
+        }
+        if (this._layerObserver) {
+            this._layerObserver.disconnect();
+            this._layerObserver = null;
+        }
+        if (this._scaleController) {
+            this._scaleController.dispose();
+            this._scaleController = null;
+        }
+    }
+
     protected _onScaleChanged(scale: ICartesian3): void {
         const material = this._template.material;
         if (material && HasMapScale(material)) {
@@ -232,7 +262,7 @@ export class Map3dElevationHost
         const mesh = this._createMesh(this._buildNameWithSuffix("template"), scene);
         this._grid.applyToMesh(mesh, true);
         mesh.isVisible = false;
-        mesh.material = material ?? this._createDefaultMaterial(scene);
+        mesh.material = material;
         return mesh;
     }
 
@@ -245,6 +275,35 @@ export class Map3dElevationHost
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
         instance.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
         return instance;
+    }
+
+    protected _onElevationLayerPropertyChanged(event: PropertyChangedEventArgs<unknown, unknown>, state: EventState): void {
+        if (event.source instanceof ElevationLayer) {
+            switch (event.propertyName) {
+                case ElevationLayer.ExagerationPropertyName: {
+                    if (event.source.exageration !== this._exageration) {
+                        this._exageration = event.source.exageration ?? ElevationLayer.DefaultExageration;
+                        this.scaling.z = this._exageration;
+                    }
+                    break;
+                }
+                case ElevationLayer.InsetsPropertyName: {
+                    const insets = event.source.insets;
+                    if (insets) {
+                        this.position.set(insets.x, insets.y, insets.z);
+                    }
+                    break;
+                }
+                case ElevationLayer.ColorPropertyName: {
+                    if (this._template.material instanceof WebMapMaterial) {
+                        if (this._template.material.terrainColor !== event.source.color) {
+                            this._template.material.terrainColor = event.source.color ?? null;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
@@ -320,6 +379,7 @@ export class Map3dElevationHost
                 .withZInitializer(Map3dElevationHost.InitZ) // register the z initializer, which serve as referencing the texture depth
                 .withUvs(true) // generate uvs.
                 .withUVInitializer(Map3dElevationHost.InitUV) // register the uv initializer, which serve as referencing the texture coordinate used in conjunction with depth
+                .withNormals(true) // generate normals
                 .build();
         }
         if (options instanceof TerrainGridOptionsBuilder) {
@@ -404,7 +464,18 @@ export class Map3dElevationHost
         return `${this.name ?? Map3dElevationHost.DefaultName}.${suffix}`;
     }
 
-    protected _createDefaultMaterial(scene?: Scene): Material {
-        return new WebMapMaterial(this._buildNameWithSuffix("material"), scene);
+    protected _buildMaterial(material?: IElevationMaterialOptions, scene?: Scene): Material {
+        if (material?.material) {
+            return material.material;
+        }
+        return this._createDefaultMaterial(material, scene);
+    }
+
+    protected _createDefaultMaterial(material?: IElevationMaterialOptions, scene?: Scene): Material {
+        const m = new WebMapMaterial(this._buildNameWithSuffix("material"), scene);
+        if (material?.color) {
+            m.terrainColor = material.color;
+        }
+        return m;
     }
 }

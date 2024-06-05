@@ -12,7 +12,7 @@ void main(void) {
     
     #include<clipFragment>
     
-    vec4 texColor = texture(uTextures, vUvs);
+    vec4 texColor = uTerrainColor; // texture(uTextures, vUvs);
 
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
         gl_FragColor=vColor;

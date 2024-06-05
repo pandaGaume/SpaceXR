@@ -22,22 +22,26 @@
                 width: 100%;
                 height: 100%;
             }
-            #compass {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                width: 200px;
-                height: 200px;
-                transform-origin: center;
+            header {
+                border-bottom: 2px solid #ccc;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
             }
-
-            #compassImage {
-                width: 100%;
-                height: 100%;
+            h1 {
+                font-size: 24px;
+                color: #333;
+            }
+            p {
+                font-size: 16px;
+                color: #666;
             }
         </style>
     </head>
     <body>
+        <header>
+            <h1>3D Holographic Display Sample</h1>
+            <p></p>
+        </header>
         <div id="mapcontainer">
             <canvas id="mapcanvas3d"></canvas>
         </div>
@@ -95,7 +99,7 @@
                 const display = new SPACEXR.HolographicDisplay("holographicDisplay", size, resolution, scene);
                 display.material = createGlassMaterial(scene);
                 display.rotation.x = -Math.PI / 2;
-                //display.freezeWorldMatrix();
+                display.freezeWorldMatrix();
 
                 camera.setTarget(display);
 
@@ -111,15 +115,12 @@
                 // build the map
                 const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
 
-                //const defaultTileMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
-                //defaultTileMaterial.wireframe = true;
-
                 // build layer options
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
                     exageration: 1.5,
                     insets: new BABYLON.Vector3(0, 0, 10),
-                    material: new BABYLON.StandardMaterial("groundMaterial", scene),
+                    color: new BABYLON.Color4(0.5, 0.5, 0.5),
                 };
 
                 // build layer and add it to the map

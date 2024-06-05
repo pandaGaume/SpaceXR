@@ -1,32 +1,40 @@
-import { Material } from "@babylonjs/core";
+import { Color4, Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { PropertyChangedEventArgs } from "core/events";
-import { ICartesian3 } from "core/geometry";
+import { Cartesian3, ICartesian3 } from "core/geometry";
 import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
 
-export interface IElevationLayerOptions extends ITileMapLayerOptions {
+export interface IElevationMaterialOptions {
+    material?: Material; // this is the default material to use. If defined, superseed any other material options.
+    color?: Color4;
+}
+
+export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationMaterialOptions {
     exageration?: number;
     insets?: ICartesian3;
-    material?: Material;
 }
 
 export interface IElevationLayer extends ITileMapLayer<IDemInfos>, IElevationLayerOptions {}
 
 export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevationLayer {
+    public static readonly DefaultColor: Color4 = Color4.FromInts(70, 130, 180, 255);
     public static readonly DefaultExageration: number = 1.0;
-    public static readonly DefaultInsets: ICartesian3 = { x: 0, y: 0, z: 0 };
+    public static readonly DefaultInsets: ICartesian3 = Cartesian3.Zero();
 
     public static readonly ExagerationPropertyName: string = "exageration";
     public static readonly InsetsPropertyName: string = "insets";
+    public static readonly ColorPropertyName: string = "color";
 
     private _exageration?: number;
     private _insets?: ICartesian3;
+    private _color?: Color4;
     private _material?: Material;
 
     public constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
         super(name, provider, options, enabled);
         this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
         this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
+        this._color = options?.color;
         this._material = options?.material;
     }
 
@@ -45,7 +53,7 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
             return;
         }
 
-        this._exageration = value ?? 1.0;
+        this._exageration = value;
     }
 
     public get insets(): ICartesian3 | undefined {
@@ -64,6 +72,24 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         }
 
         this._insets = value;
+    }
+
+    public get color(): Color4 | undefined {
+        return this._color;
+    }
+
+    public set color(value: Color4 | undefined) {
+        if (this._color === value) return;
+
+        if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+            const oldValue = this._exageration;
+            this._color = value;
+            const args = new PropertyChangedEventArgs<ElevationLayer, number>(this, oldValue, this._exageration, ElevationLayer.ColorPropertyName);
+            this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+            return;
+        }
+
+        this._color = value;
     }
 
     public get material(): Material | undefined {

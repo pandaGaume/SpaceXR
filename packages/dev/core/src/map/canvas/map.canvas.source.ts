@@ -3,7 +3,7 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
-import { ITile, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
+import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, Tile, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasTileContentType } from "./map.canvas";
@@ -52,13 +52,23 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
     _background?: string;
     _alpha: number;
 
-    public constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasTileSourceOptions) {
+    public constructor(
+        name: string,
+        layers: ITileMapLayerContainer<CanvasTileContentType, L>,
+        target: ITile<ImageData> | ITileAddress,
+        metrics: ITileMetrics,
+        options?: ICanvasTileSourceOptions
+    ) {
         super(name, false);
         this._layers = layers;
         this._layerAddedObservable = this._layers.layerAddedObservable.add(this._onLayerAdded.bind(this));
         this._layerRemovedObservable = this._layers.layerRemovedObservable.add(this._onLayerRemoved.bind(this));
 
-        this._target = target;
+        if (IsTileAddress(target)) {
+            this._target = new Tile<ImageData>(target.x, target.y, target.levelOfDetail, null, metrics);
+        } else {
+            this._target = target;
+        }
         this._metrics = metrics;
 
         this._display = this._buildDisplay(options);
@@ -71,6 +81,10 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         for (const layer of this._layers.getLayers()) {
             this._onLayerAdded(layer);
         }
+    }
+
+    public get target(): ITile<ImageData> {
+        return this._target;
     }
 
     public get display(): CanvasDisplay {
@@ -219,8 +233,8 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const y = 0;
             this._draw(ctx, x, y);
             const res = this._display;
-            const w = res.displayWidth;
-            const h = res.displayHeight;
+            const w = res.width;
+            const h = res.height;
             this._target.content = ctx.getImageData(x, y, w, h);
         }
     }
@@ -246,8 +260,8 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         const res = this._display;
         const x = xoffset;
         const y = yoffset;
-        const w = res.displayWidth;
-        const h = res.displayHeight;
+        const w = res.width;
+        const h = res.height;
 
         // we clear the canvas
         ctx.clearRect(x, y, w, h);
@@ -264,7 +278,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         ctx.globalAlpha = a;
 
         // here we need to adapt the scale between the desired resolution and the tile size.
-        ctx.scale(this.display.displayWidth / this.metrics.tileSize, this.display.displayHeight / this.metrics.tileSize);
+        ctx.scale(this.display.width / this.metrics.tileSize, this.display.height / this.metrics.tileSize);
 
         for (const tiles of this._activeTiles) {
             if (!tiles.layer.enabled) {

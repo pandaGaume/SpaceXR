@@ -108,19 +108,17 @@
                 };
 
                 // build the map
-                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
+                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod);
                 map.parent = display; // and attach to parent.
 
-                const defaultTileMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
-                defaultTileMaterial.wireframe = true;
+                //const defaultTileMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+                //defaultTileMaterial.wireframe = true;
 
                 // build layer options
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
-                    exageration: 1,
-                    gridOptions: undefined,
+                    exageration: 1.5,
                     insets: new BABYLON.Vector3(0, 0, 10),
-                    //material: defaultTileMaterial,
                 };
 
                 // build layer and add it to the map

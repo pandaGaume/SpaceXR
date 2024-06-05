@@ -17,7 +17,7 @@ export interface IHolographicBounds {
     clipPlanes: Nullable<Array<ClipPlaneDefinition>>;
     clipPlanesWorld: Nullable<Array<ClipPlaneDefinition>>;
 }
-export declare function hasHolographicBounds(obj: unknown): obj is IHasHolographicBounds;
+export declare function HasHolographicBounds(obj: unknown): obj is IHasHolographicBounds;
 export interface IHasHolographicBounds {
     holographicBounds: Nullable<IHolographicBounds>;
 }

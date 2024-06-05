@@ -2,18 +2,17 @@ import { Observable, PropertyChangedEventArgs } from "../../events";
 import { Size2, ISize2, ISize3, IsSize } from "../../geometry";
 import { ITileDisplayBounds } from "../map";
 
-export class TileDisplayBounds implements ITileDisplayBounds {
+export class TileDisplayBounds extends Size2 implements ITileDisplayBounds {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
-    _w: number;
-    _h: number;
 
     public constructor(w?: number | ISize2, h?: number) {
         if (IsSize(w)) {
             h = w.height;
             w = w.width;
+            super(w, h);
+        } else {
+            super(w ?? 0, h ?? 0);
         }
-        this._w = w ?? 0;
-        this._h = h ?? 0;
     }
 
     public dispose(): void {}
@@ -24,16 +23,9 @@ export class TileDisplayBounds implements ITileDisplayBounds {
         }
         return this._propertyChangedObservable;
     }
-    public get displayWidth(): number {
-        return this._w;
-    }
-
-    public get displayHeight(): number {
-        return this._h;
-    }
 
     public get ratio(): number {
-        return this._w / this._h;
+        return this.width / this.height;
     }
 
     public resize(w: number | ISize2 | ISize3, h?: number): ITileDisplayBounds {
@@ -42,18 +34,18 @@ export class TileDisplayBounds implements ITileDisplayBounds {
             w = w.width;
         }
         h = h ?? 0;
-        if (this._w !== w || this._h != h) {
+        if (this.width !== w || this.height != h) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                const old = new Size2(this._w, this._h);
+                const old = new Size2(this.width, this.height);
                 const value = new Size2(w, h);
-                this._w = w;
-                this._h = h;
+                this.width = w;
+                this.height = h;
                 const e = new PropertyChangedEventArgs(this, old, value, "size");
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 return this;
             }
-            this._w = w;
-            this._h = h;
+            this.width = w;
+            this.height = h;
         }
         return this;
     }

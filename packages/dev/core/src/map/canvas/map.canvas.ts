@@ -5,7 +5,7 @@ import { Nullable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { InputsNavigationTarget, MouseInputController } from "../inputs";
 
-export type CanvasTileContentType = HTMLImageElement;
+export type CanvasTileContentType = HTMLImageElement | ImageData;
 
 // we delegate the rendering options.
 
@@ -61,8 +61,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         const res = this._display;
         const x = xoffset;
         const y = yoffset;
-        const w = res.displayWidth;
-        const h = res.displayHeight;
+        const w = res.width;
+        const h = res.height;
         const a = this._alpha ?? 1;
         const b = this._background ?? Context2DTileMap.DefaultBackground.toHexString();
 

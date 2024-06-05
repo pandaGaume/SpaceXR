@@ -5,11 +5,10 @@ import { IHasActivTiles, ITileMetrics, ITileMetricsProvider, ITileProvider, ITil
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 import { ICanvasRenderingOptions } from "../../engine/icanvas";
-export interface ITileDisplayBounds extends IDisposable {
+import { ISize2 } from "../../geometry";
+export interface ITileDisplayBounds extends ISize2, IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
-    displayHeight: number;
-    displayWidth: number;
-    ratio: number;
+    ratio?: number;
 }
 export interface ITileMapLayerOptions {
     zindex: number;
@@ -24,7 +23,7 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, I
 }
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvasRenderingOptions {
 }
-export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement>, IImageTileMapLayerOptions {
+export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement | ImageData>, IImageTileMapLayerOptions {
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
 }
@@ -48,6 +47,7 @@ export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L>;
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
+    clear(): void;
 }
 export interface IHasTileMapLayerContainer<T, L extends ITileMapLayer<T>> {
     layerContainer: ITileMapLayerContainer<T, L>;

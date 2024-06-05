@@ -1,10 +1,11 @@
 import { PropertyChangedEventArgs } from "../../events";
 
 import { ITileCollection, ITileMetrics } from "../tiles.interfaces";
-import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy } from "./tiles.map.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy } from "./tiles.map.interfaces";
 import { TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
+import { ISize2 } from "../../geometry";
 
 export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
@@ -23,7 +24,7 @@ export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implem
         this._state = new TileNavigationState();
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {
         if (state) {
             this._state?.setViewMap(state.center, state.zoom + this.zoomOffset, state.azimuth.value).validate();
         }

@@ -40,7 +40,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;
     rotateMap(r: number): TileNavigationState;
-    syncWith(state: ITileNavigationState): TileNavigationState;
+    syncWith(state: Nullable<ITileNavigationState>): TileNavigationState;
     toString(): string;
     protected _doValidate(): void;
     private rotatePointInv;

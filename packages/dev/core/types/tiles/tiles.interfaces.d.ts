@@ -4,7 +4,7 @@ import { IBounded, ICartesian2, IRectangle } from "../geometry/geometry.interfac
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
-export declare function isTileAddress(b: unknown): b is ITileAddress;
+export declare function IsTileAddress(b: unknown): b is ITileAddress;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
@@ -87,6 +87,7 @@ export interface ITileMetrics extends ITileSystem {
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;
 }
+export declare function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider;
 export declare class FetchResult<T> {
     address: ITileAddress;
     content: T;

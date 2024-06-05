@@ -112,6 +112,17 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         this._onLayerRemovedInternal(container);
     }
 
+    public clear(): void {
+        if (this._layers) {
+            for (const layer of this._layers) {
+                layer.unlinkFrom(this);
+                this._removeSortedLayer(layer);
+                this._onLayerRemovedInternal(layer);
+            }
+            this._layers = [];
+        }
+    }
+
     public dispose() {
         super.dispose();
         this._navigationUpdatedObserver?.disconnect();

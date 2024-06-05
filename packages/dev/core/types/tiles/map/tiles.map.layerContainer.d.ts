@@ -11,6 +11,7 @@ export declare class LayerContainer<T, L extends ITileMapLayer<T>> implements IT
     getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L>;
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
+    clear(): void;
     private _addSortedLayer;
     private _removeSortedLayer;
     protected _onLayerAdded(layer: L): void;

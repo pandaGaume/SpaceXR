@@ -1,5 +1,5 @@
 import { Scene } from "@babylonjs/core";
-import { Map3dMaterial } from "./materials.map3d";
+import { Map3dMaterial } from "./materials.elevation";
 export declare class EllipsoidalMapMaterial extends Map3dMaterial {
     static ClassName: string;
     static ShaderName: string;

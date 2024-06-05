@@ -1,7 +1,7 @@
 import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
-import { ICloneable, IValidable } from "../../types";
+import { ICloneable, IValidable, Nullable } from "../../types";
 export interface IHasNavigationState {
     navigation: ITileNavigationState;
 }
@@ -15,7 +15,7 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
     bounds: ITileSystemBounds;
     lod: number;
     scale: number;
-    syncWith(state: ITileNavigationState): void;
+    syncWith(state: Nullable<ITileNavigationState>): void;
 }
 export declare function IsTileNavigationState(b: unknown): b is ITileNavigationState;
 export interface ITileNavigationApi<T> {

@@ -24,6 +24,7 @@ export declare class MapControl extends GUI.Container implements ITileDisplayBou
     _navigationManager: InputsNavigationTarget<MapControl>;
     _inputController: ControlInputController<MapControl>;
     constructor(name: string, options?: IMapControlOptions, nav?: ITileNavigationState);
+    getOrderedLayers(predicate?: ((l: IImageTileMapLayer) => boolean) | undefined): IterableIterator<IImageTileMapLayer>;
     get displayHeight(): number;
     get displayWidth(): number;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;

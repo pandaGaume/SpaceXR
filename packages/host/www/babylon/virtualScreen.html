@@ -48,6 +48,8 @@
             async function createScene(canvas, engine) {
                 // This creates a basic Babylon Scene object (non-mesh)
                 const scene = new BABYLON.Scene(engine);
+                //scene.clearColor = BABYLON.Color3.Black();
+
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
                 camera.setTarget(new BABYLON.Vector3(0, 50, 0));
@@ -55,10 +57,11 @@
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, true);
+
                 // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
                 const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
                 // Default intensity is 1. Let's dim the light a small amount
-                light.intensity = 0.7;
+                light.intensity = 0.8;
 
                 // create a basic table (in centimeter)
                 const h = 170;
@@ -76,29 +79,25 @@
                 display.position.y = 90;
                 display.rotation.x = -Math.PI / 2;
                 display.rotation.z = -Math.PI / 2;
-                const displayMaterial = new BABYLON.StandardMaterial("display_material", scene);
-                displayMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-                displayMaterial.alpha = 0.5;
-                display.material = displayMaterial;
                 display.freezeWorldMatrix();
 
-                display.onPointerUpObservable.add((eventData, eventState) => {
+                display.pointerSource.onPointerUpObservable.add((eventData, eventState) => {
                     console.log("Pointer up on display");
                 });
 
-                display.onPointerDownObservable.add((eventData, eventState) => {
+                display.pointerSource.onPointerDownObservable.add((eventData, eventState) => {
                     console.log("Pointer down on display");
                 });
 
-                display.onPointerMoveObservable.add((eventData, eventState) => {
+                display.pointerSource.onPointerMoveObservable.add((eventData, eventState) => {
                     console.log(`${eventData.x}, ${eventData.y}`);
                 });
 
-                display.onPointerEnterObservable.add((eventData, eventState) => {
+                display.pointerSource.onPointerEnterObservable.add((eventData, eventState) => {
                     console.log("Pointer enter on display");
                 });
 
-                display.onPointerOutObservable.add((eventData, eventState) => {
+                display.pointerSource.onPointerOutObservable.add((eventData, eventState) => {
                     console.log("Pointer out on display");
                 });
 

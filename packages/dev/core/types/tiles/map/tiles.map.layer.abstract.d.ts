@@ -1,8 +1,9 @@
 import { ITileCollection, ITileMetrics } from "../tiles.interfaces";
-import { ITileMapLayer, ITileMapLayerOptions, ITileDisplayBounds, ITileMapLayerContainer, IHasTileMapLayerContainer } from "./tiles.map.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer } from "./tiles.map.interfaces";
 import { TileConsumerBase } from "../pipeline";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
+import { ISize2 } from "../../geometry";
 export declare abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
     _zindex: number;
     _zoomOffset?: number;
@@ -10,7 +11,7 @@ export declare abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T
     _enabled: boolean;
     _state: ITileNavigationState;
     constructor(name: string, options?: ITileMapLayerOptions, enabled?: boolean);
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
     get zindex(): number;
     get navigation(): ITileNavigationState;
     set zindex(zindex: number);

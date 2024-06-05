@@ -3,13 +3,15 @@ import { ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interf
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
 
-export class ImageLayer extends TileMapLayer<HTMLImageElement> implements IImageTileMapLayer {
+export type ImageLayerContentType = HTMLImageElement | ImageData;
+
+export class ImageLayer extends TileMapLayer<ImageLayerContentType> implements IImageTileMapLayer {
     _alpha: number;
     _background?: string;
 
     public constructor(
         name: string,
-        provider: ITileProvider<HTMLImageElement> | ITileDatasource<HTMLImageElement, ITileAddress>,
+        provider: ITileProvider<ImageLayerContentType> | ITileDatasource<ImageLayerContentType, ITileAddress>,
         options?: IImageTileMapLayerOptions,
         enabled?: boolean
     ) {

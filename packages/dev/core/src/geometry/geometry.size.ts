@@ -7,6 +7,10 @@ export class Size2 implements ISize2 {
 
     public constructor(public width: number, public height: number) {}
 
+    public multiplyFloats(w: number, h?: number): ISize2 {
+        return new Size2(this.width * w, this.height * (h ?? w));
+    }
+
     public clone(): ISize2 {
         return new Size2(this.width, this.height);
     }

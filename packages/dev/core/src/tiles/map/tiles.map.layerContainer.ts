@@ -2,7 +2,6 @@ import { Observable } from "../../events";
 import { ITileMapLayer, ITileMapLayerContainer } from "./tiles.map.interfaces";
 
 export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLayerContainer<T, L> {
-
     _layerAddedObservable?: Observable<L>;
     _layerRemovedObservable?: Observable<L>;
     protected _layers?: Array<L>;
@@ -74,6 +73,19 @@ export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLa
         this._onLayerRemoved(layer);
         if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
             this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
+        }
+    }
+
+    public clear(): void {
+        if (this._layers) {
+            for (const layer of this._layers) {
+                this._removeSortedLayer(layer);
+                this._onLayerRemoved(layer);
+                if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
+                    this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
+                }
+            }
+            this._layers = [];
         }
     }
 

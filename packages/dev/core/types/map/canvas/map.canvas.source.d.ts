@@ -3,7 +3,7 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope } from "../../geography";
 import { ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
-import { ITile, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
+import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasTileContentType } from "./map.canvas";
@@ -32,7 +32,8 @@ export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentT
     _context: Nullable<CanvasRenderingContext2D>;
     _background?: string;
     _alpha: number;
-    constructor(name: string, layers: ITileMapLayerContainer<HTMLImageElement, L>, target: ITile<ImageData>, metrics: ITileMetrics, options?: ICanvasTileSourceOptions);
+    constructor(name: string, layers: ITileMapLayerContainer<CanvasTileContentType, L>, target: ITile<ImageData> | ITileAddress, metrics: ITileMetrics, options?: ICanvasTileSourceOptions);
+    get target(): ITile<ImageData>;
     get display(): CanvasDisplay;
     get metrics(): ITileMetrics;
     get background(): string | undefined;

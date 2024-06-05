@@ -215,7 +215,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this;
     }
 
-    public syncWith(state: ITileNavigationState): TileNavigationState {
+    public syncWith(state: Nullable<ITileNavigationState>): TileNavigationState {
         if (this._sync) {
             this._sync.dispose();
             this._sync = null;

@@ -15,6 +15,11 @@ export interface IComparable<T> {
     equals(other: T | undefined): boolean;
 }
 
+export function IsDisposable(obj: unknown): obj is IDisposable {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IDisposable>obj).dispose !== undefined;
+}
+
 export interface IDisposable {
     dispose(): void;
 }

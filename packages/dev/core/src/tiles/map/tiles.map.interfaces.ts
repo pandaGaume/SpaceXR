@@ -1,19 +1,18 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { IHasActivTiles,ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { IHasActivTiles, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 import { ICanvasRenderingOptions } from "../../engine/icanvas";
+import { ISize2 } from "../../geometry";
 
 /// <summary>
 /// Provide Unitless target size
 /// </summary>
-export interface ITileDisplayBounds extends IDisposable {
+export interface ITileDisplayBounds extends ISize2, IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
-    displayHeight: number;
-    displayWidth: number;
-    ratio: number;
+    ratio?: number;
 }
 
 export interface ITileMapLayerOptions {
@@ -32,7 +31,7 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, I
 
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvasRenderingOptions {}
 
-export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement>, IImageTileMapLayerOptions {}
+export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement | ImageData>, IImageTileMapLayerOptions {}
 
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {}
 
@@ -69,6 +68,7 @@ export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
 
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
+    clear(): void;
 }
 
 export interface IHasTileMapLayerContainer<T, L extends ITileMapLayer<T>> {

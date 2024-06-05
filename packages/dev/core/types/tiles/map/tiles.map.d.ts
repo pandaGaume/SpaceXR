@@ -24,6 +24,7 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileCons
     getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L>;
     addLayer(layer: L): void;
     removeLayer(layer: L): void;
+    clear(): void;
     dispose(): void;
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L>;
     zoomMap(delta: number): TileMapBase<T, L>;

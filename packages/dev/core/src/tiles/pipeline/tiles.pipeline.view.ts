@@ -3,11 +3,10 @@ import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
-import { ICartesian2, IRectangle, Rectangle, Cartesian2 } from "../../geometry";
+import { ICartesian2, IRectangle, Rectangle, Cartesian2, ISize2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 import { Bearing, Geo2 } from "../../geography";
-import { ITileDisplayBounds } from "../map";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -73,7 +72,7 @@ export class TileView implements ITileView {
         return undefined;
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
         if (!state || !display) {
             this._doClearContext(state, dispatchEvent);
             return;
@@ -81,7 +80,7 @@ export class TileView implements ITileView {
         this._doValidateContext(state, display, metrics, dispatchEvent);
     }
 
-    protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
+    protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
         if (state && display) {
             const lod = TileAddress.ClampLod(state.lod, metrics);
             const scale = state.scale;
@@ -90,8 +89,8 @@ export class TileView implements ITileView {
             const seTileXY = Cartesian2.Zero();
 
             const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
-            let w = display?.displayWidth ?? 0;
-            let h = display?.displayHeight ?? 0;
+            let w = display?.width ?? 0;
+            let h = display?.height ?? 0;
 
             let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
             // if azimuth is set, then we need to keep reference of the original rectangle to optimize the tile selection.

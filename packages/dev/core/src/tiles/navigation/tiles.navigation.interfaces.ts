@@ -1,7 +1,7 @@
 import { IGeo2, IsLocation, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
-import { ICloneable, IValidable } from "../../types";
+import { ICloneable, IValidable, Nullable } from "../../types";
 
 export interface IHasNavigationState {
     navigation: ITileNavigationState;
@@ -24,7 +24,7 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
     lod: number; // Math.round(zoom)
     scale: number; // scale corresponding to the decimal part of zoom
 
-    syncWith(state: ITileNavigationState): void;
+    syncWith(state: Nullable<ITileNavigationState>): void;
 }
 
 export function IsTileNavigationState(b: unknown): b is ITileNavigationState {

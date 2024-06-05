@@ -42,6 +42,10 @@ export class MapControl extends GUI.Container implements ITileDisplayBounds, ITi
         this._inputController = o.inputController ?? new ControlInputController<MapControl>(this, this._navigationManager);
     }
 
+    public getOrderedLayers(predicate?: ((l: IImageTileMapLayer) => boolean) | undefined): IterableIterator<IImageTileMapLayer> {
+        return this._map.getOrderedLayers(predicate);
+    }
+
     public get displayHeight(): number {
         return this._currentMeasure.height;
     }

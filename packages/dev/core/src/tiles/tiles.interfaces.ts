@@ -5,7 +5,7 @@ import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
 
-export function isTileAddress(b: unknown): b is ITileAddress {
+export function IsTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
     return (<ITileAddress>b).x !== undefined && (<ITileAddress>b).y !== undefined && (<ITileAddress>b).levelOfDetail !== undefined;
 }
@@ -141,6 +141,11 @@ export interface ITileMetrics extends ITileSystem {
 
 export interface ITileMetricsProvider {
     metrics: ITileMetrics;
+}
+
+export function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileMetricsProvider>b).metrics !== undefined;
 }
 
 export class FetchResult<T> {

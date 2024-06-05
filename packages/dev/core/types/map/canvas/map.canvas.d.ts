@@ -4,7 +4,7 @@ import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { InputsNavigationTarget, MouseInputController } from "../inputs";
-export type CanvasTileContentType = HTMLImageElement;
+export type CanvasTileContentType = HTMLImageElement | ImageData;
 export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;

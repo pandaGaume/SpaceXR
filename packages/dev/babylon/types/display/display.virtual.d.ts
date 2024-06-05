@@ -1,7 +1,9 @@
 import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
 import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
-export declare class VirtualDisplay extends Mesh {
+import { Observable, PropertyChangedEventArgs } from "core/events";
+import { ITileDisplayBounds } from "core/tiles";
+export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     static SD: ISize2;
     static QHD: ISize2;
     static HD: ISize2;
@@ -9,6 +11,7 @@ export declare class VirtualDisplay extends Mesh {
     static FullHD: ISize2;
     static UltraHD: ISize2;
     static UltraHD_2: ISize2;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
     _worldTransform: TransformNode;
     _dimension: ISize3;
     _halfDimension: ISize3;
@@ -18,6 +21,10 @@ export declare class VirtualDisplay extends Mesh {
     _pointerSource: VirtualDisplayInputsSource;
     _inverseWorldMatrix?: Matrix;
     constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene);
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
+    get width(): number;
+    get height(): number;
+    get ratio(): number;
     get pointerSource(): VirtualDisplayInputsSource;
     protected _buildVertexData(): VertexData;
     get context3D(): TransformNode;

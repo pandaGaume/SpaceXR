@@ -2,7 +2,7 @@ import { EventState, Observable, PropertyChangedEventArgs } from "../../events";
 import { IDisposable, Nullable } from "../../types";
 import { ITile, ITileAddress, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
-import { ITileDisplayBounds } from "../map";
+import { ISize2 } from "../../geometry";
 
 export type IPipelineMessageType<T> = Array<T>;
 
@@ -10,6 +10,11 @@ export interface ITargetBlock<T> {
     added(eventData: IPipelineMessageType<T>, eventState: EventState): void;
     removed(eventData: IPipelineMessageType<T>, eventState: EventState): void;
     updated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+}
+
+export function IsTargetBlock<T>(b: unknown): b is ITargetBlock<T> {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITargetBlock<T>>b).added !== undefined && (<ITargetBlock<T>>b).removed !== undefined && (<ITargetBlock<T>>b).updated !== undefined;
 }
 
 export interface ILinkOptions {}
@@ -28,6 +33,8 @@ export interface ISourceBlock<T> extends ISourceEvent<T> {
     unlinkFrom(target: ITargetBlock<T>): ITilePipelineLink<T> | undefined;
 }
 
+export interface ITransformBlock<TInput, TOutput> extends ITargetBlock<TInput>, ISourceBlock<TOutput> {}
+
 export interface ITilePipelineLink<T> extends IDisposable {
     source: ISourceBlock<T>;
     target: ITargetBlock<T>;
@@ -39,7 +46,7 @@ export interface ITilePipelineComponent extends IDisposable {
 }
 
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ITileDisplayBounds>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
 }
 
 /// <summary>
@@ -57,7 +64,7 @@ export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<I
     removeProvider(name: string): void;
 }
 
-export interface ITileConsumer<T> extends ITilePipelineComponent, ITargetBlock<ITile<T>>, ISourceBlock<ITile<T>> {}
+export interface ITileConsumer<T> extends ITilePipelineComponent, ITransformBlock<ITile<T>, ITile<T>> {}
 
 export interface ITilePipeline<T> extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITilePipeline<T>, unknown>>;

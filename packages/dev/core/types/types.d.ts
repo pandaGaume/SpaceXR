@@ -8,6 +8,7 @@ export interface ICloneable<T> {
 export interface IComparable<T> {
     equals(other: T | undefined): boolean;
 }
+export declare function IsDisposable(obj: unknown): obj is IDisposable;
 export interface IDisposable {
     dispose(): void;
 }

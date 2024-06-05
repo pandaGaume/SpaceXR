@@ -5,16 +5,14 @@ import { ICartesian3 } from "core/geometry";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IDisposable, Nullable } from "core/types";
 
-
-export function hasMapScale(obj: unknown): obj is IHasMapScale {
+export function HasMapScale(obj: unknown): obj is IHasMapScale {
     if (typeof obj !== "object" || obj === null) return false;
     return (<IHasMapScale>obj).mapScale !== undefined;
 }
 
-export interface IHasMapScale{
+export interface IHasMapScale {
     mapScale: ICartesian3;
 }
-
 
 export class Map3dScaleController implements IDisposable {
     public static GetScale(display: VirtualDisplay, nav: ITileNavigationState, metrics: ITileMetrics): ICartesian3 {

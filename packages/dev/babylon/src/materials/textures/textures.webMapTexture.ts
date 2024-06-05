@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { CanvasDisplay, CanvasMap } from "core/map/canvas";
-import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer } from "core/tiles";
+import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer, ImageLayerContentType } from "core/tiles";
 
 import { ISize2 } from "core/geometry";
 import { IGeo2 } from "core/geography";
@@ -17,7 +17,7 @@ export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
 /**
  * Provide Babylon js Texture implementation for a 2D WebMap (Web Mercator projection).
  */
-export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi<WebMapTexture>, ITileMap<HTMLImageElement, IImageTileMapLayer, WebMapTexture> {
+export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi<WebMapTexture>, ITileMap<ImageLayerContentType, IImageTileMapLayer, WebMapTexture> {
     static readonly DefaultOptions: IMapTextureOptions = {
         width: 1024,
         height: 768,
@@ -73,6 +73,10 @@ export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi
                 this._renderObserver = scene.onBeforeCameraRenderObservable.add(this._checkUpdate.bind(this));
             }
         }
+    }
+
+    public getOrderedLayers(predicate?: ((l: IImageTileMapLayer) => boolean) | undefined): IterableIterator<IImageTileMapLayer> {
+        return this.map?.getOrderedLayers(predicate) ?? [].values();
     }
 
     public get map(): BABYLON.Nullable<CanvasMap> {
@@ -151,6 +155,11 @@ export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi
     public removeLayer(layer: ImageLayer): void {
         if (!this._map) throw new Error("Invalid State");
         this._map.removeLayer(layer);
+    }
+
+    public clear(): void {
+        if (!this._map) throw new Error("Invalid State");
+        this._map.clear();
     }
 
     public dispose() {

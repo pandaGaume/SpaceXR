@@ -302,6 +302,14 @@ export class Map3dElevationHost
                     }
                     break;
                 }
+                case ElevationLayer.ShininessPropertyName: {
+                    if (this._template.material instanceof WebMapMaterial) {
+                        if (this._template.material.shininess !== event.source.shininess) {
+                            this._template.material.shininess = event.source.shininess ?? 0;
+                        }
+                    }
+                    break;
+                }
             }
         }
     }
@@ -475,6 +483,9 @@ export class Map3dElevationHost
         const m = new WebMapMaterial(this._buildNameWithSuffix("material"), scene);
         if (material?.color) {
             m.terrainColor = material.color;
+        }
+        if (material?.shininess) {
+            m.shininess = material.shininess;
         }
         return m;
     }

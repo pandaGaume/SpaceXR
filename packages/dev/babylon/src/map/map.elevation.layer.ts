@@ -7,6 +7,7 @@ import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITi
 export interface IElevationMaterialOptions {
     material?: Material; // this is the default material to use. If defined, superseed any other material options.
     color?: Color4;
+    shininess?: number;
 }
 
 export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationMaterialOptions {
@@ -24,10 +25,12 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
     public static readonly ExagerationPropertyName: string = "exageration";
     public static readonly InsetsPropertyName: string = "insets";
     public static readonly ColorPropertyName: string = "color";
+    public static readonly ShininessPropertyName: string = "shininess";
 
     private _exageration?: number;
     private _insets?: ICartesian3;
     private _color?: Color4;
+    private _shininess?: number;
     private _material?: Material;
 
     public constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
@@ -36,6 +39,7 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
         this._color = options?.color;
         this._material = options?.material;
+        this._shininess = options?.shininess;
     }
 
     public get exageration(): number | undefined {
@@ -90,6 +94,24 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         }
 
         this._color = value;
+    }
+
+    public get shininess(): number | undefined {
+        return this._shininess;
+    }
+
+    public set shininess(value: number | undefined) {
+        if (this._shininess === value) return;
+
+        if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+            const oldValue = this._shininess;
+            this._shininess = value;
+            const args = new PropertyChangedEventArgs<ElevationLayer, number>(this, oldValue, this._shininess, ElevationLayer.ShininessPropertyName);
+            this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+            return;
+        }
+
+        this._shininess = value;
     }
 
     public get material(): Material | undefined {

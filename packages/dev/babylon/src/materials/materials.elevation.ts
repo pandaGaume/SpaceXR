@@ -206,6 +206,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
+    public get shininess(): number {
+        return this._shininess;
+    }
+
+    public set shininess(value: number) {
+        if (this._shininess !== value) {
+            this._shininess = value;
+            this.markAsDirty(Material.AttributesDirtyFlag);
+        }
+    }
+
     /// #region ITargetBlock
     public added(eventData: IPipelineMessageType<ElevationTile | ITile<ImageData>>, eventState: EventState): void {
         for (let tile of eventData) {

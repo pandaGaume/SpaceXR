@@ -81,6 +81,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     set mapScale(value: ICartesian3);
     get terrainColor(): Nullable<Color4>;
     set terrainColor(value: Nullable<Color4>);
+    get shininess(): number;
+    set shininess(value: number);
     added(eventData: IPipelineMessageType<ElevationTile | ITile<ImageData>>, eventState: EventState): void;
     removed(eventData: IPipelineMessageType<ElevationTile | ITile<ImageData>>, eventState: EventState): void;
     updated(eventData: IPipelineMessageType<ElevationTile | ITile<ImageData>>, eventState: EventState): void;

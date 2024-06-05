@@ -247,7 +247,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     private _updateLayerWithDisplayAndNavigation(layer: ElevationLayer | ITileMapLayer<Map3dTextureContentType> | ITileMapLayer<Map3dContentType>) {
         if (this._targetDisplay) {
-            let size: ISize2 = this._targetDisplay;
+            let size: ISize2 = this._targetDisplay.resolution;
             if (layer.zoomOffset) {
                 const s = Math.pow(2, Math.abs(layer.zoomOffset)); // Always positive offset supported.
                 size = new Size2(size.width * s, size.height * s);

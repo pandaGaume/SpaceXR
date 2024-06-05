@@ -5,6 +5,7 @@ import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITi
 export interface IElevationMaterialOptions {
     material?: Material;
     color?: Color4;
+    shininess?: number;
 }
 export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationMaterialOptions {
     exageration?: number;
@@ -19,9 +20,11 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     static readonly ExagerationPropertyName: string;
     static readonly InsetsPropertyName: string;
     static readonly ColorPropertyName: string;
+    static readonly ShininessPropertyName: string;
     private _exageration?;
     private _insets?;
     private _color?;
+    private _shininess?;
     private _material?;
     constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean);
     get exageration(): number | undefined;
@@ -30,5 +33,7 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     set insets(value: ICartesian3 | undefined);
     get color(): Color4 | undefined;
     set color(value: Color4 | undefined);
+    get shininess(): number | undefined;
+    set shininess(value: number | undefined);
     get material(): Material | undefined;
 }

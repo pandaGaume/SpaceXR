@@ -6,6 +6,7 @@
         <title>Exemple d'un ecrans virtuel</title>
         <script src="../libs/babylon.js"></script>
         <script src="../libs/babylon.inspector.bundle.js"></script>
+        <script src="../libs/babylon.glTF2FileLoader.min.js"></script>
 
         <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
         <style>
@@ -39,8 +40,12 @@
     </head>
     <body>
         <header>
-            <h1>3D Holographic Display Sample</h1>
-            <p></p>
+            <h1>3D Map Holographic Display</h1>
+            <p>
+                Example of a holographic map based on a virtual screen. This holographic map is a 3D representation of the global terrain and elevations. The data used for this map
+                comes from Mapzen, but it could also be sourced from other elevation data providers. Explore the possibilities of immersive and interactive visualization of the
+                world's topography with this technology.
+            </p>
         </header>
         <div id="mapcontainer">
             <canvas id="mapcanvas3d"></canvas>
@@ -65,12 +70,12 @@
             }
 
             async function createScene(canvas, engine) {
-                // This creates a basic Babylon Scene object (non-mesh)
+                const unit = 100; // cm
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 4, 200, new BABYLON.Vector3(0, 150, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
 
-                camera.setTarget(new BABYLON.Vector3(0, 50, 0));
+                camera.setTarget(new BABYLON.Vector3(0, 0, 0));
                 camera.wheelPrecision = 10;
                 camera.minZ = 0;
                 // This attaches the camera to the canvas
@@ -88,8 +93,8 @@
 
                 // create a basic table (in centimeter)
                 const size = {
-                    width: 320,
-                    height: 240,
+                    width: 3.2 * unit,
+                    height: 2.4 * unit,
                 };
 
                 const resolution = SPACEXR.VirtualDisplay.SD;
@@ -120,7 +125,8 @@
                     attribution: SPACEXR.MapZen.Attribution,
                     exageration: 1.5,
                     insets: new BABYLON.Vector3(0, 0, 10),
-                    color: new BABYLON.Color4(0.5, 0.5, 0.5),
+                    color: new BABYLON.Color4(0.5, 0.5, 0.8),
+                    shininess: 0,
                 };
 
                 // build layer and add it to the map
@@ -152,6 +158,7 @@
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = await createScene(canvas, engine); //Call the createScene function
                 scene.debugLayer.show();
+
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {
                     scene.render();

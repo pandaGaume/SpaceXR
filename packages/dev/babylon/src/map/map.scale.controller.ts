@@ -4,6 +4,7 @@ import { VirtualDisplay } from "../display";
 import { ICartesian3 } from "core/geometry";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IDisposable, Nullable } from "core/types";
+import { Geo2, IGeo2 } from "..";
 
 export function HasMapScale(obj: unknown): obj is IHasMapScale {
     if (typeof obj !== "object" || obj === null) return false;
@@ -15,6 +16,8 @@ export interface IHasMapScale {
 }
 
 export class Map3dScaleController implements IDisposable {
+    public static DefaultThresholdLat: number = 0.01;
+
     public static GetScale(display: VirtualDisplay, nav: ITileNavigationState, metrics: ITileMetrics): ICartesian3 {
         const x = metrics.mapScale(nav.center.lat, nav.lod, display.pixelPerUnit.x);
         const y = metrics.mapScale(nav.center.lat, nav.lod, display.pixelPerUnit.y);
@@ -28,12 +31,24 @@ export class Map3dScaleController implements IDisposable {
     private _display: VirtualDisplay;
     private _nav: ITileNavigationState;
     private _metrics: ITileMetrics;
+    private _currentCenter: IGeo2;
+    private _thresholdLat: number = Map3dScaleController.DefaultThresholdLat;
 
     constructor(display: VirtualDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics) {
         this._display = display;
         this._nav = hasNavigationState(nav) ? nav.navigation : nav;
         this._metrics = metrics;
         this._observer = this._nav.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+        this._currentCenter = this._nav.center?.clone() ?? Geo2.Zero();
+    }
+
+    public get thresholdLat(): number {
+        return this._thresholdLat;
+    }
+
+    /// The threshold in degrees that triggers a scale change when the center changes ONLY in latitude for a given threshold.
+    public set thresholdLat(v: number) {
+        this._thresholdLat = v;
     }
 
     public get scaleChangedObservable(): Observable<ICartesian3> {
@@ -66,6 +81,14 @@ export class Map3dScaleController implements IDisposable {
     }
 
     protected _onCenterChanged(): void {
-        this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));
+        if (this._thresholdExceeded(this._currentCenter, this._nav.center)) {
+            this._currentCenter.lat = this._nav.center.lat;
+            this._currentCenter.lon = this._nav.center.lon;
+            this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));
+        }
+    }
+
+    protected _thresholdExceeded(a: IGeo2, b: IGeo2): boolean {
+        return Math.abs(a.lat - b.lat) > this._thresholdLat;
     }
 }

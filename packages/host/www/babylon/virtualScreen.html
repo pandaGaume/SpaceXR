@@ -9,6 +9,7 @@
         <script src="../libs/babylonjs.loaders.js"></script>
         <script src="../libs/babylon.glTF2FileLoader.js"></script>
         <script src="../libs/babylon.inspector.bundle.js"></script>
+        <script src="../libs/babylon.gridMaterial.min.js"></script>
 
         <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
         <style>
@@ -79,6 +80,9 @@
                 display.position.y = 90;
                 display.rotation.x = -Math.PI / 2;
                 display.rotation.z = -Math.PI / 2;
+
+                display.material = new BABYLON.GridMaterial("displayMaterial", scene);
+
                 display.freezeWorldMatrix();
 
                 display.pointerSource.onPointerUpObservable.add((eventData, eventState) => {

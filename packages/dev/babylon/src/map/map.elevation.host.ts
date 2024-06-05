@@ -22,7 +22,6 @@ import {
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observable, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
-import { WebMapMaterial } from "../materials";
 import { ElevationTile, IElevationMesh, IElevationTile } from "./map.elevation.tile";
 import { IElevationLayerOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
@@ -30,7 +29,8 @@ import { Map3dTextureContentType } from "./map.elevation";
 import { CanvasTileSource } from "core/map";
 import { Map3dScaleController, HasMapScale } from "./map.scale.controller";
 import { HolographicDisplay, HasHolographicBounds } from "../display";
-import { IsDisposable } from "..";
+import { IsDisposable } from "core/types";
+import { WebMapMaterial } from "../materials";
 
 ///<summary>
 /// A layer for elevation data. The layer serve as host for elevation tiles and therefore the grid model used to display the elevation.
@@ -106,9 +106,12 @@ export class Map3dElevationHost
         this._tilesRoot = new TransformNode(this._buildNameWithSuffix(Map3dElevationHost.TileRootSuffix));
         this._tilesRoot.parent = this;
         this._grid = this._buildTopology();
-        this._template = this._buildMesh();
-        this._cartesianCenter = null;
+        this._template = this._buildMesh(options?.material);
         this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+        const geo = this.navigation.center;
+        const lod = this.navigation.lod;
+        this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, lod);
+
         this._activTiles = new TileCollection<IElevationMesh>();
     }
 
@@ -132,16 +135,19 @@ export class Map3dElevationHost
 
     //#region ITargetBlock<IDemInfos>
     public added(eventData: IPipelineMessageType<ITile<IDemInfos>>, eventState: EventState): void {
+        console.log("Map3dElevationHost.added");
         for (const tile of eventData) {
             this._onTileAdded(tile, eventState);
         }
     }
     public removed(eventData: IPipelineMessageType<ITile<IDemInfos>>, eventState: EventState): void {
+        console.log("Map3dElevationHost.removed");
         for (const tile of eventData) {
             this._onTileRemoved(tile, eventState);
         }
     }
     public updated(eventData: IPipelineMessageType<ITile<IDemInfos>>, eventState: EventState): void {
+        console.log("Map3dElevationHost.updated");
         for (const tile of eventData) {
             this._onTileUpdated(tile, eventState);
         }

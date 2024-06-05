@@ -4,6 +4,7 @@ export declare class Size2 implements ISize2 {
     height: number;
     static Zero(): Size2;
     constructor(width: number, height: number);
+    multiplyFloats(w: number, h?: number): ISize2;
     clone(): ISize2;
     equals(other: ISize2): boolean;
 }

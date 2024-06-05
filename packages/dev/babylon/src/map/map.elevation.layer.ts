@@ -1,3 +1,4 @@
+import { Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { PropertyChangedEventArgs } from "core/events";
 import { ICartesian3 } from "core/geometry";
@@ -6,6 +7,7 @@ import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITi
 export interface IElevationLayerOptions extends ITileMapLayerOptions {
     exageration?: number;
     insets?: ICartesian3;
+    material?: Material;
 }
 
 export interface IElevationLayer extends ITileMapLayer<IDemInfos>, IElevationLayerOptions {}
@@ -19,9 +21,13 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
 
     private _exageration?: number;
     private _insets?: ICartesian3;
+    private _material?: Material;
 
-    public constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: ITileMapLayerOptions, enabled?: boolean) {
+    public constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
         super(name, provider, options, enabled);
+        this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
+        this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
+        this._material = options?.material;
     }
 
     public get exageration(): number | undefined {
@@ -58,5 +64,9 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         }
 
         this._insets = value;
+    }
+
+    public get material(): Material | undefined {
+        return this._material;
     }
 }

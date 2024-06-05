@@ -52,10 +52,11 @@
                 glass.refractionTexture = refractionTexture;
                 glass.linkRefractionWithTransparency = true;
                 glass.indexOfRefraction = 0.52;
-                glass.alpha = 0;
-                glass.microSurface = 1;
-                glass.reflectivityColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-                glass.albedoColor = new BABYLON.Color3(0.85, 0.85, 0.85);
+                glass.alpha = 0.5;
+                glass.microSurface = 1; // Controls the roughness of the material
+                glass.albedoColor = new BABYLON.Color3(0.1, 0.1, 0.3);
+                glass.roughness = 0.2;
+                glass.backFaceCulling = false;
                 return glass;
             }
 
@@ -94,7 +95,7 @@
                 const display = new SPACEXR.HolographicDisplay("holographicDisplay", size, resolution, scene);
                 display.material = createGlassMaterial(scene);
                 display.rotation.x = -Math.PI / 2;
-                display.freezeWorldMatrix();
+                //display.freezeWorldMatrix();
 
                 camera.setTarget(display);
 
@@ -108,8 +109,7 @@
                 };
 
                 // build the map
-                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod);
-                map.parent = display; // and attach to parent.
+                const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
 
                 //const defaultTileMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
                 //defaultTileMaterial.wireframe = true;
@@ -119,6 +119,7 @@
                     attribution: SPACEXR.MapZen.Attribution,
                     exageration: 1.5,
                     insets: new BABYLON.Vector3(0, 0, 10),
+                    material: new BABYLON.StandardMaterial("groundMaterial", scene),
                 };
 
                 // build layer and add it to the map

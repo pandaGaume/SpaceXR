@@ -27,7 +27,7 @@ export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     get ratio(): number;
     get pointerSource(): VirtualDisplayInputsSource;
     protected _buildVertexData(): VertexData;
-    get context3D(): TransformNode;
+    get context3d(): TransformNode;
     get resolution(): ISize3;
     get dimension(): ISize3;
     get halfDimension(): ISize3;

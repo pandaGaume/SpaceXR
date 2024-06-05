@@ -83,7 +83,7 @@ export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
         return data;
     }
 
-    public get context3D(): TransformNode {
+    public get context3d(): TransformNode {
         return this._worldTransform;
     }
 

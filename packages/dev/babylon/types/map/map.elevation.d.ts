@@ -36,7 +36,6 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     private _navigationUpdatedObserver;
     constructor(name: string, options: IMap3dOptions, scene: Scene);
     get navigation(): ITileNavigationState;
-    set parent(v: Nullable<Node>);
     setViewMap(center: IGeo2 | number[], zoom?: number | undefined, rotation?: number | undefined): Map3d;
     zoomMap(delta: number): Map3d;
     zoomInMap(delta: number): Map3d;
@@ -46,9 +45,9 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     rotateMap(r: number): Map3d;
     get layerContainer(): ITileMapLayerContainer<Map3dContentType, ITileMapLayer<Map3dContentType>>;
     dispose(): void;
+    withDisplay(display: HolographicDisplay): Map3d;
     protected _searchForDisplay(node: Nullable<Node>): Nullable<HolographicDisplay>;
     protected _createNavigationState(): ITileNavigationState;
-    protected _withDisplay(display: HolographicDisplay): Map3d;
     protected _withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
     protected _onLayerAdded(layer: ITileMapLayer<Map3dContentType>): void;
     protected _onLayerRemoved(layer: ITileMapLayer<Map3dContentType>): void;
@@ -57,7 +56,6 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     protected _removedElevationLayer(layer: ElevationLayer): void;
     protected _addedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void;
     protected _removedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void;
-    protected _buildNameWithSuffix(name: string, suffix: string): string;
     private _onNavigationUpdatedInternal;
-    private _updateLayersWithDisplayAndNavigation;
+    private _updateLayerWithDisplayAndNavigation;
 }

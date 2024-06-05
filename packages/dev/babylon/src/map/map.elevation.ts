@@ -21,6 +21,7 @@ import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
 import { ElevationLayer } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
+import { TextUtils } from "core/utils";
 
 export type Map3dTextureContentType = ImageLayerContentType;
 export type Map3dElevationContentType = IDemInfos;
@@ -83,41 +84,29 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
     }
     /// #endregion IHasNavigationState
 
-    // override the parent property to handle the display search
-    public set parent(v: Nullable<Node>) {
-        super.parent = v;
-
-        // just in case we find a display in the hierarchy
-        // WARNING : In Babylonjs, there is no way to know if a node has changed in the upper hierarchy.
-        let newDisplay = this._searchForDisplay(this.parent);
-        if (newDisplay) {
-            this._withDisplay(newDisplay);
-        }
-    }
-
     /// #region ITileNavigationApi
     public setViewMap(center: IGeo2 | number[], zoom?: number | undefined, rotation?: number | undefined): Map3d {
-        this._navigation.setViewMap(center, zoom, rotation);
+        this._navigation.setViewMap(center, zoom, rotation).validate(); // validate the navigation state, which will trigger the state changed event;
         return this;
     }
     public zoomMap(delta: number): Map3d {
-        this._navigation.zoomMap(delta);
+        this._navigation.zoomMap(delta).validate(); // validate the navigation state, which will trigger the state changed event;
         return this;
     }
     public zoomInMap(delta: number): Map3d {
-        this._navigation.zoomInMap(delta);
+        this._navigation.zoomInMap(delta).validate(); // validate the navigation state, which will trigger the state changed event;
         return this;
     }
     public zoomOutMap(delta: number): Map3d {
-        this._navigation.zoomOutMap(delta);
+        this._navigation.zoomOutMap(delta).validate(); // validate the navigation state, which will trigger the state changed event;
         return this;
     }
     public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics | undefined): Map3d {
-        this._navigation.translateUnitsMap(tx, ty, metrics);
+        this._navigation.translateUnitsMap(tx, ty, metrics).validate(); // validate the navigation state, which will trigger the state changed event
         return this;
     }
     public translateMap(dlat: number | IGeo2 | number[], dlon?: number | undefined): Map3d {
-        this._navigation.translateMap(dlat, dlon);
+        this._navigation.translateMap(dlat, dlon).validate(); // validate the navigation state, which will trigger the state changed event;
         return this;
     }
     public rotateMap(r: number): Map3d {
@@ -148,6 +137,17 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
         this._navigationUpdatedObserver?.disconnect();
     }
 
+    public withDisplay(display: HolographicDisplay): Map3d {
+        if (this._targetDisplay === display) return this;
+
+        this._targetDisplay = display;
+        for (const host of this._elevationHosts.values()) {
+            host.bindDisplay(display);
+        }
+        this.parent = display.context3d;
+        return this._withPointerControl(this._targetDisplay.pointerSource);
+    }
+
     protected _searchForDisplay(node: Nullable<Node>): Nullable<HolographicDisplay> {
         if (!node) return null;
         if (node instanceof HolographicDisplay) return node;
@@ -156,16 +156,6 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     protected _createNavigationState(): ITileNavigationState {
         return new TileNavigationState();
-    }
-
-    protected _withDisplay(display: HolographicDisplay): Map3d {
-        if (this._targetDisplay === display) return this;
-
-        this._targetDisplay = display;
-        for (const host of this._elevationHosts.values()) {
-            host.bindDisplay(display);
-        }
-        return this._withPointerControl(this._targetDisplay.pointerSource);
     }
 
     protected _withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d {
@@ -211,11 +201,17 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
         // create the elevation host
         const host = this._createElevationHost(layer);
+        if (this._targetDisplay) {
+            host.bindDisplay(this._targetDisplay);
+        }
+        host.parent = this;
         this._elevationHosts.set(layer.name, host);
+
+        this._updateLayerWithDisplayAndNavigation(layer);
     }
 
     protected _createElevationHost(layer: ElevationLayer): Map3dElevationHost {
-        const name = this._buildNameWithSuffix(layer.name, Map3d.HostSuffix);
+        const name = TextUtils.BuildNameWithSuffix(layer.name, Map3d.HostSuffix);
         const source = layer;
         const options = layer;
         const enabled = layer.enabled;
@@ -236,30 +232,27 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     protected _addedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void {
         this._textureLayersView.addLayer(layer);
+        // this._updateLayerWithDisplayAndNavigation(layer);
     }
 
     protected _removedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void {
         this._textureLayersView.removeLayer(layer);
     }
 
-    protected _buildNameWithSuffix(name: string, suffix: string): string {
-        return `${this.name}.${suffix}`;
-    }
-
     private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
-        this._updateLayersWithDisplayAndNavigation();
+        for (const layer of this._layers.getLayers()) {
+            this._updateLayerWithDisplayAndNavigation(layer);
+        }
     }
 
-    private _updateLayersWithDisplayAndNavigation() {
-        for (const layer of this._layers.getLayers()) {
-            if (this._targetDisplay && this._navigation) {
-                let size: ISize2 = this._targetDisplay;
-                if (layer.zoomOffset) {
-                    const s = Math.pow(2, Math.abs(layer.zoomOffset)); // Always positive offset supported.
-                    size = new Size2(size.width * s, size.height * s);
-                }
-                layer.setContext(this._navigation, size);
+    private _updateLayerWithDisplayAndNavigation(layer: ElevationLayer | ITileMapLayer<Map3dTextureContentType> | ITileMapLayer<Map3dContentType>) {
+        if (this._targetDisplay) {
+            let size: ISize2 = this._targetDisplay;
+            if (layer.zoomOffset) {
+                const s = Math.pow(2, Math.abs(layer.zoomOffset)); // Always positive offset supported.
+                size = new Size2(size.width * s, size.height * s);
             }
+            layer.setContext(this._navigation, size);
         }
     }
 }

@@ -4,6 +4,7 @@ import { ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { ITileDisplayBounds } from "core/tiles";
+import { Length, Quantity, Unit } from "core/math";
 
 export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     public static SD: ISize2 = new Size2(640, 480);
@@ -24,11 +25,12 @@ export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     _ppu: Vector3;
     _ratio: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
+    _unit: Unit;
 
     // cached
     _inverseWorldMatrix?: Matrix;
 
-    public constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene) {
+    public constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene, unit: Unit = Length.Units.meter) {
         super(name, scene);
         this._dimension = Size3.FromSize(dimension);
         this._halfDimension = new Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.thickness / 2);
@@ -45,6 +47,7 @@ export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
         this._worldTransform.parent = this;
         this.isPickable = true; // enable pointer events
         this._pointerSource = new VirtualDisplayInputsSource(this);
+        this._unit = unit;
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>> {
@@ -87,20 +90,39 @@ export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
         return this._worldTransform;
     }
 
+    /// <summary>
+    /// Gets the display resolution in "pixels" like.
+    /// </summary>
     public get resolution(): ISize3 {
         return this._resolution;
     }
 
+    /// <summary>
+    /// Gets the display dimension unit. Defualt is meter.
+    /// </summary>
+    public get unit(): Unit {
+        return this._unit;
+    }
+
+    /// <summary>
+    /// Gets the display dimension in current unit. Current unit may be accessed via <see cref="unit"/> property.
     public get dimension(): ISize3 {
         return this._dimension;
     }
 
+    /// <summary>
+    /// Gets the display half dimension in current unit.
+    /// </summary>
     public get halfDimension(): ISize3 {
         return this._halfDimension;
     }
 
     public get pixelPerUnit(): ICartesian3 {
         return this._ppu;
+    }
+
+    public get dpi(): number {
+        return Quantity.Convert(this._ppu.x, this._unit, Length.Units.inch);
     }
 
     public get aspectRatio(): ICartesian3 {

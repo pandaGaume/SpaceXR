@@ -19,6 +19,8 @@ export declare class Map3dScaleController implements IDisposable {
     private _currentCenter;
     private _thresholdLat;
     constructor(display: VirtualDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics);
+    get thresholdLat(): number;
+    set thresholdLat(v: number);
     get scaleChangedObservable(): Observable<ICartesian3>;
     dispose(): void;
     protected _onNavigationPropertyChanged(e: PropertyChangedEventArgs<ITileNavigationState, unknown>): void;

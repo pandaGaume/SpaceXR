@@ -1,4 +1,4 @@
-import { Distance, Angle, Timespan, Speed } from "../../math/math.units";
+import { Length, Angle, Timespan, Speed } from "../../math/math.units";
 import { IKeplerOrbit, ICelestialBody } from "../space.interfaces";
 
 export class KeplerOrbitBase implements IKeplerOrbit {
@@ -8,7 +8,7 @@ export class KeplerOrbitBase implements IKeplerOrbit {
     protected _body: ICelestialBody;
     protected _focus: ICelestialBody;
 
-    protected _semiMajorAxis: Distance;
+    protected _semiMajorAxis: Length;
     protected _eccentricity: number;
     protected _periapsisTime: number;
     protected _periapsisAngle: Angle;
@@ -19,7 +19,7 @@ export class KeplerOrbitBase implements IKeplerOrbit {
     protected constructor(
         body: ICelestialBody,
         focus: ICelestialBody,
-        semiMajorAxis: Distance | number,
+        semiMajorAxis: Length | number,
         eccentricity = 0,
         periapsisTime = 0,
         inclination: Angle | number,
@@ -29,7 +29,7 @@ export class KeplerOrbitBase implements IKeplerOrbit {
     ) {
         this._body = body;
         this._focus = focus;
-        this._semiMajorAxis = new Distance(semiMajorAxis, Distance.Units.Ly);
+        this._semiMajorAxis = new Length(semiMajorAxis, Length.Units.Ly);
         this._eccentricity = eccentricity;
         this._periapsisTime = periapsisTime;
         this._inclination = new Angle(inclination, Angle.Units.d);
@@ -46,18 +46,18 @@ export class KeplerOrbitBase implements IKeplerOrbit {
         return this._focus;
     }
 
-    public get semiMajorAxis(): Distance {
+    public get semiMajorAxis(): Length {
         return this._semiMajorAxis;
     }
 
-    public get semiMinorAxis(): Distance {
+    public get semiMinorAxis(): Length {
         const v: number = this._semiMajorAxis.value * Math.sqrt(1.0 - this._eccentricity * this._eccentricity);
-        return new Distance(v, this._semiMajorAxis.unit);
+        return new Length(v, this._semiMajorAxis.unit);
     }
 
-    public get periapsis(): Distance {
+    public get periapsis(): Length {
         const v: number = this.semiMajorAxis.value * (1.0 - this._eccentricity);
-        return new Distance(v, this._semiMajorAxis.unit);
+        return new Length(v, this._semiMajorAxis.unit);
     }
 
     public get periapsisTime(): number {
@@ -74,9 +74,9 @@ export class KeplerOrbitBase implements IKeplerOrbit {
         return this._period;
     }
 
-    public get apoapsis(): Distance {
+    public get apoapsis(): Length {
         const v: number = this.semiMajorAxis.value * (1.0 + this._eccentricity);
-        return new Distance(v, this._semiMajorAxis.unit);
+        return new Length(v, this._semiMajorAxis.unit);
     }
 
     public get meanAngularSpeed(): Speed {
@@ -89,7 +89,7 @@ export class KeplerOrbitBase implements IKeplerOrbit {
      * @param meanAnomaly
      * @param decimalPrecision
      */
-    public getEccentricAnomaly(meanAnomaly: number, decimalPrecision: number): Distance {
+    public getEccentricAnomaly(meanAnomaly: number, decimalPrecision: number): Length {
         const dp: number = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
         const K: number = Math.PI / 180.0;
         let m: number = meanAnomaly / 360.0;
@@ -111,6 +111,6 @@ export class KeplerOrbitBase implements IKeplerOrbit {
 
         E /= K;
 
-        return new Distance(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
+        return new Length(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
     }
 }

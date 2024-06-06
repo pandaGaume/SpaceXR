@@ -1,4 +1,4 @@
-import { Temperature, Distance, Mass, Luminosity, QuantityRange as QR } from "../math/math.units";
+import { Temperature, Length, Mass, Luminosity, QuantityRange as QR } from "../math/math.units";
 
 export type MKMajor = "O" | "B" | "A" | "F" | "G" | "K" | "M";
 export type MKMinor = number;
@@ -66,7 +66,7 @@ export class SpectralClass {
         "blue",
         "blue",
         new QR(new Mass(16, Mass.Units.Sm)),
-        new QR(new Distance(6.6, Distance.Units.Sr)),
+        new QR(new Length(6.6, Length.Units.Sr)),
         new QR(new Luminosity(30000, Luminosity.Units.Lsun)),
         "weak",
         0.00003
@@ -78,7 +78,7 @@ export class SpectralClass {
         "blue white",
         "deep blue white",
         new QR(new Mass(2.1, Mass.Units.Sm), new Mass(16, Mass.Units.Sm)),
-        new QR(new Distance(1.8, Distance.Units.Sr), new Distance(6.6, Distance.Units.Sr)),
+        new QR(new Length(1.8, Length.Units.Sr), new Length(6.6, Length.Units.Sr)),
         new QR(new Luminosity(25, Luminosity.Units.Lsun), new Luminosity(30000, Luminosity.Units.Lsun)),
         "weak",
         0.13
@@ -90,7 +90,7 @@ export class SpectralClass {
         "white",
         "blue white",
         new QR(new Mass(1.4, Mass.Units.Sm), new Mass(2.1, Mass.Units.Sm)),
-        new QR(new Distance(1.4, Distance.Units.Sr), new Distance(1.8, Distance.Units.Sr)),
+        new QR(new Length(1.4, Length.Units.Sr), new Length(1.8, Length.Units.Sr)),
         new QR(new Luminosity(5, Luminosity.Units.Lsun), new Luminosity(25, Luminosity.Units.Lsun)),
         "strong",
         0.6
@@ -102,7 +102,7 @@ export class SpectralClass {
         "yellow white",
         "white",
         new QR(new Mass(1.04, Mass.Units.Sm), new Mass(1.4, Mass.Units.Sm)),
-        new QR(new Distance(1.15, Distance.Units.Sr), new Distance(1.4, Distance.Units.Sr)),
+        new QR(new Length(1.15, Length.Units.Sr), new Length(1.4, Length.Units.Sr)),
         new QR(new Luminosity(1.5, Luminosity.Units.Lsun), new Luminosity(5, Luminosity.Units.Lsun)),
         "medium",
         3
@@ -114,7 +114,7 @@ export class SpectralClass {
         "yellow",
         "yello white",
         new QR(new Mass(0.8, Mass.Units.Sm), new Mass(1.04, Mass.Units.Sm)),
-        new QR(new Distance(0.96, Distance.Units.Sr), new Distance(1.15, Distance.Units.Sr)),
+        new QR(new Length(0.96, Length.Units.Sr), new Length(1.15, Length.Units.Sr)),
         new QR(new Luminosity(0.6, Luminosity.Units.Lsun), new Luminosity(1.5, Luminosity.Units.Lsun)),
         "weak",
         7.6
@@ -126,7 +126,7 @@ export class SpectralClass {
         "orange	pale",
         "yello orange",
         new QR(new Mass(0.45, Mass.Units.Sm), new Mass(0.8, Mass.Units.Sm)),
-        new QR(new Distance(0.7, Distance.Units.Sr), new Distance(0.96, Distance.Units.Sr)),
+        new QR(new Length(0.7, Length.Units.Sr), new Length(0.96, Length.Units.Sr)),
         new QR(new Luminosity(0.08, Luminosity.Units.Lsun), new Luminosity(0.6, Luminosity.Units.Lsun)),
         "very weak",
         12.1
@@ -138,7 +138,7 @@ export class SpectralClass {
         "red light",
         "orange red",
         new QR(new Mass(0.08, Mass.Units.Sm), new Mass(0.45, Mass.Units.Sm)),
-        new QR(new Distance(0, Distance.Units.Sr), new Distance(0.7, Distance.Units.Sr)),
+        new QR(new Length(0, Length.Units.Sr), new Length(0.7, Length.Units.Sr)),
         new QR(new Luminosity(0, Luminosity.Units.Lsun), new Luminosity(0.8, Luminosity.Units.Lsun)),
         "very weak",
         76.45
@@ -180,7 +180,7 @@ export class SpectralClass {
         public VegaRelativeColorLabel: string,
         public chromacityLabel: string,
         public mass: QR<Mass>,
-        public radius: QR<Distance>,
+        public radius: QR<Length>,
         public luminosity: QR<Luminosity>,
         public hydrogenLine: string,
         public fractionOfStars: number

@@ -1,4 +1,4 @@
-import { Temperature, Distance, Mass, Luminosity, QuantityRange as QR } from "../math/math.units";
+import { Temperature, Length, Mass, Luminosity, QuantityRange as QR } from "../math/math.units";
 export type MKMajor = "O" | "B" | "A" | "F" | "G" | "K" | "M";
 export type MKMinor = number;
 export type MKLuminosity = "Ia+" | "I" | "II" | "III" | "IV" | "V" | "sd" | "D";
@@ -22,7 +22,7 @@ export declare class SpectralClass {
     VegaRelativeColorLabel: string;
     chromacityLabel: string;
     mass: QR<Mass>;
-    radius: QR<Distance>;
+    radius: QR<Length>;
     luminosity: QR<Luminosity>;
     hydrogenLine: string;
     fractionOfStars: number;
@@ -39,5 +39,5 @@ export declare class SpectralClass {
     static HarwardClassification: SpectralClass[];
     static TemperatureRange: QR<Temperature>;
     static ClassFromTemperature(temperature: Temperature | number): SpectralClass | undefined;
-    constructor(name: MKMajor, effectiveTemperature: QR<Temperature>, VegaRelativeColorLabel: string, chromacityLabel: string, mass: QR<Mass>, radius: QR<Distance>, luminosity: QR<Luminosity>, hydrogenLine: string, fractionOfStars: number);
+    constructor(name: MKMajor, effectiveTemperature: QR<Temperature>, VegaRelativeColorLabel: string, chromacityLabel: string, mass: QR<Mass>, radius: QR<Length>, luminosity: QR<Luminosity>, hydrogenLine: string, fractionOfStars: number);
 }

@@ -3,6 +3,7 @@ import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { ITileDisplayBounds } from "core/tiles";
+import { Unit } from "core/math";
 export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     static SD: ISize2;
     static QHD: ISize2;
@@ -19,8 +20,9 @@ export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     _ppu: Vector3;
     _ratio: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
+    _unit: Unit;
     _inverseWorldMatrix?: Matrix;
-    constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene);
+    constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene, unit?: Unit);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
     get width(): number;
     get height(): number;
@@ -29,9 +31,11 @@ export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     protected _buildVertexData(): VertexData;
     get context3d(): TransformNode;
     get resolution(): ISize3;
+    get unit(): Unit;
     get dimension(): ISize3;
     get halfDimension(): ISize3;
     get pixelPerUnit(): ICartesian3;
+    get dpi(): number;
     get aspectRatio(): ICartesian3;
     getInverseWorldMatrix(): Matrix;
     getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2;

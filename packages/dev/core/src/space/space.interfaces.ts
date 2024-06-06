@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { Temperature, Distance, Angle, Timespan, Speed } from "../math/math.units";
+import { Temperature, Length, Angle, Timespan, Speed } from "../math/math.units";
 import { RGBAColor } from "../math/math.color";
 import { AxialTilt } from "./space.axialTilt";
 import { SpectralClass } from "./space.spectralClass";
@@ -25,9 +25,9 @@ export enum CelestialNodeType {
 export interface ICelestialObjectShape {}
 
 export interface IEllipsoidShape {
-    x: Distance;
-    y: Distance;
-    z: Distance;
+    x: Length;
+    y: Length;
+    z: Length;
 }
 
 export interface ICelestialObjectMotion {}
@@ -46,13 +46,13 @@ export interface ISingleOrbit extends ICelestialObjectMotion {
 }
 
 export interface IKeplerOrbit extends ISingleOrbit {
-    semiMinorAxis: Distance;
-    periapsis: Distance;
+    semiMinorAxis: Length;
+    periapsis: Length;
     periapsisTime: number;
     periapsisAngle: Angle;
     inclination: Angle;
     period: Timespan;
-    apoapsis: Distance;
+    apoapsis: Length;
     meanAngularSpeed: Speed;
 }
 

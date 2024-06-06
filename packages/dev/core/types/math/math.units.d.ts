@@ -11,6 +11,7 @@ export declare class Unit {
     constructor(name: string, symbol: string, value?: number, converter?: IUnitConverter | undefined);
 }
 export declare abstract class Quantity {
+    static Convert(value: number, from: Unit, to: Unit): number;
     _value: number;
     private _unit?;
     static round(value: number, decimalPrecision?: number): number;
@@ -99,15 +100,15 @@ export declare class Angle extends Quantity {
     };
     unitForSymbol(str: string): Unit | undefined;
 }
-export declare class Distance extends Quantity {
-    static ForParameter(value: Distance | number, defaultValue: number, defaultUnit: Unit): Distance;
+export declare class Length extends Quantity {
+    static ForParameter(value: Length | number, defaultValue: number, defaultUnit: Unit): Length;
     static Units: {
         [key: string]: Unit;
     };
     unitForSymbol(str: string): Unit | undefined;
 }
 export declare class Speed extends Quantity {
-    static ForParameter(value: Distance | number, defaultValue: number, defaultUnit: Unit): Distance;
+    static ForParameter(value: Length | number, defaultValue: number, defaultUnit: Unit): Length;
     static Units: {
         [key: string]: Unit;
     };

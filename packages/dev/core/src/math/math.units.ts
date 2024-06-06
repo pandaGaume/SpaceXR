@@ -12,6 +12,16 @@ export class Unit {
 const _defaultDecimalPrecision = 6;
 
 export abstract class Quantity {
+    public static Convert(value: number, from: Unit, to: Unit): number {
+        if (!from || !to || from === to) {
+            return value;
+        }
+        if (from.converter && from.converter.accept(to)) {
+            return from.converter.convert(value, to);
+        }
+        return value * (from.value / to.value);
+    }
+
     public _value: number;
     private _unit?: Unit;
 
@@ -65,7 +75,6 @@ export abstract class Quantity {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -102,7 +111,7 @@ export abstract class Quantity {
     }
 
     public subtract(v: Quantity): Quantity {
-        const result = this.value - (v._unit === this._unit ? v.value : v.getValue(this._unit)) ;
+        const result = this.value - (v._unit === this._unit ? v.value : v.getValue(this._unit));
         return this.constructor(result, this._unit);
     }
 
@@ -134,9 +143,9 @@ export abstract class Quantity {
 
 export class QuantityRange<T extends Quantity> extends AbstractRange<T> {
     protected computeDelta(a: T, b: T): T {
-        return b && a ? b.subtract(a) : a.constructor(0,a.unit);
+        return b && a ? b.subtract(a) : a.constructor(0, a.unit);
     }
-} 
+}
 
 export class Timespan extends Quantity {
     public static ForParameter(value: Timespan | number, defaultValue: number, defaultUnit: Unit): Timespan {
@@ -345,9 +354,9 @@ export class Angle extends Quantity {
     }
 }
 
-export class Distance extends Quantity {
-    public static ForParameter(value: Distance | number, defaultValue: number, defaultUnit: Unit): Distance {
-        return value ? new Distance(value, defaultUnit) : new Distance(defaultValue, defaultUnit);
+export class Length extends Quantity {
+    public static ForParameter(value: Length | number, defaultValue: number, defaultUnit: Unit): Length {
+        return value ? new Length(value, defaultUnit) : new Length(defaultValue, defaultUnit);
     }
 
     public static Units: { [key: string]: Unit } = {
@@ -360,6 +369,7 @@ export class Distance extends Quantity {
         mim: new Unit("micrometer", "mim", 10e-6),
         mm: new Unit("millimeter", "mm", 10e-3),
         cm: new Unit("centimeter", "cm", 10e-2),
+        in: new Unit("inch", "in", 0.0254),
         dm: new Unit("decimeter", "dm", 10e-1),
         m: new Unit("meter", "m", 1),
         Mi: new Unit("mile", "Mi", 1.609343502101154),
@@ -382,13 +392,13 @@ export class Distance extends Quantity {
     };
 
     public unitForSymbol(str: string): Unit | undefined {
-        return Distance.Units[str] || undefined;
+        return Length.Units[str] || undefined;
     }
 }
 
 export class Speed extends Quantity {
-    public static ForParameter(value: Distance | number, defaultValue: number, defaultUnit: Unit): Distance {
-        return value ? new Distance(value, defaultUnit) : new Distance(defaultValue, defaultUnit);
+    public static ForParameter(value: Length | number, defaultValue: number, defaultUnit: Unit): Length {
+        return value ? new Length(value, defaultUnit) : new Length(defaultValue, defaultUnit);
     }
 
     public static Units: { [key: string]: Unit } = {};

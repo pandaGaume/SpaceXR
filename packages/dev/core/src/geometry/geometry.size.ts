@@ -1,6 +1,19 @@
+import { Quantity, Unit } from "../math";
 import { ISize2, ISize3, IsSize3 } from "./geometry.interfaces";
 
 export class Size2 implements ISize2 {
+    public static ConvertInPlace(size: ISize2, from: Unit, to: Unit): ISize2 {
+        return Size2.ConvertToRef(size, from, to, size);
+    }
+
+    public static ConvertToRef(size: ISize2, from: Unit, to: Unit, ref?: ISize2): ISize2 {
+        ref = ref ?? Size2.Zero();
+        ref.width = Quantity.Convert(size.width, from, to);
+        ref.height = Quantity.Convert(size.height, from, to);
+
+        return ref;
+    }
+
     public static Zero() {
         return new Size2(0, 0);
     }
@@ -21,6 +34,18 @@ export class Size2 implements ISize2 {
 }
 
 export class Size3 extends Size2 implements ISize3 {
+    public static ConvertInPlace(size: ISize3, from: Unit, to: Unit): ISize3 {
+        return Size3.ConvertToRef(size, from, to, size);
+    }
+
+    public static ConvertToRef(size: ISize3, from: Unit, to: Unit, ref?: ISize3): ISize3 {
+        ref = ref ?? Size3.Zero();
+        ref.width = Quantity.Convert(size.width, from, to);
+        ref.height = Quantity.Convert(size.height, from, to);
+        ref.thickness = Quantity.Convert(size.thickness, from, to);
+        return ref;
+    }
+
     public static Zero() {
         return new Size3(0, 0, 0);
     }

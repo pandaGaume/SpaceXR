@@ -13,7 +13,7 @@ gl_FragColor=vColor;#elif defined(PHONG_SHADING) || defined(BLINN_PHONG_SHADING
 #if defined(SPECULAR)
 vec3 lightColor=calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights,normalize(vNormal),vPosition,uViewPosition,uShininess);#else
 vec3 lightColor= calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights,normalize(vNormal),vPosition);#endif
-gl_FragColor= texColor*vec4(lightColor,1.);#endif
+gl_FragColor= vec4(texColor.rgb*lightColor,texColor.a);#endif
 }`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const webmapFragmentShader = { name, shader };

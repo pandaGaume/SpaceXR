@@ -53,7 +53,7 @@ void main(void) {
         #else
             vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldNormal.xyz, worldPosition.xyz);
         #endif
-        vColor= uTerrainColor* vec4(lightColor,1.);
+        vColor= vec4(uTerrainColor.rgb * lightColor, uTerrainColor.a);
     #endif
     #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
         vNormal = worldNormal.xyz;

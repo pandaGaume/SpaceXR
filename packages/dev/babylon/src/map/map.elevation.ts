@@ -1,4 +1,4 @@
-import { Nullable, Scene, TransformNode, Node } from "@babylonjs/core";
+import { Nullable, Scene, TransformNode, Node, Color4 } from "@babylonjs/core";
 import {
     IHasNavigationState,
     IHasTileMapLayerContainer,
@@ -27,17 +27,43 @@ export type Map3dTextureContentType = ImageLayerContentType;
 export type Map3dElevationContentType = IDemInfos;
 export type Map3dContentType = Map3dTextureContentType | Map3dElevationContentType;
 
-export interface IMap3DMetrics {
-    resolution: Size2;
-    dimension: Size2;
-    scale: number;
-    spatialResolution: Size2;
+/// <summary>
+/// The 3D grid sampling mode. Default is GRID.
+/// </summary>
+export enum ElevationSamplingMode {
+    GRID = 0, // default
+    POINT_CLOUD = 1,
+}
 
-    getLevelOfDetail(center: IGeo2, metrics: ITileMetrics): number;
+/// <summary>
+/// The 3D grid sampling resolution mode. Default is FIXED. This is used to define the resolution of the grid.
+/// The resolution of the grid is similar to the resolution of the display. A resolution of W,H means that the grid will be displayed
+/// onto the display with WxH points along the width and the height of the display. As the aspect ratio is important, the resolution
+/// is defined with a size but may be preffered addressed as number, which will allow the framework to adapt the resolution to the display.
+/// FIXED - fixed resolution for all the surface
+/// ADAPTATIVE - adaptative resolution based on the distance to the camera. In that case, the higher resolution will be the value defined as resolution.
+/// </summary>
+export enum ElevationSamplingResolutionMode {
+    FIXED = 0, // default - fixed for all the surface
+    ADAPTATIVE = 1, // adaptative resolution based on the distance to the camera
+}
+
+export interface IMap3DMetrics {
+    elevationSamplingMode?: ElevationSamplingMode;
+    elevationSamplingResolutionMode?: ElevationSamplingResolutionMode;
+    elevationSamplingResolution?: number;
+
+    textureResolution?: ISize2;
+}
+
+export interface IMap3dSurfaceOptions {
+    color?: Color4;
+    shininess?: number;
 }
 
 export interface IMap3dOptions {
     metrics: IMap3DMetrics;
+    surfaceOptions: IMap3dSurfaceOptions;
 }
 
 /// <summary>

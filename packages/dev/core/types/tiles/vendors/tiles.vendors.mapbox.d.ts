@@ -5,7 +5,7 @@ import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 export declare class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
     constructor(token: string, extension?: string);
 }
-export declare class MapboxAltitudeDecoder implements IPixelDecoder {
+export declare class MapboxAltitudeDecoder implements IPixelDecoder<Float32Array> {
     static Shared: MapboxAltitudeDecoder;
     decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number;
 }

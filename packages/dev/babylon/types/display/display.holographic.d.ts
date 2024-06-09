@@ -1,8 +1,8 @@
 import { Nullable, Observable, Scene } from "@babylonjs/core";
-import { ClipPlaneDefinition, IHolographicBounds } from "./display.clipPlane";
+import { ClipPlaneDefinition, IHolographicBox } from "./display.holographic.bounds";
 import { VirtualDisplay } from "./display.virtual";
 import { ISize3 } from "core/geometry";
-export declare class HolographicDisplay extends VirtualDisplay implements IHolographicBounds {
+export declare class HolographicDisplay extends VirtualDisplay implements IHolographicBox {
     static BuildLateralClipPlanes(display: VirtualDisplay): Array<ClipPlaneDefinition>;
     static buildHorizontalClipPlanes(display: VirtualDisplay): Array<ClipPlaneDefinition>;
     private _clipPlanesAddedObservable?;

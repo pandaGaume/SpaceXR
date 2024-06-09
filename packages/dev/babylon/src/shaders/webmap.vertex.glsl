@@ -11,7 +11,7 @@
 #include<elevationVertexDeclaration>
 
 // build in
-uniform mat4 viewProjection; 
+uniform mat4 viewProjection;
 in vec3 position; 
 in vec2 uv; 
 // end build in
@@ -30,11 +30,15 @@ void main(void) {
     // this value will be [0,3] to index one value into the ids vector. 
     // we assume the value is already clamped.
     float depth = demIds[int(position.z)] ;
+    vec3 v = vec3(uv.xy, depth);
     if( depth < 0.0) {
+        // we are in the case of a border vertex, which is defined at 0 by the current REPEAT wrap mode
+        // we may have done similar result usin wrap mode CLAMP_TO_EDGE.
+        v.x = v.x == 0.0 ? 1.0 : v.x;
+        v.y = v.y == 0.0 ? 1.0 : v.y;  
         depth = demIds[0];
     } 
-    vec3 v = vec3(uv.xy, depth);
-  
+
     // get the position
     float alt0 = float(texture(uAltitudes, v)) ;
     float alt = (alt0 -uAltRange.x) * uMapScale;
@@ -43,20 +47,21 @@ void main(void) {
 
     // get the normal
     vec4 pixel = texture(uNormals, v);
-    vec4 n = vec4(elevation_rgbaToNormal(pixel),1.0);
-    vec4 worldNormal = n; //normalize(finalWorld * n);
+    //mat3 normalMatrix = transpose(inverse(mat3(finalWorld))) ;
+    //vec3 worldNormal = normalize(normalMatrix * elevation_rgbaToNormal(pixel));
+    vec3 worldNormal = elevation_rgbaToNormal(pixel); 
 
     // compute lights
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
         #if defined(SPECULAR)
-            vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldNormal.xyz, worldPosition.xyz, uViewPosition, uShininess);
+            vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldNormal, worldPosition.xyz, uViewPosition, uShininess);
         #else
-            vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldNormal.xyz, worldPosition.xyz);
+            vec3 lightColor=calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, worldNormal, worldPosition.xyz);
         #endif
         vColor= vec4(uTerrainColor.rgb * lightColor, uTerrainColor.a);
     #endif
     #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
-        vNormal = worldNormal.xyz;
+        vNormal = worldNormal;
         vPosition = worldPosition.xyz;
     #endif
 

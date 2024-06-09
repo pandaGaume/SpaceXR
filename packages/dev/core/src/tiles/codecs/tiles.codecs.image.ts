@@ -161,7 +161,7 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
     private _canvas?: HTMLCanvasElement;
     private _options?: Float32TileCodecOptions;
 
-    public constructor(public pixelDecoder: IPixelDecoder, options?: Float32TileCodecOptions, canvas?: HTMLCanvasElement) {
+    public constructor(public pixelDecoder: IPixelDecoder<Float32Array>, options?: Float32TileCodecOptions, canvas?: HTMLCanvasElement) {
         this._options = options;
         this._canvas = canvas;
     }

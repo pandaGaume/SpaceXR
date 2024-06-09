@@ -1,9 +1,9 @@
 import { Nullable, Observable, Scene, Vector3 } from "@babylonjs/core";
-import { ClipIndex, ClipPlaneDefinition, IHolographicBounds } from "./display.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IHolographicBox } from "./display.holographic.bounds";
 import { VirtualDisplay } from "./display.virtual";
 import { ISize3 } from "core/geometry";
 
-export class HolographicDisplay extends VirtualDisplay implements IHolographicBounds {
+export class HolographicDisplay extends VirtualDisplay implements IHolographicBox {
     public static BuildLateralClipPlanes(display: VirtualDisplay): Array<ClipPlaneDefinition> {
         const clipPlanes = new Array<ClipPlaneDefinition>();
         const halfWidth: number = display.halfDimension.width;

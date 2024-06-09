@@ -18,7 +18,7 @@ export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
     }
 }
 
-export class MapboxAltitudeDecoder implements IPixelDecoder {
+export class MapboxAltitudeDecoder implements IPixelDecoder<Float32Array> {
     public static Shared = new MapboxAltitudeDecoder();
 
     public decode(pixels: Uint8ClampedArray, offset: number, target: Float32Array, targetOffset: number): number {

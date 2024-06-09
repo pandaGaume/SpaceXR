@@ -1,5 +1,5 @@
 import { Quantity, Unit } from "../math";
-import { ICartesian2, ICartesian3 } from "./geometry.interfaces";
+import { ICartesian2, ICartesian3, ICartesian4 } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
     public static ConvertInPlace(value: ICartesian2, from: Unit, to: Unit): ICartesian2 {
@@ -27,11 +27,11 @@ export class Cartesian2 implements ICartesian2 {
     }
 }
 export class Cartesian3 implements ICartesian3 {
-    public static ConvertInPlace(value: ICartesian3, from: Unit, to: Unit): ICartesian3 {
+    public static ConvertInPlace(value: ICartesian3 | ICartesian4, from: Unit, to: Unit): ICartesian3 {
         return Cartesian3.ConvertToRef(value, from, to, value);
     }
 
-    public static ConvertToRef(value: ICartesian3, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3 {
+    public static ConvertToRef(value: ICartesian3 | ICartesian4, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3 {
         ref = ref ?? Cartesian3.Zero();
         ref.x = Quantity.Convert(value.x, from, to);
         ref.y = Quantity.Convert(value.y, from, to);
@@ -45,5 +45,15 @@ export class Cartesian3 implements ICartesian3 {
     public constructor(public x: number, public y: number, public z: number) {}
     public toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;
+    }
+}
+
+export class Cartesian4 implements ICartesian4 {
+    public static Zero() {
+        return new Cartesian4(0, 0, 0);
+    }
+    public constructor(public x: number, public y: number, public z: number, public w: number = 1.0) {}
+    public toString() {
+        return `x:${this.x}, y:${this.y}, z:${this.z}, w:${this.w}`;
     }
 }

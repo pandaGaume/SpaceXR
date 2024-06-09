@@ -39,9 +39,9 @@ export declare class Float32TileCodecOptions extends ImageDataTileCodecOptions {
 export declare class Float32TileCodecOptionsBuilder extends ImageDataTileCodecOptionsBuilder {
 }
 export declare class Float32TileCodec implements ITileCodec<Float32Array> {
-    pixelDecoder: IPixelDecoder;
+    pixelDecoder: IPixelDecoder<Float32Array>;
     private _canvas?;
     private _options?;
-    constructor(pixelDecoder: IPixelDecoder, options?: Float32TileCodecOptions, canvas?: HTMLCanvasElement);
+    constructor(pixelDecoder: IPixelDecoder<Float32Array>, options?: Float32TileCodecOptions, canvas?: HTMLCanvasElement);
     decodeAsync(r: void | Response): Promise<Nullable<Float32Array>>;
 }

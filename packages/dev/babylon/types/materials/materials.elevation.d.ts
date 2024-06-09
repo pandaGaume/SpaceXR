@@ -1,7 +1,7 @@
 import { AbstractMesh, Color4, Effect, Light, Matrix, Mesh, Nullable, Observer, PushMaterial, Scene, SubMesh } from "@babylonjs/core";
 import { IPipelineMessageType, ITargetBlock, ITile } from "core/tiles";
 import { Range } from "core/math";
-import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IHasHolographicBox, IHolographicBox } from "../display";
 import { ElevationTile, IHasMapScale } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { ICartesian3 } from "core/geometry";
@@ -15,6 +15,7 @@ export declare enum Map3dShadingMode {
 declare class AreaInfos {
     layer: ITexture3Layer;
     adjacentIds: Array<number>;
+    isReady: boolean;
     constructor(layer: ITexture3Layer);
 }
 export declare enum Map3dLayerKind {
@@ -29,7 +30,7 @@ declare class TileBag {
     getArea(kind: Map3dLayerKind): Nullable<AreaInfos>;
     setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void;
 }
-export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<ImageData>>, IHasHolographicBounds, IHasMapScale {
+export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<ImageData>>, IHasHolographicBox, IHasMapScale {
 }
 export declare class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     static DefaultTerrainColor: Color4;
@@ -74,8 +75,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _lightAddedObserver: Nullable<Observer<Light>>;
     protected _lightRemovedObserver: Nullable<Observer<Light>>;
     constructor(name: string, shaderName: string, scene?: Scene);
-    get holographicBounds(): Nullable<IHolographicBounds>;
-    set holographicBounds(value: Nullable<IHolographicBounds>);
+    get holographicBox(): Nullable<IHolographicBox>;
+    set holographicBox(value: Nullable<IHolographicBox>);
     getLights(): Light[];
     get mapScale(): ICartesian3;
     set mapScale(value: ICartesian3);

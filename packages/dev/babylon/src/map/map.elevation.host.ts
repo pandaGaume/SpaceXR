@@ -28,7 +28,7 @@ import { IDemInfos } from "core/dem";
 import { Map3dTextureContentType } from "./map.elevation";
 import { CanvasTileSource } from "core/map";
 import { Map3dScaleController, HasMapScale } from "./map.scale.controller";
-import { HolographicDisplay, HasHolographicBounds } from "../display";
+import { HolographicDisplay, HasHolographicBox } from "../display";
 import { IsDisposable } from "core/types";
 import { WebMapMaterial } from "../materials";
 
@@ -104,15 +104,17 @@ export class Map3dElevationHost
         this._elevationSource.linkTo(this);
         this._layerObserver = this._elevationSource.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
 
-        this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
-        this.scaling.z = this._exageration;
-
         this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
         if (this._insets) {
             this.position.set(this._insets.x, this._insets.y, this._insets.z);
         }
+
         this._tilesRoot = new TransformNode(this._buildNameWithSuffix(Map3dElevationHost.TileRootSuffix));
         this._tilesRoot.parent = this;
+
+        this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
+        this._tilesRoot.scaling.z = this._exageration;
+
         this._grid = this._buildTopology();
         // build the material
         const material = this._buildMaterial(options, this.getScene());
@@ -219,18 +221,19 @@ export class Map3dElevationHost
             this._scaleObserver = null;
         }
         var m = this.mesh.material;
-        if (m && HasHolographicBounds(m)) {
-            m.holographicBounds = null;
+        if (m && HasHolographicBox(m)) {
+            m.holographicBox = null;
         }
 
         if (display) {
             this._scaleController = new Map3dScaleController(display, this.navigation, this.metrics);
             this._scaleObserver = this._scaleController.scaleChangedObservable.add(this._onScaleChanged.bind(this));
             this._onScaleChanged(Map3dScaleController.GetScale(display, this.navigation, this.metrics));
-
+            this.scaling.x = display.dimension.width / display.resolution.width;
+            this.scaling.y = display.dimension.height / display.resolution.height;
             var m = this.mesh.material;
-            if (m && HasHolographicBounds(m)) {
-                m.holographicBounds = display;
+            if (m && HasHolographicBox(m)) {
+                m.holographicBox = display;
             }
         }
     }
@@ -272,6 +275,9 @@ export class Map3dElevationHost
 
     protected _buildInstance(name: string, tile: ITile<IElevationMesh>): AbstractMesh {
         const instance = this._template.createInstance(name);
+        // at this point, the dimension should be in meters.
+        // the tile size is actually unitless and normalized to one.
+        // it represents usually 256 or 512, units in the display space.
         instance.scaling.x = instance.scaling.y = this.metrics.tileSize;
         instance.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
         return instance;

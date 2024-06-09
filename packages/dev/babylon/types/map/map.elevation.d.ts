@@ -1,7 +1,7 @@
-import { Nullable, Scene, TransformNode, Node } from "@babylonjs/core";
+import { Nullable, Scene, TransformNode, Node, Color4 } from "@babylonjs/core";
 import { IHasNavigationState, IHasTileMapLayerContainer, ITileMapLayer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayerContentType } from "core/tiles";
 import { IGeo2 } from "core/geography";
-import { Size2 } from "core/geometry";
+import { ISize2 } from "core/geometry";
 import { IPointerSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
@@ -10,15 +10,27 @@ import { IDemInfos } from "core/dem";
 export type Map3dTextureContentType = ImageLayerContentType;
 export type Map3dElevationContentType = IDemInfos;
 export type Map3dContentType = Map3dTextureContentType | Map3dElevationContentType;
+export declare enum ElevationSamplingMode {
+    GRID = 0,
+    POINT_CLOUD = 1
+}
+export declare enum ElevationSamplingResolutionMode {
+    FIXED = 0,
+    ADAPTATIVE = 1
+}
 export interface IMap3DMetrics {
-    resolution: Size2;
-    dimension: Size2;
-    scale: number;
-    spatialResolution: Size2;
-    getLevelOfDetail(center: IGeo2, metrics: ITileMetrics): number;
+    elevationSamplingMode?: ElevationSamplingMode;
+    elevationSamplingResolutionMode?: ElevationSamplingResolutionMode;
+    elevationSamplingResolution?: number;
+    textureResolution?: ISize2;
+}
+export interface IMap3dSurfaceOptions {
+    color?: Color4;
+    shininess?: number;
 }
 export interface IMap3dOptions {
     metrics: IMap3DMetrics;
+    surfaceOptions: IMap3dSurfaceOptions;
 }
 export declare class Map3d extends TransformNode implements IHasTileMapLayerContainer<Map3dContentType, ITileMapLayer<Map3dContentType>>, ITileNavigationApi<Map3d>, IHasNavigationState {
     static DefaultTextureSize: number;

@@ -28,7 +28,7 @@ import {
 
 import { IPipelineMessageType, ITargetBlock, ITile, IsTileMetricsProvider, TileAddress } from "core/tiles";
 import { Range } from "core/math";
-import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds } from "../display/display.clipPlane";
+import { ClipIndex, ClipPlaneDefinition, IHasHolographicBox, IHolographicBox } from "../display";
 import { ElevationTile, IHasMapScale } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { ICartesian3 } from "core/geometry";
@@ -61,6 +61,7 @@ export enum Map3dShadingMode {
 class AreaInfos {
     layer: ITexture3Layer;
     adjacentIds: Array<number> = [-1, -1, -1, -1];
+    isReady: boolean = false;
 
     public constructor(layer: ITexture3Layer) {
         this.layer = layer;
@@ -86,7 +87,7 @@ class TileBag {
     }
 }
 
-export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<ImageData>>, IHasHolographicBounds, IHasMapScale {}
+export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<ImageData>>, IHasHolographicBox, IHasMapScale {}
 
 /**
  * Base class for Map3D related materials. This class is intended to be used as a base class for
@@ -155,7 +156,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     private _mapScale: ICartesian3 = Vector3.One();
 
     // the optional display where the material is used
-    private _holoBounds: Nullable<IHolographicBounds> = null;
+    private _holoBounds: Nullable<IHolographicBox> = null;
 
     // the light filter used by the material, if any
     protected _lightFilter: Nullable<(light: Light) => boolean> = null;
@@ -170,11 +171,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this._setupLights();
     }
 
-    public get holographicBounds(): Nullable<IHolographicBounds> {
+    public get holographicBox(): Nullable<IHolographicBox> {
         return this._holoBounds;
     }
 
-    public set holographicBounds(value: Nullable<IHolographicBounds>) {
+    public set holographicBox(value: Nullable<IHolographicBox>) {
         if (this._holoBounds === value) return;
         this._holoBounds = value;
         this.markAsDirty(Material.AttributesDirtyFlag);
@@ -354,10 +355,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
 
         // we heavily rely on instances
-        if (useInstances) {
-            defines.INSTANCES = true;
-            MaterialHelper.PushAttributesForInstances(attribs);
-        }
+        defines.INSTANCES = true;
+        MaterialHelper.PushAttributesForInstances(attribs);
 
         defines.rebuild();
 
@@ -458,7 +457,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _getAdjacentIds(quadkey: Nullable<string>, kind: Map3dLayerKind, index: number = 0): number {
         if (!quadkey) return -1;
         const bag = this._bags.get(quadkey);
-        return bag?.getArea(kind)?.adjacentIds[index] ?? -1;
+        const a = bag?.getArea(kind);
+        return a?.isReady ? a.adjacentIds[index] : -1;
     }
 
     protected _setAdjacentIds(quadkey: Nullable<string>, index: number, kind: Map3dLayerKind, id: number = -1): void {
@@ -512,7 +512,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 // we update the elevation range
                 this._updateElevationRange(eventData);
                 bag.tile.content?.surface?.setEnabled(true);
-                bag.getArea(Map3dLayerKind.Elevation)?.layer.update(elevations);
+                const area = bag.getArea(Map3dLayerKind.Elevation);
+                if (area) {
+                    area.layer.update(elevations);
+                    area.isReady = true;
+                    this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
+                }
             }
             const normals = eventData.content?.infos?.normals;
             if (normals) {

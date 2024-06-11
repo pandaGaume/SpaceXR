@@ -101,8 +101,8 @@ export class Range extends AbstractRange<number> {
             return;
         }
         this._min = Math.min(this._min, min);
-        if (this._max !== undefined) {
-            this._max = Math.max(this._max, max ?? min);
+        if (max !== undefined) {
+            this._max = Math.max(this._max ?? max, max);
         }
     }
 

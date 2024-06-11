@@ -51,6 +51,14 @@
         {
             "type": "chrome",
             "request": "launch",
+            "name": "Launch 3D DEM MESH on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/3dDemMesh.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
             "name": "Launch 3D map on chrome",
             "url": "http://localhost:1338/packages/host/www/babylon/3DMap.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",

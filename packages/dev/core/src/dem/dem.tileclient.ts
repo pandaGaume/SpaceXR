@@ -66,7 +66,9 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
             normals = this.computeNormals(elevations, s, s);
         }
 
-        return new FetchResult(request, new DemInfos(elevations, normals), userArgs);
+        const result = new FetchResult(request, new DemInfos(elevations, normals), userArgs);
+        result.ok = true;
+        return result;
     }
 
     /**

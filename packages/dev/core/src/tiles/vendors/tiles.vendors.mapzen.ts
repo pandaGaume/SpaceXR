@@ -1,6 +1,6 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
-import { Float32TileCodec, ImageTileCodec } from "../codecs/tiles.codecs.image";
+import { Float32TileCodec, ImageDataTileCodec, ImageTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
@@ -62,7 +62,10 @@ export class MapZen {
     public static NormalsImagesClient(options?: TileWebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);
     }
-    public static NormalsClient(options?: TileWebClientOptions) {
+    public static NormalsUint8ArrayClient(options?: TileWebClientOptions) {
+        return new TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new ImageDataTileCodec(), MapZen.Metrics, options);
+    }
+    public static NormalsCartesian4Client(options?: TileWebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_normal_Cartesian4`, MapZenDemUrlBuilder.Normal, new Cartesian4TileCodec(MapZenNormalsDecoder.Shared), MapZen.Metrics, options);
     }
     public static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions) {

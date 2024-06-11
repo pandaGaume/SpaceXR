@@ -153,6 +153,7 @@ export class FetchResult<T> {
         return new FetchResult<Nullable<T>>(address, null, userArgs);
     }
 
+    ok?: boolean = true;
     status?: number;
     statusText?: string;
     public constructor(public address: ITileAddress, public content: T, public userArgs: Nullable<Array<unknown>> = null) {}

@@ -26,30 +26,29 @@ void main(void) {
     // babylon specific
     #include<instancesVertex>
 
-    // we choose the index using the value stored into the z of the position.
+    // we choose the index using the value stored into the y of the position.
     // this value will be [0,3] to index one value into the ids vector. 
     // we assume the value is already clamped.
     float depth = demIds[int(position.z)] ;
     vec3 v = vec3(uv.xy, depth);
     if( depth < 0.0) {
         // we are in the case of a border vertex, which is defined at 0 by the current REPEAT wrap mode
-        // we may have done similar result usin wrap mode CLAMP_TO_EDGE.
+        // we may have done similar result using wrap mode CLAMP_TO_EDGE.
         v.x = v.x == 0.0 ? 1.0 : v.x;
         v.y = v.y == 0.0 ? 1.0 : v.y;  
-        depth = demIds[0];
+        v.z = demIds[0];
     } 
 
     // get the position
     float alt0 = float(texture(uAltitudes, v)) ;
     float alt = (alt0 -uAltRange.x) * uMapScale;
-    vec4 pos = vec4(position.xy, alt ,1.0);
+    vec4 pos = vec4(position.xy, alt, 1.0);
     vec4 worldPosition = finalWorld * pos;
 
     // get the normal
     vec4 pixel = texture(uNormals, v);
-    //mat3 normalMatrix = transpose(inverse(mat3(finalWorld))) ;
-    //vec3 worldNormal = normalize(normalMatrix * elevation_rgbaToNormal(pixel));
-    vec3 worldNormal = elevation_rgbaToNormal(pixel); 
+    vec3 rawNormal = elevation_rgbaToNormal(pixel);
+    vec3 worldNormal = vec3(-rawNormal.x,rawNormal.z,rawNormal.y); 
 
     // compute lights
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)

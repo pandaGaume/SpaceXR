@@ -93,6 +93,7 @@ export declare class FetchResult<T> {
     content: T;
     userArgs: Nullable<Array<unknown>>;
     static Null<T>(address: ITileAddress, userArgs: Nullable<Array<unknown>>): FetchResult<Nullable<T>>;
+    ok?: boolean;
     status?: number;
     statusText?: string;
     constructor(address: ITileAddress, content: T, userArgs?: Nullable<Array<unknown>>);

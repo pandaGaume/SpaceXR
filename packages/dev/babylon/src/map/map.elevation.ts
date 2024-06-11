@@ -136,7 +136,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
         return this;
     }
     public rotateMap(r: number): Map3d {
-        this._navigation.rotateMap(r);
+        this._navigation.rotateMap(r).validate(); // validate the navigation state, which will trigger the state changed event;
         return this;
     }
     /// #endregion ITileNavigationApi

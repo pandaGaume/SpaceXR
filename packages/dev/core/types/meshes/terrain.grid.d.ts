@@ -1,6 +1,6 @@
 import { IVerticesData, IVerticesDataBuilder } from "./meshes.interfaces";
 import { Nullable } from "../types";
-type VInitializerFn = (column: number, row: number, w: number, h: number, ...data: any[]) => number | number[];
+type InitializerFn = (column: number, row: number, w: number, h: number, ...data: any[]) => number | number[];
 export declare class TerrainGridOptions {
     static DefaultGridSize: number;
     static DefaultInvertIndices: boolean;
@@ -15,8 +15,9 @@ export declare class TerrainGridOptions {
     ox?: number;
     oy?: number;
     invertIndices?: boolean;
-    zInitializer?: VInitializerFn;
-    uvInitializer?: VInitializerFn;
+    invertYZ?: boolean;
+    zInitializer?: InitializerFn;
+    uvInitializer?: InitializerFn;
     constructor(p: Partial<TerrainGridOptions>);
     clone(): TerrainGridOptions;
 }
@@ -31,8 +32,8 @@ export declare class TerrainGridOptionsBuilder {
     _oy?: number;
     _invertIndices?: boolean;
     _invertYZ?: boolean;
-    _zInitializer?: VInitializerFn;
-    _uvInitializer?: VInitializerFn;
+    _zInitializer?: InitializerFn;
+    _uvInitializer?: InitializerFn;
     withUvs(flag: boolean): TerrainGridOptionsBuilder;
     withNormals(flag: boolean): TerrainGridOptionsBuilder;
     withColumns(v?: number): TerrainGridOptionsBuilder;
@@ -41,8 +42,8 @@ export declare class TerrainGridOptionsBuilder {
     withInvertYZ(v?: boolean): TerrainGridOptionsBuilder;
     withScale(x: number, y?: number): TerrainGridOptionsBuilder;
     withOffset(x: number, y?: number): TerrainGridOptionsBuilder;
-    withZInitializer(zinit: VInitializerFn): TerrainGridOptionsBuilder;
-    withUVInitializer(uvinit: VInitializerFn): TerrainGridOptionsBuilder;
+    withZInitializer(zinit: InitializerFn): TerrainGridOptionsBuilder;
+    withUVInitializer(uvinit: InitializerFn): TerrainGridOptionsBuilder;
     build(): TerrainGridOptions;
 }
 export declare class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {

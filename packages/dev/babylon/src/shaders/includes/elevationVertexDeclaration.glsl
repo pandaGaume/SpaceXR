@@ -4,19 +4,17 @@
 //       x = (2 * R / 255) - 1
 //       y = (2 * G / 255) - 1
 //       z = (B - 128) / 127
+// these formula are in cartesian coordinates, so we need to swap the y and z coordinates
 // when accessing the RawTexture in GLSL using the texture2D function, the returned values are normalized.
 // This normalization occurs because GLSL expects texture data to be in the range [0, 1]. 
 // Therefore, when you sample a RawTexture using texture2D in GLSL, the pixel values are automatically 
 // divided by the maximum possible value for the respective data type.
 // So we need to restore them to their original range by multply by 255
 vec3 elevation_rgbaToNormal(vec4 rgba) {
-    //float x = (2.0 * rgba.r) - 1.0;
-    //float y = (2.0 * rgba.g) - 1.0;
-    //float z = (rgba.b * 255.0 - 128.0) / 127.0;
-    float x = rgba.r;
-    float y = rgba.g;
-    float z = rgba.b;
-    return normalize(vec3(x,z,-y));    
+    float x = (2.0 * rgba.r) - 1.0;
+    float y = (2.0 * rgba.g) - 1.0;
+    float z = (rgba.b * 255.0 - 128.0) / 127.0;
+    return normalize(vec3(x,y,z));    
 }
 
 uniform highp sampler2DArray uAltitudes;

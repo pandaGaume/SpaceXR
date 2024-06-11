@@ -25,6 +25,7 @@ export declare class MapZen {
     static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
     static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
     static NormalsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
-    static NormalsClient(options?: TileWebClientOptions): TileWebClient<ICartesian4[]>;
+    static NormalsUint8ArrayClient(options?: TileWebClientOptions): TileWebClient<ImageData>;
+    static NormalsCartesian4Client(options?: TileWebClientOptions): TileWebClient<ICartesian4[]>;
     static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions): DemTileWebClient;
 }

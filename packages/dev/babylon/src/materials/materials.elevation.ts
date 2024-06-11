@@ -286,6 +286,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
         const attribs = [VertexBuffer.PositionKind, VertexBuffer.UVKind, Map3dMaterial.DemIdsAttName];
 
+        const hemiLightProperties = ["skyColor", "groundColor", "direction", "intensity"];
         const pointLightProperties = ["position", "color", "intensity"];
         const spotLightProperties = ["position", "direction", "color", "intensity", "innerCutoff", "outerCutoff", "exponent"];
 
@@ -301,7 +302,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             Map3dMaterial.TerrainColorUniformName,
             Map3dMaterial.AmbientLightUniformName,
 
-            Map3dMaterial.HemiLightUniformName,
+            ...this._prepareUniforms(Map3dMaterial.HemiLightUniformName, ...hemiLightProperties),
             ...this._prepareArrayOfUniforms(Map3dMaterial.PointLightsUniformName, this._maxPointLights, ...pointLightProperties),
             ...this._prepareArrayOfUniforms(Map3dMaterial.SpotLightsUniformName, this._maxSpotLights, ...spotLightProperties),
 

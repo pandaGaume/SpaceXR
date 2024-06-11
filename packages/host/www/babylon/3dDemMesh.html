@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Exemple d'un ecrans virtuel</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/babylon.inspector.bundle.js"></script>
+        <script src="../libs/babylon.glTF2FileLoader.min.js"></script>
+        <script src="../libs/babylon.normalMaterial.min.js"></script>
+
+        <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+        <style>
+            html,
+            body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #mapcanvas3d {
+                width: 100%;
+                height: 100%;
+            }
+            .babylon-purple-bg {
+                background-color: #34344a;
+                color: white;
+            }
+            header {
+                border-bottom: 10px solid #34344a;
+            }
+            h1 {
+                font-size: 32px;
+            }
+            p {
+                font-size: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="babylon-purple-bg">
+            <h1>3D DEM Sample</h1>
+        </header>
+        <div id="mapcontainer">
+            <canvas id="mapcanvas3d"></canvas>
+        </div>
+        <script>
+            const unit = 100;
+            const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc;
+            const defaultLod = 11;
+
+            function createNormalLines(mesh, scale = 1.0, color = new BABYLON.Color3(1, 0, 0), scene = null) {
+                const vertexData = BABYLON.VertexData.ExtractFromMesh(mesh);
+                const positions = vertexData.positions;
+                const normals = vertexData.normals;
+
+                const lines = [];
+                for (let i = 0; i < positions.length; i += 3) {
+                    const pos = new BABYLON.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+                    const normal = new BABYLON.Vector3(normals[i], normals[i + 1], normals[i + 2]).scale(scale);
+
+                    lines.push([pos, pos.add(normal)]);
+                }
+
+                // Create the line system
+                const normalLines = BABYLON.MeshBuilder.CreateLineSystem(
+                    "normalLines",
+                    {
+                        lines: lines,
+                    },
+                    scene
+                );
+
+                // Set the line color
+                normalLines.color = color ?? new BABYLON.Color3(1, 0, 0); // Red color for normals
+
+                return normalLines;
+            }
+
+            async function createScene(canvas, engine) {
+                const scene = new BABYLON.Scene(engine);
+                // Parameters: name, alpha, beta, radius, target position, scene
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 1 * unit, new BABYLON.Vector3(0, 0, 0), scene);
+
+                camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+                camera.wheelPrecision = 10;
+                camera.minZ = 0;
+                // This attaches the camera to the canvas
+                camera.attachControl(canvas, true);
+
+                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+                // Default intensity is 1. Let's dim the light a small amount
+                light.intensity = 0.5;
+                light.diffuse = new BABYLON.Color3(1, 1, 1);
+
+                //const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(500, 150, 0), scene);
+                //pointLight.diffuse = new BABYLON.Color3(1, 1, 1);
+                //pointLight.intensity = 0.8;
+
+                // build layer and add it to the map
+                let client = new SPACEXR.DemTileWebClient(`${SPACEXR.MapZen.KEY}_dem`, SPACEXR.MapZen.ElevationsClient(), SPACEXR.MapZen.NormalsUint8ArrayClient());
+                const targetXY = client.metrics.getLatLonToTileXY(defaultCenter.lat, defaultCenter.lon, defaultLod);
+                const address = new SPACEXR.TileAddress(targetXY.x, targetXY.y, defaultLod);
+                const result = await client.fetchAsync(address);
+                if (result.ok) {
+                    console.log("DemInfos", result.content);
+                    const demInfos = result.content;
+                    const s = client.metrics.tileSize;
+                    const o = new SPACEXR.TerrainGridOptionsBuilder()
+                        .withColumns(s) // add one column to fill the gap
+                        .withRows(s) // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
+                        .withScale(-unit, unit)
+                        //.withInvertYZ(true) // we consider a grid oriented with babylonjs coordinate system, left handed
+                        .withInvertIndices(true) // we consider a grid oriented with babylonjs coordinate system, left handed
+                        .withUvs(true) // generate uvs.
+                        .withNormals(true) // generate normals
+                        .build();
+                    const vertexData = new SPACEXR.TerrainNormalizedGridBuilder().withOptions(o).build(new BABYLON.VertexData());
+
+                    // set the positions
+                    for (let i = 0; i < vertexData.positions.length / 3; i++) {
+                        const alt = demInfos.elevations[i] - demInfos.min.z;
+                        const j = i * 3;
+                        vertexData.positions[j + 2] = alt / unit; // y
+                    }
+
+                    // set the normals, r,g,b,a
+                    for (let i = 0; i < vertexData.normals.length / 3; i++) {
+                        let n = i * 4;
+                        let j = i * 3;
+
+                        let r = demInfos.normals.data[n];
+                        let g = demInfos.normals.data[n + 1];
+                        let b = demInfos.normals.data[n + 2];
+
+                        let x = (2 * r) / 255 - 1;
+                        let y = (2 * g) / 255 - 1;
+                        let z = (b - 128) / 127;
+
+                        const norm = Math.sqrt(x * x + y * y + z * z);
+                        x /= norm;
+                        y /= norm;
+                        z /= norm;
+
+                        // invert y and z
+                        vertexData.normals[j++] = -x;
+                        vertexData.normals[j++] = y;
+                        vertexData.normals[j] = z;
+                        //console.log("Normal", x, y, z);
+                        const a = demInfos.normals.data[n + 3]; // this is the quantized elevation to be used as alpha or heat map
+                    }
+
+                    const mesh = new BABYLON.Mesh("terrain", scene);
+
+                    vertexData.applyToMesh(mesh);
+                    mesh.rotation.x = (3 * Math.PI) / 2;
+                    mesh.material = new BABYLON.StandardMaterial("terrainMaterial", scene);
+                    mesh.material.diffuseColor = new BABYLON.Color3(0.0, 0.0, 1.0);
+                    mesh.material.wireframe = true;
+
+                    let normalLines = createNormalLines(mesh);
+                    normalLines.rotation.x = mesh.rotation.x;
+                } else {
+                    console.error("Failed to fetch DEM data", result.error);
+                }
+
+                const showAxes = true;
+                if (showAxes) {
+                    const mainaxes = new BABYLON.Debug.AxesViewer(scene, 0.1 * unit);
+                }
+
+                return scene;
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
+                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+                const scene = await createScene(canvas, engine); //Call the createScene function
+                scene.debugLayer.show();
+
+                // Register a render loop to repeatedly render the scene
+                engine.runRenderLoop(function () {
+                    scene.render();
+                });
+
+                // Watch for browser/canvas resize events
+                window.addEventListener("resize", function () {
+                    engine.resize();
+                });
+            };
+        </script>
+    </body>
+</html>

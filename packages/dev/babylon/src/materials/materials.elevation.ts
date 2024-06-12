@@ -434,6 +434,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             }
         }
 
+        // prepare the texture sampler
+        const textureArea = this._textureSampler?.reserve();
+        if (textureArea) {
+            bag.setArea(Map3dLayerKind.Texture, new AreaInfos(textureArea));
+        }
+
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
@@ -498,6 +504,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             }
             bag.getArea(Map3dLayerKind.Elevation)?.layer.release();
             bag.getArea(Map3dLayerKind.Normal)?.layer.release();
+            bag.getArea(Map3dLayerKind.Texture)?.layer.release();
             this._bags.delete(qk);
             this._elevationRange = null;
         }
@@ -528,11 +535,29 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this.markAsDirty(Material.TextureDirtyFlag);
     }
 
-    protected _imageAdded(tile: ITile<ImageData>): void {}
+    protected _imageAdded(tile: ITile<ImageData>): void {
+        // nothing to do here while the the image is strongly coupled with the elevation tile
+    }
 
-    protected _imageRemoved(eventData: ITile<ImageData>): void {}
+    protected _imageRemoved(tile: ITile<ImageData>): void {
+        // nothing to do here while the the image is strongly coupled with the elevation tile
+    }
 
-    protected _imageUpdated(eventData: ITile<ImageData>): void {}
+    protected _imageUpdated(tile: ITile<ImageData>): void {
+        // this is the only event it will be raised by the texture source. this will let us to feed the texture sampler
+        // with the image data. the tile address is suppose to be the same as the elevation tile.
+        // so we may
+        // 1 - retrieve the correponding bag
+        // 2 - retrieve the texture area
+        // 3 - update the texture area with the image data
+        const bag = this._bags.get(tile.address.quadkey);
+        if (bag) {
+            const area = bag.getArea(Map3dLayerKind.Texture);
+            if (area) {
+                area.layer.update(tile.content);
+            }
+        }
+    }
 
     public dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void {
         this._bags.clear();
@@ -719,6 +744,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const scene = this.getScene();
         this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, maxDepth, generateMipMap, scene);
         this._normalSampler = <Texture3>this._buildSampler(Map3dLayerKind.Normal, width, height, maxDepth, generateMipMap, scene);
+        this._textureSampler = <Texture3>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
     }
 
     protected _getElevationSamplerDepth(): number {

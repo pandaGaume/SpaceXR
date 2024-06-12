@@ -36,19 +36,21 @@ void main(void) {
         // we may have done similar result using wrap mode CLAMP_TO_EDGE.
         v.x = v.x == 0.0 ? 1.0 : v.x;
         v.y = v.y == 0.0 ? 1.0 : v.y;  
-        v.z = demIds[0];
+        v.z = depth = demIds[0];
     } 
 
     // get the position
-    float alt0 = float(texture(uAltitudes, v)) ;
-    float alt = (alt0 -uAltRange.x) * uMapScale;
+    float rawAltitude = float(texture(uAltitudes, v)) ;
+    float alt = (rawAltitude -uAltRange.x) * uMapScale;
     vec4 pos = vec4(position.xy, alt, 1.0);
     vec4 worldPosition = finalWorld * pos;
 
     // get the normal
     vec4 pixel = texture(uNormals, v);
     vec3 rawNormal = elevation_rgbaToNormal(pixel);
-    vec3 worldNormal = vec3(-rawNormal.x,rawNormal.z,rawNormal.y); 
+    // this is the way we generate the grid, left handed, x is the west, y is the north, z is the up
+    // so we need to minus x  
+    vec3 worldNormal = vec3(-rawNormal.x,rawNormal.y,rawNormal.z); 
 
     // compute lights
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)

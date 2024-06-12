@@ -254,6 +254,12 @@ export class Map3dElevationHost
         }
     }
 
+    public validate(): void {
+        for (const et of this._activTiles) {
+            et.content?.validate();
+        }
+    }
+
     protected _onScaleChanged(scale: ICartesian3): void {
         const material = this._template.material;
         if (material && HasMapScale(material)) {
@@ -370,6 +376,9 @@ export class Map3dElevationHost
             const x = c.x - center.x;
             const y = c.y - center.y;
             const p = s.position;
+            // the tile system is origin north-west corner, y pointing to the south, x to the east.
+            // our choice is to have the origin at the center of the tile, y pointing to the north, x to the west (this make z up into babylonjs coordinate system)
+            // so the minus sign comes from that.
             p.x = -x;
             p.y = -y;
             p.z = 0;

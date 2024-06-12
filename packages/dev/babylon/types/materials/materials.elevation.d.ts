@@ -100,8 +100,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _demRemoved(eventData: ElevationTile): void;
     protected _demUpdated(eventData: ElevationTile): void;
     protected _imageAdded(tile: ITile<ImageData>): void;
-    protected _imageRemoved(eventData: ITile<ImageData>): void;
-    protected _imageUpdated(eventData: ITile<ImageData>): void;
+    protected _imageRemoved(tile: ITile<ImageData>): void;
+    protected _imageUpdated(tile: ITile<ImageData>): void;
     dispose(forceDisposeEffect?: boolean, forceDisposeTextures?: boolean, notBoundToMesh?: boolean): void;
     bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void;
     protected _bindLights(effect: Effect): void;

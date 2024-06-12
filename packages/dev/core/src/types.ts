@@ -24,7 +24,10 @@ export interface IDisposable {
     dispose(): void;
 }
 
-
+export function isValidable(obj: unknown): obj is IValidable {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IValidable>obj).validate !== undefined && (<IValidable>obj).invalidate !== undefined;
+}
 
 export interface IValidable {
     validationObservable?: Observable<boolean>;

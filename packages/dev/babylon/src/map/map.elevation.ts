@@ -1,4 +1,4 @@
-import { Nullable, Scene, TransformNode, Node, Color4 } from "@babylonjs/core";
+import { Nullable, Scene, TransformNode, Node, Color4, Observer as BabylonObserver } from "@babylonjs/core";
 import {
     IHasNavigationState,
     IHasTileMapLayerContainer,
@@ -80,6 +80,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
     private _textureLayersView: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>;
     private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dContentType>>>;
     private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dContentType>>>;
+    private _validateHostObserver: Nullable<BabylonObserver<Scene>>;
 
     private _targetDisplay: Nullable<HolographicDisplay> = null;
     private _controller: Nullable<PointerController<IPointerSource>> = null;
@@ -102,6 +103,8 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
         this._elevationHosts = new Map<string, Map3dElevationHost>();
         this._navigation = this._createNavigationState();
         this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
+        // this is necessary to validate the elevation host
+        this._validateHostObserver = this.getScene().onBeforeRenderObservable.add(this._validateElevationHost.bind(this));
     }
 
     /// #region IHasNavigationState
@@ -161,6 +164,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
         this._layers.clear();
 
         this._navigationUpdatedObserver?.disconnect();
+        this._validateHostObserver?.remove();
     }
 
     public withDisplay(display: HolographicDisplay): Map3d {
@@ -258,7 +262,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     protected _addedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void {
         this._textureLayersView.addLayer(layer);
-        // this._updateLayerWithDisplayAndNavigation(layer);
+        this._updateLayerWithDisplayAndNavigation(layer);
     }
 
     protected _removedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void {
@@ -279,6 +283,12 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
                 size = new Size2(size.width * s, size.height * s);
             }
             layer.setContext(this._navigation, size);
+        }
+    }
+
+    protected _validateElevationHost(): void {
+        for (var host of this._elevationHosts.values()) {
+            host.validate();
         }
     }
 }

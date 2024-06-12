@@ -48,6 +48,7 @@ export declare class Map3dElevationHost extends TransformNode implements ITransf
     get mesh(): Mesh;
     bindDisplay(display?: HolographicDisplay): void;
     dispose(doNotRecurse?: boolean | undefined, disposeMaterialAndTextures?: boolean | undefined): void;
+    validate(): void;
     protected _onScaleChanged(scale: ICartesian3): void;
     protected _buildMesh(material?: Nullable<Material>, scene?: Scene): Mesh;
     protected _createMesh(name: string, scene?: Nullable<Scene>): Mesh;

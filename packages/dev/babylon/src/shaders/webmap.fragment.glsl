@@ -13,7 +13,7 @@ void main(void) {
     #include<clipFragment>
     
     #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
-    vec4 texColor = uTerrainColor;
+    vec4 texColor = texture(uTextures, vUvs);
     #endif
 
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
@@ -24,6 +24,7 @@ void main(void) {
         #else
             vec3 lightColor= calculateLight(uAmbientLight, uHemiLight,uPointLights,uNumPointLights,uSpotLights,uNumSpotLights, normalize(vNormal), vPosition);
         #endif
-        gl_FragColor= vec4(texColor.rgb * lightColor, texColor.a);
+        //gl_FragColor= vec4(texColor.rgb * lightColor, texColor.a);
+        gl_FragColor= texColor;
     #endif
 }

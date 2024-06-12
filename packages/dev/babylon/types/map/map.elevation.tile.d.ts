@@ -8,6 +8,7 @@ export interface IElevationMesh {
     surface: Nullable<AbstractMesh>;
     textureSource: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>>;
     tile: Nullable<ITile<ImageData>>;
+    validate(): void;
 }
 export interface IElevationTile extends ITile<IElevationMesh> {
 }
@@ -25,6 +26,7 @@ export declare class ElevationMesh implements IElevationMesh {
     set textureSource(value: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>>);
     get infos(): Nullable<IDemInfos>;
     set infos(value: Nullable<IDemInfos>);
+    validate(): void;
 }
 export declare class ElevationTile extends Tile<IElevationMesh> implements IElevationTile {
     constructor(x: number, y: number, lod: number, mesh: Nullable<IElevationMesh | IDemInfos>, metrics?: ITileMetrics);

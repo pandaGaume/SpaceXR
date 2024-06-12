@@ -40,6 +40,7 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     private _textureLayersView;
     private _addLayerObserver;
     private _removeLayerObserver;
+    private _validateHostObserver;
     private _targetDisplay;
     private _controller;
     private _ownController;
@@ -70,4 +71,5 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     protected _removedImageLayer(layer: ITileMapLayer<Map3dTextureContentType>): void;
     private _onNavigationUpdatedInternal;
     private _updateLayerWithDisplayAndNavigation;
+    protected _validateElevationHost(): void;
 }

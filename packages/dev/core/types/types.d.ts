@@ -12,6 +12,7 @@ export declare function IsDisposable(obj: unknown): obj is IDisposable;
 export interface IDisposable {
     dispose(): void;
 }
+export declare function isValidable(obj: unknown): obj is IValidable;
 export interface IValidable {
     validationObservable?: Observable<boolean>;
     isValid: boolean;

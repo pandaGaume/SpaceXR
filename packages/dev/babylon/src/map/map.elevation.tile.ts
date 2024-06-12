@@ -1,7 +1,7 @@
 import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos, IsDemInfos } from "core/dem";
 import { ISourceBlock, ITile, ITileMetrics, Tile } from "core/tiles";
-import { Nullable } from "core/types";
+import { Nullable, isValidable } from "core/types";
 import { Map3dTextureContentType } from "./map.elevation";
 
 export interface IElevationMesh {
@@ -12,6 +12,7 @@ export interface IElevationMesh {
     // the texture used to display onto the elevation mesh
     textureSource: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>>;
     tile: Nullable<ITile<ImageData>>;
+    validate(): void;
 }
 
 export interface IElevationTile extends ITile<IElevationMesh> {}
@@ -67,6 +68,13 @@ export class ElevationMesh implements IElevationMesh {
 
     public set infos(value: Nullable<IDemInfos>) {
         this._demInfos = value;
+    }
+
+    public validate(): void {
+        const t = this._texture;
+        if (isValidable(t)) {
+            t.validate();
+        }
     }
 }
 

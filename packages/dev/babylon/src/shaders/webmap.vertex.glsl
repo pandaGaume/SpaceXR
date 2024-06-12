@@ -72,5 +72,5 @@ void main(void) {
     // finally set the position
     gl_Position = viewProjection * worldPosition;
     
-    vUvs = vec3(- position.x + 0.5, -position.y + 0.5, demIds[0]);
+    vUvs = vec3(- position.xy + 0.5, demIds[0]);
 }

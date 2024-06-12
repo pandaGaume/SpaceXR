@@ -18,6 +18,6 @@ vColor= vec4(uTerrainColor.rgb*lightColor,uTerrainColor.a);#endif
 #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
 vNormal=worldNormal;vPosition=worldPosition.xyz;#endif
 #include<clipVertex>
-gl_Position=viewProjection*worldPosition;vUvs=vec3(- position.x+0.5,-position.y+0.5,demIds[0]);}`;
+gl_Position=viewProjection*worldPosition;vUvs=vec3(- position.xy+0.5,demIds[0]);}`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const webmapVertexShader = { name, shader };

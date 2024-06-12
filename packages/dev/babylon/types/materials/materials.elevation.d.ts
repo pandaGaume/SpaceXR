@@ -4,7 +4,7 @@ import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition, IHasHolographicBox, IHolographicBox } from "../display";
 import { ElevationTile, IHasMapScale } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
-import { ICartesian3 } from "core/geometry";
+import { ICartesian3, ISize2 } from "core/geometry";
 import { EventState } from "..";
 export declare enum Map3dShadingMode {
     FLAT = 0,
@@ -71,10 +71,13 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     private _elevationRange;
     private _mapScale;
     private _holoBounds;
+    private _textureResolution?;
     protected _lightFilter: Nullable<(light: Light) => boolean>;
     protected _lightAddedObserver: Nullable<Observer<Light>>;
     protected _lightRemovedObserver: Nullable<Observer<Light>>;
     constructor(name: string, shaderName: string, scene?: Scene);
+    get textureResolution(): ISize2 | undefined;
+    set textureResolution(value: ISize2 | undefined);
     get holographicBox(): Nullable<IHolographicBox>;
     set holographicBox(value: Nullable<IHolographicBox>);
     getLights(): Light[];
@@ -118,6 +121,8 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _registerInstanceBuffers(target: Mesh): void;
     protected _ensureElevationLayerReady(tile: ElevationTile, src: any): void;
     protected _buildElevationSamplers(width: number, height?: number, depth?: number): void;
+    protected _buildTextureSamplers(width: number, height?: number, depth?: number): void;
+    protected _getTextureSamplerDepth(): number;
     protected _getElevationSamplerDepth(): number;
     protected _buildSampler(kind: Map3dLayerKind, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3>;
     protected _onEffectCompiled(effect: Effect): void;

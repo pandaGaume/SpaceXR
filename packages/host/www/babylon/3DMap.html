@@ -76,7 +76,7 @@
             }
 
             async function createScene(canvas, engine) {
-                const unit = 100;
+                const unit = 1;
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
@@ -115,13 +115,7 @@
                 camera.setTarget(display);
 
                 // build the map options
-                const mapOptions = {
-                    metrics: {
-                        resolution: display.resolution,
-                        dimension: display.dimension,
-                        scale: 25000.0,
-                    },
-                };
+                const mapOptions = {};
 
                 // build the map
                 const map = new SPACEXR.Map3d("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
@@ -129,10 +123,11 @@
                 // build layer options
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
-                    exageration: 1.5,
+                    exageration: 1,
                     insets: new BABYLON.Vector3(0, 0, 0.1),
                     color: new BABYLON.Color4(0.5, 0.5, 0.8),
                     shininess: 0,
+                    textureResolution: { width: 512, height: 512 },
                 };
 
                 // build layer and add it to the map
@@ -148,7 +143,7 @@
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
-                const showAxes = true;
+                const showAxes = false;
                 if (showAxes) {
                     const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
                     axes.xAxis.parent = display;

@@ -5,7 +5,7 @@ import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observable, Observer } from "core/events";
 import { Bearing } from "core/geography";
 import { IElevationMesh, IElevationTile } from "./map.elevation.tile";
-import { ElevationLayer, IElevationLayerOptions, IElevationMaterialOptions } from "./map.elevation.layer";
+import { ElevationLayer, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { Map3dTextureContentType } from "./map.elevation";
 import { Map3dScaleController } from "./map.scale.controller";
@@ -33,7 +33,7 @@ export declare class Map3dElevationHost extends TransformNode implements ITransf
     _activTiles: ITileCollection<IElevationMesh>;
     _tilesRoot: TransformNode;
     _cartesianCenter: Nullable<ICartesian2>;
-    constructor(name: string, layers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>, source: ElevationLayer, options?: IElevationLayerOptions, enabled?: boolean);
+    constructor(name: string, layers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>, source: ElevationLayer, enabled?: boolean);
     get navigation(): ITileNavigationState;
     get metrics(): ITileMetrics;
     get activTiles(): ITileCollection<IElevationMesh>;
@@ -66,6 +66,6 @@ export declare class Map3dElevationHost extends TransformNode implements ITransf
     protected _onTileRemoved(tile: ITile<IDemInfos>, eventState: EventState): void;
     protected _onTileUpdated(tile: ITile<IDemInfos>, eventState: EventState): void;
     protected _buildNameWithSuffix(suffix: string): string;
-    protected _buildMaterial(material?: IElevationMaterialOptions, scene?: Scene): Material;
-    protected _createDefaultMaterial(material?: IElevationMaterialOptions, scene?: Scene): Material;
+    protected _buildMaterial(options?: IElevationLayerMaterialOptions, scene?: Scene): Material;
+    protected _createDefaultMaterial(options?: IElevationLayerMaterialOptions, scene?: Scene): Material;
 }

@@ -1,16 +1,17 @@
 import { Color4, Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { PropertyChangedEventArgs } from "core/events";
-import { Cartesian3, ICartesian3 } from "core/geometry";
+import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
 import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
 
-export interface IElevationMaterialOptions {
+export interface IElevationLayerMaterialOptions {
     material?: Material; // this is the default material to use. If defined, superseed any other material options.
     color?: Color4;
     shininess?: number;
+    textureResolution?: ISize2;
 }
 
-export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationMaterialOptions {
+export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationLayerMaterialOptions {
     exageration?: number;
     insets?: ICartesian3;
 }
@@ -26,12 +27,14 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
     public static readonly InsetsPropertyName: string = "insets";
     public static readonly ColorPropertyName: string = "color";
     public static readonly ShininessPropertyName: string = "shininess";
+    public static readonly TextureResolutionPropertyName: string = "textureResolution";
 
     private _exageration?: number;
     private _insets?: ICartesian3;
     private _color?: Color4;
     private _shininess?: number;
     private _material?: Material;
+    private _textureResolution?: ISize2;
 
     public constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
         super(name, provider, options, enabled);
@@ -40,6 +43,7 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         this._color = options?.color;
         this._material = options?.material;
         this._shininess = options?.shininess;
+        this._textureResolution = options?.textureResolution;
     }
 
     public get exageration(): number | undefined {
@@ -112,6 +116,23 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         }
 
         this._shininess = value;
+    }
+
+    public get textureResolution(): ISize2 | undefined {
+        return this._textureResolution;
+    }
+
+    public set textureResolution(value: ISize2 | undefined) {
+        if (this._textureResolution === value) return;
+        if (value?.width == this._textureResolution?.width && value?.height == this._textureResolution?.height) return;
+
+        if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+            const oldValue = this._textureResolution;
+            this._textureResolution = value;
+            const args = new PropertyChangedEventArgs<ElevationLayer, ISize2>(this, oldValue, this._textureResolution, ElevationLayer.TextureResolutionPropertyName);
+            this._propertyChangedObservable.notifyObservers(args, -1, this, this);
+            return;
+        }
     }
 
     public get material(): Material | undefined {

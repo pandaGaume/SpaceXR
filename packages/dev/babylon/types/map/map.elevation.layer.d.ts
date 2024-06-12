@@ -1,13 +1,14 @@
 import { Color4, Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
-import { ICartesian3 } from "core/geometry";
+import { ICartesian3, ISize2 } from "core/geometry";
 import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
-export interface IElevationMaterialOptions {
+export interface IElevationLayerMaterialOptions {
     material?: Material;
     color?: Color4;
     shininess?: number;
+    textureResolution?: ISize2;
 }
-export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationMaterialOptions {
+export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationLayerMaterialOptions {
     exageration?: number;
     insets?: ICartesian3;
 }
@@ -21,11 +22,13 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     static readonly InsetsPropertyName: string;
     static readonly ColorPropertyName: string;
     static readonly ShininessPropertyName: string;
+    static readonly TextureResolutionPropertyName: string;
     private _exageration?;
     private _insets?;
     private _color?;
     private _shininess?;
     private _material?;
+    private _textureResolution?;
     constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean);
     get exageration(): number | undefined;
     set exageration(value: number | undefined);
@@ -35,5 +38,7 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     set color(value: Color4 | undefined);
     get shininess(): number | undefined;
     set shininess(value: number | undefined);
+    get textureResolution(): ISize2 | undefined;
+    set textureResolution(value: ISize2 | undefined);
     get material(): Material | undefined;
 }

@@ -31,7 +31,7 @@ import { Range } from "core/math";
 import { ClipIndex, ClipPlaneDefinition, IHasHolographicBox, IHolographicBox } from "../display";
 import { ElevationTile, IHasMapScale } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
-import { ICartesian3 } from "core/geometry";
+import { ICartesian3, ISize2 } from "core/geometry";
 import { EventState } from "..";
 
 export enum Map3dShadingMode {
@@ -158,6 +158,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     // the optional display where the material is used
     private _holoBounds: Nullable<IHolographicBox> = null;
 
+    // the texture reolution used by the material
+    private _textureResolution?: ISize2;
+
     // the light filter used by the material, if any
     protected _lightFilter: Nullable<(light: Light) => boolean> = null;
     protected _lightAddedObserver: Nullable<Observer<Light>> = null;
@@ -169,6 +172,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this._shaderName = shaderName;
         // setting up the light filter and observers
         this._setupLights();
+    }
+
+    public get textureResolution(): ISize2 | undefined {
+        return this._textureResolution;
+    }
+
+    public set textureResolution(value: ISize2 | undefined) {
+        this._textureResolution = value;
     }
 
     public get holographicBox(): Nullable<IHolographicBox> {
@@ -730,6 +741,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             }
             if (size) {
                 this._buildElevationSamplers(size);
+                if (this._textureResolution) {
+                    this._buildTextureSamplers(this._textureResolution.width, this._textureResolution.height);
+                } else {
+                    this._buildTextureSamplers(size);
+                }
                 const mesh = tile.content?.surface instanceof InstancedMesh ? tile.content.surface.sourceMesh : (tile.content?.surface as Mesh);
                 this._registerInstanceBuffers(mesh);
                 this.markAsDirty(Material.TextureDirtyFlag);
@@ -745,6 +761,18 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, maxDepth, generateMipMap, scene);
         this._normalSampler = <Texture3>this._buildSampler(Map3dLayerKind.Normal, width, height, maxDepth, generateMipMap, scene);
         this._textureSampler = <Texture3>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
+    }
+
+    protected _buildTextureSamplers(width: number, height?: number, depth?: number): void {
+        height = height ?? width;
+        const maxDepth = depth ?? this._getTextureSamplerDepth();
+        const generateMipMap = false;
+        const scene = this.getScene();
+        this._textureSampler = <Texture3>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
+    }
+
+    protected _getTextureSamplerDepth(): number {
+        return 24; // for dev purpose we set a fixed number of tiles
     }
 
     protected _getElevationSamplerDepth(): number {

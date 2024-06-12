@@ -242,10 +242,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     protected _createElevationHost(layer: ElevationLayer): Map3dElevationHost {
         const name = TextUtils.BuildNameWithSuffix(layer.name, Map3d.HostSuffix);
-        const source = layer;
-        const options = layer;
-        const enabled = layer.enabled;
-        return new Map3dElevationHost(name, this._textureLayersView, source, options, enabled);
+        return new Map3dElevationHost(name, this._textureLayersView, layer, layer.enabled);
     }
 
     protected _removedElevationLayer(layer: ElevationLayer): void {

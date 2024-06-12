@@ -23,7 +23,7 @@ import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observable, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
 import { ElevationTile, IElevationMesh, IElevationTile } from "./map.elevation.tile";
-import { ElevationLayer, IElevationLayerOptions, IElevationMaterialOptions } from "./map.elevation.layer";
+import { ElevationLayer, IElevationLayerOptions, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { Map3dTextureContentType } from "./map.elevation";
 import { CanvasTileSource } from "core/map";
@@ -95,7 +95,6 @@ export class Map3dElevationHost
         name: string,
         layers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>,
         source: ElevationLayer,
-        options?: IElevationLayerOptions,
         enabled: boolean = true
     ) {
         super(name);
@@ -103,6 +102,9 @@ export class Map3dElevationHost
         this._elevationSource = source;
         this._elevationSource.linkTo(this);
         this._layerObserver = this._elevationSource.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
+
+        // elevation laer implements options
+        const options: IElevationLayerOptions = this._elevationSource;
 
         this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
         if (this._insets) {
@@ -427,12 +429,17 @@ export class Map3dElevationHost
             }
             elevationTile.content.surface.parent = this._tilesRoot;
 
+            const options: IElevationLayerOptions = this._elevationSource;
+
             // texture
             elevationTile.content.textureSource = new CanvasTileSource<ITileMapLayer<Map3dTextureContentType>>(
                 `${elevationTile.address.quadkey}.texture`,
                 this._textureLayers,
                 elevationTile.address,
-                this.metrics
+                this.metrics,
+                {
+                    resolution: options.textureResolution,
+                }
             );
             if (IsTargetBlock<ITile<ImageData>>(this.mesh.material)) {
                 elevationTile.content.textureSource.linkTo(this.mesh.material);
@@ -487,20 +494,23 @@ export class Map3dElevationHost
         return `${this.name ?? Map3dElevationHost.DefaultName}.${suffix}`;
     }
 
-    protected _buildMaterial(material?: IElevationMaterialOptions, scene?: Scene): Material {
-        if (material?.material) {
-            return material.material;
+    protected _buildMaterial(options?: IElevationLayerMaterialOptions, scene?: Scene): Material {
+        if (options?.material) {
+            return options.material;
         }
-        return this._createDefaultMaterial(material, scene);
+        return this._createDefaultMaterial(options, scene);
     }
 
-    protected _createDefaultMaterial(material?: IElevationMaterialOptions, scene?: Scene): Material {
+    protected _createDefaultMaterial(options?: IElevationLayerMaterialOptions, scene?: Scene): Material {
         const m = new WebMapMaterial(this._buildNameWithSuffix("material"), scene);
-        if (material?.color) {
-            m.terrainColor = material.color;
+        if (options?.color) {
+            m.terrainColor = options.color;
         }
-        if (material?.shininess) {
-            m.shininess = material.shininess;
+        if (options?.shininess) {
+            m.shininess = options.shininess;
+        }
+        if (options?.textureResolution) {
+            m.textureResolution = options.textureResolution;
         }
         return m;
     }

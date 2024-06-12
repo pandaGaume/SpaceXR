@@ -50,7 +50,7 @@ void main(void) {
     vec3 rawNormal = elevation_rgbaToNormal(pixel);
     // this is the way we generate the grid, left handed, x is the west, y is the north, z is the up
     // so we need to minus x  
-    vec3 worldNormal = vec3(-rawNormal.x,rawNormal.y,rawNormal.z); 
+    vec3 worldNormal = vec3(-rawNormal.x,rawNormal.z,rawNormal.y); 
 
     // compute lights
     #if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING)
@@ -71,5 +71,6 @@ void main(void) {
     
     // finally set the position
     gl_Position = viewProjection * worldPosition;
-    vUvs = vec3(uv, depth);
+    
+    vUvs = vec3(- position.x + 0.5, -position.y + 0.5, demIds[0]);
 }

@@ -140,11 +140,12 @@
                 const l = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);
 
                 const imageLayerOptions = {
+                    zoomOffset: 1,
                     alpha: 1.0,
                     background: "rgb(.5,.5,.5)",
                 };
-                
-                client = SPACEXR.Google.TerrainClient2d();
+
+                client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
                 const showAxes = true;

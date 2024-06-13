@@ -29,6 +29,7 @@
         "test": "jest"
     },
     "dependencies": {
-        "@babylonjs/gui": "^6.29.1"
+        "@babylonjs/gui": "^6.29.1",
+        "quickhull3d": "^2.1.0"
     }
 }

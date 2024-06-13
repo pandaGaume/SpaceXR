@@ -2,6 +2,7 @@
     "extends": "../../../tsconfig.json",
     "name": "spacexr-babylon",
     "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
         "composite": true,
         "outDir": "./dist",
         "rootDir": "./src",

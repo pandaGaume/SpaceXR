@@ -20,7 +20,8 @@ export class GoogleMap2DUrlBuilder extends WebTileUrlBuilder {
         super();
         this.withSubDomains(["mt0", "mt1", "mt2", "mt3"])
             .withHost("{s}.google.com")
-            .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`);
+            .withPath(`vt/lyrs=${types.join(",")}&x={x}&y={y}&z={z}`)
+            .withSecure(true);
     }
 }
 

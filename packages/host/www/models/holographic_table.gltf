@@ -1,0 +1,352 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "babylon.js glTF exporter for 3dsmax 2023 vCustom.Build.Version"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "translation": [
+        0.6936346,
+        -0.0694519058,
+        0.300441116
+      ],
+      "name": "CIC_corridor_low"
+    },
+    {
+      "children": [
+        2
+      ],
+      "mesh": 0,
+      "translation": [
+        -0.475191325,
+        0.159110263,
+        -0.300441116
+      ],
+      "name": "central_table_low"
+    },
+    {
+      "children": [
+        3
+      ],
+      "translation": [
+        -1.02860987,
+        0.450789779,
+        0.4213091
+      ],
+      "rotation": [
+        0.133834,
+        -0.6943259,
+        0.6943259,
+        -0.133833975
+      ],
+      "scale": [
+        0.99999994,
+        -2.12231731,
+        0.99999994
+      ],
+      "name": "mainCourante_low"
+    },
+    {
+      "mesh": 1,
+      "translation": [
+        -0.7875792,
+        -0.1985137,
+        0.8002677
+      ],
+      "rotation": [
+        0.133834,
+        0.6943259,
+        0.6943259,
+        -0.13383396
+      ],
+      "scale": [
+        0.9999999,
+        -0.9999999,
+        0.471182972
+      ],
+      "name": "display_table_low"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 0,
+          "material": 0
+        }
+      ],
+      "name": "central_table_low"
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 5,
+            "NORMAL": 6,
+            "TEXCOORD_0": 7
+          },
+          "indices": 4,
+          "material": 1
+        }
+      ],
+      "name": "display_table_low"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 2292,
+      "type": "SCALAR",
+      "name": "accessorIndices"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1059,
+      "max": [
+        0.947942853,
+        0.6199874,
+        1.50788331
+      ],
+      "min": [
+        -0.9635671,
+        -0.118259124,
+        -1.5086664
+      ],
+      "type": "VEC3",
+      "name": "accessorPositions"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 12708,
+      "componentType": 5126,
+      "count": 1059,
+      "type": "VEC3",
+      "name": "accessorNormals"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1059,
+      "type": "VEC2",
+      "name": "accessorUVs"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 4584,
+      "componentType": 5123,
+      "count": 198,
+      "type": "SCALAR",
+      "name": "accessorIndices"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 25416,
+      "componentType": 5126,
+      "count": 46,
+      "max": [
+        0.862235,
+        0.6199874,
+        1.25599062
+      ],
+      "min": [
+        -0.8231439,
+        0.618923247,
+        -1.42493033
+      ],
+      "type": "VEC3",
+      "name": "accessorPositions"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 25968,
+      "componentType": 5126,
+      "count": 46,
+      "type": "VEC3",
+      "name": "accessorNormals"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 8472,
+      "componentType": 5126,
+      "count": 46,
+      "type": "VEC2",
+      "name": "accessorUVs"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 4980,
+      "name": "bufferViewScalar"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4980,
+      "byteLength": 26520,
+      "byteStride": 12,
+      "name": "bufferViewFloatVec3"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 31500,
+      "byteLength": 8840,
+      "byteStride": 8,
+      "name": "bufferViewFloatVec2"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "holographic_table_data.bin",
+      "byteLength": 40340
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 2
+        },
+        "metallicRoughnessTexture": {
+          "index": 3
+        }
+      },
+      "normalTexture": {
+        "index": 0,
+        "scale": 0.3
+      },
+      "emissiveTexture": {
+        "index": 1
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ],
+      "doubleSided": true,
+      "name": "Standard material for CIC_025_low6_table.sbsar_46",
+      "extras": {
+        "babylonSeparateCullingPass": false
+      }
+    },
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 6
+        },
+        "metallicRoughnessTexture": {
+          "index": 7
+        }
+      },
+      "normalTexture": {
+        "index": 4,
+        "scale": 0.3
+      },
+      "emissiveTexture": {
+        "index": 5
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ],
+      "doubleSided": true,
+      "name": "Standard material for CIC_025_low6_display_table_high.sbsar_22",
+      "extras": {
+        "babylonSeparateCullingPass": false
+      }
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0,
+      "name": "table_Normal.png"
+    },
+    {
+      "sampler": 0,
+      "source": 1,
+      "name": "table_Emissive.png"
+    },
+    {
+      "sampler": 0,
+      "source": 2,
+      "name": "table_Base_color.png"
+    },
+    {
+      "sampler": 0,
+      "source": 3,
+      "name": "table_Roughnesstable_Metallic.png"
+    },
+    {
+      "sampler": 0,
+      "source": 4,
+      "name": "display_table_high_Normal.png"
+    },
+    {
+      "sampler": 0,
+      "source": 5,
+      "name": "display_table_high_Emissive.png"
+    },
+    {
+      "sampler": 0,
+      "source": 6,
+      "name": "display_table_high_Base_color.png"
+    },
+    {
+      "sampler": 0,
+      "source": 7,
+      "name": "display_table_high_Roughnessdisplay_table_high_Metallic.png"
+    }
+  ],
+  "images": [
+    {
+      "uri": "holographic_table_img0.png"
+    },
+    {
+      "uri": "holographic_table_img1.png"
+    },
+    {
+      "uri": "holographic_table_img2.png"
+    },
+    {
+      "uri": "holographic_table_img3.png"
+    },
+    {
+      "uri": "holographic_table_img4.png"
+    },
+    {
+      "uri": "holographic_table_img5.png"
+    },
+    {
+      "uri": "holographic_table_img6.png"
+    },
+    {
+      "uri": "holographic_table_img7.png"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ]
+}

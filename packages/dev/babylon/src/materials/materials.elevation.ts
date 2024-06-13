@@ -766,7 +766,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _buildTextureSamplers(width: number, height?: number, depth?: number): void {
         height = height ?? width;
         const maxDepth = depth ?? this._getTextureSamplerDepth();
-        const generateMipMap = false;
+        const generateMipMap = true;
         const scene = this.getScene();
         this._textureSampler = <Texture3>this._buildSampler(Map3dLayerKind.Texture, width, height, maxDepth, generateMipMap, scene);
     }

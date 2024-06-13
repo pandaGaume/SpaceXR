@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Exemple d'un ecrans virtuel</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/babylon.inspector.bundle.js"></script>
+        <script src="../libs/babylon.glTF2FileLoader.min.js"></script>
+
+        <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+        <style>
+            html,
+            body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #mapcanvas3d {
+                width: 100%;
+                height: 100%;
+            }
+            .babylon-purple-bg {
+                background-color: #34344a;
+                color: white;
+            }
+            header {
+                border-bottom: 10px solid #34344a;
+            }
+            h1 {
+                font-size: 32px;
+            }
+            p {
+                font-size: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="babylon-purple-bg">
+            <h1>3D DEM Sample</h1>
+        </header>
+        <div id="mapcontainer">
+            <canvas id="mapcanvas3d"></canvas>
+        </div>
+        <script>
+            const unit = 1;
+
+            function createPolygon(name, positions, color = new BABYLON.Color3(1, 0, 0), scene = null) {
+                const lines = [];
+                let a = null;
+                let b = null;
+                for (let i = 0; i < positions.length; i += 3) {
+                    const b = new BABYLON.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+                    if (a) {
+                        lines.push([a, b]);
+                    }
+                    a = b;
+                }
+                lines.push([a, new BABYLON.Vector3(positions[0], positions[1], positions[2])]);
+
+                // Create the line system
+                const normalLines = BABYLON.MeshBuilder.CreateLineSystem(
+                    name,
+                    {
+                        lines: lines,
+                    },
+                    scene
+                );
+
+                // Set the line color
+                normalLines.color = color ?? new BABYLON.Color3(1, 0, 0); // Red color for normals
+
+                return normalLines;
+            }
+
+            async function createScene(canvas, engine) {
+                const scene = new BABYLON.Scene(engine);
+                // Parameters: name, alpha, beta, radius, target position, scene
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 4 * unit, new BABYLON.Vector3(0, 0, 0), scene);
+
+                camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+                camera.wheelPrecision = 10;
+                camera.minZ = 0;
+                // This attaches the camera to the canvas
+                camera.attachControl(canvas, true);
+
+                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+                // Default intensity is 1. Let's dim the light a small amount
+                light.intensity = 0.5;
+                light.diffuse = new BABYLON.Color3(1, 1, 1);
+
+                BABYLON.SceneLoader.ImportMesh(null, "../models/", "holographic_table.glb", scene, function (meshes) {
+                    var mesh = scene.getMeshByName("display_table_low");
+                    if (mesh) {
+                        // const hull = SPACEXR.CreateQuickHull("hull", mesh);
+                        // hull.material = new BABYLON.StandardMaterial("hullMaterial", scene);
+                        // hull.material.diffuseColor = new BABYLON.Color3(1, 0, 1);
+                        // hull.material.alpha = 0.5;
+
+                        const localVertices = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+                        const vectors = [];
+                        let worldMatrix = mesh.getWorldMatrix();
+                        for (let i = 0; i < localVertices.length; i += 3) {
+                            let localVertex = new BABYLON.Vector3(localVertices[i], localVertices[i + 1], localVertices[i + 2]);
+                            let worldVertex = BABYLON.Vector3.TransformCoordinates(localVertex, worldMatrix);
+                            vectors.push(worldVertex);
+                        }
+                        const indices = mesh.getIndices();
+                        const planeCruncher = new SPACEXR.PlaneCruncher()
+                            .withTolerance(0.05)
+                            .withPositions(vectors.flatMap((v) => [v.x, v.y, v.z]))
+                            .withIndices(indices);
+                        const planes = planeCruncher.crunch();
+
+                        for (let i = 0; i < planes.length; i++) {
+                            createPolygon(
+                                `polygon${i}`,
+                                planes[i].hull.flatMap((v) => [v.x, v.y, v.z]),
+                                new BABYLON.Color3(1, 0, 0),
+                                scene
+                            );
+                        }
+                    }
+
+                    // create an hologram display reference with a 96 dpi
+                    const f = 0.7;
+                    const size = {
+                        width: 3.2 * unit * f,
+                        height: 2.4 * unit * f,
+                    };
+                    const resolution = SPACEXR.VirtualDisplay.SD;
+
+                    /*const display = new SPACEXR.VirtualDisplay("display", size, resolution, scene);
+                    display.position.y = 1;
+                    display.position.x = -0.25;
+                    display.position.z = -0.1;
+                    display.rotation.y = Math.PI / 2;
+                    display.rotation.x = (3 * Math.PI) / 2;
+
+                    display.material = new BABYLON.StandardMaterial("displayMaterial", scene);
+                    display.material.alpha = 0.1;
+*/
+                    const showAxes = false;
+                    if (showAxes) {
+                        const axes = new BABYLON.Debug.AxesViewer(scene, 0.5 * unit);
+                        axes.xAxis.parent = display;
+                        axes.yAxis.parent = display;
+                        axes.zAxis.parent = display;
+                    }
+                });
+
+                return scene;
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
+                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+                const scene = await createScene(canvas, engine); //Call the createScene function
+                scene.debugLayer.show();
+
+                // Register a render loop to repeatedly render the scene
+                engine.runRenderLoop(function () {
+                    scene.render();
+                });
+
+                // Watch for browser/canvas resize events
+                window.addEventListener("resize", function () {
+                    engine.resize();
+                });
+            };
+        </script>
+    </body>
+</html>

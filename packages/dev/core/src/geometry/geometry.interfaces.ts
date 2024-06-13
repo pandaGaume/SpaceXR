@@ -105,3 +105,8 @@ export function IsBox(b: unknown): b is IBox {
         (<IBox>b).ceil !== undefined
     );
 }
+
+export interface IPlane {
+    point: ICartesian3;
+    normal: ICartesian3;
+}

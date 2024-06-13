@@ -72,7 +72,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         this._metrics = metrics;
 
         this._display = this._buildDisplay(options);
-        this._context = this._display.getContext();
+        this._context = this._display.getContext({ willReadFrequently: true });
 
         this._background = options?.background;
         this._alpha = options?.alpha ?? 1;

@@ -9,6 +9,7 @@
         <script src="../libs/babylon.glTF2FileLoader.min.js"></script>
 
         <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
+        <!--script src="../libs/stellar_landscape_xr.1.0.0.js"></script-->
         <style>
             html,
             body {
@@ -40,8 +41,8 @@
     </head>
     <body>
         <header class="babylon-purple-bg">
-            <h1>3D Map Holographic Display</h1>
-            <!--            <p>
+            <!--    <h1>3D Map Holographic Display</h1>
+            <p>
                 Example of a world's topography "holographic" map based on a virtual screen. This holographic map is a 3D representation of the global terrain and elevations. The data used for this map
                 comes from Mapzen, but it could also be sourced from other elevation data providers. 
                 <p>The map is hosted on an interactive display surface that tracks your inputs. Here's how to navigate the map:</p>
@@ -57,7 +58,7 @@
             <canvas id="mapcanvas3d"></canvas>
         </div>
         <script>
-            const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc; // everest
+            const defaultCenter = SPACEXR.KnownPlaces.Mountains.Everest; // everest
             const defaultLod = 11;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
@@ -160,7 +161,7 @@
                 const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = await createScene(canvas, engine); //Call the createScene function
-                scene.debugLayer.show();
+                //scene.debugLayer.show();
 
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {

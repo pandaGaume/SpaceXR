@@ -1,7 +1,15 @@
-import { Quantity, Unit } from "../math";
+import { Quantity, Scalar, Unit } from "../math";
 import { ICartesian2, ICartesian3, ICartesian4 } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
+    public static Cross(a: ICartesian2, b: ICartesian2): number {
+        return a.x * b.y - a.y * b.x;
+    }
+
+    public static Subtract(a: ICartesian2, b: ICartesian2): ICartesian2 {
+        return new Cartesian2(a.x - b.x, a.y - b.y);
+    }
+
     public static ConvertInPlace(value: ICartesian2, from: Unit, to: Unit): ICartesian2 {
         return Cartesian2.ConvertToRef(value, from, to, value);
     }
@@ -27,6 +35,89 @@ export class Cartesian2 implements ICartesian2 {
     }
 }
 export class Cartesian3 implements ICartesian3 {
+    public static Dot(a: ICartesian3, b: ICartesian3): number {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+
+    public static Cross(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return new Cartesian3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+    }
+
+    public static Subtract(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return new Cartesian3(a.x - b.x, a.y - b.y, a.z - b.z);
+    }
+
+    public static Normalize(a: ICartesian3): ICartesian3 {
+        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero());
+    }
+
+    public static NormalizeInPlace(a: ICartesian3): ICartesian3 {
+        return Cartesian3.NormalizeToRef(a, a);
+    }
+
+    public static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3 {
+        return Cartesian3.NormalizeInPlace(Cartesian3.Cross(Cartesian3.Subtract(v1, v0), Cartesian3.Subtract(v2, v0)));
+    }
+
+    public static NormalizeToRef(a: ICartesian3, ref: ICartesian3): ICartesian3 {
+        const length = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+        ref.x = a.x / length;
+        ref.y = a.y / length;
+        ref.z = a.z / length;
+        return ref;
+    }
+
+    /// <summary>
+    ///   Check if two points are coincident
+    /// </summary>
+
+    public static AreCoincident(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
+        const length = Cartesian3.Magnitude(Cartesian3.Subtract(a, b));
+        return length <= (epsilon ?? Scalar.EPSILON);
+    }
+
+    /// <summary>
+    ///   Check if three points are collinear
+    /// </summary>
+    public static AreCollinear(a: ICartesian3, b: ICartesian3, c: ICartesian3, epsilon?: number): boolean {
+        const length = Cartesian3.Magnitude(Cartesian3.Cross(Cartesian3.Subtract(b, a), Cartesian3.Subtract(c, a)));
+        return length <= (epsilon ?? Scalar.EPSILON);
+    }
+
+    /// <summary>
+    ///   Check if four points are coplanar
+    /// </summary>
+    public static AreCoplanar(a: ICartesian3, b: ICartesian3, c: ICartesian3, d: ICartesian3, epsilon?: number): boolean {
+        var n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
+        var n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
+
+        var m1 = Cartesian3.Magnitude(n1);
+        var m2 = Cartesian3.Magnitude(n2);
+
+        const EPSILON = epsilon ?? Scalar.EPSILON;
+
+        return (
+            m1 <= EPSILON ||
+            m2 <= EPSILON ||
+            Cartesian3.AreCollinear(Cartesian3.Zero(), Cartesian3.MultplyByFloatInPlace(n1, 1.0 / m1), Cartesian3.MultplyByFloatInPlace(n2, 1.0 / m2))
+        );
+    }
+
+    public static MultplyByFloatInPlace(a: ICartesian3, n: number): ICartesian3 {
+        return Cartesian3.MultplyByFloatToRef(a, n, a);
+    }
+
+    public static MultplyByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3 {
+        ref.x = a.x * n;
+        ref.y = a.y * n;
+        ref.z = a.z * n;
+        return ref;
+    }
+
+    public static Magnitude(a: ICartesian3): number {
+        return Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    }
+
     public static ConvertInPlace(value: ICartesian3 | ICartesian4, from: Unit, to: Unit): ICartesian3 {
         return Cartesian3.ConvertToRef(value, from, to, value);
     }
@@ -39,10 +130,39 @@ export class Cartesian3 implements ICartesian3 {
         return ref;
     }
 
+    public static Centroid(values: Array<ICartesian3>, ref?: ICartesian3): ICartesian3 {
+        let x = 0;
+        let y = 0;
+        let z = 0;
+
+        for (let i = 0; i < values.length; i++) {
+            x += values[i].x;
+            y += values[i].y;
+            z += values[i].z;
+        }
+
+        const count = values.length;
+        ref = ref ?? Cartesian3.Zero();
+        ref.x = x / count;
+        ref.y = y / count;
+        ref.z = z / count;
+        return ref;
+    }
+
     public static Zero() {
         return new Cartesian3(0, 0, 0);
     }
+    public static FromArray(array: Float32Array, index: number): ICartesian3 {
+        return new Cartesian3(array[index], array[index + 1], array[index + 2]);
+    }
+
+    public static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
+        epsilon = epsilon ?? Scalar.EPSILON;
+        return Scalar.WithinEpsilon(a.x, b.x, epsilon) && Scalar.WithinEpsilon(a.y, b.y, epsilon) && Scalar.WithinEpsilon(a.z, b.z, epsilon);
+    }
+
     public constructor(public x: number, public y: number, public z: number) {}
+
     public toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;
     }

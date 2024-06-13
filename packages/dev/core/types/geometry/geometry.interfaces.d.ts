@@ -66,3 +66,7 @@ export interface IBox extends ISize3, ICartesian3 {
     toString(): string;
 }
 export declare function IsBox(b: unknown): b is IBox;
+export interface IPlane {
+    point: ICartesian3;
+    normal: ICartesian3;
+}

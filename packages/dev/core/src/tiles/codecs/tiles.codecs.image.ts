@@ -88,7 +88,7 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
             if (!workingCanvas) {
                 throw new Error("Unable to create 2d canvas");
             }
-            const workingContext = workingCanvas.getContext("2d");
+            const workingContext = workingCanvas.getContext("2d", { willReadFrequently: true });
             if (!workingContext) {
                 throw new Error("Unable to get 2d context");
             }

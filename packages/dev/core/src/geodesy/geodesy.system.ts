@@ -11,6 +11,8 @@ export enum CartesianMode {
 }
 
 export class GeodeticSystem {
+    public static readonly Default: GeodeticSystem = new GeodeticSystem(Ellipsoid.WGS84);
+
     /**
      * Given lat, lon and alt, return an array of 16, which is the enu transformation matrix (4x4)
      * @param lat the reference latitude

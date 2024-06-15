@@ -1,6 +1,5 @@
 import { IEnvelope, IGeo2, IGeo3, IGeoBounded } from "./geography.interfaces";
-import { ISize3, ISize2 } from "../geometry/geometry.interfaces";
-import { Ellipsoid, IGeoCalculator } from "../geodesy";
+import { ISize3 } from "../geometry/geometry.interfaces";
 export declare class Envelope implements IEnvelope {
     static MaxLongitude: number;
     static MaxLatitude: number;
@@ -9,10 +8,8 @@ export declare class Envelope implements IEnvelope {
     static Zero(): IEnvelope;
     static Split2(a: IEnvelope | IGeoBounded | undefined): IEnvelope[];
     static Split3(a: IEnvelope | IGeoBounded | undefined): IEnvelope[];
-    static FromSizeMeters(position: IGeo3 | IGeo2, size: ISize3 | ISize2, calculator?: IGeoCalculator, ellipsoid?: Ellipsoid): IEnvelope;
-    static FromSizeAngles(position: IGeo3 | IGeo2, size: ISize3 | ISize2): Envelope;
     static FromPoints(...array: (IGeo3 | IGeo2)[]): IEnvelope | undefined;
-    static FromEnvelopes(...array: (IEnvelope | IGeoBounded | undefined | null)[]): IEnvelope | undefined;
+    static FromEnvelopes(...array: Array<IEnvelope | IGeoBounded | undefined | null>): IEnvelope | undefined;
     _min: IGeo3;
     _max: IGeo3;
     private constructor();

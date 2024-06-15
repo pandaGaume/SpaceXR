@@ -8,6 +8,7 @@ export declare enum CartesianMode {
     NED = 2
 }
 export declare class GeodeticSystem {
+    static readonly Default: GeodeticSystem;
     static GetENUTransformMatrixFromFloat(lat: number, lon: number, alt?: number, ellipsoid?: Ellipsoid, rowOrder?: boolean): Array<number>;
     _ellipsoid: Ellipsoid;
     _bounds?: IEnvelope;

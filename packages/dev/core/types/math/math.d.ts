@@ -2,6 +2,7 @@ export type ParametricValue = number;
 export declare class Scalar {
     static EPSILON: number;
     static DEG2RAD: number;
+    static RAD2DEG: number;
     static INCH2METER: number;
     static METER2INCH: number;
     static PI: number;

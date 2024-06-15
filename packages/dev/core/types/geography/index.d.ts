@@ -4,3 +4,5 @@ export * from "./geography.envelope";
 export * from "./geography.knownPlaces";
 export * from "./geography.projections";
 export * from "./geography.bearing";
+export * from "./shapes/geography.shape";
+export * from "./shapes";

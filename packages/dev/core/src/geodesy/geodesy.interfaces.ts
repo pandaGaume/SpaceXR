@@ -1,10 +1,7 @@
 import { IGeo2 } from "../geography";
 
-export interface IGeoCalculator {
-    getDistanceBetweenTwoPoint(a: IGeo2, b: IGeo2, deg?: boolean): number;
-    getDistanceBetweenTwoPoint_Haversine(a: IGeo2, b: IGeo2, deg?: boolean): number;
-    getLocationAtDistanceAzimuthToRef(a: IGeo2, dist: number, az: number, ref: IGeo2, deg?: boolean): void;
-    getCrossTrackDistance(a: IGeo2, b: IGeo2, c: IGeo2, deg?: boolean): number;
-    getCrossArcDistance(a: IGeo2, b: IGeo2, c: IGeo2, deg?: boolean): number;
-    getBearing(a: IGeo2, b: IGeo2, deg?: boolean): number;
+export interface IGeoProcessor {
+    getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number;
+    getAzimuthFromFloat(lata: number, lona: number, latb: number, lonb: number): number;
+    getLocationAtDistanceAzimuth(lat: number, lon: number, distance: number, azimuth: number): IGeo2;
 }

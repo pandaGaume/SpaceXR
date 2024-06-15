@@ -4,12 +4,14 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Exemple d'un ecrans virtuel</title>
-        <script src="../libs/babylon.js"></script>
-        <script src="../libs/babylon.inspector.bundle.js"></script>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <!--script src="../libs/babylon.js"></script>
+        <script src="../libs/babylon.inspector.bundle.js"></script-->
         <script src="../libs/babylon.glTF2FileLoader.min.js"></script>
 
-        <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
-        <!--script src="../libs/stellar_landscape_xr.1.0.0.js"></script-->
+        <!--script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script-->
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+
         <style>
             html,
             body {
@@ -18,6 +20,10 @@
                 height: 100%;
                 margin: 0;
                 padding: 0;
+            }
+            #mapcontainer {
+                width: 100%;
+                height: 70%;            
             }
 
             #mapcanvas3d {
@@ -30,6 +36,8 @@
             }
             header {
                 border-bottom: 10px solid #34344a;
+                width: 100%;
+                height: 30%;      
             }
             h1 {
                 font-size: 32px;
@@ -41,7 +49,7 @@
     </head>
     <body>
         <header class="babylon-purple-bg">
-            <!--    <h1>3D Map Holographic Display</h1>
+            <h1>3D Map Holographic Display</h1>
             <p>
                 Example of a world's topography "holographic" map based on a virtual screen. This holographic map is a 3D representation of the global terrain and elevations. The data used for this map
                 comes from Mapzen, but it could also be sourced from other elevation data providers. 
@@ -52,7 +60,8 @@
                     <li><strong>Zooming:</strong> Use the mouse wheel to zoom in and out when the pointer is over the map.</li>
                 </ul>
                 <p>Tiles are loaded dynamically during these navigation actions to ensure a smooth and seamless experience.</p>
-             </p>-->
+                <p>Satelite image by (c)Google tile server</p>
+             </p>
         </header>
         <div id="mapcontainer">
             <canvas id="mapcanvas3d"></canvas>
@@ -162,6 +171,9 @@
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = await createScene(canvas, engine); //Call the createScene function
                 //scene.debugLayer.show();
+                
+                // initialize XR
+                var xr = await scene.createDefaultXRExperienceAsync();
 
                 // Register a render loop to repeatedly render the scene
                 engine.runRenderLoop(function () {

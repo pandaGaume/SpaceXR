@@ -1,5 +1,5 @@
 /**
- * From Copyright 2019 Oskar Sigvardsson
+ * From Java implementation of Oskar Sigvardsson
  */
 
 import { Assert } from "../utils";

@@ -21,6 +21,10 @@ export interface ITileMapLayerOptions {
     attribution?: string;
 }
 
+export interface IDrawableTileMapLayer {
+    draw(context: CanvasRenderingContext2D, bounds: ITileDisplayBounds): void;
+}
+
 export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext, IHasNavigationState {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;

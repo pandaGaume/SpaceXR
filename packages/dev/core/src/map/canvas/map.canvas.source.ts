@@ -280,12 +280,12 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         // here we need to adapt the scale between the desired resolution and the tile size.
         ctx.scale(this.display.width / this.metrics.tileSize, this.display.height / this.metrics.tileSize);
 
-        for (const tiles of this._activeTiles) {
-            if (!tiles.layer.enabled) {
+        for (const view of this._activeTiles) {
+            if (!view.layer.enabled) {
                 continue;
             }
 
-            const layerLod = tiles.layer.navigation.lod;
+            const layerLod = view.layer.navigation.lod;
             const tileLod = this._target.address.levelOfDetail;
             const dlod = layerLod - tileLod;
 
@@ -293,7 +293,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
                 // fast track - rect is in pixel at given LOD.
                 const sx = this._target.rect?.x ?? 0;
                 const sy = this._target.rect?.y ?? 0;
-                for (const t of tiles.tiles) {
+                for (const t of view.tiles) {
                     if (t.rect) {
                         const x = t.rect.x - sx;
                         const y = t.rect.y - sy;
@@ -303,7 +303,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
                             continue;
                         }
 
-                        var size = tiles.layer.metrics.tileSize;
+                        var size = view.layer.metrics.tileSize;
                         ctx.fillRect(x, y, size, size);
                     }
                 }
@@ -316,7 +316,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const sx = this._target.rect?.x ?? 0;
             const sy = this._target.rect?.y ?? 0;
 
-            for (const t of tiles.tiles) {
+            for (const t of view.tiles) {
                 const geo = t.bounds;
                 if (!geo) {
                     continue;
@@ -332,7 +332,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
                     ctx.drawImage(item, 0, 0, item.width, item.height, x, y, w, h);
                     continue;
                 }
-                var size = tiles.layer.metrics.tileSize;
+                var size = view.layer.metrics.tileSize;
                 ctx.fillRect(x, y, size, size);
             }
         }

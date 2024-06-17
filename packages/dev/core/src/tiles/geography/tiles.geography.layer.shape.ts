@@ -1,5 +1,5 @@
 import { IGeoShape } from "dev/core/src/geography";
-import { IDrawableTileMapLayer, IShapeLayer, ITileMapLayerOptions } from "../map/tiles.map.interfaces";
+import { IDrawableTileMapLayer, IShapeLayer, ITileMapLayerOptions, ShapeLayerOutputContentType } from "../map/tiles.map.interfaces";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 
 import { TileMapLayer } from "../map";
@@ -9,75 +9,15 @@ import { EPSG3857 } from "./tiles.geography.EPSG3857";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
+import { IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.shape.decorated";
 
-export type ShapeLayerContentType = Array<IShape>;
-
-export interface IShapeDrawOptions {
-    /// <summary>
-    /// A boolean value that specifies whether to draw the shape stroke.
-    /// Set it to false to disable border on polygons or circles.
-    /// </summary>
-    stroke: boolean;
-
-    /// <summary>
-    /// An Array of numbers that specify distances to alternately draw a line and a gap (in coordinate space units).
-    /// If the number of elements in the array is odd, the elements of the array get copied and concatenated.
-    /// For example, [5, 15, 25] will become [5, 15, 25, 5, 15, 25].
-    /// If the array is empty, the line dash list is cleared and line strokes return to being solid.
-    /// </summary>
-    dashArray?: Array<number>;
-
-    /// <summary>
-    /// A string parsed as CSS <color> value.
-    /// </summary>
-    color?: string;
-    opacity?: number;
-
-    /// <summary>
-    /// A number specifying the line width, in coordinate space units.
-    /// Zero, negative, Infinity, and NaN values are ignored.
-    /// This value is 1.0 by default.
-    /// </summary>
-    weight?: number;
-
-    fill?: boolean;
-
-    fillColor?: string;
-    fillOpacity?: number;
-}
+export type ShapeLayerContentType = Array<ShapeLayerOutputContentType>;
+export type ShapeLayerInputContentType = IGeoShape | IDecoratedShape<IGeoShape>;
 
 export interface IShapeLayerOptions extends IShapeDrawOptions, ITileMapLayerOptions {
     metrics?: ITileMetrics;
     tolerance?: number;
     highestQuality?: boolean;
-}
-
-export interface IDecoratedShape<T> {
-    shape: T;
-    options?: IShapeDrawOptions;
-}
-
-export function isDecoratedShape<T>(b: any): b is IDecoratedShape<T> {
-    if (typeof b !== "object" || b === null) return false;
-    return b.shape !== undefined && b.options !== undefined;
-}
-
-export class DecoratedShape<T> implements IDecoratedShape<T> {
-    private _shape: T;
-    private _options?: IShapeDrawOptions;
-
-    public constructor(shape: T, options?: IShapeDrawOptions) {
-        this._shape = shape;
-        this._options = options;
-    }
-
-    public get shape(): T {
-        return this._shape;
-    }
-
-    public get options(): IShapeDrawOptions | undefined {
-        return this._options;
-    }
 }
 
 export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements IShapeLayer, IDrawableTileMapLayer<ShapeLayerContentType> {
@@ -115,57 +55,93 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         this._fillOpacity = options?.fillOpacity ?? ShapeLayer.DefaultOpacity;
     }
 
-    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<IShape[]>): void {
+    public get dashArray(): Array<number> | undefined {
+        return this._dashArray;
+    }
+
+    public get color(): string | undefined {
+        return this._color;
+    }
+    public get weight(): number | undefined {
+        return this._weight;
+    }
+    public get stroke(): boolean | undefined {
+        return this._stroke;
+    }
+    public get opacity(): number | undefined {
+        return this._opacity;
+    }
+    public get fill(): boolean | undefined {
+        return this._fill;
+    }
+    public get fillColor(): string | undefined {
+        return this._fillColor;
+    }
+    public get fillOpacity(): number | undefined {
+        return this._fillOpacity;
+    }
+
+    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<Array<ShapeLayerOutputContentType>>): void {
         if (tile.content) {
-            console.log(`Drawing ${tile.content.length} shapes`);
-            for (const shape of tile.content) {
-                if (isLine(shape)) {
-                    this._drawPolyline(ctx, x, y, [shape.start, shape.end]);
+            for (const content of tile.content) {
+                if (isDecoratedShape<IShape>(content)) {
+                    this._draw(ctx, x, y, content.shape, content.options);
                     continue;
                 }
-
-                if (isPolyline(shape)) {
-                    this._drawPolyline(ctx, x, y, shape.points);
-                    continue;
-                }
-
-                if (isPolygon(shape)) {
-                    this._drawPolygon(ctx, x, y, shape.points);
-                    continue;
-                }
+                this._draw(ctx, x, y, content);
             }
         }
     }
 
-    public addShapes(...shapes: Array<IGeoShape | IDecoratedShape<IGeoShape>>): void {
+    public addShapes(...shapes: Array<ShapeLayerInputContentType>): void {
         const provider = this.provider as ShapeProvider;
         provider.addShapes(...shapes);
     }
 
-    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, close: boolean = false): void {
-        if (this._dashArray) {
-            ctx.setLineDash(this._dashArray);
+    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, shape: IShape, options?: IShapeDrawOptions): void {
+        if (isLine(shape)) {
+            this._drawPolyline(ctx, x, y, [shape.start, shape.end], options);
+            return;
         }
-        ctx.strokeStyle = this._color ?? ShapeLayer.DefaultStrokeStyle;
-        ctx.lineWidth = this._weight ?? ShapeLayer.DefaultWeight;
+
+        if (isPolyline(shape)) {
+            this._drawPolyline(ctx, x, y, shape.points, options);
+            return;
+        }
+
+        if (isPolygon(shape)) {
+            this._drawPolygon(ctx, x, y, shape.points, options);
+            return;
+        }
+    }
+
+    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IShapeDrawOptions, close: boolean = false): void {
+        const o = options ?? this;
+        if (o.dashArray) {
+            ctx.setLineDash(o.dashArray);
+        }
+        ctx.strokeStyle = o.color ?? ShapeLayer.DefaultStrokeStyle;
+        ctx.lineWidth = o.weight ?? ShapeLayer.DefaultWeight;
         this._drawPath(ctx, x, y, points, close);
         ctx.stroke();
     }
 
-    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>): void {
-        if (this._fill) {
-            ctx.fillStyle = this._fillColor ?? ShapeLayer.DefaultFillStyle;
-            ctx.globalAlpha = this._fillOpacity ?? ShapeLayer.DefaultOpacity;
+    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IShapeDrawOptions): void {
+        const o = options ?? this;
+        if (o.fill) {
+            ctx.fillStyle = o.fillColor ?? ShapeLayer.DefaultFillStyle;
+            ctx.globalAlpha = o.fillOpacity ?? ShapeLayer.DefaultOpacity;
             this._drawPath(ctx, x, y, points, true);
             ctx.fill();
         }
-        if (this._stroke) {
-            if (this._dashArray) {
-                ctx.setLineDash(this._dashArray);
+        if (o.stroke) {
+            if (o.dashArray) {
+                ctx.setLineDash(o.dashArray);
             }
-            ctx.strokeStyle = this._color ?? ShapeLayer.DefaultStrokeStyle;
-            ctx.globalAlpha = this._opacity ?? ShapeLayer.DefaultOpacity;
-            ctx.lineWidth = this._weight ?? ShapeLayer.DefaultWeight;
+            ctx.strokeStyle = o.color ?? ShapeLayer.DefaultStrokeStyle;
+            ctx.globalAlpha = o.opacity ?? ShapeLayer.DefaultOpacity;
+            ctx.lineWidth = o.weight ?? ShapeLayer.DefaultWeight;
+            // draw the path if not previously done
             if (!this._fill) {
                 this._drawPath(ctx, x, y, points, true);
             }

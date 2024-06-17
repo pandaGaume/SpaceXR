@@ -8,7 +8,8 @@ import { Nullable } from "../../types";
 import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
-import { DecoratedShape, IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.layer.shape";
+import { DecoratedShape, IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.shape.decorated";
+import { ShapeLayerInputContentType } from "./tiles.geography.layer.shape";
 
 export interface IShapeView extends IDecoratedShape<IGeoShape>, IGeoBounded, IBounded {
     view: IShape;
@@ -86,7 +87,7 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         return this._shapes[lod - this._metrics.minLOD];
     }
 
-    public trySet(lod: number, ...shapes: Array<IGeoShape | IDecoratedShape<IGeoShape>>): boolean {
+    public trySet(lod: number, ...shapes: Array<ShapeLayerInputContentType>): boolean {
         let collection = this.get(lod);
         const views = shapes.map((s) => this._buildView(s, lod, this.metrics)).filter((v) => v !== null) as ShapeView[];
         if (views.length === 0) {
@@ -103,7 +104,7 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         return true;
     }
 
-    protected _buildView(decorated: IGeoShape | IDecoratedShape<IGeoShape>, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
+    protected _buildView(decorated: ShapeLayerInputContentType, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
         if (isDecoratedShape(decorated)) {
             const s = this._buildShape(decorated.shape, lod, metrics);
             if (s) {

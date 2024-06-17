@@ -160,7 +160,10 @@
                 }
 
                 const shapeLayer = new SPACEXR.ShapeLayer("shapeLayer", shapeLayerOptions).addTo(map);
-                const lineToK2 = new SPACEXR.GeoLine("toK2", SPACEXR.KnownPlaces.Mountains.Everest, SPACEXR.KnownPlaces.Mountains.K2);
+                const lineToK2 = {
+                    shape:new SPACEXR.GeoLine("toK2", SPACEXR.KnownPlaces.Mountains.Everest, SPACEXR.KnownPlaces.Mountains.K2),
+                    options:{color: "blue"}
+                }
                 // draw a  circle arround everest, radius is in meter.
                 const circleEverest = new SPACEXR.GeoCircle("everest", SPACEXR.KnownPlaces.Mountains.Everest, 1000);
                 shapeLayer.addShapes(lineToK2,circleEverest);

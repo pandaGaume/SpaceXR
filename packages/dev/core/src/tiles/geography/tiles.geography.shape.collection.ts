@@ -11,23 +11,23 @@ import { Observable } from "../../events";
 import { DecoratedShape, IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.shape.decorated";
 import { ShapeLayerInputContentType } from "./tiles.geography.layer.shape";
 
-export interface IShapeView extends IDecoratedShape<IGeoShape>, IGeoBounded, IBounded {
-    view: IShape;
+export interface IShapeView extends IDecoratedShape<IShape>, IGeoBounded, IBounded {
+    source: IGeoShape;
     lod: number;
 }
 
-class ShapeView extends DecoratedShape<IGeoShape> implements IShapeView {
-    private _view: IShape;
+class ShapeView extends DecoratedShape<IShape> implements IShapeView {
+    private _source: IGeoShape;
     private _lod: number;
 
-    public constructor(shape: IGeoShape, view: IShape, lod: number, options?: IShapeDrawOptions) {
-        super(shape, options);
-        this._view = view;
+    public constructor(shape: IGeoShape, view: IShape, lod: number, options: Nullable<IShapeDrawOptions>) {
+        super(view, options);
+        this._source = shape;
         this._lod = lod;
     }
 
-    public get view(): IShape {
-        return this._view;
+    public get source(): IGeoShape {
+        return this._source;
     }
 
     public get lod(): number {
@@ -35,11 +35,11 @@ class ShapeView extends DecoratedShape<IGeoShape> implements IShapeView {
     }
 
     public get bounds(): IBounds2 | undefined {
-        return this._view?.bounds;
+        return this.shape?.bounds;
     }
 
     public get geoBounds(): IEnvelope | undefined {
-        return this.shape?.geoBounds;
+        return this.source?.geoBounds;
     }
 }
 
@@ -113,7 +113,7 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         } else {
             const s = this._buildShape(decorated, lod, metrics);
             if (s) {
-                return new ShapeView(decorated, s, lod);
+                return new ShapeView(decorated, s, lod, null);
             }
         }
         return null;

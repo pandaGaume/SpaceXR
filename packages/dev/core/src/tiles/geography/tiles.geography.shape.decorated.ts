@@ -1,3 +1,5 @@
+import { Nullable } from "../../types";
+
 export interface IShapeDrawOptions {
     /// <summary>
     /// A boolean value that specifies whether to draw the shape stroke.
@@ -34,7 +36,7 @@ export interface IShapeDrawOptions {
 
 export interface IDecoratedShape<T> {
     shape: T;
-    options?: IShapeDrawOptions;
+    options: Nullable<IShapeDrawOptions>;
 }
 
 export function isDecoratedShape<T>(b: any): b is IDecoratedShape<T> {
@@ -44,18 +46,18 @@ export function isDecoratedShape<T>(b: any): b is IDecoratedShape<T> {
 
 export class DecoratedShape<T> implements IDecoratedShape<T> {
     private _shape: T;
-    private _options?: IShapeDrawOptions;
+    private _options: Nullable<IShapeDrawOptions>;
 
-    public constructor(shape: T, options?: IShapeDrawOptions) {
+    public constructor(shape: T, options: Nullable<IShapeDrawOptions>) {
         this._shape = shape;
-        this._options = options;
+        this._options = options ?? null;
     }
 
     public get shape(): T {
         return this._shape;
     }
 
-    public get options(): IShapeDrawOptions | undefined {
+    public get options(): Nullable<IShapeDrawOptions> {
         return this._options;
     }
 }

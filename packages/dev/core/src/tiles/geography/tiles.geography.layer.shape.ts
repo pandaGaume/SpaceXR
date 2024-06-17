@@ -10,6 +10,7 @@ import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
 import { IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.shape.decorated";
+import { Nullable } from "../../types";
 
 export type ShapeLayerContentType = Array<ShapeLayerOutputContentType>;
 export type ShapeLayerInputContentType = IGeoShape | IDecoratedShape<IGeoShape>;
@@ -88,7 +89,7 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
                     this._draw(ctx, x, y, content.shape, content.options);
                     continue;
                 }
-                this._draw(ctx, x, y, content);
+                this._draw(ctx, x, y, content, null);
             }
         }
     }
@@ -98,7 +99,7 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         provider.addShapes(...shapes);
     }
 
-    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, shape: IShape, options?: IShapeDrawOptions): void {
+    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, shape: IShape, options: Nullable<IShapeDrawOptions>): void {
         if (isLine(shape)) {
             this._drawPolyline(ctx, x, y, [shape.start, shape.end], options);
             return;
@@ -115,7 +116,7 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         }
     }
 
-    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IShapeDrawOptions, close: boolean = false): void {
+    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options: Nullable<IShapeDrawOptions>, close: boolean = false): void {
         const o = options ?? this;
         if (o.dashArray) {
             ctx.setLineDash(o.dashArray);
@@ -126,7 +127,7 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         ctx.stroke();
     }
 
-    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IShapeDrawOptions): void {
+    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options: Nullable<IShapeDrawOptions>): void {
         const o = options ?? this;
         if (o.fill) {
             ctx.fillStyle = o.fillColor ?? ShapeLayer.DefaultFillStyle;

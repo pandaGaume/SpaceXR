@@ -7,15 +7,23 @@ import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { Nullable } from "../../types";
 import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
+import { Observable } from "../../events";
 
-class ShapeView implements IGeoBounded, IBounded {
+export interface IShapeView extends IGeoBounded, IBounded {
+    shape: IGeoShape;
+    view: IShape;
+    lod: number;
+}
+
+class ShapeView implements IShapeView {
     private _shape: IGeoShape;
     private _view: IShape;
+    private _lod: number;
 
-    public constructor(shape: IGeoShape, view: IShape) {
+    public constructor(shape: IGeoShape, view: IShape, lod: number) {
         this._shape = shape;
-
         this._view = view;
+        this._lod = lod;
     }
 
     public get shape(): IGeoShape {
@@ -25,6 +33,11 @@ class ShapeView implements IGeoBounded, IBounded {
     public get view(): IShape {
         return this._view;
     }
+
+    public get lod(): number {
+        return this._lod;
+    }
+
     public get geoBounds(): IEnvelope | undefined {
         return this._shape?.geoBounds;
     }
@@ -40,6 +53,9 @@ export class ShapeViewCollection implements ITileMetricsProvider {
     public static DefaultSimplifyHighQuality: boolean = false;
     public static Epsilon = 1;
 
+    _addedObservable?: Observable<Array<IShapeView>>;
+    _removedObservable?: Observable<Array<IShapeView>>;
+
     private _shapes: Array<GeoBoundedCollection<ShapeView>>;
     private _metrics: ITileMetrics;
     private _simplifier: PolylineSimplifier<ICartesian3>;
@@ -52,6 +68,20 @@ export class ShapeViewCollection implements ITileMetricsProvider {
 
     public get metrics(): ITileMetrics {
         return this._metrics;
+    }
+
+    public get addedObservable(): Observable<Array<IShapeView>> {
+        if (this._addedObservable === undefined) {
+            this._addedObservable = new Observable<Array<IShapeView>>();
+        }
+        return this._addedObservable;
+    }
+
+    public get removedObservable(): Observable<Array<IShapeView>> {
+        if (this._removedObservable === undefined) {
+            this._removedObservable = new Observable<Array<IShapeView>>();
+        }
+        return this._removedObservable;
     }
 
     public get(lod: number): Nullable<GeoBoundedCollection<ShapeView>> {
@@ -72,13 +102,16 @@ export class ShapeViewCollection implements ITileMetricsProvider {
             this._shapes[lod - this._metrics.minLOD] = collection;
         }
         collection.push(...views);
+        if (this._addedObservable !== undefined && this._addedObservable.hasObservers()) {
+            this._addedObservable.notifyObservers(views, -1, this, this);
+        }
         return true;
     }
 
     protected _buildView(shape: IGeoShape, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
         const s = this._buildShape(shape, lod, metrics);
         if (s) {
-            return new ShapeView(shape, s);
+            return new ShapeView(shape, s, lod);
         }
         return null;
     }

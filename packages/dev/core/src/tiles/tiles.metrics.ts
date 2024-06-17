@@ -22,7 +22,8 @@ export abstract class AbstractTileMetrics extends TileSystemBounds implements IT
     }
 
     public mapSize(levelOfDetail: number): number {
-        return this.tileSize << levelOfDetail;
+        const result = this.tileSize * Math.pow(2, levelOfDetail);
+        return result >>> 0; // Convert to unsigned 32-bit integer
     }
 
     public get tileSize(): number {

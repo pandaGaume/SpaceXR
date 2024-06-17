@@ -4,7 +4,7 @@ import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { AbstractTileProvider } from "../providers";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
-import { ShapeViewCollection } from "./tiles.geography.shape.collection";
+import { IShapeView, ShapeViewCollection } from "./tiles.geography.shape.collection";
 
 export class ShapeProvider extends AbstractTileProvider<Array<IShape>> {
     static readonly DEFAULT_NAMESPACE = "ShapeProvider";
@@ -13,6 +13,7 @@ export class ShapeProvider extends AbstractTileProvider<Array<IShape>> {
     public constructor(namespace: string, metrics: ITileMetrics | ShapeViewCollection, simplifier?: PolylineSimplifier<ICartesian3>) {
         super();
         this._source = metrics instanceof ShapeViewCollection ? metrics : new ShapeViewCollection(metrics, simplifier);
+        this._source.addedObservable.add(this._shapesAdded.bind(this));
         this.factory.withMetrics(this._source.metrics).withNamespace(namespace ?? ShapeProvider.DEFAULT_NAMESPACE); // ensure the factory has the right metrics and namespace to build bounds.
     }
 
@@ -33,10 +34,28 @@ export class ShapeProvider extends AbstractTileProvider<Array<IShape>> {
     public addShapes(...shapes: Array<IGeoShape>): void {
         let lod = this._source.metrics.maxLOD;
         do {
-            if (this._source.trySet(lod, ...shapes)) {
+            if (!this._source.trySet(lod, ...shapes)) {
                 break;
             }
             lod--;
         } while (lod >= this._source.metrics.minLOD);
+    }
+
+    protected _shapesAdded(shape: Array<IShapeView>): void {
+        for (const view of shape) {
+            this._shapeAdded(view);
+        }
+    }
+
+    protected _shapeAdded(view: IShapeView): void {
+        for (const tile of this.activTiles) {
+            if (tile.address.levelOfDetail === view.lod && tile.geoBounds?.intersects(view.geoBounds)) {
+                tile.content = tile.content ?? [];
+                tile.content.push(view.view);
+                if (this._updatedObservable && this._updatedObservable.hasObservers()) {
+                    this._updatedObservable.notifyObservers(tile);
+                }
+            }
+        }
     }
 }

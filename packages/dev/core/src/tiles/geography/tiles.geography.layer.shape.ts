@@ -4,9 +4,10 @@ import { ITile, ITileMetrics } from "../tiles.interfaces";
 
 import { TileMapLayer } from "../map";
 import { ShapeProvider } from "./tiles.geography.shape.provider";
-import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
+import { IShape, isLine } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { EPSG3857 } from "./tiles.geography.EPSG3857";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
+import { ICanvasRenderingContext } from "../../engine";
 
 export type ShapeLayerContentType = Array<IShape>;
 
@@ -64,12 +65,33 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         this._weight = options?.weight;
     }
 
+    public static DefaultStrokeStyle = "red";
+    public static DefaultWeight = 1;
+
+    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<IShape[]>): void {
+        if (tile.content) {
+            console.log(`Drawing ${tile.content.length} shapes`);
+            for (const shape of tile.content) {
+                if (isLine(shape)) {
+                    console.log(`Drawing line from ${shape.start.x},${shape.start.y} to ${shape.end.x},${shape.end.y}`);
+                    ctx.strokeStyle = this._color ?? ShapeLayer.DefaultStrokeStyle;
+                    ctx.lineWidth = this._weight ?? ShapeLayer.DefaultWeight;
+                    ctx.beginPath();
+                    let px = shape.start.x - x;
+                    let py = shape.start.y - y;
+                    ctx.moveTo(px, py);
+                    px = shape.end.x - x;
+                    py = shape.end.y - y;
+                    ctx.lineTo(px, py);
+                    ctx.stroke();
+                    break;
+                }
+            }
+        }
+    }
+
     public addShapes(...shapes: Array<IGeoShape>): void {
         const provider = this.provider as ShapeProvider;
         provider.addShapes(...shapes);
-    }
-
-    public draw(context: CanvasRenderingContext2D, tile: ITile<ShapeLayerContentType>): void {
-        console.log("Drawing shapes");
     }
 }

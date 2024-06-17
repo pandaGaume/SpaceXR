@@ -4,7 +4,7 @@ import { IEnvelope } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, ShapeLayerContentType, Tile, TileCollection, TileConsumerBase } from "../../tiles";
-import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType } from "../../tiles/map";
+import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType, isDrawableTileMapLayer } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasDisplay } from "./map.canvas.display";
 
@@ -302,6 +302,12 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                     if (b) {
                         const x = b.x - sx;
                         const y = b.y - sy;
+
+                        if (isDrawableTileMapLayer(view.layer)) {
+                            view.layer.draw(ctx, sx, sy, t);
+                            continue;
+                        }
+
                         const item = t.content ?? null; // trick to address erroness tile.
                         if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);

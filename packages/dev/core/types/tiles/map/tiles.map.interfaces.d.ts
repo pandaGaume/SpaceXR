@@ -4,7 +4,7 @@ import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionConte
 import { IHasActivTiles, ITile, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
-import { ICanvasRenderingOptions } from "../../engine/icanvas";
+import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { ISize2 } from "../../geometry";
 import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 export interface ITileDisplayBounds extends ISize2, IDisposable {
@@ -17,8 +17,9 @@ export interface ITileMapLayerOptions {
     attribution?: string;
 }
 export interface IDrawableTileMapLayer<T> {
-    draw(context: CanvasRenderingContext2D, tile: ITile<T>): void;
+    draw(context: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>): void;
 }
+export declare function isDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T>;
 export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext, IHasNavigationState {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;

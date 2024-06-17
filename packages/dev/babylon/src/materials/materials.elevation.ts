@@ -834,16 +834,16 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _onEffectCompiled(effect: Effect): void {
-        console.log("DEFINES:", effect.defines);
-        console.log("VERTEX:", effect.vertexSourceCode);
-        console.log("FRAGMENT:", effect.fragmentSourceCode);
+        //console.log("DEFINES:", effect.defines);
+        //console.log("VERTEX:", effect.vertexSourceCode);
+        //console.log("FRAGMENT:", effect.fragmentSourceCode);
         if (this.onCompiled) {
             this.onCompiled(effect);
         }
     }
 
     protected _onEffectError(effect: Effect, errors: string): void {
-        console.error("ERRORS:", errors);
+        //console.error("ERRORS:", errors);
         if (this.onError) {
             this.onError(effect, errors);
         }

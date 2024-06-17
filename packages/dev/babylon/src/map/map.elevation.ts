@@ -9,6 +9,7 @@ import {
     ITileNavigationState,
     ImageLayer,
     LayerContainer,
+    ShapeLayer,
     TileNavigationState,
 } from "core/tiles";
 import { Observer, EventState } from "core/events";
@@ -208,7 +209,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
             this._addedElevationLayer(layer);
             return;
         }
-        if (layer instanceof ImageLayer) {
+        if (layer instanceof ImageLayer || layer instanceof ShapeLayer) {
             this._addedImageLayer(layer as ITileMapLayer<Map3dTextureContentType>);
         }
     }
@@ -218,7 +219,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
             this._removedElevationLayer(layer);
             return;
         }
-        if (layer instanceof ImageLayer) {
+        if (layer instanceof ImageLayer || layer instanceof ShapeLayer) {
             this._removedImageLayer(layer as ITileMapLayer<Map3dTextureContentType>);
         }
     }

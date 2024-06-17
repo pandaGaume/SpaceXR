@@ -68,7 +68,7 @@
         </div>
         <script>
             const defaultCenter = SPACEXR.KnownPlaces.Mountains.Everest; // everest
-            const defaultLod = 10;
+            const defaultLod = 12;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
                 // Create a PBR material
@@ -158,7 +158,8 @@
 
                 const shapeLayer = new SPACEXR.ShapeLayer("shapeLayer", shapeLayerOptions).addTo(map);
                 const lineToK2 = new SPACEXR.GeoLine("toK2", SPACEXR.KnownPlaces.Mountains.Everest, SPACEXR.KnownPlaces.Mountains.K2);
-                shapeLayer.addShapes(lineToK2);
+                const circleEverest = new SPACEXR.GeoCircle("everest", SPACEXR.KnownPlaces.Mountains.Everest, 1000);
+                shapeLayer.addShapes(lineToK2,circleEverest);
 
                 const showAxes = false;
                 if (showAxes) {

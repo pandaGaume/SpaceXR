@@ -5,7 +5,7 @@ import { GeoPolyline } from "./geography.polyline";
 import { IGeoPolygon, GeoShapeType } from "./geography.shapes.interfaces";
 
 export class GeoPolygon extends GeoPolyline implements IGeoPolygon {
-    public static Rectangle(center: IGeo2, width: number, height: number, s?: GeodeticSystem, proc?: IGeoProcessor): GeoPolygon {
+    public static Rectangle(name: string, center: IGeo2, width: number, height: number, s?: GeodeticSystem, proc?: IGeoProcessor): GeoPolygon {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
         proc = proc ?? CalculatorBase.Shared ?? SphericalCalculator.Shared;
@@ -17,10 +17,10 @@ export class GeoPolygon extends GeoPolyline implements IGeoPolygon {
         const W = proc.getLocationAtDistanceAzimuth(lat, lon, halfWidth, 270);
 
         const points = new Array<IGeo2>(new Geo2(N.lat, W.lon), new Geo2(N.lat, E.lon), new Geo2(S.lat, E.lon), new Geo2(S.lat, W.lon));
-        return new GeoPolygon(points, s, proc);
+        return new GeoPolygon(name, points, s, proc);
     }
 
-    public constructor(p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor) {
-        super(p, s, proc, GeoShapeType.Polygon);
+    public constructor(name: string, p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor) {
+        super(name, p, s, proc, GeoShapeType.Polygon);
     }
 }

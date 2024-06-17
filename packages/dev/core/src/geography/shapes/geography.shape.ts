@@ -4,15 +4,21 @@ import { IEnvelope } from "../geography.interfaces";
 import { IGeoShape, GeoShapeType } from "./geography.shapes.interfaces";
 
 export abstract class AbstractGeoShape extends GeoBounded implements IGeoShape {
+    _name?: string;
     _system: GeodeticSystem;
     _processor: IGeoProcessor;
     _type: GeoShapeType;
 
-    public constructor(t: GeoShapeType, s?: GeodeticSystem, p?: IGeoProcessor) {
+    public constructor(t: GeoShapeType, name?: string, s?: GeodeticSystem, p?: IGeoProcessor) {
         super();
         this._type = t;
+        this._name = name;
         this._system = s ?? GeodeticSystem.Default;
         this._processor = p ?? CalculatorBase.Shared ?? SphericalCalculator.Shared;
+    }
+
+    public get name(): string | undefined {
+        return this._name;
     }
 
     public get type(): GeoShapeType {

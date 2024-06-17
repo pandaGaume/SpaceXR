@@ -11,8 +11,8 @@ export class GeoCircle extends AbstractGeoShape implements IGeoCircle {
     _center: IGeo2;
     _radius: number;
 
-    public constructor(lat: IGeo2, radius: number, s?: GeodeticSystem, proc?: IGeoProcessor) {
-        super(GeoShapeType.Circle, s, proc);
+    public constructor(name: string, lat: IGeo2, radius: number, s?: GeodeticSystem, proc?: IGeoProcessor) {
+        super(GeoShapeType.Circle, name, s, proc);
         this._center = lat;
         this._radius = radius;
     }
@@ -60,6 +60,6 @@ export class GeoCircle extends AbstractGeoShape implements IGeoCircle {
         for (let i = 0; i < 360; i += angle) {
             points.push(this.processor.getLocationAtDistanceAzimuth(lat, lon, r, i));
         }
-        return new GeoPolygon(points, this.system, this.processor);
+        return new GeoPolygon(`${this.name ?? ""}.polygon[${step}]`, points, this.system, this.processor);
     }
 }

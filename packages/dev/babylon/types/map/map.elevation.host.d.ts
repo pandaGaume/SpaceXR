@@ -7,7 +7,7 @@ import { Bearing } from "core/geography";
 import { IElevationMesh, IElevationTile } from "./map.elevation.tile";
 import { ElevationLayer, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
-import { Map3dTextureContentType } from "./map.elevation";
+import { CanvasTileSourceSourceContentType } from "core/map";
 import { Map3dScaleController } from "./map.scale.controller";
 import { HolographicDisplay } from "../display";
 export declare class Map3dElevationHost extends TransformNode implements ITransformBlock<ITile<IDemInfos>, ITile<IElevationMesh>>, IHasActivTiles<IElevationMesh>, ITileMetricsProvider, IHasNavigationState {
@@ -21,7 +21,7 @@ export declare class Map3dElevationHost extends TransformNode implements ITransf
     _links: Array<ITilePipelineLink<ITile<IElevationMesh>>>;
     _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
     _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
-    _textureLayers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>;
+    _textureLayers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, ITileMapLayer<CanvasTileSourceSourceContentType>>;
     _elevationSource: ElevationLayer;
     _grid: VertexData;
     _template: Mesh;
@@ -33,7 +33,7 @@ export declare class Map3dElevationHost extends TransformNode implements ITransf
     _activTiles: ITileCollection<IElevationMesh>;
     _tilesRoot: TransformNode;
     _cartesianCenter: Nullable<ICartesian2>;
-    constructor(name: string, layers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>, source: ElevationLayer, enabled?: boolean);
+    constructor(name: string, layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, ITileMapLayer<CanvasTileSourceSourceContentType>>, source: ElevationLayer, enabled?: boolean);
     get navigation(): ITileNavigationState;
     get metrics(): ITileMetrics;
     get activTiles(): ITileCollection<IElevationMesh>;

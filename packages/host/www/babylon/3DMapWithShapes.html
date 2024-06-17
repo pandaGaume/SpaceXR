@@ -68,7 +68,7 @@
         </div>
         <script>
             const defaultCenter = SPACEXR.KnownPlaces.Mountains.Everest; // everest
-            const defaultLod = 11;
+            const defaultLod = 10;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
                 // Create a PBR material
@@ -104,10 +104,6 @@
                 // Default intensity is 1. Let's dim the light a small amount
                 light.intensity = 0.8;
                 light.diffuse = new BABYLON.Color3(1, 1, 1);
-
-                //const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(10, 2, 0), scene);
-                //pointLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
-                //pointLight.intensity = 1;
 
                 // create a basic table (in centimeter)
                 const size = {
@@ -154,6 +150,14 @@
 
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
+
+                const shapeLayerOptions = {
+                    color: "rgba(255, 0, 0, 0.5)",
+                }
+
+                const shapeLayer = new SPACEXR.ShapeLayer("shapeLayer", shapeLayerOptions).addTo(map);
+                const lineToK2 = new SPACEXR.GeoLine("toK2", SPACEXR.KnownPlaces.Mountains.Everest, SPACEXR.KnownPlaces.Mountains.K2);
+                shapeLayer.addShapes(lineToK2);
 
                 const showAxes = false;
                 if (showAxes) {

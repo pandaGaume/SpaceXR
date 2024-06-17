@@ -7,8 +7,8 @@ import { IGeoPolyline, GeoShapeType } from "./geography.shapes.interfaces";
 export class GeoPolyline extends AbstractGeoShape implements IGeoPolyline {
     _points: Array<IGeo2>;
 
-    public constructor(p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor, type?: GeoShapeType) {
-        super(type ?? GeoShapeType.Polyline, s, proc);
+    public constructor(name: string, p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor, type?: GeoShapeType) {
+        super(type ?? GeoShapeType.Polyline, name, s, proc);
         this._points = p;
     }
 

@@ -6,7 +6,7 @@ import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 import { ICanvasRenderingOptions } from "../../engine/icanvas";
 import { ISize2 } from "../../geometry";
-import { IGeoShape } from "../../geography";
+import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 
 /// <summary>
 /// Provide Unitless target size
@@ -40,7 +40,7 @@ export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement | Ima
 
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {}
 
-export interface IShapeLayer extends ITileMapLayer<IGeoShape>, IDrawableTileMapLayer<IGeoShape> {}
+export interface IShapeLayer extends ITileMapLayer<Array<IShape>>, IDrawableTileMapLayer<Array<IShape>> {}
 
 export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     name: string; // provide access to the underlying name for uniquely identify the intended layer

@@ -25,8 +25,7 @@ import { Bearing, IGeo2 } from "core/geography";
 import { ElevationTile, IElevationMesh, IElevationTile } from "./map.elevation.tile";
 import { ElevationLayer, IElevationLayerOptions, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
-import { Map3dTextureContentType } from "./map.elevation";
-import { CanvasTileSource } from "core/map";
+import { CanvasTileSource, CanvasTileSourceSourceContentType } from "core/map";
 import { Map3dScaleController, HasMapScale } from "./map.scale.controller";
 import { HolographicDisplay, HasHolographicBox } from "../display";
 import { IsDisposable } from "core/types";
@@ -66,7 +65,7 @@ export class Map3dElevationHost
     _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null;
 
     // the data source
-    _textureLayers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>;
+    _textureLayers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, ITileMapLayer<CanvasTileSourceSourceContentType>>;
     _elevationSource: ElevationLayer;
 
     // the grid model
@@ -93,7 +92,7 @@ export class Map3dElevationHost
 
     public constructor(
         name: string,
-        layers: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>,
+        layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, ITileMapLayer<CanvasTileSourceSourceContentType>>,
         source: ElevationLayer,
         enabled: boolean = true
     ) {
@@ -432,7 +431,7 @@ export class Map3dElevationHost
             const options: IElevationLayerOptions = this._elevationSource;
 
             // texture
-            elevationTile.content.textureSource = new CanvasTileSource<ITileMapLayer<Map3dTextureContentType>>(
+            elevationTile.content.textureSource = new CanvasTileSource<ITileMapLayer<CanvasTileSourceSourceContentType>>(
                 `${elevationTile.address.quadkey}.texture`,
                 this._textureLayers,
                 elevationTile.address,

@@ -7,8 +7,8 @@ export class GeoLine extends AbstractGeoShape implements IGeoLine {
     _alice: IGeo2;
     _bob: IGeo2;
 
-    public constructor(a: IGeo2, b: IGeo2) {
-        super(GeoShapeType.Line);
+    public constructor(name: string, a: IGeo2, b: IGeo2) {
+        super(GeoShapeType.Line, name);
         this._alice = a;
         this._bob = b;
     }

@@ -4,27 +4,27 @@ import { IEnvelope } from "../../geography";
 import { ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
-import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
+import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType } from "../../tiles/map";
 import { Nullable } from "../../types";
-import { CanvasTileContentType } from "./map.canvas";
 import { CanvasDisplay } from "./map.canvas.display";
-type CanvasProducerContentType = HTMLImageElement | ImageData;
+export type CanvasTileSourceTargetContentType = ImageLayerContentType;
+export type CanvasTileSourceSourceContentType = ImageLayerContentType;
 declare class LayerView {
-    layer: ITileMapLayer<CanvasTileContentType>;
-    tiles: TileCollection<CanvasTileContentType>;
+    layer: ITileMapLayer<CanvasTileSourceSourceContentType>;
+    tiles: TileCollection<CanvasTileSourceSourceContentType>;
     propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
-    constructor(layer: ITileMapLayer<CanvasTileContentType>, tiles: TileCollection<CanvasTileContentType>, propertyChangedObserver?: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>);
+    constructor(layer: ITileMapLayer<CanvasTileSourceSourceContentType>, tiles: TileCollection<CanvasTileSourceSourceContentType>, propertyChangedObserver?: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>);
 }
 export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
     resolution?: ISize2;
     display?: HTMLCanvasElement | CanvasDisplay;
 }
-export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>> extends TileConsumerBase<CanvasProducerContentType> implements ICanvasRenderingOptions, ITileMetricsProvider {
+export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceContentType>> extends TileConsumerBase<CanvasTileSourceTargetContentType> implements ICanvasRenderingOptions, ITileMetricsProvider {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;
     _target: ITile<ImageData>;
     _metrics: ITileMetrics;
-    _layers: ITileMapLayerContainer<CanvasTileContentType, L>;
+    _layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, L>;
     _layerAddedObservable?: Nullable<Observer<L>>;
     _layerRemovedObservable?: Nullable<Observer<L>>;
     _activeTiles: Array<LayerView>;
@@ -32,7 +32,7 @@ export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentT
     _context: Nullable<CanvasRenderingContext2D>;
     _background?: string;
     _alpha: number;
-    constructor(name: string, layers: ITileMapLayerContainer<CanvasTileContentType, L>, target: ITile<ImageData> | ITileAddress, metrics: ITileMetrics, options?: ICanvasTileSourceOptions);
+    constructor(name: string, layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, L>, target: ITile<ImageData> | ITileAddress, metrics: ITileMetrics, options?: ICanvasTileSourceOptions);
     get target(): ITile<ImageData>;
     get display(): CanvasDisplay;
     get metrics(): ITileMetrics;
@@ -45,12 +45,12 @@ export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentT
     protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void;
     protected _onLayerRemoved(layer: L): void;
     dispose(): void;
-    protected _onBeforeTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
-    protected _onTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
-    protected _onBeforeTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
-    protected _onTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
-    protected _onBeforeTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
-    protected _onTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void;
+    protected _onBeforeTileAdded(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void;
+    protected _onTileAdded(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void;
+    protected _onBeforeTileRemoved(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void;
+    protected _onTileRemoved(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void;
+    protected _onBeforeTileUpdated(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void;
+    protected _onTileUpdated(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void;
     protected _doValidate(): void;
     protected _afterValidate(): void;
     protected _getContext2D(): Nullable<CanvasRenderingContext2D>;

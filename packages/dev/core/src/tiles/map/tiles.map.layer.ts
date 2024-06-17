@@ -37,6 +37,10 @@ export class TileMapLayer<T> extends AbstractTileMapLayer<T> implements ITileMap
         return this._provider.metrics;
     }
 
+    public get provider(): ITileProvider<T> {
+        return this._provider;
+    }
+
     public dispose() {
         super.dispose();
         // clear pipeline links

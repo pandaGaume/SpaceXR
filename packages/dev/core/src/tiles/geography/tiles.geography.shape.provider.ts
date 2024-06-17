@@ -7,11 +7,13 @@ import { ITile, ITileMetrics } from "../tiles.interfaces";
 import { ShapeViewCollection } from "./tiles.geography.shape.collection";
 
 export class ShapeProvider extends AbstractTileProvider<Array<IShape>> {
+    static readonly DEFAULT_NAMESPACE = "ShapeProvider";
     _source: ShapeViewCollection;
 
-    public constructor(metrics: ITileMetrics | ShapeViewCollection, simplifier?: PolylineSimplifier<ICartesian3>) {
+    public constructor(namespace: string, metrics: ITileMetrics | ShapeViewCollection, simplifier?: PolylineSimplifier<ICartesian3>) {
         super();
         this._source = metrics instanceof ShapeViewCollection ? metrics : new ShapeViewCollection(metrics, simplifier);
+        this.factory.withMetrics(this._source.metrics).withNamespace(namespace ?? ShapeProvider.DEFAULT_NAMESPACE); // ensure the factory has the right metrics and namespace to build bounds.
     }
 
     public _fetchContent(tile: ITile<IShape[]>, callback: (t: ITile<IShape[]>) => void): ITile<IShape[]> {

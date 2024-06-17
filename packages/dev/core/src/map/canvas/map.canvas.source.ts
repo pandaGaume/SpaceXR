@@ -4,17 +4,17 @@ import { IEnvelope } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, Tile, TileCollection, TileConsumerBase } from "../../tiles";
-import { ITileMapLayer, ITileMapLayerContainer } from "../../tiles/map";
+import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType } from "../../tiles/map";
 import { Nullable } from "../../types";
-import { CanvasTileContentType } from "./map.canvas";
 import { CanvasDisplay } from "./map.canvas.display";
 
-type CanvasProducerContentType = HTMLImageElement | ImageData;
+export type CanvasTileSourceTargetContentType = ImageLayerContentType;
+export type CanvasTileSourceSourceContentType = ImageLayerContentType;
 
 class LayerView {
     constructor(
-        public layer: ITileMapLayer<CanvasTileContentType>,
-        public tiles: TileCollection<CanvasTileContentType>,
+        public layer: ITileMapLayer<CanvasTileSourceSourceContentType>,
+        public tiles: TileCollection<CanvasTileSourceSourceContentType>,
         public propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null
     ) {}
 }
@@ -24,8 +24,8 @@ export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
     display?: HTMLCanvasElement | CanvasDisplay;
 }
 
-export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
-    extends TileConsumerBase<CanvasProducerContentType>
+export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceContentType>>
+    extends TileConsumerBase<CanvasTileSourceTargetContentType>
     implements ICanvasRenderingOptions, ITileMetricsProvider
 {
     public static DefaultBackground = RGBAColor.LightGray();
@@ -38,7 +38,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
     _metrics: ITileMetrics;
 
     // layer management
-    _layers: ITileMapLayerContainer<CanvasTileContentType, L>;
+    _layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, L>;
     _layerAddedObservable?: Nullable<Observer<L>>;
     _layerRemovedObservable?: Nullable<Observer<L>>;
 
@@ -54,7 +54,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
 
     public constructor(
         name: string,
-        layers: ITileMapLayerContainer<CanvasTileContentType, L>,
+        layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, L>,
         target: ITile<ImageData> | ITileAddress,
         metrics: ITileMetrics,
         options?: ICanvasTileSourceOptions
@@ -175,11 +175,11 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         }
     }
 
-    protected _onBeforeTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
+    protected _onBeforeTileAdded(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
         /* we are overriding this method to prevent the default behavior of invalidate before every operation */
     }
 
-    protected _onTileAdded(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
+    protected _onTileAdded(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
         const bounds = this.bounds;
         if (bounds) {
             const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
@@ -195,11 +195,11 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         }
     }
 
-    protected _onBeforeTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
+    protected _onBeforeTileRemoved(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
         /* we are overriding this method to prevent the default behavior of invalidate before every operation */
     }
 
-    protected _onTileRemoved(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
+    protected _onTileRemoved(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
         const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
         if (layer) {
             for (const tile of eventData) {
@@ -211,11 +211,11 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         }
     }
 
-    protected _onBeforeTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
+    protected _onBeforeTileUpdated(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
         /* we are overriding this method to prevent the default behavior of invalidate before every operation */
     }
 
-    protected _onTileUpdated(eventData: Array<ITile<CanvasTileContentType>>, eventState: EventState): void {
+    protected _onTileUpdated(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
         const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
         if (layer) {
             for (const tile of eventData) {
@@ -289,18 +289,21 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const tileLod = this._target.address.levelOfDetail;
             const dlod = layerLod - tileLod;
 
+            let sx: number = 0;
+            let sy: number = 0;
+
             if (dlod == 0) {
                 let b = this._target.bounds;
                 // fast track - rect is in pixel at given LOD.
-                const sx = b?.x ?? 0;
-                const sy = b?.y ?? 0;
+                sx = b?.x ?? 0;
+                sy = b?.y ?? 0;
                 for (const t of view.tiles) {
                     b = t.bounds;
                     if (b) {
                         const x = b.x - sx;
                         const y = b.y - sy;
                         const item = t.content ?? null; // trick to address erroness tile.
-                        if (item) {
+                        if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
                             continue;
                         }
@@ -315,8 +318,8 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const scale = dlod < 0 ? 1 << dlod : 1 / (1 << dlod);
 
             const ref = Cartesian2.Zero();
-            const sx = this._target.bounds?.x ?? 0;
-            const sy = this._target.bounds?.y ?? 0;
+            sx = this._target.bounds?.x ?? 0;
+            sy = this._target.bounds?.y ?? 0;
 
             for (const t of view.tiles) {
                 const geo = t.geoBounds;
@@ -328,7 +331,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
                 const x = ref.x - sx;
                 const y = ref.y - sy;
                 const item = t.content ?? null; // trick to address erroness tile.
-                if (item) {
+                if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
                     const w = Math.ceil(item.width * scale);
                     const h = Math.ceil(item.height * scale);
                     ctx.drawImage(item, 0, 0, item.width, item.height, x, y, w, h);

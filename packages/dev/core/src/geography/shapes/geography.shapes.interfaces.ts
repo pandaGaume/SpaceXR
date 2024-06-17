@@ -10,6 +10,7 @@ export enum GeoShapeType {
 }
 
 export interface IGeoShape extends IGeoBounded {
+    name?: string;
     type: GeoShapeType;
     system?: GeodeticSystem;
     processor?: IGeoProcessor;

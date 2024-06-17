@@ -4,6 +4,7 @@ import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { AbstractTileProvider } from "../providers";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
+import { IDecoratedShape } from "./tiles.geography.layer.shape";
 import { IShapeView, ShapeViewCollection } from "./tiles.geography.shape.collection";
 
 export class ShapeProvider extends AbstractTileProvider<Array<IShape>> {
@@ -31,7 +32,7 @@ export class ShapeProvider extends AbstractTileProvider<Array<IShape>> {
         return tile;
     }
 
-    public addShapes(...shapes: Array<IGeoShape>): void {
+    public addShapes(...shapes: Array<IGeoShape | IDecoratedShape<IGeoShape>>): void {
         let lod = this._source.metrics.maxLOD;
         do {
             if (!this._source.trySet(lod, ...shapes)) {

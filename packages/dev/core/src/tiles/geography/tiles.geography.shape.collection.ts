@@ -8,26 +8,21 @@ import { Nullable } from "../../types";
 import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
+import { DecoratedShape, IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.layer.shape";
 
-export interface IShapeView extends IGeoBounded, IBounded {
-    shape: IGeoShape;
+export interface IShapeView extends IDecoratedShape<IGeoShape>, IGeoBounded, IBounded {
     view: IShape;
     lod: number;
 }
 
-class ShapeView implements IShapeView {
-    private _shape: IGeoShape;
+class ShapeView extends DecoratedShape<IGeoShape> implements IShapeView {
     private _view: IShape;
     private _lod: number;
 
-    public constructor(shape: IGeoShape, view: IShape, lod: number) {
-        this._shape = shape;
+    public constructor(shape: IGeoShape, view: IShape, lod: number, options?: IShapeDrawOptions) {
+        super(shape, options);
         this._view = view;
         this._lod = lod;
-    }
-
-    public get shape(): IGeoShape {
-        return this._shape;
     }
 
     public get view(): IShape {
@@ -38,12 +33,12 @@ class ShapeView implements IShapeView {
         return this._lod;
     }
 
-    public get geoBounds(): IEnvelope | undefined {
-        return this._shape?.geoBounds;
-    }
-
     public get bounds(): IBounds2 | undefined {
         return this._view?.bounds;
+    }
+
+    public get geoBounds(): IEnvelope | undefined {
+        return this.shape?.geoBounds;
     }
 }
 
@@ -91,7 +86,7 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         return this._shapes[lod - this._metrics.minLOD];
     }
 
-    public trySet(lod: number, ...shapes: Array<IGeoShape>): boolean {
+    public trySet(lod: number, ...shapes: Array<IGeoShape | IDecoratedShape<IGeoShape>>): boolean {
         let collection = this.get(lod);
         const views = shapes.map((s) => this._buildView(s, lod, this.metrics)).filter((v) => v !== null) as ShapeView[];
         if (views.length === 0) {
@@ -108,10 +103,17 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         return true;
     }
 
-    protected _buildView(shape: IGeoShape, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
-        const s = this._buildShape(shape, lod, metrics);
-        if (s) {
-            return new ShapeView(shape, s, lod);
+    protected _buildView(decorated: IGeoShape | IDecoratedShape<IGeoShape>, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
+        if (isDecoratedShape(decorated)) {
+            const s = this._buildShape(decorated.shape, lod, metrics);
+            if (s) {
+                return new ShapeView(decorated.shape, s, lod, decorated.options);
+            }
+        } else {
+            const s = this._buildShape(decorated, lod, metrics);
+            if (s) {
+                return new ShapeView(decorated, s, lod);
+            }
         }
         return null;
     }

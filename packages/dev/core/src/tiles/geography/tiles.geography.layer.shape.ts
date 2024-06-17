@@ -31,6 +31,7 @@ export interface IShapeDrawOptions {
     /// A string parsed as CSS <color> value.
     /// </summary>
     color?: string;
+    opacity?: number;
 
     /// <summary>
     /// A number specifying the line width, in coordinate space units.
@@ -38,6 +39,11 @@ export interface IShapeDrawOptions {
     /// This value is 1.0 by default.
     /// </summary>
     weight?: number;
+
+    fill?: boolean;
+
+    fillColor?: string;
+    fillOpacity?: number;
 }
 
 export interface IShapeLayerOptions extends IShapeDrawOptions, ITileMapLayerOptions {
@@ -46,11 +52,48 @@ export interface IShapeLayerOptions extends IShapeDrawOptions, ITileMapLayerOpti
     highestQuality?: boolean;
 }
 
+export interface IDecoratedShape<T> {
+    shape: T;
+    options?: IShapeDrawOptions;
+}
+
+export function isDecoratedShape<T>(b: any): b is IDecoratedShape<T> {
+    if (typeof b !== "object" || b === null) return false;
+    return b.shape !== undefined && b.options !== undefined;
+}
+
+export class DecoratedShape<T> implements IDecoratedShape<T> {
+    private _shape: T;
+    private _options?: IShapeDrawOptions;
+
+    public constructor(shape: T, options?: IShapeDrawOptions) {
+        this._shape = shape;
+        this._options = options;
+    }
+
+    public get shape(): T {
+        return this._shape;
+    }
+
+    public get options(): IShapeDrawOptions | undefined {
+        return this._options;
+    }
+}
+
 export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements IShapeLayer, IDrawableTileMapLayer<ShapeLayerContentType> {
+    public static DefaultStrokeStyle = "red";
+    public static DefaultFillStyle = "grey";
+    public static DefaultOpacity = 1;
+    public static DefaultWeight = 1;
+
     protected _dashArray?: Array<number>;
     protected _color?: string;
     protected _weight?: number;
     protected _stroke?: boolean;
+    protected _opacity?: number;
+    protected _fill?: boolean;
+    protected _fillColor?: string;
+    protected _fillOpacity?: number;
 
     public constructor(name: string, options?: IShapeLayerOptions, provider?: ShapeProvider, enabled?: boolean) {
         if (provider === undefined) {
@@ -64,12 +107,13 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         super(name, provider, options, enabled);
         this._dashArray = options?.dashArray;
         this._color = options?.color;
+        this._opacity = options?.opacity ?? ShapeLayer.DefaultOpacity;
         this._weight = options?.weight;
         this._stroke = options?.stroke === undefined ? true : options.stroke;
+        this._fill = options?.fill === undefined ? true : options.fill;
+        this._fillColor = options?.fillColor;
+        this._fillOpacity = options?.fillOpacity ?? ShapeLayer.DefaultOpacity;
     }
-
-    public static DefaultStrokeStyle = "red";
-    public static DefaultWeight = 1;
 
     public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<IShape[]>): void {
         if (tile.content) {
@@ -93,7 +137,7 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         }
     }
 
-    public addShapes(...shapes: Array<IGeoShape>): void {
+    public addShapes(...shapes: Array<IGeoShape | IDecoratedShape<IGeoShape>>): void {
         const provider = this.provider as ShapeProvider;
         provider.addShapes(...shapes);
     }
@@ -104,6 +148,32 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         }
         ctx.strokeStyle = this._color ?? ShapeLayer.DefaultStrokeStyle;
         ctx.lineWidth = this._weight ?? ShapeLayer.DefaultWeight;
+        this._drawPath(ctx, x, y, points, close);
+        ctx.stroke();
+    }
+
+    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>): void {
+        if (this._fill) {
+            ctx.fillStyle = this._fillColor ?? ShapeLayer.DefaultFillStyle;
+            ctx.globalAlpha = this._fillOpacity ?? ShapeLayer.DefaultOpacity;
+            this._drawPath(ctx, x, y, points, true);
+            ctx.fill();
+        }
+        if (this._stroke) {
+            if (this._dashArray) {
+                ctx.setLineDash(this._dashArray);
+            }
+            ctx.strokeStyle = this._color ?? ShapeLayer.DefaultStrokeStyle;
+            ctx.globalAlpha = this._opacity ?? ShapeLayer.DefaultOpacity;
+            ctx.lineWidth = this._weight ?? ShapeLayer.DefaultWeight;
+            if (!this._fill) {
+                this._drawPath(ctx, x, y, points, true);
+            }
+            ctx.stroke();
+        }
+    }
+
+    protected _drawPath(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, close: boolean = false): void {
         ctx.beginPath();
         let p = points[0];
         let px = p.x - x;
@@ -120,13 +190,6 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
             px = p.x - x;
             py = p.y - y;
             ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-    }
-
-    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>): void {
-        if (this._stroke) {
-            this._drawPolyline(ctx, x, y, points, true);
         }
     }
 }

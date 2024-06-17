@@ -17,6 +17,7 @@ export interface ICircle extends IShape {
 }
 
 export function isCircle(shape: IShape): shape is ILine {
+    if (typeof shape !== "object" || shape === null) return false;
     return shape.type === ShapeType.Circle;
 }
 
@@ -26,6 +27,7 @@ export interface ILine extends IShape {
 }
 
 export function isLine(shape: IShape): shape is ILine {
+    if (typeof shape !== "object" || shape === null) return false;
     return shape.type === ShapeType.Line;
 }
 
@@ -34,11 +36,13 @@ export interface IPolyline extends IShape {
 }
 
 export function isPolyline(shape: IShape): shape is IPolyline {
+    if (typeof shape !== "object" || shape === null) return false;
     return shape.type === ShapeType.Polyline;
 }
 
 export interface IPolygon extends IPolyline {}
 
 export function isPolygon(shape: IShape): shape is IPolygon {
+    if (typeof shape !== "object" || shape === null) return false;
     return shape.type === ShapeType.Polygon;
 }

@@ -138,10 +138,11 @@
                     textureResolution: { width: 512, height: 512 },
                 };
 
-                // build layer and add it to the map
+                // build dem layer and add it to the map
                 let client = SPACEXR.MapZen.DemClient();
                 const l = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);
 
+                // build image layer 
                 const imageLayerOptions = {
                     zoomOffset: 1,
                     alpha: 1.0,
@@ -151,13 +152,16 @@
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
+                // build shape layer
                 const shapeLayerOptions = {
-                    color: "rgba(255, 0, 0, 0.5)",
-                    weight: 5,
+                    color: "green",
+                    weight: 2,
+                    fillOpacity: 0.5,
                 }
 
                 const shapeLayer = new SPACEXR.ShapeLayer("shapeLayer", shapeLayerOptions).addTo(map);
                 const lineToK2 = new SPACEXR.GeoLine("toK2", SPACEXR.KnownPlaces.Mountains.Everest, SPACEXR.KnownPlaces.Mountains.K2);
+                // draw a  circle arround everest, radius is in meter.
                 const circleEverest = new SPACEXR.GeoCircle("everest", SPACEXR.KnownPlaces.Mountains.Everest, 1000);
                 shapeLayer.addShapes(lineToK2,circleEverest);
 

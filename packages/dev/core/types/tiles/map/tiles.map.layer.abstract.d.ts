@@ -10,7 +10,7 @@ export declare abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T
     _attribution?: string;
     _enabled: boolean;
     _state: ITileNavigationState;
-    constructor(name: string, options?: ITileMapLayerOptions, enabled?: boolean);
+    constructor(name: string, options?: ITileMapLayerOptions, enabled?: boolean, navigation?: ITileNavigationState);
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
     get zindex(): number;
     get navigation(): ITileNavigationState;

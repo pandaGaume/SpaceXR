@@ -27,15 +27,15 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     size: ISize3;
     add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
-    unionInPlace(other: IEnvelope): IEnvelope;
-    intersects(bounds: IEnvelope): boolean;
-    overlaps(bounds: IEnvelope): boolean;
-    contains(loc: IGeo3): boolean;
+    unionInPlace(other?: IEnvelope): IEnvelope;
+    intersects(bounds?: IEnvelope): boolean;
+    overlaps(bounds?: IEnvelope): boolean;
+    contains(loc?: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     clone(): IEnvelope;
 }
 export declare function IsEnvelope(b: unknown): b is IEnvelope;
 export interface IGeoBounded {
-    bounds?: IEnvelope;
+    geoBounds?: IEnvelope;
 }
 export declare function IsGeoBounded(b: unknown): b is IGeoBounded;

@@ -1,21 +1,21 @@
 import { IGeoProcessor, GeodeticSystem, CalculatorBase, SphericalCalculator } from "../../geodesy";
 import { GeoBounded } from "../geography.envelope";
 import { IEnvelope } from "../geography.interfaces";
-import { IGeoShape, ShapeType } from "./geography.shapes.interfaces";
+import { IGeoShape, GeoShapeType } from "./geography.shapes.interfaces";
 
-export abstract class AbstractShape extends GeoBounded implements IGeoShape {
+export abstract class AbstractGeoShape extends GeoBounded implements IGeoShape {
     _system: GeodeticSystem;
     _processor: IGeoProcessor;
-    _type: ShapeType;
+    _type: GeoShapeType;
 
-    public constructor(t: ShapeType, s?: GeodeticSystem, p?: IGeoProcessor) {
+    public constructor(t: GeoShapeType, s?: GeodeticSystem, p?: IGeoProcessor) {
         super();
         this._type = t;
         this._system = s ?? GeodeticSystem.Default;
         this._processor = p ?? CalculatorBase.Shared ?? SphericalCalculator.Shared;
     }
 
-    public get type(): ShapeType {
+    public get type(): GeoShapeType {
         return this._type;
     }
 

@@ -2,7 +2,7 @@ import { CalculatorBase, GeodeticSystem, IGeoProcessor, SphericalCalculator } fr
 import { IGeo2 } from "../geography.interfaces";
 import { Geo2 } from "../geography.position";
 import { GeoPolyline } from "./geography.polyline";
-import { IGeoPolygon, ShapeType } from "./geography.shapes.interfaces";
+import { IGeoPolygon, GeoShapeType } from "./geography.shapes.interfaces";
 
 export class GeoPolygon extends GeoPolyline implements IGeoPolygon {
     public static Rectangle(center: IGeo2, width: number, height: number, s?: GeodeticSystem, proc?: IGeoProcessor): GeoPolygon {
@@ -21,6 +21,6 @@ export class GeoPolygon extends GeoPolyline implements IGeoPolygon {
     }
 
     public constructor(p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor) {
-        super(p, s, proc, ShapeType.Polygon);
+        super(p, s, proc, GeoShapeType.Polygon);
     }
 }

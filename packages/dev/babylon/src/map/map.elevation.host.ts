@@ -372,9 +372,9 @@ export class Map3dElevationHost
     }
 
     protected _setTilePosition(tile: ITile<IElevationMesh>, center: ICartesian2): void {
-        if (tile.rect && tile.content?.surface) {
-            const c = tile.rect.center;
-            const s = tile.content?.surface;
+        if (tile.bounds && tile.content?.surface) {
+            const c = tile.bounds.center;
+            const s = tile.content.surface;
             const x = c.x - center.x;
             const y = c.y - center.y;
             const p = s.position;

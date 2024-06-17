@@ -1,14 +1,14 @@
 import { GeodeticSystem, IGeoProcessor } from "../../geodesy";
 import { Envelope } from "../geography.envelope";
 import { IEnvelope, IGeo2 } from "../geography.interfaces";
-import { AbstractShape } from "./geography.shape";
-import { IGeoPolyline, ShapeType } from "./geography.shapes.interfaces";
+import { AbstractGeoShape } from "./geography.shape";
+import { IGeoPolyline, GeoShapeType } from "./geography.shapes.interfaces";
 
-export class GeoPolyline extends AbstractShape implements IGeoPolyline {
+export class GeoPolyline extends AbstractGeoShape implements IGeoPolyline {
     _points: Array<IGeo2>;
 
-    public constructor(p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor, type?: ShapeType) {
-        super(type ?? ShapeType.Polyline, s, proc);
+    public constructor(p: Array<IGeo2>, s?: GeodeticSystem, proc?: IGeoProcessor, type?: GeoShapeType) {
+        super(type ?? GeoShapeType.Polyline, s, proc);
         this._points = p;
     }
 

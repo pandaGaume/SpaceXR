@@ -1,8 +1,8 @@
 import { ITile, ITileAddress, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
-import { IRectangle } from "../../geometry/geometry.interfaces";
-import { TileCollection } from "../tiles.collections";
+import { IBounds2 } from "../../geometry/geometry.interfaces";
+import { TileCollection } from "../tiles.collection";
 export declare abstract class AbstractTileProvider<T> implements ITileProvider<T> {
     _updatedObservable?: Observable<ITile<T>>;
     _enabledObservable?: Observable<ITileProvider<T>>;
@@ -11,8 +11,8 @@ export declare abstract class AbstractTileProvider<T> implements ITileProvider<T
     _enabled: boolean;
     _callback: (t: ITile<T>) => void;
     constructor(factory?: ITileBuilder<T>, enabled?: boolean);
-    get bounds(): IEnvelope | undefined;
-    get rect(): IRectangle | undefined;
+    get geoBounds(): IEnvelope | undefined;
+    get bounds(): IBounds2 | undefined;
     get updatedObservable(): Observable<ITile<T>>;
     get enabledObservable(): Observable<ITileProvider<T>>;
     get enabled(): boolean;

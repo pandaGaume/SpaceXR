@@ -39,10 +39,10 @@ export interface IEnvelope extends IComparable<IEnvelope> {
 
     add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
-    unionInPlace(other: IEnvelope): IEnvelope;
-    intersects(bounds: IEnvelope): boolean;
-    overlaps(bounds: IEnvelope): boolean;
-    contains(loc: IGeo3): boolean;
+    unionInPlace(other?: IEnvelope): IEnvelope;
+    intersects(bounds?: IEnvelope): boolean;
+    overlaps(bounds?: IEnvelope): boolean;
+    contains(loc?: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     clone(): IEnvelope;
 }
@@ -53,10 +53,10 @@ export function IsEnvelope(b: unknown): b is IEnvelope {
 }
 
 export interface IGeoBounded {
-    bounds?: IEnvelope;
+    geoBounds?: IEnvelope;
 }
 
 export function IsGeoBounded(b: unknown): b is IGeoBounded {
     if (typeof b !== "object" || b === null) return false;
-    return (<IGeoBounded>b).bounds !== undefined && IsEnvelope((<IGeoBounded>b).bounds);
+    return (<IGeoBounded>b).geoBounds !== undefined && IsEnvelope((<IGeoBounded>b).geoBounds);
 }

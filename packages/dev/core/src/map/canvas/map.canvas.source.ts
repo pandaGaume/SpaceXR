@@ -118,7 +118,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
     }
 
     public get bounds(): IEnvelope | undefined {
-        return this._target?.bounds;
+        return this._target?.geoBounds;
     }
 
     protected _onLayerAdded(layer: L): void {
@@ -129,7 +129,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
         const bounds = this.bounds;
         if (bounds) {
             for (const tile of layer.activTiles) {
-                if (tile.bounds && tile.bounds.intersects(bounds)) {
+                if (tile.geoBounds && tile.geoBounds.intersects(bounds)) {
                     view.tiles.add(tile);
                     this.invalidate();
                 }
@@ -185,7 +185,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
             if (layer) {
                 for (const tile of eventData) {
-                    if (tile.bounds && tile.bounds.overlaps(bounds)) {
+                    if (tile.geoBounds && tile.geoBounds.overlaps(bounds)) {
                         // do something with the tile
                         layer.tiles.add(tile);
                         this.invalidate();
@@ -290,13 +290,15 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const dlod = layerLod - tileLod;
 
             if (dlod == 0) {
+                let b = this._target.bounds;
                 // fast track - rect is in pixel at given LOD.
-                const sx = this._target.rect?.x ?? 0;
-                const sy = this._target.rect?.y ?? 0;
+                const sx = b?.x ?? 0;
+                const sy = b?.y ?? 0;
                 for (const t of view.tiles) {
-                    if (t.rect) {
-                        const x = t.rect.x - sx;
-                        const y = t.rect.y - sy;
+                    b = t.bounds;
+                    if (b) {
+                        const x = b.x - sx;
+                        const y = b.y - sy;
                         const item = t.content ?? null; // trick to address erroness tile.
                         if (item) {
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
@@ -313,11 +315,11 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileContentType>>
             const scale = dlod < 0 ? 1 << dlod : 1 / (1 << dlod);
 
             const ref = Cartesian2.Zero();
-            const sx = this._target.rect?.x ?? 0;
-            const sy = this._target.rect?.y ?? 0;
+            const sx = this._target.bounds?.x ?? 0;
+            const sy = this._target.bounds?.y ?? 0;
 
             for (const t of view.tiles) {
-                const geo = t.bounds;
+                const geo = t.geoBounds;
                 if (!geo) {
                     continue;
                 }

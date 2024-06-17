@@ -53,7 +53,7 @@ export function IsSize3(size: ISize2 | ISize3): size is ISize3 {
     return IsSize(size) && (size as ISize3).thickness !== undefined;
 }
 
-export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
+export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
     ymax: number;
     xmin: number;
     xmax: number;
@@ -61,49 +61,21 @@ export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> 
 
     center: ICartesian2;
 
-    intersect(other: IRectangle): boolean;
-    intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;
-    unionInPlace(other: IRectangle): IRectangle;
+    intersects(other?: IBounds2): boolean;
+    intersection(other?: IBounds2, ref?: IBounds2): IBounds2 | undefined;
+    unionInPlace(other?: IBounds2): IBounds2;
     contains(x: number, y: number): boolean;
     toString(): string;
     points(): IterableIterator<ICartesian2>;
 }
 
-export function IsRectangle(b: unknown): b is IRectangle {
+export function IsBounds(b: unknown): b is IBounds2 {
     if (typeof b !== "object" || b === null) return false;
-    return (<IRectangle>b).ymax !== undefined && (<IRectangle>b).xmin !== undefined && (<IRectangle>b).xmax !== undefined && (<IRectangle>b).ymin !== undefined;
+    return (<IBounds2>b).ymax !== undefined && (<IBounds2>b).xmin !== undefined && (<IBounds2>b).xmax !== undefined && (<IBounds2>b).ymin !== undefined;
 }
 
 export interface IBounded {
-    rect?: IRectangle;
-}
-
-export interface IBox extends ISize3, ICartesian3 {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-    floor: number;
-    ceil: number;
-
-    center: ICartesian3;
-
-    intersect(other: IBox): boolean;
-    intersection(other: IBox, ref?: IBox): IBox | undefined;
-    contains(x: number, y: number, z: number): boolean;
-    toString(): string;
-}
-
-export function IsBox(b: unknown): b is IBox {
-    if (typeof b !== "object" || b === null) return false;
-    return (
-        (<IBox>b).top !== undefined &&
-        (<IBox>b).left !== undefined &&
-        (<IBox>b).right !== undefined &&
-        (<IBox>b).bottom !== undefined &&
-        (<IBox>b).floor !== undefined &&
-        (<IBox>b).ceil !== undefined
-    );
+    bounds?: IBounds2;
 }
 
 export interface IPlane {

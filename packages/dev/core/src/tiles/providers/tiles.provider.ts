@@ -1,8 +1,8 @@
 import { ITile, ITileAddress, ITileBuilder, ITileCollection, ITileContentProvider, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
-import { IRectangle } from "../../geometry/geometry.interfaces";
-import { TileCollection } from "../tiles.collections";
+import { IBounds2 } from "../../geometry/geometry.interfaces";
+import { TileCollection } from "../tiles.collection";
 import { TileBuilder } from "../tiles.builder";
 
 export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
@@ -23,12 +23,12 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
         this._callback = this._onContentFetched.bind(this);
     }
 
-    public get bounds(): IEnvelope | undefined {
-        return this._activTiles?.bounds;
+    public get geoBounds(): IEnvelope | undefined {
+        return this._activTiles?.geoBounds;
     }
 
-    public get rect(): IRectangle | undefined {
-        return this._activTiles?.rect;
+    public get bounds(): IBounds2 | undefined {
+        return this._activTiles?.bounds;
     }
 
     public get updatedObservable(): Observable<ITile<T>> {

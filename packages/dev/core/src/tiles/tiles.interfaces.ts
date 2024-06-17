@@ -1,6 +1,6 @@
 import { IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded, IsGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
@@ -46,7 +46,7 @@ export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBo
     remove(address: ITileAddress): void;
     removeAll(...address: Array<ITileAddress>): void;
     clear(): void;
-    intersect(bounds?: IRectangle | IEnvelope): IterableIterator<ITile<T>>;
+    intersect(bounds?: IBounds2 | IEnvelope): IterableIterator<ITile<T>>;
 }
 
 export function IsTileCollection<T>(b: unknown): b is ITileCollection<T> {
@@ -221,7 +221,7 @@ export interface IActivateTiles<T> {
 /// <summary>
 /// Used as entry point to Tile Data source. It is responsible for managing the lifecycle of the datasource and the content provider
 /// plus dealing with the asynchronous nature of the data source, by providing update notification.
-/// The main interaction is done usin activateTile and deactivateTile methods which are messaging the datasource and content provider and also
+/// The main interaction is done using activateTile and deactivateTile methods which are messaging the datasource and content provider and also
 /// managing the local cache
 /// </summary>
 export interface ITileProvider<T> extends IHasNamespace, IHasActivTiles<T>, IActivateTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {

@@ -1,9 +1,9 @@
-import { IRectangle } from "../geometry/geometry.interfaces";
+import { IBounds2 } from "../geometry/geometry.interfaces";
 import { IEnvelope, IsEnvelope } from "../geography/geography.interfaces";
 import { ITile, ITileAddress, ITileCollection } from "./tiles.interfaces";
 import { TileAddress } from "./address/tiles.address";
 import { Envelope } from "../geography/geography.envelope";
-import { Rectangle } from "../geometry/geometry.rectangle";
+import { Bounds2 } from "../geometry/geometry.bounds";
 
 export class TileCollection<T> implements ITileCollection<T> {
     public static Empty<T>(): ITileCollection<T> {
@@ -13,7 +13,7 @@ export class TileCollection<T> implements ITileCollection<T> {
     private _index?: Map<string, ITile<T>>;
     private _items: Array<ITile<T>>;
     private _bounds?: IEnvelope;
-    private _rect?: IRectangle;
+    private _rect?: IBounds2;
     private _ns?: string;
 
     public constructor(...items: Array<ITile<T>>) {
@@ -39,14 +39,14 @@ export class TileCollection<T> implements ITileCollection<T> {
         return this._index;
     }
 
-    public get bounds(): IEnvelope | undefined {
+    public get geoBounds(): IEnvelope | undefined {
         if (!this._bounds) {
             this._bounds = this._buildBounds();
         }
         return this._bounds;
     }
 
-    public get rect(): IRectangle | undefined {
+    public get bounds(): IBounds2 | undefined {
         if (!this._rect) {
             this._rect = this._buildRect();
         }
@@ -69,11 +69,11 @@ export class TileCollection<T> implements ITileCollection<T> {
         if (!this.has(tile.address)) {
             this._items.push(tile);
             this._index?.set(tile.quadkey, tile);
-            const b = tile.bounds;
+            const b = tile.geoBounds;
             if (b && this._bounds) {
                 this._bounds.unionInPlace(b);
             }
-            const r = tile.rect;
+            const r = tile.bounds;
             if (r && this._rect) {
                 this._rect.unionInPlace(r);
             }
@@ -108,7 +108,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         this._rect = undefined;
     }
 
-    public intersect(bounds?: IRectangle | IEnvelope): IterableIterator<ITile<T>> {
+    public intersect(bounds?: IBounds2 | IEnvelope): IterableIterator<ITile<T>> {
         if (!bounds) return this[Symbol.iterator]();
 
         let pointer = 0;
@@ -116,13 +116,13 @@ export class TileCollection<T> implements ITileCollection<T> {
 
         if (IsEnvelope(bounds)) {
             // this is an envelope
-            if (this.bounds?.intersects(bounds)) {
+            if (this.geoBounds?.intersects(bounds)) {
                 // with a valid intersection with the collection
                 return {
                     next(): IteratorResult<ITile<T>> {
                         while (pointer < items.length) {
                             let item = items[pointer++];
-                            let b = item.bounds;
+                            let b = item.geoBounds;
                             if (!b || bounds.intersects(b)) {
                                 return {
                                     done: false,
@@ -142,14 +142,14 @@ export class TileCollection<T> implements ITileCollection<T> {
             }
         } else {
             // this is a rectangle
-            if (this.rect?.intersect(bounds)) {
+            if (this.bounds?.intersects(bounds)) {
                 // with a valid intersection with the collection
                 return {
                     next(): IteratorResult<ITile<T>> {
                         while (pointer < items.length) {
                             let item = items[pointer++];
-                            let r = item.rect;
-                            if (!r || bounds.intersect(r)) {
+                            let r = item.bounds;
+                            if (!r || bounds.intersects(r)) {
                                 return {
                                     done: false,
                                     value: item,
@@ -220,7 +220,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         return Envelope.FromEnvelopes(...this._items);
     }
 
-    protected _buildRect(): IRectangle | undefined {
-        return Rectangle.FromRectangles(...this._items);
+    protected _buildRect(): IBounds2 | undefined {
+        return Bounds2.FromBounds(...this._items);
     }
 }

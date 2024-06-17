@@ -1,8 +1,8 @@
 import { Nullable } from "../../types";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
-import { IRectangle } from "../../geometry";
+import { IBounds2 } from "../../geometry";
 export declare class TileAddress implements ITileAddress {
-    static ToBounds(a: ITileAddress, metrics: ITileMetrics): IRectangle;
+    static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds2;
     static IsEquals(a: ITileAddress, b: ITileAddress): boolean;
     static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean;
     static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void;

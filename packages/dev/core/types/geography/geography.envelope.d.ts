@@ -23,7 +23,7 @@ export declare class Envelope implements IEnvelope {
     get sw(): IGeo3;
     get ne(): IGeo3;
     get se(): IGeo3;
-    equals(other: IEnvelope): boolean;
+    equals(other?: IEnvelope): boolean;
     clone(): IEnvelope;
     get hasAltitude(): boolean;
     get center(): IGeo3;
@@ -31,9 +31,9 @@ export declare class Envelope implements IEnvelope {
     add(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     unionInPlace(other: IEnvelope): IEnvelope;
-    intersects(bounds: IEnvelope): boolean;
-    overlaps(bounds: IEnvelope): boolean;
-    contains(loc: IGeo3): boolean;
+    intersects(bounds?: IEnvelope): boolean;
+    overlaps(bounds?: IEnvelope): boolean;
+    contains(loc?: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     toString(): string;
 }
@@ -42,7 +42,7 @@ export declare abstract class GeoBounded implements IGeoBounded {
     _env?: IEnvelope;
     constructor(bounds?: IEnvelope, parent?: GeoBounded);
     get parent(): GeoBounded | undefined;
-    get bounds(): IEnvelope | undefined;
+    get geoBounds(): IEnvelope | undefined;
     validateEnvelope(): void;
     invalidateEnvelope(): void;
     protected abstract _buildEnvelope(): IEnvelope | undefined;

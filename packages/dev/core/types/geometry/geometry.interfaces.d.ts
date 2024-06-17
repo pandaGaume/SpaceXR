@@ -35,37 +35,23 @@ export interface ISize3 {
 }
 export declare function IsSize(b: unknown): b is ISize3 | ISize2;
 export declare function IsSize3(size: ISize2 | ISize3): size is ISize3;
-export interface IRectangle extends ISize2, ICartesian2, ICloneable<IRectangle> {
+export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
     ymax: number;
     xmin: number;
     xmax: number;
     ymin: number;
     center: ICartesian2;
-    intersect(other: IRectangle): boolean;
-    intersection(other: IRectangle, ref?: IRectangle): IRectangle | undefined;
-    unionInPlace(other: IRectangle): IRectangle;
+    intersects(other?: IBounds2): boolean;
+    intersection(other?: IBounds2, ref?: IBounds2): IBounds2 | undefined;
+    unionInPlace(other?: IBounds2): IBounds2;
     contains(x: number, y: number): boolean;
     toString(): string;
     points(): IterableIterator<ICartesian2>;
 }
-export declare function IsRectangle(b: unknown): b is IRectangle;
+export declare function IsBounds(b: unknown): b is IBounds2;
 export interface IBounded {
-    rect?: IRectangle;
+    bounds?: IBounds2;
 }
-export interface IBox extends ISize3, ICartesian3 {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-    floor: number;
-    ceil: number;
-    center: ICartesian3;
-    intersect(other: IBox): boolean;
-    intersection(other: IBox, ref?: IBox): IBox | undefined;
-    contains(x: number, y: number, z: number): boolean;
-    toString(): string;
-}
-export declare function IsBox(b: unknown): b is IBox;
 export interface IPlane {
     point: ICartesian3;
     normal: ICartesian3;

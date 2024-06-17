@@ -3,7 +3,7 @@ import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
-import { ICartesian2, IRectangle, Rectangle, Cartesian2, ISize2 } from "../../geometry";
+import { ICartesian2, IBounds2, Bounds2, Cartesian2, ISize2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 import { Bearing, Geo2 } from "../../geography";
@@ -116,7 +116,7 @@ export class TileView implements ITileView {
                     // this save a huge amount of data to be processed.
                     if (testRect) {
                         const tileRect = this._getTileRectangle(tmp, metrics, pixelCenterXY, state.azimuth);
-                        if (testRect.intersect(tileRect) == false) {
+                        if (testRect.intersects(tileRect) == false) {
                             continue;
                         }
                     }
@@ -166,24 +166,24 @@ export class TileView implements ITileView {
         }
     }
 
-    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IRectangle {
+    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IBounds2 {
         w = w / scale;
         h = h / scale;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        const bounds = new Rectangle(x0, y0, w, h);
+        const bounds = new Bounds2(x0, y0, w, h);
         // bounds.points is returning a new set of points, so we need to rotate them if azimuth is non zero.
-        return azimuth?.value ? Rectangle.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        return azimuth?.value ? Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
 
-    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IRectangle {
+    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IBounds2 {
         const points = [
             metrics.getTileXYToPointXY(a.x, a.y),
             metrics.getTileXYToPointXY(a.x + 1, a.y),
             metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
             metrics.getTileXYToPointXY(a.x, a.y + 1),
         ];
-        return Rectangle.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
+        return Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
     }
 
     protected *_rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2> {

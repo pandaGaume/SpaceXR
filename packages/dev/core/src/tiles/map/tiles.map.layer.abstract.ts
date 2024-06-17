@@ -15,13 +15,13 @@ export abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implem
     _enabled: boolean;
     _state: ITileNavigationState;
 
-    public constructor(name: string, options?: ITileMapLayerOptions, enabled?: boolean) {
+    public constructor(name: string, options?: ITileMapLayerOptions, enabled?: boolean, navigation?: ITileNavigationState) {
         super(name);
         this._zindex = options?.zindex ?? -1;
         this._zoomOffset = options?.zoomOffset !== undefined ? options?.zoomOffset : 0;
         this._attribution = options?.attribution;
         this._enabled = enabled ?? true; // default is enabled
-        this._state = new TileNavigationState();
+        this._state = navigation ?? new TileNavigationState();
     }
 
     public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent: boolean = true): void {

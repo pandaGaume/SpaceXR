@@ -1,7 +1,7 @@
 import { GeodeticSystem, IGeoProcessor } from "../../geodesy";
 import { IGeo2, IGeoBounded } from "../geography.interfaces";
 
-export enum ShapeType {
+export enum GeoShapeType {
     Circle,
     Line,
     Polyline,
@@ -10,7 +10,7 @@ export enum ShapeType {
 }
 
 export interface IGeoShape extends IGeoBounded {
-    type: ShapeType;
+    type: GeoShapeType;
     system?: GeodeticSystem;
     processor?: IGeoProcessor;
 }
@@ -18,6 +18,7 @@ export interface IGeoShape extends IGeoBounded {
 export interface IGeoCircle extends IGeoShape {
     center: IGeo2;
     radius: number;
+    toPolygon(step: number): IGeoPolygon;
 }
 
 export interface IGeoLine extends IGeoShape {

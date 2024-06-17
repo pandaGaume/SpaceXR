@@ -13,5 +13,5 @@ export * from "./tiles.metrics";
 export * from "./tiles.client";
 export * from "./tiles";
 export * from "./tiles.urlBuilder";
-export * from "./tiles.collections";
+export * from "./tiles.collection";
 export * from "./tiles.system";

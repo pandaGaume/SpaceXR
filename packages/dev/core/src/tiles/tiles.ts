@@ -1,7 +1,7 @@
 import { IEnvelope, Envelope } from "../geography";
 import { ITile, ITileAddress, ITileMetrics, TileContentType } from "./tiles.interfaces";
-import { IRectangle } from "../geometry/geometry.interfaces";
-import { Rectangle } from "../geometry/geometry.rectangle";
+import { IBounds2 } from "../geometry/geometry.interfaces";
+import { Bounds2 } from "../geometry/geometry.bounds";
 import { TileAddress } from "./address/tiles.address";
 
 export class Tile<T> extends TileAddress implements ITile<T> {
@@ -14,17 +14,17 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    public static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IRectangle | undefined {
+    public static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IBounds2 | undefined {
         if (metrics) {
             const p = metrics.getTileXYToPointXY(a.x, a.y);
-            return new Rectangle(p.x, p.y, metrics.tileSize, metrics.tileSize);
+            return new Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }
         return undefined;
     }
 
     private _value: TileContentType<T>;
     private _env?: IEnvelope;
-    private _rect?: IRectangle;
+    private _rect?: IBounds2;
     private _ns?: string;
 
     public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T> = null, metrics?: ITileMetrics) {
@@ -56,19 +56,19 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         this._value = v;
     }
 
-    public get bounds(): IEnvelope | undefined {
+    public get geoBounds(): IEnvelope | undefined {
         return this._env;
     }
 
-    public set bounds(e: IEnvelope | undefined) {
+    public set geoBounds(e: IEnvelope | undefined) {
         this._env = e;
     }
 
-    public get rect(): IRectangle | undefined {
+    public get bounds(): IBounds2 | undefined {
         return this._rect;
     }
 
-    public set rect(r: IRectangle | undefined) {
+    public set bounds(r: IBounds2 | undefined) {
         this._rect = r;
     }
 }

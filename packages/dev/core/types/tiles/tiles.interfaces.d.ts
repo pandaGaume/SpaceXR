@@ -1,6 +1,6 @@
 import { IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IRectangle } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { IMemoryCache } from "../cache/cache";
@@ -28,7 +28,7 @@ export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBo
     remove(address: ITileAddress): void;
     removeAll(...address: Array<ITileAddress>): void;
     clear(): void;
-    intersect(bounds?: IRectangle | IEnvelope): IterableIterator<ITile<T>>;
+    intersect(bounds?: IBounds2 | IEnvelope): IterableIterator<ITile<T>>;
 }
 export declare function IsTileCollection<T>(b: unknown): b is ITileCollection<T>;
 export interface ITileProxy<T> {

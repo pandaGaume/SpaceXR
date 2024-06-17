@@ -2,7 +2,7 @@ import { Observable } from "../../events";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
-import { ICartesian2, IRectangle, Cartesian2, ISize2 } from "../../geometry";
+import { ICartesian2, IBounds2, Cartesian2, ISize2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { Bearing, Geo2 } from "../../geography";
 export declare class TileView implements ITileView {
@@ -25,8 +25,8 @@ export declare class TileView implements ITileView {
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
     protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
     private _doClearContext;
-    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IRectangle;
-    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IRectangle;
+    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IBounds2;
+    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IBounds2;
     protected _rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2>;
     protected _rotatePointArround<R extends ICartesian2>(x: number, y: number, center: ICartesian2, azimuth: Bearing, target?: R): R;
 }

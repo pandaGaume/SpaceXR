@@ -1,12 +1,12 @@
 import { Nullable } from "../../types";
 import { Scalar } from "../../math/math";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
-import { IRectangle, Rectangle } from "../../geometry";
+import { IBounds2, Bounds2 } from "../../geometry";
 
 export class TileAddress implements ITileAddress {
-    public static ToBounds(a: ITileAddress, metrics: ITileMetrics): IRectangle {
+    public static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds2 {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return Rectangle.FromPoints(...points);
+        return Bounds2.FromPoints(...points);
     }
 
     public static IsEquals(a: ITileAddress, b: ITileAddress): boolean {

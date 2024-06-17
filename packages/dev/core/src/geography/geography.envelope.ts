@@ -26,7 +26,7 @@ export class Envelope implements IEnvelope {
     public static Split2(a: IEnvelope | IGeoBounded | undefined): IEnvelope[] {
         if (a) {
             if (IsGeoBounded(a)) {
-                return Envelope.Split2(a.bounds);
+                return Envelope.Split2(a.geoBounds);
             }
             const center = a.center;
             return [
@@ -55,7 +55,7 @@ export class Envelope implements IEnvelope {
     public static Split3(a: IEnvelope | IGeoBounded | undefined): IEnvelope[] {
         if (a) {
             if (IsGeoBounded(a)) {
-                return Envelope.Split3(a.bounds);
+                return Envelope.Split3(a.geoBounds);
             }
             if (a.hasAltitude) {
                 const center = a.center;
@@ -99,7 +99,7 @@ export class Envelope implements IEnvelope {
                 if (IsEnvelope(a)) {
                     env = env ? env.unionInPlace(a) : a.clone();
                 } else {
-                    a = a.bounds;
+                    a = a.geoBounds;
                     if (a) {
                         env = env ? env.unionInPlace(a) : a.clone();
                     }
@@ -157,9 +157,9 @@ export class Envelope implements IEnvelope {
         return new Geo3(this.south, this.east);
     }
 
-    public equals(other: IEnvelope): boolean {
+    public equals(other?: IEnvelope): boolean {
         return (
-            other &&
+            other !== undefined &&
             this._min.lat === other.south &&
             this._min.lon === other.west &&
             this._min.alt === other.bottom &&
@@ -226,7 +226,8 @@ export class Envelope implements IEnvelope {
         return this;
     }
 
-    public intersects(bounds: IEnvelope): boolean {
+    public intersects(bounds?: IEnvelope): boolean {
+        if (bounds === undefined) return false;
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
             return false;
         }
@@ -240,7 +241,8 @@ export class Envelope implements IEnvelope {
         return true;
     }
 
-    public overlaps(bounds: IEnvelope): boolean {
+    public overlaps(bounds?: IEnvelope): boolean {
+        if (bounds === undefined) return false;
         // Check if there is overlap in latitude and longitude
         if (this._min.lat >= bounds.north || this._max.lat <= bounds.south || this._min.lon >= bounds.east || this._max.lon <= bounds.west) {
             return false;
@@ -257,8 +259,8 @@ export class Envelope implements IEnvelope {
         return true;
     }
 
-    public contains(loc: IGeo3): boolean {
-        return this.containsFloat(loc.lat, loc.lon, loc.alt);
+    public contains(loc?: IGeo3): boolean {
+        return loc !== undefined && this.containsFloat(loc.lat, loc.lon, loc.alt);
     }
 
     public containsFloat(lat: number, lon?: number, alt?: number): boolean {
@@ -290,7 +292,7 @@ export abstract class GeoBounded implements IGeoBounded {
         return this._parent;
     }
 
-    public get bounds(): IEnvelope | undefined {
+    public get geoBounds(): IEnvelope | undefined {
         this.validateEnvelope();
         return this._env;
     }

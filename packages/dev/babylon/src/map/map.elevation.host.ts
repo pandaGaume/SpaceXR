@@ -441,7 +441,7 @@ export class Map3dElevationHost
                 }
             );
             if (IsTargetBlock<ITile<ImageData>>(this.mesh.material)) {
-                elevationTile.content.textureSource.linkTo(this.mesh.material);
+                elevationTile.content.textureSource?.linkTo(this.mesh.material);
             }
         }
         if (this._addedObservable && this._addedObservable.hasObservers()) {

@@ -2,7 +2,7 @@ import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos, IsDemInfos } from "core/dem";
 import { ISourceBlock, ITile, ITileMetrics, Tile } from "core/tiles";
 import { Nullable, isValidable } from "core/types";
-import { Map3dTextureContentType } from "./map.elevation";
+import { CanvasTileSourceTargetContentType } from "core/map/canvas/map.canvas.source";
 
 export interface IElevationMesh {
     // the original dem infos
@@ -10,7 +10,7 @@ export interface IElevationMesh {
     // the mesh used to display the elevation ()
     surface: Nullable<AbstractMesh>;
     // the texture used to display onto the elevation mesh
-    textureSource: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>>;
+    textureSource: Nullable<ISourceBlock<ITile<CanvasTileSourceTargetContentType>>>;
     tile: Nullable<ITile<ImageData>>;
     validate(): void;
 }
@@ -24,11 +24,11 @@ export class ElevationMesh implements IElevationMesh {
 
     // texture related
     _tile: Nullable<ITile<ImageData>>;
-    _texture: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>>;
+    _texture: Nullable<ISourceBlock<ITile<CanvasTileSourceTargetContentType>>>;
 
     public constructor(
         demInfos: Nullable<IDemInfos> = null,
-        texture: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>> = null,
+        texture: Nullable<ISourceBlock<ITile<CanvasTileSourceTargetContentType>>> = null,
         tile: Nullable<ITile<ImageData>> = null,
         surface: Nullable<AbstractMesh> = null
     ) {
@@ -54,11 +54,11 @@ export class ElevationMesh implements IElevationMesh {
         this._tile = value;
     }
 
-    public get textureSource(): Nullable<ISourceBlock<ITile<Map3dTextureContentType>>> {
+    public get textureSource(): Nullable<ISourceBlock<ITile<CanvasTileSourceTargetContentType>>> {
         return this._texture;
     }
 
-    public set textureSource(value: Nullable<ISourceBlock<ITile<Map3dTextureContentType>>>) {
+    public set textureSource(value: Nullable<ISourceBlock<ITile<CanvasTileSourceTargetContentType>>>) {
         this._texture = value;
     }
 

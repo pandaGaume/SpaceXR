@@ -1,13 +1,13 @@
 import { Nullable, Scene, TransformNode, Node, Color4 } from "@babylonjs/core";
-import { IHasNavigationState, IHasTileMapLayerContainer, ITileMapLayer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayerContentType } from "core/tiles";
+import { IHasNavigationState, IHasTileMapLayerContainer, ITileMapLayer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
 import { IGeo2 } from "core/geography";
 import { ISize2 } from "core/geometry";
-import { IPointerSource, PointerController } from "core/map";
+import { CanvasTileSourceSourceContentType, IPointerSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
 import { ElevationLayer } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
-export type Map3dTextureContentType = ImageLayerContentType;
+export type Map3dTextureContentType = CanvasTileSourceSourceContentType;
 export type Map3dElevationContentType = IDemInfos;
 export type Map3dContentType = Map3dTextureContentType | Map3dElevationContentType;
 export declare enum ElevationSamplingMode {

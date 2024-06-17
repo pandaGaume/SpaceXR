@@ -3,13 +3,13 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
-import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, Tile, TileCollection, TileConsumerBase } from "../../tiles";
+import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, ShapeLayerContentType, Tile, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasDisplay } from "./map.canvas.display";
 
 export type CanvasTileSourceTargetContentType = ImageLayerContentType;
-export type CanvasTileSourceSourceContentType = ImageLayerContentType;
+export type CanvasTileSourceSourceContentType = ImageLayerContentType | ShapeLayerContentType;
 
 class LayerView {
     constructor(

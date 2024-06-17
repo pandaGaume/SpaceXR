@@ -3,12 +3,12 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope } from "../../geography";
 import { ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
-import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, TileCollection, TileConsumerBase } from "../../tiles";
+import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, ShapeLayerContentType, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasDisplay } from "./map.canvas.display";
 export type CanvasTileSourceTargetContentType = ImageLayerContentType;
-export type CanvasTileSourceSourceContentType = ImageLayerContentType;
+export type CanvasTileSourceSourceContentType = ImageLayerContentType | ShapeLayerContentType;
 declare class LayerView {
     layer: ITileMapLayer<CanvasTileSourceSourceContentType>;
     tiles: TileCollection<CanvasTileSourceSourceContentType>;

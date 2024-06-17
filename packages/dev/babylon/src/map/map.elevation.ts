@@ -8,7 +8,6 @@ import {
     ITileNavigationApi,
     ITileNavigationState,
     ImageLayer,
-    ImageLayerContentType,
     LayerContainer,
     TileNavigationState,
 } from "core/tiles";
@@ -16,14 +15,14 @@ import { Observer, EventState } from "core/events";
 
 import { IGeo2 } from "core/geography";
 import { ISize2, Size2 } from "core/geometry";
-import { IPointerSource, PointerController } from "core/map";
+import { CanvasTileSourceSourceContentType, IPointerSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
 import { ElevationLayer } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { TextUtils } from "core/utils";
 
-export type Map3dTextureContentType = ImageLayerContentType;
+export type Map3dTextureContentType = CanvasTileSourceSourceContentType;
 export type Map3dElevationContentType = IDemInfos;
 export type Map3dContentType = Map3dTextureContentType | Map3dElevationContentType;
 

@@ -742,7 +742,6 @@ class Map3dElevationHost extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tr
         this._scaleObserver = null;
         this._textureLayers = layers;
         this._elevationSource = source;
-        this._elevationSource.linkTo(this);
         this._layerObserver = this._elevationSource.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
         const options = this._elevationSource;
         this._insets = options?.insets ?? _map_elevation_layer__WEBPACK_IMPORTED_MODULE_1__.ElevationLayer.DefaultInsets;
@@ -758,6 +757,7 @@ class Map3dElevationHost extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tr
         if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock)(material)) {
             this.linkTo(material);
         }
+        this._elevationSource.linkTo(this, {}, material);
         this._template = this._buildMesh(material);
         this._navigationObserver = this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
         const geo = this.navigation.center;
@@ -1404,6 +1404,12 @@ class ElevationLayer extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLaye
     }
     get material() {
         return this._material;
+    }
+    linkTo(target, options, ...args) {
+        super.linkTo(target, options);
+        if (args.length > 0 && args[0] instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material) {
+            this._material = args[0];
+        }
     }
 }
 ElevationLayer.DefaultColor = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color4.FromInts(70, 130, 180, 255);
@@ -2248,6 +2254,8 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         return this._elevationRange;
     }
     _growSamplersDepth() {
+    }
+    debug(ctx, x, y, tile, scale) {
     }
 }
 Map3dMaterial.DefaultTerrainColor = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color4.FromInts(70, 130, 180, 255);

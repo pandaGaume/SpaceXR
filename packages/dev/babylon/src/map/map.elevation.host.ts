@@ -99,10 +99,9 @@ export class Map3dElevationHost
         super(name);
         this._textureLayers = layers;
         this._elevationSource = source;
-        this._elevationSource.linkTo(this);
         this._layerObserver = this._elevationSource.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
 
-        // elevation laer implements options
+        // elevation layer implements options
         const options: IElevationLayerOptions = this._elevationSource;
 
         this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
@@ -124,6 +123,9 @@ export class Map3dElevationHost
             // remember that the source is a layer of ITile<IDemInfos> (ElevationLayer as of now), which is transformed by this host to ITile<IElevationMesh> (ElevationTile as of now).
             this.linkTo(material);
         }
+
+        // once the material is linked to the source, we can link the source to this host and give back parameters such material.
+        this._elevationSource.linkTo(this, {}, material);
 
         this._template = this._buildMesh(material);
         this._navigationObserver = this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));

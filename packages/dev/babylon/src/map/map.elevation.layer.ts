@@ -2,7 +2,7 @@ import { Color4, Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { PropertyChangedEventArgs } from "core/events";
 import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
-import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
+import { ILinkOptions, ITargetBlock, ITile, ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
 
 export interface IElevationLayerMaterialOptions {
     material?: Material; // this is the default material to use. If defined, superseed any other material options.
@@ -137,5 +137,12 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
 
     public get material(): Material | undefined {
         return this._material;
+    }
+
+    public linkTo(target: ITargetBlock<ITile<IDemInfos>>, options?: ILinkOptions, ...args: Array<any>): void {
+        super.linkTo(target, options);
+        if (args.length > 0 && args[0] instanceof Material) {
+            this._material = args[0];
+        }
     }
 }

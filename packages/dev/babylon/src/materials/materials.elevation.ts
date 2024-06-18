@@ -883,4 +883,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // this is the place we gonna grow the depth of the samplers
         // TODO
     }
+
+    public debug(ctx: CanvasRenderingContext2D, x: number, y: number, tile: ITile<Map3dMaterial>, scale: number): void {
+        // this is the place where we can draw some debug information
+        // such as the elevation range, the texture areas, etc.
+    }
 }

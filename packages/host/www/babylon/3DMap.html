@@ -66,7 +66,7 @@
             <canvas id="mapcanvas3d"></canvas>
         </div>
         <script>
-            const defaultCenter = [42.81883085301269, 0.0];//SPACEXR.KnownPlaces.Mountains.MontBlanc; // everest
+            const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc; // everest
             const defaultLod = 11;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
@@ -143,7 +143,7 @@
 
                 // build layer and add it to the map
                 let client = SPACEXR.MapZen.DemClient();
-                const l = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);
+                const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);
 
                 const imageLayerOptions = {
                     zoomOffset: 2,
@@ -154,9 +154,11 @@
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
+                /*const material = demLayer.links?.map((link) => link.target).find((target) => target instanceof SPACEXR.Map3dMaterial);
                 const debugLayerOptions = {
+                    function:material.debug
                 }
-                const debugLayer = new SPACEXR.DebugLayer("debugLayer", map, debugLayerOptions).addTo(map);
+                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
 
                 const showAxes = false;
                 if (showAxes) {

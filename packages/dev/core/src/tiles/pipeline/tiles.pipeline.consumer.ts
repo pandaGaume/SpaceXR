@@ -45,7 +45,11 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
         this._forward = forward;
     }
 
-    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void {
+    public get links(): Array<ITilePipelineLink<ITile<T>>> {
+        return this._links;
+    }
+
+    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions, ...args: Array<any>): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             // avoid linking twice to the same target
@@ -54,7 +58,7 @@ export class TileConsumerBase<T> extends ValidableBase implements ITileConsumer<
         }
     }
 
-    public unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined {
+    public unlinkFrom(target: ITargetBlock<ITile<T>>, ...args: Array<any>): ITilePipelineLink<ITile<T>> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];

@@ -29,8 +29,9 @@ export interface ISourceEvent<T> {
 }
 
 export interface ISourceBlock<T> extends ISourceEvent<T> {
-    linkTo(target: ITargetBlock<T>, options?: ILinkOptions): void;
-    unlinkFrom(target: ITargetBlock<T>): ITilePipelineLink<T> | undefined;
+    linkTo(target: ITargetBlock<T>, options?: ILinkOptions, ...args: Array<any>): void;
+    unlinkFrom(target: ITargetBlock<T>, ...args: Array<any>): ITilePipelineLink<T> | undefined;
+    links?: Array<ITilePipelineLink<T>>;
 }
 
 export interface ITransformBlock<TInput, TOutput> extends ITargetBlock<TInput>, ISourceBlock<TOutput> {}

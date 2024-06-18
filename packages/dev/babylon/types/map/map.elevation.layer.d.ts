@@ -1,7 +1,7 @@
 import { Color4, Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { ICartesian3, ISize2 } from "core/geometry";
-import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
+import { ILinkOptions, ITargetBlock, ITile, ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
 export interface IElevationLayerMaterialOptions {
     material?: Material;
     color?: Color4;
@@ -41,4 +41,5 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     get textureResolution(): ISize2 | undefined;
     set textureResolution(value: ISize2 | undefined);
     get material(): Material | undefined;
+    linkTo(target: ITargetBlock<ITile<IDemInfos>>, options?: ILinkOptions, ...args: Array<any>): void;
 }

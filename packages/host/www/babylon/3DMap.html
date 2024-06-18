@@ -154,11 +154,11 @@
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
-                /*const material = demLayer.links?.map((link) => link.target).find((target) => target instanceof SPACEXR.Map3dMaterial);
-                const debugLayerOptions = {
-                    function:material.debug
+                const material = demLayer.material;
+                 const debugLayerOptions = {
+                    function:material?.debug
                 }
-                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
+                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);
 
                 const showAxes = false;
                 if (showAxes) {

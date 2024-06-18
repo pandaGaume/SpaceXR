@@ -1,6 +1,6 @@
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine";
 import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
-import { IEnvelope } from "../../geography";
+import { IEnvelope, IGeoBounded } from "../../geography";
 import { ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, ShapeLayerContentType, TileCollection, TileConsumerBase } from "../../tiles";
@@ -19,7 +19,7 @@ export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
     resolution?: ISize2;
     display?: HTMLCanvasElement | CanvasDisplay;
 }
-export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceContentType>> extends TileConsumerBase<CanvasTileSourceTargetContentType> implements ICanvasRenderingOptions, ITileMetricsProvider {
+export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceContentType>> extends TileConsumerBase<CanvasTileSourceTargetContentType> implements ICanvasRenderingOptions, ITileMetricsProvider, IGeoBounded {
     static DefaultBackground: RGBAColor;
     static DefaultOptions: ICanvasRenderingOptions;
     _target: ITile<ImageData>;
@@ -40,7 +40,7 @@ export declare class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSo
     set background(v: string | undefined);
     get alpha(): number;
     set alpha(v: number);
-    get bounds(): IEnvelope | undefined;
+    get geoBounds(): IEnvelope | undefined;
     protected _onLayerAdded(layer: L): void;
     protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void;
     protected _onLayerRemoved(layer: L): void;

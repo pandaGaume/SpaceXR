@@ -203,7 +203,7 @@ export class Envelope implements IEnvelope {
 
         this._min.lat = Math.min(this._min.lat, lat);
         this._max.lat = Math.max(this._max.lat, lat);
-        if (lon) {
+        if (lon !== undefined) {
             this._min.lon = Math.min(this._min.lon, lon);
             this._max.lon = Math.max(this._max.lon, lon);
         }
@@ -238,24 +238,6 @@ export class Envelope implements IEnvelope {
             }
         }
 
-        return true;
-    }
-
-    public overlaps(bounds?: IEnvelope): boolean {
-        if (bounds === undefined) return false;
-        // Check if there is overlap in latitude and longitude
-        if (this._min.lat >= bounds.north || this._max.lat <= bounds.south || this._min.lon >= bounds.east || this._max.lon <= bounds.west) {
-            return false;
-        }
-
-        // Check if altitude should be considered and if there is overlap in altitude
-        if (this.hasAltitude && bounds.hasAltitude) {
-            if (this._min.alt! >= bounds.top! || this._max.alt! <= bounds.bottom!) {
-                return false;
-            }
-        }
-
-        // If no separating conditions were met, the envelopes overlap
         return true;
     }
 

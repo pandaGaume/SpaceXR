@@ -1,6 +1,6 @@
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine";
 import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
-import { IEnvelope } from "../../geography";
+import { IEnvelope, IGeoBounded } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, ShapeLayerContentType, Tile, TileCollection, TileConsumerBase } from "../../tiles";
@@ -26,7 +26,7 @@ export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
 
 export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceContentType>>
     extends TileConsumerBase<CanvasTileSourceTargetContentType>
-    implements ICanvasRenderingOptions, ITileMetricsProvider
+    implements ICanvasRenderingOptions, ITileMetricsProvider, IGeoBounded
 {
     public static DefaultBackground = RGBAColor.LightGray();
 
@@ -117,7 +117,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
         }
     }
 
-    public get bounds(): IEnvelope | undefined {
+    public get geoBounds(): IEnvelope | undefined {
         return this._target?.geoBounds;
     }
 
@@ -126,13 +126,18 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
         const view = new LayerView(layer, new TileCollection());
         this._activeTiles.push(view);
         this._activeTiles.sort((a, b) => a.layer.zindex - b.layer.zindex);
-        const bounds = this.bounds;
+        const bounds = this.geoBounds;
         if (bounds) {
+            let needInvalidate = false;
             for (const tile of layer.activTiles) {
-                if (tile.geoBounds && tile.geoBounds.intersects(bounds)) {
+                const env = tile.geoBounds;
+                if (env && env.intersects(bounds)) {
                     view.tiles.add(tile);
-                    this.invalidate();
+                    needInvalidate = true;
                 }
+            }
+            if (needInvalidate) {
+                this.invalidate();
             }
         }
         view.propertyChangedObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
@@ -180,16 +185,21 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
     }
 
     protected _onTileAdded(eventData: Array<ITile<CanvasTileSourceSourceContentType>>, eventState: EventState): void {
-        const bounds = this.bounds;
+        const bounds = this.geoBounds;
         if (bounds) {
             const layer = this._activeTiles.find((v) => v.layer === eventState.currentTarget);
             if (layer) {
+                let needInvalidate = false;
                 for (const tile of eventData) {
-                    if (tile.geoBounds && tile.geoBounds.overlaps(bounds)) {
+                    const env = tile.geoBounds;
+                    if (env && env.intersects(bounds)) {
                         // do something with the tile
                         layer.tiles.add(tile);
-                        this.invalidate();
+                        needInvalidate = true;
                     }
+                }
+                if (needInvalidate) {
+                    this.invalidate();
                 }
             }
         }

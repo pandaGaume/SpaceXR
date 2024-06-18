@@ -41,7 +41,6 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     unionInPlace(other?: IEnvelope): IEnvelope;
     intersects(bounds?: IEnvelope): boolean;
-    overlaps(bounds?: IEnvelope): boolean;
     contains(loc?: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     clone(): IEnvelope;

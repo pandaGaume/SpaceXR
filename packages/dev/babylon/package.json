@@ -17,7 +17,8 @@
         "precompile:babylon": "npm run build:babylon:assets",
         "build:babylon:assets": "npx build-tools -c process-assets",
         "webpack:babylon:dev": "webpack --mode development --stats-error-details",
-        "publish:babylon:dev": "npm run build:babylon:dev && npm run webpack:babylon:dev"
+        "copy:babylon:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../host/www/libs\"",
+        "publish:babylon:dev": "npm run build:babylon:dev && npm run webpack:babylon:dev && npm run copy:babylon:bundle"
     },
     "sideEffects": false,
     "devDependencies": {

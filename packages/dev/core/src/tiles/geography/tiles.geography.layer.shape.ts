@@ -1,5 +1,5 @@
 import { IGeoShape } from "dev/core/src/geography";
-import { IDrawableTileMapLayer, IShapeLayer, ITileMapLayerOptions, ShapeLayerOutputContentType } from "../map/tiles.map.interfaces";
+import { IDrawableTileMapLayer, IShapeLayer, ITileMapLayerOptions, ShapeLayerOutputContentType, TileMapLayerDrawFn } from "../map/tiles.map.interfaces";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 
 import { TileMapLayer } from "../map";
@@ -35,6 +35,7 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
     protected _fill?: boolean;
     protected _fillColor?: string;
     protected _fillOpacity?: number;
+    protected _debug?: TileMapLayerDrawFn<ShapeLayerContentType>;
 
     public constructor(name: string, options?: IShapeLayerOptions, provider?: ShapeProvider, enabled?: boolean) {
         if (provider === undefined) {
@@ -54,6 +55,14 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         this._fill = options?.fill === undefined ? true : options.fill;
         this._fillColor = options?.fillColor;
         this._fillOpacity = options?.fillOpacity ?? ShapeLayer.DefaultOpacity;
+    }
+
+    public get debug(): TileMapLayerDrawFn<ShapeLayerContentType> | undefined {
+        return this._debug;
+    }
+
+    public set debug(value: TileMapLayerDrawFn<ShapeLayerContentType> | undefined) {
+        this._debug = value;
     }
 
     public get dashArray(): Array<number> | undefined {

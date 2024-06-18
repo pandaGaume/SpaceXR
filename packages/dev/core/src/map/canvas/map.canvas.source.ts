@@ -3,13 +3,14 @@ import { EventState, Observer, PropertyChangedEventArgs } from "../../events";
 import { IEnvelope, IGeoBounded } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
-import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, ShapeLayerContentType, Tile, TileCollection, TileConsumerBase } from "../../tiles";
+import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, Tile, TileCollection, TileConsumerBase } from "../../tiles";
 import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType, isDrawableTileMapLayer } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasDisplay } from "./map.canvas.display";
 
 export type CanvasTileSourceTargetContentType = ImageLayerContentType;
-export type CanvasTileSourceSourceContentType = ImageLayerContentType | ShapeLayerContentType;
+export type CanvasTileSourceSourceContentType = any;
+//export type CanvasTileSourceSourceContentType = ImageLayerContentType | ShapeLayerContentType ;
 
 class LayerView {
     constructor(
@@ -22,6 +23,7 @@ class LayerView {
 export interface ICanvasTileSourceOptions extends ICanvasRenderingOptions {
     resolution?: ISize2;
     display?: HTMLCanvasElement | CanvasDisplay;
+    debug?: boolean;
 }
 
 export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceContentType>>
@@ -51,6 +53,7 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
 
     _background?: string;
     _alpha: number;
+    _debug: boolean;
 
     public constructor(
         name: string,
@@ -76,11 +79,20 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
 
         this._background = options?.background;
         this._alpha = options?.alpha ?? 1;
+        this._debug = options?.debug ?? false;
 
         // finally add existing layers
         for (const layer of this._layers.getLayers()) {
             this._onLayerAdded(layer);
         }
+    }
+
+    public get debug(): boolean {
+        return this._debug;
+    }
+
+    public set debug(value: boolean) {
+        this._debug = value;
     }
 
     public get target(): ITile<ImageData> {
@@ -314,7 +326,10 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                         const y = b.y - sy;
 
                         if (isDrawableTileMapLayer(view.layer)) {
-                            view.layer.draw(ctx, sx, sy, t);
+                            view.layer.draw?.call(view.layer, ctx, sx, sy, t);
+                            if (this._debug) {
+                                view.layer.debug?.call(view.layer, ctx, sx, sy, t);
+                            }
                             continue;
                         }
 
@@ -346,10 +361,19 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
 
                 const x = ref.x - sx;
                 const y = ref.y - sy;
+
+                if (isDrawableTileMapLayer(view.layer)) {
+                    view.layer.draw?.call(view.layer, ctx, sx, sy, t, scale);
+                    if (this._debug) {
+                        view.layer.debug?.call(view.layer, ctx, sx, sy, t, scale);
+                    }
+                    continue;
+                }
+
                 const item = t.content ?? null; // trick to address erroness tile.
                 if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
-                    const w = Math.ceil(item.width * scale);
-                    const h = Math.ceil(item.height * scale);
+                    const w = Math.ceil((item.width + 1) * scale);
+                    const h = Math.ceil((item.height + 1) * scale);
                     ctx.drawImage(item, 0, 0, item.width, item.height, x, y, w, h);
                     continue;
                 }

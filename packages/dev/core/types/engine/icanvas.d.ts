@@ -65,6 +65,8 @@ export interface ICanvasRenderingContext {
     shadowOffsetX: number;
     shadowOffsetY: number;
     lineWidth: number;
+    textAlign: string;
+    textBaseline: string;
     readonly canvas: ICanvas;
     clearRect(x: number, y: number, width: number, height: number): void;
     save(): void;

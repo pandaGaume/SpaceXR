@@ -219,6 +219,16 @@ export interface ICanvasRenderingContext {
     lineWidth: number;
 
     /**
+     * Text alignment setting. Possible values: start, end, left, right, center. Default: start.
+     */
+    textAlign: string;
+
+    /**
+     * Text baseline setting. Possible values: top, hanging, middle, alphabetic, ideographic, bottom. Default: alphabetic.
+     */
+    textBaseline: string;
+
+    /**
      * canvas is a read-only reference to ICanvas.
      */
     readonly canvas: ICanvas;

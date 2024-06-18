@@ -23,13 +23,16 @@ export interface ITileMapLayerOptions {
     attribution?: string;
 }
 
+export type TileMapLayerDrawFn<T> = (ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>, scale?: number) => void;
+
 export interface IDrawableTileMapLayer<T> {
-    draw(context: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>): void;
+    draw?: TileMapLayerDrawFn<T>;
+    debug?: TileMapLayerDrawFn<T>;
 }
 
 export function isDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T> {
     if (b === null || typeof b !== "object") return false;
-    return (<IDrawableTileMapLayer<T>>b).draw !== undefined;
+    return (<IDrawableTileMapLayer<T>>b).draw !== undefined || (<IDrawableTileMapLayer<T>>b).debug !== undefined;
 }
 
 export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext, IHasNavigationState {

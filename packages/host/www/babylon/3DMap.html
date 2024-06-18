@@ -4,13 +4,12 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Exemple d'un ecrans virtuel</title>
-        <script src="https://cdn.babylonjs.com/babylon.js"></script>
-        <!--script src="../libs/babylon.js"></script>
-        <script src="../libs/babylon.inspector.bundle.js"></script-->
-        <script src="../libs/babylon.glTF2FileLoader.min.js"></script>
+        <!--script src="https://cdn.babylonjs.com/babylon.js"></script-->
+        <script src="../libs/babylon.js"></script>
+        <!--script src="../libs/babylon.inspector.bundle.js"></script-->
+        <!--script src="../libs/babylon.glTF2FileLoader.min.js"></script-->
 
-        <script src="../../../dev/babylon/bundles/stellar_landscape_xr.1.0.0.js"></script>
-        <!--script src="../libs/stellar_landscape_xr.1.0.0.js"></script-->
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
 
         <style>
             html,
@@ -147,13 +146,17 @@
                 const l = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);
 
                 const imageLayerOptions = {
-                    zoomOffset: 1,
+                    zoomOffset: 2,
                     alpha: 1.0,
                     background: "rgb(.5,.5,.5)",
                 };
 
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
+
+                const debugLayerOptions = {
+                }
+                const debugLayer = new SPACEXR.DebugLayer("debugLayer", map, debugLayerOptions).addTo(map);
 
                 const showAxes = false;
                 if (showAxes) {

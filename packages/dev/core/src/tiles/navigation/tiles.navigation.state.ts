@@ -24,6 +24,8 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _center: IGeo2;
     _azimuth: Bearing;
     _bounds: ITileSystemBounds;
+    _minZoom?: number;
+    _maxZoom?: number;
 
     // internal
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
@@ -126,6 +128,20 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
 
     public get bounds(): ITileSystemBounds {
         return this._bounds;
+    }
+
+    public set bounds(bounds: ITileSystemBounds) {
+        if (this._bounds !== bounds) {
+            this._boundsObserver?.disconnect;
+            const old = this._bounds;
+            this._bounds = bounds;
+            this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
+            this.invalidate();
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, old, this._bounds, "bounds");
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
+        }
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>> {

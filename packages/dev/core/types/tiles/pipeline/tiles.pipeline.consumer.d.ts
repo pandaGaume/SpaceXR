@@ -16,8 +16,9 @@ export declare class TileConsumerBase<T> extends ValidableBase implements ITileC
     get removedObservable(): Observable<IPipelineMessageType<ITile<T>>>;
     get isForward(): boolean;
     set isForward(forward: boolean);
-    linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions): void;
-    unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined;
+    get links(): Array<ITilePipelineLink<ITile<T>>>;
+    linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions, ...args: Array<any>): void;
+    unlinkFrom(target: ITargetBlock<ITile<T>>, ...args: Array<any>): ITilePipelineLink<ITile<T>> | undefined;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
     get name(): string;
     set name(name: string);

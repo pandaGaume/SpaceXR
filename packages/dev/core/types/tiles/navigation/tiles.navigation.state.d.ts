@@ -14,6 +14,8 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _center: IGeo2;
     _azimuth: Bearing;
     _bounds: ITileSystemBounds;
+    _minZoom?: number;
+    _maxZoom?: number;
     _cartesianCache: ICartesian2;
     _lod: number;
     _scale: number;
@@ -31,6 +33,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     get azimuth(): Bearing;
     set azimuth(r: Bearing);
     get bounds(): ITileSystemBounds;
+    set bounds(bounds: ITileSystemBounds);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     get stateChangedObservable(): Observable<ITileNavigationState>;
     setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState;

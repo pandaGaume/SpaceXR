@@ -1,4 +1,4 @@
-import { IDisposable, Nullable } from "../types";
+import { ICloneable, IDisposable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded, IsGeoBounded } from "../geography/geography.interfaces";
 import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
@@ -86,7 +86,7 @@ export enum CellCoordinateReference {
     SE,
 }
 
-export interface ITileSystemBounds {
+export interface ITileSystemBounds extends ICloneable<ITileSystemBounds> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
 
     minLOD: number;
@@ -97,6 +97,7 @@ export interface ITileSystemBounds {
     maxLongitude: number;
 
     unionInPlace(bounds: ITileSystemBounds): void;
+    intersectionInPlace(bounds: ITileSystemBounds): void;
     copyInPlace(bounds: ITileSystemBounds): void;
 }
 

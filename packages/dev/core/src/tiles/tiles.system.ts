@@ -1,8 +1,28 @@
 import { Projections } from "../geography";
 import { ITileSystemBounds } from "./tiles.interfaces";
 import { Observable, PropertyChangedEventArgs } from "../events";
+import { Nullable } from "../types";
 
 export class TileSystemBounds implements ITileSystemBounds {
+    public static Intersection(bounds: Array<ITileSystemBounds>): Nullable<TileSystemBounds> {
+        if (!bounds || bounds.length === 0) {
+            return null;
+        }
+        const result = new TileSystemBounds();
+        for (const bound of bounds) {
+            result.intersectionInPlace(bound);
+        }
+        return result;
+    }
+
+    public static Union(bounds: Array<ITileSystemBounds>): Nullable<ITileSystemBounds> {
+        const result = bounds[0].clone();
+        for (let i = 1; i < bounds.length; i++) {
+            result.unionInPlace(bounds[i]);
+        }
+        return result;
+    }
+
     public static DefaultLOD = 0;
     public static DefaultMinLOD = 0;
     public static DefaultMaxLOD = 23;
@@ -54,6 +74,21 @@ export class TileSystemBounds implements ITileSystemBounds {
             this.maxLatitude = bounds.maxLatitude;
             this.minLongitude = bounds.minLongitude;
             this.maxLongitude = bounds.maxLongitude;
+        }
+    }
+
+    public clone(): TileSystemBounds {
+        return new TileSystemBounds(this);
+    }
+
+    public intersectionInPlace(bounds: ITileSystemBounds): void {
+        if (bounds) {
+            this.minLOD = Math.max(this.minLOD, bounds.minLOD);
+            this.maxLOD = Math.min(this.maxLOD, bounds.maxLOD);
+            this.minLatitude = Math.max(this.minLatitude, bounds.minLatitude);
+            this.maxLatitude = Math.min(this.maxLatitude, bounds.maxLatitude);
+            this.minLongitude = Math.max(this.minLongitude, bounds.minLongitude);
+            this.maxLongitude = Math.min(this.maxLongitude, bounds.maxLongitude);
         }
     }
 

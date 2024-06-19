@@ -1101,12 +1101,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.layerContainer.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.system.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.source.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.js");
-/* harmony import */ var _map_elevation_host__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map.elevation.host */ "./dist/map/map.elevation.host.js");
+/* harmony import */ var _map_elevation_host__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./map.elevation.host */ "./dist/map/map.elevation.host.js");
 /* harmony import */ var _map_elevation_layer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.elevation.layer */ "./dist/map/map.elevation.layer.js");
-/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
+/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
 
 
 
@@ -1228,6 +1229,7 @@ class Map3d extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     _onLayerAdded(layer) {
         if (layer instanceof _map_elevation_layer__WEBPACK_IMPORTED_MODULE_5__.ElevationLayer) {
             this._addedElevationLayer(layer);
+            this._updateNavigationBounds();
             return;
         }
         this._addedImageLayer(layer);
@@ -1235,9 +1237,15 @@ class Map3d extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     _onLayerRemoved(layer) {
         if (layer instanceof _map_elevation_layer__WEBPACK_IMPORTED_MODULE_5__.ElevationLayer) {
             this._removedElevationLayer(layer);
+            this._updateNavigationBounds();
             return;
         }
         this._removedImageLayer(layer);
+    }
+    _updateNavigationBounds() {
+        let bounds = core_tiles__WEBPACK_IMPORTED_MODULE_6__.TileSystemBounds.Intersection(Array.from(this._elevationLayersView.getLayers()).map((l) => l.metrics));
+        bounds = bounds ?? core_tiles__WEBPACK_IMPORTED_MODULE_6__.TileSystemBounds.Shared;
+        this._navigation.bounds = bounds;
     }
     _addedElevationLayer(layer) {
         this._elevationLayersView.addLayer(layer);
@@ -1251,8 +1259,8 @@ class Map3d extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
         this._updateLayerWithDisplayAndNavigation(layer);
     }
     _createElevationHost(layer) {
-        const name = core_utils__WEBPACK_IMPORTED_MODULE_6__.TextUtils.BuildNameWithSuffix(layer.name, Map3d.HostSuffix);
-        return new _map_elevation_host__WEBPACK_IMPORTED_MODULE_7__.Map3dElevationHost(name, this._textureLayersView, layer, layer.enabled);
+        const name = core_utils__WEBPACK_IMPORTED_MODULE_7__.TextUtils.BuildNameWithSuffix(layer.name, Map3d.HostSuffix);
+        return new _map_elevation_host__WEBPACK_IMPORTED_MODULE_8__.Map3dElevationHost(name, this._textureLayersView, layer, layer.enabled);
     }
     _removedElevationLayer(layer) {
         this._elevationLayersView.removeLayer(layer);
@@ -1280,7 +1288,7 @@ class Map3d extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
             let size = this._targetDisplay.resolution;
             if (layer.zoomOffset) {
                 const s = Math.pow(2, Math.abs(layer.zoomOffset));
-                size = new core_geometry__WEBPACK_IMPORTED_MODULE_8__.Size2(size.width * s, size.height * s);
+                size = new core_geometry__WEBPACK_IMPORTED_MODULE_9__.Size2(size.width * s, size.height * s);
             }
             layer.setContext(this._navigation, size);
         }
@@ -11895,6 +11903,19 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
     get bounds() {
         return this._bounds;
     }
+    set bounds(bounds) {
+        if (this._bounds !== bounds) {
+            this._boundsObserver?.disconnect;
+            const old = this._bounds;
+            this._bounds = bounds;
+            this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
+            this.invalidate();
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._bounds, "bounds");
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
+        }
+    }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
             this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
@@ -12170,13 +12191,16 @@ class TileConsumerBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
     set isForward(forward) {
         this._forward = forward;
     }
-    linkTo(target, options) {
+    get links() {
+        return this._links;
+    }
+    linkTo(target, options, ...args) {
         if (this._links.findIndex((l) => l.target === target) === -1) {
             const link = new _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink(this, target, options);
             this._links.push(link);
         }
     }
-    unlinkFrom(target) {
+    unlinkFrom(target, ...args) {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];
@@ -13769,6 +13793,23 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class TileSystemBounds {
+    static Intersection(bounds) {
+        if (!bounds || bounds.length === 0) {
+            return null;
+        }
+        const result = new TileSystemBounds();
+        for (const bound of bounds) {
+            result.intersectionInPlace(bound);
+        }
+        return result;
+    }
+    static Union(bounds) {
+        const result = bounds[0].clone();
+        for (let i = 1; i < bounds.length; i++) {
+            result.unionInPlace(bounds[i]);
+        }
+        return result;
+    }
     constructor(p) {
         this._minLOD = TileSystemBounds.DefaultMinLOD;
         this._maxLOD = TileSystemBounds.DefaultMaxLOD;
@@ -13804,6 +13845,19 @@ class TileSystemBounds {
             this.maxLatitude = bounds.maxLatitude;
             this.minLongitude = bounds.minLongitude;
             this.maxLongitude = bounds.maxLongitude;
+        }
+    }
+    clone() {
+        return new TileSystemBounds(this);
+    }
+    intersectionInPlace(bounds) {
+        if (bounds) {
+            this.minLOD = Math.max(this.minLOD, bounds.minLOD);
+            this.maxLOD = Math.min(this.maxLOD, bounds.maxLOD);
+            this.minLatitude = Math.max(this.minLatitude, bounds.minLatitude);
+            this.maxLatitude = Math.min(this.maxLatitude, bounds.maxLatitude);
+            this.minLongitude = Math.max(this.minLongitude, bounds.minLongitude);
+            this.maxLongitude = Math.min(this.maxLongitude, bounds.maxLongitude);
         }
     }
     get minLOD() {

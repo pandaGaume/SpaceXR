@@ -64,6 +64,7 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     protected _withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
     protected _onLayerAdded(layer: ITileMapLayer<Map3dContentType>): void;
     protected _onLayerRemoved(layer: ITileMapLayer<Map3dContentType>): void;
+    protected _updateNavigationBounds(): void;
     protected _addedElevationLayer(layer: ElevationLayer): void;
     protected _createElevationHost(layer: ElevationLayer): Map3dElevationHost;
     protected _removedElevationLayer(layer: ElevationLayer): void;

@@ -15,6 +15,8 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
     bounds: ITileSystemBounds;
     lod: number;
     scale: number;
+    minZoom?: number;
+    maxZoom?: number;
     syncWith(state: Nullable<ITileNavigationState>): void;
 }
 export declare function IsTileNavigationState(b: unknown): b is ITileNavigationState;

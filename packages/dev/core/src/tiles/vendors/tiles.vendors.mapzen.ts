@@ -49,6 +49,7 @@ export class MapZenNormalsDecoder implements IPixelDecoder<Array<ICartesian4>> {
 export class MapZen {
     private static readonly KEY = "mapzen";
 
+    // in theory, mapzen is going to zoom 15, but we experiencing too many elevation error.
     public static MaxLevelOfDetail = 15;
     public static Metrics = new EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
     public static Attribution = "Freely provided by MapZen - with thanks.";

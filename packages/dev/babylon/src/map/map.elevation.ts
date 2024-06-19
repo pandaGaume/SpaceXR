@@ -9,6 +9,7 @@ import {
     ITileNavigationState,
     LayerContainer,
     TileNavigationState,
+    TileSystemBounds,
 } from "core/tiles";
 import { Observer, EventState } from "core/events";
 
@@ -205,6 +206,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
     protected _onLayerAdded(layer: ITileMapLayer<Map3dContentType>): void {
         if (layer instanceof ElevationLayer) {
             this._addedElevationLayer(layer);
+            this._updateNavigationBounds();
             return;
         }
         this._addedImageLayer(layer as ITileMapLayer<Map3dTextureContentType>);
@@ -213,11 +215,18 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
     protected _onLayerRemoved(layer: ITileMapLayer<Map3dContentType>): void {
         if (layer instanceof ElevationLayer) {
             this._removedElevationLayer(layer);
+            this._updateNavigationBounds();
             return;
         }
         this._removedImageLayer(layer as ITileMapLayer<Map3dTextureContentType>);
     }
     ///#endregion layer handler
+
+    protected _updateNavigationBounds(): void {
+        let bounds = TileSystemBounds.Intersection(Array.from(this._elevationLayersView.getLayers()).map((l) => l.metrics));
+        bounds = bounds ?? TileSystemBounds.Shared;
+        this._navigation.bounds = bounds;
+    }
 
     protected _addedElevationLayer(layer: ElevationLayer): void {
         this._elevationLayersView.addLayer(layer);

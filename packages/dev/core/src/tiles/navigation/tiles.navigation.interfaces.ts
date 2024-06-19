@@ -23,6 +23,8 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
 
     lod: number; // Math.round(zoom)
     scale: number; // scale corresponding to the decimal part of zoom
+    minZoom?: number;
+    maxZoom?: number;
 
     syncWith(state: Nullable<ITileNavigationState>): void;
 }

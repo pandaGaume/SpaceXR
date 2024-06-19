@@ -423,13 +423,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         if (elevationArea) {
             const areaInfos = new AreaInfos(elevationArea);
             bag.setArea(Map3dLayerKind.Elevation, areaInfos);
-            // prepare the adjacent ids.
-            this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
             const elevations = tile.content?.infos?.elevations;
             if (elevations) {
                 // we process the dem content and update the elevation range
                 this._updateElevationRange(tile);
+                // update the area
                 elevationArea.update(elevations);
+                // prepare the adjacent ids.
+                this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
                 areaInfos.isReady = true;
             } else {
                 // disabling the surface, waiting for the data
@@ -540,8 +541,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 const area = bag.getArea(Map3dLayerKind.Elevation);
                 if (area) {
                     area.layer.update(elevations);
-                    area.isReady = true;
                     this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
+                    area.isReady = true;
                 }
             }
             const normals = eventData.content?.infos?.normals;

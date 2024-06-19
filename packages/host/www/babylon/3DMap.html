@@ -66,7 +66,7 @@
             <canvas id="mapcanvas3d"></canvas>
         </div>
         <script>
-            const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc; // everest
+            const defaultCenter = SPACEXR.KnownPlaces.Mountains.Everest
             const defaultLod = 11;
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
@@ -138,7 +138,7 @@
                     insets: new BABYLON.Vector3(0, 0, 0.1),
                     color: new BABYLON.Color4(0.5, 0.5, 0.8),
                     shininess: 0,
-                    textureResolution: { width: 512, height: 512 },
+                    textureResolution: { width: 1024, height: 1024 },
                 };
 
                 // build layer and add it to the map

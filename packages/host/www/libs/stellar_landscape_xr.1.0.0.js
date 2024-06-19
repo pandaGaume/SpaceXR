@@ -1870,11 +1870,11 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         if (elevationArea) {
             const areaInfos = new AreaInfos(elevationArea);
             bag.setArea(Map3dLayerKind.Elevation, areaInfos);
-            this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
             const elevations = tile.content?.infos?.elevations;
             if (elevations) {
                 this._updateElevationRange(tile);
                 elevationArea.update(elevations);
+                this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
                 areaInfos.isReady = true;
             }
             else {
@@ -1970,8 +1970,8 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 const area = bag.getArea(Map3dLayerKind.Elevation);
                 if (area) {
                     area.layer.update(elevations);
-                    area.isReady = true;
                     this._updateAdjacentIds(bag, Map3dLayerKind.Elevation);
+                    area.isReady = true;
                 }
             }
             const normals = eventData.content?.infos?.normals;

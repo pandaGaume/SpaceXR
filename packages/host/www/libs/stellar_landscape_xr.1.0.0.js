@@ -4667,6 +4667,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
 
 class KnownPlaces {
+    static FillSelectElement(select, places, callback) {
+        const unselectedOption = document.createElement("option");
+        unselectedOption.value = "";
+        unselectedOption.disabled = true;
+        unselectedOption.selected = true;
+        unselectedOption.textContent = "Select a location...";
+        select.appendChild(unselectedOption);
+        for (const [category, locations] of Object.entries(places)) {
+            const optgroup = document.createElement("optgroup");
+            optgroup.label = category;
+            for (const [name, coords] of Object.entries(locations)) {
+                const option = document.createElement("option");
+                option.value = _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.ToString(coords);
+                option.text = name;
+                optgroup.appendChild(option);
+            }
+            select.appendChild(optgroup);
+        }
+        select.onchange = () => {
+            const selectedOption = select.options[select.selectedIndex];
+            const coords = _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2.Parse(selectedOption.value);
+            callback(selectedOption.text, coords);
+        };
+        return select;
+    }
 }
 KnownPlaces.Mountains = {
     Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925),
@@ -4707,6 +4732,27 @@ KnownPlaces.Volcanoes = {
     Tambora: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-8.25, 118.0),
     Sakurajima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(31.593, 130.657),
 };
+KnownPlaces.SightsAndParks = {
+    GrandCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.1069, -112.1129),
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.5885),
+    GreatBarrierReef: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-18.2871, 147.6992),
+    Yosemite: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.8651, -119.5383),
+    Serengeti: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-2.3333, 34.8333),
+    MachuPicchu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-13.1631, -72.545),
+    Banff: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(51.1784, -115.5708),
+    Galapagos: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.9538, -90.9656),
+    TorresDelPaine: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-51.1667, -73.2425),
+    PlitviceLakes: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.8803, 15.6161),
+    VictoriaFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-17.9243, 25.8573),
+    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.3932, 25.4615),
+    Petra: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(30.3285, 35.4444),
+    IguazuFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-25.6953, -54.4367),
+    Kruger: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-23.9884, 31.5547),
+    BryceCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.593, -112.1871),
+    CliffsOfMoher: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(52.9715, -9.4265),
+    AngkorWat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(13.4125, 103.8669),
+    HaLongBay: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.9101, 107.1839),
+};
 //# sourceMappingURL=geography.knownPlaces.js.map
 
 /***/ }),
@@ -4723,6 +4769,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Geo3: () => (/* binding */ Geo3)
 /* harmony export */ });
 class Geo2 {
+    static Parse(value) {
+        const parts = value.replace(/[\[\]]/g, "").split(",");
+        const lat = parseFloat(parts[0]);
+        const lon = parseFloat(parts[1]);
+        return new Geo2(lat, lon);
+    }
+    static ToString(value) {
+        return `[${value.lat},${value.lon}]`;
+    }
     static Zero() {
         return new Geo2(0, 0);
     }
@@ -4749,11 +4804,27 @@ class Geo2 {
         return this._lat === other.lat && this._lon === other.lon;
     }
     toString() {
-        return `(${this._lat},${this._lon})`;
+        return `[${this._lat},${this._lon}]`;
     }
 }
 Geo2.Default = new Geo2(46.382581, -0.308024);
 class Geo3 extends Geo2 {
+    static ToString(value) {
+        if (value.alt !== undefined) {
+            return `[${value.lat},${value.lon},${value.alt}]`;
+        }
+        return `[${value.lat},${value.lon}]`;
+    }
+    static Parse(value) {
+        const parts = value.replace(/[\[\]]/g, "").split(",");
+        const lat = parseFloat(parts[0]);
+        const lon = parseFloat(parts[1]);
+        if (parts.length > 2) {
+            const alt = parseFloat(parts[2]);
+            return new Geo3(lat, lon, alt);
+        }
+        return new Geo3(lat, lon);
+    }
     static Zero() {
         return new Geo3(0, 0, 0);
     }
@@ -6825,6 +6896,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapboxAltitudeDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapzenAltitudeDecoder),
 /* harmony export */   Mass: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Mass),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.MemoryCache),
 /* harmony export */   MoonState: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.MoonState),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.MorganKeenanClass),
@@ -6900,6 +6972,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isCartesian3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isCartesian3),
 /* harmony export */   isCircle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isCircle),
 /* harmony export */   isDrawableTileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.isDrawableTileMapLayer),
+/* harmony export */   isFilter: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.isFilter),
 /* harmony export */   isLine: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isLine),
 /* harmony export */   isPolygon: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolygon),
 /* harmony export */   isPolyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolyline),
@@ -9612,25 +9685,30 @@ class TileAddress {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   BlobTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_0__.BlobTileCodec),
-/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian4TileCodec),
-/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian4TileCodecOptions),
-/* harmony export */   Float32TileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodec),
-/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodecOptions),
-/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodecOptionsBuilder),
-/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodec),
-/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptions),
-/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptionsBuilder),
-/* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
-/* harmony export */   JsonTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_0__.JsonTileCodec),
-/* harmony export */   RGBATileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
-/* harmony export */   RGBTileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
-/* harmony export */   TextTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_0__.TextTileCodec),
-/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_0__.XmlDocumentTileCodec)
+/* harmony export */   BlobTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
+/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian4TileCodec),
+/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian4TileCodecOptions),
+/* harmony export */   Float32TileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec),
+/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions),
+/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptionsBuilder),
+/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageDataTileCodec),
+/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageDataTileCodecOptions),
+/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec),
+/* harmony export */   JsonTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_1__.JsonTileCodec),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ _tiles_codecs_filter__WEBPACK_IMPORTED_MODULE_4__.MedianFilter),
+/* harmony export */   RGBATileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec),
+/* harmony export */   RGBTileCodec: () => (/* reexport safe */ _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBTileCodec),
+/* harmony export */   TextTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
+/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _tiles_codecs__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
+/* harmony export */   isFilter: () => (/* reexport safe */ _tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_0__.isFilter)
 /* harmony export */ });
-/* harmony import */ var _tiles_codecs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.codecs */ "../core/dist/tiles/codecs/tiles.codecs.js");
-/* harmony import */ var _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.codecs.cartesian */ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js");
+/* harmony import */ var _tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
+/* harmony import */ var _tiles_codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.codecs */ "../core/dist/tiles/codecs/tiles.codecs.js");
+/* harmony import */ var _tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.codecs.cartesian */ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js");
+/* harmony import */ var _tiles_codecs_filter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.codecs.filter */ "../core/dist/tiles/codecs/tiles.codecs.filter.js");
+
 
 
 
@@ -9695,6 +9773,57 @@ class Cartesian4TileCodec {
     }
 }
 //# sourceMappingURL=tiles.codecs.cartesian.js.map
+
+/***/ }),
+
+/***/ "../core/dist/tiles/codecs/tiles.codecs.filter.js":
+/*!********************************************************!*\
+  !*** ../core/dist/tiles/codecs/tiles.codecs.filter.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MedianFilter: () => (/* binding */ MedianFilter)
+/* harmony export */ });
+class MedianFilter {
+    constructor(_windowSize = 5, _threshold = 50) {
+        this._windowSize = _windowSize;
+        this._threshold = _threshold;
+        if (_windowSize % 2 === 0) {
+            throw new Error("Window size must be odd.");
+        }
+    }
+    apply(values, x, y, width, height) {
+        const edge = Math.floor(this._windowSize / 2);
+        const result = new Float32Array(values.length);
+        values.copyWithin(0, 0);
+        for (let i = 0; i < height; i++) {
+            for (let j = 0; j < width; j++) {
+                const window = [];
+                for (let wi = Math.max(-edge, -i); wi <= Math.min(edge, height - 1 - i); wi++) {
+                    for (let wj = Math.max(-edge, -j); wj <= Math.min(edge, width - 1 - j); wj++) {
+                        const index = (i + wi) * width + (j + wj);
+                        window.push(values[index]);
+                    }
+                }
+                window.sort((a, b) => a - b);
+                const median = window[Math.floor(window.length / 2)];
+                const currentIndex = i * width + j;
+                const currentValue = values[currentIndex];
+                if (Math.abs(currentValue - median) > this._threshold) {
+                    result[currentIndex] = median;
+                }
+                else {
+                    result[currentIndex] = currentValue;
+                }
+            }
+        }
+        return result;
+    }
+}
+MedianFilter.Shared = new MedianFilter();
+//# sourceMappingURL=tiles.codecs.filter.js.map
 
 /***/ }),
 
@@ -9867,12 +9996,32 @@ class Float32TileCodec {
                     i = this.pixelDecoder.decode(pixels, offset + column * pixelSize, values, i);
                 }
             }
+            if (this._options?.filter) {
+                return this._options.filter.apply(values, 0, 0, w, h);
+            }
             return values;
         }
         return null;
     }
 }
 //# sourceMappingURL=tiles.codecs.image.js.map
+
+/***/ }),
+
+/***/ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js":
+/*!************************************************************!*\
+  !*** ../core/dist/tiles/codecs/tiles.codecs.interfaces.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   isFilter: () => (/* binding */ isFilter)
+/* harmony export */ });
+function isFilter(f) {
+    return f && typeof f.apply === "function";
+}
+//# sourceMappingURL=tiles.codecs.interfaces.js.map
 
 /***/ }),
 
@@ -10715,6 +10864,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeLayer: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.ShapeLayer),
@@ -10745,7 +10895,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_14__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
 /* harmony export */   hasNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.hasNavigationState),
-/* harmony export */   isDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.isDrawableTileMapLayer)
+/* harmony export */   isDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.isDrawableTileMapLayer),
+/* harmony export */   isFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.isFilter)
 /* harmony export */ });
 /* harmony import */ var _vendors_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vendors/index */ "../core/dist/tiles/vendors/index.js");
 /* harmony import */ var _codecs_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./codecs/index */ "../core/dist/tiles/codecs/index.js");
@@ -14168,10 +14319,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
 /* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "../core/dist/tiles/tiles.urlBuilder.js");
 /* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
+/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../codecs/tiles.codecs.cartesian */ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js");
+/* harmony import */ var _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../codecs/tiles.codecs.cartesian */ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js");
+
 
 
 
@@ -14216,7 +14369,8 @@ class MapZen {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static ElevationsClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
+        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_4__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodec(MapzenAltitudeDecoder.Shared, o), MapZen.Metrics, options);
     }
     static NormalsImagesClient(options) {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec(), MapZen.Metrics, options);
@@ -14225,15 +14379,15 @@ class MapZen {
         return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.ImageDataTileCodec(), MapZen.Metrics, options);
     }
     static NormalsCartesian4Client(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal_Cartesian4`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_4__.Cartesian4TileCodec(MapZenNormalsDecoder.Shared), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal_Cartesian4`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_5__.Cartesian4TileCodec(MapZenNormalsDecoder.Shared), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_5__.DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__.DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsImagesClient(optionsNormals));
     }
 }
 MapZen.KEY = "mapzen";
 MapZen.MaxLevelOfDetail = 15;
-MapZen.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_6__.EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
+MapZen.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_7__.EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
 MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 //# sourceMappingURL=tiles.vendors.mapzen.js.map
 
@@ -14996,6 +15150,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapboxAltitudeDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapzenAltitudeDecoder),
 /* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Mass),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MemoryCache),
 /* harmony export */   MoonState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MoonState),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MorganKeenanClass),
@@ -15082,6 +15237,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isCartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isCartesian3),
 /* harmony export */   isCircle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isCircle),
 /* harmony export */   isDrawableTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isDrawableTileMapLayer),
+/* harmony export */   isFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isFilter),
 /* harmony export */   isLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isLine),
 /* harmony export */   isPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isPolygon),
 /* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isPolyline),

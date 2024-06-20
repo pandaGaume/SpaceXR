@@ -1,4 +1,4 @@
-import { IPixelDecoder } from "./tiles.codecs.interfaces";
+import { IFilter, IPixelDecoder } from "./tiles.codecs.interfaces";
 import { Nullable } from "../../types";
 import { ITileCodec } from "../tiles.interfaces";
 import { Side } from "../../geometry/geometry.interfaces";
@@ -34,6 +34,7 @@ export declare class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
     decodeAsync(r: void | Response): Promise<Awaited<Nullable<Uint8ClampedArray>>>;
 }
 export declare class Float32TileCodecOptions extends ImageDataTileCodecOptions {
+    filter?: IFilter<Float32Array>;
     constructor(p: Partial<Float32TileCodecOptions>);
 }
 export declare class Float32TileCodecOptionsBuilder extends ImageDataTileCodecOptionsBuilder {

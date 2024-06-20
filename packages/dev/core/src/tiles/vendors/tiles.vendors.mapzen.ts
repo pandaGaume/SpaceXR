@@ -1,9 +1,9 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { WebTileUrlBuilder } from "../tiles.urlBuilder";
-import { Float32TileCodec, ImageDataTileCodec, ImageTileCodec } from "../codecs/tiles.codecs.image";
+import { Float32TileCodec, Float32TileCodecOptions, ImageDataTileCodec, ImageTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
-import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
+import { IPixelDecoder, isFilter } from "../codecs/tiles.codecs.interfaces";
 import { Cartesian4, ICartesian4 } from "../../geometry";
 import { Cartesian4TileCodec } from "../codecs/tiles.codecs.cartesian";
 
@@ -58,7 +58,8 @@ export class MapZen {
         return new TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);
     }
     public static ElevationsClient(options?: TileWebClientOptions) {
-        return new TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared), MapZen.Metrics, options);
+        const o = isFilter<Float32Array>(options?.filter) ? new Float32TileCodecOptions({ filter: options?.filter }) : undefined;
+        return new TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared, o), MapZen.Metrics, options);
     }
     public static NormalsImagesClient(options?: TileWebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);

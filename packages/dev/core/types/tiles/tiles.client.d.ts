@@ -1,10 +1,12 @@
 import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { IGeoBounded } from "../geography";
+import { IFilter } from "./codecs";
 export declare class TileWebClientOptions {
     static Default: TileWebClientOptions;
     maxRetry?: number;
     initialDelay?: number;
+    filter?: IFilter<any>;
     constructor(p: Partial<TileWebClientOptions>);
 }
 export declare class TileWebClientOptionsBuilder {

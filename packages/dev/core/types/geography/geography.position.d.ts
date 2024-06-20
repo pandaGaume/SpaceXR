@@ -1,6 +1,8 @@
 import { IGeo2, IGeo3 } from "./geography.interfaces";
 export declare class Geo2 implements IGeo2 {
     static Default: Geo2;
+    static Parse(value: string): IGeo2;
+    static ToString(value: IGeo2): string;
     static Zero(): Geo2;
     protected _lat: number;
     protected _lon: number;
@@ -14,6 +16,8 @@ export declare class Geo2 implements IGeo2 {
     toString(): string;
 }
 export declare class Geo3 extends Geo2 implements IGeo3 {
+    static ToString(value: IGeo3): string;
+    static Parse(value: string): IGeo3;
     static Zero(): Geo3;
     protected _alt?: number;
     constructor(lat: number, lon: number, alt?: number);

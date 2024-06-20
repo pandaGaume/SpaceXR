@@ -1,5 +1,7 @@
+import { IGeo2 } from "./geography.interfaces";
 import { Geo2 } from "./geography.position";
 export declare class KnownPlaces {
+    static FillSelectElement(select: HTMLSelectElement, places: any, callback: (name: string, geo: IGeo2) => void): HTMLSelectElement;
     static Mountains: {
         Everest: Geo2;
         K2: Geo2;
@@ -38,5 +40,26 @@ export declare class KnownPlaces {
         Yellowstone: Geo2;
         Tambora: Geo2;
         Sakurajima: Geo2;
+    };
+    static SightsAndParks: {
+        GrandCanyon: Geo2;
+        Yellowstone: Geo2;
+        GreatBarrierReef: Geo2;
+        Yosemite: Geo2;
+        Serengeti: Geo2;
+        MachuPicchu: Geo2;
+        Banff: Geo2;
+        Galapagos: Geo2;
+        TorresDelPaine: Geo2;
+        PlitviceLakes: Geo2;
+        VictoriaFalls: Geo2;
+        Santorini: Geo2;
+        Petra: Geo2;
+        IguazuFalls: Geo2;
+        Kruger: Geo2;
+        BryceCanyon: Geo2;
+        CliffsOfMoher: Geo2;
+        AngkorWat: Geo2;
+        HaLongBay: Geo2;
     };
 }

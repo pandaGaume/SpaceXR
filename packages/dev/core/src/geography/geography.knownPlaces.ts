@@ -1,6 +1,35 @@
+import { IGeo2 } from "./geography.interfaces";
 import { Geo2 } from "./geography.position";
 
 export class KnownPlaces {
+    public static FillSelectElement(select: HTMLSelectElement, places: any, callback: (name: string, geo: IGeo2) => void): HTMLSelectElement {
+        const unselectedOption = document.createElement("option");
+        unselectedOption.value = "";
+        unselectedOption.disabled = true;
+        unselectedOption.selected = true;
+        unselectedOption.textContent = "Select a location...";
+        select.appendChild(unselectedOption);
+        for (const [category, locations] of Object.entries(places)) {
+            const optgroup = document.createElement("optgroup");
+            optgroup.label = category;
+
+            for (const [name, coords] of Object.entries(<any>locations)) {
+                const option = document.createElement("option");
+                option.value = Geo2.ToString(coords as IGeo2);
+                option.text = name;
+                optgroup.appendChild(option);
+            }
+
+            select.appendChild(optgroup);
+        }
+        select.onchange = () => {
+            const selectedOption = select.options[select.selectedIndex];
+            const coords: IGeo2 = Geo2.Parse(selectedOption.value);
+            callback(selectedOption.text, coords);
+        };
+        return select;
+    }
+
     public static Mountains = {
         Everest: new Geo2(27.9881, 86.925), // Mount Everest, Himalayas
         K2: new Geo2(35.8808, 76.5155), // K2, Karakoram
@@ -40,5 +69,27 @@ export class KnownPlaces {
         Yellowstone: new Geo2(44.428, -110.588), // Yellowstone Caldera, USA
         Tambora: new Geo2(-8.25, 118.0), // Mount Tambora, Indonesia
         Sakurajima: new Geo2(31.593, 130.657), // Sakurajima, Japan
+    };
+
+    public static SightsAndParks = {
+        GrandCanyon: new Geo2(36.1069, -112.1129), // Grand Canyon, USA
+        Yellowstone: new Geo2(44.428, -110.5885), // Yellowstone National Park, USA
+        GreatBarrierReef: new Geo2(-18.2871, 147.6992), // Great Barrier Reef, Australia
+        Yosemite: new Geo2(37.8651, -119.5383), // Yosemite National Park, USA
+        Serengeti: new Geo2(-2.3333, 34.8333), // Serengeti National Park, Tanzania
+        MachuPicchu: new Geo2(-13.1631, -72.545), // Machu Picchu, Peru
+        Banff: new Geo2(51.1784, -115.5708), // Banff National Park, Canada
+        Galapagos: new Geo2(-0.9538, -90.9656), // Galapagos Islands, Ecuador
+        TorresDelPaine: new Geo2(-51.1667, -73.2425), // Torres del Paine National Park, Chile
+        PlitviceLakes: new Geo2(44.8803, 15.6161), // Plitvice Lakes National Park, Croatia
+        VictoriaFalls: new Geo2(-17.9243, 25.8573), // Victoria Falls, Zimbabwe/Zambia
+        Santorini: new Geo2(36.3932, 25.4615), // Santorini, Greece
+        Petra: new Geo2(30.3285, 35.4444), // Petra, Jordan
+        IguazuFalls: new Geo2(-25.6953, -54.4367), // Iguazu Falls, Argentina/Brazil
+        Kruger: new Geo2(-23.9884, 31.5547), // Kruger National Park, South Africa
+        BryceCanyon: new Geo2(37.593, -112.1871), // Bryce Canyon National Park, USA
+        CliffsOfMoher: new Geo2(52.9715, -9.4265), // Cliffs of Moher, Ireland
+        AngkorWat: new Geo2(13.4125, 103.8669), // Angkor Wat, Cambodia
+        HaLongBay: new Geo2(20.9101, 107.1839), // Ha Long Bay, Vietnam
     };
 }

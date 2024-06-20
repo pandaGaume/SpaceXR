@@ -3,11 +3,13 @@ import { Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { TileAddress } from "./address/tiles.address";
 import { IGeoBounded } from "../geography";
+import { IFilter } from "./codecs";
 
 export class TileWebClientOptions {
     public static Default = new TileWebClientOptions({ maxRetry: 3, initialDelay: 1000 });
     maxRetry?: number;
     initialDelay?: number;
+    filter?: IFilter<any>;
 
     public constructor(p: Partial<TileWebClientOptions>) {
         Object.assign(this, p);

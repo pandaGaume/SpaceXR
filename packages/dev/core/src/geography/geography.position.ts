@@ -3,6 +3,19 @@ import { IGeo2, IGeo3 } from "./geography.interfaces";
 export class Geo2 implements IGeo2 {
     public static Default = new Geo2(46.382581, -0.308024);
 
+    public static Parse(value: string): IGeo2 {
+        // Remove the brackets and split the string by comma
+        const parts = value.replace(/[\[\]]/g, "").split(",");
+        // Parse the latitude and longitude
+        const lat = parseFloat(parts[0]);
+        const lon = parseFloat(parts[1]);
+        return new Geo2(lat, lon);
+    }
+
+    public static ToString(value: IGeo2): string {
+        return `[${value.lat},${value.lon}]`;
+    }
+
     public static Zero() {
         return new Geo2(0, 0);
     }
@@ -39,11 +52,32 @@ export class Geo2 implements IGeo2 {
     }
 
     public toString(): string {
-        return `(${this._lat},${this._lon})`;
+        return `[${this._lat},${this._lon}]`;
     }
 }
 
 export class Geo3 extends Geo2 implements IGeo3 {
+    public static ToString(value: IGeo3): string {
+        if (value.alt !== undefined) {
+            return `[${value.lat},${value.lon},${value.alt}]`;
+        }
+        return `[${value.lat},${value.lon}]`;
+    }
+
+    public static Parse(value: string): IGeo3 {
+        // Remove the brackets and split the string by comma
+        const parts = value.replace(/[\[\]]/g, "").split(",");
+        // Parse the latitude and longitude
+        const lat = parseFloat(parts[0]);
+        const lon = parseFloat(parts[1]);
+        // Check if altitude is provided
+        if (parts.length > 2) {
+            const alt = parseFloat(parts[2]);
+            return new Geo3(lat, lon, alt);
+        }
+        return new Geo3(lat, lon);
+    }
+
     public static Zero() {
         return new Geo3(0, 0, 0);
     }

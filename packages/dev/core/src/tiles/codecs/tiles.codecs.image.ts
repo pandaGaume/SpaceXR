@@ -1,4 +1,4 @@
-import { IPixelDecoder } from "./tiles.codecs.interfaces";
+import { IFilter, IPixelDecoder } from "./tiles.codecs.interfaces";
 import { Nullable } from "../../types";
 import { ITileCodec } from "../tiles.interfaces";
 import { Side } from "../../geometry/geometry.interfaces";
@@ -150,6 +150,7 @@ export class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
 }
 
 export class Float32TileCodecOptions extends ImageDataTileCodecOptions {
+    filter?: IFilter<Float32Array>;
     public constructor(p: Partial<Float32TileCodecOptions>) {
         super(p);
     }
@@ -189,6 +190,9 @@ export class Float32TileCodec implements ITileCodec<Float32Array> {
                 }
             }
 
+            if (this._options?.filter) {
+                return this._options.filter.apply(values, 0, 0, w, h);
+            }
             return values;
         }
         return null;

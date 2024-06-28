@@ -1,31 +1,17 @@
-import { IDisposable, Nullable } from "../../types";
-import { Cartesian2, ICartesian2 } from "../../geometry";
-import { InputsNavigationTarget } from "./map.inputs.navigation";
-import { ICartesian2WithInfos, IPointerSource } from "./map.inputs.interfaces";
+
 import { EventState, Observer } from "../../events";
 import { ITileNavigationApi } from "../../tiles";
-
-export class Cartesian2WithInfos extends Cartesian2 implements ICartesian2WithInfos {
-    /** defines the current mouse button index */
-    _buttonIndex: number;
-
-    public constructor(public x: number, public y: number, buttonIndex?: number) {
-        super(x, y);
-        this._buttonIndex = buttonIndex ?? -1;
-    }
-
-    public get buttonIndex() {
-        return this._buttonIndex;
-    }
-}
+import { IDisposable, Nullable } from "../../types";
+import { ICartesian2WithInfos, IPointerSource, IWheelSource } from "./map.inputs.interfaces";
+import { InputsNavigationTarget } from "./map.inputs.navigation";
 
 /// <summary>
 /// Pointer input controller. Map basic pointer source event and forward them to the target.
 /// </summary>
-export class PointerController<S extends IPointerSource> implements IDisposable {
+export class PointerController<S extends IPointerSource & IWheelSource> implements IDisposable {
     _src: S;
     _target: InputsNavigationTarget<S>;
-    _moveObserver?: Nullable<Observer<ICartesian2>>;
+    _moveObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
@@ -64,14 +50,14 @@ export class PointerController<S extends IPointerSource> implements IDisposable 
         }
     }
 
-    protected _onPointerMove(v: ICartesian2, e: EventState) {
-        this._target?.onPointerMove(this._src, v.x, v.y);
+    protected _onPointerMove(v: ICartesian2WithInfos, e: EventState) {
+        this._target?.onPointerMove(this._src, v.x, v.y, v.pointerId);
     }
     protected _onPointerDown(v: ICartesian2WithInfos, e: EventState) {
-        this._target?.onPointerDown(this._src, v.x, v.y, v.buttonIndex);
+        this._target?.onPointerDown(this._src, v.x, v.y, v.buttonIndex ?? -1, v.pointerId);
     }
     protected _onPointerUp(v: ICartesian2WithInfos, e: EventState) {
-        this._target?.onPointerUp(this._src, v.x, v.y, v.buttonIndex);
+        this._target?.onPointerUp(this._src, v.x, v.y, v.buttonIndex ?? -1, v.pointerId);
     }
     protected _onWheel(v: number, e: EventState) {
         this._target?.onWheel(this._src, v);

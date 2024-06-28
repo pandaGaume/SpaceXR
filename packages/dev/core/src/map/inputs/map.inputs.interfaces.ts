@@ -6,12 +6,16 @@ export interface IWheelTarget<T> {
 }
 
 export interface IPointerTarget<T> {
-    onPointerMove(src: T, x: number, y: number, id?: number): void;
-    onPointerExit(src: T, x: number, y: number, id?: number): void;
+    onPointerOver(src: T, x: number, y: number, id?: number): void;
+    onPointerEnter(src: T, x: number, y: number, id?: number): void;
+    onPointerOut(src: T, x: number, y: number, id?: number): void;
+    onPointerLeave(src: T, x: number, y: number, id?: number): void;
     onPointerDown(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
     onPointerUp(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
-    onPointerClick(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
-    onPointerEnter(src: T, x: number, y: number, id?: number): void;
+    onPointerMove(src: T, x: number, y: number, id?: number): void;
+    onPointerCancel(src: T, x: number, y: number, id?: number): void;
+    onPointerGotCapture(src: T, x: number, y: number, id?: number): void;
+    onPointerLostCapture(src: T, x: number, y: number, id?: number): void;
 }
 
 export interface IDragTarget<T> {
@@ -20,16 +24,36 @@ export interface IDragTarget<T> {
     onEndDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
 }
 
+export interface IGestureSource<T> {}
+
+export function isSupportingTouch(): boolean {
+    return window.matchMedia("(hover: none)").matches || "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
 export interface ICartesian2WithInfos extends ICartesian2 {
-    buttonIndex: number;
+    buttonIndex?: number;
+    pointerId?: number;
 }
 
 export interface IPointerSource {
-    onPointerMoveObservable: Observable<ICartesian2>;
-    onPointerOutObservable: Observable<IPointerSource>;
+    onPointerOverObservable: Observable<ICartesian2WithInfos>;
+    onPointerEnterObservable: Observable<ICartesian2WithInfos>;
+    onPointerOutObservable: Observable<ICartesian2WithInfos>;
+    onPointerLeaveObservable: Observable<ICartesian2WithInfos>;
+    onPointerMoveObservable: Observable<ICartesian2WithInfos>;
     onPointerDownObservable: Observable<ICartesian2WithInfos>;
     onPointerUpObservable: Observable<ICartesian2WithInfos>;
-    onPointerClickObservable: Observable<ICartesian2WithInfos>;
-    onPointerEnterObservable: Observable<IPointerSource>;
+    onPointerCancelObservable: Observable<ICartesian2WithInfos>;
+    onPointerGotCaptureObservable: Observable<ICartesian2WithInfos>;
+    onPointerLostCaptureObservable: Observable<ICartesian2WithInfos>;
+}
+
+export interface IWheelSource {
     onWheelObservable: Observable<number>;
+}
+
+export interface IDragSource {
+    onBeginDragObservable: Observable<ICartesian2WithInfos>;
+    onDragObservable: Observable<ICartesian2WithInfos>;
+    onEndDragObservable: Observable<ICartesian2WithInfos>;
 }

@@ -15,7 +15,7 @@ import { Observer, EventState } from "core/events";
 
 import { IGeo2 } from "core/geography";
 import { ISize2, Size2 } from "core/geometry";
-import { CanvasTileSourceSourceContentType, IPointerSource, PointerController } from "core/map";
+import { CanvasTileSourceSourceContentType, IPointerSource, IWheelSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
 import { ElevationLayer } from "./map.elevation.layer";
@@ -82,7 +82,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
     private _validateHostObserver: Nullable<BabylonObserver<Scene>>;
 
     private _targetDisplay: Nullable<HolographicDisplay> = null;
-    private _controller: Nullable<PointerController<IPointerSource>> = null;
+    private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
     private _ownController = false;
 
     private _elevationHosts: Map<string, Map3dElevationHost>;
@@ -187,7 +187,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
         return new TileNavigationState();
     }
 
-    protected _withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d {
+    protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): Map3d {
         if (this._controller === controller) return this;
 
         if (this._controller && this._ownController) {

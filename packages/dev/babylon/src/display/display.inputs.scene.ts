@@ -1,16 +1,20 @@
 import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-import { Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource } from "core/map/inputs";
+import { Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource, IWheelSource } from "core/map/inputs";
 import { Observable } from "core/events";
-import { ICartesian2 } from "core/geometry";
 
-export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisposable {
-    _onPointerMoveObservable?: Observable<ICartesian2>;
-    _onPointerOutObservable?: Observable<IPointerSource>;
+export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource, BABYLON.IDisposable {
+    _onPointerOverObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerEnterObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerOutObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerLeaveObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerMoveObservable?: Observable<ICartesian2WithInfos>;
     _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
     _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerClickObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerEnterObservable?: Observable<IPointerSource>;
+    _onPointerCancelObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerGotCaptureObservable?: Observable<ICartesian2WithInfos>;
+    _onPointerLostCaptureObservable?: Observable<ICartesian2WithInfos>;
+
     _onWheelObservable?: Observable<number>;
 
     _display: VirtualDisplay;
@@ -29,18 +33,39 @@ export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisp
         return this._display;
     }
 
-    public get onPointerMoveObservable(): Observable<ICartesian2> {
-        if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new Observable<ICartesian2>();
+    public get onPointerOverObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerOverObservable) {
+            this._onPointerOverObservable = new Observable<ICartesian2WithInfos>();
         }
-        return this._onPointerMoveObservable;
+        return this._onPointerOverObservable;
     }
 
-    public get onPointerOutObservable(): Observable<IPointerSource> {
+    public get onPointerEnterObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerEnterObservable) {
+            this._onPointerEnterObservable = new Observable<ICartesian2WithInfos>();
+        }
+        return this._onPointerEnterObservable;
+    }
+
+    public get onPointerOutObservable(): Observable<ICartesian2WithInfos> {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new Observable<IPointerSource>();
+            this._onPointerOutObservable = new Observable<ICartesian2WithInfos>();
         }
         return this._onPointerOutObservable;
+    }
+
+    public get onPointerLeaveObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerLeaveObservable) {
+            this._onPointerLeaveObservable = new Observable<ICartesian2WithInfos>();
+        }
+        return this._onPointerLeaveObservable;
+    }
+
+    public get onPointerMoveObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerMoveObservable) {
+            this._onPointerMoveObservable = new Observable<ICartesian2WithInfos>();
+        }
+        return this._onPointerMoveObservable;
     }
 
     public get onPointerDownObservable(): Observable<ICartesian2WithInfos> {
@@ -57,18 +82,25 @@ export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisp
         return this._onPointerUpObservable;
     }
 
-    public get onPointerClickObservable(): Observable<ICartesian2WithInfos> {
-        if (!this._onPointerClickObservable) {
-            this._onPointerClickObservable = new Observable<ICartesian2WithInfos>();
+    public get onPointerCancelObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerCancelObservable) {
+            this._onPointerCancelObservable = new Observable<ICartesian2WithInfos>();
         }
-        return this._onPointerClickObservable;
+        return this._onPointerCancelObservable;
     }
 
-    public get onPointerEnterObservable(): Observable<IPointerSource> {
-        if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new Observable<IPointerSource>();
+    public get onPointerGotCaptureObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerGotCaptureObservable) {
+            this._onPointerGotCaptureObservable = new Observable<ICartesian2WithInfos>();
         }
-        return this._onPointerEnterObservable;
+        return this._onPointerGotCaptureObservable;
+    }
+
+    public get onPointerLostCaptureObservable(): Observable<ICartesian2WithInfos> {
+        if (!this._onPointerLostCaptureObservable) {
+            this._onPointerLostCaptureObservable = new Observable<ICartesian2WithInfos>();
+        }
+        return this._onPointerLostCaptureObservable;
     }
 
     public get onWheelObservable(): Observable<number> {
@@ -85,12 +117,16 @@ export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisp
                 scene.onPrePointerObservable.remove(this._prePointerObserver);
             }
         }
-        this._onPointerMoveObservable?.clear();
+        this._onPointerOverObservable?.clear();
+        this._onPointerEnterObservable?.clear();
         this._onPointerOutObservable?.clear();
+        this._onPointerLeaveObservable?.clear();
+        this._onPointerMoveObservable?.clear();
         this._onPointerDownObservable?.clear();
         this._onPointerUpObservable?.clear();
-        this._onPointerClickObservable?.clear();
-        this._onPointerEnterObservable?.clear();
+        this._onPointerCancelObservable?.clear();
+        this._onPointerGotCaptureObservable?.clear();
+        this._onPointerLostCaptureObservable?.clear();
         this._onWheelObservable?.clear();
     }
 
@@ -117,7 +153,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisp
                 break;
             }
             case BABYLON.PointerEventTypes.POINTERWHEEL: {
-                this._onPointerWheel(pi);
+                this._onWheel(pi);
                 break;
             }
             default: {
@@ -164,7 +200,10 @@ export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisp
                 // move
                 const pixelXY = this._display.getPixelToRef(current);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                    this._onPointerMoveObservable.notifyObservers(pixelXY, -1, this._display, this);
+                    const buttonIndex = (<any>pointerInfo.event).button;
+                    const pointerId = (<any>pointerInfo.event).pointerId;
+                    const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
+                    this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
                 return;
@@ -173,24 +212,34 @@ export class VirtualDisplayInputsSource implements IPointerSource, BABYLON.IDisp
             pointerInfo.skipOnPointerObservable = true;
             // enter
             if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
-                this._onPointerEnterObservable.notifyObservers(this, -1, this._display, this);
+                const buttonIndex = (<any>pointerInfo.event).button;
+                const pointerId = (<any>pointerInfo.event).pointerId;
+                const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+                this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
             }
             // then move
             const pixelXY = this._display.getPixelToRef(current);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                this._onPointerMoveObservable.notifyObservers(pixelXY, -1, this._display, this);
+                const buttonIndex = (<any>pointerInfo.event).button;
+                const pointerId = (<any>pointerInfo.event).pointerId;
+                const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+
+                this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
             }
             this._currentPosition = pixelXY;
             return;
         }
         // out
         if (this._onPointerOutObservable && this._onPointerOutObservable.hasObservers()) {
-            this._onPointerOutObservable.notifyObservers(this, -1, this._display, this);
+            const buttonIndex = (<any>pointerInfo.event).button;
+            const pointerId = (<any>pointerInfo.event).pointerId;
+            const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+            this._onPointerOutObservable.notifyObservers(e, -1, this._display, this);
         }
         this._currentPosition = null;
     }
 
-    private _onPointerWheel(pointerInfo: BABYLON.PointerInfoPre): void {
+    private _onWheel(pointerInfo: BABYLON.PointerInfoPre): void {
         if (this._currentPosition) {
             pointerInfo.skipOnPointerObservable = true;
             const e = pointerInfo.event as WheelEvent;

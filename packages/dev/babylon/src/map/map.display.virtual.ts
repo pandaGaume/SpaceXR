@@ -2,7 +2,7 @@ import { Material, Scene, StandardMaterial } from "@babylonjs/core";
 import { VirtualDisplay, VirtualDisplayInputsSource } from "../display";
 import { IMapTextureOptions, WebMapTexture } from "../materials";
 import { ISize2 } from "core/geometry";
-import { IPointerSource, InputsNavigationTarget, PointerController } from "core/map";
+import { IPointerSource, IWheelSource, InputsNavigationTarget, PointerController } from "core/map";
 
 export class MapDisplay extends VirtualDisplay {
     static MaterialSuffix = "material";
@@ -10,7 +10,7 @@ export class MapDisplay extends VirtualDisplay {
 
     _map: WebMapTexture;
     _target: InputsNavigationTarget<VirtualDisplayInputsSource>;
-    _controller: PointerController<IPointerSource>;
+    _controller: PointerController<IPointerSource&IWheelSource>;
 
     constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene) {
         options = options ?? WebMapTexture.OptionsHD();

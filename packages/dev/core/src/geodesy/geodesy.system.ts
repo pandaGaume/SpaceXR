@@ -20,7 +20,6 @@ export class GeodeticSystem {
      * @param alt the reference altitude, default is zero
      * @param ellipsoid the reference ellipsoid, default is Ellipsoid.WGS84
      * @param rowOrder the matrix order returned. true is row order, false is column order. default is true, so row order.
-     * Babylonjs is row order, directX is row order, opengl is column order, threejs is column order.
      * @returns
      */
     public static GetENUTransformMatrixFromFloat(lat: number, lon: number, alt = 0, ellipsoid: Ellipsoid = Ellipsoid.WGS84, rowOrder = true): Array<number> {

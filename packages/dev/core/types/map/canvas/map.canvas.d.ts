@@ -3,7 +3,7 @@ import { TileMapBase, ITileDisplayBounds, ITileNavigationState, IImageTileMapLay
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
-import { InputsNavigationTarget, MouseInputController } from "../inputs";
+import { InputsNavigationTarget, PointerInputController } from "../inputs";
 export type CanvasTileContentType = HTMLImageElement | ImageData;
 export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
     static DefaultBackground: RGBAColor;
@@ -19,12 +19,12 @@ export declare class Context2DTileMap extends TileMapBase<CanvasTileContentType,
 }
 export interface ICanvasMapOptions extends ICanvasRenderingOptions {
     navigationManager?: InputsNavigationTarget<HTMLCanvasElement>;
-    inputController?: MouseInputController<HTMLCanvasElement>;
+    inputController?: PointerInputController<HTMLCanvasElement>;
 }
 export declare class CanvasMap extends Context2DTileMap {
     _context: Nullable<CanvasRenderingContext2D>;
     _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
-    _inputController: MouseInputController<HTMLCanvasElement>;
+    _inputController: PointerInputController<HTMLCanvasElement>;
     constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasMapOptions, nav?: ITileNavigationState);
     protected _doValidate(): void;
     protected _getContext2D(): Nullable<CanvasRenderingContext2D>;

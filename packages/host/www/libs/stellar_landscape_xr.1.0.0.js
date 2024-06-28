@@ -137,7 +137,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_map_inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map/inputs */ "../core/dist/map/inputs/map.inputs.source.js");
+/* harmony import */ var core_map_inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map/inputs */ "../core/dist/map/inputs/map.inputs.cartesian.js");
 /* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
 
 
@@ -152,17 +152,35 @@ class VirtualDisplayInputsSource {
     get display() {
         return this._display;
     }
-    get onPointerMoveObservable() {
-        if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+    get onPointerOverObservable() {
+        if (!this._onPointerOverObservable) {
+            this._onPointerOverObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
         }
-        return this._onPointerMoveObservable;
+        return this._onPointerOverObservable;
+    }
+    get onPointerEnterObservable() {
+        if (!this._onPointerEnterObservable) {
+            this._onPointerEnterObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        }
+        return this._onPointerEnterObservable;
     }
     get onPointerOutObservable() {
         if (!this._onPointerOutObservable) {
             this._onPointerOutObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
         }
         return this._onPointerOutObservable;
+    }
+    get onPointerLeaveObservable() {
+        if (!this._onPointerLeaveObservable) {
+            this._onPointerLeaveObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        }
+        return this._onPointerLeaveObservable;
+    }
+    get onPointerMoveObservable() {
+        if (!this._onPointerMoveObservable) {
+            this._onPointerMoveObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        }
+        return this._onPointerMoveObservable;
     }
     get onPointerDownObservable() {
         if (!this._onPointerDownObservable) {
@@ -176,17 +194,23 @@ class VirtualDisplayInputsSource {
         }
         return this._onPointerUpObservable;
     }
-    get onPointerClickObservable() {
-        if (!this._onPointerClickObservable) {
-            this._onPointerClickObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+    get onPointerCancelObservable() {
+        if (!this._onPointerCancelObservable) {
+            this._onPointerCancelObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
         }
-        return this._onPointerClickObservable;
+        return this._onPointerCancelObservable;
     }
-    get onPointerEnterObservable() {
-        if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+    get onPointerGotCaptureObservable() {
+        if (!this._onPointerGotCaptureObservable) {
+            this._onPointerGotCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
         }
-        return this._onPointerEnterObservable;
+        return this._onPointerGotCaptureObservable;
+    }
+    get onPointerLostCaptureObservable() {
+        if (!this._onPointerLostCaptureObservable) {
+            this._onPointerLostCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        }
+        return this._onPointerLostCaptureObservable;
     }
     get onWheelObservable() {
         if (!this._onWheelObservable) {
@@ -201,12 +225,16 @@ class VirtualDisplayInputsSource {
                 scene.onPrePointerObservable.remove(this._prePointerObserver);
             }
         }
-        this._onPointerMoveObservable?.clear();
+        this._onPointerOverObservable?.clear();
+        this._onPointerEnterObservable?.clear();
         this._onPointerOutObservable?.clear();
+        this._onPointerLeaveObservable?.clear();
+        this._onPointerMoveObservable?.clear();
         this._onPointerDownObservable?.clear();
         this._onPointerUpObservable?.clear();
-        this._onPointerClickObservable?.clear();
-        this._onPointerEnterObservable?.clear();
+        this._onPointerCancelObservable?.clear();
+        this._onPointerGotCaptureObservable?.clear();
+        this._onPointerLostCaptureObservable?.clear();
         this._onWheelObservable?.clear();
     }
     _attach() {
@@ -231,7 +259,7 @@ class VirtualDisplayInputsSource {
                 break;
             }
             case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL: {
-                this._onPointerWheel(pi);
+                this._onWheel(pi);
                 break;
             }
             default: {
@@ -272,28 +300,40 @@ class VirtualDisplayInputsSource {
                 pointerInfo.skipOnPointerObservable = true;
                 const pixelXY = this._display.getPixelToRef(current);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                    this._onPointerMoveObservable.notifyObservers(pixelXY, -1, this._display, this);
+                    const buttonIndex = pointerInfo.event.button;
+                    const pointerId = pointerInfo.event.pointerId;
+                    const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
+                    this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
                 return;
             }
             pointerInfo.skipOnPointerObservable = true;
             if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
-                this._onPointerEnterObservable.notifyObservers(this, -1, this._display, this);
+                const buttonIndex = pointerInfo.event.button;
+                const pointerId = pointerInfo.event.pointerId;
+                const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+                this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
             }
             const pixelXY = this._display.getPixelToRef(current);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                this._onPointerMoveObservable.notifyObservers(pixelXY, -1, this._display, this);
+                const buttonIndex = pointerInfo.event.button;
+                const pointerId = pointerInfo.event.pointerId;
+                const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+                this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
             }
             this._currentPosition = pixelXY;
             return;
         }
         if (this._onPointerOutObservable && this._onPointerOutObservable.hasObservers()) {
-            this._onPointerOutObservable.notifyObservers(this, -1, this._display, this);
+            const buttonIndex = pointerInfo.event.button;
+            const pointerId = pointerInfo.event.pointerId;
+            const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+            this._onPointerOutObservable.notifyObservers(e, -1, this._display, this);
         }
         this._currentPosition = null;
     }
-    _onPointerWheel(pointerInfo) {
+    _onWheel(pointerInfo) {
         if (this._currentPosition) {
             pointerInfo.skipOnPointerObservable = true;
             const e = pointerInfo.event;
@@ -6856,6 +6896,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageLayer),
 /* harmony export */   ImageLayerBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageLayerBuilder),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageTileCodec),
+/* harmony export */   InputControllerBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputControllerBase),
 /* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationTarget),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounds),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.IsDemInfos),
@@ -6908,6 +6949,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   PointerController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.PointerController),
+/* harmony export */   PointerInputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.PointerInputController),
 /* harmony export */   Polygon: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Polygon),
 /* harmony export */   Polyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Polyline),
 /* harmony export */   Power: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Power),
@@ -6976,6 +7018,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isLine: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isLine),
 /* harmony export */   isPolygon: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolygon),
 /* harmony export */   isPolyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolyline),
+/* harmony export */   isSupportingTouch: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.isSupportingTouch),
 /* harmony export */   isValidable: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.isValidable)
 /* harmony export */ });
 /* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types */ "../core/dist/types.js");
@@ -7044,7 +7087,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CanvasDisplay: () => (/* binding */ CanvasDisplay)
 /* harmony export */ });
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/display/tiles.display.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/display/tiles.display.bounds.js");
 
 class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileDisplayBounds {
     static CreateCanvas(width, height) {
@@ -7115,7 +7158,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.js");
 /* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.canvas.display */ "../core/dist/map/canvas/map.canvas.display.js");
 /* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.navigation.js");
-/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.mouse.js");
+/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.pointer.js");
 
 
 
@@ -7207,7 +7250,7 @@ class CanvasMap extends Context2DTileMap {
         super(name, display, o, nav);
         this._context = display.getContext();
         this._navigationManager = o.navigationManager ?? new _inputs__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationTarget(this);
-        this._inputController = o.inputController ?? new _inputs__WEBPACK_IMPORTED_MODULE_5__.MouseInputController(display.canvas, this._navigationManager);
+        this._inputController = o.inputController ?? new _inputs__WEBPACK_IMPORTED_MODULE_5__.PointerInputController(display.canvas, this._navigationManager);
     }
     _doValidate() {
         const ctx = this._getContext2D();
@@ -7554,9 +7597,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CanvasTileSource: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasTileSource),
 /* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian2WithInfos),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap),
+/* harmony export */   InputControllerBase: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputControllerBase),
 /* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTarget),
 /* harmony export */   MouseInputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.MouseInputController),
-/* harmony export */   PointerController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerController)
+/* harmony export */   PointerController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerController),
+/* harmony export */   PointerInputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerInputController),
+/* harmony export */   isSupportingTouch: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.isSupportingTouch)
 /* harmony export */ });
 /* harmony import */ var _canvas_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./canvas/index */ "../core/dist/map/canvas/index.js");
 /* harmony import */ var _inputs_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./inputs/index */ "../core/dist/map/inputs/index.js");
@@ -7574,19 +7620,108 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _map_inputs_source__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos),
-/* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTarget),
-/* harmony export */   MouseInputController: () => (/* reexport safe */ _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_0__.MouseInputController),
-/* harmony export */   PointerController: () => (/* reexport safe */ _map_inputs_source__WEBPACK_IMPORTED_MODULE_2__.PointerController)
+/* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_5__.Cartesian2WithInfos),
+/* harmony export */   InputControllerBase: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__.InputControllerBase),
+/* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationTarget),
+/* harmony export */   MouseInputController: () => (/* reexport safe */ _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_1__.MouseInputController),
+/* harmony export */   PointerController: () => (/* reexport safe */ _map_inputs_source__WEBPACK_IMPORTED_MODULE_6__.PointerController),
+/* harmony export */   PointerInputController: () => (/* reexport safe */ _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_3__.PointerInputController),
+/* harmony export */   isSupportingTouch: () => (/* reexport safe */ _map_inputs_interfaces__WEBPACK_IMPORTED_MODULE_0__.isSupportingTouch)
 /* harmony export */ });
-/* harmony import */ var _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.mouse */ "../core/dist/map/inputs/map.inputs.mouse.js");
-/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.navigation */ "../core/dist/map/inputs/map.inputs.navigation.js");
-/* harmony import */ var _map_inputs_source__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.source */ "../core/dist/map/inputs/map.inputs.source.js");
+/* harmony import */ var _map_inputs_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces */ "../core/dist/map/inputs/map.inputs.interfaces.js");
+/* harmony import */ var _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.mouse */ "../core/dist/map/inputs/map.inputs.mouse.js");
+/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.navigation */ "../core/dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.inputs.pointer */ "../core/dist/map/inputs/map.inputs.pointer.js");
+/* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.inputs.controller */ "../core/dist/map/inputs/map.inputs.controller.js");
+/* harmony import */ var _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.inputs.cartesian */ "../core/dist/map/inputs/map.inputs.cartesian.js");
+/* harmony import */ var _map_inputs_source__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.inputs.source */ "../core/dist/map/inputs/map.inputs.source.js");
+
+
+
 
 
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.cartesian.js":
+/*!*******************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.cartesian.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Cartesian2WithInfos: () => (/* binding */ Cartesian2WithInfos)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+
+class Cartesian2WithInfos extends _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian2 {
+    constructor(x, y, buttonIndex, pointerId) {
+        super(x, y);
+        this.x = x;
+        this.y = y;
+        this._buttonIndex = buttonIndex ?? -1;
+        this._pointerId = pointerId;
+    }
+    get buttonIndex() {
+        return this._buttonIndex;
+    }
+    get pointerId() {
+        return this._pointerId;
+    }
+}
+//# sourceMappingURL=map.inputs.cartesian.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.controller.js":
+/*!********************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.controller.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   InputControllerBase: () => (/* binding */ InputControllerBase)
+/* harmony export */ });
+class InputControllerBase {
+    constructor(src, target) {
+        this._src = src;
+        this._target = target;
+    }
+    get target() {
+        return this._target;
+    }
+    get source() {
+        return this._src;
+    }
+    dispose() {
+        this._detachControl(this._src);
+    }
+    _attachControl(src) { }
+    _detachControl(src) { }
+}
+//# sourceMappingURL=map.inputs.controller.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.interfaces.js":
+/*!********************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.interfaces.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   isSupportingTouch: () => (/* binding */ isSupportingTouch)
+/* harmony export */ });
+function isSupportingTouch() {
+    return window.matchMedia("(hover: none)").matches || "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+//# sourceMappingURL=map.inputs.interfaces.js.map
 
 /***/ }),
 
@@ -7600,34 +7735,33 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MouseInputController: () => (/* binding */ MouseInputController)
 /* harmony export */ });
-class MouseInputController {
+/* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.controller */ "../core/dist/map/inputs/map.inputs.controller.js");
+
+class MouseInputController extends _map_inputs_controller__WEBPACK_IMPORTED_MODULE_0__.InputControllerBase {
     constructor(src, target) {
-        this._src = src;
-        this._target = target;
+        super(src, target);
         this._ctxMenu = (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
         };
         this._mouseDown = ((ev) => {
-            this._target?.onPointerDown(this._src, ev.clientX, ev.clientY, ev.button);
+            this.target?.onPointerDown(this.source, ev.clientX, ev.clientY, ev.button);
         }).bind(this);
         this._mouseMove = ((ev) => {
-            this._target?.onPointerMove(this._src, ev.clientX, ev.clientY);
+            this.target?.onPointerMove(this.source, ev.clientX, ev.clientY);
         }).bind(this);
         this._mouseUp = ((ev) => {
-            this._target?.onPointerUp(this._src, ev.clientX, ev.clientY, ev.button);
+            this.target?.onPointerUp(this.source, ev.clientX, ev.clientY, ev.button);
         }).bind(this);
         this._wheel = ((ev) => {
-            this._target?.onWheel(this._src, ev.deltaY);
+            this.target?.onWheel(this.source, ev.deltaY);
         }).bind(this);
-        if (this._src) {
-            this._attachControl(this._src);
-        }
-    }
-    dispose() {
-        if (this._src) {
-            this._detachControl(this._src);
-        }
+        this._pointerDown = (ev) => {
+            const e = ev.target;
+            if (e?.hasPointerCapture(ev.pointerId)) {
+                e?.releasePointerCapture(ev.pointerId);
+            }
+        };
     }
     _attachControl(src) {
         src.addEventListener("contextmenu", this._ctxMenu);
@@ -7635,6 +7769,7 @@ class MouseInputController {
         src.addEventListener("mousemove", this._mouseMove);
         src.addEventListener("mouseup", this._mouseUp);
         src.addEventListener("wheel", this._wheel);
+        src.addEventListener("pointerdown", this._pointerDown);
     }
     _detachControl(src) {
         src.removeEventListener("contextmenu", this._ctxMenu);
@@ -7642,6 +7777,7 @@ class MouseInputController {
         src.removeEventListener("mousemove", this._mouseMove);
         src.removeEventListener("mouseup", this._mouseUp);
         src.removeEventListener("wheel", this._wheel);
+        src.removeEventListener("pointerdown", this._pointerDown);
     }
 }
 //# sourceMappingURL=map.inputs.mouse.js.map
@@ -7669,6 +7805,11 @@ class InputsNavigationTarget {
         this._isDragging = false;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT;
     }
+    onPointerOver(src, x, y, id) { }
+    onPointerLeave(src, x, y, id) { }
+    onPointerCancel(src, x, y, id) { }
+    onPointerGotCapture(src, x, y, id) { }
+    onPointerLostCapture(src, x, y, id) { }
     get target() {
         return this._target;
     }
@@ -7682,7 +7823,7 @@ class InputsNavigationTarget {
         delta = this._zoomIncrement ? (delta < 0 ? this._zoomIncrement : -this._zoomIncrement) : delta;
         this._target.zoomMap(delta);
     }
-    onPointerMove(src, x, y) {
+    onPointerMove(src, x, y, id) {
         if (this._isDragging) {
             const dx = x - this._offsetX;
             const dy = y - this._offsetY;
@@ -7691,25 +7832,25 @@ class InputsNavigationTarget {
             this.onDrag(src, dx, dy, this._button);
         }
     }
-    onPointerExit(src, x, y) {
+    onPointerOut(src, x, y, id) {
     }
-    onPointerDown(src, x, y, buttonIndex) {
+    onPointerDown(src, x, y, buttonIndex, id) {
         this._offsetX = this._startX = x;
         this._offsetY = this._startY = y;
         this._button = buttonIndex;
         this._isDragging = true;
         this.onBeginDrag(src, this._offsetX, this._offsetY, this._button);
     }
-    onPointerUp(src, x, y, buttonIndex) {
+    onPointerUp(src, x, y, buttonIndex, id) {
         this._isDragging = false;
         const dx = x - this._offsetX;
         const dy = y - this._offsetY;
         this.onEndDrag(src, dx, dy, this._button);
     }
-    onPointerClick(src, x, y, buttonIndex) { }
-    onPointerEnter(src, x, y) { }
-    onBeginDrag(src, dx, dy, buttonIndex) { }
-    onDrag(src, dx, dy, buttonIndex) {
+    onPointerClick(src, x, y, buttonIndex, id) { }
+    onPointerEnter(src, x, y, id) { }
+    onBeginDrag(src, dx, dy, buttonIndex, id) { }
+    onDrag(src, dx, dy, buttonIndex, id) {
         switch (buttonIndex) {
             case 0: {
                 this._target.translateUnitsMap(-dx, -dy);
@@ -7721,10 +7862,110 @@ class InputsNavigationTarget {
             }
         }
     }
-    onEndDrag(src, dx, dy, buttonIndex) { }
+    onEndDrag(src, dx, dy, buttonIndex, id) { }
 }
 InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT = 0.1;
 //# sourceMappingURL=map.inputs.navigation.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.pointer.js":
+/*!*****************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.pointer.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PointerInputController: () => (/* binding */ PointerInputController)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.controller */ "../core/dist/map/inputs/map.inputs.controller.js");
+
+class PointerInputController extends _map_inputs_controller__WEBPACK_IMPORTED_MODULE_0__.InputControllerBase {
+    constructor(src, target) {
+        super(src, target);
+        this._events = [];
+        this._ctxMenu = this._onContextMenu.bind(this);
+        this._over = this._onPointerOver.bind(this);
+        this._enter = this._onPointerEnter.bind(this);
+        this._leave = this._onPointerLeave.bind(this);
+        this._out = this._onPointerOut.bind(this);
+        this._down = this._onPointerDown.bind(this);
+        this._up = this._onPointerUp.bind(this);
+        this._move = this._onPointerMove.bind(this);
+        this._cancel = this._onPointerCancel.bind(this);
+        this._gotCapture = this._onGotCapture.bind(this);
+        this._lostCapture = this._onLostCapture.bind(this);
+        this._wheel = this._onWheel.bind(this);
+        this._attachControl(src);
+    }
+    _attachControl(src) {
+        src.addEventListener("contextmenu", this._ctxMenu);
+        src.addEventListener("pointerover", this._over);
+        src.addEventListener("pointerenter", this._enter);
+        src.addEventListener("pointerleave", this._leave);
+        src.addEventListener("pointerout", this._out);
+        src.addEventListener("pointerdown", this._down);
+        src.addEventListener("pointerup", this._up);
+        src.addEventListener("pointermove", this._move);
+        src.addEventListener("pointercancel", this._cancel);
+        src.addEventListener("gotpointercapture", this._gotCapture);
+        src.addEventListener("lostpointercapture", this._lostCapture);
+        src.addEventListener("wheel", this._wheel);
+    }
+    _detachControl(src) {
+        src.removeEventListener("contextmenu", this._ctxMenu);
+        src.removeEventListener("pointerover", this._over);
+        src.removeEventListener("pointerenter", this._enter);
+        src.removeEventListener("pointerleave", this._leave);
+        src.removeEventListener("pointerout", this._out);
+        src.removeEventListener("pointerdown", this._down);
+        src.removeEventListener("pointerup", this._up);
+        src.removeEventListener("pointermove", this._move);
+        src.removeEventListener("pointercancel", this._cancel);
+        src.removeEventListener("gotpointercapture", this._gotCapture);
+        src.removeEventListener("lostpointercapture", this._lostCapture);
+        src.removeEventListener("wheel", this._wheel);
+    }
+    _onContextMenu(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+    _onPointerOver(ev) {
+        this.target?.onPointerOver(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onPointerEnter(ev) {
+        this.target?.onPointerEnter(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onPointerLeave(ev) {
+        this.target?.onPointerLeave(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onPointerOut(ev) {
+        this.target?.onPointerOut(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onPointerDown(ev) {
+        this.target?.onPointerDown(this.source, ev.clientX, ev.clientY, ev.button, ev.pointerId);
+    }
+    _onPointerUp(ev) {
+        this.target?.onPointerUp(this.source, ev.clientX, ev.clientY, ev.button, ev.pointerId);
+    }
+    _onPointerMove(ev) {
+        this.target?.onPointerMove(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onPointerCancel(ev) {
+        this.target?.onPointerCancel(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onGotCapture(ev) {
+        this.target?.onPointerGotCapture(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onLostCapture(ev) {
+        this.target?.onPointerLostCapture(this.source, ev.clientX, ev.clientY, ev.pointerId);
+    }
+    _onWheel(ev) {
+        this.target?.onWheel(this.source, ev.deltaY);
+    }
+}
+//# sourceMappingURL=map.inputs.pointer.js.map
 
 /***/ }),
 
@@ -7736,28 +7977,14 @@ InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT = 0.1;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Cartesian2WithInfos: () => (/* binding */ Cartesian2WithInfos),
 /* harmony export */   PointerController: () => (/* binding */ PointerController)
 /* harmony export */ });
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.navigation */ "../core/dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.navigation */ "../core/dist/map/inputs/map.inputs.navigation.js");
 
-
-class Cartesian2WithInfos extends _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian2 {
-    constructor(x, y, buttonIndex) {
-        super(x, y);
-        this.x = x;
-        this.y = y;
-        this._buttonIndex = buttonIndex ?? -1;
-    }
-    get buttonIndex() {
-        return this._buttonIndex;
-    }
-}
 class PointerController {
     constructor(src, target) {
         this._src = src;
-        this._target = target instanceof _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTarget ? target : new _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTarget(target);
+        this._target = target instanceof _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationTarget ? target : new _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationTarget(target);
         this._attachControl(this._src);
     }
     dispose() {
@@ -7786,13 +8013,13 @@ class PointerController {
         }
     }
     _onPointerMove(v, e) {
-        this._target?.onPointerMove(this._src, v.x, v.y);
+        this._target?.onPointerMove(this._src, v.x, v.y, v.pointerId);
     }
     _onPointerDown(v, e) {
-        this._target?.onPointerDown(this._src, v.x, v.y, v.buttonIndex);
+        this._target?.onPointerDown(this._src, v.x, v.y, v.buttonIndex ?? -1, v.pointerId);
     }
     _onPointerUp(v, e) {
-        this._target?.onPointerUp(this._src, v.x, v.y, v.buttonIndex);
+        this._target?.onPointerUp(this._src, v.x, v.y, v.buttonIndex ?? -1, v.pointerId);
     }
     _onWheel(v, e) {
         this._target?.onWheel(this._src, v);
@@ -10190,18 +10417,18 @@ DebugProvider.DEFAULT_NAMESPACE = "DebugProvider";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TileDisplayBounds: () => (/* reexport safe */ _tiles_display__WEBPACK_IMPORTED_MODULE_0__.TileDisplayBounds)
+/* harmony export */   TileDisplayBounds: () => (/* reexport safe */ _tiles_display_bounds__WEBPACK_IMPORTED_MODULE_0__.TileDisplayBounds)
 /* harmony export */ });
-/* harmony import */ var _tiles_display__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.display */ "../core/dist/tiles/display/tiles.display.js");
+/* harmony import */ var _tiles_display_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.display.bounds */ "../core/dist/tiles/display/tiles.display.bounds.js");
 
 //# sourceMappingURL=index.js.map
 
 /***/ }),
 
-/***/ "../core/dist/tiles/display/tiles.display.js":
-/*!***************************************************!*\
-  !*** ../core/dist/tiles/display/tiles.display.js ***!
-  \***************************************************/
+/***/ "../core/dist/tiles/display/tiles.display.bounds.js":
+/*!**********************************************************!*\
+  !*** ../core/dist/tiles/display/tiles.display.bounds.js ***!
+  \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -10257,7 +10484,7 @@ class TileDisplayBounds extends _geometry__WEBPACK_IMPORTED_MODULE_0__.Size2 {
         return this;
     }
 }
-//# sourceMappingURL=tiles.display.js.map
+//# sourceMappingURL=tiles.display.bounds.js.map
 
 /***/ }),
 
@@ -15103,6 +15330,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.ImageLayer),
 /* harmony export */   ImageLayerBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.ImageLayerBuilder),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.ImageTileCodec),
+/* harmony export */   InputControllerBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.InputControllerBase),
 /* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationTarget),
 /* harmony export */   IsBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsBounds),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsDemInfos),
@@ -15162,6 +15390,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.PlaneDefinition),
 /* harmony export */   PointerController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.PointerController),
+/* harmony export */   PointerInputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.PointerInputController),
 /* harmony export */   Polygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Polygon),
 /* harmony export */   Polyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Polyline),
 /* harmony export */   Power: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Power),
@@ -15241,6 +15470,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isLine),
 /* harmony export */   isPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isPolygon),
 /* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isPolyline),
+/* harmony export */   isSupportingTouch: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isSupportingTouch),
 /* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isValidable)
 /* harmony export */ });
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");

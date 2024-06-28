@@ -2,7 +2,7 @@ import { Nullable, Scene, TransformNode, Node, Color4 } from "@babylonjs/core";
 import { IHasNavigationState, IHasTileMapLayerContainer, ITileMapLayer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi, ITileNavigationState } from "core/tiles";
 import { IGeo2 } from "core/geography";
 import { ISize2 } from "core/geometry";
-import { CanvasTileSourceSourceContentType, IPointerSource, PointerController } from "core/map";
+import { CanvasTileSourceSourceContentType, IPointerSource, IWheelSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
 import { ElevationLayer } from "./map.elevation.layer";
@@ -61,7 +61,7 @@ export declare class Map3d extends TransformNode implements IHasTileMapLayerCont
     withDisplay(display: HolographicDisplay): Map3d;
     protected _searchForDisplay(node: Nullable<Node>): Nullable<HolographicDisplay>;
     protected _createNavigationState(): ITileNavigationState;
-    protected _withPointerControl(controller: PointerController<IPointerSource> | IPointerSource): Map3d;
+    protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): Map3d;
     protected _onLayerAdded(layer: ITileMapLayer<Map3dContentType>): void;
     protected _onLayerRemoved(layer: ITileMapLayer<Map3dContentType>): void;
     protected _updateNavigationBounds(): void;

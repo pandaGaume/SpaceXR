@@ -167,7 +167,7 @@
                 // build layer and add it to the map
                 const filter = new SPACEXR.MedianFilter(3,30);
                 const demOptions = {
-                    // filter: filter
+                    //filter: filter
                 }
                 let client = SPACEXR.MapZen.DemClient(demOptions);
                 const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(map);

@@ -1,0 +1,17 @@
+.navigation {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.navigation a {
+    margin: 0 10px;
+    padding: 10px 15px;
+    background-color: #73d9ff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.navigation a:hover {
+    background-color: #3c7ac0;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Accueil - Mon Blog</title>
+        <link rel="stylesheet" href="./styles/commons.css" />
+        <link rel="stylesheet" href="./styles/home.css" />
+        <link rel="icon" href="./images/ave_galaxar_favicon.png" type="image/png" />
+    </head>
+    <body>
+        <header>
+            <div class="header-container">
+                <img src="./images/png_logo.png" alt="Logo du blog" class="logo" />
+                <h1>A 3D Space Blog.</h1>
+            </div>
+        </header>
+
+        <main>
+            <section class="intro">
+                <h2>welcome to my world!</h2>
+                <p>bla bla bla .</p>
+            </section>
+            <section class="posts-grid">
+                <article class="post">
+                    <img src="./images/introduction_thumb.jpg" alt="Introduction" onerror="setFallbackImage(this)" />
+                    <h2>Introduction</h2>
+                    <p>Why Ave Galaxar</p>
+                    <a href="introduction.html" class="read-more">read more...</a>
+                </article>
+
+                <article class="post">
+                    <img src="./images/post2_thumb.jpg" alt="Chapitre 2" onerror="setFallbackImage(this)" />
+                    <h2>Post 2</h2>
+                    <p>Ceci est une courte description du deuxième chapitre de mon blog.</p>
+                    <a href="post2.html" class="read-more">read more...</a>
+                </article>
+
+                <article class="post">
+                    <img src="./images/post3_thumb.jpg" alt="Chapitre 3" onerror="setFallbackImage(this)" />
+                    <h2>Post 3</h2>
+                    <p>Ceci est une courte description du troisième chapitre de mon blog.</p>
+                    <a href="post3.html" class="read-more">read more...</a>
+                </article>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Guillaume Pelletier.</p>
+        </footer>
+
+        <script>
+            function setFallbackImage(img, src) {
+                img.onerror = null; // Prevent infinite loop if fallback image also fails
+                img.src = src ?? "./images/png_logomark.png";
+            }
+        </script>
+    </body>
+</html>

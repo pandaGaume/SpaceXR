@@ -32,10 +32,15 @@ export interface ITilePipelineLink<T> extends IDisposable {
 export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
+export interface ITileMipMapping {
+    split?(tile: ITileAddress): void;
+    stitch?(...tile: Array<ITileAddress>): void;
+}
+export declare function IsTileMipMapping(b: unknown): b is ITileMipMapping;
 export interface ITileSelectionContext {
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
 }
-export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext {
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext, ITileMipMapping {
 }
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
     addProvider(provider: ITileProvider<T>): void;

@@ -46,6 +46,18 @@ export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
 
+export interface ITileMipMapping {
+    // split the tile into 4 tiles
+    split?(tile: ITileAddress): void;
+    // replace tile with it's parent
+    stitch?(...tile: Array<ITileAddress>): void;
+}
+
+export function IsTileMipMapping(b: unknown): b is ITileMipMapping {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileMipMapping>b).split !== undefined && (<ITileMipMapping>b).stitch !== undefined;
+}
+
 export interface ITileSelectionContext {
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
 }
@@ -58,7 +70,7 @@ export interface ITileSelectionContext {
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext {}
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext, ITileMipMapping {}
 
 export interface ITileProducer<T> extends ITilePipelineComponent, ITargetBlock<ITileAddress>, ISourceBlock<ITile<T>> {
     addProvider(provider: ITileProvider<T>): void;

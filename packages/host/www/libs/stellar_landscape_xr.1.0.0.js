@@ -6915,6 +6915,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMapLayerBuilder),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMetricsProvider),
+/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileNavigationState),
 /* harmony export */   IsTilePipelineBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTilePipelineBuilder),
@@ -11076,6 +11077,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerBuilder: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerBuilder),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileMetricsProvider),
+/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationState),
 /* harmony export */   IsTilePipelineBuilder: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTilePipelineBuilder),
@@ -12466,6 +12468,7 @@ class TileNavigationStateSynchronizer {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTargetBlock),
+/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileMipMapping),
 /* harmony export */   IsTilePipelineBuilder: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTilePipelineBuilder),
 /* harmony export */   TileConsumerBase: () => (/* reexport safe */ _tiles_pipeline_consumer__WEBPACK_IMPORTED_MODULE_0__.TileConsumerBase),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _providers_tiles_provider_content__WEBPACK_IMPORTED_MODULE_3__.TileContentProvider),
@@ -12673,12 +12676,18 @@ class TileConsumerBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* binding */ IsTargetBlock),
+/* harmony export */   IsTileMipMapping: () => (/* binding */ IsTileMipMapping),
 /* harmony export */   IsTilePipelineBuilder: () => (/* binding */ IsTilePipelineBuilder)
 /* harmony export */ });
 function IsTargetBlock(b) {
     if (b === null || typeof b !== "object")
         return false;
     return b.added !== undefined && b.removed !== undefined && b.updated !== undefined;
+}
+function IsTileMipMapping(b) {
+    if (b === null || typeof b !== "object")
+        return false;
+    return b.split !== undefined && b.stitch !== undefined;
 }
 function IsTilePipelineBuilder(b) {
     if (b === null || typeof b !== "object")
@@ -15349,6 +15358,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileMapLayerBuilder),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileMetricsProvider),
+/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileNavigationState),
 /* harmony export */   IsTilePipelineBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTilePipelineBuilder),

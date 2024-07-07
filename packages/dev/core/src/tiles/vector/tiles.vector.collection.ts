@@ -3,23 +3,31 @@ import { Cartesian3, IBounds2, ICartesian3 } from "../../geometry";
 import { Polygon } from "../../geometry/shapes/geometry.polygon";
 import { Polyline } from "../../geometry/shapes/geometry.polyline";
 import { Line } from "../../geometry/shapes/geometry.line";
-import { IShape, ShapeType } from "../../geometry/shapes/geometry.shapes.interfaces";
+import { IShape, isShape, ShapeType } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { Nullable } from "../../types";
 import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
-import { DecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.vector.decorated";
+import { DecoratedShape } from "./tiles.vector.decorated";
 import { ShapeLayerInputContentType } from "./tiles.vector.layer";
-import { IShapeView } from "./tiles.vector.interfaces";
+import { isDecoratedShape, IShapeDrawOptions, IShapeView, ShapeViewCoordinateMode } from "./tiles.vector.interfaces";
 
 class ShapeView extends DecoratedShape<IShape> implements IShapeView {
     private _source: Nullable<IGeoShape | IShape>;
     private _lod: number;
+    private _cmode: ShapeViewCoordinateMode;
 
-    public constructor(shape: Nullable<IGeoShape | IShape>, view: IShape, lod: number, options: Nullable<IShapeDrawOptions>) {
+    public constructor(
+        source: Nullable<IGeoShape | IShape>,
+        view: IShape,
+        lod: number,
+        options: Nullable<IShapeDrawOptions>,
+        cmode: ShapeViewCoordinateMode = ShapeViewCoordinateMode.World
+    ) {
         super(view, options);
-        this._source = shape;
+        this._source = source;
         this._lod = lod;
+        this._cmode = cmode ?? ShapeViewCoordinateMode.World;
     }
 
     public get source(): Nullable<IGeoShape | IShape> {
@@ -30,8 +38,12 @@ class ShapeView extends DecoratedShape<IShape> implements IShapeView {
         return this._lod;
     }
 
+    public get coordinateMode(): ShapeViewCoordinateMode {
+        return this._cmode;
+    }
+
     public get bounds(): IBounds2 | undefined {
-        return this.shape?.bounds;
+        return this.value?.bounds;
     }
 
     public get geoBounds(): IEnvelope | undefined {
@@ -102,14 +114,16 @@ export class ShapeViewCollection implements ITileMetricsProvider {
 
     protected _buildView(decorated: ShapeLayerInputContentType, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
         if (isDecoratedShape(decorated)) {
-            const s = this._buildShape(decorated.shape, lod, metrics);
+            const s = this._buildShape(decorated.value, lod, metrics);
             if (s) {
-                return new ShapeView(decorated.shape, s, lod, decorated.options);
+                const mode = isShape(decorated.value) ? ShapeViewCoordinateMode.Local : ShapeViewCoordinateMode.World;
+                return new ShapeView(decorated.value, s, lod, decorated.options, mode);
             }
         } else {
             const s = this._buildShape(decorated, lod, metrics);
             if (s) {
-                return new ShapeView(decorated, s, lod, null);
+                const mode = isShape(decorated) ? ShapeViewCoordinateMode.Local : ShapeViewCoordinateMode.World;
+                return new ShapeView(decorated, s, lod, null, mode);
             }
         }
         return null;

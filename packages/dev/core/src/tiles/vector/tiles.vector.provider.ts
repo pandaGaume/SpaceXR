@@ -26,7 +26,7 @@ export class ShapeProvider extends AbstractTileProvider<Array<ShapeLayerOutputCo
         const collection = this._source.get(lod);
         if (collection?.geoBounds?.intersects(tile.geoBounds)) {
             for (const view of collection) {
-                if (view.shape.bounds?.intersects(tile.bounds)) {
+                if (view.value.bounds?.intersects(tile.bounds)) {
                     tile.content.push(view);
                 }
             }

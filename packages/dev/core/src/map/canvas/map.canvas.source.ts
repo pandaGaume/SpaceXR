@@ -321,9 +321,6 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                 for (const t of view.tiles) {
                     b = t.bounds;
                     if (b) {
-                        const x = b.x - sx;
-                        const y = b.y - sy;
-
                         if (isDrawableTileMapLayer(view.layer)) {
                             view.layer.draw?.call(view.layer, ctx, sx, sy, t);
                             if (this._debug) {
@@ -331,6 +328,8 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                             }
                             continue;
                         }
+                        const x = b.x - sx;
+                        const y = b.y - sy;
 
                         const item = t.content ?? null; // trick to address erroness tile.
                         if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {

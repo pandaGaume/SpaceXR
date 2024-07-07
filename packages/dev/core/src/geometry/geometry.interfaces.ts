@@ -21,9 +21,19 @@ export interface ICartesian4 {
     toString(): string;
 }
 
+export function isCartesian(b: unknown): b is ICartesian2 | ICartesian3 | ICartesian4 {
+    if (typeof b !== "object" || b === null) return false;
+    return (<ICartesian3>b).x !== undefined && (<ICartesian3>b).y !== undefined;
+}
+
 export function isCartesian3(b: unknown): b is ICartesian3 {
     if (typeof b !== "object" || b === null) return false;
     return (<ICartesian3>b).x !== undefined && (<ICartesian3>b).y !== undefined && (<ICartesian3>b).z !== undefined;
+}
+
+export function isCartesian4(b: unknown): b is ICartesian4 {
+    if (typeof b !== "object" || b === null) return false;
+    return (<ICartesian4>b).x !== undefined && (<ICartesian4>b).y !== undefined && (<ICartesian4>b).z !== undefined && (<ICartesian4>b).w !== undefined;
 }
 
 export interface ISize2 {

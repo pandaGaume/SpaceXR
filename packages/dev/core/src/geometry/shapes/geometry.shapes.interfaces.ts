@@ -1,14 +1,24 @@
 import { IBounded, ICartesian3 } from "../geometry.interfaces";
 
 export enum ShapeType {
-    Circle,
-    Line,
+    Unknown,
+    Point,
     Polyline,
     Polygon,
+    Circle,
+    Line,
 }
 
 export interface IShape extends IBounded {
     type: ShapeType;
+}
+
+export function isShape(value: any): value is IShape {
+    return value && value.type !== undefined && ShapeType[value.type] !== undefined;
+}
+
+export interface IPoint extends IShape {
+    position: ICartesian3;
 }
 
 export interface ICircle extends IShape {

@@ -20,6 +20,7 @@ export declare class KnownPlaces {
         Kilimanjaro: Geo2;
         Elbrus: Geo2;
         PuncakJaya: Geo2;
+        Roraima: Geo2;
     };
     static Volcanoes: {
         Krakatoa: Geo2;

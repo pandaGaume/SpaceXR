@@ -10,7 +10,6 @@ import { CanvasDisplay } from "./map.canvas.display";
 
 export type CanvasTileSourceTargetContentType = ImageLayerContentType;
 export type CanvasTileSourceSourceContentType = any;
-//export type CanvasTileSourceSourceContentType = ImageLayerContentType | ShapeLayerContentType ;
 
 class LayerView {
     constructor(

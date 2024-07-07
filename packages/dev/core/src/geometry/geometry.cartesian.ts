@@ -152,8 +152,12 @@ export class Cartesian3 implements ICartesian3 {
     public static Zero() {
         return new Cartesian3(0, 0, 0);
     }
-    public static FromArray(array: Float32Array, index: number): ICartesian3 {
-        return new Cartesian3(array[index], array[index + 1], array[index + 2]);
+    public static FromArray(array: Float32Array | Array<number>, offset: number = 0, stride: number = 3): ICartesian3 {
+        let i = 0;
+        const x = array[offset + i];
+        const y = i < stride ? array[offset + ++i] : 0;
+        const z = i < stride ? array[offset + ++i] : 0;
+        return new Cartesian3(x, y, z);
     }
 
     public static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {

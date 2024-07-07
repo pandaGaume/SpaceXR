@@ -1,0 +1,33 @@
+import { Bounds2 } from "../geometry.bounds";
+import { Cartesian3 } from "../geometry.cartesian";
+import { IBounds2, ICartesian3, isCartesian } from "../geometry.interfaces";
+import { AbstractShape } from "./geometry.shape";
+import { IPoint, ShapeType } from "./geometry.shapes.interfaces";
+
+export class Point extends AbstractShape implements IPoint {
+    _position: ICartesian3;
+
+    public constructor(a: ICartesian3 | number, b?: number, c?: number) {
+        super(ShapeType.Point);
+        if (isCartesian(a)) {
+            this._position = a;
+        } else {
+            this._position = new Cartesian3(a, b ?? 0, c ?? 0);
+        }
+    }
+
+    public get position(): ICartesian3 {
+        return this._position;
+    }
+
+    public set position(v: ICartesian3) {
+        if (Cartesian3.Equals(v, this._position) == false) {
+            this._position = v;
+            this.invalidateBounds();
+        }
+    }
+
+    protected _buildBounds(): IBounds2 | undefined {
+        return Bounds2.FromPoints(this._position);
+    }
+}

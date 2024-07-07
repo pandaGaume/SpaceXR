@@ -12,8 +12,11 @@ export class KnownPlaces {
         for (const [category, locations] of Object.entries(places)) {
             const optgroup = document.createElement("optgroup");
             optgroup.label = category;
-
-            for (const [name, coords] of Object.entries(<any>locations)) {
+            // Convert the object into an array of entries
+            const entries = Object.entries(<any>locations);
+            // Sort the entries alphabetically by the key
+            const sortedEntries = entries.sort((a, b) => a[0].localeCompare(b[0]));
+            for (const [name, coords] of sortedEntries) {
                 const option = document.createElement("option");
                 option.value = Geo2.ToString(coords as IGeo2);
                 option.text = name;
@@ -48,6 +51,7 @@ export class KnownPlaces {
         Kilimanjaro: new Geo2(-3.0674, 37.3556), // Kilimanjaro, Africa
         Elbrus: new Geo2(43.3499, 42.4375), // Mount Elbrus, Caucasus
         PuncakJaya: new Geo2(-4.0751, 137.1889), // Puncak Jaya, Indonesia
+        Roraima: new Geo2(5.125, -60.75), // Mount Roraima, Guiana Highlands
     };
 
     public static Volcanoes = {

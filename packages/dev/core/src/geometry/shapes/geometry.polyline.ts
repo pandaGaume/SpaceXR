@@ -4,6 +4,7 @@ import { AbstractShape } from "./geometry.shape";
 import { IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Polyline extends AbstractShape implements IPolyline {
+
     _points: Array<ICartesian3>;
 
     public constructor(p: Array<ICartesian3>, type?: ShapeType) {

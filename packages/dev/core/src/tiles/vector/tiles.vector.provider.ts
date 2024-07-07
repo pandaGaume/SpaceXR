@@ -1,10 +1,10 @@
 import { ICartesian3 } from "../../geometry";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
-import { ShapeLayerOutputContentType } from "../map/tiles.map.interfaces";
 import { AbstractTileProvider } from "../providers";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
-import { ShapeLayerInputContentType } from "./tiles.geography.layer.shape";
-import { IShapeView, ShapeViewCollection } from "./tiles.geography.shape.collection";
+import { ShapeLayerInputContentType } from "./tiles.vector.layer";
+import { ShapeViewCollection } from "./tiles.vector.collection";
+import { IShapeView, ShapeLayerOutputContentType } from "./tiles.vector.interfaces";
 
 export class ShapeProvider extends AbstractTileProvider<Array<ShapeLayerOutputContentType>> {
     static readonly DEFAULT_NAMESPACE = "ShapeProvider";

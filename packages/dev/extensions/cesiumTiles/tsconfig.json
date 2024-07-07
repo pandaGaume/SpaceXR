@@ -1,0 +1,20 @@
+{
+    "extends": "../../../../tsconfig.json",
+    "name": "spacexr-cesium",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declarationDir": "./types",
+        "skipLibCheck": true,
+        // paths are used to resolve modules
+        "paths": {
+            "core/*": ["./dev/core/src/*"],
+            "stellar/*": ["./dev/babylon/src/*"]
+        }
+    },
+    // you MUST use reference to the core tsconfig and the babylon tsconfig
+    "references": [{ "path": "../../core" }, { "path": "../../babylon" }],
+    "include": ["./src/**/*.ts"],
+    "exclude": ["**/node_modules", "**/dist", "**/types"]
+}

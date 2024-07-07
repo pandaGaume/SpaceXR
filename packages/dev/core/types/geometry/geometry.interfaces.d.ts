@@ -17,7 +17,9 @@ export interface ICartesian4 {
     w: number;
     toString(): string;
 }
+export declare function isCartesian(b: unknown): b is ICartesian2 | ICartesian3 | ICartesian4;
 export declare function isCartesian3(b: unknown): b is ICartesian3;
+export declare function isCartesian4(b: unknown): b is ICartesian4;
 export interface ISize2 {
     height: number;
     width: number;

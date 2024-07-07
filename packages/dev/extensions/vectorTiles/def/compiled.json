@@ -1,0 +1,147 @@
+{
+  "nested": {
+    "vector_tile": {
+      "options": {
+        "optimize_for": "LITE_RUNTIME"
+      },
+      "nested": {
+        "Tile": {
+          "fields": {
+            "layers": {
+              "rule": "repeated",
+              "type": "Layer",
+              "id": 3
+            }
+          },
+          "extensions": [
+            [
+              16,
+              8191
+            ]
+          ],
+          "nested": {
+            "GeomType": {
+              "values": {
+                "UNKNOWN": 0,
+                "POINT": 1,
+                "LINESTRING": 2,
+                "POLYGON": 3
+              }
+            },
+            "Value": {
+              "fields": {
+                "stringValue": {
+                  "type": "string",
+                  "id": 1
+                },
+                "floatValue": {
+                  "type": "float",
+                  "id": 2
+                },
+                "doubleValue": {
+                  "type": "double",
+                  "id": 3
+                },
+                "intValue": {
+                  "type": "int64",
+                  "id": 4
+                },
+                "uintValue": {
+                  "type": "uint64",
+                  "id": 5
+                },
+                "sintValue": {
+                  "type": "sint64",
+                  "id": 6
+                },
+                "boolValue": {
+                  "type": "bool",
+                  "id": 7
+                }
+              },
+              "extensions": [
+                [
+                  8,
+                  536870911
+                ]
+              ]
+            },
+            "Feature": {
+              "fields": {
+                "id": {
+                  "type": "uint64",
+                  "id": 1,
+                  "options": {
+                    "default": 0
+                  }
+                },
+                "tags": {
+                  "rule": "repeated",
+                  "type": "uint32",
+                  "id": 2
+                },
+                "type": {
+                  "type": "GeomType",
+                  "id": 3,
+                  "options": {
+                    "default": "UNKNOWN"
+                  }
+                },
+                "geometry": {
+                  "rule": "repeated",
+                  "type": "uint32",
+                  "id": 4
+                }
+              }
+            },
+            "Layer": {
+              "fields": {
+                "version": {
+                  "rule": "required",
+                  "type": "uint32",
+                  "id": 15,
+                  "options": {
+                    "default": 1
+                  }
+                },
+                "name": {
+                  "rule": "required",
+                  "type": "string",
+                  "id": 1
+                },
+                "features": {
+                  "rule": "repeated",
+                  "type": "Feature",
+                  "id": 2
+                },
+                "keys": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 3
+                },
+                "values": {
+                  "rule": "repeated",
+                  "type": "Value",
+                  "id": 4
+                },
+                "extent": {
+                  "type": "uint32",
+                  "id": 5,
+                  "options": {
+                    "default": 4096
+                  }
+                }
+              },
+              "extensions": [
+                [
+                  16,
+                  536870911
+                ]
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

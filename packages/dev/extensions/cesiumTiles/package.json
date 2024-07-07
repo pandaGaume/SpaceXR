@@ -1,0 +1,29 @@
+{
+    "name": "spacexr-cesium",
+    "version": "1.0.0",
+    "main": "dist/index",
+    "module": "dist/index",
+    "esnext": "dist/index",
+    "types": "dist/index",
+    "private": true,
+    "files": [
+        "./src"
+    ],
+    "scripts": {
+        "build:cesium:dev": "npm run clean:cesium && npm run compile:cesium",
+        "clean:cesium": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+        "compile:cesium": "npm run compile:cesium:source",
+        "compile:cesium:source": "tsc --project tsconfig.json",
+        "webpack:cesium:dev": "webpack --mode development",
+        "copy:cesium:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
+        "publish:cesium:dev": "npm run build:cesium:dev && npm run webpack:cesium:dev && npm run copy:cesium:bundle"
+    },
+    "sideEffects": false,
+    "devDependencies": {
+        "rimraf": "^4.4.1"
+    },
+    "dependencies": {
+        "protobufjs": "^7.3.2",
+        "protobufjs-cli": "^1.1.2"
+    }
+}

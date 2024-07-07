@@ -1,19 +1,20 @@
 import { IGeoShape } from "dev/core/src/geography";
-import { IDrawableTileMapLayer, IShapeLayer, ITileMapLayerOptions, ShapeLayerOutputContentType, TileMapLayerDrawFn } from "../map/tiles.map.interfaces";
+import { IDrawableTileMapLayer, ITileMapLayerOptions, TileMapLayerDrawFn } from "../map/tiles.map.interfaces";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 
 import { TileMapLayer } from "../map";
-import { ShapeProvider } from "./tiles.geography.shape.provider";
+import { ShapeProvider } from "./tiles.vector.provider";
 import { IShape, isLine, isPolygon, isPolyline } from "../../geometry/shapes/geometry.shapes.interfaces";
-import { EPSG3857 } from "./tiles.geography.EPSG3857";
+import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
-import { IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.shape.decorated";
 import { Nullable } from "../../types";
+import { IDecoratedShape, isDecoratedShape, IShapeDrawOptions } from "./tiles.vector.decorated";
+import { IShapeLayer, ShapeLayerOutputContentType } from "./tiles.vector.interfaces";
 
 export type ShapeLayerContentType = Array<ShapeLayerOutputContentType>;
-export type ShapeLayerInputContentType = IGeoShape | IDecoratedShape<IGeoShape>;
+export type ShapeLayerInputContentType = IGeoShape | IDecoratedShape<IGeoShape> | IShape | IDecoratedShape<IShape>;
 
 export interface IShapeLayerOptions extends IShapeDrawOptions, ITileMapLayerOptions {
     metrics?: ITileMetrics;

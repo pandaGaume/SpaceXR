@@ -33,7 +33,7 @@ export declare class Cartesian3 implements ICartesian3 {
     static ConvertToRef(value: ICartesian3 | ICartesian4, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3;
     static Centroid(values: Array<ICartesian3>, ref?: ICartesian3): ICartesian3;
     static Zero(): Cartesian3;
-    static FromArray(array: Float32Array, index: number): ICartesian3;
+    static FromArray(array: Float32Array | Array<number>, offset?: number, stride?: number): ICartesian3;
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     constructor(x: number, y: number, z: number);
     toString(): string;

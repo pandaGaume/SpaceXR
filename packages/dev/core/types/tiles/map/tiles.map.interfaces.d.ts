@@ -6,8 +6,6 @@ import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { ISize2 } from "../../geometry";
-import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
-import { IDecoratedShape } from "../geography/tiles.geography.shape.decorated";
 export interface ITileDisplayBounds extends ISize2, IDisposable {
     propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
     ratio?: number;
@@ -34,9 +32,6 @@ export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvas
 export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement | ImageData>, IImageTileMapLayerOptions {
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
-}
-export type ShapeLayerOutputContentType = IShape | IDecoratedShape<IShape>;
-export interface IShapeLayer extends ITileMapLayer<Array<ShapeLayerOutputContentType>>, IDrawableTileMapLayer<Array<ShapeLayerOutputContentType>> {
 }
 export interface ITileMapLayerBuilder<T, L extends ITileMapLayer<T>> {
     name: string;

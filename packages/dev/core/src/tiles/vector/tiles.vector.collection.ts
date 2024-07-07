@@ -1,32 +1,28 @@
-import { GeoBoundedCollection, GeoShapeType, IEnvelope, IGeo2, IGeoBounded, IGeoCircle, IGeoLine, IGeoPolygon, IGeoPolyline, IGeoShape } from "../../geography";
-import { Cartesian3, IBounded, IBounds2, ICartesian3 } from "../../geometry";
+import { GeoBoundedCollection, GeoShapeType, IEnvelope, IGeo2, IGeoCircle, IGeoLine, IGeoPolygon, IGeoPolyline, IGeoShape, isGeoShape } from "../../geography";
+import { Cartesian3, IBounds2, ICartesian3 } from "../../geometry";
 import { Polygon } from "../../geometry/shapes/geometry.polygon";
 import { Polyline } from "../../geometry/shapes/geometry.polyline";
 import { Line } from "../../geometry/shapes/geometry.line";
-import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
+import { IShape, ShapeType } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { Nullable } from "../../types";
 import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
-import { DecoratedShape, IDecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.geography.shape.decorated";
-import { ShapeLayerInputContentType } from "./tiles.geography.layer.shape";
-
-export interface IShapeView extends IDecoratedShape<IShape>, IGeoBounded, IBounded {
-    source: IGeoShape;
-    lod: number;
-}
+import { DecoratedShape, IShapeDrawOptions, isDecoratedShape } from "./tiles.vector.decorated";
+import { ShapeLayerInputContentType } from "./tiles.vector.layer";
+import { IShapeView } from "./tiles.vector.interfaces";
 
 class ShapeView extends DecoratedShape<IShape> implements IShapeView {
-    private _source: IGeoShape;
+    private _source: Nullable<IGeoShape | IShape>;
     private _lod: number;
 
-    public constructor(shape: IGeoShape, view: IShape, lod: number, options: Nullable<IShapeDrawOptions>) {
+    public constructor(shape: Nullable<IGeoShape | IShape>, view: IShape, lod: number, options: Nullable<IShapeDrawOptions>) {
         super(view, options);
         this._source = shape;
         this._lod = lod;
     }
 
-    public get source(): IGeoShape {
+    public get source(): Nullable<IGeoShape | IShape> {
         return this._source;
     }
 
@@ -39,7 +35,7 @@ class ShapeView extends DecoratedShape<IShape> implements IShapeView {
     }
 
     public get geoBounds(): IEnvelope | undefined {
-        return this.source?.geoBounds;
+        return isGeoShape(this.source) ? this.source.geoBounds : undefined;
     }
 }
 
@@ -119,7 +115,7 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         return null;
     }
 
-    protected _buildShape(shape: IGeoShape, lod: number, metrics: ITileMetrics): Nullable<IShape> {
+    protected _buildShape(shape: IGeoShape | IShape, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         switch (shape.type) {
             case GeoShapeType.Circle: {
                 return this._buildCircle(shape as IGeoCircle, lod, metrics);
@@ -133,8 +129,17 @@ export class ShapeViewCollection implements ITileMetricsProvider {
             case GeoShapeType.Polyline: {
                 return this._buildPolyline(shape as IGeoPolyline, lod, metrics);
             }
+            case ShapeType.Circle:
+            case ShapeType.Line:
+            case ShapeType.Polyline:
+            case ShapeType.Polygon:
+            case ShapeType.Point: {
+                return shape as IShape;
+            }
+            default: {
+                return null;
+            }
         }
-        return null;
     }
 
     protected _buildCircle(shape: IGeoCircle, lod: number, metrics: ITileMetrics): Nullable<IShape> {

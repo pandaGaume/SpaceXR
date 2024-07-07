@@ -8,6 +8,7 @@ export * from "./address/index";
 export * from "./display/index";
 export * from "./geography/index";
 export * from "./debug/index";
+export * from "./vector/index";
 
 export * from "./tiles.interfaces";
 export * from "./tiles.metrics";

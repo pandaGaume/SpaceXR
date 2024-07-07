@@ -14390,19 +14390,11 @@ class ShapeLayer extends _map__WEBPACK_IMPORTED_MODULE_0__.TileMapLayer {
     draw(ctx, x, y, tile) {
         if (tile.content) {
             for (const content of tile.content) {
-                if ((0,_tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_4__.isDecoratedShape)(content)) {
-                    if (content.coordinateMode === _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_4__.ShapeViewCoordinateMode.World) {
-                        this._draw(ctx, x, y, content.value, content.options);
-                        continue;
-                    }
-                    this._draw(ctx, 0, 0, content.value, content.options);
-                    continue;
-                }
                 if (content.coordinateMode === _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_4__.ShapeViewCoordinateMode.World) {
-                    this._draw(ctx, x, y, content.value, null);
+                    this._draw(ctx, x, y, content.value, content.options);
                     continue;
                 }
-                this._draw(ctx, 0, 0, content.value, null);
+                this._draw(ctx, 0, 0, content.value, content.options);
                 continue;
             }
         }

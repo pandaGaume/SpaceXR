@@ -10,7 +10,7 @@ import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
 import { Nullable } from "../../types";
-import { IDecoratedShape, isDecoratedShape, IShapeDrawOptions, IShapeLayer, ShapeLayerOutputContentType, ShapeViewCoordinateMode } from "./tiles.vector.interfaces";
+import { IDecoratedShape, IShapeDrawOptions, IShapeLayer, ShapeLayerOutputContentType, ShapeViewCoordinateMode } from "./tiles.vector.interfaces";
 
 export type ShapeLayerContentType = Array<ShapeLayerOutputContentType>;
 export type ShapeLayerInputContentType = IGeoShape | IDecoratedShape<IGeoShape> | IShape | IDecoratedShape<IShape>;
@@ -94,19 +94,11 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
     public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<Array<ShapeLayerOutputContentType>>): void {
         if (tile.content) {
             for (const content of tile.content) {
-                if (isDecoratedShape<ShapeLayerOutputContentType>(content)) {
-                    if (content.coordinateMode === ShapeViewCoordinateMode.World) {
-                        this._draw(ctx, x, y, content.value, content.options);
-                        continue;
-                    }
-                    this._draw(ctx, 0, 0, content.value, content.options);
-                    continue;
-                }
                 if (content.coordinateMode === ShapeViewCoordinateMode.World) {
-                    this._draw(ctx, x, y, content.value, null);
+                    this._draw(ctx, x, y, content.value, content.options);
                     continue;
                 }
-                this._draw(ctx, 0, 0, content.value, null);
+                this._draw(ctx, 0, 0, content.value, content.options);
                 continue;
             }
         }

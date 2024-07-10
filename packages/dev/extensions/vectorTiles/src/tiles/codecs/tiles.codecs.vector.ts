@@ -77,6 +77,13 @@ message ${__messageName__} {
         extensions 16 to 8191;
 }`;
 
+enum VectorTileGeomType {
+    UNKNOWN = 0,
+    POINT = 1,
+    LINESTRING = 2,
+    POLYGON = 3,
+}
+
 export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
     static _messageDefinition = PROTOBUF.parse(__vector_proto_definition__).root.lookupType(__messageName__);
     public static Shared = new VectorTileCodec();
@@ -100,7 +107,7 @@ export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
         if (!l) {
             return null;
         }
-        const layers = new Map<string, IVectorTileLayer>(mess.layers.length);
+        const layers = new Map<string, IVectorTileLayer>();
         for (const layer of mess.layers) {
             layers.set(layer.name, this._toVectorTileLayer(layer));
         }
@@ -139,11 +146,11 @@ export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
     protected _toShape(mess: any): any {
         // this is the place to convert the PROTOBUF message to the IShape
         switch (mess.type) {
-            case 1:
+            case VectorTileGeomType.POINT:
                 return this._toPoint(mess);
-            case 2:
+            case VectorTileGeomType.LINESTRING:
                 return this._toPolyline(mess);
-            case 3:
+            case VectorTileGeomType.POLYGON:
                 return this._toPolygon(mess);
             default:
                 return null;

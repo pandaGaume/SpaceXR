@@ -1,4 +1,5 @@
-import { ITileMetrics, Tile, TileContentType } from "core/tiles";
+import { Tile } from "../tiles";
+import { ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { IVectorTileContent } from "./tiles.vector.interfaces";
 
 export class VectorTile extends Tile<IVectorTileContent> {

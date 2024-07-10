@@ -1,27 +1,16 @@
-import { IGeoShape } from "dev/core/src/geography";
-import { IDrawableTileMapLayer, ITileMapLayerOptions, TileMapLayerDrawFn } from "../map/tiles.map.interfaces";
-import { ITile, ITileMetrics } from "../tiles.interfaces";
+import { IDrawableTileMapLayer, TileMapLayerDrawFn } from "../map/tiles.map.interfaces";
+import { ITile } from "../tiles.interfaces";
 
 import { TileMapLayer } from "../map";
-import { ShapeProvider } from "./tiles.vector.provider";
-import { IShape, isLine, isPolygon, isPolyline } from "../../geometry/shapes/geometry.shapes.interfaces";
+import { VectorTileProvider } from "./tiles.vector.provider";
+import { isLine, isPolygon, isPolyline } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
-import { Nullable } from "../../types";
-import { IDecoratedShape, IShapeDrawOptions, IShapeLayer, ShapeLayerOutputContentType, ShapeViewCoordinateMode } from "./tiles.vector.interfaces";
+import { IVectorTileDrawOptions, IVectorLayer, IVectorTileContent, IVectorLayerOptions, IVectorTileLayer, IVectorTileFeature } from "./tiles.vector.interfaces";
 
-export type ShapeLayerContentType = Array<ShapeLayerOutputContentType>;
-export type ShapeLayerInputContentType = IGeoShape | IDecoratedShape<IGeoShape> | IShape | IDecoratedShape<IShape>;
-
-export interface IShapeLayerOptions extends IShapeDrawOptions, ITileMapLayerOptions {
-    metrics?: ITileMetrics;
-    tolerance?: number;
-    highestQuality?: boolean;
-}
-
-export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements IShapeLayer, IDrawableTileMapLayer<ShapeLayerContentType> {
+export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVectorLayer, IDrawableTileMapLayer<IVectorTileContent>, IVectorTileDrawOptions {
     public static DefaultStrokeStyle = "red";
     public static DefaultFillStyle = "grey";
     public static DefaultOpacity = 1;
@@ -35,33 +24,33 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
     protected _fill?: boolean;
     protected _fillColor?: string;
     protected _fillOpacity?: number;
-    protected _debug?: TileMapLayerDrawFn<ShapeLayerContentType>;
+    protected _debug?: TileMapLayerDrawFn<IVectorTileContent>;
 
-    public constructor(name: string, options?: IShapeLayerOptions, provider?: ShapeProvider, enabled?: boolean) {
+    public constructor(name: string, options?: IVectorLayerOptions, provider?: VectorTileProvider, enabled?: boolean) {
         if (provider === undefined) {
             const metrics = options?.metrics ?? EPSG3857.Shared;
             if (options?.highestQuality !== undefined || options?.tolerance !== undefined) {
-                provider = new ShapeProvider(name, metrics, new PolylineSimplifier(options.tolerance, options.highestQuality));
+                provider = new VectorTileProvider(name, metrics, new PolylineSimplifier(options.tolerance, options.highestQuality));
             } else {
-                provider = new ShapeProvider(name, metrics);
+                provider = new VectorTileProvider(name, metrics);
             }
         }
         super(name, provider, options, enabled);
         this._dashArray = options?.dashArray;
         this._color = options?.color;
-        this._opacity = options?.opacity ?? ShapeLayer.DefaultOpacity;
+        this._opacity = options?.opacity ?? VectorLayer.DefaultOpacity;
         this._weight = options?.weight;
         this._stroke = options?.stroke === undefined ? true : options.stroke;
         this._fill = options?.fill === undefined ? true : options.fill;
         this._fillColor = options?.fillColor;
-        this._fillOpacity = options?.fillOpacity ?? ShapeLayer.DefaultOpacity;
+        this._fillOpacity = options?.fillOpacity ?? VectorLayer.DefaultOpacity;
     }
 
-    public get debug(): TileMapLayerDrawFn<ShapeLayerContentType> | undefined {
+    public get debug(): TileMapLayerDrawFn<IVectorTileContent> | undefined {
         return this._debug;
     }
 
-    public set debug(value: TileMapLayerDrawFn<ShapeLayerContentType> | undefined) {
+    public set debug(value: TileMapLayerDrawFn<IVectorTileContent> | undefined) {
         this._debug = value;
     }
 
@@ -91,57 +80,64 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
         return this._fillOpacity;
     }
 
-    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<Array<ShapeLayerOutputContentType>>): void {
+    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<IVectorTileContent>): void {
         if (tile.content) {
-            for (const content of tile.content) {
-                if (content.coordinateMode === ShapeViewCoordinateMode.World) {
-                    this._draw(ctx, x, y, content.value, content.options);
-                    continue;
-                }
-                this._draw(ctx, 0, 0, content.value, content.options);
+            for (const [key, layer] of tile.content) {
+                this._drawLayer(ctx, 0, 0, key, layer);
                 continue;
             }
         }
     }
 
-    public addShapes(...shapes: Array<ShapeLayerInputContentType>): void {
-        const provider = this.provider as ShapeProvider;
-        provider.addShapes(...shapes);
+    protected _getOptions(layer: string): IVectorTileDrawOptions {
+        return this;
     }
 
-    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, shape: IShape, options: Nullable<IShapeDrawOptions>): void {
+    protected _drawLayer(ctx: ICanvasRenderingContext, x: number, y: number, key: string, layer: IVectorTileLayer): void {
+        const drawOptions = this._getOptions(key);
+        for (const feature of layer.features ?? []) {
+            this._drawFeature(ctx, x, y, feature, drawOptions);
+        }
+    }
+
+    protected _drawFeature(ctx: ICanvasRenderingContext, x: number, y: number, feature: IVectorTileFeature, drawOptions?: IVectorTileDrawOptions): void {
+        if (!feature.shape) {
+            return;
+        }
+        const shape = feature.shape;
+
         if (isLine(shape)) {
-            this._drawPolyline(ctx, x, y, [shape.start, shape.end], options);
+            this._drawPolyline(ctx, x, y, [shape.start, shape.end], drawOptions);
             return;
         }
 
         if (isPolyline(shape)) {
-            this._drawPolyline(ctx, x, y, shape.points, options);
+            this._drawPolyline(ctx, x, y, shape.points, drawOptions);
             return;
         }
 
         if (isPolygon(shape)) {
-            this._drawPolygon(ctx, x, y, shape.points, options);
+            this._drawPolygon(ctx, x, y, shape.points, drawOptions);
             return;
         }
     }
 
-    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options: Nullable<IShapeDrawOptions>, close: boolean = false): void {
+    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IVectorTileDrawOptions, close: boolean = false): void {
         const o = options ?? this;
         if (o.dashArray) {
             ctx.setLineDash(o.dashArray);
         }
-        ctx.strokeStyle = o.color ?? ShapeLayer.DefaultStrokeStyle;
-        ctx.lineWidth = o.weight ?? ShapeLayer.DefaultWeight;
+        ctx.strokeStyle = o.color ?? VectorLayer.DefaultStrokeStyle;
+        ctx.lineWidth = o.weight ?? VectorLayer.DefaultWeight;
         this._drawPath(ctx, x, y, points, close);
         ctx.stroke();
     }
 
-    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options: Nullable<IShapeDrawOptions>): void {
+    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IVectorTileDrawOptions): void {
         const o = options ?? this;
         if (o.fill) {
-            ctx.fillStyle = o.fillColor ?? ShapeLayer.DefaultFillStyle;
-            ctx.globalAlpha = o.fillOpacity ?? ShapeLayer.DefaultOpacity;
+            ctx.fillStyle = o.fillColor ?? VectorLayer.DefaultFillStyle;
+            ctx.globalAlpha = o.fillOpacity ?? VectorLayer.DefaultOpacity;
             this._drawPath(ctx, x, y, points, true);
             ctx.fill();
         }
@@ -149,9 +145,9 @@ export class ShapeLayer extends TileMapLayer<ShapeLayerContentType> implements I
             if (o.dashArray) {
                 ctx.setLineDash(o.dashArray);
             }
-            ctx.strokeStyle = o.color ?? ShapeLayer.DefaultStrokeStyle;
-            ctx.globalAlpha = o.opacity ?? ShapeLayer.DefaultOpacity;
-            ctx.lineWidth = o.weight ?? ShapeLayer.DefaultWeight;
+            ctx.strokeStyle = o.color ?? VectorLayer.DefaultStrokeStyle;
+            ctx.globalAlpha = o.opacity ?? VectorLayer.DefaultOpacity;
+            ctx.lineWidth = o.weight ?? VectorLayer.DefaultWeight;
             // draw the path if not previously done
             if (!this._fill) {
                 this._drawPath(ctx, x, y, points, true);

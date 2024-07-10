@@ -1,56 +1,82 @@
-import { ICartesian3 } from "../../geometry";
+import { ICartesian3, IShape } from "../../geometry";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { AbstractTileProvider } from "../providers";
-import { ITile, ITileMetrics } from "../tiles.interfaces";
-import { ShapeLayerInputContentType } from "./tiles.vector.layer";
-import { ShapeViewCollection } from "./tiles.vector.collection";
-import { IShapeView, ShapeLayerOutputContentType } from "./tiles.vector.interfaces";
+import { ITileMetrics } from "../tiles.interfaces";
+import { ShapeCollection } from "./tiles.vector.collection";
+import { IVectorTile, IVectorTileContent, IVectorTileFeature, IVectorTileLayer } from "./tiles.vector.interfaces";
+import { IGeoShape } from "../../geography";
 
-export class ShapeProvider extends AbstractTileProvider<Array<ShapeLayerOutputContentType>> {
-    static readonly DEFAULT_NAMESPACE = "ShapeProvider";
-    _source: ShapeViewCollection;
+export class VectorTileProvider extends AbstractTileProvider<IVectorTileContent> {
+    static readonly DEFAULT_NAMESPACE = "VectorProvider";
+    static readonly DEFAULT_VERSION = 2;
 
-    public constructor(namespace: string, metrics: ITileMetrics | ShapeViewCollection, simplifier?: PolylineSimplifier<ICartesian3>) {
+    _source: Map<string, ShapeCollection>;
+    _simplifier?: PolylineSimplifier<ICartesian3>;
+
+    public constructor(namespace: string, metrics: ITileMetrics, simplifier?: PolylineSimplifier<ICartesian3>) {
         super();
-        this._source = metrics instanceof ShapeViewCollection ? metrics : new ShapeViewCollection(metrics, simplifier);
-        this._source.addedObservable.add(this._shapesAdded.bind(this));
-        this.factory.withMetrics(this._source.metrics).withNamespace(namespace ?? ShapeProvider.DEFAULT_NAMESPACE); // ensure the factory has the right metrics and namespace to build bounds.
+        this._source = new Map<string, ShapeCollection>();
+        this._simplifier = simplifier;
+        this.factory.withMetrics(metrics).withNamespace(namespace ?? VectorTileProvider.DEFAULT_NAMESPACE); // ensure the factory has the right metrics and namespace to build bounds.
     }
 
-    public _fetchContent(
-        tile: ITile<Array<ShapeLayerOutputContentType>>,
-        callback: (t: ITile<Array<ShapeLayerOutputContentType>>) => void
-    ): ITile<Array<ShapeLayerOutputContentType>> {
-        tile.content = [];
+    public _fetchContent(tile: IVectorTile, callback: (t: IVectorTile) => void): IVectorTile {
+        tile.content = new Map<string, IVectorTileLayer>();
         const lod = tile.address.levelOfDetail;
-        const collection = this._source.get(lod);
-        if (collection?.geoBounds?.intersects(tile.geoBounds)) {
-            for (const view of collection) {
-                if (view.value.bounds?.intersects(tile.bounds)) {
-                    tile.content.push(view);
+        for (const [key, collection] of this._source) {
+            const logGroup = collection.get(lod);
+            if (logGroup?.bounds?.intersects(tile.bounds)) {
+                for (const shape of logGroup) {
+                    if (shape.bounds?.intersects(tile.bounds)) {
+                        let layer = tile.content.get(key);
+                        if (!layer) {
+                            layer = this._buildVectorLayer(VectorTileProvider.DEFAULT_VERSION, key);
+                            tile.content.set(key, layer);
+                        }
+                        const feature = this._buildVectorFeature(tile, shape);
+                        if (!layer.features) {
+                            layer.features = [];
+                        }
+                        layer.features?.push(feature);
+                    }
                 }
             }
         }
         return tile;
     }
 
-    public addShapes(...shapes: Array<ShapeLayerInputContentType>): void {
-        let lod = this._source.metrics.maxLOD;
+    protected _buildVectorLayer(version: number, name: string): IVectorTileLayer {
+        throw new Error("Method not implemented.");
+    }
+
+    protected _buildVectorFeature(target: IVectorTile, shape: IShape): IVectorTileFeature {
+        throw new Error("Method not implemented.");
+    }
+
+    public addShapes(layerName: string, ...shapes: Array<IGeoShape>): void {
+        let lod = this.metrics.maxLOD;
         do {
-            if (!this._source.trySet(lod, ...shapes)) {
+            let group = this._source.get(layerName);
+            if (!group) {
+                group = new ShapeCollection(this.metrics, this._simplifier);
+                group.addedObservable.add(this._shapesAdded.bind(this));
+                this._source.set(layerName, group);
+            }
+            if (!group.trySet(lod, ...shapes)) {
+                // we break the loop if we failed to add the shapes at this Level of Detail
                 break;
             }
             lod--;
-        } while (lod >= this._source.metrics.minLOD);
+        } while (lod >= this.metrics.minLOD);
     }
 
-    protected _shapesAdded(shape: Array<IShapeView>): void {
+    protected _shapesAdded(shape: Array<IShape>): void {
         for (const view of shape) {
             this._shapeAdded(view);
         }
     }
 
-    protected _shapeAdded(view: IShapeView): void {
+    protected _shapeAdded(view: IShape): void {
         for (const tile of this.activTiles) {
             if (tile.address.levelOfDetail === view.lod && tile.geoBounds?.intersects(view.geoBounds)) {
                 tile.content = tile.content ?? [];

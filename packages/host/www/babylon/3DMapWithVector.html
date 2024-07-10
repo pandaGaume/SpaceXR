@@ -10,6 +10,7 @@
         <!--script src="../libs/babylon.glTF2FileLoader.min.js"></script-->
 
         <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+        <script src="../libs/spacexr_vector.1.0.0.js"></script>
 
         <style>
             html,
@@ -181,16 +182,20 @@
                 client = SPACEXR.Google.SatelliteClient2d();
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
 
+                // build vector layer
+                const shapeLayerOptions = {
+                    color: "green",
+                    weight: 2,
+                    fillOpacity: 0.5,
+                }
+
+                client = SPACEXR.MapBox.VectorClient("pk.eyJ1IjoiZ2F1bWUiLCJhIjoiY2x5YnU3aDV0MDhmazJvc2dqbW04ZmJpZSJ9.aAV34t1dOedP_NAY56Cn-g");
+                const shapeLayer = new SPACEXR.ShapeLayer("shapeLayer", shapeLayerOptions, client).addTo(map);
 
                 fillSelectedPlaceOption(document.getElementById("placesSelect"),SPACEXR.KnownPlaces, (name, coord) => {
                     map.setViewMap(coord, defaultLod);
                 });
 
-                /*const material = demLayer.material;
-                const debugLayerOptions = {
-                    function:material?.debug
-                }
-                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
 
                 const showAxes = false;
                 if (showAxes) {

@@ -1,4 +1,4 @@
-var SPACEXR;
+var SPACEXR_VECTOR;
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
@@ -9543,7 +9543,7 @@ class VectorTileCodec {
         if (!l) {
             return null;
         }
-        const layers = new Map(mess.layers.length);
+        const layers = new Map();
         for (const layer of mess.layers) {
             layers.set(layer.name, this._toVectorTileLayer(layer));
         }
@@ -9619,6 +9619,8 @@ VectorTileCodec.Shared = new VectorTileCodec();
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.MapBoxTileSetIds),
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.MapBoxVectorUrlBuilder),
 /* harmony export */   VectorTile: () => (/* reexport safe */ _tiles_vector__WEBPACK_IMPORTED_MODULE_0__.VectorTile),
 /* harmony export */   VectorTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_2__.VectorTileCodec),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType)
@@ -9626,6 +9628,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vector */ "./dist/tiles/tiles.vector.js");
 /* harmony import */ var _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vector.interfaces */ "./dist/tiles/tiles.vector.interfaces.js");
 /* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./codecs */ "./dist/tiles/codecs/index.js");
+/* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/vendors/index.js");
+
 
 
 
@@ -9673,6 +9677,60 @@ class VectorTile extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
     }
 }
 //# sourceMappingURL=tiles.vector.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/vendors/index.js":
+/*!*************************************!*\
+  !*** ./dist/tiles/vendors/index.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBoxTileSetIds),
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBoxVectorUrlBuilder)
+/* harmony export */ });
+/* harmony import */ var _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapbox */ "./dist/tiles/vendors/tiles.vendors.mapbox.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/vendors/tiles.vendors.mapbox.js":
+/*!****************************************************!*\
+  !*** ./dist/tiles/vendors/tiles.vendors.mapbox.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBoxTileSetIds: () => (/* binding */ MapBoxTileSetIds),
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* binding */ MapBoxVectorUrlBuilder)
+/* harmony export */ });
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.js");
+
+
+class MapBoxVectorUrlBuilder extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+    constructor(token, tileSetIds, extension = "mvt") {
+        super();
+        this.withHost("api.mapbox.com").withSecure(true).withQuery(`access_token=${token}`).withPath(`v4/${tileSetIds}/{z}/{x}/{y}.{extension}`).withExtension(extension);
+    }
+}
+var MapBoxTileSetIds;
+(function (MapBoxTileSetIds) {
+    MapBoxTileSetIds["StreetsV8"] = "mapbox.mapbox-streets-v8";
+    MapBoxTileSetIds["Terrain"] = "mapbox.mapbox-terrain-v2";
+    MapBoxTileSetIds["Outdoors"] = "mapbox.mapbox-outdoors-v11";
+    MapBoxTileSetIds["Traffic"] = "mapbox.mapbox-traffic-v1";
+})(MapBoxTileSetIds || (MapBoxTileSetIds = {}));
+core_tiles__WEBPACK_IMPORTED_MODULE_0__.MapBox.VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, options) {
+    const metrics = new core_tiles__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: core_tiles__WEBPACK_IMPORTED_MODULE_0__.MapBox.MaxLevelOfDetail, tileSize: 512 });
+    return new core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(), metrics, options);
+};
+//# sourceMappingURL=tiles.vendors.mapbox.js.map
 
 /***/ }),
 
@@ -9774,6 +9832,8 @@ var __webpack_exports__ = {};
   \***********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapBoxTileSetIds),
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapBoxVectorUrlBuilder),
 /* harmony export */   VectorTile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTile),
 /* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileGeomType)
@@ -9783,7 +9843,7 @@ __webpack_require__.r(__webpack_exports__);
 //# sourceMappingURL=index.js.map
 })();
 
-SPACEXR = __webpack_exports__;
+SPACEXR_VECTOR = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=spacexr_vector.1.0.0.js.map

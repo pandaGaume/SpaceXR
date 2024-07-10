@@ -7,7 +7,7 @@ import { WebTileUrlBuilder } from "../tiles.urlBuilder";
 import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 
 export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
-    // https://api.mapbox.com/raster/v1/mapbox.mapbox-terrain-dem-v1/14/8800/5372.webp?sku=101iNLHSEcgVj&access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY5YzJzczA2ejIzM29hNGQ3emFsMXgifQ.az9JUrQP7klCgD3W-ueILQ
+    // https://api.mapbox.com/raster/v1/mapbox.mapbox-terrain-dem-v1/14/8800/5372.webp?sku=101iNLHSEcgVj&access_token={token}
     public constructor(token: string, extension = "webp") {
         super();
         this.withHost("api.mapbox.com")

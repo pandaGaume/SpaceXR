@@ -1,29 +1,13 @@
-import { IGeoBounded, IGeoShape } from "../../geography";
-import { IBounded, IShape } from "../../geometry";
-import { Nullable } from "../../types";
-import { IDrawableTileMapLayer, ITileMapLayer } from "../map";
+import { IShape, ISize2 } from "../../geometry";
+import { IDrawableTileMapLayer, ITileMapLayer, ITileMapLayerOptions } from "../map";
+import { ITile, ITileMetrics } from "../tiles.interfaces";
 
-export enum ShapeViewCoordinateMode {
-    Local,
-    World,
-}
-
-export interface IShapeView extends IDecoratedShape<IShape>, IGeoBounded, IBounded {
-    source: Nullable<IGeoShape | IShape>;
-    lod: number;
-    coordinateMode: ShapeViewCoordinateMode;
-}
-
-export type ShapeLayerOutputContentType = IShapeView; //IShape | IDecoratedShape<IShape>;
-
-export interface IShapeLayer extends ITileMapLayer<Array<ShapeLayerOutputContentType>>, IDrawableTileMapLayer<Array<ShapeLayerOutputContentType>> {}
-
-export interface IShapeDrawOptions {
+export interface IVectorTileDrawOptions {
     /// <summary>
     /// A boolean value that specifies whether to draw the shape stroke.
     /// Set it to false to disable border on polygons or circles.
     /// </summary>
-    stroke: boolean;
+    stroke?: boolean;
 
     /// <summary>
     /// An Array of numbers that specify distances to alternately draw a line and a gap (in coordinate space units).
@@ -52,12 +36,35 @@ export interface IShapeDrawOptions {
     fillOpacity?: number;
 }
 
-export interface IDecoratedShape<T> {
-    value: T;
-    options: Nullable<IShapeDrawOptions>;
+export interface IVectorTileFeature {
+    id?: number;
+    tags: Array<number>;
+    shape: IShape;
 }
 
-export function isDecoratedShape<T>(b: any): b is IDecoratedShape<T> {
-    if (typeof b !== "object" || b === null) return false;
-    return b.value !== undefined && b.options !== undefined;
+export interface IVectorTileLayer {
+    // A layer MUST contain a version field with the major version number of the Vector Tile specification to which the layer adheres
+    version: number;
+    // A layer MUST contain a name field. A Vector Tile MUST NOT contain two or more layers whose name values are byte-for-byte identical
+    name: string;
+    // A layer SHOULD contain at least one feature.
+    features?: Array<IVectorTileFeature>;
+    // Each feature in a layer may have one or more key-value pairs as its metadata
+    metadata?: Map<string, any>;
+    // A layer MUST contain an extent that describes the width and height of the tile in integer coordinates.
+    extent: ISize2;
+}
+
+// A Vector Tile consists of a set of named layers.
+// A layer contains geometric features and their metadata.
+export type IVectorTileContent = Map<string, IVectorTileLayer>;
+
+export interface IVectorTile extends ITile<IVectorTileContent> {}
+
+export interface IVectorLayer extends ITileMapLayer<IVectorTileContent>, IDrawableTileMapLayer<IVectorTileContent> {}
+
+export interface IVectorLayerOptions extends IVectorTileDrawOptions, ITileMapLayerOptions {
+    metrics?: ITileMetrics;
+    tolerance?: number;
+    highestQuality?: boolean;
 }

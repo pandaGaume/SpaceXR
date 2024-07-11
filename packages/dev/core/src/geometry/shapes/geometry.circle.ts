@@ -2,7 +2,7 @@ import { Bounds2 } from "../geometry.bounds";
 import { Cartesian3 } from "../geometry.cartesian";
 import { IBounds2, ICartesian3 } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
-import { ICircle, ShapeType } from "./geometry.shapes.interfaces";
+import { ICircle, IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Circle extends AbstractShape implements ICircle {
     _center: ICartesian3;

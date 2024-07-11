@@ -1,5 +1,6 @@
 export * from "./geometry.shapes.interfaces";
 export * from "./geometry.shape";
+export * from "./geometry.shapes.clip";
 export * from "./geometry.circle";
 export * from "./geometry.polygon";
 export * from "./geometry.polyline";

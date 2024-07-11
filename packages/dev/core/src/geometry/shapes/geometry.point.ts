@@ -27,6 +27,14 @@ export class Point extends AbstractShape implements IPoint {
         }
     }
 
+    public clip(clipArea: IBounds2): IPoint | Array<IPoint> | undefined {
+        let code = this._position.computeCode(clipArea);
+        if (code == 0) {
+            return this;
+        }
+        return undefined;
+    }
+
     protected _buildBounds(): IBounds2 | undefined {
         return Bounds2.FromPoints(this._position);
     }

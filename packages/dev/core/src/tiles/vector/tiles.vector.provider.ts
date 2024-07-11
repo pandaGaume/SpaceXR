@@ -49,8 +49,23 @@ export class VectorTileProvider extends AbstractTileProvider<IVectorTileContent>
         throw new Error("Method not implemented.");
     }
 
-    protected _buildVectorFeature(target: IVectorTile, shape: IShape): IVectorTileFeature {
-        throw new Error("Method not implemented.");
+    protected _buildVectorFeature(target: IVectorTile, shape: IShape): IVectorTileFeature | undefined {
+        // given a shape, we need to build a feature
+        const clipArea = target.bounds;
+        const shapeBounds = shape.bounds;
+        let feature: IVectorTileFeature | undefined = undefined;
+        if (clipArea && shapeBounds) {
+            if (clipArea.contains(shapeBounds?.xmin, shapeBounds?.ymin) && clipArea.contains(shapeBounds?.xmax, shapeBounds?.ymax)) {
+                // the shape is completely inside the tile
+                feature = {
+                    tags: [],
+                    shape: shape,
+                };
+            } else {
+                // go for clipping
+            }
+        }
+        return feature;
     }
 
     public addShapes(layerName: string, ...shapes: Array<IGeoShape>): void {

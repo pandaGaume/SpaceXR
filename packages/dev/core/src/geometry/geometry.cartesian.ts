@@ -1,8 +1,28 @@
 import { Quantity, Scalar, Unit } from "../math";
-import { ICartesian2, ICartesian3, ICartesian4 } from "./geometry.interfaces";
+import { Bounds2 } from "./geometry.bounds";
+import { ICartesian2, ICartesian3, ICartesian4, RegionCode } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
-    public static Cross(a: ICartesian2, b: ICartesian2): number {
+    public static computeCode(point: ICartesian2, clipArea: Bounds2): RegionCode {
+        // initialized as being inside
+        let code = RegionCode.INSIDE;
+
+        if (point.x < clipArea.xmin)
+            // to the left of rectangle
+            code |= RegionCode.LEFT;
+        else if (point.x > clipArea.xmax)
+            // to the right of rectangle
+            code |= RegionCode.RIGHT;
+        if (point.y < clipArea.ymin)
+            // below the rectangle
+            code |= RegionCode.BOTTOM;
+        else if (point.y > clipArea.ymax)
+            // above the rectangle
+            code |= RegionCode.TOP;
+
+        return code;
+    }
+    public static Dot(a: ICartesian2, b: ICartesian2): number {
         return a.x * b.y - a.y * b.x;
     }
 
@@ -30,11 +50,15 @@ export class Cartesian2 implements ICartesian2 {
 
     public constructor(public x: number, public y: number) {}
 
+    public computeCode(clipArea: Bounds2): RegionCode {
+        return Cartesian2.computeCode(this, clipArea);
+    }
+
     public toString() {
         return `x:${this.x}, y:${this.y}`;
     }
 }
-export class Cartesian3 implements ICartesian3 {
+export class Cartesian3 extends Cartesian2 implements ICartesian3 {
     public static Dot(a: ICartesian3, b: ICartesian3): number {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
@@ -82,6 +106,30 @@ export class Cartesian3 implements ICartesian3 {
     public static AreCollinear(a: ICartesian3, b: ICartesian3, c: ICartesian3, epsilon?: number): boolean {
         const length = Cartesian3.Magnitude(Cartesian3.Cross(Cartesian3.Subtract(b, a), Cartesian3.Subtract(c, a)));
         return length <= (epsilon ?? Scalar.EPSILON);
+    }
+
+    static IsWithinTheBounds(a: ICartesian3, b: ICartesian3, p: ICartesian3): boolean {
+        // Check for collinearity
+        if (!Cartesian3.AreCollinear(a, b, p)) {
+            return false;
+        }
+
+        // Compute vectors
+        const ab = Cartesian3.Subtract(b, a);
+        const ap = Cartesian3.Subtract(p, a);
+        const bp = Cartesian3.Subtract(p, b);
+
+        // Check if the dot product of AB and AP is non-negative (p is not behind a)
+        if (Cartesian3.Dot(ab, ap) < 0) {
+            return false;
+        }
+
+        // Check if the dot product of AB and BP is non-positive (p is not beyond b)
+        if (Cartesian3.Dot(ab, bp) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -165,18 +213,22 @@ export class Cartesian3 implements ICartesian3 {
         return Scalar.WithinEpsilon(a.x, b.x, epsilon) && Scalar.WithinEpsilon(a.y, b.y, epsilon) && Scalar.WithinEpsilon(a.z, b.z, epsilon);
     }
 
-    public constructor(public x: number, public y: number, public z: number) {}
+    public constructor(public x: number, public y: number, public z: number) {
+        super(x, y);
+    }
 
     public toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;
     }
 }
 
-export class Cartesian4 implements ICartesian4 {
+export class Cartesian4 extends Cartesian3 implements ICartesian4 {
     public static Zero() {
         return new Cartesian4(0, 0, 0);
     }
-    public constructor(public x: number, public y: number, public z: number, public w: number = 1.0) {}
+    public constructor(public x: number, public y: number, public z: number, public w: number = 1.0) {
+        super(x, y, z);
+    }
     public toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}, w:${this.w}`;
     }

@@ -1,6 +1,8 @@
 import { IGeo2, IGeo3 } from "./geography.interfaces";
+import { GeoJsonCoordinate } from "./standards/geojson/geojson.interface";
 export declare class Geo2 implements IGeo2 {
     static Default: Geo2;
+    static FromGeoJson(coordinates: GeoJsonCoordinate): IGeo2;
     static Parse(value: string): IGeo2;
     static ToString(value: IGeo2): string;
     static Zero(): Geo2;
@@ -16,6 +18,7 @@ export declare class Geo2 implements IGeo2 {
     toString(): string;
 }
 export declare class Geo3 extends Geo2 implements IGeo3 {
+    static FromGeoJson(coordinates: GeoJsonCoordinate): IGeo3;
     static ToString(value: IGeo3): string;
     static Parse(value: string): IGeo3;
     static Zero(): Geo3;

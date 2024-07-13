@@ -1,4 +1,4 @@
-import { GeoShapeType, IGeo2, IGeoCircle, IGeoLine, IGeoPolygon, IGeoPolyline, IGeoShape } from "../../geography";
+import { GeoShapeType, IGeo2, IGeoLine, IGeoPolygon, IGeoPolyline, IGeoShape } from "../../geography";
 import { BoundedCollection, Cartesian3, ICartesian3 } from "../../geometry";
 import { Polygon } from "../../geometry/shapes/geometry.polygon";
 import { Polyline } from "../../geometry/shapes/geometry.polyline";
@@ -82,9 +82,6 @@ export class ShapeCollection implements ITileMetricsProvider {
 
     protected _buildShape(shape: IGeoShape, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         switch (shape.type) {
-            case GeoShapeType.Circle: {
-                return this._buildCircle(shape as IGeoCircle, lod, metrics);
-            }
             case GeoShapeType.Polygon: {
                 return this._buildPolygon(shape as IGeoPolygon, lod, metrics);
             }
@@ -100,10 +97,6 @@ export class ShapeCollection implements ITileMetricsProvider {
         }
     }
 
-    protected _buildCircle(shape: IGeoCircle, lod: number, metrics: ITileMetrics): Nullable<IShape> {
-        const p = shape.toPolygon(32);
-        return this._buildPolygon(p, lod, metrics);
-    }
 
     protected _buildPolygon(shape: IGeoPolygon, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);

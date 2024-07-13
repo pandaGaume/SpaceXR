@@ -1,7 +1,12 @@
 import { IGeo2, IGeo3 } from "./geography.interfaces";
+import { GeoJsonCoordinate } from "./standards/geojson/geojson.interface";
 
 export class Geo2 implements IGeo2 {
     public static Default = new Geo2(46.382581, -0.308024);
+
+    public static FromGeoJson(coordinates: GeoJsonCoordinate): IGeo2 {
+        return new Geo2(coordinates[1], coordinates[0]);
+    }
 
     public static Parse(value: string): IGeo2 {
         // Remove the brackets and split the string by comma
@@ -57,6 +62,13 @@ export class Geo2 implements IGeo2 {
 }
 
 export class Geo3 extends Geo2 implements IGeo3 {
+    public static FromGeoJson(coordinates: GeoJsonCoordinate): IGeo3 {
+        if (coordinates.length === 2) {
+            return new Geo3(coordinates[1], coordinates[0]);
+        }
+        return new Geo3(coordinates[1], coordinates[0], coordinates[2]);
+    }
+
     public static ToString(value: IGeo3): string {
         if (value.alt !== undefined) {
             return `[${value.lat},${value.lon},${value.alt}]`;

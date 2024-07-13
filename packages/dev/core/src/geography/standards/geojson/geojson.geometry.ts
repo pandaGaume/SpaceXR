@@ -48,9 +48,25 @@ export abstract class GeoJsonGeometry extends GeoJsonObject implements IGeoJsonG
                     }
                 }
             }
+            case GeoJsonObjectTypes.Feature: {
+                return GeoJsonGeometry.ToShape((geom as any).geometry);
+            }
+            case GeoJsonObjectTypes.FeatureCollection: {
+                const collection = geom as any;
+                const shapes = new GeoBoundedCollection<IGeoShape>();
+                for (const f of collection.features) {
+                    const shape = GeoJsonGeometry.ToShape(f);
+                    if (shape) {
+                        if (shape instanceof GeoBoundedCollection) {
+                            shapes.push(...shape);
+                            continue;
+                        }
+                        shapes.push(shape);
+                    }
+                }
+                return shapes;
+            }
         }
-
-        return undefined;
     }
 
     _coordinates: any;

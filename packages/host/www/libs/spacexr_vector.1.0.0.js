@@ -9451,7 +9451,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var protobufjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! protobufjs */ "../../../../node_modules/protobufjs/index.js");
 /* harmony import */ var protobufjs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(protobufjs__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "core/tiles");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "core/geometry");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_geometry__WEBPACK_IMPORTED_MODULE_1__);
 
 
@@ -9526,6 +9526,13 @@ message ${__messageName__} {
         repeated Layer layers = 3;
         extensions 16 to 8191;
 }`;
+var VectorTileGeomType;
+(function (VectorTileGeomType) {
+    VectorTileGeomType[VectorTileGeomType["UNKNOWN"] = 0] = "UNKNOWN";
+    VectorTileGeomType[VectorTileGeomType["POINT"] = 1] = "POINT";
+    VectorTileGeomType[VectorTileGeomType["LINESTRING"] = 2] = "LINESTRING";
+    VectorTileGeomType[VectorTileGeomType["POLYGON"] = 3] = "POLYGON";
+})(VectorTileGeomType || (VectorTileGeomType = {}));
 class VectorTileCodec {
     async decodeAsync(r) {
         const content = null;
@@ -9547,7 +9554,7 @@ class VectorTileCodec {
         for (const layer of mess.layers) {
             layers.set(layer.name, this._toVectorTileLayer(layer));
         }
-        return { layers };
+        return layers;
     }
     _toVectorTileLayer(mess) {
         const features = new Array(mess.features.length);
@@ -9577,11 +9584,11 @@ class VectorTileCodec {
     }
     _toShape(mess) {
         switch (mess.type) {
-            case 1:
+            case VectorTileGeomType.POINT:
                 return this._toPoint(mess);
-            case 2:
+            case VectorTileGeomType.LINESTRING:
                 return this._toPolyline(mess);
-            case 3:
+            case VectorTileGeomType.POLYGON:
                 return this._toPolygon(mess);
             default:
                 return null;
@@ -9595,14 +9602,14 @@ class VectorTileCodec {
         for (let i = 0; i < mess.geometry.length; i += 2) {
             v.push(core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(mess.geometry, i, 2));
         }
-        return new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Polyline(v);
+        return core_geometry__WEBPACK_IMPORTED_MODULE_1__.Polyline.FromPoints(v);
     }
     _toPolygon(mess) {
         const v = [];
         for (let i = 0; i < mess.geometry.length; i += 2) {
             v.push(core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(mess.geometry, i, 2));
         }
-        return new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Polygon(v);
+        return core_geometry__WEBPACK_IMPORTED_MODULE_1__.Polygon.FromPoints(v);
     }
 }
 VectorTileCodec._messageDefinition = protobufjs__WEBPACK_IMPORTED_MODULE_0__.parse(__vector_proto_definition__).root.lookupType(__messageName__);
@@ -9619,64 +9626,18 @@ VectorTileCodec.Shared = new VectorTileCodec();
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.MapBoxTileSetIds),
-/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.MapBoxVectorUrlBuilder),
-/* harmony export */   VectorTile: () => (/* reexport safe */ _tiles_vector__WEBPACK_IMPORTED_MODULE_0__.VectorTile),
-/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_2__.VectorTileCodec),
-/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType)
+/* harmony export */   MapBox: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapBox),
+/* harmony export */   MapBoxTerrainDemV1UrlBuilder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapBoxTerrainDemV1UrlBuilder),
+/* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapBoxTileSetIds),
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapBoxVectorUrlBuilder),
+/* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapboxAltitudeDecoder),
+/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec)
 /* harmony export */ });
-/* harmony import */ var _tiles_vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vector */ "./dist/tiles/tiles.vector.js");
-/* harmony import */ var _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vector.interfaces */ "./dist/tiles/tiles.vector.interfaces.js");
-/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./codecs */ "./dist/tiles/codecs/index.js");
-/* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/vendors/index.js");
-
-
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./codecs */ "./dist/tiles/codecs/index.js");
+/* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/vendors/index.js");
 
 
 //# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/tiles.vector.interfaces.js":
-/*!***********************************************!*\
-  !*** ./dist/tiles/tiles.vector.interfaces.js ***!
-  \***********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   VectorTileGeomType: () => (/* binding */ VectorTileGeomType)
-/* harmony export */ });
-var VectorTileGeomType;
-(function (VectorTileGeomType) {
-    VectorTileGeomType[VectorTileGeomType["UNKNOWN"] = 0] = "UNKNOWN";
-    VectorTileGeomType[VectorTileGeomType["POINT"] = 1] = "POINT";
-    VectorTileGeomType[VectorTileGeomType["LINESTRING"] = 2] = "LINESTRING";
-    VectorTileGeomType[VectorTileGeomType["POLYGON"] = 3] = "POLYGON";
-})(VectorTileGeomType || (VectorTileGeomType = {}));
-//# sourceMappingURL=tiles.vector.interfaces.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/tiles.vector.js":
-/*!************************************!*\
-  !*** ./dist/tiles/tiles.vector.js ***!
-  \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   VectorTile: () => (/* binding */ VectorTile)
-/* harmony export */ });
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_0__);
-
-class VectorTile extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
-    constructor(x, y, levelOfDetail, data = null, metrics) {
-        super(x, y, levelOfDetail, data, metrics);
-    }
-}
-//# sourceMappingURL=tiles.vector.js.map
 
 /***/ }),
 
@@ -9688,8 +9649,11 @@ class VectorTile extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBox: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBox),
+/* harmony export */   MapBoxTerrainDemV1UrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBoxTerrainDemV1UrlBuilder),
 /* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBoxTileSetIds),
-/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBoxVectorUrlBuilder)
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapBoxVectorUrlBuilder),
+/* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapbox */ "./dist/tiles/vendors/tiles.vendors.mapbox.js");
 
@@ -9705,20 +9669,39 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBox: () => (/* binding */ MapBox),
+/* harmony export */   MapBoxTerrainDemV1UrlBuilder: () => (/* binding */ MapBoxTerrainDemV1UrlBuilder),
 /* harmony export */   MapBoxTileSetIds: () => (/* binding */ MapBoxTileSetIds),
-/* harmony export */   MapBoxVectorUrlBuilder: () => (/* binding */ MapBoxVectorUrlBuilder)
+/* harmony export */   MapBoxVectorUrlBuilder: () => (/* binding */ MapBoxVectorUrlBuilder),
+/* harmony export */   MapboxAltitudeDecoder: () => (/* binding */ MapboxAltitudeDecoder)
 /* harmony export */ });
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/geometry");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_dem__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.js");
 
 
-class MapBoxVectorUrlBuilder extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
-    constructor(token, tileSetIds, extension = "mvt") {
+
+
+class MapBoxTerrainDemV1UrlBuilder extends core_dem__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+    constructor(token, extension = "webp") {
         super();
-        this.withHost("api.mapbox.com").withSecure(true).withQuery(`access_token=${token}`).withPath(`v4/${tileSetIds}/{z}/{x}/{y}.{extension}`).withExtension(extension);
+        this.withHost("api.mapbox.com")
+            .withSecure(true)
+            .withQuery(`access_token=${token}`)
+            .withPath(`raster/v1/mapbox.mapbox-terrain-dem-v1/{z}/{x}/{y}.{extension}`)
+            .withExtension(extension);
     }
 }
+class MapboxAltitudeDecoder {
+    decode(pixels, offset, target, targetOffset) {
+        const r = pixels[offset++];
+        const g = pixels[offset++];
+        const b = pixels[offset];
+        target[targetOffset++] = -10000 + (r * 256 * 256 + g * 256 + b) * 0.1;
+        return targetOffset;
+    }
+}
+MapboxAltitudeDecoder.Shared = new MapboxAltitudeDecoder();
 var MapBoxTileSetIds;
 (function (MapBoxTileSetIds) {
     MapBoxTileSetIds["StreetsV8"] = "mapbox.mapbox-streets-v8";
@@ -9726,15 +9709,31 @@ var MapBoxTileSetIds;
     MapBoxTileSetIds["Outdoors"] = "mapbox.mapbox-outdoors-v11";
     MapBoxTileSetIds["Traffic"] = "mapbox.mapbox-traffic-v1";
 })(MapBoxTileSetIds || (MapBoxTileSetIds = {}));
-core_tiles__WEBPACK_IMPORTED_MODULE_0__.MapBox.VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, options) {
-    const metrics = new core_tiles__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: core_tiles__WEBPACK_IMPORTED_MODULE_0__.MapBox.MaxLevelOfDetail, tileSize: 512 });
-    return new core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(), metrics, options);
-};
+class MapBoxVectorUrlBuilder extends core_dem__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+    constructor(token, tileSetIds, extension = "mvt") {
+        super();
+        this.withHost("api.mapbox.com").withSecure(true).withQuery(`access_token=${token}`).withPath(`v4/${tileSetIds}/{z}/{x}/{y}.{extension}`).withExtension(extension);
+    }
+}
+class MapBox {
+    static TerrainDemV1Client(token, options) {
+        const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MapBox.MaxLevelOfDetail, tileSize: 512 });
+        const codecOptions = new core_dem__WEBPACK_IMPORTED_MODULE_0__.Float32TileCodecOptionsBuilder().withInsets(1, core_dem__WEBPACK_IMPORTED_MODULE_0__.Side.top).withInsets(1, core_dem__WEBPACK_IMPORTED_MODULE_0__.Side.left).withInsets(1, core_dem__WEBPACK_IMPORTED_MODULE_0__.Side.bottom).withInsets(1, core_dem__WEBPACK_IMPORTED_MODULE_0__.Side.right).build();
+        const elevationClient = new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${MapBox.KEY}_elevation`, new MapBoxTerrainDemV1UrlBuilder(token), new core_dem__WEBPACK_IMPORTED_MODULE_0__.Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
+        return new core_dem__WEBPACK_IMPORTED_MODULE_0__.DemTileWebClient(`${MapBox.KEY}_dem`, elevationClient);
+    }
+    static VectorClient(token, tileSetIds, options) {
+        const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MapBox.MaxLevelOfDetail, tileSize: 512 });
+        return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(), metrics, options);
+    }
+}
+MapBox.KEY = "mapbox";
+MapBox.MaxLevelOfDetail = 14;
 //# sourceMappingURL=tiles.vendors.mapbox.js.map
 
 /***/ }),
 
-/***/ "core/tiles":
+/***/ "core/geometry":
 /*!**************************!*\
   !*** external "SPACEXR" ***!
   \**************************/
@@ -9832,11 +9831,12 @@ var __webpack_exports__ = {};
   \***********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapBox: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapBox),
+/* harmony export */   MapBoxTerrainDemV1UrlBuilder: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapBoxTerrainDemV1UrlBuilder),
 /* harmony export */   MapBoxTileSetIds: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapBoxTileSetIds),
 /* harmony export */   MapBoxVectorUrlBuilder: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapBoxVectorUrlBuilder),
-/* harmony export */   VectorTile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTile),
-/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec),
-/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileGeomType)
+/* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder),
+/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec)
 /* harmony export */ });
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
 

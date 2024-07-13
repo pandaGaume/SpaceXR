@@ -1,10 +1,7 @@
-import { Side } from "../../geometry/geometry.interfaces";
-import { DemTileWebClient } from "../../dem/dem.tileclient";
-import { TileWebClient, TileWebClientOptions } from "../tiles.client";
-import { Float32TileCodec, Float32TileCodecOptionsBuilder } from "../codecs/tiles.codecs.image";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
-import { WebTileUrlBuilder } from "../tiles.urlBuilder";
-import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
+import { DemTileWebClient } from "core/dem";
+import { Side } from "core/geometry";
+import { EPSG3857, Float32TileCodec, Float32TileCodecOptionsBuilder, IPixelDecoder, IVectorTileContent, TileWebClient, TileWebClientOptions, WebTileUrlBuilder } from "core/tiles";
+import { VectorTileCodec } from "../codecs";
 
 export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
     // https://api.mapbox.com/raster/v1/mapbox.mapbox-terrain-dem-v1/14/8800/5372.webp?sku=101iNLHSEcgVj&access_token={token}
@@ -31,6 +28,21 @@ export class MapboxAltitudeDecoder implements IPixelDecoder<Float32Array> {
     }
 }
 
+export enum MapBoxTileSetIds {
+    StreetsV8 = "mapbox.mapbox-streets-v8",
+    Terrain = "mapbox.mapbox-terrain-v2",
+    Outdoors = "mapbox.mapbox-outdoors-v11",
+    Traffic = "mapbox.mapbox-traffic-v1",
+}
+
+export class MapBoxVectorUrlBuilder extends WebTileUrlBuilder {
+    // https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/1/0/0.mvt?access_token={token}
+    public constructor(token: string, tileSetIds: string, extension: string = "mvt") {
+        super();
+        this.withHost("api.mapbox.com").withSecure(true).withQuery(`access_token=${token}`).withPath(`v4/${tileSetIds}/{z}/{x}/{y}.{extension}`).withExtension(extension);
+    }
+}
+
 export class MapBox {
     private static readonly KEY = "mapbox";
     public static MaxLevelOfDetail = 14;
@@ -46,5 +58,10 @@ export class MapBox {
             options
         );
         return new DemTileWebClient(`${MapBox.KEY}_dem`, elevationClient);
+    }
+
+    public static VectorClient(token: string, tileSetIds: string, options?: TileWebClientOptions): TileWebClient<IVectorTileContent> {
+        const metrics = new EPSG3857({ maxLOD: MapBox.MaxLevelOfDetail, tileSize: 512 });
+        return new TileWebClient<IVectorTileContent>(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new VectorTileCodec(), metrics, options);
     }
 }

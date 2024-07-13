@@ -1,5 +1,4 @@
-import { ITileCodec } from "core/tiles";
-import { IVectorTileContent, IVectorTileFeature, IVectorTileLayer } from "../tiles.vector.interfaces";
+import { ITileCodec, IVectorTileContent, IVectorTileFeature, IVectorTileLayer } from "core/tiles";
 import { Nullable } from "core/types";
 import * as PROTOBUF from "protobufjs";
 import { Cartesian3, Point, Polygon, Polyline, Size2 } from "core/geometry";
@@ -111,7 +110,7 @@ export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
         for (const layer of mess.layers) {
             layers.set(layer.name, this._toVectorTileLayer(layer));
         }
-        return { layers };
+        return layers;
     }
 
     protected _toVectorTileLayer(mess: any): IVectorTileLayer {
@@ -166,7 +165,7 @@ export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
         for (let i = 0; i < mess.geometry.length; i += 2) {
             v.push(Cartesian3.FromArray(mess.geometry, i, 2));
         }
-        return new Polyline(v);
+        return Polyline.FromPoints(v);
     }
 
     protected _toPolygon(mess: any): any {
@@ -174,6 +173,6 @@ export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
         for (let i = 0; i < mess.geometry.length; i += 2) {
             v.push(Cartesian3.FromArray(mess.geometry, i, 2));
         }
-        return new Polygon(v);
+        return Polygon.FromPoints(v);
     }
 }

@@ -118,12 +118,12 @@ export class Bounds2 extends Cartesian2 implements IBounds2 {
         return (
             other.xmin >= this.xmin &&
             other.xmin <= this.xmax &&
-            other.ymin >= this.ymax &&
-            other.ymin <= this.ymin &&
+            other.ymin >= this.ymin &&
+            other.ymin <= this.ymax &&
             other.xmax >= this.xmin &&
             other.xmax <= this.xmax &&
-            other.ymax >= this.ymax &&
-            other.ymax <= this.ymin
+            other.ymax >= this.ymin &&
+            other.ymax <= this.ymax
         );
     }
 

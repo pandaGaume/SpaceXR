@@ -9,27 +9,23 @@ export enum ShapeType {
     Line,
 }
 
-export interface IClipable {
+export interface IClipable<T extends IShape> {
     /// <Resume>
     /// clip to a bounding box. return the clipped shape or undefined if the whole shape is outside the clip area.
     /// the result may be a single shape or an array of shapes. In all cases the original shape is NOT modified.
     /// </Resume>
-    clip?(clipArea: IBounds2): IShape | Array<IShape> | undefined;
+    clip(clipArea: IBounds2): T | Array<T> | undefined;
 }
 
-export interface IShape extends IBounded, IClipable {
+export interface IShape extends IBounded {
     type: ShapeType;
-}
-
-export function isClipable(value: any): value is IClipable {
-    return value && value.clip && typeof value.clip === "function";
 }
 
 export function isShape(value: any): value is IShape {
     return value && value.type !== undefined && ShapeType[value.type] !== undefined;
 }
 
-export interface IPoint extends IShape {
+export interface IPoint extends IShape, IClipable<IPoint> {
     position: ICartesian3;
 }
 
@@ -43,7 +39,7 @@ export function isCircle(shape: IShape): shape is ILine {
     return shape.type === ShapeType.Circle;
 }
 
-export interface ILine extends IShape {
+export interface ILine extends IShape, IClipable<ILine> {
     start: ICartesian3;
     end: ICartesian3;
 }
@@ -53,9 +49,8 @@ export function isLine(shape: IShape): shape is ILine {
     return shape.type === ShapeType.Line;
 }
 
-export interface IPolyline extends IShape {
+export interface IPolyline extends IShape, IClipable<IPolyline> {
     points: Array<ICartesian3>;
-    reverseInPlace(): IShape;
 }
 
 export function isPolyline(shape: IShape): shape is IPolyline {
@@ -64,7 +59,7 @@ export function isPolyline(shape: IShape): shape is IPolyline {
 }
 
 export interface IPolygon extends IPolyline {
-    isClockWise: boolean;
+    holes?: Array<Array<ICartesian3>>;
 }
 
 export function isPolygon(shape: IShape): shape is IPolygon {

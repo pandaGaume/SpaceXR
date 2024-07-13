@@ -1,13 +1,38 @@
+import { FloatArray, isArrayOfFloatArray } from "../../types";
 import { Bounds2 } from "../geometry.bounds";
-import { Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3, RegionCode } from "../geometry.interfaces";
+import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
+import { IBounds2, ICartesian3, isArrayOfCartesianArray, RegionCode } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Polyline extends AbstractShape implements IPolyline {
+    public static FromFloats(points: FloatArray | Array<FloatArray>, stride: number = 3): IPolyline {
+        const p: Array<ICartesian3> = [];
+        if (isArrayOfFloatArray(points)) {
+            for (let i = 0; i < points.length; i++) {
+                const tmp = points[i];
+                for (let j = 0; j < tmp.length; j += stride) {
+                    p.push(new Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
+                }
+            }
+            return new Polyline(p);
+        }
+        for (let i = 0; i < points.length; i += stride) {
+            p.push(new Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
+        }
+        return new Polyline(p);
+    }
+
+    public static FromPoints(...points: Array<Cartesian3> | Array<Array<Cartesian3>>): IPolyline {
+        if (isArrayOfCartesianArray(points)) {
+            return Polyline.FromPoints(points.flat());
+        }
+        return new Polyline(points);
+    }
+
     protected _points: Array<ICartesian3>;
 
-    public constructor(p: Array<ICartesian3>, type?: ShapeType) {
+    protected constructor(p: Array<ICartesian3>, type?: ShapeType) {
         super(type ?? ShapeType.Polyline);
         this._points = p;
     }
@@ -26,8 +51,8 @@ export class Polyline extends AbstractShape implements IPolyline {
     protected _clipPolyline(clipArea: IBounds2): IPolyline | Array<IPolyline> | undefined {
         if (clipArea.intersects(this.bounds)) {
             const polylines = [];
-            const points = [];
-            const codes = this._points.map((p) => p.computeCode(clipArea));
+            let points = [];
+            const codes = this._points.map((p) => Cartesian2.ComputeCode(p, clipArea));
             let a = this._points[0];
             let codea = codes[0];
             let inside: boolean = codea == 0;
@@ -42,12 +67,12 @@ export class Polyline extends AbstractShape implements IPolyline {
                         const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, this._buildPoint(0, 0, 0));
                         points.push(intersection);
                         polylines.push(new Polyline(points));
-                        points.length = 0;
+                        points = [];
                         inside = !inside;
                     }
                 } else {
                     if (codeb == 0) {
-                        const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, this._buildPoint(0, 0, 0));
+                        const intersection = this._computeIntersectionToRef(clipArea, a, b, codea, this._buildPoint(0, 0, 0));
                         points.push(intersection);
                         inside = !inside;
                     }
@@ -55,14 +80,17 @@ export class Polyline extends AbstractShape implements IPolyline {
                 a = b;
                 codea = codeb;
             }
-            return polylines.length ? polylines : undefined;
+            // add last points
+            if (inside) {
+                points.push(this._buildPoint(a.x, a.y, a.z));
+            }
+            // add last polyline
+            if (points.length) {
+                polylines.push(new Polyline(points));
+            }
+            return polylines.length ? (polylines.length == 1 ? polylines[0] : polylines) : undefined;
         }
         return undefined;
-    }
-
-    public reverseInPlace(): IPolyline {
-        this._points.reverse();
-        return this;
     }
 
     protected _computeIntersectionToRef<T extends ICartesian3>(clipArea: IBounds2, a: ICartesian3, b: ICartesian3, code_out: RegionCode, ref: T): T {

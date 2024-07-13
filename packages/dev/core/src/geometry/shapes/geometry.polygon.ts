@@ -1,52 +1,107 @@
-import { Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3, RegionCode } from "../geometry.interfaces";
+import { FloatArray, isArrayOfFloatArray } from "../../types";
+import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
+import { IBounds2, ICartesian3, isArrayOfCartesianArray } from "../geometry.interfaces";
 import { Polyline } from "./geometry.polyline";
 import { IPolygon, ShapeType } from "./geometry.shapes.interfaces";
 
-enum WayCode {
-    In,
-    Out,
-}
-
 interface ICartesian3WithInfos extends ICartesian3 {
-    code: WayCode;
+    __wayCode__$t1967: boolean; // true IN, false OUT. As we use this property to identify the intersection points we need to keep the name unique
+    subject: Array<ICartesian3>;
     subjectIndex: number;
     clipIndex: number;
 }
 
 class Cartesian3WithInfos extends Cartesian3 implements ICartesian3WithInfos {
-    constructor(x: number, y: number, z: number, public code: WayCode, public subjectIndex: number, public clipIndex: number = 0) {
+    constructor(x: number, y: number, z: number, public __wayCode__$t1967: boolean, public subject: Array<ICartesian3>, public subjectIndex: number, public clipIndex: number = 0) {
         super(x, y, z);
     }
 }
 
 function isIntersection(p: ICartesian3): p is ICartesian3WithInfos {
-    return (p as ICartesian3WithInfos).code !== undefined && (p as ICartesian3WithInfos).subjectIndex !== undefined;
+    return (p as ICartesian3WithInfos).__wayCode__$t1967 !== undefined;
 }
 
 export class Polygon extends Polyline implements IPolygon {
-    _clockWise?: boolean;
+    public static IsClockWise(points: Array<ICartesian3>): boolean {
+        let sum = 0;
+        for (let i = 0; i < points.length - 1; i++) {
+            const a = points[i];
+            const b = points[i + 1];
+            sum += (b.x - a.x) * (b.y + a.y);
+        }
+        return sum > 0;
+    }
 
-    public constructor(p: Array<ICartesian3>, clockWise?: boolean) {
+    public static FromFloats(points: FloatArray | Array<FloatArray>, stride: number = 3): IPolygon {
+        if (isArrayOfFloatArray(points)) {
+            const records = [];
+            for (let i = 0; i < points.length; i++) {
+                const tmp = points[i];
+                const p: Array<ICartesian3> = [];
+                for (let j = 0; j < tmp.length; j += stride) {
+                    p.push(new Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
+                }
+                records.push(p);
+            }
+            return Polygon.FromPoints(...records);
+        }
+        const p: Array<ICartesian3> = [];
+        for (let i = 0; i < points.length; i += stride) {
+            p.push(new Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
+        }
+        return new Polygon(p);
+    }
+
+    public static FromPoints(...points: Array<Cartesian3> | Array<Array<Cartesian3>>): IPolygon {
+        if (isArrayOfCartesianArray(points)) {
+            const p = new Polygon(points[0]);
+            for (let i = 1; i < points.length; i++) {
+                p.addHole(points[i]);
+            }
+            return p;
+        }
+        return new Polygon(points);
+    }
+
+    _holes?: Array<Array<ICartesian3>>;
+
+    protected constructor(p: Array<ICartesian3>, assertClose: boolean = true, assertClockWize: boolean = true) {
         super(p, ShapeType.Polygon);
 
-        // forec the polygon to be closed.
-        if (!Cartesian3.Equals(p[0], p[p.length - 1])) {
-            p.push(this._buildPoint(p[0].x, p[0].y, p[0].z));
+        // force the polygon to be closed.
+        if (assertClose) {
+            if (!Cartesian3.Equals(p[0], p[p.length - 1])) {
+                p.push(this._buildPoint(p[0].x, p[0].y, p[0].z));
+            }
         }
 
-        // force the polygon to be clock wise
-        this._clockWise = clockWise ?? this._isClockWise();
-        if (this._clockWise == false) {
-            this.reverseInPlace();
+        // force the polygon to be clockwize
+        if (assertClockWize) {
+            if (!Polygon.IsClockWise(p)) {
+                p.reverse();
+            }
         }
     }
 
-    public get isClockWise(): boolean {
-        if (this._clockWise === undefined) {
-            this._clockWise = this._isClockWise();
+    public get holes(): Array<Array<ICartesian3>> | undefined {
+        return this._holes;
+    }
+
+    public addHole(hole: Array<ICartesian3>): void {
+        if ((hole?.length ?? 0) > 2) {
+            // force the polygon to be closed.
+            const first = hole[0];
+            const last = hole[hole.length - 1];
+            if (!Cartesian3.Equals(first, last)) {
+                hole.push(this._buildPoint(first.x, first.y, first.z));
+            }
+            // force the polygon to be anticlockwise
+            if (Polygon.IsClockWise(hole)) {
+                hole.reverse();
+            }
+            this._holes = this._holes ?? [];
+            this._holes.push(hole);
         }
-        return this._clockWise;
     }
 
     /// <summary>
@@ -61,103 +116,139 @@ export class Polygon extends Polyline implements IPolygon {
         return this._clipPolygon(clipArea);
     }
 
-    public reverseInPlace(): IPolygon {
-        this._points.reverse();
-        if (this._clockWise !== undefined) {
-            this._clockWise = !this._clockWise;
-        }
-        return this;
-    }
-
     protected _clipPolygon(clipArea: IBounds2): IPolygon | Array<IPolygon> | undefined {
         if (clipArea.intersects(this.bounds)) {
             // 1 - Identify Intersection Points: Find all points where the subject polygon intersects with the clipping polygon.
             // These points should be inserted into both the subject and clipping polygons at their respective positions.
             // Each point in both polygons should be classified as either entering, exiting, or neither with respect to the other polygon.
-            const points: Array<ICartesian3> = [];
-            const entering: Array<ICartesian3WithInfos> = [];
-            const codes = this._points.map((p) => p.computeCode(clipArea));
-            const polygonArea = new Polygon(
-                Array.from(clipArea.points()).map((p) => this._buildPoint(p.x, p.y, 0)),
-                true
-            );
-            let a = this._points[0];
-            let codea = codes[0];
-            let inside: boolean = codea == 0;
-            for (let i = 1; i < codes.length; i++) {
-                const b = this._points[i];
-                const codeb = codes[i];
 
-                // keep this algorithm for lisibility
-                points.push(this._buildPoint(a.x, a.y, a.z));
-                if (inside) {
-                    if (codeb != 0) {
-                        // We EXIT THE bounds
-                        const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, new Cartesian3WithInfos(0, 0, 0, WayCode.Out, points.length));
-                        points.push(intersection);
-                        intersection.clipIndex = this._findClipIndex(polygonArea, intersection);
-                        polygonArea.points.splice(intersection.clipIndex, 0, intersection);
-                        inside = !inside;
+            // the clip area as list of points
+            const polygonArea = Array.from(clipArea.points()).map((p) => this._buildPoint(p.x, p.y, 0));
+            polygonArea.push(polygonArea[0]); // close the polygon.
+
+            // the polygons to clip
+            const toClips = [this._points];
+            if (this._holes) {
+                toClips.push(...this._holes);
+            }
+            // keep trace of every entering intersection point
+            const entering: Array<ICartesian3WithInfos> = [];
+
+            // loop over each polygon to clip.
+            // Remember that , the outer polygon is clockwise, the holes are anticlockwise
+            for (const subject of toClips) {
+                const points: Array<ICartesian3> = [];
+                const codes = subject.map((p) => Cartesian2.ComputeCode(p, clipArea));
+                let a = subject[0];
+                let codea = codes[0];
+                let inside: boolean = codea == 0;
+                for (let i = 1; i < codes.length; i++) {
+                    const b = subject[i];
+                    const codeb = codes[i];
+
+                    // keep this algorithm for lisibility
+                    if (inside) {
+                        points.push(this._buildPoint(a.x, a.y, a.z));
+                        if (codeb != 0) {
+                            // We EXIT THE bounds
+                            const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, new Cartesian3WithInfos(0, 0, 0, false, points, points.length));
+                            points.push(intersection);
+                            intersection.clipIndex = this._InsertIntersectionIntoClipPolygon(polygonArea, intersection);
+                            inside = !inside;
+                        }
+                    } else {
+                        points.push(a); // we keep the original point while it will NOT be part of the new clipped polygon
+                        if (codeb == 0) {
+                            // We ENTER THE bounds
+                            const intersection = this._computeIntersectionToRef(clipArea, a, b, codea, new Cartesian3WithInfos(0, 0, 0, true, points, points.length));
+                            entering.push(intersection);
+                            points.push(intersection);
+                            intersection.clipIndex = this._InsertIntersectionIntoClipPolygon(polygonArea, intersection);
+                            inside = !inside;
+                        }
                     }
-                } else {
-                    if (codeb == 0) {
-                        // We ENTER THE bounds
-                        const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, new Cartesian3WithInfos(0, 0, 0, WayCode.In, points.length));
-                        entering.push(intersection);
-                        points.push(intersection);
-                        intersection.clipIndex = this._findClipIndex(polygonArea, intersection);
-                        inside = !inside;
-                    }
+                    a = b;
+                    codea = codeb;
                 }
-                a = b;
-                codea = codeb;
+                // add last points
+                if (inside) {
+                    points.push(this._buildPoint(a.x, a.y, a.z));
+                }
             }
 
             // 2 - Trace Output Polygons: Starting from an entering intersection point, trace along the subject polygon until another
             // intersection point is reached, then switch to the clipping polygon and continue tracing until the starting point is reached.
             // This forms one output polygon. Repeat this process starting from the next unvisited entering intersection point until all entering points have been visited.
-            if (entering.length == 0) {
+            const polygons = [];
+            if (entering.length != 0) {
                 do {
                     const polygon = [];
+                    // we pop the first entering point
                     const first = entering.splice(0, 1)[0];
-                    let i = first.subjectIndex;
+                    let i: number = first.subjectIndex;
+                    let subject = first.subject;
                     do {
-                        const current = points[i];
+                        const current = subject[i++];
+                        i == subject.length && (i = 1); // loop, avoiding the first point
                         if (isIntersection(current)) {
                             polygon.push(this._buildPoint(current.x, current.y, current.z));
-                            if (current.code == WayCode.Out) {
+
+                            if (!current.__wayCode__$t1967) {
                                 // we switch to the clip area
+                                i = current.clipIndex + 1;
+                                subject = polygonArea;
+                                continue;
                             }
+
+                            if (polygon.length == 1) {
+                                continue;
+                            }
+
+                            if (current === first) {
+                                // we found ONE polygon
+                                polygons.push(polygon);
+                                break;
+                            }
+
+                            // we switch to the subject
+                            i = current.subjectIndex + 1;
+                            subject = current.subject;
+                            // we remove the current point from the entering list
+                            entering.splice(
+                                entering.findIndex((p) => p === current),
+                                1
+                            );
                             continue;
                         }
-                        polygon.push(points[i]);
-                    } while (i > points.length);
+                        polygon.push(current);
+                    } while (true);
                 } while (entering.length > 0);
             }
+            return polygons.length ? (polygons.length == 1 ? new Polygon(polygons[0], false, false) : polygons.map((p) => new Polygon(p, false, false))) : undefined;
         }
         return undefined;
     }
 
-    protected _findClipIndex(clipPoly: IPolygon, p: ICartesian3): number {
-        let a = clipPoly.points[0];
-        for (let i = 1; i < clipPoly.points.length; i++) {
-            const b = clipPoly.points[i];
+    protected _InsertIntersectionIntoClipPolygon(clipPolygon: Array<ICartesian3>, intersection: ICartesian3): number {
+        let a = clipPolygon[0];
+        for (let i = 1; i < clipPolygon.length; i++) {
+            const b = clipPolygon[i];
 
-            if (Cartesian3.IsWithinTheBounds(a, b, p)) {
+            if (Cartesian3.IsWithinTheBounds(a, b, intersection)) {
+                // insert the point between a and b
+                clipPolygon.splice(i, 0, intersection);
+
+                // update the clip index of the next points - add + 1
+                for (let j = i + 1; j < clipPolygon.length; j++) {
+                    const c = clipPolygon[j];
+                    if (isIntersection(c)) {
+                        c.clipIndex++;
+                    }
+                }
                 return i;
             }
             a = b;
         }
         return -1;
-    }
-
-    protected _isClockWise(): boolean {
-        let sum = 0;
-        for (let i = 0; i < this._points.length - 1; i++) {
-            const a = this._points[i];
-            const b = this._points[i + 1];
-            sum += (b.x - a.x) * (b.y + a.y);
-        }
-        return sum > 0;
     }
 }

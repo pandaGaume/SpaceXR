@@ -3,27 +3,43 @@ import { Bounds2 } from "./geometry.bounds";
 import { ICartesian2, ICartesian3, ICartesian4, RegionCode } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
-    public static computeCode(point: ICartesian2, clipArea: Bounds2): RegionCode {
+    public static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number> {
+        ref = ref ?? new Float32Array(values.length * 2);
+        let i = 0;
+        for (let j = 0; j < values.length; j++) {
+            ref[i++] = values[j].x;
+            ref[i++] = values[j].y;
+        }
+        return ref;
+    }
+    public static ComputeCode(point: ICartesian2, clipArea: Bounds2): RegionCode {
         // initialized as being inside
         let code = RegionCode.INSIDE;
 
-        if (point.x < clipArea.xmin)
+        if (point.x < clipArea.xmin) {
             // to the left of rectangle
             code |= RegionCode.LEFT;
-        else if (point.x > clipArea.xmax)
+        } else if (point.x > clipArea.xmax) {
             // to the right of rectangle
             code |= RegionCode.RIGHT;
-        if (point.y < clipArea.ymin)
+        }
+
+        if (point.y < clipArea.ymin) {
             // below the rectangle
             code |= RegionCode.BOTTOM;
-        else if (point.y > clipArea.ymax)
+        } else if (point.y > clipArea.ymax) {
             // above the rectangle
             code |= RegionCode.TOP;
+        }
 
         return code;
     }
     public static Dot(a: ICartesian2, b: ICartesian2): number {
         return a.x * b.y - a.y * b.x;
+    }
+
+    public static Cross(a: ICartesian2, b: ICartesian2): ICartesian2 {
+        return new Cartesian2(a.x * b.y - a.y * b.x, a.y * b.x - a.x * b.y);
     }
 
     public static Subtract(a: ICartesian2, b: ICartesian2): ICartesian2 {
@@ -49,10 +65,6 @@ export class Cartesian2 implements ICartesian2 {
     }
 
     public constructor(public x: number, public y: number) {}
-
-    public computeCode(clipArea: Bounds2): RegionCode {
-        return Cartesian2.computeCode(this, clipArea);
-    }
 
     public toString() {
         return `x:${this.x}, y:${this.y}`;
@@ -208,12 +220,23 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(x, y, z);
     }
 
+    public static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number> {
+        ref = ref ?? new Float32Array(values.length * 3);
+        let i = 0;
+        for (let j = 0; j < values.length; j++) {
+            ref[i++] = values[j].x;
+            ref[i++] = values[j].y;
+            ref[i++] = values[j].z;
+        }
+        return ref;
+    }
+
     public static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
         epsilon = epsilon ?? Scalar.EPSILON;
         return Scalar.WithinEpsilon(a.x, b.x, epsilon) && Scalar.WithinEpsilon(a.y, b.y, epsilon) && Scalar.WithinEpsilon(a.z, b.z, epsilon);
     }
 
-    public constructor(public x: number, public y: number, public z: number) {
+    public constructor(x: number, y: number, public z: number = 0.0) {
         super(x, y);
     }
 
@@ -226,7 +249,7 @@ export class Cartesian4 extends Cartesian3 implements ICartesian4 {
     public static Zero() {
         return new Cartesian4(0, 0, 0);
     }
-    public constructor(public x: number, public y: number, public z: number, public w: number = 1.0) {
+    public constructor(x: number, y: number, z: number, public w: number = 1.0) {
         super(x, y, z);
     }
     public toString() {

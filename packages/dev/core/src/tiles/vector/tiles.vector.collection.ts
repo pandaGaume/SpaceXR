@@ -107,7 +107,7 @@ export class ShapeCollection implements ITileMetricsProvider {
 
     protected _buildPolygon(shape: IGeoPolygon, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);
-        return new Polygon(points);
+        return Polygon.FromPoints(points);
     }
 
     protected _buildLine(shape: IGeoLine, lod: number, metrics: ITileMetrics): Nullable<IShape> {
@@ -120,7 +120,7 @@ export class ShapeCollection implements ITileMetricsProvider {
 
     protected _buildPolyline(shape: IGeoPolyline, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);
-        return this._filter(...points) ? new Polyline(points) : null;
+        return this._filter(...points) ? Polyline.FromPoints(points) : null;
     }
 
     // transform geo points to cartesian points using tile metrics (web mercator projection within Level Of Detail)

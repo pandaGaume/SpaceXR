@@ -2,7 +2,7 @@ import { ICartesian3, IShape } from "../../geometry";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { AbstractTileProvider } from "../providers";
 import { ITileMetrics } from "../tiles.interfaces";
-import { ShapeCollection } from "./tiles.vector.collection";
+import { ShapeCollection, ShapeCollectionEventArgs } from "./tiles.vector.collection";
 import { IVectorTile, IVectorTileContent, IVectorTileFeature, IVectorTileLayer } from "./tiles.vector.interfaces";
 import { IGeoShape } from "../../geography";
 
@@ -34,10 +34,12 @@ export class VectorTileProvider extends AbstractTileProvider<IVectorTileContent>
                             tile.content.set(key, layer);
                         }
                         const feature = this._buildVectorFeature(tile, shape);
-                        if (!layer.features) {
-                            layer.features = [];
+                        if (feature) {
+                            if (!layer.features) {
+                                layer.features = [];
+                            }
+                            layer.features?.push(feature);
                         }
-                        layer.features?.push(feature);
                     }
                 }
             }
@@ -85,13 +87,9 @@ export class VectorTileProvider extends AbstractTileProvider<IVectorTileContent>
         } while (lod >= this.metrics.minLOD);
     }
 
-    protected _shapesAdded(shape: Array<IShape>): void {
-        for (const view of shape) {
-            this._shapeAdded(view);
-        }
-    }
+    protected _shapesAdded(args: ShapeCollectionEventArgs): void {}
 
-    protected _shapeAdded(view: IShape): void {
+    /*protected _shapeAdded(view: IShape): void {
         for (const tile of this.activTiles) {
             if (tile.address.levelOfDetail === view.lod && tile.geoBounds?.intersects(view.geoBounds)) {
                 tile.content = tile.content ?? [];
@@ -101,5 +99,5 @@ export class VectorTileProvider extends AbstractTileProvider<IVectorTileContent>
                 }
             }
         }
-    }
+    }*/
 }

@@ -1,5 +1,5 @@
 import { Bounds2 } from "../geometry.bounds";
-import { Cartesian3 } from "../geometry.cartesian";
+import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
 import { IBounds2, ICartesian3, RegionCode } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { ILine, ShapeType } from "./geometry.shapes.interfaces";
@@ -38,8 +38,8 @@ export class Line extends AbstractShape implements ILine {
 
     public clip(clipArea: IBounds2): ILine | Array<ILine> | undefined {
         // Compute region codes for P1, P2
-        let code1 = this._alice.computeCode(clipArea);
-        let code2 = this._alice.computeCode(clipArea);
+        let code1 = Cartesian2.ComputeCode(this._alice, clipArea);
+        let code2 = Cartesian2.ComputeCode(this._bob, clipArea);
 
         if (code1 == 0 && code2 == 0) {
             // If both endpoints lie within rectangle
@@ -97,13 +97,13 @@ export class Line extends AbstractShape implements ILine {
             if (code_out == code1) {
                 a.x = x;
                 a.y = y;
-                code1 = this._alice.computeCode(clipArea);
+                code1 = Cartesian2.ComputeCode(a, clipArea);
             } else {
                 b.x = x;
                 b.y = y;
-                code1 = this._bob.computeCode(clipArea);
+                code2 = Cartesian2.ComputeCode(b, clipArea);
             }
-        } while (code1 != 0 && code2 != 0);
+        } while (code1 != 0 || code2 != 0);
 
         return new Line(a, b);
     }

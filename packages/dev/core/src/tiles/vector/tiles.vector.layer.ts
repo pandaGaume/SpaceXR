@@ -1,5 +1,4 @@
-import { IDrawableTileMapLayer, TileMapLayerDrawFn } from "../map/tiles.map.interfaces";
-import { ITile } from "../tiles.interfaces";
+import { IDrawableTileMapLayer } from "../map/tiles.map.interfaces";
 
 import { TileMapLayer } from "../map";
 import { VectorTileProvider } from "./tiles.vector.provider";
@@ -10,7 +9,7 @@ import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
 import { IVectorTileDrawOptions, IVectorLayer, IVectorTileContent, IVectorLayerOptions, IVectorTileLayer, IVectorTileFeature } from "./tiles.vector.interfaces";
 
-export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVectorLayer, IDrawableTileMapLayer<IVectorTileContent>, IVectorTileDrawOptions {
+export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVectorLayer, IDrawableTileMapLayer, IVectorTileDrawOptions {
     public static DefaultStrokeStyle = "red";
     public static DefaultFillStyle = "grey";
     public static DefaultOpacity = 1;
@@ -24,7 +23,6 @@ export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVe
     protected _fill?: boolean;
     protected _fillColor?: string;
     protected _fillOpacity?: number;
-    protected _debug?: TileMapLayerDrawFn<IVectorTileContent>;
 
     public constructor(name: string, options?: IVectorLayerOptions, provider?: VectorTileProvider, enabled?: boolean) {
         if (provider === undefined) {
@@ -44,14 +42,6 @@ export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVe
         this._fill = options?.fill === undefined ? true : options.fill;
         this._fillColor = options?.fillColor;
         this._fillOpacity = options?.fillOpacity ?? VectorLayer.DefaultOpacity;
-    }
-
-    public get debug(): TileMapLayerDrawFn<IVectorTileContent> | undefined {
-        return this._debug;
-    }
-
-    public set debug(value: TileMapLayerDrawFn<IVectorTileContent> | undefined) {
-        this._debug = value;
     }
 
     public get dashArray(): Array<number> | undefined {
@@ -80,13 +70,13 @@ export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVe
         return this._fillOpacity;
     }
 
-    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<IVectorTileContent>): void {
-        if (tile.content) {
+    public draw(ctx: ICanvasRenderingContext): void {
+        /*        if (tile.content) {
             for (const [key, layer] of tile.content) {
                 this._drawLayer(ctx, 0, 0, key, layer);
                 continue;
             }
-        }
+        }*/
     }
 
     protected _getOptions(layer: string): IVectorTileDrawOptions {

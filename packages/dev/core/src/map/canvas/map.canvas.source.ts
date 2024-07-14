@@ -322,10 +322,10 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                     b = t.bounds;
                     if (b) {
                         if (isDrawableTileMapLayer(view.layer)) {
-                            view.layer.draw?.call(view.layer, ctx, sx, sy, t);
-                            if (this._debug) {
-                                view.layer.debug?.call(view.layer, ctx, sx, sy, t);
-                            }
+                            view.layer.draw?.call(view.layer, ctx); //, ctx, sx, sy, t);
+                            //if (this._debug) {
+                            //    view.layer.debug?.call(view.layer, ctx, sx, sy, t);
+                            //}
                             continue;
                         }
                         const x = b.x - sx;
@@ -361,10 +361,10 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                 const y = ref.y - sy;
 
                 if (isDrawableTileMapLayer(view.layer)) {
-                    view.layer.draw?.call(view.layer, ctx, sx, sy, t, scale);
-                    if (this._debug) {
-                        view.layer.debug?.call(view.layer, ctx, sx, sy, t, scale);
-                    }
+                    view.layer.draw?.call(view.layer, ctx); //, sx, sy, t, scale);
+                    //if (this._debug) {
+                    //    view.layer.debug?.call(view.layer, ctx, sx, sy, t, scale);
+                    //}
                     continue;
                 }
 

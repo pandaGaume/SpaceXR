@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi, ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { ITileConsumer, ITilePipeline, ITilePipelineBuilder, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { IHasActivTiles, ITile, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
+import { IHasActivTiles, ITileMetrics, ITileMetricsProvider, ITileProvider, ITileProviderBuilder } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
@@ -15,12 +15,10 @@ export interface ITileMapLayerOptions {
     zoomOffset?: number;
     attribution?: string;
 }
-export type TileMapLayerDrawFn<T> = (ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>, scale?: number) => void;
-export interface IDrawableTileMapLayer<T> {
-    draw?: TileMapLayerDrawFn<T>;
-    debug?: TileMapLayerDrawFn<T>;
+export interface IDrawableTileMapLayer {
+    draw(ctx: ICanvasRenderingContext, options?: ICanvasRenderingOptions): void;
 }
-export declare function isDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T>;
+export declare function isDrawableTileMapLayer(b: unknown): b is IDrawableTileMapLayer;
 export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, ITileMapLayerOptions, ITileMetricsProvider, IValidable, ITileSelectionContext, IHasNavigationState {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
@@ -29,7 +27,7 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileConsumer<T>, I
 }
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions, ICanvasRenderingOptions {
 }
-export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement | ImageData>, IImageTileMapLayerOptions {
+export interface IImageTileMapLayer extends ITileMapLayer<HTMLImageElement | ImageData>, IImageTileMapLayerOptions, IDrawableTileMapLayer {
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
 }

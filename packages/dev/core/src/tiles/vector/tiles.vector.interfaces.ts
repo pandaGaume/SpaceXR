@@ -61,7 +61,7 @@ export type IVectorTileContent = Map<string, IVectorTileLayer>;
 
 export interface IVectorTile extends ITile<IVectorTileContent> {}
 
-export interface IVectorLayer extends ITileMapLayer<IVectorTileContent>, IDrawableTileMapLayer<IVectorTileContent> {}
+export interface IVectorLayer extends ITileMapLayer<IVectorTileContent>, IDrawableTileMapLayer {}
 
 export interface IVectorLayerOptions extends IVectorTileDrawOptions, ITileMapLayerOptions {
     metrics?: ITileMetrics;

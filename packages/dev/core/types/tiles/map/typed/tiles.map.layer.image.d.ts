@@ -1,3 +1,4 @@
+import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../../engine";
 import { ITileAddress, ITileDatasource, ITileProvider } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
@@ -10,4 +11,5 @@ export declare class ImageLayer extends TileMapLayer<ImageLayerContentType> impl
     set alpha(alpha: number);
     get background(): string | undefined;
     set background(b: string | undefined);
+    draw(ctx: ICanvasRenderingContext, options?: ICanvasRenderingOptions): void;
 }

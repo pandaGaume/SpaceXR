@@ -1,8 +1,10 @@
 import { ICanvasRenderingContext } from "../../engine";
 import { EPSG3857 } from "../geography";
-import { IDrawableTileMapLayer, ITileMapLayerOptions, TileMapLayer, TileMapLayerDrawFn } from "../map";
+import { IDrawableTileMapLayer, ITileMapLayerOptions, TileMapLayer } from "../map";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 import { DebugProvider } from "./tile.debug.provider";
+
+type TileMapLayerDrawFn<T> = (ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>) => void;
 
 export interface IDebugLayerOptions<T> extends ITileMapLayerOptions {
     metrics?: ITileMetrics;
@@ -10,7 +12,7 @@ export interface IDebugLayerOptions<T> extends ITileMapLayerOptions {
     target?: any;
 }
 
-export class DebugLayer<T> extends TileMapLayer<T> implements IDrawableTileMapLayer<T> {
+export class DebugLayer<T> extends TileMapLayer<T> implements IDrawableTileMapLayer {
     private _function?: TileMapLayerDrawFn<any>;
     private _target?: any;
 
@@ -21,9 +23,20 @@ export class DebugLayer<T> extends TileMapLayer<T> implements IDrawableTileMapLa
         this._function = options?.function;
     }
 
-    public draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>): void {
+    public draw(ctx: ICanvasRenderingContext): void {
         const fn = this._function ?? this._draw;
-        fn.call(this._target ?? this, ctx, x, y, tile);
+        if (this.enabled && this.activTiles) {
+            const center = this.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+
+            for (const t of this.activTiles) {
+                const b = t.bounds;
+                if (b) {
+                    const x = b.x - center.x;
+                    const y = b.y - center.y;
+                    fn.call(this._target ?? this, ctx, x, y, t);
+                }
+            }
+        }
     }
 
     protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>): void {

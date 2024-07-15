@@ -6,24 +6,41 @@ import { AbstractShape } from "./geometry.shape";
 import { IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Polyline extends AbstractShape implements IPolyline {
-    public static FromFloats(points: FloatArray | Array<FloatArray>, stride: number = 3): IPolyline {
-        const p: Array<ICartesian3> = [];
+    public static ArraysEqual(arr1: FloatArray, arr2: FloatArray): boolean {
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static FromFloats(points: FloatArray | Array<FloatArray>, stride: number = 3): IPolyline | Array<IPolyline> {
         if (isArrayOfFloatArray(points)) {
+            const multipolyline = [];
             for (let i = 0; i < points.length; i++) {
                 const tmp = points[i];
+                const p: Array<ICartesian3> = [];
                 for (let j = 0; j < tmp.length; j += stride) {
                     p.push(new Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
                 }
+                multipolyline.push(new Polyline(p));
             }
-            return new Polyline(p);
+            return multipolyline;
         }
+        const p: Array<ICartesian3> = [];
         for (let i = 0; i < points.length; i += stride) {
             p.push(new Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
         }
         return new Polyline(p);
     }
 
-    public static FromPoints(...points: Array<Cartesian3> | Array<Array<Cartesian3>>): IPolyline {
+    public static FromPoints(points: Array<ICartesian3> | Array<Array<ICartesian3>>): IPolyline {
         if (isArrayOfCartesianArray(points)) {
             return Polyline.FromPoints(points.flat());
         }

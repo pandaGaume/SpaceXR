@@ -22,6 +22,7 @@ export interface ICartesian3 extends ICartesian2 {
 export interface ICartesian4 extends ICartesian3 {
     w: number;
 }
+
 export type CartesianArray = Array<ICartesian2 | ICartesian3 | ICartesian4>;
 
 export function isCartesian(b: unknown): b is ICartesian2 | ICartesian3 | ICartesian4 {

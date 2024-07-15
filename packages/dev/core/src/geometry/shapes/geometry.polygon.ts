@@ -24,17 +24,19 @@ function isIntersection(p: ICartesian3): p is ICartesian3WithInfos {
 export class Polygon extends Polyline implements IPolygon {
     public static IsClockWise(points: Array<ICartesian3>): boolean {
         let sum = 0;
+        const n = points.length;
         for (let i = 0; i < points.length - 1; i++) {
             const a = points[i];
-            const b = points[i + 1];
+            const b = points[(i + 1) % n]; // %n ensure the last point is connected to the first one
             sum += (b.x - a.x) * (b.y + a.y);
         }
-        return sum > 0;
+        return sum < 0;
     }
 
-    public static FromFloats(points: FloatArray | Array<FloatArray>, stride: number = 3): IPolygon {
+    public static FromFloats(points: FloatArray | Array<FloatArray>, stride: number = 3, assertClose: boolean = true, assertClockWize: boolean = true): IPolygon {
         if (isArrayOfFloatArray(points)) {
             const records = [];
+
             for (let i = 0; i < points.length; i++) {
                 const tmp = points[i];
                 const p: Array<ICartesian3> = [];
@@ -43,24 +45,24 @@ export class Polygon extends Polyline implements IPolygon {
                 }
                 records.push(p);
             }
-            return Polygon.FromPoints(...records);
+            return Polygon.FromPoints(records, assertClose, assertClockWize);
         }
         const p: Array<ICartesian3> = [];
         for (let i = 0; i < points.length; i += stride) {
             p.push(new Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
         }
-        return new Polygon(p);
+        return new Polygon(p, assertClose, assertClockWize);
     }
 
-    public static FromPoints(...points: Array<Cartesian3> | Array<Array<Cartesian3>>): IPolygon {
+    public static FromPoints(points: Array<ICartesian3> | Array<Array<ICartesian3>>, assertClose: boolean = true, assertClockWize: boolean = true): IPolygon {
         if (isArrayOfCartesianArray(points)) {
-            const p = new Polygon(points[0]);
+            const p = new Polygon(points[0], assertClose, assertClockWize);
             for (let i = 1; i < points.length; i++) {
-                p.addHole(points[i]);
+                p.addHole(points[i], assertClose, assertClockWize);
             }
             return p;
         }
-        return new Polygon(points);
+        return new Polygon(points, assertClose, assertClockWize);
     }
 
     _holes?: Array<Array<ICartesian3>>;
@@ -69,17 +71,13 @@ export class Polygon extends Polyline implements IPolygon {
         super(p, ShapeType.Polygon);
 
         // force the polygon to be closed.
-        if (assertClose) {
-            if (!Cartesian3.Equals(p[0], p[p.length - 1])) {
-                p.push(this._buildPoint(p[0].x, p[0].y, p[0].z));
-            }
+        if (assertClose && !Cartesian3.Equals(p[0], p[p.length - 1])) {
+            p.push(p[0]);
         }
 
         // force the polygon to be clockwize
-        if (assertClockWize) {
-            if (!Polygon.IsClockWise(p)) {
-                p.reverse();
-            }
+        if (assertClockWize && !Polygon.IsClockWise(p)) {
+            p.reverse();
         }
     }
 
@@ -87,16 +85,14 @@ export class Polygon extends Polyline implements IPolygon {
         return this._holes;
     }
 
-    public addHole(hole: Array<ICartesian3>): void {
+    public addHole(hole: Array<ICartesian3>, assertClose: boolean = true, assertAntiClockWize: boolean = true): void {
         if ((hole?.length ?? 0) > 2) {
             // force the polygon to be closed.
-            const first = hole[0];
-            const last = hole[hole.length - 1];
-            if (!Cartesian3.Equals(first, last)) {
-                hole.push(this._buildPoint(first.x, first.y, first.z));
+            if (assertClose && !Cartesian3.Equals(hole[0], hole[hole.length - 1])) {
+                hole.push(hole[0]);
             }
             // force the polygon to be anticlockwise
-            if (Polygon.IsClockWise(hole)) {
+            if (assertAntiClockWize && Polygon.IsClockWise(hole)) {
                 hole.reverse();
             }
             this._holes = this._holes ?? [];

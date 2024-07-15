@@ -16,14 +16,14 @@
         "compile:vector:source": "tsc --project tsconfig.json",
         "webpack:vector:dev": "webpack --mode development",
         "copy:vector:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
-        "publish:vector:dev": "npm run build:vector:dev && npm run webpack:vector:dev && npm run copy:vector:bundle"
+        "publish:vector:dev": "npm run build:vector:dev && npm run webpack:vector:dev && npm run copy:vector:bundle",
+        "test:vector": "jest -c ./jest.config.ts --verbose"
     },
     "sideEffects": false,
     "devDependencies": {
         "rimraf": "^4.4.1"
     },
     "dependencies": {
-        "protobufjs": "^7.3.2",
         "protobufjs-cli": "^1.1.2"
     }
 }

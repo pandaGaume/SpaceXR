@@ -6,6 +6,8 @@ import { ICartesian2 } from "./geometry.interfaces";
 export class PolylineSimplifier<T extends ICartesian2> {
     public static DEFAULT_TOLERANCE = 1;
 
+    public static Shared = new PolylineSimplifier<ICartesian2>();
+
     _tolerance: number;
     _highestQuality: boolean;
 

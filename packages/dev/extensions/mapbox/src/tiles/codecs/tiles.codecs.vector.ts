@@ -1,80 +1,9 @@
 import { ITileCodec, IVectorTileContent, IVectorTileFeature, IVectorTileLayer } from "core/tiles";
-import { Nullable } from "core/types";
-import * as PROTOBUF from "protobufjs";
-import { Cartesian3, Point, Polygon, Polyline, Size2 } from "core/geometry";
+import { FloatArray, Nullable } from "core/types";
+import { ICartesian2, Polygon, Polyline } from "core/geometry";
 
-// this is the official vector tile proto definition from https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto
-const __messageName__ = "PBTileMessage";
-const __vector_proto_definition__ = `package vector_tile;
-option optimize_for = LITE_RUNTIME;
-message ${__messageName__} {
-        // GeomType is described in section 4.3.4 of the specification
-        enum GeomType {
-             UNKNOWN = 0;
-             POINT = 1;
-             LINESTRING = 2;
-             POLYGON = 3;
-        }
-        // Variant type encoding
-        // The use of values is described in section 4.1 of the specification
-        message Value {
-                // Exactly one of these values must be present in a valid message
-                optional string string_value = 1;
-                optional float float_value = 2;
-                optional double double_value = 3;
-                optional int64 int_value = 4;
-                optional uint64 uint_value = 5;
-                optional sint64 sint_value = 6;
-                optional bool bool_value = 7;
-
-                extensions 8 to max;
-        }
-        // Features are described in section 4.2 of the specification
-        message Feature {
-                optional uint64 id = 1 [ default = 0 ];
-
-                // Tags of this feature are encoded as repeated pairs of
-                // integers.
-                // A detailed description of tags is located in sections
-                // 4.2 and 4.4 of the specification
-                repeated uint32 tags = 2 [ packed = true ];
-
-                // The type of geometry stored in this feature.
-                optional GeomType type = 3 [ default = UNKNOWN ];
-
-                // Contains a stream of commands and parameters (vertices).
-                // A detailed description on geometry encoding is located in 
-                // section 4.3 of the specification.
-                repeated uint32 geometry = 4 [ packed = true ];
-        }
-        // Layers are described in section 4.1 of the specification
-        message Layer {
-                // Any compliant implementation must first read the version
-                // number encoded in this message and choose the correct
-                // implementation for this version number before proceeding to
-                // decode other parts of this message.
-                required uint32 version = 15 [ default = 1 ];
-
-                required string name = 1;
-
-                // The actual features in this tile.
-                repeated Feature features = 2;
-
-                // Dictionary encoding for keys
-                repeated string keys = 3;
-
-                // Dictionary encoding for values
-                repeated Value values = 4;
-
-                // Although this is an "optional" field it is required by the specification.
-                // See https://github.com/mapbox/vector-tile-spec/issues/47
-                optional uint32 extent = 5 [ default = 4096 ];
-
-                extensions 16 to max;
-        }
-        repeated Layer layers = 3;
-        extensions 16 to 8191;
-}`;
+import { VectorTile } from "@mapbox/vector-tile";
+import Protobuf from "pbf";
 
 enum VectorTileGeomType {
     UNKNOWN = 0,
@@ -84,95 +13,60 @@ enum VectorTileGeomType {
 }
 
 export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
-    static _messageDefinition = PROTOBUF.parse(__vector_proto_definition__).root.lookupType(__messageName__);
     public static Shared = new VectorTileCodec();
 
     public async decodeAsync(r: void | Response): Promise<Awaited<Nullable<IVectorTileContent>>> {
-        const content: Nullable<IVectorTileContent> = null;
+        let content: Nullable<IVectorTileContent> = null;
         if (r instanceof Response) {
             const data = await r.blob();
             if (data) {
                 // this is the place to read the PROTOBUF data
-                // for the purpose we use PROTOBUF js library
-                const message: PROTOBUF.Message = VectorTileCodec._messageDefinition.decode(new Uint8Array(await data.arrayBuffer()));
-                return this._toVectorTileContent(message);
+                const encoded = new Uint8Array(await data.arrayBuffer());
+                const tile = new VectorTile(new Protobuf(encoded));
+                content = new Map<string, IVectorTileLayer>();
+                for (const [key, value] of Object.entries(tile.layers)) {
+                    const features: Array<IVectorTileFeature> = [];
+                    const layer = { extent: value.extent, features: features } as IVectorTileLayer;
+                    content.set(key, layer);
+                    for (let i = 0; i < value.length; i++) {
+                        const f = value.feature(i);
+                        const geom = f.loadGeometry();
+                        let coordinates = this._toFloats(geom);
+                        let shape: any = null;
+                        switch (f.type) {
+                            case VectorTileGeomType.POINT:
+                                break;
+                            case VectorTileGeomType.LINESTRING:
+                                shape = Polyline.FromFloats(coordinates, 2);
+                                features.push({ shape: shape });
+                                break;
+                            case VectorTileGeomType.POLYGON:
+                                shape = Polygon.FromFloats(coordinates, 2);
+                                features.push({ shape: shape });
+                                break;
+                        }
+                    }
+                }
             }
         }
         return content;
     }
 
-    protected _toVectorTileContent(mess: any): Nullable<IVectorTileContent> {
-        const l = mess.layers?.length ?? 0;
-        if (!l) {
-            return null;
+    protected _toFloats(points: Array<Array<ICartesian2>>): Array<FloatArray> {
+        const arrays = new Array(points.length);
+        for (let i = 0; i < points.length; i++) {
+            arrays[i] = this._toFloats0(points[i]);
         }
-        const layers = new Map<string, IVectorTileLayer>();
-        for (const layer of mess.layers) {
-            layers.set(layer.name, this._toVectorTileLayer(layer));
-        }
-        return layers;
+        return arrays;
     }
 
-    protected _toVectorTileLayer(mess: any): IVectorTileLayer {
-        const features = new Array(mess.features.length);
-        for (let i = 0; i < mess.features.length; i++) {
-            features[i] = this._toVectorTileFeature(mess.features[i]);
+    protected _toFloats0(points: Array<ICartesian2>): FloatArray {
+        const floats = new Float32Array(points.length * 2);
+        let i = 0;
+        for (const p of points) {
+            floats[i++] = p.x;
+            floats[i++] = p.y;
         }
-
-        let metadata: Map<string, any> | undefined = undefined;
-        if (mess.metadata) {
-            metadata = new Map<string, any>();
-            for (const [key, value] of Object.entries(mess.metadata)) {
-                metadata.set(key, value);
-            }
-        }
-        return {
-            version: mess.version,
-            name: mess.name,
-            features: features,
-            metadata: metadata,
-            extent: new Size2(mess.extent, mess.extent),
-        };
-    }
-
-    protected _toVectorTileFeature(mess: any): IVectorTileFeature {
-        const id = mess.id;
-        const tags = mess.tags;
-        const shape = this._toShape(mess);
-        return { id, tags, shape };
-    }
-
-    protected _toShape(mess: any): any {
-        // this is the place to convert the PROTOBUF message to the IShape
-        switch (mess.type) {
-            case VectorTileGeomType.POINT:
-                return this._toPoint(mess);
-            case VectorTileGeomType.LINESTRING:
-                return this._toPolyline(mess);
-            case VectorTileGeomType.POLYGON:
-                return this._toPolygon(mess);
-            default:
-                return null;
-        }
-    }
-
-    protected _toPoint(mess: any): any {
-        return new Point(mess.geometry[0] as number, mess.geometry[1] as number);
-    }
-
-    protected _toPolyline(mess: any): any {
-        const v = [];
-        for (let i = 0; i < mess.geometry.length; i += 2) {
-            v.push(Cartesian3.FromArray(mess.geometry, i, 2));
-        }
-        return Polyline.FromPoints(v);
-    }
-
-    protected _toPolygon(mess: any): any {
-        const v = [];
-        for (let i = 0; i < mess.geometry.length; i += 2) {
-            v.push(Cartesian3.FromArray(mess.geometry, i, 2));
-        }
-        return Polygon.FromPoints(v);
+        return floats;
     }
 }

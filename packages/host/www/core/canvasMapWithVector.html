@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../libs/spacexr.1.0.0.js"></script>
+        <script src="../libs/spacexr_vector.1.0.0.js"></script>
         <style>
             html,
             body {
@@ -44,17 +45,30 @@
 
                 // initialiser la localisation et le niveau de zoom
                 // cela peut être un tableau de coordonnées [lat, lon] ou un objet { lat: lat, lon: lon }
-                let center = [27.98817689833976, 86.92491071824738]; // everest
+                let center = SPACEXR.KnownPlaces.Mountains.MontBlanc
                 const lod = 12;
 
-                // definir la source de donnée.
-                const tileClient = SPACEXR.Google.SatelliteClient2d() ;
-                 
-                // construire la carte.
-                // display may be a canvas or a display object if we want to set scale or other options.
-                const map = new SPACEXR.CanvasMap("myMap", canvas).setViewMap([27.98817689833976, 86.92491071824738], lod);
+
+                // build the map
+                const map = new SPACEXR.CanvasMap("myMap", canvas).setViewMap(center, lod);
                 map.background = "white";
-                const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+                
+                // add an image layer
+                const tileClient = SPACEXR.Google.SatelliteClient2d() ;
+                new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+
+                // Add a vector layer
+                client = SPACEXR_MAPBOX.VectorClient("pk.eyJ1IjoiZ2F1bWUiLCJhIjoiY2x5YnU3aDV0MDhmazJvc2dqbW04ZmJpZSJ9.aAV34t1dOedP_NAY56Cn-g", SPACEXR_MAPBOX.MapBoxTileSetIds.Terrain);
+                const vectorLayerOptions = {
+                    attribution:SPACEXR_MAPBOX.Attribution,
+                    style: {
+                        fillColor: 'rgba(255, 0, 0, 0.1)',
+                        color: 'rgba(255, 0, 0, 1)',
+                        weight: 2
+                    }
+                };
+                new SPACEXR.VectorLayer("VectorLayer", vectorLayerOptions, client).addTo(map);
+
                 
                 const navigationManager = new SPACEXR.InputsNavigationTarget(map);
                 const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);

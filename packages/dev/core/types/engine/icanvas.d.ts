@@ -87,7 +87,7 @@ export interface ICanvasRenderingContext {
     quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void;
     measureText(text: string): ITextMetrics;
     stroke(): void;
-    fill(): void;
+    fill(rule?: string): void;
     drawImage(image: any, sx: number, sy: number, sWidth: number, sHeight: number, dx: number, dy: number, dWidth: number, dHeight: number): void;
     drawImage(image: any, dx: number, dy: number, dWidth: number, dHeight: number): void;
     drawImage(image: any, dx: number, dy: number): void;

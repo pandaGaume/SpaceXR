@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Canvas Polygon Test</title>
+    </head>
+    <body>
+        <canvas id="canvas" width="1024" height="1024" style="border: 1px solid #000"></canvas>
+        <script>
+            function drawPath(ctx, points, scale) {
+                let i = 0;
+                let p = points[i];
+                let px = p.x * scale;
+                let py = p.y * scale;
+                ctx.moveTo(px, py);
+                if (i < points.length - 1) {
+                    do {
+                        p = points[++i];
+                        px = p.x * scale;
+                        py = p.y * scale;
+                        ctx.lineTo(px, py);
+                    } while (i < points.length - 1);
+                }
+            }
+
+            function drawInvPath(ctx, points, scale) {
+                let i = points.length - 1;
+                let p = points[i];
+                let px = p.x * scale;
+                let py = p.y * scale;
+                ctx.moveTo(px, py);
+                if (i > 0) {
+                    do {
+                        p = points[--i];
+                        px = p.x * scale;
+                        py = p.y * scale;
+                        ctx.lineTo(px, py);
+                    } while (i > 0);
+                }
+            }
+
+            function drawPolygon(ctx, polygon, scale) {
+                ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+                ctx.beginPath();
+                //drawPath(ctx, polygon.points, scale);
+                if (polygon.holes && polygon.holes.length) {
+                    for (const hole of polygon.holes) {
+                        drawPath(ctx, hole, scale);
+                    }
+                }
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            window.onload = function () {
+                const canvas = document.getElementById("canvas");
+                const ctx = canvas.getContext("2d");
+                const scale = 1024 / 4096;
+                const polygon = {
+                    points: [
+                        { x: 3924, y: 3779, z: 0 },
+                        { x: 4012, y: 3824, z: 0 },
+                        { x: 4028, y: 3840, z: 0 },
+                        { x: 4078, y: 3932, z: 0 },
+                        { x: 4127, y: 3996, z: 0 },
+                        { x: 4160, y: 4059, z: 0 },
+                        { x: 4160, y: 4160, z: 0 },
+                        { x: 3742, y: 4160, z: 0 },
+                        { x: 3742, y: 4116, z: 0 },
+                        { x: 3723, y: 4020, z: 0 },
+                        { x: 3724, y: 3996, z: 0 },
+                        { x: 3820, y: 3890, z: 0 },
+                        { x: 3877, y: 3804, z: 0 },
+                        { x: 3905, y: 3780, z: 0 },
+                        { x: 3924, y: 3779, z: 0 },
+                    ],
+                    holes: [
+                        [
+                            { x: 3924, y: 3779, z: 0 },
+                            { x: 4012, y: 3824, z: 0 },
+                            { x: 4028, y: 3840, z: 0 },
+                            { x: 4078, y: 3932, z: 0 },
+                            { x: 4127, y: 3996, z: 0 },
+                            { x: 4160, y: 4059, z: 0 },
+                            { x: 4160, y: 4160, z: 0 },
+                            { x: 3742, y: 4160, z: 0 },
+                            { x: 3742, y: 4116, z: 0 },
+                            { x: 3723, y: 4020, z: 0 },
+                            { x: 3724, y: 3996, z: 0 },
+                            { x: 3820, y: 3890, z: 0 },
+                            { x: 3877, y: 3804, z: 0 },
+                            { x: 3905, y: 3780, z: 0 },
+                            { x: 3924, y: 3779, z: 0 },
+                        ],
+                    ],
+                };
+                drawPolygon(ctx, polygon, scale);
+            };
+        </script>
+    </body>
+</html>

@@ -58,24 +58,29 @@ export class ImageLayer extends TileMapLayer<ImageLayerContentType> implements I
 
     public draw(ctx: ICanvasRenderingContext, options?: ICanvasRenderingOptions): void {
         if (this.enabled && this.activTiles) {
-            ctx.globalAlpha = this.alpha ?? options?.alpha ?? 1.0;
-            ctx.fillStyle = this.background ?? options?.background ?? Context2DTileMap.DefaultBackground.toHexString();
-            const center = this.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+            ctx.save();
+            try {
+                ctx.globalAlpha = this.alpha ?? options?.alpha ?? 1.0;
+                ctx.fillStyle = this.background ?? options?.background ?? Context2DTileMap.DefaultBackground.toHexString();
+                const center = this.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
 
-            for (const t of this.activTiles) {
-                const b = t.bounds;
-                if (b) {
-                    const x = b.x - center.x;
-                    const y = b.y - center.y;
-                    const item = t.content ?? null; // trick to address erroness tile.
-                    if (item) {
-                        ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
-                        continue;
-                    } else {
-                        const size = this.metrics.tileSize;
-                        ctx.fillRect(x, y, size, size);
+                for (const t of this.activTiles) {
+                    const b = t.bounds;
+                    if (b) {
+                        const x = b.x - center.x;
+                        const y = b.y - center.y;
+                        const item = t.content ?? null; // trick to address erroness tile.
+                        if (item) {
+                            ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
+                            continue;
+                        } else {
+                            const size = this.metrics.tileSize;
+                            ctx.fillRect(x, y, size, size);
+                        }
                     }
                 }
+            } finally {
+                ctx.restore();
             }
         }
     }

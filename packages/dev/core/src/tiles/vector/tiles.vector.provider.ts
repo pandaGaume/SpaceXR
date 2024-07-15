@@ -61,7 +61,7 @@ export class VectorTileProvider extends AbstractTileProvider<IVectorTileContent>
                 // the shape is completely inside the tile
                 feature = {
                     tags: [],
-                    shape: shape,
+                    shape: [shape],
                 };
             } else {
                 // go for clipping

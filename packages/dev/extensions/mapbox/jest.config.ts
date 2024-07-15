@@ -103,6 +103,15 @@ export default {
     // A preset that is used as a base for Jest's configuration
     preset: "ts-jest",
 
+    globals: {
+        "ts-jest": {
+            tsconfig: "./tsconfig.json",
+        },
+    },
+    moduleNameMapper: {
+        "^core/(.*)$": "<rootDir>/../../core/src/$1",
+    },
+
     // Run tests from one or more projects
     // projects: undefined,
 

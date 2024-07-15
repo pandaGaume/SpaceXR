@@ -9,7 +9,7 @@ module.exports = [
         },
         devtool: "source-map",
         output: {
-            library: "SPACEXR_VECTOR",
+            library: "SPACEXR_MAPBOX",
             libraryTarget: "var",
             filename: "[name]." + config.version + ".js",
             path: path.resolve(__dirname, "bundles"),

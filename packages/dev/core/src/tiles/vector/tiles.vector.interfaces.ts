@@ -1,8 +1,8 @@
-import { IShape, ISize2 } from "../../geometry";
+import { IShape } from "../../geometry";
 import { IDrawableTileMapLayer, ITileMapLayer, ITileMapLayerOptions } from "../map";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 
-export interface IVectorTileDrawOptions {
+export interface IVectorTileStyle {
     /// <summary>
     /// A boolean value that specifies whether to draw the shape stroke.
     /// Set it to false to disable border on polygons or circles.
@@ -38,8 +38,8 @@ export interface IVectorTileDrawOptions {
 
 export interface IVectorTileFeature {
     id?: number;
-    tags: Array<number>;
-    shape: IShape;
+    tags?: Array<number>;
+    shape?: IShape | Array<IShape>;
 }
 
 export interface IVectorTileLayer {
@@ -52,7 +52,7 @@ export interface IVectorTileLayer {
     // Each feature in a layer may have one or more key-value pairs as its metadata
     metadata?: Map<string, any>;
     // A layer MUST contain an extent that describes the width and height of the tile in integer coordinates.
-    extent: ISize2;
+    extent: number;
 }
 
 // A Vector Tile consists of a set of named layers.
@@ -63,8 +63,10 @@ export interface IVectorTile extends ITile<IVectorTileContent> {}
 
 export interface IVectorLayer extends ITileMapLayer<IVectorTileContent>, IDrawableTileMapLayer {}
 
-export interface IVectorLayerOptions extends IVectorTileDrawOptions, ITileMapLayerOptions {
+export interface IVectorLayerOptions extends ITileMapLayerOptions {
     metrics?: ITileMetrics;
     tolerance?: number;
     highestQuality?: boolean;
+    style?: IVectorTileStyle;
+    styles?: Map<string, IVectorTileStyle>;
 }

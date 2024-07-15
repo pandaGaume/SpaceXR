@@ -43,25 +43,24 @@ export class MapBoxVectorUrlBuilder extends WebTileUrlBuilder {
     }
 }
 
-export class MapBox {
-    private static readonly KEY = "mapbox";
-    public static MaxLevelOfDetail = 14;
+export const MaxLevelOfDetail = 14;
+export const KEY = "mapbox";
+export const Attribution = "© Mapbox © OpenStreetMap";
 
-    public static TerrainDemV1Client(token: string, options?: TileWebClientOptions) {
-        const metrics = new EPSG3857({ maxLOD: MapBox.MaxLevelOfDetail, tileSize: 512 });
-        const codecOptions = new Float32TileCodecOptionsBuilder().withInsets(1, Side.top).withInsets(1, Side.left).withInsets(1, Side.bottom).withInsets(1, Side.right).build();
-        const elevationClient = new TileWebClient(
-            `${MapBox.KEY}_elevation`,
-            new MapBoxTerrainDemV1UrlBuilder(token),
-            new Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions),
-            metrics,
-            options
-        );
-        return new DemTileWebClient(`${MapBox.KEY}_dem`, elevationClient);
-    }
+export const TerrainDemV1Client = function (token: string, options?: TileWebClientOptions) {
+    const metrics = new EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 512 });
+    const codecOptions = new Float32TileCodecOptionsBuilder().withInsets(1, Side.top).withInsets(1, Side.left).withInsets(1, Side.bottom).withInsets(1, Side.right).build();
+    const elevationClient = new TileWebClient(
+        `${KEY}_elevation`,
+        new MapBoxTerrainDemV1UrlBuilder(token),
+        new Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions),
+        metrics,
+        options
+    );
+    return new DemTileWebClient(`${KEY}_dem`, elevationClient);
+};
 
-    public static VectorClient(token: string, tileSetIds: string, options?: TileWebClientOptions): TileWebClient<IVectorTileContent> {
-        const metrics = new EPSG3857({ maxLOD: MapBox.MaxLevelOfDetail, tileSize: 512 });
-        return new TileWebClient<IVectorTileContent>(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new VectorTileCodec(), metrics, options);
-    }
-}
+export const VectorClient = function (token: string, tileSetIds: string = MapBoxTileSetIds.Terrain, options?: TileWebClientOptions): TileWebClient<IVectorTileContent> {
+    const metrics = new EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 512 });
+    return new TileWebClient<IVectorTileContent>(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new VectorTileCodec(), metrics, options);
+};

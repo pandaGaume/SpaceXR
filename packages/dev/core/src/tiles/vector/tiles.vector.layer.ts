@@ -2,27 +2,17 @@ import { IDrawableTileMapLayer } from "../map/tiles.map.interfaces";
 
 import { TileMapLayer } from "../map";
 import { VectorTileProvider } from "./tiles.vector.provider";
-import { isLine, isPolygon, isPolyline } from "../../geometry/shapes/geometry.shapes.interfaces";
+import { IShape, isLine, isPolygon, isPolyline } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian3 } from "../../geometry";
-import { IVectorTileDrawOptions, IVectorLayer, IVectorTileContent, IVectorLayerOptions, IVectorTileLayer, IVectorTileFeature } from "./tiles.vector.interfaces";
+import { IVectorTileStyle, IVectorLayer, IVectorTileContent, IVectorLayerOptions, IVectorTileLayer, IVectorTileFeature } from "./tiles.vector.interfaces";
+import { VectorStyle } from "./tiles.vector.style";
 
-export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVectorLayer, IDrawableTileMapLayer, IVectorTileDrawOptions {
-    public static DefaultStrokeStyle = "red";
-    public static DefaultFillStyle = "grey";
-    public static DefaultOpacity = 1;
-    public static DefaultWeight = 1;
-
-    protected _dashArray?: Array<number>;
-    protected _color?: string;
-    protected _weight?: number;
-    protected _stroke?: boolean;
-    protected _opacity?: number;
-    protected _fill?: boolean;
-    protected _fillColor?: string;
-    protected _fillOpacity?: number;
+export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVectorLayer, IDrawableTileMapLayer {
+    protected _style?: IVectorTileStyle;
+    protected _styles?: Map<string, IVectorTileStyle>;
 
     public constructor(name: string, options?: IVectorLayerOptions, provider?: VectorTileProvider, enabled?: boolean) {
         if (provider === undefined) {
@@ -34,135 +24,155 @@ export class VectorLayer extends TileMapLayer<IVectorTileContent> implements IVe
             }
         }
         super(name, provider, options, enabled);
-        this._dashArray = options?.dashArray;
-        this._color = options?.color;
-        this._opacity = options?.opacity ?? VectorLayer.DefaultOpacity;
-        this._weight = options?.weight;
-        this._stroke = options?.stroke === undefined ? true : options.stroke;
-        this._fill = options?.fill === undefined ? true : options.fill;
-        this._fillColor = options?.fillColor;
-        this._fillOpacity = options?.fillOpacity ?? VectorLayer.DefaultOpacity;
-    }
-
-    public get dashArray(): Array<number> | undefined {
-        return this._dashArray;
-    }
-
-    public get color(): string | undefined {
-        return this._color;
-    }
-    public get weight(): number | undefined {
-        return this._weight;
-    }
-    public get stroke(): boolean | undefined {
-        return this._stroke;
-    }
-    public get opacity(): number | undefined {
-        return this._opacity;
-    }
-    public get fill(): boolean | undefined {
-        return this._fill;
-    }
-    public get fillColor(): string | undefined {
-        return this._fillColor;
-    }
-    public get fillOpacity(): number | undefined {
-        return this._fillOpacity;
+        this._style = options?.style;
+        this._styles = options?.styles;
     }
 
     public draw(ctx: ICanvasRenderingContext): void {
-        /*        if (tile.content) {
-            for (const [key, layer] of tile.content) {
-                this._drawLayer(ctx, 0, 0, key, layer);
-                continue;
+        if (this.enabled && this.activTiles) {
+            ctx.save();
+            try {
+                const center = this.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
+
+                for (const t of this.activTiles) {
+                    const b = t.bounds;
+                    if (b) {
+                        const x = b.x - center.x;
+                        const y = b.y - center.y;
+                        const item = t.content ?? null; // trick to address erroness tile.
+                        if (item) {
+                            this._drawTile(ctx, x, y, item);
+                        }
+                    }
+                }
+            } finally {
+                ctx.restore();
             }
-        }*/
-    }
-
-    protected _getOptions(layer: string): IVectorTileDrawOptions {
-        return this;
-    }
-
-    protected _drawLayer(ctx: ICanvasRenderingContext, x: number, y: number, key: string, layer: IVectorTileLayer): void {
-        const drawOptions = this._getOptions(key);
-        for (const feature of layer.features ?? []) {
-            this._drawFeature(ctx, x, y, feature, drawOptions);
         }
     }
 
-    protected _drawFeature(ctx: ICanvasRenderingContext, x: number, y: number, feature: IVectorTileFeature, drawOptions?: IVectorTileDrawOptions): void {
+    protected _drawTile(ctx: ICanvasRenderingContext, x: number, y: number, content: IVectorTileContent): void {
+        if (content) {
+            let i = 0;
+
+            for (const [key, layer] of content) {
+                if (i == 2) {
+                    ctx.save();
+                    try {
+                        ctx.translate(x, y);
+                        this._drawLayer(ctx, key, layer);
+                    } finally {
+                        ctx.restore();
+                    }
+                }
+                i++;
+            }
+        }
+    }
+
+    protected _drawLayer(ctx: ICanvasRenderingContext, key: string, layer: IVectorTileLayer): void {
+        const extent = layer.extent ?? this.metrics.tileSize;
+        const scale = this.metrics.tileSize / extent;
+        const style = this._styles?.get(key) ?? this._style ?? {};
+        for (const feature of layer.features ?? []) {
+            this._drawFeature(ctx, feature, style, scale);
+        }
+    }
+    protected _drawFeature(ctx: ICanvasRenderingContext, feature: IVectorTileFeature, style: IVectorTileStyle, scale: number): void {
         if (!feature.shape) {
             return;
         }
         const shape = feature.shape;
+        if (Array.isArray(shape)) {
+            for (const s of shape) {
+                this._drawShape(ctx, s, style, scale);
+            }
+        } else {
+            this._drawShape(ctx, shape, style, scale);
+        }
+    }
 
-        if (isLine(shape)) {
-            this._drawPolyline(ctx, x, y, [shape.start, shape.end], drawOptions);
+    protected _drawShape(ctx: ICanvasRenderingContext, s: IShape, style: IVectorTileStyle, scale: number): void {
+        if (isLine(s)) {
+            this._drawPolyline(ctx, [s.start, s.end], style, scale);
             return;
         }
 
-        if (isPolyline(shape)) {
-            this._drawPolyline(ctx, x, y, shape.points, drawOptions);
+        if (isPolyline(s)) {
+            this._drawPolyline(ctx, s.points, style, scale);
             return;
         }
 
-        if (isPolygon(shape)) {
-            this._drawPolygon(ctx, x, y, shape.points, drawOptions);
+        if (isPolygon(s)) {
+            this._drawPolygon(ctx, s.points, s.holes, style, scale);
             return;
         }
     }
 
-    protected _drawPolyline(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IVectorTileDrawOptions, close: boolean = false): void {
-        const o = options ?? this;
+    protected _drawPolyline(ctx: ICanvasRenderingContext, points: Array<ICartesian3>, o: IVectorTileStyle, scale: number, close: boolean = false): void {
         if (o.dashArray) {
             ctx.setLineDash(o.dashArray);
         }
-        ctx.strokeStyle = o.color ?? VectorLayer.DefaultStrokeStyle;
-        ctx.lineWidth = o.weight ?? VectorLayer.DefaultWeight;
-        this._drawPath(ctx, x, y, points, close);
+        ctx.strokeStyle = o.color ?? VectorStyle.DefaultStrokeStyle;
+        ctx.lineWidth = o.weight ?? VectorStyle.DefaultWeight;
+        ctx.beginPath();
+        this._drawPath(ctx, points, scale);
         ctx.stroke();
     }
 
-    protected _drawPolygon(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, options?: IVectorTileDrawOptions): void {
-        const o = options ?? this;
-        if (o.fill) {
-            ctx.fillStyle = o.fillColor ?? VectorLayer.DefaultFillStyle;
-            ctx.globalAlpha = o.fillOpacity ?? VectorLayer.DefaultOpacity;
-            this._drawPath(ctx, x, y, points, true);
-            ctx.fill();
+    protected _drawPolygon(ctx: ICanvasRenderingContext, points: Array<ICartesian3>, holes: Array<Array<ICartesian3>> | undefined, o: IVectorTileStyle, scale: number): void {
+        ctx.fillStyle = o.fillColor ?? VectorStyle.DefaultFillStyle;
+        ctx.globalAlpha = o.fillOpacity ?? VectorStyle.DefaultOpacity;
+        ctx.beginPath();
+
+        points = points.map((p) => ({ x: p.x * scale, y: p.y * scale, z: 0 }));
+
+        PolylineSimplifier.Shared.simplify(points);
+
+        this._drawPath(ctx, points, 1);
+
+        if (holes && holes.length) {
+            for (let hole of holes) {
+                hole = hole.map((p) => ({ x: p.x * scale, y: p.y * scale, z: 0 }));
+
+                PolylineSimplifier.Shared.simplify(hole);
+
+                this._drawPath(ctx, hole, 1);
+            }
         }
-        if (o.stroke) {
-            if (o.dashArray) {
-                ctx.setLineDash(o.dashArray);
-            }
-            ctx.strokeStyle = o.color ?? VectorLayer.DefaultStrokeStyle;
-            ctx.globalAlpha = o.opacity ?? VectorLayer.DefaultOpacity;
-            ctx.lineWidth = o.weight ?? VectorLayer.DefaultWeight;
-            // draw the path if not previously done
-            if (!this._fill) {
-                this._drawPath(ctx, x, y, points, true);
-            }
-            ctx.stroke();
+
+        ctx.fill();
+    }
+
+    protected _drawPath(ctx: ICanvasRenderingContext, points: Array<ICartesian3>, scale: number): void {
+        let i = 0;
+        let p = points[i];
+        let px = p.x * scale;
+        let py = p.y * scale;
+        ctx.moveTo(px, py);
+        if (i < points.length - 1) {
+            do {
+                p = points[++i];
+                px = p.x * scale;
+                py = p.y * scale;
+                ctx.lineTo(px, py);
+            } while (i < points.length - 1);
         }
     }
 
-    protected _drawPath(ctx: ICanvasRenderingContext, x: number, y: number, points: Array<ICartesian3>, close: boolean = false): void {
-        ctx.beginPath();
-        let p = points[0];
-        let px = p.x - x;
-        let py = p.y - y;
+    _drawInvPath(ctx: ICanvasRenderingContext, points: Array<ICartesian3>, scale: number): void {
+        let i = points.length - 1;
+        let p = points[i];
+        let px = p.x * scale;
+        let py = p.y * scale;
         ctx.moveTo(px, py);
-        for (let i = 0; i != points.length; ++i) {
-            p = points[i];
-            px = p.x - x;
-            py = p.y - y;
-            ctx.lineTo(px, py);
-        }
-        if (close) {
-            p = points[0];
-            px = p.x - x;
-            py = p.y - y;
-            ctx.lineTo(px, py);
+        if (i > 0) {
+            do {
+                p = points[--i];
+                px = p.x * scale;
+                py = p.y * scale;
+                ctx.lineTo(px, py);
+            } while (i > 0);
         }
     }
 }

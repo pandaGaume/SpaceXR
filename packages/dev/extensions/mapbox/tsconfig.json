@@ -2,6 +2,7 @@
     "extends": "../../../../tsconfig.json",
     "name": "spacexr-vector",
     "compilerOptions": {
+        "esModuleInterop": true,
         "composite": true,
         "outDir": "./dist",
         "rootDir": "./src",
@@ -12,7 +13,7 @@
             "core/*": ["./dev/core/src/*"]
         }
     },
-    // you MUST use reference to the core tsconfig and the babylon-ext tsconfig
+    // you MUST use reference to the core tsconfig
     "references": [{ "path": "../../core" }],
     "include": ["./src/**/*.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]

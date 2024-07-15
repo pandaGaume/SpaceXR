@@ -59,15 +59,7 @@
 
                 // Add a vector layer
                 client = SPACEXR_MAPBOX.VectorClient("pk.eyJ1IjoiZ2F1bWUiLCJhIjoiY2x5YnU3aDV0MDhmazJvc2dqbW04ZmJpZSJ9.aAV34t1dOedP_NAY56Cn-g", SPACEXR_MAPBOX.MapBoxTileSetIds.Terrain);
-                const vectorLayerOptions = {
-                    attribution:SPACEXR_MAPBOX.Attribution,
-                    style: {
-                        fillColor: 'rgba(255, 0, 0, 0.1)',
-                        color: 'rgba(255, 0, 0, 1)',
-                        weight: 2
-                    }
-                };
-                new SPACEXR.VectorLayer("VectorLayer", vectorLayerOptions, client).addTo(map);
+                new SPACEXR.ImageLayer("VectorLayer", client, { attribution:SPACEXR_MAPBOX.Attribution }).addTo(map);
 
                 
                 const navigationManager = new SPACEXR.InputsNavigationTarget(map);

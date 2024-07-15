@@ -6,3 +6,4 @@ export * from "./geometry.size";
 export * from "./geometry.convex.quickhull";
 export * from "./geometry.plane.cruncher";
 export * from "./shapes";
+export * from "./geometry.simplify";

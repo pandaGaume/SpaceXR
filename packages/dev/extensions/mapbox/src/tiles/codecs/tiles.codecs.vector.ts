@@ -1,72 +1,41 @@
-import { ITileCodec, IVectorTileContent, IVectorTileFeature, IVectorTileLayer } from "core/tiles";
-import { FloatArray, Nullable } from "core/types";
-import { ICartesian2, Polygon, Polyline } from "core/geometry";
-
+import { ICanvasRenderingContext } from "core/engine";
 import { VectorTile } from "@mapbox/vector-tile";
 import Protobuf from "pbf";
+import { CanvasTileCodec, ITileMetrics, IVectorTile, TileVectorRenderer } from "core/tiles";
+import { PolylineSimplifier } from "core/geometry/geometry.simplify";
+import { ICartesian2 } from "core/geometry";
+import { Nullable } from "core/types";
 
-enum VectorTileGeomType {
-    UNKNOWN = 0,
-    POINT = 1,
-    LINESTRING = 2,
-    POLYGON = 3,
+declare module "@mapbox/vector-tile" {
+    export interface VectorTile extends IVectorTile {}
 }
 
-export class VectorTileCodec implements ITileCodec<IVectorTileContent> {
-    public static Shared = new VectorTileCodec();
-
-    public async decodeAsync(r: void | Response): Promise<Awaited<Nullable<IVectorTileContent>>> {
-        let content: Nullable<IVectorTileContent> = null;
-        if (r instanceof Response) {
-            const data = await r.blob();
-            if (data) {
-                // this is the place to read the PROTOBUF data
-                const encoded = new Uint8Array(await data.arrayBuffer());
-                const tile = new VectorTile(new Protobuf(encoded));
-                content = new Map<string, IVectorTileLayer>();
-                for (const [key, value] of Object.entries(tile.layers)) {
-                    const features: Array<IVectorTileFeature> = [];
-                    const layer = { extent: value.extent, features: features } as IVectorTileLayer;
-                    content.set(key, layer);
-                    for (let i = 0; i < value.length; i++) {
-                        const f = value.feature(i);
-                        const geom = f.loadGeometry();
-                        let coordinates = this._toFloats(geom);
-                        let shape: any = null;
-                        switch (f.type) {
-                            case VectorTileGeomType.POINT:
-                                break;
-                            case VectorTileGeomType.LINESTRING:
-                                shape = Polyline.FromFloats(coordinates, 2);
-                                features.push({ shape: shape });
-                                break;
-                            case VectorTileGeomType.POLYGON:
-                                shape = Polygon.FromFloats(coordinates, 2);
-                                features.push({ shape: shape });
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-        return content;
+export class VectorTileCodec extends CanvasTileCodec<VectorTile> {
+    public static CreateCanvas(width: number, height: number): HTMLCanvasElement {
+        const canvas = <HTMLCanvasElement>document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
     }
 
-    protected _toFloats(points: Array<Array<ICartesian2>>): Array<FloatArray> {
-        const arrays = new Array(points.length);
-        for (let i = 0; i < points.length; i++) {
-            arrays[i] = this._toFloats0(points[i]);
-        }
-        return arrays;
+    _simplifier: PolylineSimplifier<ICartesian2>;
+    _renderer: TileVectorRenderer;
+
+    public constructor(metrics: ITileMetrics) {
+        super(VectorTileCodec.CreateCanvas(metrics.tileSize, metrics.tileSize));
+        this._simplifier = new PolylineSimplifier<ICartesian2>();
+        this._renderer = new TileVectorRenderer(this._simplifier);
     }
 
-    protected _toFloats0(points: Array<ICartesian2>): FloatArray {
-        const floats = new Float32Array(points.length * 2);
-        let i = 0;
-        for (const p of points) {
-            floats[i++] = p.x;
-            floats[i++] = p.y;
+    protected async _decodeDataAsync(r: Response): Promise<Awaited<Nullable<VectorTile>>> {
+        const b = await r.blob();
+        if (b) {
+            return new VectorTile(new Protobuf(await b.arrayBuffer()));
         }
-        return floats;
+        return null;
+    }
+
+    protected _render(ctx: ICanvasRenderingContext, tile: VectorTile): void {
+        this._renderer.renderTile(tile, ctx);
     }
 }

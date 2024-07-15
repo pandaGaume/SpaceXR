@@ -1,6 +1,6 @@
 import { DemTileWebClient } from "core/dem";
 import { Side } from "core/geometry";
-import { EPSG3857, Float32TileCodec, Float32TileCodecOptionsBuilder, IPixelDecoder, IVectorTileContent, TileWebClient, TileWebClientOptions, WebTileUrlBuilder } from "core/tiles";
+import { EPSG3857, Float32TileCodec, Float32TileCodecOptionsBuilder, IPixelDecoder, TileWebClient, TileWebClientOptions, WebTileUrlBuilder } from "core/tiles";
 import { VectorTileCodec } from "../codecs";
 
 export class MapBoxTerrainDemV1UrlBuilder extends WebTileUrlBuilder {
@@ -43,7 +43,7 @@ export class MapBoxVectorUrlBuilder extends WebTileUrlBuilder {
     }
 }
 
-export const MaxLevelOfDetail = 14;
+export const MaxLevelOfDetail = 21;
 export const KEY = "mapbox";
 export const Attribution = "© Mapbox © OpenStreetMap";
 
@@ -60,7 +60,7 @@ export const TerrainDemV1Client = function (token: string, options?: TileWebClie
     return new DemTileWebClient(`${KEY}_dem`, elevationClient);
 };
 
-export const VectorClient = function (token: string, tileSetIds: string = MapBoxTileSetIds.Terrain, options?: TileWebClientOptions): TileWebClient<IVectorTileContent> {
-    const metrics = new EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 512 });
-    return new TileWebClient<IVectorTileContent>(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new VectorTileCodec(), metrics, options);
+export const VectorClient = function (token: string, tileSetIds: string = MapBoxTileSetIds.Terrain, options?: TileWebClientOptions): TileWebClient<ImageBitmap> {
+    const metrics = new EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 256 });
+    return new TileWebClient<ImageBitmap>(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new VectorTileCodec(metrics), metrics, options);
 };

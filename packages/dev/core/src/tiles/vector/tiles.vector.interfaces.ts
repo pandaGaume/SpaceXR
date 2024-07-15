@@ -1,4 +1,4 @@
-import { IShape } from "../../geometry";
+import { IBounded, ICartesian2 } from "../../geometry";
 import { IDrawableTileMapLayer, ITileMapLayer, ITileMapLayerOptions } from "../map";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 
@@ -36,10 +36,17 @@ export interface IVectorTileStyle {
     fillOpacity?: number;
 }
 
-export interface IVectorTileFeature {
-    id?: number;
-    tags?: Array<number>;
-    shape?: IShape | Array<IShape>;
+export enum VectorTileGeomType {
+    UNKNOWN = 0,
+    POINT = 1,
+    LINESTRING = 2,
+    POLYGON = 3,
+}
+
+export interface IVectorTileFeature extends IBounded {
+    id?: number | undefined;
+    type: VectorTileGeomType;
+    loadGeometry(): Array<Array<ICartesian2>>;
 }
 
 export interface IVectorTileLayer {
@@ -47,17 +54,18 @@ export interface IVectorTileLayer {
     version: number;
     // A layer MUST contain a name field. A Vector Tile MUST NOT contain two or more layers whose name values are byte-for-byte identical
     name: string;
-    // A layer SHOULD contain at least one feature.
-    features?: Array<IVectorTileFeature>;
-    // Each feature in a layer may have one or more key-value pairs as its metadata
-    metadata?: Map<string, any>;
     // A layer MUST contain an extent that describes the width and height of the tile in integer coordinates.
     extent: number;
+    length: number;
+    // A layer SHOULD contain at least one feature.
+    feature(i: number): IVectorTileFeature;
 }
 
 // A Vector Tile consists of a set of named layers.
 // A layer contains geometric features and their metadata.
-export type IVectorTileContent = Map<string, IVectorTileLayer>;
+export interface IVectorTileContent {
+    layers: Record<string, IVectorTileLayer>;
+}
 
 export interface IVectorTile extends ITile<IVectorTileContent> {}
 

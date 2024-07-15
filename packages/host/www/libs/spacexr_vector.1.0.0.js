@@ -29,74 +29,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   VectorTileCodec: () => (/* binding */ VectorTileCodec)
 /* harmony export */ });
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/geometry */ "core/geometry");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_geometry__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @mapbox/vector-tile */ "../../../../node_modules/@mapbox/vector-tile/index.js");
-/* harmony import */ var pbf__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! pbf */ "../../../../node_modules/pbf/index.js");
+/* harmony import */ var _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @mapbox/vector-tile */ "../../../../node_modules/@mapbox/vector-tile/index.js");
+/* harmony import */ var pbf__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! pbf */ "../../../../node_modules/pbf/index.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry/geometry.simplify */ "core/tiles");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_2__);
 
 
 
-var VectorTileGeomType;
-(function (VectorTileGeomType) {
-    VectorTileGeomType[VectorTileGeomType["UNKNOWN"] = 0] = "UNKNOWN";
-    VectorTileGeomType[VectorTileGeomType["POINT"] = 1] = "POINT";
-    VectorTileGeomType[VectorTileGeomType["LINESTRING"] = 2] = "LINESTRING";
-    VectorTileGeomType[VectorTileGeomType["POLYGON"] = 3] = "POLYGON";
-})(VectorTileGeomType || (VectorTileGeomType = {}));
-class VectorTileCodec {
-    async decodeAsync(r) {
-        let content = null;
-        if (r instanceof Response) {
-            const data = await r.blob();
-            if (data) {
-                const encoded = new Uint8Array(await data.arrayBuffer());
-                const tile = new _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_1__.VectorTile(new pbf__WEBPACK_IMPORTED_MODULE_2__["default"](encoded));
-                content = new Map();
-                for (const [key, value] of Object.entries(tile.layers)) {
-                    const features = [];
-                    const layer = { extent: value.extent, features: features };
-                    content.set(key, layer);
-                    for (let i = 0; i < value.length; i++) {
-                        const f = value.feature(i);
-                        const geom = f.loadGeometry();
-                        let coordinates = this._toFloats(geom);
-                        let shape = null;
-                        switch (f.type) {
-                            case VectorTileGeomType.POINT:
-                                break;
-                            case VectorTileGeomType.LINESTRING:
-                                shape = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Polyline.FromFloats(coordinates, 2);
-                                features.push({ shape: shape });
-                                break;
-                            case VectorTileGeomType.POLYGON:
-                                shape = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Polygon.FromFloats(coordinates, 2);
-                                features.push({ shape: shape });
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-        return content;
+
+class VectorTileCodec extends core_tiles__WEBPACK_IMPORTED_MODULE_2__.CanvasTileCodec {
+    static CreateCanvas(width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
     }
-    _toFloats(points) {
-        const arrays = new Array(points.length);
-        for (let i = 0; i < points.length; i++) {
-            arrays[i] = this._toFloats0(points[i]);
-        }
-        return arrays;
+    constructor(metrics) {
+        super(VectorTileCodec.CreateCanvas(metrics.tileSize, metrics.tileSize));
+        this._simplifier = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.PolylineSimplifier();
+        this._renderer = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileVectorRenderer(this._simplifier);
     }
-    _toFloats0(points) {
-        const floats = new Float32Array(points.length * 2);
-        let i = 0;
-        for (const p of points) {
-            floats[i++] = p.x;
-            floats[i++] = p.y;
+    async _decodeDataAsync(r) {
+        const b = await r.blob();
+        if (b) {
+            return new _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_0__.VectorTile(new pbf__WEBPACK_IMPORTED_MODULE_1__["default"](await b.arrayBuffer()));
         }
-        return floats;
+        return null;
+    }
+    _render(ctx, tile) {
+        this._renderer.renderTile(tile, ctx);
     }
 }
-VectorTileCodec.Shared = new VectorTileCodec();
 //# sourceMappingURL=tiles.codecs.vector.js.map
 
 /***/ }),
@@ -170,7 +133,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TerrainDemV1Client: () => (/* binding */ TerrainDemV1Client),
 /* harmony export */   VectorClient: () => (/* binding */ VectorClient)
 /* harmony export */ });
-/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/geometry");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
 /* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_dem__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.js");
 
@@ -210,7 +173,7 @@ class MapBoxVectorUrlBuilder extends core_dem__WEBPACK_IMPORTED_MODULE_0__.WebTi
         this.withHost("api.mapbox.com").withSecure(true).withQuery(`access_token=${token}`).withPath(`v4/${tileSetIds}/{z}/{x}/{y}.{extension}`).withExtension(extension);
     }
 }
-const MaxLevelOfDetail = 14;
+const MaxLevelOfDetail = 21;
 const KEY = "mapbox";
 const Attribution = "© Mapbox © OpenStreetMap";
 const TerrainDemV1Client = function (token, options) {
@@ -220,14 +183,14 @@ const TerrainDemV1Client = function (token, options) {
     return new core_dem__WEBPACK_IMPORTED_MODULE_0__.DemTileWebClient(`${KEY}_dem`, elevationClient);
 };
 const VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, options) {
-    const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 512 });
-    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(), metrics, options);
+    const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 256 });
+    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(metrics), metrics, options);
 };
 //# sourceMappingURL=tiles.vendors.mapbox.js.map
 
 /***/ }),
 
-/***/ "core/geometry":
+/***/ "core/tiles":
 /*!**************************!*\
   !*** external "SPACEXR" ***!
   \**************************/

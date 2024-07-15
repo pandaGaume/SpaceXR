@@ -71,7 +71,8 @@ export class ImageLayer extends TileMapLayer<ImageLayerContentType> implements I
                         const y = b.y - center.y;
                         const item = t.content ?? null; // trick to address erroness tile.
                         if (item) {
-                            ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
+                            const size = this.metrics.tileSize;
+                            ctx.drawImage(item, 0, 0, item.width, item.height, x, y, size + 1, size + 1);
                             continue;
                         } else {
                             const size = this.metrics.tileSize;

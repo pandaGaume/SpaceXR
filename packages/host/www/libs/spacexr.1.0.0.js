@@ -9097,10 +9097,6 @@ class ImageLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.TileMapLa
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, size + 1, size + 1);
                             continue;
                         }
-                        else {
-                            const size = this.metrics.tileSize;
-                            ctx.fillRect(x, y, size, size);
-                        }
                     }
                 }
             }
@@ -10357,6 +10353,7 @@ class TileContentProvider {
             callback?.(tile);
         }, (reason) => {
             console.log(`the fetch operation has failed because of ${reason}`);
+            callback?.(tile);
         });
         tile.content = c;
         return tile;

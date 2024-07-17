@@ -1,7 +1,7 @@
 import { Cartesian2 } from "./geometry.cartesian";
 import { IBounds2, ICartesian2, ISize2, IBounded, IsBounds } from "./geometry.interfaces";
 
-export class Bounds2 implements IBounds2 {
+export class Bounds2 extends Cartesian2 implements IBounds2 {
     public static Zero(): IBounds2 {
         return new Bounds2(0, 0, 0, 0);
     }
@@ -45,7 +45,9 @@ export class Bounds2 implements IBounds2 {
         return rect;
     }
 
-    public constructor(public x: number, public y: number, public width: number, public height: number) {}
+    public constructor(x: number, y: number, public width: number, public height: number) {
+        super(x, y);
+    }
 
     public *points(): IterableIterator<ICartesian2> {
         const r = this.xmax;
@@ -109,6 +111,20 @@ export class Bounds2 implements IBounds2 {
 
     public contains(x: number, y: number): boolean {
         return x >= this.xmin && x <= this.xmax && y >= this.ymax && y <= this.ymin;
+    }
+
+    public containsBounds(other?: IBounds2): boolean {
+        if (!other) return false;
+        return (
+            other.xmin >= this.xmin &&
+            other.xmin <= this.xmax &&
+            other.ymin >= this.ymin &&
+            other.ymin <= this.ymax &&
+            other.xmax >= this.xmin &&
+            other.xmax <= this.xmax &&
+            other.ymax >= this.ymin &&
+            other.ymax <= this.ymax
+        );
     }
 
     public toString() {

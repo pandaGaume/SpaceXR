@@ -372,7 +372,7 @@ export interface ICanvasRenderingContext {
     /**
      * Fills the current sub-paths with the current fill style.
      */
-    fill(): void;
+    fill(rule?: string): void;
 
     /**
      * Draws the specified image. This method is available in multiple formats, providing a great deal of flexibility in its use.

@@ -1,5 +1,5 @@
 import { Scalar, RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplayBounds, ITileNavigationState, IImageTileMapLayer } from "../../tiles";
+import { TileMapBase, ITileDisplayBounds, ITileNavigationState, IImageTileMapLayer, isDrawableTileMapLayer } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
 import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
@@ -63,8 +63,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         const y = yoffset;
         const w = res.width;
         const h = res.height;
-        const a = this._alpha ?? 1;
-        const b = this._background ?? Context2DTileMap.DefaultBackground.toHexString();
+        //const a = this._alpha ?? 1;
+        //const b = this._background ?? Context2DTileMap.DefaultBackground.toHexString();
 
         if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
             ctx.restore();
@@ -86,26 +86,8 @@ export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageT
         ctx.scale(scale, scale);
         // every tiles are supposed to got the same size here, using same metrics
         for (const l of this._zIndexOrderedLayers ?? []) {
-            if (l.enabled && l.activTiles) {
-                ctx.globalAlpha = l.alpha ?? a;
-                ctx.fillStyle = l.background ?? b;
-                const center = l.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
-
-                for (const t of l.activTiles) {
-                    const b = t.bounds;
-                    if (b) {
-                        const x = b.x - center.x;
-                        const y = b.y - center.y;
-                        const item = t.content ?? null; // trick to address erroness tile.
-                        if (item) {
-                            ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
-                            continue;
-                        } else {
-                            const size = l.metrics.tileSize;
-                            ctx.fillRect(x, y, size, size);
-                        }
-                    }
-                }
+            if (isDrawableTileMapLayer(l)) {
+                l.draw(ctx, this);
             }
         }
         ctx.restore();

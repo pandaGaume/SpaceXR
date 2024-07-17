@@ -1,10 +1,31 @@
 {
     "configurations": [
         {
+            "type": "node",
+            "request": "launch",
+            "name": "Test Vector",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": ["--config", "./jest.config.ts", "--verbose"],
+            "outputCapture": "std",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}/packages/dev/extensions/mapbox/",
+            "windows": {
+                "skipFiles": ["C:\\**\\node_modules\\**\\*", "<node_internals>/**/*"]
+            }
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Canvas Map on chrome",
             "url": "http://localhost:1338/packages/host/www/core/canvasmap.html",
+            "webRoot": "${workspaceFolder}/packages/dev/core/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Canvas Map with vectors on chrome",
+            "url": "http://localhost:1338/packages/host/www/core/canvasmapwithvector.html",
             "webRoot": "${workspaceFolder}/packages/dev/core/",
             "sourceMaps": true
         },
@@ -69,6 +90,14 @@
             "request": "launch",
             "name": "Launch 3D map with shapes on chrome",
             "url": "http://localhost:1338/packages/host/www/babylon/3DMapWithShapes.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch 3D map with vectors on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/3DMapWithVector.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },

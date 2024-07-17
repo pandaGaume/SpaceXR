@@ -1,14 +1,14 @@
 import { Envelope } from "../geography.envelope";
 import { IEnvelope, IGeo2 } from "../geography.interfaces";
-import { AbstractGeoShape } from "./geography.shape";
+import { GeoShape } from "./geography.shape";
 import { IGeoLine, GeoShapeType } from "./geography.shapes.interfaces";
 
-export class GeoLine extends AbstractGeoShape implements IGeoLine {
+export class GeoLine extends GeoShape implements IGeoLine {
     _alice: IGeo2;
     _bob: IGeo2;
 
-    public constructor(name: string, a: IGeo2, b: IGeo2) {
-        super(GeoShapeType.Line, name);
+    public constructor(a: IGeo2, b: IGeo2) {
+        super(GeoShapeType.Line);
         this._alice = a;
         this._bob = b;
     }

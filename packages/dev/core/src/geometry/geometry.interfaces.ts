@@ -1,25 +1,29 @@
 import { ICloneable } from "../types";
 
+// Defining region codes
+export enum RegionCode {
+    INSIDE = 0, // 0000
+    LEFT = 1, // 0001
+    RIGHT = 2, // 0010
+    BOTTOM = 4, // 0100
+    TOP = 8, // 1000
+}
+
 export interface ICartesian2 {
     x: number;
     y: number;
     toString(): string;
 }
 
-export interface ICartesian3 {
-    x: number;
-    y: number;
+export interface ICartesian3 extends ICartesian2 {
     z: number;
-    toString(): string;
 }
 
-export interface ICartesian4 {
-    x: number;
-    y: number;
-    z: number;
+export interface ICartesian4 extends ICartesian3 {
     w: number;
-    toString(): string;
 }
+
+export type CartesianArray = Array<ICartesian2 | ICartesian3 | ICartesian4>;
 
 export function isCartesian(b: unknown): b is ICartesian2 | ICartesian3 | ICartesian4 {
     if (typeof b !== "object" || b === null) return false;
@@ -29,6 +33,17 @@ export function isCartesian(b: unknown): b is ICartesian2 | ICartesian3 | ICarte
 export function isCartesian3(b: unknown): b is ICartesian3 {
     if (typeof b !== "object" || b === null) return false;
     return (<ICartesian3>b).x !== undefined && (<ICartesian3>b).y !== undefined && (<ICartesian3>b).z !== undefined;
+}
+
+export function isCartesianArray(b: unknown): b is CartesianArray {
+    return Array.isArray(b) && b.every(isCartesian);
+}
+
+export function isArrayOfCartesianArray(input: any): input is Array<CartesianArray> {
+    if (!Array.isArray(input)) {
+        return false;
+    }
+    return input.every(isCartesianArray);
 }
 
 export function isCartesian4(b: unknown): b is ICartesian4 {
@@ -75,7 +90,10 @@ export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
     intersection(other?: IBounds2, ref?: IBounds2): IBounds2 | undefined;
     unionInPlace(other?: IBounds2): IBounds2;
     contains(x: number, y: number): boolean;
+    containsBounds(other?: IBounds2): boolean;
     toString(): string;
+    /// <summary>
+    /// Return the 4 corners of the bounds in clockwise order starting from the bottom left corner.
     points(): IterableIterator<ICartesian2>;
 }
 

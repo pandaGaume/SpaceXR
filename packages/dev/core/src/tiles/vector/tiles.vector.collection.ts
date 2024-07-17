@@ -1,139 +1,87 @@
-import { GeoBoundedCollection, GeoShapeType, IEnvelope, IGeo2, IGeoCircle, IGeoLine, IGeoPolygon, IGeoPolyline, IGeoShape, isGeoShape } from "../../geography";
-import { Cartesian3, IBounds2, ICartesian3 } from "../../geometry";
+import { GeoShapeType, IGeo2, IGeoLine, IGeoPolygon, IGeoPolyline, IGeoShape } from "../../geography";
+import { BoundedCollection, Cartesian3, ICartesian3 } from "../../geometry";
 import { Polygon } from "../../geometry/shapes/geometry.polygon";
 import { Polyline } from "../../geometry/shapes/geometry.polyline";
 import { Line } from "../../geometry/shapes/geometry.line";
-import { IShape, isShape, ShapeType } from "../../geometry/shapes/geometry.shapes.interfaces";
+import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { Nullable } from "../../types";
 import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
-import { DecoratedShape } from "./tiles.vector.decorated";
-import { ShapeLayerInputContentType } from "./tiles.vector.layer";
-import { isDecoratedShape, IShapeDrawOptions, IShapeView, ShapeViewCoordinateMode } from "./tiles.vector.interfaces";
 
-class ShapeView extends DecoratedShape<IShape> implements IShapeView {
-    private _source: Nullable<IGeoShape | IShape>;
-    private _lod: number;
-    private _cmode: ShapeViewCoordinateMode;
-
-    public constructor(
-        source: Nullable<IGeoShape | IShape>,
-        view: IShape,
-        lod: number,
-        options: Nullable<IShapeDrawOptions>,
-        cmode: ShapeViewCoordinateMode = ShapeViewCoordinateMode.World
-    ) {
-        super(view, options);
-        this._source = source;
-        this._lod = lod;
-        this._cmode = cmode ?? ShapeViewCoordinateMode.World;
-    }
-
-    public get source(): Nullable<IGeoShape | IShape> {
-        return this._source;
-    }
-
-    public get lod(): number {
-        return this._lod;
-    }
-
-    public get coordinateMode(): ShapeViewCoordinateMode {
-        return this._cmode;
-    }
-
-    public get bounds(): IBounds2 | undefined {
-        return this.value?.bounds;
-    }
-
-    public get geoBounds(): IEnvelope | undefined {
-        return isGeoShape(this.source) ? this.source.geoBounds : undefined;
-    }
+export class ShapeCollectionEventArgs {
+    public constructor(public lod: number, public IShapes: Array<IShape>) {}
 }
 
-// TODO : introduce ShapeFactory to allow extensions..
-export class ShapeViewCollection implements ITileMetricsProvider {
+/// <summary>
+/// A collection of shapes that can be added to a map. The collection is organized by level of detail.
+/// taking as input GeoShapes and transforming them into IShapes using the tile metrics. Note that the whole
+/// shape is transformed once and then simplified using a PolylineSimplifier.
+/// ShapeCollection will be used by VectorTileProvider to build VectorTileContent, windowing the shapes to the tiles and
+/// offseting the coordinates to the tile bounds.
+/// </summary>
+export class ShapeCollection implements ITileMetricsProvider {
     public static DefaultSimplifyTolerance: number = 2;
     public static DefaultSimplifyHighQuality: boolean = false;
     public static Epsilon = 1;
 
-    _addedObservable?: Observable<Array<IShapeView>>;
-    _removedObservable?: Observable<Array<IShapeView>>;
+    _addedObservable?: Observable<ShapeCollectionEventArgs>;
+    _removedObservable?: Observable<ShapeCollectionEventArgs>;
 
-    private _shapes: Array<GeoBoundedCollection<ShapeView>>;
+    private _shapes: Array<BoundedCollection<IShape>>;
     private _metrics: ITileMetrics;
     private _simplifier: PolylineSimplifier<ICartesian3>;
 
     public constructor(metrics: ITileMetrics, simplifier?: PolylineSimplifier<ICartesian3>) {
         this._metrics = metrics;
-        this._shapes = new Array<GeoBoundedCollection<ShapeView>>(metrics.maxLOD - metrics.minLOD + 1);
-        this._simplifier = simplifier ?? new PolylineSimplifier<ICartesian3>(ShapeViewCollection.DefaultSimplifyTolerance, ShapeViewCollection.DefaultSimplifyHighQuality);
+        this._shapes = new Array<BoundedCollection<IShape>>(metrics.maxLOD - metrics.minLOD + 1);
+        this._simplifier = simplifier ?? new PolylineSimplifier<ICartesian3>(ShapeCollection.DefaultSimplifyTolerance, ShapeCollection.DefaultSimplifyHighQuality);
     }
 
     public get metrics(): ITileMetrics {
         return this._metrics;
     }
 
-    public get addedObservable(): Observable<Array<IShapeView>> {
+    public get addedObservable(): Observable<ShapeCollectionEventArgs> {
         if (this._addedObservable === undefined) {
-            this._addedObservable = new Observable<Array<IShapeView>>();
+            this._addedObservable = new Observable<ShapeCollectionEventArgs>();
         }
         return this._addedObservable;
     }
 
-    public get removedObservable(): Observable<Array<IShapeView>> {
+    public get removedObservable(): Observable<ShapeCollectionEventArgs> {
         if (this._removedObservable === undefined) {
-            this._removedObservable = new Observable<Array<IShapeView>>();
+            this._removedObservable = new Observable<ShapeCollectionEventArgs>();
         }
         return this._removedObservable;
     }
 
-    public get(lod: number): Nullable<GeoBoundedCollection<ShapeView>> {
+    public get(lod: number): Nullable<BoundedCollection<IShape>> {
         if (lod < this._metrics.minLOD || lod > this._metrics.maxLOD) {
             return null;
         }
         return this._shapes[lod - this._metrics.minLOD];
     }
 
-    public trySet(lod: number, ...shapes: Array<ShapeLayerInputContentType>): boolean {
+    public trySet(lod: number, ...shapes: Array<IGeoShape>): boolean {
         let collection = this.get(lod);
-        const views = shapes.map((s) => this._buildView(s, lod, this.metrics)).filter((v) => v !== null) as ShapeView[];
+        const views = shapes.map((s) => this._buildShape(s, lod, this.metrics)).filter((v) => v !== null) as IShape[];
         if (views.length === 0) {
             return false;
         }
         if (!collection) {
-            collection = new GeoBoundedCollection<ShapeView>();
+            collection = new BoundedCollection<IShape>();
             this._shapes[lod - this._metrics.minLOD] = collection;
         }
         collection.push(...views);
         if (this._addedObservable !== undefined && this._addedObservable.hasObservers()) {
-            this._addedObservable.notifyObservers(views, -1, this, this);
+            this._addedObservable.notifyObservers(new ShapeCollectionEventArgs(lod, views), -1, this, this);
         }
         return true;
     }
 
-    protected _buildView(decorated: ShapeLayerInputContentType, lod: number, metrics: ITileMetrics): Nullable<ShapeView> {
-        if (isDecoratedShape(decorated)) {
-            const s = this._buildShape(decorated.value, lod, metrics);
-            if (s) {
-                const mode = isShape(decorated.value) ? ShapeViewCoordinateMode.Local : ShapeViewCoordinateMode.World;
-                return new ShapeView(decorated.value, s, lod, decorated.options, mode);
-            }
-        } else {
-            const s = this._buildShape(decorated, lod, metrics);
-            if (s) {
-                const mode = isShape(decorated) ? ShapeViewCoordinateMode.Local : ShapeViewCoordinateMode.World;
-                return new ShapeView(decorated, s, lod, null, mode);
-            }
-        }
-        return null;
-    }
-
-    protected _buildShape(shape: IGeoShape | IShape, lod: number, metrics: ITileMetrics): Nullable<IShape> {
+    protected _buildShape(shape: IGeoShape, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         switch (shape.type) {
-            case GeoShapeType.Circle: {
-                return this._buildCircle(shape as IGeoCircle, lod, metrics);
-            }
             case GeoShapeType.Polygon: {
                 return this._buildPolygon(shape as IGeoPolygon, lod, metrics);
             }
@@ -143,27 +91,16 @@ export class ShapeViewCollection implements ITileMetricsProvider {
             case GeoShapeType.Polyline: {
                 return this._buildPolyline(shape as IGeoPolyline, lod, metrics);
             }
-            case ShapeType.Circle:
-            case ShapeType.Line:
-            case ShapeType.Polyline:
-            case ShapeType.Polygon:
-            case ShapeType.Point: {
-                return shape as IShape;
-            }
             default: {
                 return null;
             }
         }
     }
 
-    protected _buildCircle(shape: IGeoCircle, lod: number, metrics: ITileMetrics): Nullable<IShape> {
-        const p = shape.toPolygon(32);
-        return this._buildPolygon(p, lod, metrics);
-    }
 
     protected _buildPolygon(shape: IGeoPolygon, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);
-        return new Polygon(points);
+        return Polygon.FromPoints(points);
     }
 
     protected _buildLine(shape: IGeoLine, lod: number, metrics: ITileMetrics): Nullable<IShape> {
@@ -176,7 +113,7 @@ export class ShapeViewCollection implements ITileMetricsProvider {
 
     protected _buildPolyline(shape: IGeoPolyline, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);
-        return this._filter(...points) ? new Polyline(points) : null;
+        return this._filter(...points) ? Polyline.FromPoints(points) : null;
     }
 
     // transform geo points to cartesian points using tile metrics (web mercator projection within Level Of Detail)
@@ -197,6 +134,6 @@ export class ShapeViewCollection implements ITileMetricsProvider {
         if (args.length < 2) return true;
         const p1 = args[0];
         const p2 = args[1];
-        return Cartesian3.Equals(p1, p2, ShapeViewCollection.Epsilon) == false;
+        return Cartesian3.Equals(p1, p2, ShapeCollection.Epsilon) == false;
     }
 }

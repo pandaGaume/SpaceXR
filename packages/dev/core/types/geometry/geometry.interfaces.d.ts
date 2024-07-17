@@ -1,24 +1,27 @@
 import { ICloneable } from "../types";
+export declare enum RegionCode {
+    INSIDE = 0,
+    LEFT = 1,
+    RIGHT = 2,
+    BOTTOM = 4,
+    TOP = 8
+}
 export interface ICartesian2 {
     x: number;
     y: number;
     toString(): string;
 }
-export interface ICartesian3 {
-    x: number;
-    y: number;
+export interface ICartesian3 extends ICartesian2 {
     z: number;
-    toString(): string;
 }
-export interface ICartesian4 {
-    x: number;
-    y: number;
-    z: number;
+export interface ICartesian4 extends ICartesian3 {
     w: number;
-    toString(): string;
 }
+export type CartesianArray = Array<ICartesian2 | ICartesian3 | ICartesian4>;
 export declare function isCartesian(b: unknown): b is ICartesian2 | ICartesian3 | ICartesian4;
 export declare function isCartesian3(b: unknown): b is ICartesian3;
+export declare function isCartesianArray(b: unknown): b is CartesianArray;
+export declare function isArrayOfCartesianArray(input: any): input is Array<CartesianArray>;
 export declare function isCartesian4(b: unknown): b is ICartesian4;
 export interface ISize2 {
     height: number;
@@ -47,6 +50,7 @@ export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
     intersection(other?: IBounds2, ref?: IBounds2): IBounds2 | undefined;
     unionInPlace(other?: IBounds2): IBounds2;
     contains(x: number, y: number): boolean;
+    containsBounds(other?: IBounds2): boolean;
     toString(): string;
     points(): IterableIterator<ICartesian2>;
 }

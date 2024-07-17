@@ -15,8 +15,9 @@
         "compile:core": "npm run compile:core:source",
         "compile:core:source": "tsc --project tsconfig.json",
         "webpack:core:dev": "webpack --mode development",
-        "publish:core:dev": "npm run build:core:dev && npm run webpack:core:dev",
-        "test": "jest -c ../../../jest.config.ts --verbose"
+        "copy:core:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../host/www/libs\"",
+        "publish:core:dev": "npm run build:core:dev && npm run webpack:core:dev && npm run copy:core:bundle",
+        "test:core": "jest -c ../../../jest.config.ts --verbose"
     },
     "sideEffects": false,
     "devDependencies": {

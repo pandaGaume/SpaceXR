@@ -7,6 +7,22 @@ export type FloatArray = number[] | Float32Array;
 /** Alias type for number array or Float32Array or Int32Array or Uint32Array or Uint16Array */
 export type IndicesArray = number[] | Int32Array | Uint32Array | Uint16Array;
 
+export function isFloatArray(input: any): input is FloatArray {
+    if (Array.isArray(input)) {
+        // Check if the input is a number array
+        return input.every((item: any) => typeof item === "number");
+    }
+    // Check if the input is a Float32Array
+    return input instanceof Float32Array;
+}
+
+export function isArrayOfFloatArray(input: any): input is FloatArray[] {
+    if (!Array.isArray(input)) {
+        return false;
+    }
+    return input.every(isFloatArray);
+}
+
 export interface ICloneable<T> {
     clone(): T;
 }

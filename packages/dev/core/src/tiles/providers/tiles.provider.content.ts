@@ -69,6 +69,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
             },
             (reason) => {
                 console.log(`the fetch operation has failed because of ${reason}`);
+                callback?.(tile);
             }
         );
         tile.content = c;

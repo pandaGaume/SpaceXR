@@ -103,6 +103,15 @@ export default {
     // A preset that is used as a base for Jest's configuration
     preset: "ts-jest",
 
+    globals: {
+        "ts-jest": {
+            tsconfig: "./tsconfig.json",
+        },
+    },
+    moduleNameMapper: {
+        "^core/(.*)$": "<rootDir>/../../core/src/$1",
+    },
+
     // Run tests from one or more projects
     // projects: undefined,
 
@@ -163,7 +172,7 @@ export default {
     // ],
 
     // The regexp pattern or array of patterns that Jest uses to detect test files
-    testRegex: [`(/test/unit/.*(test|spec))\\.[ts]sx?$`],
+    testRegex: [`(/tests/unit/.*(test|spec))\\.[ts]sx?$`],
 
     // This option allows the use of a custom results processor
     // testResultsProcessor: undefined,

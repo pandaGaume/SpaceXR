@@ -162,7 +162,7 @@ export class PlaneCruncher {
             while (hull.length >= 2) {
                 const top = hull[hull.length - 1];
                 const nextToTop = hull[hull.length - 2];
-                const cross = Cartesian2.Cross(Cartesian2.Subtract(top, nextToTop), Cartesian2.Subtract(sortedPoints[i], top));
+                const cross = Cartesian2.Dot(Cartesian2.Subtract(top, nextToTop), Cartesian2.Subtract(sortedPoints[i], top));
                 if (cross > 0) {
                     break;
                 }

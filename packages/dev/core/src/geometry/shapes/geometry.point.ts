@@ -1,5 +1,5 @@
 import { Bounds2 } from "../geometry.bounds";
-import { Cartesian3 } from "../geometry.cartesian";
+import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
 import { IBounds2, ICartesian3, isCartesian } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { IPoint, ShapeType } from "./geometry.shapes.interfaces";
@@ -25,6 +25,14 @@ export class Point extends AbstractShape implements IPoint {
             this._position = v;
             this.invalidateBounds();
         }
+    }
+
+    public clip(clipArea: IBounds2): IPoint | Array<IPoint> | undefined {
+        let code = Cartesian2.ComputeCode(this._position, clipArea);
+        if (code == 0) {
+            return this;
+        }
+        return undefined;
     }
 
     protected _buildBounds(): IBounds2 | undefined {

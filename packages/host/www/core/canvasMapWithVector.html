@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Exemple de dessin de tuiles sur canvas</title>
+        <script src="../libs/spacexr.1.0.0.js"></script>
+        <script src="../libs/spacexr_vector.1.0.0.js"></script>
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+            #tileCanvas {
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
+            #compass {
+                position: absolute;
+                top: 20px; /* Adjust this to position the compass */
+                right: 20px; /* Adjust this to position the compass */
+                width: 200px; /* Adjust this according to your compass image size */
+                height: 200px; /* Adjust this according to your compass image size */
+                transform-origin: center;
+            }
+
+            #compassImage {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapContainer">
+            <canvas id="tileCanvas"></canvas>
+            <div id="compass">
+              <img id="compassImage" src="../images/compass.png" alt="Compass">
+            </div>
+        <script>
+            window.onload = () => {
+                // Récupérer le canvas
+                const canvas = document.getElementById("tileCanvas");
+
+                // initialiser la localisation et le niveau de zoom
+                // cela peut être un tableau de coordonnées [lat, lon] ou un objet { lat: lat, lon: lon }
+                let center = SPACEXR.KnownPlaces.Mountains.MontBlanc
+                const lod = 12;
+
+
+                // build the map
+                const map = new SPACEXR.CanvasMap("myMap", canvas).setViewMap(center, lod);
+                map.background = "white";
+                
+                // add an image layer
+                const tileClient = SPACEXR.Google.SatelliteClient2d() ;
+                new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+
+                const style = {
+                layers: [
+                    {
+                        id: "landcover",
+                        source: "mapbox-terrain",
+                        sourceLayer: "landcover",
+                        type: "fill",
+                        paint: {
+                            color: "rgba(66,100,251, 0.3)",
+                            outlineColor: "rgba(66,100,251, 1)",
+                        },
+                    },
+                    {
+                        id: "hillshade",
+                        source: "mapbox-terrain",
+                        sourceLayer: "hillshade",
+                        type: "fill",
+                        paint: {
+                            color: "rgba(66,100,251, 0.3)",
+                            outlineColor: "rgba(66,100,251, 1)",
+                        },
+                    },
+                    {
+                        id: "contour",
+                        source: "mapbox-terrain",
+                        sourceLayer: "contour",
+                        type: "line",
+                        paint: {
+                            color: "#ffffff",
+                        },
+                    },
+                ],};
+
+
+                // Add a vector layer
+                client = SPACEXR_MAPBOX.VectorClient("pk.eyJ1IjoiZ2F1bWUiLCJhIjoiY2x5YnU3aDV0MDhmazJvc2dqbW04ZmJpZSJ9.aAV34t1dOedP_NAY56Cn-g", SPACEXR_MAPBOX.MapBoxTileSetIds.Terrain, style);
+                new SPACEXR.ImageLayer("VectorLayer", client, { attribution:SPACEXR_MAPBOX.Attribution }).addTo(map);
+
+                
+                const navigationManager = new SPACEXR.InputsNavigationTarget(map);
+                const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);
+
+                function updateCompassRotation(bearing) {
+                    var compass = document.getElementById('compass');
+                    compass.style.transform = 'rotate(' + bearing + 'deg)';
+                }
+
+                // Function to handle the compass click event
+                function handleCompassClick(event) {
+                    map.setViewMap(undefined, undefined, 0);
+                    updateCompassRotation(0);
+                }
+
+                // Get the compass element
+                var compass = document.getElementById('compass');
+
+                // Add a click event listener to the compass
+                compass.addEventListener('click', handleCompassClick);
+
+                // listen to azimuth change.
+                map.navigation.propertyChangedObservable.add((p,e)=> {
+                    if (p.propertyName === 'azimuth'){
+                       updateCompassRotation(p.newValue?.value??0);
+                    }
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    if (event.ctrlKey) {
+                        console.log('DOWN')
+                    }
+                });
+                
+                document.addEventListener('keyup', function(event) {
+                    if (event.key === 'Control' || event.key === 'Meta') {
+                          console.log('UP')
+                     }
+                });
+                
+                // Function to recursively update the animation frame
+                // This function is called every time the browser is ready to repaint the canvas
+                // This is the main animation loop
+                function updateFrame() {
+                    // Update the animation frame
+                    map.validate();
+                    // Recursively request another frame update
+                    requestAnimationFrame(updateFrame);
+                }
+
+                // Start the animation
+                requestAnimationFrame(updateFrame);
+            };
+        </script>
+    </body>
+</html>

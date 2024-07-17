@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Panneau de contrôle sur canvas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Electrolize', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="command-panel-canvas" width="800" height="500"></canvas>
+    <script>
+
+        function computeSize(containerSize, cssSize) {
+            if (typeof cssSize === 'string') {
+                if (cssSize.endsWith('%')) {
+                    const percentage = Number.parseFloat(cssSize.slice(0, -1));
+                    return containerSize * percentage / 100;
+                }
+            } else if (typeof cssSize === 'number') {
+                return cssSize;
+            }
+            throw Error('Size must be expressed as percentage or number.');
+        }
+
+        function drawBeveledButton(canvas, width, height, x, y) {
+            const ctx = canvas.getContext('2d');
+            // Draw button background
+            ctx.fillStyle = 'rgba(173, 216, 230, 0.5)'; // Light blue with transparency
+            ctx.strokeStyle = '#8fe9dd';
+            ctx.lineWidth = 1;
+            const borderRadius = 2;
+            const bevelSize = 10;
+            ctx.beginPath();
+            ctx.moveTo(x + borderRadius, y);
+            ctx.lineTo(x + width, y);
+            ctx.lineTo(x + width, y + height - bevelSize);
+            ctx.lineTo(x + width - bevelSize, y + height);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x, y + borderRadius);
+            ctx.quadraticCurveTo(x, y, x + borderRadius, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Set text properties
+            ctx.font = 'bold 20px Electrolize';
+            ctx.fillStyle = '#8fe9dd';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Calculate text position
+            const textX = x + (width / 2);
+            const textY = y + (height / 2);
+
+            // Draw text
+            ctx.fillText('Open', textX, textY);
+        }
+
+        window.onload = () => {
+            const canvas = document.getElementById("command-panel-canvas");
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#071d2f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawBeveledButton(canvas, 200, 50, 10, 10);
+
+            // TODO 
+            // Save canvas to image and use it as a texture for a 2D Button
+            // Or use DynamicTexture
+
+            // Apply different image on interaction with the button
+
+
+
+            const panel = {
+                id: 'left-panel',
+                width: '30%',
+                height: '100%',
+                margin: 10
+            };
+            // Calculate panel dimensions
+            var panelWidth = computeSize(canvas.width, panel.width);
+            var panelHeight = computeSize(canvas.height, panel.height) - 2 * panel.margin;
+            var panelLeft = panel.margin;
+            var panelRight = panel.margin;
+            // Draw panel
+            // ctx.fillStyle = '#2a6e6f';
+            // ctx.fillRect(panelLeft, panelRight, panelWidth, panelHeight);
+
+            // const text = {
+            //     content: 'The most extraordinary experience',
+            //     style: {
+            //         textSize: 20,
+            //         fontWeight: 'bold',
+            //         marginTop: 10
+            //     }
+            // };
+
+            // ctx.font = 'bold 20px Arial';
+            // ctx.fillStyle = '#8fe9dd';
+
+            // const textTop = text.style.marginTop + text.style.textSize;
+            // ctx.fillText(text.content, panelWidth + panelLeft + 10, textTop);
+        
+
+
+        };
+    </script>
+</body>
+
+</html>

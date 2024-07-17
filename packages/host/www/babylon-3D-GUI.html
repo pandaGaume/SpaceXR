@@ -226,8 +226,9 @@
                     });
                     panel.addControl(layerButton);
                 }
-                
                 // panel.addControl(layersPanel);
+
+                
 
                 panel.blockLayout = false;
                 panel.position.x = 150;
@@ -235,10 +236,6 @@
                 panel.position.z = 50; // parallel to table
                 panel.node.rotation = new BABYLON.Vector3(0,  - Math.PI / 2, 0);
                 //#endregion
-
-                //map.view.centerObservable.add((arg) => minimap2D.setView(arg.newValue));
-                //map.view.zoomObservable.add((arg) => minimap2D.setZoom(arg.newValue));
-                //map.view.azimuthObservable.add((arg) => minimap2D.setAzimuth(arg.newValue));
 
                 // interaction avec la carte
                 // Warning !! this MUST be include into a Manager somewhere

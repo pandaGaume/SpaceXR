@@ -4,7 +4,7 @@ import { IEnvelope, IGeoBounded } from "../../geography";
 import { Cartesian2, ISize2 } from "../../geometry";
 import { RGBAColor } from "../../math";
 import { ITile, ITileAddress, ITileMetrics, ITileMetricsProvider, IsTileAddress, Tile, TileCollection, TileConsumerBase } from "../../tiles";
-import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType, isDrawableTileMapLayer } from "../../tiles/map";
+import { ITileMapLayer, ITileMapLayerContainer, ImageLayerContentType } from "../../tiles/map";
 import { Nullable } from "../../types";
 import { CanvasDisplay } from "./map.canvas.display";
 
@@ -321,18 +321,15 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                 for (const t of view.tiles) {
                     b = t.bounds;
                     if (b) {
-                        if (isDrawableTileMapLayer(view.layer)) {
-                            view.layer.draw?.call(view.layer, ctx); //, ctx, sx, sy, t);
-                            //if (this._debug) {
-                            //    view.layer.debug?.call(view.layer, ctx, sx, sy, t);
-                            //}
-                            continue;
-                        }
+                        //if (isDrawableTileMapLayer(view.layer)) {
+                        //    view.layer.draw?.call(view.layer, ctx);
+                        //    continue;
+                        //}
                         const x = b.x - sx;
                         const y = b.y - sy;
 
                         const item = t.content ?? null; // trick to address erroness tile.
-                        if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
+                        if (item && (item instanceof HTMLImageElement || item instanceof ImageBitmap)) {
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
                             continue;
                         }
@@ -360,16 +357,13 @@ export class CanvasTileSource<L extends ITileMapLayer<CanvasTileSourceSourceCont
                 const x = ref.x - sx;
                 const y = ref.y - sy;
 
-                if (isDrawableTileMapLayer(view.layer)) {
-                    view.layer.draw?.call(view.layer, ctx); //, sx, sy, t, scale);
-                    //if (this._debug) {
-                    //    view.layer.debug?.call(view.layer, ctx, sx, sy, t, scale);
-                    //}
-                    continue;
-                }
+                //if (isDrawableTileMapLayer(view.layer)) {
+                //    view.layer.draw?.call(view.layer, ctx);
+                //    continue;
+                //}
 
                 const item = t.content ?? null; // trick to address erroness tile.
-                if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
+                if (item && (item instanceof HTMLImageElement || item instanceof ImageBitmap)) {
                     const w = Math.ceil((item.width + 1) * scale);
                     const h = Math.ceil((item.height + 1) * scale);
                     ctx.drawImage(item, 0, 0, item.width, item.height, x, y, w, h);

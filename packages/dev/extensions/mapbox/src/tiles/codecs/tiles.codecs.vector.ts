@@ -1,14 +1,9 @@
 import { ICanvasRenderingContext } from "core/engine";
 import { VectorTile } from "@mapbox/vector-tile";
 import Protobuf from "pbf";
-import { CanvasTileCodec, ITileMetrics, IVectorTile, TileVectorRenderer } from "core/tiles";
-import { PolylineSimplifier } from "core/geometry/geometry.simplify";
-import { ICartesian2 } from "core/geometry";
+import { CanvasTileCodec, ITileMetrics, TileVectorRenderer } from "core/tiles";
 import { Nullable } from "core/types";
-
-declare module "@mapbox/vector-tile" {
-    export interface VectorTile extends IVectorTile {}
-}
+import { IVectorStyle } from "core/tiles/vector/tiles.vector.style.interface";
 
 export class VectorTileCodec extends CanvasTileCodec<VectorTile> {
     public static CreateCanvas(width: number, height: number): HTMLCanvasElement {
@@ -18,13 +13,15 @@ export class VectorTileCodec extends CanvasTileCodec<VectorTile> {
         return canvas;
     }
 
-    _simplifier: PolylineSimplifier<ICartesian2>;
     _renderer: TileVectorRenderer;
 
-    public constructor(metrics: ITileMetrics) {
+    public constructor(metrics: ITileMetrics, render: TileVectorRenderer | IVectorStyle) {
         super(VectorTileCodec.CreateCanvas(metrics.tileSize, metrics.tileSize));
-        this._simplifier = new PolylineSimplifier<ICartesian2>();
-        this._renderer = new TileVectorRenderer(this._simplifier);
+        if (render instanceof TileVectorRenderer) {
+            this._renderer = render;
+        } else {
+            this._renderer = new TileVectorRenderer(render);
+        }
     }
 
     protected async _decodeDataAsync(r: Response): Promise<Awaited<Nullable<VectorTile>>> {
@@ -35,7 +32,7 @@ export class VectorTileCodec extends CanvasTileCodec<VectorTile> {
         return null;
     }
 
-    protected _render(ctx: ICanvasRenderingContext, tile: VectorTile): void {
-        this._renderer.renderTile(tile, ctx);
+    protected _render(ctx: ICanvasRenderingContext, tile: VectorTile, style?: IVectorStyle): void {
+        this._renderer.renderTile(tile, ctx, style);
     }
 }

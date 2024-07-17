@@ -35,5 +35,5 @@ export abstract class CanvasTileCodec<T> implements ITileCodec<ImageBitmap>, ISi
 
     protected abstract _decodeDataAsync(r: Response): Promise<Awaited<Nullable<T>>>;
 
-    protected abstract _render(ctx: ICanvasRenderingContext, r: T): void;
+    protected abstract _render(ctx: ICanvasRenderingContext, r: T, ...params: []): void;
 }

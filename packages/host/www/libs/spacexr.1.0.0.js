@@ -4651,15 +4651,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CanvasTileSource: () => (/* binding */ CanvasTileSource)
 /* harmony export */ });
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../math */ "./dist/math/math.color.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../math */ "./dist/math/math.color.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "./dist/tiles/pipeline/tiles.pipeline.consumer.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../tiles */ "./dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../tiles */ "./dist/tiles/tiles.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../tiles */ "./dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../tiles/map */ "./dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/canvas/map.canvas.display.js");
-
+/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/canvas/map.canvas.display.js");
 
 
 
@@ -4888,14 +4886,10 @@ class CanvasTileSource extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileConsumerB
                 for (const t of view.tiles) {
                     b = t.bounds;
                     if (b) {
-                        if ((0,_tiles_map__WEBPACK_IMPORTED_MODULE_4__.isDrawableTileMapLayer)(view.layer)) {
-                            view.layer.draw?.call(view.layer, ctx);
-                            continue;
-                        }
                         const x = b.x - sx;
                         const y = b.y - sy;
                         const item = t.content ?? null;
-                        if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
+                        if (item && (item instanceof HTMLImageElement || item instanceof ImageBitmap)) {
                             ctx.drawImage(item, 0, 0, item.width, item.height, x, y, item.width + 1, item.height + 1);
                             continue;
                         }
@@ -4906,7 +4900,7 @@ class CanvasTileSource extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileConsumerB
                 continue;
             }
             const scale = dlod < 0 ? 1 << dlod : 1 / (1 << dlod);
-            const ref = _geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian2.Zero();
+            const ref = _geometry__WEBPACK_IMPORTED_MODULE_4__.Cartesian2.Zero();
             sx = this._target.bounds?.x ?? 0;
             sy = this._target.bounds?.y ?? 0;
             for (const t of view.tiles) {
@@ -4917,12 +4911,8 @@ class CanvasTileSource extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileConsumerB
                 this.metrics.getLatLonToPointXYToRef(geo.north, geo.west, tileLod, ref);
                 const x = ref.x - sx;
                 const y = ref.y - sy;
-                if ((0,_tiles_map__WEBPACK_IMPORTED_MODULE_4__.isDrawableTileMapLayer)(view.layer)) {
-                    view.layer.draw?.call(view.layer, ctx);
-                    continue;
-                }
                 const item = t.content ?? null;
-                if (item && (item instanceof ImageData || item instanceof HTMLImageElement)) {
+                if (item && (item instanceof HTMLImageElement || item instanceof ImageBitmap)) {
                     const w = Math.ceil((item.width + 1) * scale);
                     const h = Math.ceil((item.height + 1) * scale);
                     ctx.drawImage(item, 0, 0, item.width, item.height, x, y, w, h);
@@ -4936,16 +4926,16 @@ class CanvasTileSource extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileConsumerB
     }
     _buildDisplay(options) {
         if (options?.display) {
-            if (options.display instanceof _map_canvas_display__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay) {
+            if (options.display instanceof _map_canvas_display__WEBPACK_IMPORTED_MODULE_5__.CanvasDisplay) {
                 return options.display;
             }
-            return new _map_canvas_display__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay(options.display, 1, false);
+            return new _map_canvas_display__WEBPACK_IMPORTED_MODULE_5__.CanvasDisplay(options.display, 1, false);
         }
-        const canvas = _map_canvas_display__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay.CreateCanvas(options?.resolution?.width ?? this._metrics.tileSize, options?.resolution?.height ?? this._metrics.tileSize);
-        return new _map_canvas_display__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay(canvas, 1, false);
+        const canvas = _map_canvas_display__WEBPACK_IMPORTED_MODULE_5__.CanvasDisplay.CreateCanvas(options?.resolution?.width ?? this._metrics.tileSize, options?.resolution?.height ?? this._metrics.tileSize);
+        return new _map_canvas_display__WEBPACK_IMPORTED_MODULE_5__.CanvasDisplay(canvas, 1, false);
     }
 }
-CanvasTileSource.DefaultBackground = _math__WEBPACK_IMPORTED_MODULE_7__.RGBAColor.LightGray();
+CanvasTileSource.DefaultBackground = _math__WEBPACK_IMPORTED_MODULE_6__.RGBAColor.LightGray();
 CanvasTileSource.DefaultOptions = {
     background: CanvasTileSource.DefaultBackground.toHexString(),
 };
@@ -11592,68 +11582,191 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileVectorRenderer: () => (/* binding */ TileVectorRenderer)
 /* harmony export */ });
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.simplify.js");
-/* harmony import */ var _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vector.interfaces */ "./dist/tiles/vector/tiles.vector.interfaces.js");
+/* harmony import */ var _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vector.interfaces */ "./dist/tiles/vector/tiles.vector.interfaces.js");
+/* harmony import */ var _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vector.style.interface */ "./dist/tiles/vector/tiles.vector.style.interface.js");
+
 
 
 class TileVectorRenderer {
-    constructor(simplifier) {
+    constructor(style, simplifier) {
+        this._style = style;
         this._simplifier = simplifier ?? _geometry__WEBPACK_IMPORTED_MODULE_0__.PolylineSimplifier.Shared;
+        this._orderedStyleLayers = this._prepareOrderedLayers(style);
     }
-    renderTile(tile, ctx) {
+    renderTile(tile, ctx, style) {
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
         ctx.clearRect(0, 0, w, h);
         if (tile) {
-            for (const [key, value] of Object.entries(tile.layers)) {
-                if (value && this._acceptLayer(key, value)) {
-                    this._drawLayer(ctx, key, value, w, h);
+            style = style ?? this._style;
+            if (style) {
+                if (style !== this._style) {
+                    this._style = style;
+                    this._orderedStyleLayers = this._prepareOrderedLayers(style);
+                }
+                if (this._orderedStyleLayers) {
+                    for (const key of this._orderedStyleLayers) {
+                        const styleLayer = style.layers[key];
+                        const name = styleLayer.sourceLayer;
+                        const layer = tile.layers[name];
+                        if (layer && this._acceptLayer(name, layer, styleLayer)) {
+                            this._drawLayer(ctx, name, layer, w, h, styleLayer);
+                        }
+                    }
                 }
             }
         }
     }
-    _drawLayer(ctx, key, layer, w, h) {
+    _prepareOrderedLayers(style) {
+        if (!style) {
+            return undefined;
+        }
+        const a = {};
+        const defaultSlot = this._generateUniqueSlotName();
+        const length = style.layers.length;
+        for (let i = 0; i < length; i++) {
+            const value = style.layers[i];
+            if (!value) {
+                continue;
+            }
+            const slot = value.slot ?? defaultSlot;
+            let group = a[slot];
+            if (!group) {
+                a[slot] = group = [];
+            }
+            group.push(i);
+        }
+        return Object.values(a).flat();
+    }
+    _generateUniqueSlotName() {
+        return `slot-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    }
+    _drawLayer(ctx, key, layer, w, h, styleLayer) {
         const extent = layer.extent;
         const scalex = w / extent;
         const scaley = h / extent;
-        for (let i = 0; i < layer.length; i++) {
-            const feature = layer.feature(i);
-            if (feature && this._acceptFeature(feature)) {
-                this._drawFeature(ctx, feature, scalex, scaley);
+        ctx.save();
+        try {
+            switch (styleLayer.type) {
+                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.LayerStyleTypes.Fill: {
+                    const paint = styleLayer.paint;
+                    if (!paint) {
+                        break;
+                    }
+                    const color = this._evaluate(paint.color);
+                    if (!color) {
+                        break;
+                    }
+                    ctx.fillStyle = color;
+                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
+                    ctx.globalAlpha = opacity;
+                    const outlineColor = this._evaluate(paint.outlineColor);
+                    if (outlineColor) {
+                        ctx.strokeStyle = outlineColor;
+                        ctx.lineWidth = TileVectorRenderer.DefaultLineWith;
+                    }
+                    const translate = this._evaluate(paint.translate);
+                    for (let i = 0; i < layer.length; i++) {
+                        const feature = layer.feature(i);
+                        if (feature && this._acceptFeature(feature, styleLayer)) {
+                            switch (feature.type) {
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.POLYGON: {
+                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
+                                    ctx.beginPath();
+                                    this._drawPath(ctx, transformed[0]);
+                                    if (transformed.length > 1) {
+                                        for (let i = 1; i < transformed.length; i++) {
+                                            this._drawPath(ctx, transformed[i]);
+                                        }
+                                    }
+                                    ctx.fill();
+                                    if (outlineColor) {
+                                        ctx.stroke();
+                                    }
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.LayerStyleTypes.Line: {
+                    const paint = styleLayer.paint;
+                    if (!paint) {
+                        break;
+                    }
+                    const color = this._evaluate(paint.color);
+                    if (!color) {
+                        break;
+                    }
+                    ctx.strokeStyle = color;
+                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
+                    ctx.globalAlpha = opacity;
+                    const dasharray = this._evaluate(paint.dashArray);
+                    if (dasharray) {
+                        ctx.setLineDash(dasharray);
+                    }
+                    const translate = this._evaluate(paint.translate);
+                    for (let i = 0; i < layer.length; i++) {
+                        const feature = layer.feature(i);
+                        if (feature && this._acceptFeature(feature, styleLayer)) {
+                            switch (feature.type) {
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.POLYGON:
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.LINESTRING: {
+                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
+                                    for (const line of transformed) {
+                                        ctx.beginPath();
+                                        this._drawPath(ctx, line);
+                                        ctx.stroke();
+                                    }
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
         }
+        finally {
+            ctx.restore();
+        }
     }
-    _drawFeature(ctx, feature, scalex, scaley) {
+    _evaluate(p) {
+        if ((0,_tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.IsExpressionSpecification)(p)) {
+            return this._evaluateExpression(p);
+        }
+        return p;
+    }
+    _evaluateExpression(p) {
+        return undefined;
+    }
+    _getTransformedGeometry(feature, scalex, scaley, translate) {
         const geom = feature.loadGeometry();
         const transformed = [];
         for (let i = 0; i < geom.length; i++) {
             for (let j = 0; j < geom[i].length; j++) {
+                if (translate) {
+                    geom[i][j].x += translate[0];
+                    geom[i][j].y += translate[1];
+                }
                 geom[i][j].x *= scalex;
                 geom[i][j].y *= scaley;
             }
             transformed.push(this._simplifier.simplify(geom[i]));
         }
-        switch (feature.type) {
-            case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.POINT:
-                break;
-            case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.LINESTRING:
-                for (let i = 0; i < transformed.length; i++) {
-                    this._drawPolyline(ctx, transformed[i]);
-                }
-                break;
-            case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.POLYGON:
-                for (let i = 0; i < transformed.length; i++) {
-                    this._drawPolyline(ctx, transformed[i]);
-                }
-                break;
-        }
+        return transformed;
     }
     _drawPolyline(ctx, points) {
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
         this._drawPath(ctx, points);
-        ctx.stroke();
     }
+    _drawPolygon(ctx, points) { }
     _drawPath(ctx, points) {
         let i = 0;
         let p = points[i];
@@ -11665,14 +11778,48 @@ class TileVectorRenderer {
             } while (i < points.length - 1);
         }
     }
-    _acceptLayer(key, layer) {
-        return key == "contour";
+    _acceptLayer(key, layer, styleLayer) {
+        return true;
     }
-    _acceptFeature(layer) {
+    _acceptFeature(layer, styleLayer) {
         return true;
     }
 }
+TileVectorRenderer.DefaultOpacity = 1.0;
+TileVectorRenderer.DefaultLineWith = 1.0;
 //# sourceMappingURL=tiles.vector.renderer.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/vector/tiles.vector.style.interface.js":
+/*!***********************************************************!*\
+  !*** ./dist/tiles/vector/tiles.vector.style.interface.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsExpressionSpecification: () => (/* binding */ IsExpressionSpecification),
+/* harmony export */   IsFillLayerStyle: () => (/* binding */ IsFillLayerStyle),
+/* harmony export */   IsLineLayerStyle: () => (/* binding */ IsLineLayerStyle),
+/* harmony export */   LayerStyleTypes: () => (/* binding */ LayerStyleTypes)
+/* harmony export */ });
+function IsExpressionSpecification(value) {
+    return Array.isArray(value) && typeof value[0] === "string";
+}
+var LayerStyleTypes;
+(function (LayerStyleTypes) {
+    LayerStyleTypes["Fill"] = "fill";
+    LayerStyleTypes["Line"] = "line";
+    LayerStyleTypes["Background"] = "background";
+})(LayerStyleTypes || (LayerStyleTypes = {}));
+function IsFillLayerStyle(value) {
+    return value && value.type === LayerStyleTypes.Fill;
+}
+function IsLineLayerStyle(value) {
+    return value && value.type === LayerStyleTypes.Line;
+}
+//# sourceMappingURL=tiles.vector.style.interface.js.map
 
 /***/ }),
 

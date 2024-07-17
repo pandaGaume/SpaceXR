@@ -1,17 +1,29 @@
 import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian2, PolylineSimplifier } from "../../geometry";
 import { IVectorTileContent, IVectorTileFeature, IVectorTileLayer, VectorTileGeomType } from "./tiles.vector.interfaces";
-import { IFillLayerStyle, IsFillLayerStyle, IsLineLayerStyle, IVectorLayerStyle, IVectorStyle, LayerStyleTypes } from "./tiles.vector.style.interface";
+import {
+    ExpressionSpecification,
+    IFillPaintStyle,
+    ILinePaintStyle,
+    IsExpressionSpecification,
+    IVectorLayerStyle,
+    IVectorStyle,
+    LayerStyleTypes,
+    PropertyValueSpecification,
+} from "./tiles.vector.style.interface";
 
 export class TileVectorRenderer {
+    static DefaultOpacity = 1.0;
+    static DefaultLineWith = 1.0;
+
     _simplifier: PolylineSimplifier<ICartesian2>;
     // cached style and ordered layers
     _style?: IVectorStyle;
-    _orderedStyleLayers?: Array<string>;
+    _orderedStyleLayers?: Array<number>;
 
-    public constructor(simplifier: PolylineSimplifier<ICartesian2>, style?: IVectorStyle) {
-        this._simplifier = simplifier ?? PolylineSimplifier.Shared;
+    public constructor(style?: IVectorStyle, simplifier?: PolylineSimplifier<ICartesian2>) {
         this._style = style;
+        this._simplifier = simplifier ?? PolylineSimplifier.Shared;
         this._orderedStyleLayers = this._prepareOrderedLayers(style);
     }
 
@@ -31,10 +43,13 @@ export class TileVectorRenderer {
 
                 if (this._orderedStyleLayers) {
                     for (const key of this._orderedStyleLayers) {
-                        const layer = tile.layers[key];
+                        // retreive the corresponding layer
                         const styleLayer = style.layers[key];
-                        if (layer && this._acceptLayer(key, layer, styleLayer)) {
-                            this._drawLayer(ctx, key, layer, w, h, styleLayer);
+                        const name = styleLayer.sourceLayer;
+                        const layer = tile.layers[name];
+                        // draw the layer
+                        if (layer && this._acceptLayer(name, layer, styleLayer)) {
+                            this._drawLayer(ctx, name, layer, w, h, styleLayer);
                         }
                     }
                 }
@@ -42,13 +57,15 @@ export class TileVectorRenderer {
         }
     }
 
-    protected _prepareOrderedLayers(style?: IVectorStyle): Array<string> | undefined {
+    protected _prepareOrderedLayers(style?: IVectorStyle): Array<number> | undefined {
         if (!style) {
             return undefined;
         }
-        const a: Record<string, Array<string>> = {};
+        const a: Record<string, Array<number>> = {};
         const defaultSlot = this._generateUniqueSlotName();
-        for (const [key, value] of Object.entries(style.layers)) {
+        const length = style.layers.length;
+        for (let i = 0; i < length; i++) {
+            const value = style.layers[i];
             if (!value) {
                 continue;
             }
@@ -57,7 +74,7 @@ export class TileVectorRenderer {
             if (!group) {
                 a[slot] = group = [];
             }
-            group.push(key);
+            group.push(i);
         }
         return Object.values(a).flat();
     }
@@ -75,13 +92,34 @@ export class TileVectorRenderer {
             // set the style
             switch (styleLayer.type) {
                 case LayerStyleTypes.Fill: {
-                    let outline = false;
+                    // set the root fill style properties
+                    const paint = styleLayer.paint as IFillPaintStyle;
+                    if (!paint) {
+                        break;
+                    }
+                    const color = this._evaluate(paint.color);
+                    if (!color) {
+                        break;
+                    }
+                    ctx.fillStyle = color;
+                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
+                    ctx.globalAlpha = opacity;
+
+                    // set the outline style properties
+                    const outlineColor = this._evaluate(paint.outlineColor);
+                    if (outlineColor) {
+                        ctx.strokeStyle = outlineColor;
+                        ctx.lineWidth = TileVectorRenderer.DefaultLineWith;
+                    }
+                    const translate = this._evaluate(paint.translate);
+
+                    // loop over features
                     for (let i = 0; i < layer.length; i++) {
                         const feature = layer.feature(i);
                         if (feature && this._acceptFeature(feature, styleLayer)) {
                             switch (feature.type) {
                                 case VectorTileGeomType.POLYGON: {
-                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley);
+                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
                                     // fill polygon
                                     ctx.beginPath();
                                     this._drawPath(ctx, transformed[0]);
@@ -92,7 +130,7 @@ export class TileVectorRenderer {
                                     }
                                     ctx.fill();
                                     // draw outline
-                                    if (outline) {
+                                    if (outlineColor) {
                                         ctx.stroke();
                                     }
                                     break;
@@ -102,16 +140,39 @@ export class TileVectorRenderer {
                             }
                         }
                     }
+
                     break;
                 }
                 case LayerStyleTypes.Line: {
+                    // set the root fill style properties
+
+                    const paint = styleLayer.paint as ILinePaintStyle;
+                    if (!paint) {
+                        break;
+                    }
+                    const color = this._evaluate(paint.color);
+                    if (!color) {
+                        break;
+                    }
+                    ctx.strokeStyle = color;
+                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
+                    ctx.globalAlpha = opacity;
+
+                    const dasharray = this._evaluate(paint.dashArray);
+                    if (dasharray) {
+                        ctx.setLineDash(dasharray);
+                    }
+
+                    const translate = this._evaluate(paint.translate);
+
+                    // loop over features
                     for (let i = 0; i < layer.length; i++) {
                         const feature = layer.feature(i);
                         if (feature && this._acceptFeature(feature, styleLayer)) {
                             switch (feature.type) {
                                 case VectorTileGeomType.POLYGON:
                                 case VectorTileGeomType.LINESTRING: {
-                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley);
+                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
                                     // draw outline
                                     for (const line of transformed) {
                                         ctx.beginPath();
@@ -135,11 +196,27 @@ export class TileVectorRenderer {
         }
     }
 
-    protected _getTransformedGeometry(feature: IVectorTileFeature, scalex: number, scaley: number): Array<Array<ICartesian2>> {
+    protected _evaluate<T>(p: PropertyValueSpecification<T>): T | undefined {
+        if (IsExpressionSpecification(p)) {
+            // evaluate the expression
+            return this._evaluateExpression<T>(p);
+        }
+        return p;
+    }
+
+    protected _evaluateExpression<T>(p: ExpressionSpecification): T | undefined {
+        return undefined;
+    }
+
+    protected _getTransformedGeometry(feature: IVectorTileFeature, scalex: number, scaley: number, translate?: [number, number]): Array<Array<ICartesian2>> {
         const geom = feature.loadGeometry();
         const transformed: Array<Array<ICartesian2>> = [];
         for (let i = 0; i < geom.length; i++) {
             for (let j = 0; j < geom[i].length; j++) {
+                if (translate) {
+                    geom[i][j].x += translate[0];
+                    geom[i][j].y += translate[1];
+                }
                 geom[i][j].x *= scalex;
                 geom[i][j].y *= scaley;
             }

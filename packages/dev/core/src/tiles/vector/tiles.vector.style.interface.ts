@@ -26,7 +26,7 @@ export type ColorSpecification = string;
 export type ResolvedImageSpecification = string;
 
 export interface IVectorStyle {
-    layers: Record<string, IVectorLayerStyle>;
+    layers: Array<IVectorLayerStyle>;
 }
 
 export enum LayerStyleTypes {
@@ -44,7 +44,7 @@ export interface ILayoutStyle {
 export interface IVectorLayerStyle {
     id?: string | number;
     type: LayerStyleTypes;
-    "source-layer": string; // this is used to bind the style with a specific source layer
+    sourceLayer: string; // this is used to bind the style with a specific source layer
     minzoom?: number;
     maxzoom?: number;
     slot?: string; // use as grouping layer to ordering the layer.
@@ -73,24 +73,18 @@ export function IsLineLayerStyle(value: any): value is IFillLayerStyle {
 
 // Renders filled polygons.
 export interface IFillPaintStyle extends IPaintStyle {
-    [key: string]:
-        | PropertyValueSpecification<number>
-        | PropertyValueSpecification<ColorSpecification>
-        | PropertyValueSpecification<ResolvedImageSpecification>
-        | PropertyValueSpecification<[number, number]>
-        | undefined;
-    "fill-opacity"?: PropertyValueSpecification<number>;
-    "fill-color"?: PropertyValueSpecification<ColorSpecification>;
-    "fill-outline-color"?: PropertyValueSpecification<ColorSpecification>; // this is a shorcut to outline a polygon withoiut the need of defining a line layer
-    "fill-pattern"?: PropertyValueSpecification<ResolvedImageSpecification>;
-    "fill-translate"?: PropertyValueSpecification<[number, number]>; // shifts the fill layer content by a specified distance in pixels
+    opacity?: PropertyValueSpecification<number>;
+    color?: PropertyValueSpecification<ColorSpecification>;
+    outlineColor?: PropertyValueSpecification<ColorSpecification>; // this is a shorcut to outline a polygon withoiut the need of defining a line layer
+    pattern?: PropertyValueSpecification<ResolvedImageSpecification>;
+    translate?: PropertyValueSpecification<[number, number]>; // shifts the fill layer content by a specified distance in pixels
 }
 
 // Renders lines and outlines of polygons
 export interface ILinePaintStyle extends IPaintStyle {
-    "line-opacity"?: PropertyValueSpecification<number>;
-    "line-color"?: PropertyValueSpecification<ColorSpecification>;
-    "line-width"?: PropertyValueSpecification<number>;
-    "line-dasharray"?: PropertyValueSpecification<Array<number>>;
-    "line-translate"?: PropertyValueSpecification<[number, number]>; // shifts the line layer content by a specified distance in pixels
+    opacity?: PropertyValueSpecification<number>;
+    color?: PropertyValueSpecification<ColorSpecification>;
+    width?: PropertyValueSpecification<number>;
+    dashArray?: PropertyValueSpecification<Array<number>>;
+    translate?: PropertyValueSpecification<[number, number]>; // shifts the line layer content by a specified distance in pixels
 }

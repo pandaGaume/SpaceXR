@@ -31,9 +31,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @mapbox/vector-tile */ "../../../../node_modules/@mapbox/vector-tile/index.js");
 /* harmony import */ var pbf__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! pbf */ "../../../../node_modules/pbf/index.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry/geometry.simplify */ "core/tiles");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "core/tiles");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_2__);
-
 
 
 
@@ -44,10 +43,14 @@ class VectorTileCodec extends core_tiles__WEBPACK_IMPORTED_MODULE_2__.CanvasTile
         canvas.height = height;
         return canvas;
     }
-    constructor(metrics) {
+    constructor(metrics, render) {
         super(VectorTileCodec.CreateCanvas(metrics.tileSize, metrics.tileSize));
-        this._simplifier = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.PolylineSimplifier();
-        this._renderer = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileVectorRenderer(this._simplifier);
+        if (render instanceof core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileVectorRenderer) {
+            this._renderer = render;
+        }
+        else {
+            this._renderer = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileVectorRenderer(render);
+        }
     }
     async _decodeDataAsync(r) {
         const b = await r.blob();
@@ -56,8 +59,8 @@ class VectorTileCodec extends core_tiles__WEBPACK_IMPORTED_MODULE_2__.CanvasTile
         }
         return null;
     }
-    _render(ctx, tile) {
-        this._renderer.renderTile(tile, ctx);
+    _render(ctx, tile, style) {
+        this._renderer.renderTile(tile, ctx, style);
     }
 }
 //# sourceMappingURL=tiles.codecs.vector.js.map
@@ -182,9 +185,9 @@ const TerrainDemV1Client = function (token, options) {
     const elevationClient = new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${KEY}_elevation`, new MapBoxTerrainDemV1UrlBuilder(token), new core_dem__WEBPACK_IMPORTED_MODULE_0__.Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
     return new core_dem__WEBPACK_IMPORTED_MODULE_0__.DemTileWebClient(`${KEY}_dem`, elevationClient);
 };
-const VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, options) {
+const VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, style, options) {
     const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 256 });
-    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(metrics), metrics, options);
+    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(metrics, style), metrics, options);
 };
 //# sourceMappingURL=tiles.vendors.mapbox.js.map
 

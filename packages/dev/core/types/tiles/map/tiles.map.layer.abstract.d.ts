@@ -1,19 +1,24 @@
-import { ITileCollection, ITileMetrics } from "../tiles.interfaces";
-import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer } from "./tiles.map.interfaces";
-import { TileConsumerBase } from "../pipeline";
-import { Nullable } from "../../types";
-import { ITileNavigationState } from "../navigation";
-import { ISize2 } from "../../geometry";
-export declare abstract class AbstractTileMapLayer<T> extends TileConsumerBase<T> implements ITileMapLayer<T> {
+import { Observable, PropertyChangedEventArgs } from "../../events";
+import { ITile, ITileAddress, ITileCollection, ITileMetrics } from "../tiles.interfaces";
+import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, LayerRenderFn } from "./tiles.map.interfaces";
+import { ITransformBlock } from "../pipeline/tiles.pipeline.interfaces";
+export declare abstract class AbstractTileMapLayer<T> implements ITileMapLayer<T> {
+    _name: string;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     _zindex: number;
-    _zoomOffset?: number;
+    _zoomOffset: number;
     _attribution?: string;
     _enabled: boolean;
-    _state: ITileNavigationState;
-    constructor(name: string, options?: ITileMapLayerOptions, enabled?: boolean, navigation?: ITileNavigationState);
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics?: ITileMetrics, dispatchEvent?: boolean): void;
+    _provider: ITransformBlock<ITileAddress, ITile<T>>;
+    _draw?: LayerRenderFn<T>;
+    _drawTarget?: any;
+    constructor(name: string, provider: ITransformBlock<ITileAddress, ITile<T>>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
+    get draw(): LayerRenderFn<T> | undefined;
+    get drawTarget(): any;
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
+    get name(): string;
+    get provider(): ITransformBlock<ITileAddress, ITile<T>>;
     get zindex(): number;
-    get navigation(): ITileNavigationState;
     set zindex(zindex: number);
     get zoomOffset(): number;
     set zoomOffset(zoomOffset: number);

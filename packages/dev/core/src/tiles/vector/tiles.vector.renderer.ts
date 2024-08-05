@@ -1,8 +1,8 @@
-import { ICanvasRenderingContext } from "../../engine";
 import { ICartesian2, PolylineSimplifier } from "../../geometry";
 import { IVectorTileContent, IVectorTileFeature, IVectorTileLayer, VectorTileGeomType } from "./tiles.vector.interfaces";
 import {
     ExpressionSpecification,
+    ICirclePaintStyle,
     IFillPaintStyle,
     ILinePaintStyle,
     IsExpressionSpecification,
@@ -15,6 +15,7 @@ import {
 export class TileVectorRenderer {
     static DefaultOpacity = 1.0;
     static DefaultLineWith = 1.0;
+    static DefaultColor = "white";
 
     _simplifier: PolylineSimplifier<ICartesian2>;
     // cached style and ordered layers
@@ -27,7 +28,7 @@ export class TileVectorRenderer {
         this._orderedStyleLayers = this._prepareOrderedLayers(style);
     }
 
-    public renderTile(tile: IVectorTileContent, ctx: ICanvasRenderingContext, style?: IVectorStyle): void {
+    public renderTile(tile: IVectorTileContent, ctx: CanvasRenderingContext2D, style?: IVectorStyle): void {
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
         ctx.clearRect(0, 0, w, h);
@@ -83,7 +84,7 @@ export class TileVectorRenderer {
         return `slot-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     }
 
-    protected _drawLayer(ctx: ICanvasRenderingContext, key: string, layer: IVectorTileLayer, w: number, h: number, styleLayer: IVectorLayerStyle): void {
+    protected _drawLayer(ctx: CanvasRenderingContext2D, key: string, layer: IVectorTileLayer, w: number, h: number, styleLayer: IVectorLayerStyle): void {
         const extent = layer.extent;
         const scalex = w / extent;
         const scaley = h / extent;
@@ -98,19 +99,23 @@ export class TileVectorRenderer {
                         break;
                     }
                     const color = this._evaluate(paint.color);
-                    if (!color) {
+                    const outlineColor = this._evaluate(paint.outlineColor);
+                    if (!color && !outlineColor) {
                         break;
                     }
-                    ctx.fillStyle = color;
-                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
-                    ctx.globalAlpha = opacity;
 
-                    // set the outline style properties
-                    const outlineColor = this._evaluate(paint.outlineColor);
+                    if (color) {
+                        ctx.fillStyle = color;
+                    }
+
                     if (outlineColor) {
                         ctx.strokeStyle = outlineColor;
                         ctx.lineWidth = TileVectorRenderer.DefaultLineWith;
                     }
+
+                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
+                    ctx.globalAlpha = opacity;
+
                     const translate = this._evaluate(paint.translate);
 
                     // loop over features
@@ -158,6 +163,9 @@ export class TileVectorRenderer {
                     const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
                     ctx.globalAlpha = opacity;
 
+                    const width = this._evaluate(paint.width);
+                    ctx.lineWidth = width ?? TileVectorRenderer.DefaultLineWith;
+
                     const dasharray = this._evaluate(paint.dashArray);
                     if (dasharray) {
                         ctx.setLineDash(dasharray);
@@ -188,8 +196,59 @@ export class TileVectorRenderer {
                     }
                     break;
                 }
-                default:
+                case LayerStyleTypes.Circle: {
+                    const paint = styleLayer.paint as ICirclePaintStyle;
+                    if (!paint) {
+                        break;
+                    }
+                    const color = this._evaluate(paint.color);
+                    const outlineColor = this._evaluate(paint.strockeColor);
+                    if (!color && !outlineColor) {
+                        break;
+                    }
+                    if (color) {
+                        ctx.fillStyle = color;
+                    }
+
+                    const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
+                    ctx.globalAlpha = opacity;
+
+                    // set the outline style properties
+                    if (outlineColor) {
+                        ctx.strokeStyle = outlineColor;
+                        ctx.lineWidth = TileVectorRenderer.DefaultLineWith;
+                    }
+
+                    const translate = this._evaluate(paint.translate);
+                    // loop over features
+                    for (let i = 0; i < layer.length; i++) {
+                        const feature = layer.feature(i);
+                        if (feature && this._acceptFeature(feature, styleLayer)) {
+                            switch (feature.type) {
+                                case VectorTileGeomType.POINT: {
+                                    const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
+                                    for (const point of transformed) {
+                                        ctx.beginPath();
+                                        ctx.arc(point[0].x, point[0].y, paint.radius, 0, 2 * Math.PI);
+                                        ctx.fill();
+                                        if (outlineColor) {
+                                            ctx.stroke();
+                                        }
+                                    }
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     break;
+                }
+                default: {
+                    break;
+                }
             }
         } finally {
             ctx.restore();
@@ -225,13 +284,13 @@ export class TileVectorRenderer {
         return transformed;
     }
 
-    protected _drawPolyline(ctx: ICanvasRenderingContext, points: Array<ICartesian2>): void {
+    protected _drawPolyline(ctx: CanvasRenderingContext2D, points: Array<ICartesian2>): void {
         this._drawPath(ctx, points);
     }
 
-    protected _drawPolygon(ctx: ICanvasRenderingContext, points: Array<Array<ICartesian2>>): void {}
+    protected _drawPolygon(ctx: CanvasRenderingContext2D, points: Array<Array<ICartesian2>>): void {}
 
-    protected _drawPath(ctx: ICanvasRenderingContext, points: Array<ICartesian2>): void {
+    protected _drawPath(ctx: CanvasRenderingContext2D, points: Array<ICartesian2>): void {
         let i = 0;
         let p = points[i];
         ctx.moveTo(p.x, p.y);

@@ -3,11 +3,22 @@ import { IEnvelope, IGeo2, IGeoBounded, IsGeoBounded } from "../geography/geogra
 import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
-import { IMemoryCache } from "../cache/cache";
+import { ITransformBlock } from "./pipeline";
 
 export function IsTileAddress(b: unknown): b is ITileAddress {
     if (typeof b !== "object" || b === null) return false;
     return (<ITileAddress>b).x !== undefined && (<ITileAddress>b).y !== undefined && (<ITileAddress>b).levelOfDetail !== undefined;
+}
+
+export function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress> {
+    if (Array.isArray(b) && b.length) {
+        for (let i = 0; i != b.length; i++) {
+            if (IsTileAddress(b[i])) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 export interface ITileAddress extends ICartesian2 {
@@ -15,13 +26,16 @@ export interface ITileAddress extends ICartesian2 {
     quadkey: string;
 }
 
-export type TileContentType<T> = Nullable<T>;
-
-export interface ITile<T> extends IGeoBounded, IBounded {
+export interface ITileAddressable {
     namespace?: string;
     address: ITileAddress;
-    content: TileContentType<T>;
     quadkey: string; // shortcut for address.quadkey
+}
+
+export type TileContentType<T> = Nullable<T>;
+
+export interface ITile<T> extends ITileAddressable, IGeoBounded, IBounded {
+    content: TileContentType<T>;
 }
 
 export function IsTile<T>(b: unknown): b is ITile<T> {
@@ -190,22 +204,6 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
 }
 
-export interface ITileContentProviderBuilder<T> {
-    // name and metrics are comming from data sourec
-    withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
-    withCache(cache: IMemoryCache<string, TileContentType<T>>): ITileContentProviderBuilder<T>;
-    build(): ITileContentProvider<T>;
-}
-
-export function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T> {
-    if (b === null || typeof b !== "object") return false;
-    return (
-        (<ITileContentProviderBuilder<T>>b).build !== undefined &&
-        (<ITileContentProviderBuilder<T>>b).withDatasource !== undefined &&
-        (<ITileContentProviderBuilder<T>>b).withCache !== undefined
-    );
-}
-
 export interface IHasNamespace {
     namespace: string;
 }
@@ -214,42 +212,14 @@ export interface IHasActivTiles<T> {
     activTiles: ITileCollection<T>;
 }
 
-export interface IActivateTiles<T> {
-    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // activate tiles by addresses
-    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>; // deactivate tiles by addresses, if no address is provided, all tiles are deactivated, this is the preffered way to dispose the provider
-}
-
 /// <summary>
 /// Used as entry point to Tile Data source. It is responsible for managing the lifecycle of the datasource and the content provider
 /// plus dealing with the asynchronous nature of the data source, by providing update notification.
-/// The main interaction is done using activateTile and deactivateTile methods which are messaging the datasource and content provider and also
-/// managing the local cache
+/// The main interaction is done using ITransformBlock interface methods.
+/// Basically, a TileProvider may be connected to several ISourceBlock<ITileAddress>, listening for Address to resolve. Fetch or build Tile base on addresses, and finally messaging listeners of ITargetBlock<ITile<T>>.
 /// </summary>
-export interface ITileProvider<T> extends IHasNamespace, IHasActivTiles<T>, IActivateTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
-    updatedObservable: Observable<ITile<T>>; // messaged when a tile is updated
+export interface ITileProvider<T> extends ITransformBlock<ITileAddress, ITile<T>>, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
-    factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
     enabled: boolean; // enable/disable the provider
-}
-
-export function IsTileProvider<T>(b: unknown): b is ITileProvider<T> {
-    if (b === null || typeof b !== "object") return false;
-    return (<ITileProvider<T>>b).activateTile !== undefined && (<ITileProvider<T>>b).deactivateTile !== undefined;
-}
-
-export interface ITileProviderBuilder<T> {
-    withEnabled(enabled: boolean): ITileProviderBuilder<T>;
-    withFactory(factory: ITileBuilder<T>): ITileProviderBuilder<T>;
-    withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T>;
-    build(): ITileProvider<T>;
-}
-
-export function IsTileProviderBuilder<T>(b: unknown): b is ITileProviderBuilder<T> {
-    if (b === null || typeof b !== "object") return false;
-    return (
-        (<ITileProviderBuilder<T>>b).build !== undefined &&
-        (<ITileProviderBuilder<T>>b).withEnabled !== undefined &&
-        (<ITileProviderBuilder<T>>b).withFactory !== undefined &&
-        (<ITileProviderBuilder<T>>b).withContentProvider !== undefined
-    );
+    factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
 }

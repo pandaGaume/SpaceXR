@@ -254,6 +254,25 @@ export class Envelope implements IEnvelope {
         );
     }
 
+    public scaleInPlace(scale: number): IEnvelope {
+        const size = this.size;
+        size.width = (size.width * scale - size.width) / 2;
+        size.height = (size.height * scale - size.height) / 2;
+        size.thickness = (size.thickness * scale - size.thickness) / 2;
+
+        this._min.lat -= size.height;
+        this._min.lon -= size.width;
+        if (this._min.alt) {
+            this._min.alt -= size.thickness;
+        }
+        this._max.lat += size.height;
+        this._max.lon += size.width;
+        if (this._max.alt) {
+            this._max.alt += size.thickness;
+        }
+        return this;
+    }
+
     public toString(): string {
         return `Envelope(${this._min.toString()}, ${this._max.toString()})`;
     }

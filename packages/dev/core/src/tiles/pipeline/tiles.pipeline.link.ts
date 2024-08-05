@@ -11,13 +11,13 @@ import { EventState, Observer } from "../../events/events.observable";
 export class TilePipelineLink<T> implements ITilePipelineLink<T> {
     _source: ISourceBlock<T>;
     _target: ITargetBlock<T>;
-    _options?: ILinkOptions;
+    _options?: ILinkOptions<T>;
 
     _updatedObserver: Nullable<Observer<IPipelineMessageType<T>>>;
     _addedObserver: Nullable<Observer<IPipelineMessageType<T>>>;
     _removedObserver: Nullable<Observer<IPipelineMessageType<T>>>;
 
-    public constructor(source: ISourceBlock<T>, target: ITargetBlock<T>, options?: ILinkOptions) {
+    public constructor(source: ISourceBlock<T>, target: ITargetBlock<T>, options?: ILinkOptions<T>) {
         this._source = source;
         this._target = target;
         this._options = options;
@@ -35,7 +35,7 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
         return this._target;
     }
 
-    public get options(): ILinkOptions | undefined {
+    public get options(): ILinkOptions<T> | undefined {
         return this._options;
     }
 
@@ -49,14 +49,34 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
     }
 
     protected _onAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        this._target?.added(eventData, eventState);
+        if (this._target) {
+            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+            this._target.added(eventData, eventState);
+        }
     }
 
     protected _onRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        this._target?.removed(eventData, eventState);
+        if (this._target) {
+            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+            this._target.removed(eventData, eventState);
+        }
     }
 
     protected _onUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        this._target?.updated(eventData, eventState);
+        if (this._target) {
+            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+            this._target.updated(eventData, eventState);
+        }
+    }
+
+    protected _filter(eventData: IPipelineMessageType<T>, filter: (data: T) => boolean): IPipelineMessageType<T> {
+        const filtered = [];
+        for (let i = 0; i != eventData.length; i++) {
+            const d = eventData[i];
+            if (filter(d)) {
+                filtered.push(d);
+            }
+        }
+        return filtered;
     }
 }

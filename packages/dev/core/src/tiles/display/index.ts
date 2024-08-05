@@ -1,1 +1,1 @@
-export * from "./tiles.display.bounds";
+export * from "./tiles.display";

@@ -1,4 +1,3 @@
-import { ICanvasRenderingContext } from "../../engine";
 import { ISize2 } from "../../geometry";
 import { Nullable } from "../../types";
 import { ITileCodec } from "../tiles.interfaces";
@@ -21,7 +20,7 @@ export abstract class CanvasTileCodec<T> implements ITileCodec<ImageBitmap>, ISi
         if (r instanceof Response) {
             const data = await this._decodeDataAsync(r);
             if (data) {
-                const workingContext = this._canvas?.getContext("2d", { willReadFrequently: true }) as ICanvasRenderingContext;
+                const workingContext = this._canvas?.getContext("2d", { willReadFrequently: true });
                 if (!workingContext) {
                     throw new Error("Unable to get 2d context");
                 }
@@ -35,5 +34,5 @@ export abstract class CanvasTileCodec<T> implements ITileCodec<ImageBitmap>, ISi
 
     protected abstract _decodeDataAsync(r: Response): Promise<Awaited<Nullable<T>>>;
 
-    protected abstract _render(ctx: ICanvasRenderingContext, r: T, ...params: []): void;
+    protected abstract _render(ctx: CanvasRenderingContext2D, r: T, ...params: []): void;
 }

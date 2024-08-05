@@ -91,6 +91,7 @@ export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
     unionInPlace(other?: IBounds2): IBounds2;
     contains(x: number, y: number): boolean;
     containsBounds(other?: IBounds2): boolean;
+    inflateInPlace(dx: number, dy: number): IBounds2;
     toString(): string;
     /// <summary>
     /// Return the 4 corners of the bounds in clockwise order starting from the bottom left corner.

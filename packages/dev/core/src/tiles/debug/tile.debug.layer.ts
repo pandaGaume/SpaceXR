@@ -1,53 +1,25 @@
-import { ICanvasRenderingContext } from "../../engine";
 import { EPSG3857 } from "../geography";
-import { IDrawableTileMapLayer, ITileMapLayerOptions, TileMapLayer } from "../map";
-import { ITile, ITileMetrics } from "../tiles.interfaces";
+import { ITileMapLayerOptions, TileMapLayer } from "../map";
+import { ITile, ITileMetricsProvider } from "../tiles.interfaces";
 import { DebugProvider } from "./tile.debug.provider";
 
-type TileMapLayerDrawFn<T> = (ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>) => void;
-
-export interface IDebugLayerOptions<T> extends ITileMapLayerOptions {
-    metrics?: ITileMetrics;
-    function?: TileMapLayerDrawFn<T>;
+export interface IDebugLayerOptions<T> extends ITileMapLayerOptions<T>, ITileMetricsProvider {
     target?: any;
 }
 
-export class DebugLayer<T> extends TileMapLayer<T> implements IDrawableTileMapLayer {
-    private _function?: TileMapLayerDrawFn<any>;
-    private _target?: any;
-
+export class DebugLayer<T> extends TileMapLayer<T> {
     public constructor(name: string, data: T, options?: IDebugLayerOptions<T>, enabled?: boolean) {
         const metrics = options?.metrics ?? EPSG3857.Shared;
         const provider = new DebugProvider<T>(name, metrics, data);
         super(name, provider, options, enabled);
-        this._function = options?.function;
+        this._draw = this._draw ?? this._renderTile.bind(this);
     }
 
-    public draw(ctx: ICanvasRenderingContext): void {
-        const fn = this._function ?? this._draw;
-        if (this.enabled && this.activTiles) {
-            const center = this.metrics.getLatLonToPointXY(this.navigation.center.lat, this.navigation.center.lon, this.navigation.lod);
-
-            for (const t of this.activTiles) {
-                const b = t.bounds;
-                if (b) {
-                    const x = b.x - center.x;
-                    const y = b.y - center.y;
-                    fn.call(this._target ?? this, ctx, x, y, t);
-                }
-            }
-        }
-    }
-
-    protected _draw(ctx: ICanvasRenderingContext, x: number, y: number, tile: ITile<T>): void {
+    protected _renderTile(ctx: CanvasRenderingContext2D, tile: ITile<T>, w: number, h: number): void {
         const text = tile.address.quadkey;
-        const rect = tile.bounds;
 
-        const localx = (rect?.xmin ?? x) - x;
-        const localy = (rect?.ymin ?? y) - y;
-        console.log(`local x: ${localx}, local y: ${localy} to ${text}`);
-        const w = rect?.width ?? this.metrics.tileSize;
-        const h = rect?.height ?? this.metrics.tileSize;
+        const localx = 0;
+        const localy = 0;
 
         // Set font properties
         ctx.font = "10px Arial";
@@ -55,7 +27,7 @@ export class DebugLayer<T> extends TileMapLayer<T> implements IDrawableTileMapLa
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        // Calculate the center of the canvas
+        // Calculate the center of the tile
         const centerX = localx + w / 2;
         const centerY = localy + h / 2;
 

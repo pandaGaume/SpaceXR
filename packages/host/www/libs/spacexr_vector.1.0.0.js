@@ -11,11 +11,57 @@ var SPACEXR_MAPBOX;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles_codecs_vector__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec)
+/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles_codecs_vector__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec),
+/* harmony export */   VectorToImageTileCodec: () => (/* reexport safe */ _tiles_codecs_vector_image__WEBPACK_IMPORTED_MODULE_0__.VectorToImageTileCodec)
 /* harmony export */ });
-/* harmony import */ var _tiles_codecs_vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.codecs.vector */ "./dist/tiles/codecs/tiles.codecs.vector.js");
+/* harmony import */ var _tiles_codecs_vector_image__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.codecs.vector.image */ "./dist/tiles/codecs/tiles.codecs.vector.image.js");
+/* harmony import */ var _tiles_codecs_vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.codecs.vector */ "./dist/tiles/codecs/tiles.codecs.vector.js");
+
 
 //# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/codecs/tiles.codecs.vector.image.js":
+/*!********************************************************!*\
+  !*** ./dist/tiles/codecs/tiles.codecs.vector.image.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   VectorToImageTileCodec: () => (/* binding */ VectorToImageTileCodec)
+/* harmony export */ });
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tiles_codecs_vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.codecs.vector */ "./dist/tiles/codecs/tiles.codecs.vector.js");
+
+
+class VectorToImageTileCodec extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.CanvasTileCodec {
+    static CreateCanvas(width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+    constructor(metrics, render) {
+        super(VectorToImageTileCodec.CreateCanvas(metrics.tileSize, metrics.tileSize));
+        if (render instanceof core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileVectorRenderer) {
+            this._renderer = render;
+        }
+        else {
+            this._renderer = new core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileVectorRenderer(render);
+        }
+        this._codec = new _tiles_codecs_vector__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec();
+    }
+    async _decodeDataAsync(r) {
+        return await this._codec.decodeAsync(r);
+    }
+    _render(ctx, tile, style) {
+        this._renderer.renderTile(tile, ctx, style);
+    }
+}
+//# sourceMappingURL=tiles.codecs.vector.image.js.map
 
 /***/ }),
 
@@ -31,36 +77,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @mapbox/vector-tile */ "../../../../node_modules/@mapbox/vector-tile/index.js");
 /* harmony import */ var pbf__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! pbf */ "../../../../node_modules/pbf/index.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "core/tiles");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_tiles__WEBPACK_IMPORTED_MODULE_2__);
 
 
-
-class VectorTileCodec extends core_tiles__WEBPACK_IMPORTED_MODULE_2__.CanvasTileCodec {
-    static CreateCanvas(width, height) {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        return canvas;
-    }
-    constructor(metrics, render) {
-        super(VectorTileCodec.CreateCanvas(metrics.tileSize, metrics.tileSize));
-        if (render instanceof core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileVectorRenderer) {
-            this._renderer = render;
-        }
-        else {
-            this._renderer = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileVectorRenderer(render);
-        }
-    }
-    async _decodeDataAsync(r) {
-        const b = await r.blob();
-        if (b) {
-            return new _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_0__.VectorTile(new pbf__WEBPACK_IMPORTED_MODULE_1__["default"](await b.arrayBuffer()));
+class VectorTileCodec {
+    async decodeAsync(r) {
+        if (r instanceof Response) {
+            const b = await r.blob();
+            if (b) {
+                return new _mapbox_vector_tile__WEBPACK_IMPORTED_MODULE_0__.VectorTile(new pbf__WEBPACK_IMPORTED_MODULE_1__["default"](await b.arrayBuffer()));
+            }
         }
         return null;
-    }
-    _render(ctx, tile, style) {
-        this._renderer.renderTile(tile, ctx, style);
     }
 }
 //# sourceMappingURL=tiles.codecs.vector.js.map
@@ -83,8 +110,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.TerrainDemV1Client),
-/* harmony export */   VectorClient: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.VectorClient),
-/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec)
+/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec),
+/* harmony export */   VectorToImageClient: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.VectorToImageClient),
+/* harmony export */   VectorToImageTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_0__.VectorToImageTileCodec)
 /* harmony export */ });
 /* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./codecs */ "./dist/tiles/codecs/index.js");
 /* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/vendors/index.js");
@@ -110,7 +138,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.TerrainDemV1Client),
-/* harmony export */   VectorClient: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.VectorClient)
+/* harmony export */   VectorToImageClient: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.VectorToImageClient)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapbox */ "./dist/tiles/vendors/tiles.vendors.mapbox.js");
 
@@ -134,11 +162,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* binding */ MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* binding */ MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* binding */ TerrainDemV1Client),
-/* harmony export */   VectorClient: () => (/* binding */ VectorClient)
+/* harmony export */   VectorToImageClient: () => (/* binding */ VectorToImageClient)
 /* harmony export */ });
 /* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
 /* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_dem__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.js");
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.image.js");
 
 
 
@@ -185,9 +213,9 @@ const TerrainDemV1Client = function (token, options) {
     const elevationClient = new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${KEY}_elevation`, new MapBoxTerrainDemV1UrlBuilder(token), new core_dem__WEBPACK_IMPORTED_MODULE_0__.Float32TileCodec(MapboxAltitudeDecoder.Shared, codecOptions), metrics, options);
     return new core_dem__WEBPACK_IMPORTED_MODULE_0__.DemTileWebClient(`${KEY}_dem`, elevationClient);
 };
-const VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, style, options) {
+const VectorToImageClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, style, options) {
     const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 256 });
-    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorTileCodec(metrics, style), metrics, options);
+    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorToImageTileCodec(metrics, style), metrics, options);
 };
 //# sourceMappingURL=tiles.vendors.mapbox.js.map
 
@@ -1853,8 +1881,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.TerrainDemV1Client),
-/* harmony export */   VectorClient: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorClient),
-/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec)
+/* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec),
+/* harmony export */   VectorToImageClient: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorToImageClient),
+/* harmony export */   VectorToImageTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorToImageTileCodec)
 /* harmony export */ });
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
 

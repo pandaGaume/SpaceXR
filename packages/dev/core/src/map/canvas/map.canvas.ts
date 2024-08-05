@@ -1,100 +1,10 @@
-import { Scalar, RGBAColor } from "../../math";
-import { TileMapBase, ITileDisplayBounds, ITileNavigationState, IImageTileMapLayer, isDrawableTileMapLayer } from "../../tiles";
+import { ITileNavigationState } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { ICanvasRenderingContext, ICanvasRenderingOptions } from "../../engine/icanvas";
 import { InputsNavigationTarget, PointerInputController } from "../inputs";
+import { Context2DTileMap } from "./map.context2d";
 
-export type CanvasTileContentType = HTMLImageElement | ImageData;
-
-// we delegate the rendering options.
-
-// intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
-export class Context2DTileMap extends TileMapBase<CanvasTileContentType, IImageTileMapLayer> implements ICanvasRenderingOptions {
-    public static DefaultBackground = RGBAColor.LightGray();
-
-    public static DefaultOptions: ICanvasRenderingOptions = {
-        background: Context2DTileMap.DefaultBackground.toHexString(),
-    };
-
-    _background?: string;
-    _alpha: number;
-
-    public constructor(name: string, display?: Nullable<ITileDisplayBounds>, options?: ICanvasRenderingOptions, nav?: ITileNavigationState) {
-        super(name, display, nav);
-        this._background = options?.background;
-        this._alpha = options?.alpha ?? 1;
-    }
-
-    public get background(): string | undefined {
-        return this._background;
-    }
-
-    public set background(v: string | undefined) {
-        if (this._background !== v) {
-            this._background = v;
-            this.invalidate();
-        }
-    }
-
-    public get alpha(): number {
-        return this._alpha;
-    }
-
-    public set alpha(v: number) {
-        if (this._alpha !== v) {
-            this._alpha = v;
-            this.invalidate();
-        }
-    }
-
-    /// <summary>
-    /// Draw the map on the canvas.
-    /// </summary>
-    public draw(ctx: ICanvasRenderingContext, xoffset: number = 0, yoffset: number = 0): void {
-        if (!ctx || !this._display) {
-            return;
-        }
-        ctx.save();
-
-        // clear the canvas
-        const res = this._display;
-        const x = xoffset;
-        const y = yoffset;
-        const w = res.width;
-        const h = res.height;
-        //const a = this._alpha ?? 1;
-        //const b = this._background ?? Context2DTileMap.DefaultBackground.toHexString();
-
-        if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
-            ctx.restore();
-            return;
-        }
-
-        const scale = this.navigation.scale;
-        // we move the reference to the center of the display
-        ctx.translate(x + w / 2, y + h / 2);
-        // we clear the canvas
-        ctx.clearRect(-w / 2, -h / 2, w, h);
-        // we rotate the canvas according the navigation azimuth
-        if (this.navigation.azimuth?.value) {
-            // convert azimuth to canvas rotation, which is clockwize, and cartesian
-            const angle = this.navigation.azimuth.value * Scalar.DEG2RAD;
-            ctx.rotate(angle);
-        }
-        // we scale the canvas according the navigation scale
-        ctx.scale(scale, scale);
-        // every tiles are supposed to got the same size here, using same metrics
-        for (const l of this._zIndexOrderedLayers ?? []) {
-            if (isDrawableTileMapLayer(l)) {
-                l.draw(ctx, this);
-            }
-        }
-        ctx.restore();
-    }
-}
-
-export interface ICanvasMapOptions extends ICanvasRenderingOptions {
+export interface ICanvasMapOptions {
     navigationManager?: InputsNavigationTarget<HTMLCanvasElement>;
     inputController?: PointerInputController<HTMLCanvasElement>;
 }
@@ -125,23 +35,23 @@ export class CanvasMap extends Context2DTileMap {
     _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
     _inputController: PointerInputController<HTMLCanvasElement>;
 
-    public constructor(name: string, display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasMapOptions, nav?: ITileNavigationState) {
+    public constructor(display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasMapOptions, nav?: ITileNavigationState) {
         if (display instanceof HTMLCanvasElement) {
             display = new CanvasDisplay(display);
         }
-        const o = { ...Context2DTileMap.DefaultOptions, ...options };
-        super(name, display, o, nav);
+        super(display, nav);
         this._context = display.getContext();
 
-        this._navigationManager = o.navigationManager ?? new InputsNavigationTarget<HTMLCanvasElement>(this);
-        this._inputController = o.inputController ?? new PointerInputController(display.canvas, this._navigationManager);
+        this._navigationManager = options?.navigationManager ?? new InputsNavigationTarget<HTMLCanvasElement>(this);
+        this._inputController = options?.inputController ?? new PointerInputController(display.canvas, this._navigationManager);
     }
 
     /// <summary>
     /// This method is called when the map is validated.
     /// </summary>
     protected _doValidate(): void {
-        const ctx: ICanvasRenderingContext = this._getContext2D() as ICanvasRenderingContext;
+        super._doValidate();
+        const ctx = this._getContext2D();
         if (ctx) {
             this.draw(ctx);
         }

@@ -17,7 +17,11 @@ export interface IClipable<T extends IShape> {
     clip(clipArea: IBounds2): T | Array<T> | undefined;
 }
 
-export interface IShape extends IBounded {
+export function isClipable<T extends IShape>(value: any): value is IClipable<T> {
+    return value && value.clip !== undefined;
+}
+
+export interface IShape extends IBounded, Iterable<ICartesian3> {
     type: ShapeType;
 }
 
@@ -49,9 +53,7 @@ export function isLine(shape: IShape): shape is ILine {
     return shape.type === ShapeType.Line;
 }
 
-export interface IPolyline extends IShape, IClipable<IPolyline> {
-    points: Array<ICartesian3>;
-}
+export interface IPolyline extends IShape, IClipable<IPolyline> {}
 
 export function isPolyline(shape: IShape): shape is IPolyline {
     if (typeof shape !== "object" || shape === null) return false;

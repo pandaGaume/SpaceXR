@@ -43,4 +43,8 @@ export class Circle extends AbstractShape implements ICircle {
 
         return new Bounds2(x - r, y - r, r * 2, r * 2);
     }
+
+    protected _getPoints(): Array<ICartesian3> {
+        return [this._center];
+    }
 }

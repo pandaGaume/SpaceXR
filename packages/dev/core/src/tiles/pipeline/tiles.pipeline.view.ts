@@ -3,10 +3,11 @@ import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
-import { ICartesian2, IBounds2, Bounds2, Cartesian2, ISize2 } from "../../geometry";
+import { ICartesian2, IBounds2, Bounds2, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 import { TilePipelineLink } from "./tiles.pipeline.link";
-import { Bearing, Geo2 } from "../../geography";
+import { Bearing } from "../../geography";
+import { IDisplay } from "../map";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -20,8 +21,6 @@ export class TileView implements ITileView {
 
     // cached values
     _id: string;
-    _geoTmp = Geo2.Zero();
-    _pixelTmp = Cartesian2.Zero();
 
     public constructor(id: string) {
         this._id = id;
@@ -54,7 +53,7 @@ export class TileView implements ITileView {
         return this._updatedObservable!;
     }
 
-    public linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions): void {
+    public linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions<ITileAddress>): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             const link = new TilePipelineLink(this, target, options);
@@ -72,15 +71,21 @@ export class TileView implements ITileView {
         return undefined;
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
         if (!state || !display) {
-            this._doClearContext(state, dispatchEvent);
+            this._doClearContext(state, this._activ, dispatchEvent);
             return;
         }
-        this._doValidateContext(state, display, metrics, dispatchEvent);
+        this._doValidateContext(state, display, metrics, this._activ, dispatchEvent);
     }
 
-    protected _doValidateContext(state: Nullable<ITileNavigationState>, display: Nullable<ISize2>, metrics: ITileMetrics, dispatchEvent: boolean = true) {
+    protected _doValidateContext(
+        state: Nullable<ITileNavigationState>,
+        display: Nullable<IDisplay>,
+        metrics: ITileMetrics,
+        activAddresses: Map<string, ITileAddress>,
+        dispatchEvent: boolean = true
+    ) {
         if (state && display) {
             const lod = TileAddress.ClampLod(state.lod, metrics);
             const scale = state.scale;
@@ -89,8 +94,8 @@ export class TileView implements ITileView {
             const seTileXY = Cartesian2.Zero();
 
             const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
-            let w = display?.width ?? 0;
-            let h = display?.height ?? 0;
+            let w = display?.resolution.width ?? 0;
+            let h = display?.resolution.height ?? 0;
 
             let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
             // if azimuth is set, then we need to keep reference of the original rectangle to optimize the tile selection.
@@ -121,25 +126,25 @@ export class TileView implements ITileView {
                         }
                     }
                     const key = tmp.quadkey;
-                    const activ = this._activ.get(key);
+                    const activ = activAddresses.get(key);
                     if (activ) {
                         remains.push(activ);
-                        this._activ.delete(key);
+                        activAddresses.delete(key);
                         continue;
                     }
                     added.push(tmp.clone());
                 }
             }
 
-            let deleted = Array.from(this._activ.values());
-            this._activ.clear();
+            let deleted = Array.from(activAddresses.values());
+            activAddresses.clear();
 
             for (const a of remains) {
-                this._activ.set(a.quadkey, a);
+                activAddresses.set(a.quadkey, a);
             }
 
             for (const a of added) {
-                this._activ.set(a.quadkey, a);
+                activAddresses.set(a.quadkey, a);
             }
 
             if (dispatchEvent) {
@@ -153,10 +158,10 @@ export class TileView implements ITileView {
         }
     }
 
-    private _doClearContext(state: Nullable<ITileNavigationState>, dispatchEvent: boolean = true) {
+    private _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress>, dispatchEvent: boolean = true) {
         if (state) {
-            let deleted = Array.from(this._activ.values());
-            this._activ.clear();
+            let deleted = Array.from(activAddresses.values());
+            activAddresses.clear();
 
             if (dispatchEvent) {
                 if (deleted.length && this._removedObservable?.hasObservers()) {

@@ -3,18 +3,21 @@ import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces
 import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
-import { IMemoryCache } from "../cache/cache";
+import { ITransformBlock } from "./pipeline";
 export declare function IsTileAddress(b: unknown): b is ITileAddress;
+export declare function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress>;
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export type TileContentType<T> = Nullable<T>;
-export interface ITile<T> extends IGeoBounded, IBounded {
+export interface ITileAddressable {
     namespace?: string;
     address: ITileAddress;
-    content: TileContentType<T>;
     quadkey: string;
+}
+export type TileContentType<T> = Nullable<T>;
+export interface ITile<T> extends ITileAddressable, IGeoBounded, IBounded {
+    content: TileContentType<T>;
 }
 export declare function IsTile<T>(b: unknown): b is ITile<T>;
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
@@ -118,33 +121,14 @@ export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposab
     accept(address: ITileAddress): boolean;
     fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>;
 }
-export interface ITileContentProviderBuilder<T> {
-    withDatasource(datasource: ITileDatasource<T, ITileAddress>): ITileContentProviderBuilder<T>;
-    withCache(cache: IMemoryCache<string, TileContentType<T>>): ITileContentProviderBuilder<T>;
-    build(): ITileContentProvider<T>;
-}
-export declare function IsTileContentProviderBuilder<T>(b: unknown): b is ITileContentProviderBuilder<T>;
 export interface IHasNamespace {
     namespace: string;
 }
 export interface IHasActivTiles<T> {
     activTiles: ITileCollection<T>;
 }
-export interface IActivateTiles<T> {
-    activateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-    deactivateTile(...address: Array<ITileAddress>): Array<ITile<T>>;
-}
-export interface ITileProvider<T> extends IHasNamespace, IHasActivTiles<T>, IActivateTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
-    updatedObservable: Observable<ITile<T>>;
+export interface ITileProvider<T> extends ITransformBlock<ITileAddress, ITile<T>>, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     enabledObservable: Observable<ITileProvider<T>>;
-    factory: ITileBuilder<T>;
     enabled: boolean;
+    factory: ITileBuilder<T>;
 }
-export declare function IsTileProvider<T>(b: unknown): b is ITileProvider<T>;
-export interface ITileProviderBuilder<T> {
-    withEnabled(enabled: boolean): ITileProviderBuilder<T>;
-    withFactory(factory: ITileBuilder<T>): ITileProviderBuilder<T>;
-    withContentProvider(contentProvider: ITileContentProvider<T> | ITileContentProviderBuilder<T>): ITileProviderBuilder<T>;
-    build(): ITileProvider<T>;
-}
-export declare function IsTileProviderBuilder<T>(b: unknown): b is ITileProviderBuilder<T>;

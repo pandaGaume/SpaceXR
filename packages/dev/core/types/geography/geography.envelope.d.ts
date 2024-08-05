@@ -34,6 +34,7 @@ export declare class Envelope implements IEnvelope {
     intersects(bounds?: IEnvelope): boolean;
     contains(loc?: IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
+    scaleInPlace(scale: number): IEnvelope;
     toString(): string;
 }
 export declare abstract class GeoBounded implements IGeoBounded {

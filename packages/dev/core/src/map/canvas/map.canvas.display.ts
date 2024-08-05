@@ -1,6 +1,6 @@
-import { TileDisplayBounds } from "../../tiles";
+import { Display } from "../../tiles";
 
-export class CanvasDisplay extends TileDisplayBounds {
+export class CanvasDisplay extends Display {
     public static CreateCanvas(width: number, height: number): HTMLCanvasElement {
         const canvas = <HTMLCanvasElement>document.createElement("canvas");
         canvas.width = width;
@@ -39,20 +39,21 @@ export class CanvasDisplay extends TileDisplayBounds {
 
     public constructor(public canvas: HTMLCanvasElement, scale?: number, resizeToFitClient?: boolean) {
         const f = resizeToFitClient == undefined || resizeToFitClient == true;
+        scale = scale ?? 1.0;
         if (f) {
             // the canvas width and height are the buffer size of the canvas. default values are width:300, height:150.
             // the canvas clientWidth and clientHeight are the size of the canvas in the browser window.
             // so we need to adapt the buffer size to the client size.
             CanvasDisplay.ResizeToDisplaySize(canvas, scale);
         }
-        super(canvas.width, canvas.height);
-        this._scale = scale ?? 1;
+        super(canvas); // canvas has wdth and height properties.
         this._resizeToFitClient = f;
+        this._scale = scale;
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
                 // Check if the resized element is our canvas
                 if (entry.target === canvas) {
-                    if (f) {
+                    if (this._resizeToFitClient) {
                         CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
                     }
                     this.resize(canvas.width, canvas.height);

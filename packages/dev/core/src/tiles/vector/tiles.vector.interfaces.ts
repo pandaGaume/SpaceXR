@@ -10,6 +10,7 @@ export enum VectorTileGeomType {
 export interface IVectorTileFeature extends IBounded {
     id?: number | undefined;
     type: VectorTileGeomType;
+    properties: { [name: string]: any } | null;
     loadGeometry(): Array<Array<ICartesian2>>;
 }
 
@@ -20,9 +21,10 @@ export interface IVectorTileLayer {
     name: string;
     // A layer MUST contain an extent that describes the width and height of the tile in integer coordinates.
     extent: number;
+
     length: number;
     // A layer SHOULD contain at least one feature.
-    feature(i: number): IVectorTileFeature;
+    feature(i: number): IVectorTileFeature | undefined;
 }
 
 // A Vector Tile consists of a set of named layers.

@@ -1,5 +1,5 @@
-import { TileDisplayBounds } from "../../tiles";
-export declare class CanvasDisplay extends TileDisplayBounds {
+import { Display } from "../../tiles";
+export declare class CanvasDisplay extends Display {
     canvas: HTMLCanvasElement;
     static CreateCanvas(width: number, height: number): HTMLCanvasElement;
     static ResizeToDisplaySize(canvas: HTMLCanvasElement, scale?: number): boolean;

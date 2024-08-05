@@ -38,4 +38,8 @@ export class Point extends AbstractShape implements IPoint {
     protected _buildBounds(): IBounds2 | undefined {
         return Bounds2.FromPoints(this._position);
     }
+
+    protected _getPoints(): Array<ICartesian3> {
+        return [this._position];
+    }
 }

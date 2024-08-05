@@ -1,26 +1,18 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
+import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { ITileDisplayBounds, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
-import { IGeo2 } from "../../geography/geography.interfaces";
-import { TileSystemBounds } from "../tiles.system";
-import { TileConsumerBase } from "../pipeline";
+import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
+import { TileMapLayerViewContainer } from "./tiles.map.layerContainer";
 
-export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase<T> implements ITileMap<T, L, TileMapBase<T, L>> {
-    _layerAddedObservable?: Observable<L>;
-    _layerRemovedObservable?: Observable<L>;
-
-    protected _display: Nullable<ITileDisplayBounds>;
+export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerViewContainer<T, L> implements ITileMap<T, L, TileMapBase<T, L>> {
+    protected _display: Nullable<IDisplay>;
     protected _navigation: ITileNavigationState;
-    protected _layers?: Array<L>;
 
-    // internal
-    // layer ordered by zindex
-    protected _zIndexOrderedLayers?: Array<L>;
-
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
-    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>>;
+    _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
 
     /// <summary>
     /// Create a new tile map.
@@ -30,9 +22,9 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
     /// <param name="nav">The optional navigation api. May be a NavigationAPI object or a ITileMetrics object. In the second case, it will build a new TileNavigation(metrics).
     //  </param>
     /// </summary>
-    public constructor(name: string, display?: Nullable<ITileDisplayBounds>, nav?: ITileNavigationState) {
-        super(name);
-        this._display = display ?? null;
+    public constructor(display: IDisplay, nav?: ITileNavigationState) {
+        super();
+        this._display = display;
         this._bindDisplay(this._display);
 
         // build the navigation state according parameters
@@ -40,87 +32,17 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         this._bindNavigation(this._navigation);
     }
 
-    public get layerAddedObservable(): Observable<L> {
-        if (!this._layerAddedObservable) this._layerAddedObservable = new Observable<L>();
-        return this._layerAddedObservable;
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>> {
+        if (!this._propertyChangedObservable) this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>>();
+        return this._propertyChangedObservable;
     }
 
-    public get layerRemovedObservable(): Observable<L> {
-        if (!this._layerRemovedObservable) this._layerRemovedObservable = new Observable<L>();
-        return this._layerRemovedObservable;
-    }
-
-    public get display(): Nullable<ITileDisplayBounds> {
+    public get display(): Nullable<IDisplay> {
         return this._display;
     }
 
     public get navigation(): ITileNavigationState {
         return this._navigation;
-    }
-
-    public set navigation(nav: ITileNavigationState) {
-        if (nav && this._navigation !== nav) {
-            this._bindNavigation(nav);
-        }
-    }
-
-    public *getLayers(predicate?: (l: L) => boolean, sorted: boolean = true): IterableIterator<L> {
-        if (sorted) {
-            yield* this.getOrderedLayers(predicate);
-            return;
-        }
-        if (this._layers) {
-            for (const item of this._layers) {
-                if (!predicate || predicate(item)) yield item;
-            }
-        }
-    }
-
-    public *getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L> {
-        if (this._zIndexOrderedLayers) {
-            if (predicate) {
-                for (const layer of this._zIndexOrderedLayers ?? []) {
-                    if (predicate(layer)) yield layer;
-                }
-            } else {
-                yield* this._zIndexOrderedLayers ?? [];
-            }
-        }
-    }
-
-    public addLayer(layer: L): void {
-        if (!this._layers) this._layers = [];
-        layer.linkTo(this);
-
-        this._layers.push(layer);
-        this._addSortedLayer(layer);
-        this._onLayerAddedInternal(layer);
-    }
-
-    public removeLayer(layer: L): void {
-        const index = this._layers?.findIndex((l) => l === layer);
-        if (index == undefined || index == -1) {
-            return;
-        }
-        const container = this._layers?.[index];
-        if (!container) {
-            return;
-        }
-        layer.unlinkFrom(this);
-        this._layers?.splice(index, 1);
-        this._removeSortedLayer(layer);
-        this._onLayerRemovedInternal(container);
-    }
-
-    public clear(): void {
-        if (this._layers) {
-            for (const layer of this._layers) {
-                layer.unlinkFrom(this);
-                this._removeSortedLayer(layer);
-                this._onLayerRemovedInternal(layer);
-            }
-            this._layers = [];
-        }
     }
 
     public dispose() {
@@ -165,41 +87,20 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         return this;
     }
 
+    public getGeoBounds(metrics: ITileMetrics): IEnvelope | undefined {
+        return undefined;
+    }
+
     // end navigation proxy
-    private _addSortedLayer(layer: L): void {
-        if (!this._zIndexOrderedLayers) this._zIndexOrderedLayers = [];
-        this._zIndexOrderedLayers.push(layer);
-        this._zIndexOrderedLayers.sort((a, b) => a.zindex - b.zindex); // sort by zindex
-    }
-
-    private _removeSortedLayer(layer: L): void {
-        if (this._zIndexOrderedLayers) {
-            const index = this._zIndexOrderedLayers.findIndex((l) => l === layer);
-            if (index !== -1) {
-                this._zIndexOrderedLayers.splice(index, 1);
-            }
-        }
-    }
-
     private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
         this.invalidate();
-        this._updateLayersWithDisplayAndNavigation();
         this._onNavigationUpdated(event);
     }
 
-    private _updateLayersWithDisplayAndNavigation() {
-        for (const layer of this.getLayers()) {
-            if (this._display && this._navigation) {
-                layer.setContext(this._navigation, this._display);
-            }
-        }
-    }
-
-    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<ITileDisplayBounds, unknown>, state: EventState): void {
+    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<IDisplay, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case "size": {
                 this.invalidate();
-                this._updateLayersWithDisplayAndNavigation();
                 this._onDisplayResized(event.source);
                 break;
             }
@@ -209,11 +110,10 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    private _bindDisplay(display: Nullable<ITileDisplayBounds>): void {
+    private _bindDisplay(display: Nullable<IDisplay>): void {
         if (display) {
             this._display = display;
-            this._displayPropertyObserver = this._display.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
-            this._updateLayersWithDisplayAndNavigation();
+            this._displayPropertyObserver = this._display?.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
         }
         this.invalidate();
         this._onDisplayBinded(display);
@@ -223,57 +123,9 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         this._navigationUpdatedObserver?.disconnect();
         if (nav) {
             this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
-            this._updateLayersWithDisplayAndNavigation();
         }
         this.invalidate();
         this._onNavigationBinded(nav);
-    }
-
-    private _updateNavigationBounds(): void {
-        // first get the overall bounds for all the layers
-        let b: Nullable<ITileSystemBounds> = null;
-        for (const layer of this.getLayers()) {
-            if (b === null) {
-                b = new TileSystemBounds(layer.metrics);
-                continue;
-            }
-            b.unionInPlace(layer.metrics);
-        }
-        // the assign the bounds to the navigation state
-        if (b != null) {
-            this._navigation.bounds.maxLOD = b.maxLOD;
-            this._navigation.bounds.minLOD = b.minLOD;
-            this._navigation.bounds.maxLatitude = b.maxLatitude;
-            this._navigation.bounds.minLatitude = b.minLatitude;
-            this._navigation.bounds.maxLongitude = b.maxLongitude;
-            this._navigation.bounds.minLongitude = b.minLongitude;
-        }
-    }
-
-    private _onLayerAddedInternal(layer: L): void {
-        // maintain the bounds
-        this._updateNavigationBounds();
-        // update the layer with current navigation and display
-        layer.setContext(this._navigation, this._display);
-        // invalidate the map
-        this.invalidate();
-        // we give the hand to other components
-        this._onLayerAdded(layer);
-        if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
-            this._layerAddedObservable.notifyObservers(layer, -1, this, this);
-        }
-    }
-
-    private _onLayerRemovedInternal(layer: L): void {
-        // maintain the bounds
-        this._updateNavigationBounds();
-        // invalidate the map
-        this.invalidate();
-        // we give the hand to other components
-        this._onLayerRemoved(layer);
-        if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
-            this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
-        }
     }
 
     // in response to layer validation process
@@ -283,19 +135,21 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         }
     }
 
-    protected _beforeValidate(): void {
-        if (this._layers) {
-            for (const layer of this._layers) {
-                layer.validate();
-            }
+    protected _doValidate() {
+        for (const l of this._layers.values()) {
+            const offset = l.layer.zoomOffset ?? 0;
+            const n = offset
+                ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
+                : this.navigation;
+            l.view.setContext(n, this.display, l.layer.metrics, true);
         }
     }
 
-    protected _onDisplayUnbinded(display: Nullable<ITileDisplayBounds>): void {
+    protected _onDisplayUnbinded(display: Nullable<IDisplay>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayBinded(display: Nullable<ITileDisplayBounds>): void {
+    protected _onDisplayBinded(display: Nullable<IDisplay>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
@@ -311,11 +165,11 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayResized(display: ITileDisplayBounds): void {
+    protected _onDisplayResized(display: IDisplay): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onDisplayTranslated(display: ITileDisplayBounds): void {
+    protected _onDisplayTranslated(display: IDisplay): void {
         /* nothing to do here - overrided by subclasses */
     }
 
@@ -325,5 +179,9 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileConsumerBase
 
     protected _onLayerRemoved(layer: L): void {
         /* nothing to do here - overrided by subclasses */
+    }
+
+    protected _onLayerViewAdded(layerView: ITileMapLayerView<T, L>): void {
+        layerView.validationObservable?.add(this._onLayerValidationChanged.bind(this));
     }
 }

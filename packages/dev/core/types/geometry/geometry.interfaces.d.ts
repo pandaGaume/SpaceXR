@@ -51,6 +51,7 @@ export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
     unionInPlace(other?: IBounds2): IBounds2;
     contains(x: number, y: number): boolean;
     containsBounds(other?: IBounds2): boolean;
+    inflateInPlace(dx: number, dy: number): IBounds2;
     toString(): string;
     points(): IterableIterator<ICartesian2>;
 }

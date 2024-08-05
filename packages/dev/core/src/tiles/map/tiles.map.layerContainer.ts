@@ -1,14 +1,20 @@
 import { Observable } from "../../events";
-import { ITileMapLayer, ITileMapLayerContainer } from "./tiles.map.interfaces";
+import { IDisposable } from "../../types";
+import { ValidableBase } from "../../validable";
+import { ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { TileMapLayerView } from "./tiles.map.layerView";
 
-export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLayerContainer<T, L> {
-    _layerAddedObservable?: Observable<L>;
-    _layerRemovedObservable?: Observable<L>;
-    protected _layers?: Array<L>;
+export class TileMapLayerViewContainer<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMapLayerContainer<T, L>, IDisposable {
+    private _layerAddedObservable?: Observable<L>;
+    private _layerRemovedObservable?: Observable<L>;
 
-    // internal
-    // layer ordered by zindex
+    protected _layers: Map<string, ITileMapLayerView<T, L>>;
     protected _zIndexOrderedLayers?: Array<L>;
+
+    public constructor() {
+        super();
+        this._layers = new Map<string, ITileMapLayerView<T, L>>();
+    }
 
     public get layerAddedObservable(): Observable<L> {
         if (!this._layerAddedObservable) {
@@ -24,23 +30,23 @@ export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLa
         return this._layerRemovedObservable;
     }
 
-    public *getLayers(predicate?: (l: L) => boolean, sorted: boolean = true): IterableIterator<L> {
+    public *getLayers(predicate?: (k: string, l: L) => boolean, sorted: boolean = true): IterableIterator<L> {
         if (sorted) {
             yield* this.getOrderedLayers(predicate);
             return;
         }
         if (this._layers) {
-            for (const item of this._layers) {
-                if (!predicate || predicate(item)) yield item;
+            for (const [key, item] of this._layers) {
+                if (!predicate || predicate(key, item.layer)) yield item.layer;
             }
         }
     }
 
-    public *getOrderedLayers(predicate?: (l: L) => boolean): IterableIterator<L> {
+    public *getOrderedLayers(predicate?: (k: string, l: L) => boolean): IterableIterator<L> {
         if (this._zIndexOrderedLayers) {
             if (predicate) {
                 for (const layer of this._zIndexOrderedLayers ?? []) {
-                    if (predicate(layer)) yield layer;
+                    if (predicate(layer.name, layer)) yield layer;
                 }
             } else {
                 yield* this._zIndexOrderedLayers ?? [];
@@ -49,27 +55,26 @@ export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLa
     }
 
     public addLayer(layer: L): void {
-        if (!this._layers) this._layers = [];
-
-        this._layers.push(layer);
+        const view = this._buildLayerView(layer) ?? new TileMapLayerView<T, L>(layer);
+        this._layers.set(layer.name, view);
         this._addSortedLayer(layer);
         if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
             this._layerAddedObservable.notifyObservers(layer, -1, this, this);
         }
         this._onLayerAdded(layer);
+        this._onLayerViewAdded(view);
     }
 
     public removeLayer(layer: L): void {
-        const index = this._layers?.findIndex((l) => l === layer);
-        if (index == undefined || index == -1) {
+        const k = layer.name;
+        const view = this._layers.get(k);
+        if (!view) {
             return;
         }
-        const container = this._layers?.[index];
-        if (!container) {
-            return;
-        }
-        this._layers?.splice(index, 1);
+        this._layers?.delete(k);
         this._removeSortedLayer(layer);
+        this._onLayerViewRemoved(view);
+        view.dispose();
         this._onLayerRemoved(layer);
         if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
             this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
@@ -78,15 +83,29 @@ export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLa
 
     public clear(): void {
         if (this._layers) {
-            for (const layer of this._layers) {
-                this._removeSortedLayer(layer);
-                this._onLayerRemoved(layer);
-                if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
-                    this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
-                }
+            const toRemove = Array.from(this._layers.values()).map((v) => v.layer);
+            for (const l of toRemove) {
+                this.removeLayer(l);
             }
-            this._layers = [];
         }
+    }
+
+    public dispose(): void {
+        this.clear();
+        this._layerAddedObservable?.clear();
+        this._layerRemovedObservable?.clear();
+    }
+
+    protected _onLayerAdded(layer: L): void {}
+
+    protected _onLayerRemoved(layer: L): void {}
+
+    protected _onLayerViewAdded(view: ITileMapLayerView<T, L>): void {}
+
+    protected _onLayerViewRemoved(view: ITileMapLayerView<T, L>): void {}
+
+    protected _buildLayerView(layer: L): ITileMapLayerView<T, L> | undefined {
+        return new TileMapLayerView<T, L>(layer);
     }
 
     private _addSortedLayer(layer: L): void {
@@ -103,8 +122,4 @@ export class LayerContainer<T, L extends ITileMapLayer<T>> implements ITileMapLa
             }
         }
     }
-
-    protected _onLayerAdded(layer: L): void {}
-
-    protected _onLayerRemoved(layer: L): void {}
 }

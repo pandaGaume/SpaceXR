@@ -32,6 +32,7 @@ export interface IVectorStyle {
 export enum LayerStyleTypes {
     Fill = "fill",
     Line = "line",
+    Circle = "circle",
     Background = "background",
 }
 
@@ -71,20 +72,30 @@ export function IsLineLayerStyle(value: any): value is IFillLayerStyle {
     return value && value.type === LayerStyleTypes.Line;
 }
 
+export interface IShiftableLayerStyle {
+    translate?: PropertyValueSpecification<[number, number]>; // shifts the layer content by a specified distance in pixels
+}
+
 // Renders filled polygons.
-export interface IFillPaintStyle extends IPaintStyle {
+export interface IFillPaintStyle extends IPaintStyle, IShiftableLayerStyle {
     opacity?: PropertyValueSpecification<number>;
     color?: PropertyValueSpecification<ColorSpecification>;
     outlineColor?: PropertyValueSpecification<ColorSpecification>; // this is a shorcut to outline a polygon withoiut the need of defining a line layer
     pattern?: PropertyValueSpecification<ResolvedImageSpecification>;
-    translate?: PropertyValueSpecification<[number, number]>; // shifts the fill layer content by a specified distance in pixels
 }
 
 // Renders lines and outlines of polygons
-export interface ILinePaintStyle extends IPaintStyle {
+export interface ILinePaintStyle extends IPaintStyle, IShiftableLayerStyle {
     opacity?: PropertyValueSpecification<number>;
     color?: PropertyValueSpecification<ColorSpecification>;
     width?: PropertyValueSpecification<number>;
     dashArray?: PropertyValueSpecification<Array<number>>;
-    translate?: PropertyValueSpecification<[number, number]>; // shifts the line layer content by a specified distance in pixels
+}
+
+export interface ICirclePaintStyle extends IPaintStyle, IShiftableLayerStyle {
+    opacity?: PropertyValueSpecification<number>;
+    radius: number;
+    strockeWidth: number;
+    strockeColor: string;
+    color: string;
 }

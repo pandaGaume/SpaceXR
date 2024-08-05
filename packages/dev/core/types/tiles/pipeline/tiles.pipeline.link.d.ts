@@ -4,16 +4,17 @@ import { EventState, Observer } from "../../events/events.observable";
 export declare class TilePipelineLink<T> implements ITilePipelineLink<T> {
     _source: ISourceBlock<T>;
     _target: ITargetBlock<T>;
-    _options?: ILinkOptions;
+    _options?: ILinkOptions<T>;
     _updatedObserver: Nullable<Observer<IPipelineMessageType<T>>>;
     _addedObserver: Nullable<Observer<IPipelineMessageType<T>>>;
     _removedObserver: Nullable<Observer<IPipelineMessageType<T>>>;
-    constructor(source: ISourceBlock<T>, target: ITargetBlock<T>, options?: ILinkOptions);
+    constructor(source: ISourceBlock<T>, target: ITargetBlock<T>, options?: ILinkOptions<T>);
     get source(): ISourceBlock<T>;
     get target(): ITargetBlock<T>;
-    get options(): ILinkOptions | undefined;
+    get options(): ILinkOptions<T> | undefined;
     dispose(): void;
     protected _onAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void;
     protected _onRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void;
     protected _onUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    protected _filter(eventData: IPipelineMessageType<T>, filter: (data: T) => boolean): IPipelineMessageType<T>;
 }

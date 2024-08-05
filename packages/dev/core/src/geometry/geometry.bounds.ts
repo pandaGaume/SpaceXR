@@ -127,6 +127,14 @@ export class Bounds2 extends Cartesian2 implements IBounds2 {
         );
     }
 
+    inflateInPlace(dx: number, dy: number): IBounds2 {
+        this.x -= dx;
+        this.y -= dy;
+        this.width += 2 * dx;
+        this.height += 2 * dy;
+        return this;
+    }
+
     public toString() {
         return `left:${this.xmin}, bottom:${this.ymin}, right:${this.xmax}, top:${this.ymax}, width:${this.width}, height:${this.height}`;
     }

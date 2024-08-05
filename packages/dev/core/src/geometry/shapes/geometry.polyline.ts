@@ -148,4 +148,7 @@ export class Polyline extends AbstractShape implements IPolyline {
     protected _buildBounds(): IBounds2 | undefined {
         return Bounds2.FromPoints(...this._points);
     }
+    protected _getPoints(): Array<ICartesian3> {
+        return this._points;
+    }
 }

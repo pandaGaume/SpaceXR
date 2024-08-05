@@ -1,10 +1,11 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { IsTileDatasource, ITile, ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
+import { IsTileDatasource, ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy, LayerRenderFn } from "./tiles.map.interfaces";
 
 import { Assert } from "../../utils";
 import { IMemoryCache } from "../../cache";
 import { TileContentProvider, TileProvider } from "../providers";
+import { Nullable } from "../../types";
 
 export class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;
@@ -33,7 +34,7 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
         this._enabled = enabled ?? true; // default is enabled
     }
 
-    public get activTiles(): ITileCollection<T> {
+    public get activTiles(): Array<Nullable<ITile<T>>> {
         return this._provider.activTiles;
     }
 

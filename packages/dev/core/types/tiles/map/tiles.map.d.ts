@@ -1,7 +1,7 @@
-import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
+import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
-import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
 import { TileMapLayerViewContainer } from "./tiles.map.layerContainer";
@@ -28,8 +28,6 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapL
     private _onDisplayPropertyChanged;
     private _bindDisplay;
     private _bindNavigation;
-    protected _onLayerValidationChanged(valid: boolean, state: EventState): void;
-    protected _doValidate(): void;
     protected _onDisplayUnbinded(display: Nullable<IDisplay>): void;
     protected _onDisplayBinded(display: Nullable<IDisplay>): void;
     protected _onNavigationUnbinded(nav?: ITileNavigationState): void;
@@ -39,5 +37,4 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapL
     protected _onDisplayTranslated(display: IDisplay): void;
     protected _onLayerAdded(layer: L): void;
     protected _onLayerRemoved(layer: L): void;
-    protected _onLayerViewAdded(layerView: ITileMapLayerView<T, L>): void;
 }

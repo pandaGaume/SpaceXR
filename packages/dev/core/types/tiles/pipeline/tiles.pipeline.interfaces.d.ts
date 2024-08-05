@@ -6,13 +6,16 @@ import { IDisplay } from "../map";
 export type IPipelineMessageType<T> = Array<T>;
 export type TargetCallbackFn<T> = (eventData: T, eventState: EventState) => void;
 export interface ITargetBlock<T> {
-    added: TargetCallbackFn<IPipelineMessageType<T>>;
-    removed: TargetCallbackFn<IPipelineMessageType<T>>;
-    updated: TargetCallbackFn<IPipelineMessageType<T>>;
+    added?: TargetCallbackFn<IPipelineMessageType<T>>;
+    removed?: TargetCallbackFn<IPipelineMessageType<T>>;
+    updated?: TargetCallbackFn<IPipelineMessageType<T>>;
 }
 export declare function IsTargetBlock<T>(b: unknown): b is ITargetBlock<T>;
 export interface ILinkOptions<T> {
     accept?: (data: T) => boolean;
+    acceptAdded?: (data: T) => boolean;
+    acceptRemoved?: (data: T) => boolean;
+    acceptUpdated?: (data: T) => boolean;
 }
 export interface ISourceEvent<T> {
     updatedObservable: Observable<IPipelineMessageType<T>>;

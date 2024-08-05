@@ -220,7 +220,7 @@ export interface IHasNamespace {
 }
 
 export interface IHasActivTiles<T> {
-    activTiles: ITileCollection<T>;
+    activTiles: Array<Nullable<ITile<T>>>;
 }
 
 /// <summary>

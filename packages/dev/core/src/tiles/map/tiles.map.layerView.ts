@@ -3,32 +3,35 @@ import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITileView, TileView } from "../pipeline";
 import { TargetProxy } from "../pipeline/tiles.pipeline.proxy";
-import { ITileAddress, ITile } from "../tiles.interfaces";
+import { ITileAddress, ITile, ITileMetrics } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 
 export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMapLayerView<T, L>, ILinkOptions<ITile<T>> {
     private _layer: L;
-    private _source: ITileView;
-    private _ownSource: boolean;
+    private _view: ITileView;
+    private _ownView: boolean;
     private _tiles: Map<string, Nullable<ITile<T>>>;
-    private _tilesTarget: ITargetBlock<ITile<T>>;
+    private _tilesTargetProxy: ITargetBlock<ITile<T>>;
 
     public constructor(layer: L, source?: ITileView) {
         super();
         this._layer = layer;
         this._tiles = new Map<string, Nullable<ITile<T>>>();
-        this._ownSource = source === undefined || source === null;
-        this._source = this._ownSource ? this._buildSource(layer.name) : source!;
+        this._ownView = source === undefined || source === null;
+        this._view = this._ownView ? this._buildSource(layer.name) : source!;
 
-        this._source?.linkTo(this);
+        this._view?.linkTo(this);
         // add a link with a filter, based on addresses
-        const options: ILinkOptions<ITile<T>> = { accept: this.accept.bind(this) };
-        this._tilesTarget = new TargetProxy<ITile<T>>({
-            added: this._addedTile.bind(this),
-            removed: this._removedTile.bind(this),
-            updated: this._updatedTile.bind(this),
-        });
-        this._layer.provider.linkTo(this._tilesTarget, options);
+        // the use of the proxy is due to the inability of Typescript to support
+        // methods polymorphism.
+        this._tilesTargetProxy = new TargetProxy<ITile<T>>(
+            {
+                updated: this._updatedTile,
+                added: this._addedTile,
+            },
+            this
+        );
+        this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
     }
 
     public get layer(): L {
@@ -36,12 +39,19 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
     }
 
     public get view(): ITileView {
-        return this._source;
+        return this._view;
+    }
+
+    public get metrics(): ITileMetrics {
+        return this._layer.metrics;
+    }
+
+    public get activTiles(): Array<Nullable<ITile<T>>> {
+        return Array.from(this._tiles.values());
     }
 
     public accept(tile: ITile<T>): boolean {
-        const has = this._tiles.has(tile.address.quadkey);
-        return has;
+        return this._tiles.has(tile.address.quadkey);
     }
 
     public added(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
@@ -57,11 +67,12 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
     }
 
     public dispose(): void {
-        this._source?.unlinkFrom(this);
-        if (this._ownSource) {
-            this._source.dispose();
+        super.dispose();
+        this._view?.unlinkFrom(this);
+        if (this._ownView) {
+            this._view.dispose();
         }
-        this.layer.provider.unlinkFrom(this._tilesTarget);
+        this.layer.provider.unlinkFrom(this._tilesTargetProxy);
         this._tiles.clear();
     }
 
@@ -79,7 +90,7 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
                 added.push(a);
             }
         }
-        if (added.length) {
+        if (added.length && this._layer.provider.added) {
             this._layer.provider.added(added, eventState);
         }
     }
@@ -92,10 +103,9 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
             if (t) {
                 this._tiles.delete(k);
                 removed.push(a);
-                this._layer.provider.removed(eventData, eventState);
             }
         }
-        if (removed.length) {
+        if (removed.length && this._layer.provider.removed) {
             this._layer.provider.removed(removed, eventState);
         }
     }
@@ -105,6 +115,7 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
     }
 
     protected _addedTile(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
+        // the provider as coded for now is DO NOT emmit Added event
         for (const t of eventData) {
             this._tiles.set(t.address.quadkey, t);
         }
@@ -112,8 +123,7 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
     }
 
     protected _removedTile(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        // very unlucky happening. This mean that the underlying provider has been cleared or disposed, or even
-        // underlying data are not longer exist.
+        // the provider as coded for now is DO NOT emmit Removed event
         for (const t of eventData) {
             this._tiles.delete(t.address.quadkey);
         }
@@ -121,9 +131,6 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
     }
 
     protected _updatedTile(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        for (const t of eventData) {
-            this._tiles.set(t.address.quadkey, t);
-        }
         this.invalidate();
     }
 }

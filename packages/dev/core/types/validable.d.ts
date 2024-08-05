@@ -1,6 +1,6 @@
 import { Observable } from "./events";
-import { IValidable } from "./types";
-export declare class ValidableBase implements IValidable {
+import { IDisposable, IValidable } from "./types";
+export declare class ValidableBase implements IValidable, IDisposable {
     _validationObservable?: Observable<boolean>;
     _valid: boolean;
     get isValid(): boolean;
@@ -10,6 +10,7 @@ export declare class ValidableBase implements IValidable {
     revalidate(): void;
     protected _doInvalidateInternal(): void;
     protected _doValidateInternal(): void;
+    dispose(): void;
     protected _beforeInvalidate(): void;
     protected _doInvalidate(): void;
     protected _afterInvalidate(): void;

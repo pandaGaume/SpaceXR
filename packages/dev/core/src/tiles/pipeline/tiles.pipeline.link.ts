@@ -49,22 +49,25 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
     }
 
     protected _onAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        if (this._target) {
-            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+        if (this._target && this._target.added) {
+            const filter = this._options?.acceptAdded ?? this.options?.accept;
+            eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.added(eventData, eventState);
         }
     }
 
     protected _onRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        if (this._target) {
-            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+        if (this._target && this._target.removed) {
+            const filter = this._options?.acceptRemoved ?? this.options?.accept;
+            eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.removed(eventData, eventState);
         }
     }
 
     protected _onUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void {
-        if (this._target) {
-            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+        if (this._target && this._target.updated) {
+            const filter = this._options?.acceptUpdated ?? this.options?.accept;
+            eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.updated(eventData, eventState);
         }
     }

@@ -1,7 +1,8 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { ITile, ITileAddress, ITileCollection, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, LayerRenderFn } from "./tiles.map.interfaces";
 import { IMemoryCache } from "../../cache";
+import { Nullable } from "../../types";
 export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;
     _zindex: number;
@@ -13,7 +14,7 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     _provider: ITileProvider<T>;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
-    get activTiles(): ITileCollection<T>;
+    get activTiles(): Array<Nullable<ITile<T>>>;
     get metrics(): ITileMetrics;
     get provider(): ITileProvider<T>;
     get drawFn(): LayerRenderFn<T> | undefined;

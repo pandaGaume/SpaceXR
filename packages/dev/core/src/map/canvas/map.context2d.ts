@@ -47,21 +47,24 @@ export class Context2DTileMap extends TileMapBase<unknown, ITileMapLayer<unknown
             ctx.scale(scale, scale);
 
             for (const l of this._zIndexOrderedLayers ?? []) {
-                if (!l.enabled || !l.activTiles) {
+                const layer = l.layer;
+                if (!layer.enabled) {
                     continue;
                 }
-                const render = isDrawableTileMapLayer(l) ? l.drawFn?.bind(l.drawTarget ?? l) : undefined;
+                const render = isDrawableTileMapLayer(layer) ? layer.drawFn?.bind(layer.drawTarget ?? layer) : undefined;
                 if (!render) {
                     continue;
                 }
                 const currentLod = this.navigation.lod;
                 const lat = this.navigation.center.lat;
                 const lon = this.navigation.center.lon;
-                const center = l.metrics.getLatLonToPointXY(lat, lon, currentLod);
-                const size = l.metrics.tileSize;
+                const metrics = l.metrics;
+                const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
+                const size = metrics.tileSize;
                 const tiles = l.activTiles;
+                l.validate();
                 for (const tile of tiles) {
-                    const b = tile.bounds;
+                    const b = tile?.bounds;
                     if (!b || !tile.content) {
                         continue;
                     }

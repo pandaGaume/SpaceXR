@@ -4679,21 +4679,24 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
             }
             ctx.scale(scale, scale);
             for (const l of this._zIndexOrderedLayers ?? []) {
-                if (!l.enabled || !l.activTiles) {
+                const layer = l.layer;
+                if (!layer.enabled) {
                     continue;
                 }
-                const render = (0,_tiles__WEBPACK_IMPORTED_MODULE_2__.isDrawableTileMapLayer)(l) ? l.drawFn?.bind(l.drawTarget ?? l) : undefined;
+                const render = (0,_tiles__WEBPACK_IMPORTED_MODULE_2__.isDrawableTileMapLayer)(layer) ? layer.drawFn?.bind(layer.drawTarget ?? layer) : undefined;
                 if (!render) {
                     continue;
                 }
                 const currentLod = this.navigation.lod;
                 const lat = this.navigation.center.lat;
                 const lon = this.navigation.center.lon;
-                const center = l.metrics.getLatLonToPointXY(lat, lon, currentLod);
-                const size = l.metrics.tileSize;
+                const metrics = l.metrics;
+                const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
+                const size = metrics.tileSize;
                 const tiles = l.activTiles;
+                l.validate();
                 for (const tile of tiles) {
-                    const b = tile.bounds;
+                    const b = tile?.bounds;
                     if (!b || !tile.content) {
                         continue;
                     }
@@ -8015,6 +8018,14 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
     }
     _onNavigationUpdatedInternal(event, state) {
         this.invalidate();
+        for (const l of this._layers.values()) {
+            l.validate();
+            const offset = l.layer.zoomOffset ?? 0;
+            const n = offset
+                ? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
+                : this.navigation;
+            l.view.setContext(n, this.display, l.layer.metrics, true);
+        }
         this._onNavigationUpdated(event);
     }
     _onDisplayPropertyChanged(event, state) {
@@ -8045,20 +8056,6 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
         this.invalidate();
         this._onNavigationBinded(nav);
     }
-    _onLayerValidationChanged(valid, state) {
-        if (valid === false) {
-            this.invalidate();
-        }
-    }
-    _doValidate() {
-        for (const l of this._layers.values()) {
-            const offset = l.layer.zoomOffset ?? 0;
-            const n = offset
-                ? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
-                : this.navigation;
-            l.view.setContext(n, this.display, l.layer.metrics, true);
-        }
-    }
     _onDisplayUnbinded(display) {
     }
     _onDisplayBinded(display) {
@@ -8076,9 +8073,6 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
     _onLayerAdded(layer) {
     }
     _onLayerRemoved(layer) {
-    }
-    _onLayerViewAdded(layerView) {
-        layerView.validationObservable?.add(this._onLayerValidationChanged.bind(this));
     }
 }
 //# sourceMappingURL=tiles.map.js.map
@@ -8273,26 +8267,28 @@ class TileMapLayerViewContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.
     }
     *getOrderedLayers(predicate) {
         if (this._zIndexOrderedLayers) {
-            if (predicate) {
-                for (const layer of this._zIndexOrderedLayers ?? []) {
-                    if (predicate(layer.name, layer))
-                        yield layer;
-                }
-            }
-            else {
-                yield* this._zIndexOrderedLayers ?? [];
+            for (const view of this._zIndexOrderedLayers ?? []) {
+                if (!predicate || predicate(view.layer.name, view.layer))
+                    yield view.layer;
             }
         }
     }
     addLayer(layer) {
         const view = this._buildLayerView(layer) ?? new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_2__.TileMapLayerView(layer);
         this._layers.set(layer.name, view);
-        this._addSortedLayer(layer);
+        view.validationObservable?.add(this._onLayerViewValidation.bind(this));
+        this._addSortedLayer(view);
         if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
             this._layerAddedObservable.notifyObservers(layer, -1, this, this);
         }
         this._onLayerAdded(layer);
         this._onLayerViewAdded(view);
+        this.invalidate();
+    }
+    _onLayerViewValidation(eventData, eventState) {
+        if (!eventData) {
+            this.invalidate();
+        }
     }
     removeLayer(layer) {
         const k = layer.name;
@@ -8301,13 +8297,14 @@ class TileMapLayerViewContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.
             return;
         }
         this._layers?.delete(k);
-        this._removeSortedLayer(layer);
+        this._removeSortedLayer(view);
         this._onLayerViewRemoved(view);
         view.dispose();
         this._onLayerRemoved(layer);
         if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
             this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
         }
+        this.invalidate();
     }
     clear() {
         if (this._layers) {
@@ -8333,7 +8330,7 @@ class TileMapLayerViewContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.
         if (!this._zIndexOrderedLayers)
             this._zIndexOrderedLayers = [];
         this._zIndexOrderedLayers.push(layer);
-        this._zIndexOrderedLayers.sort((a, b) => a.zindex - b.zindex);
+        this._zIndexOrderedLayers.sort((a, b) => a.layer.zindex - b.layer.zindex);
     }
     _removeSortedLayer(layer) {
         if (this._zIndexOrderedLayers) {
@@ -8369,26 +8366,29 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         super();
         this._layer = layer;
         this._tiles = new Map();
-        this._ownSource = source === undefined || source === null;
-        this._source = this._ownSource ? this._buildSource(layer.name) : source;
-        this._source?.linkTo(this);
-        const options = { accept: this.accept.bind(this) };
-        this._tilesTarget = new _pipeline_tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_1__.TargetProxy({
-            added: this._addedTile.bind(this),
-            removed: this._removedTile.bind(this),
-            updated: this._updatedTile.bind(this),
-        });
-        this._layer.provider.linkTo(this._tilesTarget, options);
+        this._ownView = source === undefined || source === null;
+        this._view = this._ownView ? this._buildSource(layer.name) : source;
+        this._view?.linkTo(this);
+        this._tilesTargetProxy = new _pipeline_tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_1__.TargetProxy({
+            updated: this._updatedTile,
+            added: this._addedTile,
+        }, this);
+        this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
     }
     get layer() {
         return this._layer;
     }
     get view() {
-        return this._source;
+        return this._view;
+    }
+    get metrics() {
+        return this._layer.metrics;
+    }
+    get activTiles() {
+        return Array.from(this._tiles.values());
     }
     accept(tile) {
-        const has = this._tiles.has(tile.address.quadkey);
-        return has;
+        return this._tiles.has(tile.address.quadkey);
     }
     added(eventData, eventState) {
         this._addedAddress(eventData, eventState);
@@ -8400,11 +8400,12 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         this._updatedAddress(eventData, eventState);
     }
     dispose() {
-        this._source?.unlinkFrom(this);
-        if (this._ownSource) {
-            this._source.dispose();
+        super.dispose();
+        this._view?.unlinkFrom(this);
+        if (this._ownView) {
+            this._view.dispose();
         }
-        this.layer.provider.unlinkFrom(this._tilesTarget);
+        this.layer.provider.unlinkFrom(this._tilesTargetProxy);
         this._tiles.clear();
     }
     _buildSource(id) {
@@ -8420,7 +8421,7 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
                 added.push(a);
             }
         }
-        if (added.length) {
+        if (added.length && this._layer.provider.added) {
             this._layer.provider.added(added, eventState);
         }
     }
@@ -8432,10 +8433,9 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
             if (t) {
                 this._tiles.delete(k);
                 removed.push(a);
-                this._layer.provider.removed(eventData, eventState);
             }
         }
-        if (removed.length) {
+        if (removed.length && this._layer.provider.removed) {
             this._layer.provider.removed(removed, eventState);
         }
     }
@@ -8454,9 +8454,6 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         this.invalidate();
     }
     _updatedTile(eventData, eventState) {
-        for (const t of eventData) {
-            this._tiles.set(t.address.quadkey, t);
-        }
         this.invalidate();
     }
 }
@@ -9025,20 +9022,23 @@ class TilePipelineLink {
         this._updatedObserver = null;
     }
     _onAdded(eventData, eventState) {
-        if (this._target) {
-            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+        if (this._target && this._target.added) {
+            const filter = this._options?.acceptAdded ?? this.options?.accept;
+            eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.added(eventData, eventState);
         }
     }
     _onRemoved(eventData, eventState) {
-        if (this._target) {
-            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+        if (this._target && this._target.removed) {
+            const filter = this._options?.acceptRemoved ?? this.options?.accept;
+            eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.removed(eventData, eventState);
         }
     }
     _onUpdated(eventData, eventState) {
-        if (this._target) {
-            eventData = this._options?.accept ? this._filter(eventData, this._options?.accept) : eventData;
+        if (this._target && this._target.updated) {
+            const filter = this._options?.acceptUpdated ?? this.options?.accept;
+            eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.updated(eventData, eventState);
         }
     }
@@ -9067,18 +9067,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TargetProxy: () => (/* binding */ TargetProxy)
 /* harmony export */ });
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils */ "./dist/utils/runtime.js");
+
 class TargetProxy {
-    constructor(delegate) {
+    constructor(delegate, target) {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(delegate !== null && delegate !== undefined);
         this._delegate = delegate;
+        this._target = target;
     }
     added(eventData, eventState) {
-        this._delegate.added(eventData, eventState);
+        this._delegate.added?.call(this._target ?? this._delegate, eventData, eventState);
     }
     removed(eventData, eventState) {
-        this._delegate.removed(eventData, eventState);
+        this._delegate.removed?.call(this._target ?? this._delegate, eventData, eventState);
     }
     updated(eventData, eventState) {
-        this._delegate.updated(eventData, eventState);
+        this._delegate.updated?.call(this._target ?? this._delegate, eventData, eventState);
     }
 }
 //# sourceMappingURL=tiles.pipeline.proxy.js.map
@@ -9340,7 +9344,7 @@ class AbstractTileProvider {
         this._activTiles?.clear();
     }
     get activTiles() {
-        return this._activTiles;
+        return Array.from(this._activTiles);
     }
     get updatedObservable() {
         this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
@@ -9401,6 +9405,9 @@ class AbstractTileProvider {
                 console.log(e);
             }
         }
+        if (tiles.length && this._addedObservable) {
+            this._addedObservable.notifyObservers(tiles, -1, this, this);
+        }
         return tiles;
     }
     _onTileAddressesRemoved(address, eventState) {
@@ -9412,6 +9419,9 @@ class AbstractTileProvider {
                     tiles.push(t);
                     this._activTiles?.remove(a);
                 }
+            }
+            if (tiles.length && this._removedObservable) {
+                this._removedObservable.notifyObservers(tiles, -1, this, this);
             }
             return tiles;
         }
@@ -9486,9 +9496,15 @@ class TileContentProvider {
         let c = this._buildTemporaryContent(address);
         this._cache.set(cacheKey, c);
         this._datasource.fetchAsync(address, tile).then((result) => {
-            this._cache.set(this._buildCacheKey(address.quadkey), result.content);
-            tile.content = result.content;
-            callback?.(tile);
+            if (result.ok) {
+                this._cache.set(this._buildCacheKey(address.quadkey), result.content);
+                tile.content = result.content;
+                callback?.(tile);
+            }
+            else {
+                console.log(`the fetch operation has failed because of ${result.statusText}`);
+                callback?.(tile);
+            }
         }, (reason) => {
             console.log(`the fetch operation has failed because of ${reason}`);
             callback?.(tile);
@@ -11300,6 +11316,9 @@ class ValidableBase {
             this._validationObservable.notifyObservers(true, -1, this, this);
         }
         this._afterValidate();
+    }
+    dispose() {
+        this._validationObservable?.clear();
     }
     _beforeInvalidate() {
     }

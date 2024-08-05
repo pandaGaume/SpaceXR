@@ -1,10 +1,11 @@
-import { ITile, ITileAddress, ITileBuilder, ITileCollection, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { ITile, ITileAddress, ITileBuilder, ITileMetrics, ITileProvider } from "../tiles.interfaces";
 import { EventState, Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IBounds2 } from "../../geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collection";
 import { TileBuilder } from "../tiles.builder";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, TilePipelineLink } from "../pipeline";
+import { Nullable } from "../../types";
 
 export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
     _updateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
@@ -71,8 +72,8 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
         this._activTiles?.clear();
     }
 
-    public get activTiles(): ITileCollection<T> {
-        return this._activTiles;
+    public get activTiles(): Array<Nullable<ITile<T>>> {
+        return Array.from(this._activTiles);
     }
 
     /// begin ISourceBlock
@@ -152,6 +153,9 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
                 console.log(e);
             }
         }
+        if (tiles.length && this._addedObservable) {
+            this._addedObservable.notifyObservers(tiles, -1, this, this);
+        }
         return tiles;
     }
 
@@ -164,6 +168,9 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
                     tiles.push(t);
                     this._activTiles?.remove(a)!;
                 }
+            }
+            if (tiles.length && this._removedObservable) {
+                this._removedObservable.notifyObservers(tiles, -1, this, this);
             }
             return tiles;
         }

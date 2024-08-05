@@ -1,7 +1,7 @@
 import { Observable } from "./events";
-import { IValidable } from "./types";
+import { IDisposable, IValidable } from "./types";
 
-export class ValidableBase implements IValidable {
+export class ValidableBase implements IValidable, IDisposable {
     _validationObservable?: Observable<boolean>;
     _valid: boolean = true;
 
@@ -51,6 +51,10 @@ export class ValidableBase implements IValidable {
             this._validationObservable.notifyObservers(true, -1, this, this);
         }
         this._afterValidate();
+    }
+
+    public dispose(): void {
+        this._validationObservable?.clear();
     }
 
     protected _beforeInvalidate() {

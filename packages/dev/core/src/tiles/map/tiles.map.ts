@@ -1,7 +1,7 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
 import { TileMapLayerViewContainer } from "./tiles.map.layerContainer";
@@ -94,6 +94,14 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
     // end navigation proxy
     private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
         this.invalidate();
+        for (const l of this._layers.values()) {
+            l.validate();
+            const offset = l.layer.zoomOffset ?? 0;
+            const n = offset
+                ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
+                : this.navigation;
+            l.view.setContext(n, this.display, l.layer.metrics, true);
+        }
         this._onNavigationUpdated(event);
     }
 
@@ -126,23 +134,6 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
         }
         this.invalidate();
         this._onNavigationBinded(nav);
-    }
-
-    // in response to layer validation process
-    protected _onLayerValidationChanged(valid: boolean, state: EventState): void {
-        if (valid === false) {
-            this.invalidate();
-        }
-    }
-
-    protected _doValidate() {
-        for (const l of this._layers.values()) {
-            const offset = l.layer.zoomOffset ?? 0;
-            const n = offset
-                ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
-                : this.navigation;
-            l.view.setContext(n, this.display, l.layer.metrics, true);
-        }
     }
 
     protected _onDisplayUnbinded(display: Nullable<IDisplay>): void {
@@ -179,9 +170,5 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
 
     protected _onLayerRemoved(layer: L): void {
         /* nothing to do here - overrided by subclasses */
-    }
-
-    protected _onLayerViewAdded(layerView: ITileMapLayerView<T, L>): void {
-        layerView.validationObservable?.add(this._onLayerValidationChanged.bind(this));
     }
 }

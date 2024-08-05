@@ -63,9 +63,14 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         // then try to get it from the datasource
         this._datasource.fetchAsync(address, tile).then(
             (result) => {
-                this._cache.set(this._buildCacheKey(address.quadkey), result.content);
-                tile.content = result.content;
-                callback?.(tile);
+                if (result.ok) {
+                    this._cache.set(this._buildCacheKey(address.quadkey), result.content);
+                    tile.content = result.content;
+                    callback?.(tile);
+                } else {
+                    console.log(`the fetch operation has failed because of ${result.statusText}`);
+                    callback?.(tile);
+                }
             },
             (reason) => {
                 console.log(`the fetch operation has failed because of ${reason}`);

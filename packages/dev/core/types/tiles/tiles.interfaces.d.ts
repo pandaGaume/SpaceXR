@@ -20,6 +20,7 @@ export interface ITile<T> extends ITileAddressable, IGeoBounded, IBounded {
     content: TileContentType<T>;
 }
 export declare function IsTile<T>(b: unknown): b is ITile<T>;
+export declare function IsArrayOfTile<T>(b: unknown): b is Array<ITile<T>>;
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
     namespace?: string;
     count: number;

@@ -4,8 +4,7 @@ import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMa
 
 import { Assert } from "../../utils";
 import { IMemoryCache } from "../../cache";
-import { TileContentProvider } from "../pipeline";
-import { TileProvider } from "../providers";
+import { TileContentProvider, TileProvider } from "../providers";
 
 export class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;

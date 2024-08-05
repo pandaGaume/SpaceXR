@@ -43,6 +43,17 @@ export function IsTile<T>(b: unknown): b is ITile<T> {
     return IsGeoBounded(b) && (<any>b).address !== undefined && (<any>b).content !== undefined;
 }
 
+export function IsArrayOfTile<T>(b: unknown): b is Array<ITile<T>> {
+    if (Array.isArray(b) && b.length) {
+        for (let i = 0; i != b.length; i++) {
+            if (IsTile(b[i])) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 /// <summary>
 /// The TileCollection is a collection of tiles, it is used to store the active tiles of a provider
 /// Tile are stored using a quadkey index, this allow fast access to a tile using its address only.

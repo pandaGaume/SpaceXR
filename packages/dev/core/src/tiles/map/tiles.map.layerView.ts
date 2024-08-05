@@ -1,8 +1,9 @@
 import { EventState } from "../../events";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
-import { ILinkOptions, IPipelineMessageType, ITileView, TileView } from "../pipeline";
-import { ITileAddress, ITile, IsArrayOfTileAddress } from "../tiles.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITileView, TileView } from "../pipeline";
+import { TargetProxy } from "../pipeline/tiles.pipeline.proxy";
+import { ITileAddress, ITile } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 
 export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMapLayerView<T, L>, ILinkOptions<ITile<T>> {
@@ -10,6 +11,7 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
     private _source: ITileView;
     private _ownSource: boolean;
     private _tiles: Map<string, Nullable<ITile<T>>>;
+    private _tilesTarget: ITargetBlock<ITile<T>>;
 
     public constructor(layer: L, source?: ITileView) {
         super();
@@ -21,7 +23,12 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
         this._source?.linkTo(this);
         // add a link with a filter, based on addresses
         const options: ILinkOptions<ITile<T>> = { accept: this.accept.bind(this) };
-        this._layer.provider.linkTo(this, options);
+        this._tilesTarget = new TargetProxy<ITile<T>>({
+            added: this._addedTile.bind(this),
+            removed: this._removedTile.bind(this),
+            updated: this._updatedTile.bind(this),
+        });
+        this._layer.provider.linkTo(this._tilesTarget, options);
     }
 
     public get layer(): L {
@@ -37,28 +44,16 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
         return has;
     }
 
-    public added(eventData: IPipelineMessageType<ITileAddress> | IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        if (IsArrayOfTileAddress(eventData)) {
-            this._addedAddress(eventData, eventState);
-        } else {
-            this._addedTile(eventData, eventState);
-        }
+    public added(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
+        this._addedAddress(eventData, eventState);
     }
 
-    public removed(eventData: IPipelineMessageType<ITileAddress> | IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        if (IsArrayOfTileAddress(eventData)) {
-            this._removedAddress(eventData, eventState);
-        } else {
-            this._removedTile(eventData, eventState);
-        }
+    public removed(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
+        this._removedAddress(eventData, eventState);
     }
 
-    public updated(eventData: IPipelineMessageType<ITileAddress> | IPipelineMessageType<ITile<T>>, eventState: EventState): void {
-        if (IsArrayOfTileAddress(eventData)) {
-            this._updatedAddress(eventData, eventState);
-        } else {
-            this._updatedTile(eventData, eventState);
-        }
+    public updated(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
+        this._updatedAddress(eventData, eventState);
     }
 
     public dispose(): void {
@@ -66,7 +61,7 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
         if (this._ownSource) {
             this._source.dispose();
         }
-        this.layer.provider.unlinkFrom(this);
+        this.layer.provider.unlinkFrom(this._tilesTarget);
         this._tiles.clear();
     }
 

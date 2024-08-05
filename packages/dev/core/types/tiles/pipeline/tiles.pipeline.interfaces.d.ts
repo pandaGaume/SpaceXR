@@ -4,10 +4,11 @@ import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { IDisplay } from "../map";
 export type IPipelineMessageType<T> = Array<T>;
+export type TargetCallbackFn<T> = (eventData: T, eventState: EventState) => void;
 export interface ITargetBlock<T> {
-    added(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-    removed(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-    updated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    added: TargetCallbackFn<IPipelineMessageType<T>>;
+    removed: TargetCallbackFn<IPipelineMessageType<T>>;
+    updated: TargetCallbackFn<IPipelineMessageType<T>>;
 }
 export declare function IsTargetBlock<T>(b: unknown): b is ITargetBlock<T>;
 export interface ILinkOptions<T> {

@@ -33,7 +33,7 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileMapLayerOption
     addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
 }
 
-export interface ITileMapLayerView<T, L extends ITileMapLayer<T>> extends ITargetBlock<ITileAddress | ITile<T>>, IValidable, IDisposable {
+export interface ITileMapLayerView<T, L extends ITileMapLayer<T>> extends ITargetBlock<ITileAddress>, IValidable, IDisposable {
     layer: L;
     view: ITileView;
 }

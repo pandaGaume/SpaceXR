@@ -4,31 +4,39 @@
 
 Welcome to the SpaceXR Project - an innovative venture into the realm of 3D terrain rendering within the WebXR environment. Our mission is to revolutionize the way we interact with geographic data by bringing a comprehensive, immersive, and holographic approach to both 2D and 3D mapping.
 
-## Installation
+## Building
 
-The step for the intallation is important so please follow the guideline below
+1. First install the dependencies of the root package.
 
 ```bash
 npm install
-
-cd packages/dev/buildTools
-
-npm run build:build-tools
-
-cd ..
-
-npm run build:babylon:assets
-
-npm run publish:babylon:dev
-
-cd ../core
-
-npm run build:core:dev
-
-cd ../../..
 ```
 
-Or if you prefer, you can write `npm run build:all` to execute all the commands above in the main folder.
+2. Link package @dev/buildTools to the local version. This only has to be done once, for fresh copies of the project.
+
+```bash
+cd packages/dev/babylon
+npm link ../buildTools
+```
+
+3. Then navigate back to the root folder and build the buildTools.
+
+```bash
+npm run build:buildTools
+```
+4. Build the core package.
+
+```
+npm run build:core
+```
+
+5. Finally, build the babylon package.
+```
+npm run build:babylon
+```
+
+Alternatively, you may use `npm run build:all` to execute all the commands above in the main folder. You'll still have
+to proceed to the link phase before the first build.
 
 ## Features
 

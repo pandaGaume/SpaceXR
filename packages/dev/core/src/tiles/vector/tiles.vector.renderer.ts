@@ -28,10 +28,9 @@ export class TileVectorRenderer {
         this._orderedStyleLayers = this._prepareOrderedLayers(style);
     }
 
-    public renderTile(tile: IVectorTileContent, ctx: CanvasRenderingContext2D, style?: IVectorStyle): void {
-        const w = ctx.canvas.width;
-        const h = ctx.canvas.height;
-        ctx.clearRect(0, 0, w, h);
+    public renderTile(tile: IVectorTileContent, ctx: CanvasRenderingContext2D, w?: number, h?: number, style?: IVectorStyle): void {
+        w = w ?? ctx.canvas.width;
+        h = h ?? ctx.canvas.height;
 
         if (tile) {
             style = style ?? this._style;

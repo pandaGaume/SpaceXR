@@ -48,6 +48,7 @@
                 let center = SPACEXR.KnownPlaces.Mountains.MontBlanc
                 const lod = 12;
 
+
                 // build the map
                 const map = new SPACEXR.CanvasMap(canvas).setViewMap(center, lod);
                 map.background = "white";
@@ -89,9 +90,11 @@
                     },
                 ],};
 
+
                 // Add a vector layer
-                client = SPACEXR_MAPBOX.VectorClient("pk.eyJ1IjoiZ2F1bWUiLCJhIjoiY2x5YnU3aDV0MDhmazJvc2dqbW04ZmJpZSJ9.aAV34t1dOedP_NAY56Cn-g", SPACEXR_MAPBOX.MapBoxTileSetIds.Terrain);
-                new SPACEXR.TileMapVectorLayer("VectorLayer", client, { attribution:SPACEXR_MAPBOX.Attribution, style:style }).addTo(map);
+                client = SPACEXR_MAPBOX.VectorToImageClient("pk.eyJ1IjoiZ2F1bWUiLCJhIjoiY2x5YnU3aDV0MDhmazJvc2dqbW04ZmJpZSJ9.aAV34t1dOedP_NAY56Cn-g", SPACEXR_MAPBOX.MapBoxTileSetIds.Terrain, style);
+                new SPACEXR.ImageLayer("VectorLayer", client, { attribution:SPACEXR_MAPBOX.Attribution }).addTo(map);
+
                 
                 const navigationManager = new SPACEXR.InputsNavigationTarget(map);
                 const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);

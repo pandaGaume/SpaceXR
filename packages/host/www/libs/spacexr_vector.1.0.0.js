@@ -110,6 +110,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.TerrainDemV1Client),
+/* harmony export */   VectorClient: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.VectorClient),
 /* harmony export */   VectorTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec),
 /* harmony export */   VectorToImageClient: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_1__.VectorToImageClient),
 /* harmony export */   VectorToImageTileCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_0__.VectorToImageTileCodec)
@@ -138,6 +139,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.TerrainDemV1Client),
+/* harmony export */   VectorClient: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.VectorClient),
 /* harmony export */   VectorToImageClient: () => (/* reexport safe */ _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__.VectorToImageClient)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapbox__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapbox */ "./dist/tiles/vendors/tiles.vendors.mapbox.js");
@@ -162,11 +164,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* binding */ MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* binding */ MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* binding */ TerrainDemV1Client),
+/* harmony export */   VectorClient: () => (/* binding */ VectorClient),
 /* harmony export */   VectorToImageClient: () => (/* binding */ VectorToImageClient)
 /* harmony export */ });
 /* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "core/tiles");
 /* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_dem__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.image.js");
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/codecs/tiles.codecs.vector.js");
 
 
 
@@ -216,6 +220,10 @@ const TerrainDemV1Client = function (token, options) {
 const VectorToImageClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, style, options) {
     const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 256 });
     return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_1__.VectorToImageTileCodec(metrics, style), metrics, options);
+};
+const VectorClient = function (token, tileSetIds = MapBoxTileSetIds.Terrain, options) {
+    const metrics = new core_dem__WEBPACK_IMPORTED_MODULE_0__.EPSG3857({ maxLOD: MaxLevelOfDetail, tileSize: 256 });
+    return new core_dem__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${token}`, new MapBoxVectorUrlBuilder(token, tileSetIds), new _codecs__WEBPACK_IMPORTED_MODULE_2__.VectorTileCodec(), metrics, options);
 };
 //# sourceMappingURL=tiles.vendors.mapbox.js.map
 
@@ -1881,6 +1889,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapboxAltitudeDecoder: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MapboxAltitudeDecoder),
 /* harmony export */   MaxLevelOfDetail: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.MaxLevelOfDetail),
 /* harmony export */   TerrainDemV1Client: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.TerrainDemV1Client),
+/* harmony export */   VectorClient: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorClient),
 /* harmony export */   VectorTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorTileCodec),
 /* harmony export */   VectorToImageClient: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorToImageClient),
 /* harmony export */   VectorToImageTileCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.VectorToImageTileCodec)

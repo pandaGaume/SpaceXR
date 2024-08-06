@@ -1,4 +1,3 @@
-import { ICanvasRenderingContext } from "core/engine";
 import { VectorTile } from "@mapbox/vector-tile";
 import { CanvasTileCodec, ITileMetrics, TileVectorRenderer } from "core/tiles";
 import { Nullable } from "core/types";
@@ -30,7 +29,7 @@ export class VectorToImageTileCodec extends CanvasTileCodec<VectorTile> {
         return await this._codec.decodeAsync(r);
     }
 
-    protected _render(ctx: ICanvasRenderingContext, tile: VectorTile, style?: IVectorStyle): void {
+    protected _render(ctx: CanvasRenderingContext2D, tile: VectorTile, style?: IVectorStyle): void {
         this._renderer.renderTile(tile, ctx, style);
     }
 }

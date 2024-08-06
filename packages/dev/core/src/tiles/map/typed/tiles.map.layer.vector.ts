@@ -28,7 +28,7 @@ export class TileMapVectorLayer extends TileMapLayer<IVectorTileContent> {
 
     protected _renderTile(ctx: CanvasRenderingContext2D, tile: ITile<IVectorTileContent>, w: number, h: number): void {
         this._clip(ctx, 0, 0, w, h);
-        this._renderer.renderTile(tile.content!, ctx);
+        this._renderer.renderTile(tile.content!, ctx, w, h);
     }
 
     protected _clip(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): void {

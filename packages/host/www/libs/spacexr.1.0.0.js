@@ -8556,7 +8556,7 @@ class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.T
     }
     _renderTile(ctx, tile, w, h) {
         this._clip(ctx, 0, 0, w, h);
-        this._renderer.renderTile(tile.content, ctx);
+        this._renderer.renderTile(tile.content, ctx, w, h);
     }
     _clip(ctx, x, y, w, h) {
         ctx.beginPath();
@@ -10657,10 +10657,9 @@ class TileVectorRenderer {
         this._simplifier = simplifier ?? _geometry__WEBPACK_IMPORTED_MODULE_0__.PolylineSimplifier.Shared;
         this._orderedStyleLayers = this._prepareOrderedLayers(style);
     }
-    renderTile(tile, ctx, style) {
-        const w = ctx.canvas.width;
-        const h = ctx.canvas.height;
-        ctx.clearRect(0, 0, w, h);
+    renderTile(tile, ctx, w, h, style) {
+        w = w ?? ctx.canvas.width;
+        h = h ?? ctx.canvas.height;
         if (tile) {
             style = style ?? this._style;
             if (style) {

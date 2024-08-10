@@ -12,9 +12,6 @@ export declare class TileView implements ITileView {
     _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
     _activ: Map<string, ITileAddress>;
     _links: Array<ITilePipelineLink<ITileAddress>>;
-    _id: string;
-    constructor(id: string);
-    get name(): string;
     dispose(): void;
     get addedObservable(): Observable<IPipelineMessageType<ITileAddress>>;
     get removedObservable(): Observable<IPipelineMessageType<ITileAddress>>;

@@ -1,24 +1,25 @@
 import { EventState } from "../../events";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
+import { ITileNavigationState } from "../navigation";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITileView, TileView } from "../pipeline";
 import { TargetProxy } from "../pipeline/tiles.pipeline.proxy";
 import { ITileAddress, ITile, ITileMetrics } from "../tiles.interfaces";
-import { ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 
-export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBase implements ITileMapLayerView<T, L>, ILinkOptions<ITile<T>> {
-    private _layer: L;
+export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerView<T>, ILinkOptions<ITile<T>> {
+    private _layer: ITileMapLayer<T>;
     private _view: ITileView;
     private _ownView: boolean;
     private _tiles: Map<string, Nullable<ITile<T>>>;
     private _tilesTargetProxy: ITargetBlock<ITile<T>>;
 
-    public constructor(layer: L, source?: ITileView) {
+    public constructor(layer: ITileMapLayer<T>, source?: ITileView) {
         super();
         this._layer = layer;
         this._tiles = new Map<string, Nullable<ITile<T>>>();
         this._ownView = source === undefined || source === null;
-        this._view = this._ownView ? this._buildSource(layer.name) : source!;
+        this._view = this._ownView ? this._buildSource() : source!;
 
         this._view?.linkTo(this);
         // add a link with a filter, based on addresses
@@ -34,7 +35,14 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
         this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
     }
 
-    public get layer(): L {
+    public get name(): string {
+        return this._layer.name;
+    }
+
+    public get zindex(): number | undefined {
+        return this._layer.zindex;
+    }
+    public get layer(): ITileMapLayer<T> {
         return this._layer;
     }
 
@@ -76,8 +84,12 @@ export class TileMapLayerView<T, L extends ITileMapLayer<T>> extends ValidableBa
         this._tiles.clear();
     }
 
-    protected _buildSource(id: string): ITileView {
-        return new TileView(id);
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void {
+        this._view?.setContext(state, display, metrics, dispatchEvent);
+    }
+
+    protected _buildSource(): ITileView {
+        return new TileView();
     }
 
     protected _addedAddress(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {

@@ -7,7 +7,6 @@ import {
     ITileMetrics,
     ITileNavigationApi,
     ITileNavigationState,
-    LayerContainer,
     TileNavigationState,
     TileSystemBounds,
 } from "core/tiles";
@@ -15,7 +14,7 @@ import { Observer, EventState } from "core/events";
 
 import { IGeo2 } from "core/geography";
 import { ISize2, Size2 } from "core/geometry";
-import { CanvasTileSourceSourceContentType, IPointerSource, IWheelSource, PointerController } from "core/map";
+import { IPointerSource, IWheelSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host";
 import { ElevationLayer } from "./map.elevation.layer";
@@ -77,6 +76,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
     private _layers: ITileMapLayerContainer<Map3dContentType, ITileMapLayer<Map3dContentType>>;
     private _elevationLayersView: ITileMapLayerContainer<Map3dElevationContentType, ITileMapLayer<Map3dElevationContentType>>;
     private _textureLayersView: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>;
+
     private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dContentType>>>;
     private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dContentType>>>;
     private _validateHostObserver: Nullable<BabylonObserver<Scene>>;
@@ -230,7 +230,6 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     protected _addedElevationLayer(layer: ElevationLayer): void {
         this._elevationLayersView.addLayer(layer);
-        layer.navigation.syncWith(this.navigation);
 
         // create the elevation host
         const host = this._createElevationHost(layer);
@@ -250,7 +249,6 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
 
     protected _removedElevationLayer(layer: ElevationLayer): void {
         this._elevationLayersView.removeLayer(layer);
-        layer.navigation.syncWith(null); // pass null to reset
 
         // remove the elevation host
         const host = this._elevationHosts.get(layer.name);

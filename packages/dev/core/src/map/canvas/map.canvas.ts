@@ -30,7 +30,7 @@ export interface ICanvasMapOptions {
 ///
 /// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
 /// </summary>
-export class CanvasMap extends Context2DTileMap {
+export class CanvasMap<T> extends Context2DTileMap<T> {
     _context: Nullable<CanvasRenderingContext2D>;
     _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
     _inputController: PointerInputController<HTMLCanvasElement>;

@@ -10,14 +10,15 @@ export class MapDisplay extends VirtualDisplay {
 
     _map: WebMapTexture;
     _target: InputsNavigationTarget<VirtualDisplayInputsSource>;
-    _controller: PointerController<IPointerSource&IWheelSource>;
+    _controller: PointerController<IPointerSource & IWheelSource>;
 
-    constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene) {
+    public constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene) {
         options = options ?? WebMapTexture.OptionsHD();
         super(name, dimension, options, scene);
         this._map = this._createTextureMap(name, options, scene ?? this.getScene());
         this.material = this._createMaterial(name, this._map, scene ?? this.getScene());
-        this._target = new InputsNavigationTarget(this._map);
+
+        this._target = new InputsNavigationTarget(this._map?.map);
         this._controller = new PointerController(this.pointerSource, this._target);
     }
 

@@ -11,7 +11,7 @@ export interface IElevationLayerMaterialOptions {
     textureResolution?: ISize2;
 }
 
-export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationLayerMaterialOptions {
+export interface IElevationLayerOptions extends ITileMapLayerOptions<IDemInfos>, IElevationLayerMaterialOptions {
     exageration?: number;
     insets?: ICartesian3;
 }
@@ -139,8 +139,7 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         return this._material;
     }
 
-    public linkTo(target: ITargetBlock<ITile<IDemInfos>>, options?: ILinkOptions, ...args: Array<any>): void {
-        super.linkTo(target, options);
+    public linkTo(target: ITargetBlock<ITile<IDemInfos>>, options?: ILinkOptions<IDemInfos>, ...args: Array<any>): void {
         if (args.length > 0 && args[0] instanceof Material) {
             this._material = args[0];
         }

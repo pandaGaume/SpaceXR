@@ -87,7 +87,7 @@ class TileBag {
     }
 }
 
-export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<ImageData>>, IHasHolographicBox, IHasMapScale {}
+export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<unknown>>, IHasHolographicBox, IHasMapScale {}
 
 /**
  * Base class for Map3D related materials. This class is intended to be used as a base class for
@@ -95,7 +95,7 @@ export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<Image
  * Thus materials are related to a specific geometry which are implemented into the vertex shader.
  * Commons properties and methods are implemented in this class, such as data samplers (elevation, normals and layer)
  * and clip planes.
- * Support ONLY ONE dem layer and ONE layer texture.
+ * Support ONLY ONE dem layer and ONE layer texture (which may be composite and merged into the pipeline).
  */
 export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static DefaultTerrainColor: Color4 = Color4.FromInts(70, 130, 180, 255); // cool steel blue
@@ -883,10 +883,5 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _growSamplersDepth(): void {
         // this is the place we gonna grow the depth of the samplers
         // TODO
-    }
-
-    public debug(ctx: CanvasRenderingContext2D, x: number, y: number, tile: ITile<Map3dMaterial>, scale: number): void {
-        // this is the place where we can draw some debug information
-        // such as the elevation range, the texture areas, etc.
     }
 }

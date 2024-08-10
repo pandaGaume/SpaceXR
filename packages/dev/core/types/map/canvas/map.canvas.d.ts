@@ -7,7 +7,7 @@ export interface ICanvasMapOptions {
     navigationManager?: InputsNavigationTarget<HTMLCanvasElement>;
     inputController?: PointerInputController<HTMLCanvasElement>;
 }
-export declare class CanvasMap extends Context2DTileMap {
+export declare class CanvasMap<T> extends Context2DTileMap<T> {
     _context: Nullable<CanvasRenderingContext2D>;
     _navigationManager: InputsNavigationTarget<HTMLCanvasElement>;
     _inputController: PointerInputController<HTMLCanvasElement>;

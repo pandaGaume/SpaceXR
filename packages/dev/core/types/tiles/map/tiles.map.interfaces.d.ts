@@ -1,6 +1,6 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { ITargetBlock, ITileView } from "../pipeline/tiles.pipeline.interfaces";
+import { IHasView, ITargetBlock, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
 import { IHasActivTiles, ITile, ITileAddress, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
@@ -21,11 +21,15 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileMapLayerOption
     name: string;
     enabled: boolean;
     provider: ITileProvider<T>;
-    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
+    addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
 }
-export interface ITileMapLayerView<T, L extends ITileMapLayer<T>> extends ITargetBlock<ITileAddress>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider {
-    layer: L;
-    view: ITileView;
+export interface ITileMapLayerProxy<T> extends IHasActivTiles<T>, IValidable {
+    name: string;
+    layer: ITileMapLayer<T>;
+    zindex?: number;
+}
+export declare function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T>;
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITargetBlock<ITileAddress>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider, IHasView, ITileSelectionContext {
 }
 export type ImageLayerContentType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas;
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions<ImageLayerContentType> {
@@ -34,29 +38,29 @@ export interface IImageTileMapLayer extends ITileMapLayer<ImageLayerContentType>
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
 }
-export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
-    layerAddedObservable: Observable<L>;
-    layerRemovedObservable: Observable<L>;
-    getLayers(predicate?: (k: string, l: L) => boolean, sorted?: boolean): IterableIterator<L>;
-    getOrderedLayers(predicate?: (k: string, l: L) => boolean): IterableIterator<L>;
-    addLayer(layer: L): void;
-    removeLayer(layer: L): void;
+export type TileMapLayerContainerContentType<T> = ITileMapLayer<T> | ITileMapLayerProxy<T>;
+export interface ITileMapLayerContainer<T> {
+    layerAddedObservable: Observable<TileMapLayerContainerContentType<T>>;
+    layerRemovedObservable: Observable<TileMapLayerContainerContentType<T>>;
+    getLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean, sorted?: boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
+    getOrderedLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
+    addLayer(layer: TileMapLayerContainerContentType<T>): void;
+    removeLayer(layer: TileMapLayerContainerContentType<T>): void;
     clear(): void;
 }
-export interface IHasTileMapLayerContainer<T, L extends ITileMapLayer<T>> {
-    layerContainer: ITileMapLayerContainer<T, L>;
+export interface IHasTileMapLayerContainer<T> {
+    layerContainer: ITileMapLayerContainer<T>;
 }
-export declare function IsTileMapLayerContainerProxy<T, L extends ITileMapLayer<T>>(b: unknown): b is IHasTileMapLayerContainer<T, L>;
+export declare function IsTileMapLayerContainerProxy<T>(b: unknown): b is IHasTileMapLayerContainer<T>;
 export interface IDisplay extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
     resolution: ISize3;
 }
-export interface IPhysicalDisoplay extends IDisplay {
+export interface IPhysicalDisplay extends IDisplay {
     dimension: ISize3;
 }
 export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
-export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T, L>, ITileNavigationApi<S>, IHasNavigationState, IHasDisplay, IDisposable {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMap<T, L, S>, unknown>>;
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T>, ITileNavigationApi<S>, IHasNavigationState, IHasDisplay, IDisposable {
 }

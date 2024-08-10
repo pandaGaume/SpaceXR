@@ -16,16 +16,16 @@ import {
     ITilePipelineLink,
     ITransformBlock,
     IsTargetBlock,
+    Tile,
     TileCollection,
     TilePipelineLink,
 } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observable, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
-import { ElevationTile, IElevationMesh, IElevationTile } from "./map.elevation.tile";
+import { ElevationMesh, IElevationMesh, IElevationTile } from "./map.elevation.mesh";
 import { ElevationLayer, IElevationLayerOptions, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
-import { CanvasTileSource, CanvasTileSourceSourceContentType } from "core/map";
 import { Map3dScaleController, HasMapScale } from "./map.scale.controller";
 import { HolographicDisplay, HasHolographicBox } from "../display";
 import { IsDisposable } from "core/types";
@@ -60,12 +60,14 @@ export class Map3dElevationHost
     // internal pipeline links dedicated to ISourceBlock
     _links: Array<ITilePipelineLink<ITile<IElevationMesh>>> = [];
 
+    _navigation: ITileNavigationState;
+
     // observers
     _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
     _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null;
 
     // the data source
-    _textureLayers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, ITileMapLayer<CanvasTileSourceSourceContentType>>;
+    _textureLayers: ITileMapLayerContainer<unknown, ITileMapLayer<unknown>>;
     _elevationSource: ElevationLayer;
 
     // the grid model
@@ -82,7 +84,7 @@ export class Map3dElevationHost
     _gridOptions?: TerrainGridOptions | TerrainGridOptionsBuilder;
 
     // where the tiles are stored
-    _activTiles: ITileCollection<IElevationMesh>;
+    _activTiles: Array<ITile<IElevationMesh>>;
 
     // where the tiles are displayed
     _tilesRoot: TransformNode;
@@ -92,11 +94,13 @@ export class Map3dElevationHost
 
     public constructor(
         name: string,
-        layers: ITileMapLayerContainer<CanvasTileSourceSourceContentType, ITileMapLayer<CanvasTileSourceSourceContentType>>,
+        navigation: ITileNavigationState,
+        layers: ITileMapLayerContainer<unknown, ITileMapLayer<unknown>>,
         source: ElevationLayer,
         enabled: boolean = true
     ) {
         super(name);
+        this._navigation = navigation;
         this._textureLayers = layers;
         this._elevationSource = source;
         this._layerObserver = this._elevationSource.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
@@ -118,7 +122,7 @@ export class Map3dElevationHost
         this._grid = this._buildTopology();
         // build the material
         const material = this._buildMaterial(options, this.getScene());
-        if (IsTargetBlock<ElevationTile>(material)) {
+        if (IsTargetBlock<IElevationTile>(material)) {
             // if the material is a target block for elevation tiles, we link it to the source, which is this.
             // remember that the source is a layer of ITile<IDemInfos> (ElevationLayer as of now), which is transformed by this host to ITile<IElevationMesh> (ElevationTile as of now).
             this.linkTo(material);
@@ -128,18 +132,18 @@ export class Map3dElevationHost
         this._elevationSource.linkTo(this, {}, material);
 
         this._template = this._buildMesh(material);
-        this._navigationObserver = this.navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
-        const geo = this.navigation.center;
-        const lod = this.navigation.lod;
+        this._navigationObserver = this._navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+        const geo = this._navigation.center;
+        const lod = this._navigation.lod;
         this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, lod);
 
-        this._activTiles = new TileCollection<IElevationMesh>();
+        this._activTiles = new Array<ITile<IElevationMesh>>();
         this.setEnabled(enabled);
     }
 
     //#region IHasNavigationState
     public get navigation(): ITileNavigationState {
-        return this._elevationSource.navigation;
+        return this._navigation;
     }
     //#endregion
 
@@ -150,7 +154,7 @@ export class Map3dElevationHost
     //#endregion
 
     //#region IHasActivTiles<IElevationMesh>
-    public get activTiles(): ITileCollection<IElevationMesh> {
+    public get activTiles(): Array<Nullable<ITile<IElevationMesh>>> {
         return this._activTiles;
     }
     //#endregion
@@ -186,7 +190,7 @@ export class Map3dElevationHost
         return this._removedObservable ?? (this._removedObservable = new Observable<IPipelineMessageType<ITile<IElevationMesh>>>());
     }
 
-    public linkTo(target: ITargetBlock<ITile<IElevationMesh>>, options?: ILinkOptions): void {
+    public linkTo(target: ITargetBlock<ITile<IElevationMesh>>, options?: ILinkOptions<IElevationMesh>): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             // avoid linking twice to the same target
@@ -363,7 +367,7 @@ export class Map3dElevationHost
     protected _onCenterChanged(center: Nullable<ICartesian2>): void {
         if (center) {
             const tiles = this._activTiles;
-            if (!tiles || !tiles.count) {
+            if (!tiles || !tiles.length) {
                 return;
             }
             for (const tile of tiles) {
@@ -421,7 +425,7 @@ export class Map3dElevationHost
             throw new Error("Elevation tile creation failed.");
         }
 
-        this._activTiles.add(elevationTile);
+        this._activTiles.push(elevationTile);
 
         if (elevationTile.content) {
             elevationTile.content.surface = this._buildInstance(this._buildNameWithSuffix(tile.quadkey), elevationTile);
@@ -433,7 +437,7 @@ export class Map3dElevationHost
             const options: IElevationLayerOptions = this._elevationSource;
 
             // texture
-            elevationTile.content.textureSource = new CanvasTileSource<ITileMapLayer<CanvasTileSourceSourceContentType>>(
+            const t = new CanvasTileSource<ITileMapLayer<CanvasTileSourceSourceContentType>>(
                 `${elevationTile.address.quadkey}.texture`,
                 this._textureLayers,
                 elevationTile.address,
@@ -442,8 +446,9 @@ export class Map3dElevationHost
                     resolution: options.textureResolution,
                 }
             );
-            if (IsTargetBlock<ITile<ImageData>>(this.mesh.material)) {
-                elevationTile.content.textureSource?.linkTo(this.mesh.material);
+            elevationTile.content.textureSource = t;
+            if (IsTargetBlock<ITile<unknown>>(this.mesh.material)) {
+                t?.linkTo(this.mesh.material);
             }
         }
         if (this._addedObservable && this._addedObservable.hasObservers()) {
@@ -451,19 +456,19 @@ export class Map3dElevationHost
         }
     }
 
-    protected _createElevationTile(tile: ITile<IDemInfos>): IElevationTile {
+    protected _createElevationTile(tile: ITile<IDemInfos>, mesh: AbstractMesh): IElevationTile {
         const a = tile.address;
-        return new ElevationTile(a.x, a.y, a.levelOfDetail, tile.content, this.metrics);
+        return new Tile<IElevationMesh>(a.x, a.y, a.levelOfDetail, new ElevationMesh(tile, mesh), this.metrics);
     }
 
     protected _onTileRemoved(tile: ITile<IDemInfos>, eventState: EventState): void {
         const a = tile.address;
-        const elevationTile = this._activTiles.get(a);
-        if (elevationTile) {
-            this._activTiles.remove(a);
+        const i = this._activTiles.findIndex((t) => t.address === a);
+        if (i >= 0) {
+            const elevationTile = this._activTiles[i];
+            this._activTiles.splice(i, 1);
             if (elevationTile.content?.surface) {
                 elevationTile.content.surface.dispose();
-                elevationTile.content.surface = null;
             }
             if (elevationTile.content?.textureSource) {
                 if (IsTargetBlock<ITile<ImageData>>(this.mesh.material)) {
@@ -482,11 +487,14 @@ export class Map3dElevationHost
 
     protected _onTileUpdated(tile: ITile<IDemInfos>, eventState: EventState): void {
         const a = tile.address;
-        const elevationTile = this._activTiles.get(a);
-        if (elevationTile?.content) {
-            elevationTile.content.infos = tile.content;
-            if (this._updatedObservable && this._updatedObservable.hasObservers()) {
-                this._updatedObservable.notifyObservers([elevationTile], -1, eventState.currentTarget, this);
+        const i = this._activTiles.findIndex((t) => t.address === a);
+        if (i >= 0) {
+            const elevationTile = this._activTiles[i];
+            if (elevationTile?.content) {
+                elevationTile.content = tile.content;
+                if (this._updatedObservable && this._updatedObservable.hasObservers()) {
+                    this._updatedObservable.notifyObservers([elevationTile], -1, eventState.currentTarget, this);
+                }
             }
         }
     }

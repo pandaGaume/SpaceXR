@@ -1,13 +1,15 @@
 import { Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
-import { IDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer, TileMapLayerContainerContentType } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
-import { TileMapLayerViewContainer } from "./tiles.map.layerContainer";
-export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerViewContainer<T, L> implements ITileMap<T, L, TileMapBase<T, L>> {
+import { TileMapLayerContainer } from "./tiles.map.layerContainer";
+import { ITileView } from "../pipeline";
+export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerContainer<T> implements ITileMap<T, L, TileMapBase<T, L>> {
     protected _display: Nullable<IDisplay>;
     protected _navigation: ITileNavigationState;
+    protected _view: ITileView;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
@@ -15,6 +17,7 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapL
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>>;
     get display(): Nullable<IDisplay>;
     get navigation(): ITileNavigationState;
+    get view(): ITileView;
     dispose(): void;
     setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T, L>;
     zoomMap(delta: number): TileMapBase<T, L>;
@@ -37,4 +40,7 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapL
     protected _onDisplayTranslated(display: IDisplay): void;
     protected _onLayerAdded(layer: L): void;
     protected _onLayerRemoved(layer: L): void;
+    protected _buildNavigationState(): ITileNavigationState;
+    protected _buildView(): ITileView;
+    protected _onBeforeLayerAdded(layer: TileMapLayerContainerContentType<T>): TileMapLayerContainerContentType<T>;
 }

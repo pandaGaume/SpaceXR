@@ -69,6 +69,11 @@ export interface ITileSelectionContext {
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
 }
 
+export function hasTileSelectionContext(b: unknown): b is ITileSelectionContext {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileSelectionContext>b).setContext !== undefined;
+}
+
 /// <summary>
 /// The View component is tasked with selecting appropriate tile addresses, guided by the Tile Metrics and navigation properties. Its role is expanded to include the following:
 /// - Tile Selection Based on Navigation Properties: Considers the geographic center, azimuth, and level of detail in tile selection, ensuring relevance and accuracy.
@@ -78,3 +83,12 @@ export interface ITileSelectionContext {
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
 export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext, ITileMipMapping {}
+
+export interface IHasView {
+    view: ITileView;
+}
+
+export function isViewProxy(b: unknown): b is IHasView {
+    if (b === null || typeof b !== "object") return false;
+    return (<IHasView>b).view !== undefined;
+}

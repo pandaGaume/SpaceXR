@@ -29,7 +29,7 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     set attribution(attribution: string | undefined);
     get enabled(): boolean;
     set enabled(enabled: boolean);
-    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
+    addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
     dispose(): void;
     protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>, type?: new (...args: any[]) => ITile<T>): ITileProvider<T>;
 }

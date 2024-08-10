@@ -1,6 +1,6 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { ITargetBlock, ITileView } from "../pipeline/tiles.pipeline.interfaces";
+import { IHasView, ITargetBlock, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
 import { IHasActivTiles, ITile, ITileAddress, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
@@ -29,14 +29,29 @@ export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileMapLayerOption
     name: string;
     enabled: boolean;
     provider: ITileProvider<T>;
-
-    addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T>;
+    addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
 }
 
-export interface ITileMapLayerView<T, L extends ITileMapLayer<T>> extends ITargetBlock<ITileAddress>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider {
-    layer: L;
-    view: ITileView;
+export interface ITileMapLayerProxy<T> extends IHasActivTiles<T>, IValidable {
+    name: string;
+    layer: ITileMapLayer<T>;
+    zindex?: number;
 }
+
+export function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T> {
+    if (b === null || typeof b !== "object") return false;
+    return (<ITileMapLayerProxy<T>>b).layer !== undefined;
+}
+
+export interface ITileMapLayerView<T>
+    extends ITileMapLayerProxy<T>,
+        ITargetBlock<ITileAddress>,
+        IHasActivTiles<T>,
+        IValidable,
+        IDisposable,
+        ITileMetricsProvider,
+        IHasView,
+        ITileSelectionContext {}
 
 export type ImageLayerContentType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas;
 
@@ -46,25 +61,27 @@ export interface IImageTileMapLayer extends ITileMapLayer<ImageLayerContentType>
 
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {}
 
-export interface ITileMapLayerContainer<T, L extends ITileMapLayer<T>> {
-    layerAddedObservable: Observable<L>;
-    layerRemovedObservable: Observable<L>;
+export type TileMapLayerContainerContentType<T> = ITileMapLayer<T> | ITileMapLayerProxy<T>;
 
-    getLayers(predicate?: (k: string, l: L) => boolean, sorted?: boolean): IterableIterator<L>;
-    getOrderedLayers(predicate?: (k: string, l: L) => boolean): IterableIterator<L>;
+export interface ITileMapLayerContainer<T> {
+    layerAddedObservable: Observable<TileMapLayerContainerContentType<T>>;
+    layerRemovedObservable: Observable<TileMapLayerContainerContentType<T>>;
 
-    addLayer(layer: L): void;
-    removeLayer(layer: L): void;
+    getLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean, sorted?: boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
+    getOrderedLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
+
+    addLayer(layer: TileMapLayerContainerContentType<T>): void;
+    removeLayer(layer: TileMapLayerContainerContentType<T>): void;
     clear(): void;
 }
 
-export interface IHasTileMapLayerContainer<T, L extends ITileMapLayer<T>> {
-    layerContainer: ITileMapLayerContainer<T, L>;
+export interface IHasTileMapLayerContainer<T> {
+    layerContainer: ITileMapLayerContainer<T>;
 }
 
-export function IsTileMapLayerContainerProxy<T, L extends ITileMapLayer<T>>(b: unknown): b is IHasTileMapLayerContainer<T, L> {
+export function IsTileMapLayerContainerProxy<T>(b: unknown): b is IHasTileMapLayerContainer<T> {
     if (b === null || typeof b !== "object") return false;
-    return (<IHasTileMapLayerContainer<T, L>>b).layerContainer !== undefined;
+    return (<IHasTileMapLayerContainer<T>>b).layerContainer !== undefined;
 }
 
 export interface IDisplay extends IDisposable {
@@ -72,7 +89,7 @@ export interface IDisplay extends IDisposable {
     resolution: ISize3;
 }
 
-export interface IPhysicalDisoplay extends IDisplay {
+export interface IPhysicalDisplay extends IDisplay {
     dimension: ISize3;
 }
 
@@ -80,6 +97,4 @@ export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
 
-export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T, L>, ITileNavigationApi<S>, IHasNavigationState, IHasDisplay, IDisposable {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileMap<T, L, S>, unknown>>;
-}
+export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T>, ITileNavigationApi<S>, IHasNavigationState, IHasDisplay, IDisposable {}

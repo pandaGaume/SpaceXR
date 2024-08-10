@@ -19,17 +19,6 @@ export class TileView implements ITileView {
     // internal pipeline links
     _links: Array<ITilePipelineLink<ITileAddress>> = [];
 
-    // cached values
-    _id: string;
-
-    public constructor(id: string) {
-        this._id = id;
-    }
-
-    public get name(): string {
-        return this._id;
-    }
-
     public dispose(): void {
         // dispose the links
         for (const l of this._links) {

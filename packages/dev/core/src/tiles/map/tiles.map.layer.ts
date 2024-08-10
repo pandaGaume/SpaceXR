@@ -133,9 +133,9 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
         }
     }
 
-    public addTo(map: ITileMapLayerContainer<T, ITileMapLayer<T>> | IHasTileMapLayerContainer<T, ITileMapLayer<T>>): ITileMapLayer<T> {
+    public addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T> {
         if (map) {
-            if (IsTileMapLayerContainerProxy<T, ITileMapLayer<T>>(map)) {
+            if (IsTileMapLayerContainerProxy<T>(map)) {
                 map = map.layerContainer;
             }
             map?.addLayer(this);

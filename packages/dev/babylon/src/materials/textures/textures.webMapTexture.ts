@@ -1,13 +1,12 @@
 import * as BABYLON from "@babylonjs/core";
-import { CanvasDisplay, CanvasMap } from "core/map/canvas";
-import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer, ImageLayerContentType } from "core/tiles";
+import { CanvasDisplay, CanvasMap, ICanvasMapOptions } from "core/map/canvas";
+import { ITileNavigationState } from "core/tiles";
 
 import { ISize2 } from "core/geometry";
-import { IGeo2 } from "core/geography";
-import { EventState, Observable } from "core/events";
-import { ICanvasRenderingOptions } from "core/engine";
+import { EventState } from "core/events";
+import { Assert } from "core/utils";
 
-export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
+export interface IMapTextureOptions extends ICanvasMapOptions, ISize2 {
     generateMipMaps?: boolean;
     samplingMode?: number;
     format?: number;
@@ -17,7 +16,7 @@ export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
 /**
  * Provide Babylon js Texture implementation for a 2D WebMap (Web Mercator projection).
  */
-export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi<WebMapTexture>, ITileMap<ImageLayerContentType, IImageTileMapLayer, WebMapTexture> {
+export class WebMapTexture extends BABYLON.Texture {
     static readonly DefaultOptions: IMapTextureOptions = {
         width: 1024,
         height: 768,
@@ -44,7 +43,7 @@ export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi
     }
 
     _display: BABYLON.Nullable<CanvasDisplay>;
-    _map: BABYLON.Nullable<CanvasMap>;
+    _map: BABYLON.Nullable<CanvasMap<unknown>>;
     _renderObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.Camera>>;
 
     public constructor(name: string, options: IMapTextureOptions, scene: BABYLON.Scene, nav?: ITileNavigationState) {
@@ -63,103 +62,19 @@ export class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi
         this.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
 
         const engine = this._getEngine();
-        if (engine) {
-            const canvas = engine.createCanvas(options.width, options.height);
+        Assert(engine !== null, "unable to get engine");
 
-            if (canvas) {
-                this._texture = engine.createDynamicTexture(options.width, options.height, o.generateMipMaps!, o.samplingMode!);
-                this._display = new CanvasDisplay(canvas as HTMLCanvasElement, 1, false); // do NOT automatically resize the canvas to the client size.
-                this._map = new CanvasMap(name, this._display, o, nav);
-                this._renderObserver = scene.onBeforeCameraRenderObservable.add(this._checkUpdate.bind(this));
-            }
-        }
-    }
+        const canvas = engine.createCanvas(options.width, options.height);
+        Assert(canvas !== null && canvas != undefined, "unable to create canvas");
 
-    public getOrderedLayers(predicate?: ((l: IImageTileMapLayer) => boolean) | undefined): IterableIterator<IImageTileMapLayer> {
-        return this.map?.getOrderedLayers(predicate) ?? [].values();
+        this._texture = engine.createDynamicTexture(options.width, options.height, o.generateMipMaps!, o.samplingMode!);
+        this._display = new CanvasDisplay(canvas as HTMLCanvasElement, 1, false); // do NOT automatically resize the canvas to the client size.
+        this._map = new CanvasMap(this._display, o, nav);
+        this._renderObserver = scene.onBeforeCameraRenderObservable.add(this._checkUpdate.bind(this));
     }
 
-    public get map(): BABYLON.Nullable<CanvasMap> {
-        return this._map;
-    }
-
-    // navigation related
-    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.setViewMap(center, zoom, rotation);
-        return this;
-    }
-
-    public zoomMap(delta: number): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.zoomMap(delta);
-        return this;
-    }
-
-    public zoomInMap(delta: number): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.zoomInMap(delta);
-        return this;
-    }
-    public zoomOutMap(delta: number): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.zoomOutMap(delta);
-        return this;
-    }
-    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.translateUnitsMap(tx, ty, metrics);
-        return this;
-    }
-    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.translateMap(lat, lon);
-        return this;
-    }
-    public rotateMap(r: number): WebMapTexture {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.rotateMap(r);
-        return this;
-    }
-
-    public get navigation(): ITileNavigationState {
-        if (!this._map) throw new Error("Invalid State");
-        return this._map.navigation;
-    }
-
-    public get display(): BABYLON.Nullable<CanvasDisplay> {
-        return this._display;
-    }
-
-    // map related
-    public get layerAddedObservable(): Observable<IImageTileMapLayer> {
-        if (!this._map) throw new Error("Invalid State");
-        return this._map.layerAddedObservable;
-    }
-
-    public get layerRemovedObservable(): Observable<IImageTileMapLayer> {
-        if (!this._map) throw new Error("Invalid State");
-        return this._map.layerRemovedObservable;
-    }
-
-    public getLayers(predicate?: (l: IImageTileMapLayer) => boolean, sorted?: boolean): IterableIterator<IImageTileMapLayer> {
-        if (!this._map) throw new Error("Invalid State");
-        return this._map.getLayers(predicate, sorted);
-    }
-
-    public addLayer(layer: ImageLayer): void {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.addLayer(layer);
-    }
-
-    public removeLayer(layer: ImageLayer): void {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.removeLayer(layer);
-    }
-
-    public clear(): void {
-        if (!this._map) throw new Error("Invalid State");
-        this._map.clear();
+    public get map(): CanvasMap<unknown> {
+        return this._map!;
     }
 
     public dispose() {

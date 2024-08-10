@@ -1,14 +1,17 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { IDisplay, ITileMap, ITileMapLayer } from "./tiles.map.interfaces";
-import { Nullable } from "../../types";
+import { IDisplay, isTileMapLayerProxy, ITileMap, ITileMapLayer, TileMapLayerContainerContentType } from "./tiles.map.interfaces";
+import { isValidable, Nullable } from "../../types";
 import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
-import { TileMapLayerViewContainer } from "./tiles.map.layerContainer";
+import { TileMapLayerContainer } from "./tiles.map.layerContainer";
+import { hasTileSelectionContext, ITileView, TileView } from "../pipeline";
+import { TileMapLayerView } from "./tiles.map.layerView";
 
-export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerViewContainer<T, L> implements ITileMap<T, L, TileMapBase<T, L>> {
+export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerContainer<T> implements ITileMap<T, L, TileMapBase<T, L>> {
     protected _display: Nullable<IDisplay>;
     protected _navigation: ITileNavigationState;
+    protected _view: ITileView;
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
@@ -28,8 +31,10 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
         this._bindDisplay(this._display);
 
         // build the navigation state according parameters
-        this._navigation = nav ?? new TileNavigationState();
+        this._navigation = nav ?? this._buildNavigationState() ?? new TileNavigationState();
         this._bindNavigation(this._navigation);
+
+        this._view = this._buildView() ?? new TileView();
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMap<T, L, TileMapBase<T, L>>, unknown>> {
@@ -43,6 +48,10 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
 
     public get navigation(): ITileNavigationState {
         return this._navigation;
+    }
+
+    public get view(): ITileView {
+        return this._view;
     }
 
     public dispose() {
@@ -95,12 +104,17 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
     private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
         this.invalidate();
         for (const l of this._layers.values()) {
-            l.validate();
-            const offset = l.layer.zoomOffset ?? 0;
+            const layer: ITileMapLayer<T> = isTileMapLayerProxy<T>(l) ? l.layer : l;
+            if (isValidable(l)) {
+                l.validate();
+            }
+            const offset = layer.zoomOffset ?? 0;
             const n = offset
                 ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
                 : this.navigation;
-            l.view.setContext(n, this.display, l.layer.metrics, true);
+            if (hasTileSelectionContext(l)) {
+                l.setContext(n, this.display, layer.metrics, true);
+            }
         }
         this._onNavigationUpdated(event);
     }
@@ -170,5 +184,23 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerView
 
     protected _onLayerRemoved(layer: L): void {
         /* nothing to do here - overrided by subclasses */
+    }
+
+    protected _buildNavigationState(): ITileNavigationState {
+        return new TileNavigationState();
+    }
+
+    protected _buildView(): ITileView {
+        return new TileView();
+    }
+
+    protected _onBeforeLayerAdded(layer: TileMapLayerContainerContentType<T>): TileMapLayerContainerContentType<T> {
+        if (isTileMapLayerProxy<T>(layer)) {
+            if (layer instanceof TileMapLayerView) {
+                return layer;
+            }
+            return new TileMapLayerView(layer.layer, this.view);
+        }
+        return new TileMapLayerView(layer, this.view);
     }
 }

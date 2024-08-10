@@ -1,8 +1,9 @@
 import { Scalar } from "../../math";
-import { IDisplay, isDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
+import { IDisplay, isDrawableTileMapLayer, isTileMapLayerProxy, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
+import { isValidable } from "../../types";
 
 // intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
-export class Context2DTileMap extends TileMapBase<unknown, ITileMapLayer<unknown>> {
+export class Context2DTileMap<T> extends TileMapBase<T, ITileMapLayer<T>> {
     public constructor(display: IDisplay, nav?: ITileNavigationState) {
         super(display, nav);
     }
@@ -47,7 +48,7 @@ export class Context2DTileMap extends TileMapBase<unknown, ITileMapLayer<unknown
             ctx.scale(scale, scale);
 
             for (const l of this._zIndexOrderedLayers ?? []) {
-                const layer = l.layer;
+                const layer: ITileMapLayer<T> = isTileMapLayerProxy<T>(l) ? l.layer : l;
                 if (!layer.enabled) {
                     continue;
                 }
@@ -58,11 +59,13 @@ export class Context2DTileMap extends TileMapBase<unknown, ITileMapLayer<unknown
                 const currentLod = this.navigation.lod;
                 const lat = this.navigation.center.lat;
                 const lon = this.navigation.center.lon;
-                const metrics = l.metrics;
+                const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;
                 const tiles = l.activTiles;
-                l.validate();
+                if (isValidable(l)) {
+                    l.validate();
+                }
                 for (const tile of tiles) {
                     const b = tile?.bounds;
                     if (!b || !tile.content) {

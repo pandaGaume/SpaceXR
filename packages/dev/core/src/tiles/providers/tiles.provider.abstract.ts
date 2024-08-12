@@ -76,6 +76,14 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
         return Array.from(this._activTiles);
     }
 
+    public getTile(a: ITileAddress): Nullable<ITile<T>> | undefined {
+        return this._activTiles.get(a);
+    }
+
+    public hasTile(a: ITileAddress): boolean {
+        return this._activTiles.has(a);
+    }
+
     /// begin ISourceBlock
     public get updatedObservable(): Observable<IPipelineMessageType<ITile<T>>> {
         this._updateObservable = this._updateObservable || new Observable<IPipelineMessageType<ITile<T>>>();

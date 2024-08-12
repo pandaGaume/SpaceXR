@@ -221,6 +221,8 @@ export interface IHasNamespace {
 
 export interface IHasActivTiles<T> {
     activTiles: Array<Nullable<ITile<T>>>;
+    getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
+    hasTile(a: ITileAddress): boolean;
 }
 
 /// <summary>

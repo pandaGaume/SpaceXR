@@ -37,6 +37,13 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
     public get activTiles(): Array<Nullable<ITile<T>>> {
         return this._provider.activTiles;
     }
+    public getTile(a: ITileAddress): Nullable<ITile<T>> | undefined {
+        return this._provider.getTile(a);
+    }
+
+    public hasTile(a: ITileAddress): boolean {
+        return this._provider.hasTile(a);
+    }
 
     public get metrics(): ITileMetrics {
         return this._provider.metrics;

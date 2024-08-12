@@ -58,6 +58,14 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
         return Array.from(this._tiles.values());
     }
 
+    public getTile(a: ITileAddress): Nullable<ITile<T>> | undefined {
+        return this._tiles.get(a.quadkey);
+    }
+
+    public hasTile(a: ITileAddress): boolean {
+        return this._tiles.has(a.quadkey);
+    }
+
     public accept(tile: ITile<T>): boolean {
         return this._tiles.has(tile.address.quadkey);
     }

@@ -15,6 +15,8 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _provider: ITileProvider<T>;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
     get activTiles(): Array<Nullable<ITile<T>>>;
+    getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
+    hasTile(a: ITileAddress): boolean;
     get metrics(): ITileMetrics;
     get provider(): ITileProvider<T>;
     get drawFn(): LayerRenderFn<T> | undefined;

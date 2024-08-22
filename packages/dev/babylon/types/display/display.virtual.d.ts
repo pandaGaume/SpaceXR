@@ -2,9 +2,9 @@ import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexData } from
 import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
-import { ITileDisplayBounds } from "core/tiles";
 import { Unit } from "core/math";
-export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
+import { IDisplay, IPhysicalDisplay } from "core/tiles";
+export declare class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     static SD: ISize2;
     static QHD: ISize2;
     static HD: ISize2;
@@ -12,7 +12,7 @@ export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     static FullHD: ISize2;
     static UltraHD: ISize2;
     static UltraHD_2: ISize2;
-    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
     _worldTransform: TransformNode;
     _dimension: ISize3;
     _halfDimension: ISize3;
@@ -23,7 +23,7 @@ export declare class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     _unit: Unit;
     _inverseWorldMatrix?: Matrix;
     constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene, unit?: Unit);
-    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
+    get propertyChangedObservable(): Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
     get width(): number;
     get height(): number;
     get ratio(): number;

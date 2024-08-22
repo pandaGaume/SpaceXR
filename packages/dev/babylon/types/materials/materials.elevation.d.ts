@@ -30,7 +30,7 @@ declare class TileBag {
     getArea(kind: Map3dLayerKind): Nullable<AreaInfos>;
     setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void;
 }
-export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<ImageData>>, IHasHolographicBox, IHasMapScale {
+export interface IMap3dMaterial extends ITargetBlock<ElevationTile | ITile<unknown>>, IHasHolographicBox, IHasMapScale {
 }
 export declare class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     static DefaultTerrainColor: Color4;
@@ -131,6 +131,5 @@ export declare class Map3dMaterial extends PushMaterial implements IMap3dMateria
     protected _updateElevationRange(elevationTile: ElevationTile): void;
     protected _getElevationRange(): Range;
     protected _growSamplersDepth(): void;
-    debug(ctx: CanvasRenderingContext2D, x: number, y: number, tile: ITile<Map3dMaterial>, scale: number): void;
 }
 export {};

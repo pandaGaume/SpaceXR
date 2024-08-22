@@ -27,6 +27,7 @@ export declare class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapL
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T, L>;
     rotateMap(r: number): TileMapBase<T, L>;
     getGeoBounds(metrics: ITileMetrics): IEnvelope | undefined;
+    protected _doValidate(): void;
     private _onNavigationUpdatedInternal;
     private _onDisplayPropertyChanged;
     private _bindDisplay;

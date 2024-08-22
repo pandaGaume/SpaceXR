@@ -28,20 +28,35 @@ export interface IHolographicBox extends IHolographicBounds {
     clipPlanesWorld: Nullable<Array<ClipPlaneDefinition>>;
 }
 
+export function IsHolographicBox(obj: unknown): obj is IHolographicBox {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IHolographicBox>obj).type === HolographicBoundsType.BOX;
+}
+
 export interface IHolographicCylinder extends IHolographicBounds {
     radius: number;
     height: number;
+}
+
+export function IsHolographicCylinder(obj: unknown): obj is IHolographicBox {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IHolographicBox>obj).type === HolographicBoundsType.CYLINDER;
 }
 
 export interface IHolographicSphere extends IHolographicBounds {
     radius: number;
 }
 
-export function HasHolographicBox(obj: unknown): obj is IHasHolographicBox {
+export function IsHolographicSphere(obj: unknown): obj is IHolographicBox {
     if (typeof obj !== "object" || obj === null) return false;
-    return (<IHasHolographicBox>obj).holographicBox !== undefined;
+    return (<IHolographicBox>obj).type === HolographicBoundsType.SPHERE;
 }
 
-export interface IHasHolographicBox {
-    holographicBox: Nullable<IHolographicBox>;
+export interface IHasHolographicBounds {
+    holographicBounds: Nullable<IHolographicBounds>;
+}
+
+export function HasHolographicBounds(obj: unknown): obj is IHasHolographicBounds {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IHasHolographicBounds>obj).holographicBounds !== undefined;
 }

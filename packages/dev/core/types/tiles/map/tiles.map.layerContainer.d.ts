@@ -1,11 +1,12 @@
-import { Observable } from "../../events";
+import { EventState, Observable } from "../../events";
 import { IDisposable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileMapLayerContainer, TileMapLayerContainerContentType } from "./tiles.map.interfaces";
+type TileMapLayerContainerItemType<T> = TileMapLayerContainerContentType<T>;
 export declare class TileMapLayerContainer<T> extends ValidableBase implements ITileMapLayerContainer<T>, IDisposable {
     private _layerAddedObservable?;
     private _layerRemovedObservable?;
-    protected _layers: Map<string, TileMapLayerContainerContentType<T>>;
+    protected _layers: Map<string, TileMapLayerContainerItemType<T>>;
     protected _zIndexOrderedLayers?: Array<TileMapLayerContainerContentType<T>>;
     constructor();
     get layerAddedObservable(): Observable<TileMapLayerContainerContentType<T>>;
@@ -16,9 +17,12 @@ export declare class TileMapLayerContainer<T> extends ValidableBase implements I
     removeLayer(layer: TileMapLayerContainerContentType<T>): void;
     clear(): void;
     dispose(): void;
+    get isValid(): boolean;
+    protected _onChildrenValidation(eventData: Boolean, eventState: EventState): void;
     protected _onLayerAdded(layer: TileMapLayerContainerContentType<T>): void;
     protected _onLayerRemoved(layer: TileMapLayerContainerContentType<T>): void;
     protected _onBeforeLayerAdded(layer: TileMapLayerContainerContentType<T>): TileMapLayerContainerContentType<T>;
     private _addSortedLayer;
     private _removeSortedLayer;
 }
+export {};

@@ -8043,8 +8043,7 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
     getGeoBounds(metrics) {
         return undefined;
     }
-    _onNavigationUpdatedInternal(event, state) {
-        this.invalidate();
+    _doValidate() {
         for (const l of this._layers.values()) {
             const layer = (0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__.isTileMapLayerProxy)(l) ? l.layer : l;
             if ((0,_types__WEBPACK_IMPORTED_MODULE_5__.isValidable)(l)) {
@@ -8058,6 +8057,9 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
                 l.setContext(n, this.display, layer.metrics, true);
             }
         }
+    }
+    _onNavigationUpdatedInternal(event, state) {
+        this.invalidate();
         this._onNavigationUpdated(event);
     }
     _onDisplayPropertyChanged(event, state) {
@@ -8163,6 +8165,12 @@ class TileMapLayer {
     }
     get activTiles() {
         return this._provider.activTiles;
+    }
+    getTile(a) {
+        return this._provider.getTile(a);
+    }
+    hasTile(a) {
+        return this._provider.hasTile(a);
     }
     get metrics() {
         return this._provider.metrics;
@@ -8278,7 +8286,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileMapLayerContainer: () => (/* binding */ TileMapLayerContainer)
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
 /* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
+
 
 
 class TileMapLayerContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
@@ -8344,7 +8354,7 @@ class TileMapLayerContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.Vali
     }
     clear() {
         if (this._layers) {
-            const toRemove = Array.from(this._layers.values()).map((v) => v);
+            const toRemove = Array.from(this._layers.values());
             for (const l of toRemove) {
                 this.removeLayer(l);
             }
@@ -8354,6 +8364,22 @@ class TileMapLayerContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.Vali
         this.clear();
         this._layerAddedObservable?.clear();
         this._layerRemovedObservable?.clear();
+    }
+    get isValid() {
+        if (!super.isValid) {
+            return false;
+        }
+        return (this._zIndexOrderedLayers?.every((l) => {
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(l)) {
+                return l.isValid;
+            }
+            return true;
+        }) ?? true);
+    }
+    _onChildrenValidation(eventData, eventState) {
+        if (!eventData) {
+            this.invalidate();
+        }
     }
     _onLayerAdded(layer) { }
     _onLayerRemoved(layer) { }
@@ -8426,6 +8452,12 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
     }
     get activTiles() {
         return Array.from(this._tiles.values());
+    }
+    getTile(a) {
+        return this._tiles.get(a.quadkey);
+    }
+    hasTile(a) {
+        return this._tiles.has(a.quadkey);
     }
     accept(tile) {
         return this._tiles.has(tile.address.quadkey);
@@ -9398,6 +9430,12 @@ class AbstractTileProvider {
     }
     get activTiles() {
         return Array.from(this._activTiles);
+    }
+    getTile(a) {
+        return this._activTiles.get(a);
+    }
+    hasTile(a) {
+        return this._activTiles.has(a);
     }
     get updatedObservable() {
         this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();

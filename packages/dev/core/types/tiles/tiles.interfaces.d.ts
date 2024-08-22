@@ -127,6 +127,8 @@ export interface IHasNamespace {
 }
 export interface IHasActivTiles<T> {
     activTiles: Array<Nullable<ITile<T>>>;
+    getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
+    hasTile(a: ITileAddress): boolean;
 }
 export interface ITileProvider<T> extends ITransformBlock<ITileAddress, ITile<T>>, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     enabledObservable: Observable<ITileProvider<T>>;

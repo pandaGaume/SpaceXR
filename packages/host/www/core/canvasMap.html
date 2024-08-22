@@ -55,7 +55,7 @@
                 const map = new SPACEXR.CanvasMap(canvas).setViewMap([27.98817689833976, 86.92491071824738], lod);
                 map.background = "white";
                 const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
-                
+
                 const navigationManager = new SPACEXR.InputsNavigationTarget(map);
                 const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);
 
@@ -94,7 +94,6 @@
                           console.log('UP')
                      }
                 });
-                
                 // Function to recursively update the animation frame
                 // This function is called every time the browser is ready to repaint the canvas
                 // This is the main animation loop

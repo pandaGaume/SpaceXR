@@ -100,9 +100,7 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerCont
         return undefined;
     }
 
-    // end navigation proxy
-    private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
-        this.invalidate();
+    protected _doValidate() {
         for (const l of this._layers.values()) {
             const layer: ITileMapLayer<T> = isTileMapLayerProxy<T>(l) ? l.layer : l;
             if (isValidable(l)) {
@@ -116,6 +114,11 @@ export class TileMapBase<T, L extends ITileMapLayer<T>> extends TileMapLayerCont
                 l.setContext(n, this.display, layer.metrics, true);
             }
         }
+    }
+
+    // end navigation proxy
+    private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
+        this.invalidate();
         this._onNavigationUpdated(event);
     }
 

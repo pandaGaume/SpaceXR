@@ -4,10 +4,10 @@ import { ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
 
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
-import { ITileDisplayBounds } from "core/tiles";
 import { Length, Quantity, Unit } from "core/math";
+import { IDisplay, IPhysicalDisplay } from "core/tiles";
 
-export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
+export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     public static SD: ISize2 = new Size2(640, 480);
     public static QHD: ISize2 = new Size2(960, 540);
     public static HD: ISize2 = new Size2(1280, 720);
@@ -16,7 +16,7 @@ export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
     public static UltraHD: ISize2 = new Size2(3840, 2160);
     public static UltraHD_2: ISize2 = new Size2(7680, 4320);
 
-    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>;
+    _propertyChangedObservable?: Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
 
     _worldTransform: TransformNode;
 
@@ -51,9 +51,9 @@ export class VirtualDisplay extends Mesh implements ITileDisplayBounds {
         this._unit = unit;
     }
 
-    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>> {
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<IDisplay, unknown>> {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileDisplayBounds, unknown>>();
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<IDisplay, unknown>>();
         }
         return this._propertyChangedObservable;
     }

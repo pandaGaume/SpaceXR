@@ -23,7 +23,7 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
 
         this._view?.linkTo(this);
         // add a link with a filter, based on addresses
-        // the use of the proxy is due to the inability of Typescript to support
+        // the use of the proxy is due to the inhability of Typescript to support
         // methods polymorphism.
         this._tilesTargetProxy = new TargetProxy<ITile<T>>(
             {

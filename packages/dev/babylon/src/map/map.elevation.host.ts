@@ -7,7 +7,6 @@ import {
     IPipelineMessageType,
     ITargetBlock,
     ITile,
-    ITileCollection,
     ITileMapLayer,
     ITileMapLayerContainer,
     ITileMetrics,
@@ -17,7 +16,6 @@ import {
     ITransformBlock,
     IsTargetBlock,
     Tile,
-    TileCollection,
     TilePipelineLink,
 } from "core/tiles";
 import { ICartesian2, ICartesian3 } from "core/geometry";
@@ -27,7 +25,7 @@ import { ElevationMesh, IElevationMesh, IElevationTile } from "./map.elevation.m
 import { ElevationLayer, IElevationLayerOptions, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { Map3dScaleController, HasMapScale } from "./map.scale.controller";
-import { HolographicDisplay, HasHolographicBox } from "../display";
+import { HolographicDisplay } from "../display";
 import { IsDisposable } from "core/types";
 import { WebMapMaterial } from "../materials";
 

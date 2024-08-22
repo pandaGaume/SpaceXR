@@ -25,14 +25,17 @@ export interface IHolographicBox extends IHolographicBounds {
     clipPlanes: Nullable<Array<ClipPlaneDefinition>>;
     clipPlanesWorld: Nullable<Array<ClipPlaneDefinition>>;
 }
+export declare function IsHolographicBox(obj: unknown): obj is IHolographicBox;
 export interface IHolographicCylinder extends IHolographicBounds {
     radius: number;
     height: number;
 }
+export declare function IsHolographicCylinder(obj: unknown): obj is IHolographicBox;
 export interface IHolographicSphere extends IHolographicBounds {
     radius: number;
 }
-export declare function HasHolographicBox(obj: unknown): obj is IHasHolographicBox;
-export interface IHasHolographicBox {
-    holographicBox: Nullable<IHolographicBox>;
+export declare function IsHolographicSphere(obj: unknown): obj is IHolographicBox;
+export interface IHasHolographicBounds {
+    holographicBounds: Nullable<IHolographicBounds>;
 }
+export declare function HasHolographicBounds(obj: unknown): obj is IHasHolographicBounds;

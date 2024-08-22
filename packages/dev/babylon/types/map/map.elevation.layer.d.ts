@@ -8,7 +8,7 @@ export interface IElevationLayerMaterialOptions {
     shininess?: number;
     textureResolution?: ISize2;
 }
-export interface IElevationLayerOptions extends ITileMapLayerOptions, IElevationLayerMaterialOptions {
+export interface IElevationLayerOptions extends ITileMapLayerOptions<IDemInfos>, IElevationLayerMaterialOptions {
     exageration?: number;
     insets?: ICartesian3;
 }
@@ -41,5 +41,5 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     get textureResolution(): ISize2 | undefined;
     set textureResolution(value: ISize2 | undefined);
     get material(): Material | undefined;
-    linkTo(target: ITargetBlock<ITile<IDemInfos>>, options?: ILinkOptions, ...args: Array<any>): void;
+    linkTo(target: ITargetBlock<ITile<IDemInfos>>, options?: ILinkOptions<IDemInfos>, ...args: Array<any>): void;
 }

@@ -1,17 +1,15 @@
 import * as BABYLON from "@babylonjs/core";
-import { CanvasDisplay, CanvasMap } from "core/map/canvas";
-import { IImageTileMapLayer, ITileMap, ITileMetrics, ITileNavigationApi, ITileNavigationState, ImageLayer, ImageLayerContentType } from "core/tiles";
+import { CanvasDisplay, CanvasMap, ICanvasMapOptions } from "core/map/canvas";
+import { ITileNavigationState } from "core/tiles";
 import { ISize2 } from "core/geometry";
-import { IGeo2 } from "core/geography";
-import { EventState, Observable } from "core/events";
-import { ICanvasRenderingOptions } from "core/engine";
-export interface IMapTextureOptions extends ICanvasRenderingOptions, ISize2 {
+import { EventState } from "core/events";
+export interface IMapTextureOptions extends ICanvasMapOptions, ISize2 {
     generateMipMaps?: boolean;
     samplingMode?: number;
     format?: number;
     invertY?: boolean;
 }
-export declare class WebMapTexture extends BABYLON.Texture implements ITileNavigationApi<WebMapTexture>, ITileMap<ImageLayerContentType, IImageTileMapLayer, WebMapTexture> {
+export declare class WebMapTexture extends BABYLON.Texture {
     static readonly DefaultOptions: IMapTextureOptions;
     static Options(o?: Partial<IMapTextureOptions>): IMapTextureOptions;
     static OptionsHD(o?: Partial<IMapTextureOptions>): IMapTextureOptions;
@@ -19,26 +17,10 @@ export declare class WebMapTexture extends BABYLON.Texture implements ITileNavig
     static Options4K(o?: Partial<IMapTextureOptions>): IMapTextureOptions;
     static Options8K(o?: Partial<IMapTextureOptions>): IMapTextureOptions;
     _display: BABYLON.Nullable<CanvasDisplay>;
-    _map: BABYLON.Nullable<CanvasMap>;
+    _map: BABYLON.Nullable<CanvasMap<unknown>>;
     _renderObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.Camera>>;
     constructor(name: string, options: IMapTextureOptions, scene: BABYLON.Scene, nav?: ITileNavigationState);
-    getOrderedLayers(predicate?: ((l: IImageTileMapLayer) => boolean) | undefined): IterableIterator<IImageTileMapLayer>;
-    get map(): BABYLON.Nullable<CanvasMap>;
-    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): WebMapTexture;
-    zoomMap(delta: number): WebMapTexture;
-    zoomInMap(delta: number): WebMapTexture;
-    zoomOutMap(delta: number): WebMapTexture;
-    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): WebMapTexture;
-    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): WebMapTexture;
-    rotateMap(r: number): WebMapTexture;
-    get navigation(): ITileNavigationState;
-    get display(): BABYLON.Nullable<CanvasDisplay>;
-    get layerAddedObservable(): Observable<IImageTileMapLayer>;
-    get layerRemovedObservable(): Observable<IImageTileMapLayer>;
-    getLayers(predicate?: (l: IImageTileMapLayer) => boolean, sorted?: boolean): IterableIterator<IImageTileMapLayer>;
-    addLayer(layer: ImageLayer): void;
-    removeLayer(layer: ImageLayer): void;
-    clear(): void;
+    get map(): CanvasMap<unknown>;
     dispose(): void;
     protected _checkUpdate(camera: BABYLON.Camera, eventState: EventState): void;
 }

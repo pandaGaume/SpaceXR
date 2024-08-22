@@ -1,18 +1,20 @@
-import { Observable } from "../../events";
-import { IDisposable } from "../../types";
+import { EventState, Observable } from "../../events";
+import { IDisposable, isValidable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileMapLayerContainer, TileMapLayerContainerContentType } from "./tiles.map.interfaces";
+
+type TileMapLayerContainerItemType<T> = TileMapLayerContainerContentType<T>;
 
 export class TileMapLayerContainer<T> extends ValidableBase implements ITileMapLayerContainer<T>, IDisposable {
     private _layerAddedObservable?: Observable<TileMapLayerContainerContentType<T>>;
     private _layerRemovedObservable?: Observable<TileMapLayerContainerContentType<T>>;
 
-    protected _layers: Map<string, TileMapLayerContainerContentType<T>>;
+    protected _layers: Map<string, TileMapLayerContainerItemType<T>>;
     protected _zIndexOrderedLayers?: Array<TileMapLayerContainerContentType<T>>;
 
     public constructor() {
         super();
-        this._layers = new Map<string, TileMapLayerContainerContentType<T>>();
+        this._layers = new Map<string, TileMapLayerContainerItemType<T>>();
     }
 
     public get layerAddedObservable(): Observable<TileMapLayerContainerContentType<T>> {
@@ -66,6 +68,7 @@ export class TileMapLayerContainer<T> extends ValidableBase implements ITileMapL
         if (!l) {
             return;
         }
+
         this._layers?.delete(k);
         this._removeSortedLayer(l);
         this._onLayerRemoved(layer);
@@ -77,7 +80,7 @@ export class TileMapLayerContainer<T> extends ValidableBase implements ITileMapL
 
     public clear(): void {
         if (this._layers) {
-            const toRemove = Array.from(this._layers.values()).map((v) => v);
+            const toRemove = Array.from(this._layers.values());
             for (const l of toRemove) {
                 this.removeLayer(l);
             }
@@ -88,6 +91,27 @@ export class TileMapLayerContainer<T> extends ValidableBase implements ITileMapL
         this.clear();
         this._layerAddedObservable?.clear();
         this._layerRemovedObservable?.clear();
+    }
+
+    public get isValid(): boolean {
+        if (!super.isValid) {
+            return false;
+        }
+        return (
+            this._zIndexOrderedLayers?.every((l) => {
+                if (isValidable(l)) {
+                    return l.isValid;
+                }
+                return true;
+            }) ?? true
+        );
+    }
+
+    protected _onChildrenValidation(eventData: Boolean, eventState: EventState) {
+        // we survey the children invalidation to propagate the status.
+        if (!eventData) {
+            this.invalidate();
+        }
     }
 
     protected _onLayerAdded(layer: TileMapLayerContainerContentType<T>): void {}

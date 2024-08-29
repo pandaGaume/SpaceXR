@@ -30,3 +30,7 @@ export interface ITileNavigationApi<T> {
     rotateMap(r: number): T;
 }
 export declare function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T>;
+export interface IHasNavigationApi<T> {
+    navigationApi: ITileNavigationApi<T>;
+}
+export declare function hasNavigationApi<T>(obj: unknown): obj is IHasNavigationApi<T>;

@@ -1,4 +1,5 @@
-import { EventState } from "../../events";
+import { IWeighted } from "../../collections/collections.interfaces";
+import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileNavigationState } from "../navigation";
@@ -8,7 +9,10 @@ import { ITileAddress, ITile, ITileMetrics } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 
 export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerView<T>, ILinkOptions<ITile<T>> {
+    private _weightChangedObservable?: Observable<IWeighted>;
+
     private _layer: ITileMapLayer<T>;
+    private _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
     private _view: ITileView;
     private _ownView: boolean;
     private _tiles: Map<string, Nullable<ITile<T>>>;
@@ -17,6 +21,7 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
     public constructor(layer: ITileMapLayer<T>, source?: ITileView) {
         super();
         this._layer = layer;
+        this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
         this._tiles = new Map<string, Nullable<ITile<T>>>();
         this._ownView = source === undefined || source === null;
         this._view = this._ownView ? this._buildSource() : source!;
@@ -35,13 +40,21 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
         this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
     }
 
+    public get weightChangedObservable(): Observable<IWeighted> {
+        if (!this._weightChangedObservable) {
+            this._weightChangedObservable = new Observable<IWeighted>();
+        }
+        return this._weightChangedObservable;
+    }
+
+    public get weight(): number | undefined {
+        return this._layer.weight;
+    }
+
     public get name(): string {
         return this._layer.name;
     }
 
-    public get zindex(): number | undefined {
-        return this._layer.zindex;
-    }
     public get layer(): ITileMapLayer<T> {
         return this._layer;
     }
@@ -90,6 +103,7 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
         }
         this.layer.provider.unlinkFrom(this._tilesTargetProxy);
         this._tiles.clear();
+        this._layerObserver?.disconnect();
     }
 
     public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void {
@@ -151,6 +165,20 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
     }
 
     protected _updatedTile(eventData: IPipelineMessageType<ITile<T>>, eventState: EventState): void {
+        this.invalidate();
+    }
+
+    protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {
+        // we survey the weight property of the layer to update the current view and messaging the map container that it need
+        // to sort the layers again.
+        switch (eventData.propertyName) {
+            case "weight": {
+                if (this._weightChangedObservable && this._weightChangedObservable.hasObservers()) {
+                    this._weightChangedObservable.notifyObservers(this, -1, this, this);
+                }
+                break;
+            }
+        }
         this.invalidate();
     }
 }

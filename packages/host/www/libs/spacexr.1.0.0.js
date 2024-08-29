@@ -355,6 +355,198 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./dist/collections/collection.js":
+/*!****************************************!*\
+  !*** ./dist/collections/collection.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Collection: () => (/* binding */ Collection)
+/* harmony export */ });
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../types */ "./dist/types.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../validable */ "./dist/validable.js");
+
+
+
+class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+    static Empty() {
+        return new Collection();
+    }
+    constructor(...items) {
+        super();
+        this._items = Array.from(items);
+    }
+    get addedObservable() {
+        if (!this._addedObservable) {
+            this._addedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        }
+        return this._addedObservable;
+    }
+    get removedObservable() {
+        if (!this._removedObservable) {
+            this._removedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        }
+        return this._removedObservable;
+    }
+    get count() {
+        return this._items.length;
+    }
+    *get(predicate, sorted) {
+        for (const l of this._items ?? []) {
+            if (!predicate || predicate(l))
+                yield l;
+        }
+    }
+    add(...item) {
+        const added = this._addInternal(item);
+        if (added?.length) {
+            if (this._addedObservable && this._addedObservable.hasObservers()) {
+                this._addedObservable.notifyObservers(added, -1, this, this);
+            }
+            this.invalidate();
+        }
+    }
+    remove(...item) {
+        const removed = this._removeInternal(item);
+        if (removed?.length) {
+            if (this._removedObservable && this._removedObservable.hasObservers()) {
+                this._removedObservable.notifyObservers(removed, -1, this, this);
+            }
+            this.invalidate();
+        }
+    }
+    clear() {
+        if (this._items) {
+            const toRemove = Array.from(this._items);
+            for (const l of toRemove) {
+                this.remove(l);
+            }
+        }
+    }
+    dispose() {
+        this.clear();
+        this._addedObservable?.clear();
+        this._removedObservable?.clear();
+    }
+    [Symbol.iterator]() {
+        let pointer = 0;
+        let items = this._items;
+        const iterator = {
+            next() {
+                if (pointer < items.length) {
+                    return {
+                        done: false,
+                        value: items[pointer++],
+                    };
+                }
+                return {
+                    done: true,
+                    value: null,
+                };
+            },
+            [Symbol.iterator]() {
+                return this;
+            },
+        };
+        return iterator;
+    }
+    get isValid() {
+        if (!super.isValid) {
+            return false;
+        }
+        return (this._items.every((l) => {
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(l)) {
+                return l.isValid;
+            }
+            return true;
+        }) ?? true);
+    }
+    _addInternal(items) {
+        this._items.push(...items);
+        return items;
+    }
+    _removeInternal(items) {
+        let removed = [];
+        for (const item of items) {
+            const i = this._items.indexOf(item);
+            if (i >= 0) {
+                removed.push(...this._items.splice(i, 1));
+            }
+        }
+        return removed;
+    }
+}
+//# sourceMappingURL=collection.js.map
+
+/***/ }),
+
+/***/ "./dist/collections/orderedCollection.js":
+/*!***********************************************!*\
+  !*** ./dist/collections/orderedCollection.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   OrderedCollection: () => (/* binding */ OrderedCollection)
+/* harmony export */ });
+/* harmony import */ var _collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./collection */ "./dist/collections/collection.js");
+
+class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collection {
+    constructor(...items) {
+        super(...items);
+        this._weightCallback = this._onWeightChanged;
+    }
+    _addInternal(items) {
+        const inserted = this._insertInternal(items);
+        if (inserted?.length) {
+            for (const i of inserted) {
+                i.weightChangedObservable?.add(this._weightCallback, -1, false, this, false);
+            }
+        }
+        return inserted;
+    }
+    _insertInternal(items) {
+        if (!items) {
+            return [];
+        }
+        for (const item of items) {
+            let index = this._items.findIndex((item) => (item.weight ?? 0) > (item.weight ?? 0));
+            if (index === -1) {
+                this._items.push(item);
+            }
+            else {
+                this._items.splice(index, 0, item);
+            }
+        }
+        return items;
+    }
+    _removeInternal(items) {
+        const removed = super._removeInternal(items);
+        if (removed?.length) {
+            for (const i of removed) {
+                i.weightChangedObservable?.removeCallback(this._weightCallback, this);
+            }
+        }
+        return removed;
+    }
+    _onWeightChanged(eventData, eventState) {
+        const item = eventData;
+        if (item) {
+            const inserted = this._insertInternal(super._removeInternal([item]));
+            if (inserted?.length) {
+                this.invalidate();
+            }
+        }
+    }
+}
+//# sourceMappingURL=orderedCollection.js.map
+
+/***/ }),
+
 /***/ "./dist/dem/dem.infos.js":
 /*!*******************************!*\
   !*** ./dist/dem/dem.infos.js ***!
@@ -4659,7 +4851,7 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
         if (!ctx || !this._display) {
             return;
         }
-        if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
+        if (!this._layerViews.count) {
             return;
         }
         const display = this.display;
@@ -4680,8 +4872,8 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 ctx.rotate(angle);
             }
             ctx.scale(scale, scale);
-            for (const l of this._zIndexOrderedLayers ?? []) {
-                const layer = (0,_tiles__WEBPACK_IMPORTED_MODULE_2__.isTileMapLayerProxy)(l) ? l.layer : l;
+            for (const view of this._layerViews) {
+                const layer = view.layer;
                 if (!layer.enabled) {
                     continue;
                 }
@@ -4695,10 +4887,10 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;
-                const tiles = l.activTiles;
-                if ((0,_types__WEBPACK_IMPORTED_MODULE_3__.isValidable)(l)) {
-                    l.validate();
+                if ((0,_types__WEBPACK_IMPORTED_MODULE_3__.isValidable)(view)) {
+                    view.validate();
                 }
+                const tiles = view.activTiles;
                 for (const tile of tiles) {
                     const b = tile?.bounds;
                     if (!b || !tile.content) {
@@ -7830,7 +8022,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayer),
-/* harmony export */   TileMapLayerContainer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerContainer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView),
 /* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapVectorLayer),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationState),
@@ -7846,6 +8037,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.VectorTileGeomType),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_15__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
+/* harmony export */   hasNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.hasNavigationApi),
 /* harmony export */   hasNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.hasNavigationState),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.hasTileSelectionContext),
 /* harmony export */   isDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.isDrawableTileMapLayer),
@@ -7906,8 +8098,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileMapLayerContainerProxy),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_map__WEBPACK_IMPORTED_MODULE_0__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _tiles_map_layer__WEBPACK_IMPORTED_MODULE_3__.TileMapLayer),
-/* harmony export */   TileMapLayerContainer: () => (/* reexport safe */ _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerContainer),
-/* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_5__.TileMapLayerView),
+/* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView),
 /* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _typed_index__WEBPACK_IMPORTED_MODULE_2__.TileMapVectorLayer),
 /* harmony export */   isDrawableTileMapLayer: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.isDrawableTileMapLayer),
 /* harmony export */   isTileMapLayerProxy: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.isTileMapLayerProxy)
@@ -7916,9 +8107,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.map.interfaces */ "./dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _typed_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./typed/index */ "./dist/tiles/map/typed/index.js");
 /* harmony import */ var _tiles_map_layer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.map.layer */ "./dist/tiles/map/tiles.map.layer.js");
-/* harmony import */ var _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.layerContainer */ "./dist/tiles/map/tiles.map.layerContainer.js");
-/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
-
+/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
 
 
 
@@ -7953,7 +8142,7 @@ function isTileMapLayerProxy(b) {
 function IsTileMapLayerContainerProxy(b) {
     if (b === null || typeof b !== "object")
         return false;
-    return b.layerContainer !== undefined;
+    return b.layers !== undefined;
 }
 //# sourceMappingURL=tiles.map.interfaces.js.map
 
@@ -7969,14 +8158,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapBase: () => (/* binding */ TileMapBase)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation */ "./dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.interfaces */ "./dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
-/* harmony import */ var _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.map.layerContainer */ "./dist/tiles/map/tiles.map.layerContainer.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.interfaces.js");
-/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navigation */ "./dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles.map.interfaces */ "./dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.interfaces.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
+/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../collections/orderedCollection */ "./dist/collections/orderedCollection.js");
+/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
 
 
 
@@ -7984,18 +8174,39 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__.TileMapLayerContainer {
-    constructor(display, nav) {
+
+class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+    constructor(display, nav, container) {
         super();
+        this._layers = container ?? this._createLayerContainer() ?? new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_1__.OrderedCollection();
+        this._layerAddedObserver = this._layers.addedObservable.add(this._onLayerAdded.bind(this));
+        this._layerRemovedObserver = this._layers.removedObservable.add(this._onLayerRemoved.bind(this));
         this._display = display;
         this._bindDisplay(this._display);
-        this._navigation = nav ?? this._buildNavigationState() ?? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
+        this._navigation = nav ?? this._buildNavigationState() ?? new _navigation__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState();
         this._bindNavigation(this._navigation);
-        this._view = this._buildView() ?? new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        this._view = this._buildView() ?? new _pipeline__WEBPACK_IMPORTED_MODULE_3__.TileView();
+        this._layerViews =
+            this._createLayerViewContainer(this._layers) ??
+                new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_1__.OrderedCollection(...Array.from(this._layers).map((l) => new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView(l, this._view)));
+    }
+    _onLayerAdded(eventData, eventstate) {
+        this._layerViews.add(...eventData.map((l) => this._createLayerView(l)));
+        this.invalidate();
+    }
+    _onLayerRemoved(eventData, eventstate) {
+        const toRemove = Array.from(this._layerViews.get((v) => eventData.includes(v.layer)));
+        if (toRemove?.length) {
+            this._layerViews.remove(...toRemove);
+            this.invalidate();
+        }
+    }
+    get layers() {
+        return this._layers;
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_5__.Observable();
         return this._propertyChangedObservable;
     }
     get display() {
@@ -8043,17 +8254,20 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
     getGeoBounds(metrics) {
         return undefined;
     }
+    get isValid() {
+        return super.isValid && this._layers.isValid;
+    }
     _doValidate() {
-        for (const l of this._layers.values()) {
-            const layer = (0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__.isTileMapLayerProxy)(l) ? l.layer : l;
-            if ((0,_types__WEBPACK_IMPORTED_MODULE_5__.isValidable)(l)) {
+        for (const l of this._layerViews) {
+            const layer = (0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_6__.isTileMapLayerProxy)(l) ? l.layer : l;
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_7__.isValidable)(l)) {
                 l.validate();
             }
             const offset = layer.zoomOffset ?? 0;
             const n = offset
-                ? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
+                ? new _navigation__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
                 : this.navigation;
-            if ((0,_pipeline__WEBPACK_IMPORTED_MODULE_6__.hasTileSelectionContext)(l)) {
+            if ((0,_pipeline__WEBPACK_IMPORTED_MODULE_8__.hasTileSelectionContext)(l)) {
                 l.setContext(n, this.display, layer.metrics, true);
             }
         }
@@ -8090,6 +8304,15 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
         this.invalidate();
         this._onNavigationBinded(nav);
     }
+    _createLayerContainer() {
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_1__.OrderedCollection();
+    }
+    _createLayerViewContainer(layers) {
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_1__.OrderedCollection(...Array.from(this._layers).map((l) => this._createLayerView(l)));
+    }
+    _createLayerView(layer) {
+        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView(layer, this._view);
+    }
     _onDisplayUnbinded(display) {
     }
     _onDisplayBinded(display) {
@@ -8104,24 +8327,11 @@ class TileMapBase extends _tiles_map_layerContainer__WEBPACK_IMPORTED_MODULE_0__
     }
     _onDisplayTranslated(display) {
     }
-    _onLayerAdded(layer) {
-    }
-    _onLayerRemoved(layer) {
-    }
     _buildNavigationState() {
-        return new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
+        return new _navigation__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState();
     }
     _buildView() {
-        return new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
-    }
-    _onBeforeLayerAdded(layer) {
-        if ((0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__.isTileMapLayerProxy)(layer)) {
-            if (layer instanceof _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView) {
-                return layer;
-            }
-            return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView(layer.layer, this.view);
-        }
-        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView(layer, this.view);
+        return new _pipeline__WEBPACK_IMPORTED_MODULE_3__.TileView();
     }
 }
 //# sourceMappingURL=tiles.map.js.map
@@ -8156,7 +8366,7 @@ class TileMapLayer {
         (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(provider !== undefined && name !== null, "Invalid provider or datasource");
         this._name = name;
         this._provider = (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileDatasource)(provider) ? this._buildProvider(provider) : provider;
-        this._zindex = options?.zindex ?? -1;
+        this._weight = options?.weight ?? -1;
         this._zoomOffset = options?.zoomOffset ?? 0;
         this._attribution = options?.attribution;
         this._draw = options?.drawFn;
@@ -8190,22 +8400,31 @@ class TileMapLayer {
         }
         return this._propertyChangedObservable;
     }
+    get weightChangedObservable() {
+        if (!this._weightChangedObservable) {
+            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+        }
+        return this._weightChangedObservable;
+    }
     get name() {
         return this._name;
     }
-    get zindex() {
-        return this._zindex;
+    get weight() {
+        return this._weight;
     }
-    set zindex(zindex) {
-        if (this._zindex !== zindex) {
+    set weight(zindex) {
+        if (this._weight !== zindex) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                const oldValue = this._zindex;
-                this._zindex = zindex;
-                const args = new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, oldValue, this._zindex, "zindex");
+                const oldValue = this._weight;
+                this._weight = zindex;
+                const args = new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, oldValue, this._weight, "weight");
                 this._propertyChangedObservable.notifyObservers(args, -1, this, this);
                 return;
             }
-            this._zindex = zindex;
+            if (this._weightChangedObservable && this._weightChangedObservable.hasObservers()) {
+                this._weightChangedObservable.notifyObservers(this, -1, this, this);
+            }
+            this._weight = zindex;
         }
     }
     get zoomOffset() {
@@ -8256,9 +8475,9 @@ class TileMapLayer {
     addTo(map) {
         if (map) {
             if ((0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy)(map)) {
-                map = map.layerContainer;
+                map = map.layers;
             }
-            map?.addLayer(this);
+            map?.add(this);
         }
         return this;
     }
@@ -8275,136 +8494,6 @@ class TileMapLayer {
 
 /***/ }),
 
-/***/ "./dist/tiles/map/tiles.map.layerContainer.js":
-/*!****************************************************!*\
-  !*** ./dist/tiles/map/tiles.map.layerContainer.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TileMapLayerContainer: () => (/* binding */ TileMapLayerContainer)
-/* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
-
-
-
-class TileMapLayerContainer extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
-    constructor() {
-        super();
-        this._layers = new Map();
-    }
-    get layerAddedObservable() {
-        if (!this._layerAddedObservable) {
-            this._layerAddedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
-        }
-        return this._layerAddedObservable;
-    }
-    get layerRemovedObservable() {
-        if (!this._layerRemovedObservable) {
-            this._layerRemovedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
-        }
-        return this._layerRemovedObservable;
-    }
-    *getLayers(predicate, sorted = true) {
-        if (sorted) {
-            yield* this.getOrderedLayers(predicate);
-            return;
-        }
-        if (this._layers) {
-            for (const [key, item] of this._layers) {
-                if (!predicate || predicate(key, item))
-                    yield item;
-            }
-        }
-    }
-    *getOrderedLayers(predicate) {
-        if (this._zIndexOrderedLayers) {
-            for (const l of this._zIndexOrderedLayers ?? []) {
-                if (!predicate || predicate(l.name, l))
-                    yield l;
-            }
-        }
-    }
-    addLayer(layer) {
-        layer = this._onBeforeLayerAdded(layer);
-        this._layers.set(layer.name, layer);
-        this._addSortedLayer(layer);
-        if (this._layerAddedObservable && this._layerAddedObservable.hasObservers()) {
-            this._layerAddedObservable.notifyObservers(layer, -1, this, this);
-        }
-        this._onLayerAdded(layer);
-        this.invalidate();
-    }
-    removeLayer(layer) {
-        const k = layer.name;
-        const l = this._layers.get(k);
-        if (!l) {
-            return;
-        }
-        this._layers?.delete(k);
-        this._removeSortedLayer(l);
-        this._onLayerRemoved(layer);
-        if (this._layerRemovedObservable && this._layerRemovedObservable.hasObservers()) {
-            this._layerRemovedObservable.notifyObservers(layer, -1, this, this);
-        }
-        this.invalidate();
-    }
-    clear() {
-        if (this._layers) {
-            const toRemove = Array.from(this._layers.values());
-            for (const l of toRemove) {
-                this.removeLayer(l);
-            }
-        }
-    }
-    dispose() {
-        this.clear();
-        this._layerAddedObservable?.clear();
-        this._layerRemovedObservable?.clear();
-    }
-    get isValid() {
-        if (!super.isValid) {
-            return false;
-        }
-        return (this._zIndexOrderedLayers?.every((l) => {
-            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(l)) {
-                return l.isValid;
-            }
-            return true;
-        }) ?? true);
-    }
-    _onChildrenValidation(eventData, eventState) {
-        if (!eventData) {
-            this.invalidate();
-        }
-    }
-    _onLayerAdded(layer) { }
-    _onLayerRemoved(layer) { }
-    _onBeforeLayerAdded(layer) {
-        return layer;
-    }
-    _addSortedLayer(layer) {
-        if (!this._zIndexOrderedLayers)
-            this._zIndexOrderedLayers = [];
-        this._zIndexOrderedLayers.push(layer);
-        this._zIndexOrderedLayers.sort((a, b) => (a.zindex ?? 0) - (b.zindex ?? 0));
-    }
-    _removeSortedLayer(layer) {
-        if (this._zIndexOrderedLayers) {
-            const index = this._zIndexOrderedLayers.findIndex((l) => l === layer);
-            if (index !== -1) {
-                this._zIndexOrderedLayers.splice(index, 1);
-            }
-        }
-    }
-}
-//# sourceMappingURL=tiles.map.layerContainer.js.map
-
-/***/ }),
-
 /***/ "./dist/tiles/map/tiles.map.layerView.js":
 /*!***********************************************!*\
   !*** ./dist/tiles/map/tiles.map.layerView.js ***!
@@ -8415,9 +8504,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapLayerView: () => (/* binding */ TileMapLayerView)
 /* harmony export */ });
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
 /* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
 /* harmony import */ var _pipeline_tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../pipeline/tiles.pipeline.proxy */ "./dist/tiles/pipeline/tiles.pipeline.proxy.js");
+
 
 
 
@@ -8425,6 +8516,7 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
     constructor(layer, source) {
         super();
         this._layer = layer;
+        this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
         this._tiles = new Map();
         this._ownView = source === undefined || source === null;
         this._view = this._ownView ? this._buildSource() : source;
@@ -8435,11 +8527,17 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         }, this);
         this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
     }
+    get weightChangedObservable() {
+        if (!this._weightChangedObservable) {
+            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+        }
+        return this._weightChangedObservable;
+    }
+    get weight() {
+        return this._layer.weight;
+    }
     get name() {
         return this._layer.name;
-    }
-    get zindex() {
-        return this._layer.zindex;
     }
     get layer() {
         return this._layer;
@@ -8479,12 +8577,13 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         }
         this.layer.provider.unlinkFrom(this._tilesTargetProxy);
         this._tiles.clear();
+        this._layerObserver?.disconnect();
     }
     setContext(state, display, metrics, dispatchEvent) {
         this._view?.setContext(state, display, metrics, dispatchEvent);
     }
     _buildSource() {
-        return new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        return new _pipeline__WEBPACK_IMPORTED_MODULE_3__.TileView();
     }
     _addedAddress(eventData, eventState) {
         const added = [];
@@ -8529,6 +8628,17 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         this.invalidate();
     }
     _updatedTile(eventData, eventState) {
+        this.invalidate();
+    }
+    _onLayerPropertyChanged(eventData, eventState) {
+        switch (eventData.propertyName) {
+            case "weight": {
+                if (this._weightChangedObservable && this._weightChangedObservable.hasObservers()) {
+                    this._weightChangedObservable.notifyObservers(this, -1, this, this);
+                }
+                break;
+            }
+        }
         this.invalidate();
     }
 }
@@ -8655,6 +8765,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileNavigationState),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_navigation_state__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_navigation_state_sync__WEBPACK_IMPORTED_MODULE_2__.TileNavigationStateSynchronizer),
+/* harmony export */   hasNavigationApi: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasNavigationApi),
 /* harmony export */   hasNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasNavigationState)
 /* harmony export */ });
 /* harmony import */ var _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.navigation.interfaces */ "./dist/tiles/navigation/tiles.navigation.interfaces.js");
@@ -8677,6 +8788,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTileNavigationApi: () => (/* binding */ IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* binding */ IsTileNavigationState),
+/* harmony export */   hasNavigationApi: () => (/* binding */ hasNavigationApi),
 /* harmony export */   hasNavigationState: () => (/* binding */ hasNavigationState)
 /* harmony export */ });
 /* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geography */ "./dist/geography/geography.interfaces.js");
@@ -8710,6 +8822,11 @@ function IsTileNavigationApi(b) {
         b.translateUnitsMap !== undefined &&
         b.translateMap !== undefined &&
         b.rotateMap !== undefined);
+}
+function hasNavigationApi(obj) {
+    if (typeof obj !== "object" || obj === null)
+        return false;
+    return obj.navigationApi !== undefined;
 }
 //# sourceMappingURL=tiles.navigation.interfaces.js.map
 
@@ -11654,7 +11771,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileContentProvider),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileMapLayer),
-/* harmony export */   TileMapLayerContainer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileMapLayerContainer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileMapLayerView),
 /* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileMapVectorLayer),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileNavigationState),
@@ -11675,6 +11791,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Volume: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Volume),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.XmlDocumentTileCodec),
+/* harmony export */   hasNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.hasNavigationApi),
 /* harmony export */   hasNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.hasNavigationState),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.hasTileSelectionContext),
 /* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isArrayOfCartesianArray),

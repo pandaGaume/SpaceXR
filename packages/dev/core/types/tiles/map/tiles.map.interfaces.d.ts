@@ -5,18 +5,19 @@ import { IHasActivTiles, ITile, ITileAddress, ITileMetricsProvider, ITileProvide
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
 import { ISize3 } from "../../geometry";
+import { IOrderedCollection, IWeighted } from "../../collections/collections.interfaces";
 export type LayerRenderFn<T> = (ctx: CanvasRenderingContext2D, tile: ITile<T>, width: number, height: number) => void;
 export interface IDrawableTileMapLayer<T> {
     drawFn?: LayerRenderFn<T>;
     drawTarget?: any;
 }
 export interface ITileMapLayerOptions<T> extends IDrawableTileMapLayer<T> {
-    zindex: number;
+    weight?: number;
     zoomOffset?: number;
     attribution?: string;
 }
 export declare function isDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T>;
-export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileMapLayerOptions<T>, ITileMetricsProvider {
+export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileMapLayerOptions<T>, ITileMetricsProvider, IWeighted {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
@@ -29,7 +30,7 @@ export interface ITileMapLayerProxy<T> extends IHasActivTiles<T>, IValidable {
     zindex?: number;
 }
 export declare function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T>;
-export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITargetBlock<ITileAddress>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider, IHasView, ITileSelectionContext {
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITargetBlock<ITileAddress>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider, IHasView, ITileSelectionContext, IWeighted {
 }
 export type ImageLayerContentType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas;
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions<ImageLayerContentType> {
@@ -38,18 +39,10 @@ export interface IImageTileMapLayer extends ITileMapLayer<ImageLayerContentType>
 }
 export interface IFloat32TileMapLayer extends ITileMapLayer<Float32Array> {
 }
-export type TileMapLayerContainerContentType<T> = ITileMapLayer<T> | ITileMapLayerProxy<T>;
-export interface ITileMapLayerContainer<T> {
-    layerAddedObservable: Observable<TileMapLayerContainerContentType<T>>;
-    layerRemovedObservable: Observable<TileMapLayerContainerContentType<T>>;
-    getLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean, sorted?: boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
-    getOrderedLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
-    addLayer(layer: TileMapLayerContainerContentType<T>): void;
-    removeLayer(layer: TileMapLayerContainerContentType<T>): void;
-    clear(): void;
+export interface ITileMapLayerContainer<T> extends IOrderedCollection<ITileMapLayer<T>> {
 }
 export interface IHasTileMapLayerContainer<T> {
-    layerContainer: ITileMapLayerContainer<T>;
+    layers: ITileMapLayerContainer<T>;
 }
 export declare function IsTileMapLayerContainerProxy<T>(b: unknown): b is IHasTileMapLayerContainer<T>;
 export interface IDisplay extends IDisposable {
@@ -62,5 +55,5 @@ export interface IPhysicalDisplay extends IDisplay {
 export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
-export interface ITileMap<T, L extends ITileMapLayer<T>, S> extends ITileMapLayerContainer<T>, ITileNavigationApi<S>, IHasNavigationState, IHasDisplay, IDisposable {
+export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, ITileNavigationApi<ITileMap<T>>, IHasNavigationState, IHasDisplay, IDisposable {
 }

@@ -6,16 +6,18 @@ import { Assert } from "../../utils";
 import { IMemoryCache } from "../../cache";
 import { TileContentProvider, TileProvider } from "../providers";
 import { Nullable } from "../../types";
+import { IWeighted } from "../../collections/collections.interfaces";
 
 export class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;
-    _zindex: number;
+    _weight: number;
     _zoomOffset: number;
     _attribution?: string;
     _enabled: boolean;
     _draw?: LayerRenderFn<T>;
     _drawTarget?: any;
 
+    _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
 
     _provider: ITileProvider<T>;
@@ -26,7 +28,7 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
 
         this._name = name;
         this._provider = IsTileDatasource<T, ITileAddress>(provider) ? this._buildProvider(provider) : provider;
-        this._zindex = options?.zindex ?? -1;
+        this._weight = options?.weight ?? -1;
         this._zoomOffset = options?.zoomOffset ?? 0;
         this._attribution = options?.attribution;
         this._draw = options?.drawFn;
@@ -68,24 +70,34 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
         return this._propertyChangedObservable;
     }
 
+    public get weightChangedObservable(): Observable<IWeighted> {
+        if (!this._weightChangedObservable) {
+            this._weightChangedObservable = new Observable<IWeighted>();
+        }
+        return this._weightChangedObservable;
+    }
+
     public get name(): string {
         return this._name;
     }
 
-    public get zindex(): number {
-        return this._zindex;
+    public get weight(): number {
+        return this._weight;
     }
 
-    public set zindex(zindex: number) {
-        if (this._zindex !== zindex) {
+    public set weight(zindex: number) {
+        if (this._weight !== zindex) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                const oldValue = this._zindex;
-                this._zindex = zindex;
-                const args = new PropertyChangedEventArgs<ITileMapLayer<T>, unknown>(this, oldValue, this._zindex, "zindex");
+                const oldValue = this._weight;
+                this._weight = zindex;
+                const args = new PropertyChangedEventArgs<ITileMapLayer<T>, unknown>(this, oldValue, this._weight, "weight");
                 this._propertyChangedObservable.notifyObservers(args, -1, this, this);
                 return;
             }
-            this._zindex = zindex;
+            if (this._weightChangedObservable && this._weightChangedObservable.hasObservers()) {
+                this._weightChangedObservable.notifyObservers(this, -1, this, this);
+            }
+            this._weight = zindex;
         }
     }
 
@@ -143,9 +155,9 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
     public addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T> {
         if (map) {
             if (IsTileMapLayerContainerProxy<T>(map)) {
-                map = map.layerContainer;
+                map = map.layers;
             }
-            map?.addLayer(this);
+            map?.add(this);
         }
         return this;
     }

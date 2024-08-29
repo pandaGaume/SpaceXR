@@ -29,9 +29,6 @@ import { HolographicDisplay } from "../display";
 import { IsDisposable } from "core/types";
 import { WebMapMaterial } from "../materials";
 
-///<summary>
-/// A layer for elevation data. The layer serve as host for elevation tiles and therefore the grid model used to display the elevation.
-/// </summary>
 export class Map3dElevationHost
     extends TransformNode
     implements ITransformBlock<ITile<IDemInfos>, ITile<IElevationMesh>>, IHasActivTiles<IElevationMesh>, ITileMetricsProvider, IHasNavigationState
@@ -90,13 +87,7 @@ export class Map3dElevationHost
     // cached cartesian center
     _cartesianCenter: Nullable<ICartesian2>;
 
-    public constructor(
-        name: string,
-        navigation: ITileNavigationState,
-        layers: ITileMapLayerContainer<unknown, ITileMapLayer<unknown>>,
-        source: ElevationLayer,
-        enabled: boolean = true
-    ) {
+    public constructor(name: string, navigation: ITileNavigationState, layers: ITileMapLayerContainer<unknown>, source: ElevationLayer, enabled: boolean = true) {
         super(name);
         this._navigation = navigation;
         this._textureLayers = layers;

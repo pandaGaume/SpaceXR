@@ -1,9 +1,9 @@
 import { Scalar } from "../../math";
-import { IDisplay, isDrawableTileMapLayer, isTileMapLayerProxy, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
+import { IDisplay, isDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
 import { isValidable } from "../../types";
 
 // intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
-export class Context2DTileMap<T> extends TileMapBase<T, ITileMapLayer<T>> {
+export class Context2DTileMap<T> extends TileMapBase<T> {
     public constructor(display: IDisplay, nav?: ITileNavigationState) {
         super(display, nav);
     }
@@ -15,9 +15,10 @@ export class Context2DTileMap<T> extends TileMapBase<T, ITileMapLayer<T>> {
         if (!ctx || !this._display) {
             return;
         }
-        if (!this._zIndexOrderedLayers || !this._zIndexOrderedLayers.length) {
+        if (!this._layerViews.count) {
             return;
         }
+
         const display = this.display;
         if (!display) {
             return;
@@ -47,8 +48,9 @@ export class Context2DTileMap<T> extends TileMapBase<T, ITileMapLayer<T>> {
             // we scale the canvas according the navigation scale
             ctx.scale(scale, scale);
 
-            for (const l of this._zIndexOrderedLayers ?? []) {
-                const layer: ITileMapLayer<T> = isTileMapLayerProxy<T>(l) ? l.layer : l;
+            for (const view of this._layerViews) {
+                // we access the layer to get renders functions
+                const layer: ITileMapLayer<T> = view.layer;
                 if (!layer.enabled) {
                     continue;
                 }
@@ -62,10 +64,14 @@ export class Context2DTileMap<T> extends TileMapBase<T, ITileMapLayer<T>> {
                 const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;
-                const tiles = l.activTiles;
-                if (isValidable(l)) {
-                    l.validate();
+
+                // activ tile are comming from the views
+                // ensure the view is validate.
+                if (isValidable(view)) {
+                    view.validate();
                 }
+
+                const tiles = view.activTiles;
                 for (const tile of tiles) {
                     const b = tile?.bounds;
                     if (!b || !tile.content) {

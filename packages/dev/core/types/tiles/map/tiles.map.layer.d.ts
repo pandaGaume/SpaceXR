@@ -3,14 +3,16 @@ import { ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, Tile
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, LayerRenderFn } from "./tiles.map.interfaces";
 import { IMemoryCache } from "../../cache";
 import { Nullable } from "../../types";
+import { IWeighted } from "../../collections/collections.interfaces";
 export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;
-    _zindex: number;
+    _weight: number;
     _zoomOffset: number;
     _attribution?: string;
     _enabled: boolean;
     _draw?: LayerRenderFn<T>;
     _drawTarget?: any;
+    _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     _provider: ITileProvider<T>;
     constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
@@ -22,9 +24,10 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     get drawFn(): LayerRenderFn<T> | undefined;
     get drawTarget(): any;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
+    get weightChangedObservable(): Observable<IWeighted>;
     get name(): string;
-    get zindex(): number;
-    set zindex(zindex: number);
+    get weight(): number;
+    set weight(zindex: number);
     get zoomOffset(): number;
     set zoomOffset(zoomOffset: number);
     get attribution(): string | undefined;

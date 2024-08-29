@@ -64,3 +64,12 @@ export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {
         (<ITileNavigationApi<T>>b).rotateMap !== undefined
     );
 }
+
+export interface IHasNavigationApi<T> {
+    navigationApi: ITileNavigationApi<T>;
+}
+
+export function hasNavigationApi<T>(obj: unknown): obj is IHasNavigationApi<T> {
+    if (typeof obj !== "object" || obj === null) return false;
+    return (<IHasNavigationApi<T>>obj).navigationApi !== undefined;
+}

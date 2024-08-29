@@ -1,14 +1,18 @@
 import { EventState, Observable } from "../../events";
 import { IDisposable } from "../../types";
 import { ValidableBase } from "../../validable";
-import { ITileMapLayerContainer, TileMapLayerContainerContentType } from "./tiles.map.interfaces";
+import { ITileMapLayerContainer, LayerHandler, TileMapLayerContainerContentType } from "./tiles.map.interfaces";
 type TileMapLayerContainerItemType<T> = TileMapLayerContainerContentType<T>;
 export declare class TileMapLayerContainer<T> extends ValidableBase implements ITileMapLayerContainer<T>, IDisposable {
     private _layerAddedObservable?;
     private _layerRemovedObservable?;
     protected _layers: Map<string, TileMapLayerContainerItemType<T>>;
     protected _zIndexOrderedLayers?: Array<TileMapLayerContainerContentType<T>>;
+    private _onBeforeLayerAdded?;
     constructor();
+    get countLayer(): number;
+    get onBeforeLayerAdded(): LayerHandler<T> | undefined;
+    set onBeforeLayerAdded(handler: LayerHandler<T> | undefined);
     get layerAddedObservable(): Observable<TileMapLayerContainerContentType<T>>;
     get layerRemovedObservable(): Observable<TileMapLayerContainerContentType<T>>;
     getLayers(predicate?: (k: string, l: TileMapLayerContainerContentType<T>) => boolean, sorted?: boolean): IterableIterator<TileMapLayerContainerContentType<T>>;
@@ -21,7 +25,6 @@ export declare class TileMapLayerContainer<T> extends ValidableBase implements I
     protected _onChildrenValidation(eventData: Boolean, eventState: EventState): void;
     protected _onLayerAdded(layer: TileMapLayerContainerContentType<T>): void;
     protected _onLayerRemoved(layer: TileMapLayerContainerContentType<T>): void;
-    protected _onBeforeLayerAdded(layer: TileMapLayerContainerContentType<T>): TileMapLayerContainerContentType<T>;
     private _addSortedLayer;
     private _removeSortedLayer;
 }

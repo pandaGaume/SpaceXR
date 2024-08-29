@@ -33,7 +33,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     /// </summary>
     public constructor(display: IDisplay, nav?: ITileNavigationState, container?: ITileMapLayerContainer<T>) {
         super();
-        this._layers = container ?? this._createLayerContainer() ?? new OrderedCollection<ITileMapLayer<T>>();
+        this._layers = container ?? this._createLayerContainer() ?? this._createLayerContainerInternal();
         this._layerAddedObserver = this._layers.addedObservable.add(this._onLayerAdded.bind(this));
         this._layerRemovedObserver = this._layers.removedObservable.add(this._onLayerRemoved.bind(this));
 
@@ -46,9 +46,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
         this._view = this._buildView() ?? new TileView();
 
-        this._layerViews =
-            this._createLayerViewContainer(this._layers) ??
-            new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => new TileMapLayerView(l, this._view)));
+        this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
     }
 
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
@@ -189,15 +187,15 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     protected _createLayerContainer(): ITileMapLayerContainer<T> {
-        return new OrderedCollection<ITileMapLayer<T>>();
+        return this._createLayerContainerInternal();
     }
 
     protected _createLayerViewContainer(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
-        return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._createLayerView(l)));
+        return this._createLayerViewContainerInternal(layers);
     }
 
     protected _createLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
-        return new TileMapLayerView(layer, this._view);
+        return this._createLayerViewInternal(layer);
     }
 
     protected _onDisplayUnbinded(display: Nullable<IDisplay>): void {
@@ -234,5 +232,17 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     protected _buildView(): ITileView {
         return new TileView();
+    }
+
+    private _createLayerContainerInternal(): ITileMapLayerContainer<T> {
+        return new OrderedCollection<ITileMapLayer<T>>();
+    }
+
+    private _createLayerViewContainerInternal(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
+        return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._createLayerViewInternal(l)));
+    }
+
+    private _createLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
+        return new TileMapLayerView(layer, this._view);
     }
 }

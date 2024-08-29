@@ -53,4 +53,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _onDisplayTranslated(display: IDisplay): void;
     protected _buildNavigationState(): ITileNavigationState;
     protected _buildView(): ITileView;
+    private _createLayerContainerInternal;
+    private _createLayerViewContainerInternal;
+    private _createLayerViewInternal;
 }

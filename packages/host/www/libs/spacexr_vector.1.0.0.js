@@ -58,7 +58,7 @@ class VectorToImageTileCodec extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Can
         return await this._codec.decodeAsync(r);
     }
     _render(ctx, tile, style) {
-        this._renderer.renderTile(tile, ctx, style);
+        this._renderer.renderTile(tile, ctx, this.width, this.height, style);
     }
 }
 //# sourceMappingURL=tiles.codecs.vector.image.js.map

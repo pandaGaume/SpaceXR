@@ -30,6 +30,6 @@ export class VectorToImageTileCodec extends CanvasTileCodec<VectorTile> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, tile: VectorTile, style?: IVectorStyle): void {
-        this._renderer.renderTile(tile, ctx, style);
+        this._renderer.renderTile(tile, ctx, this.width, this.height, style);
     }
 }

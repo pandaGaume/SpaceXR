@@ -46,7 +46,7 @@ export function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T> {
 
 export interface ITileMapLayerView<T>
     extends ITileMapLayerProxy<T>,
-        ITargetBlock<ITileAddress>,
+        ITargetBlock<ITileAddress | ITile<T>>,
         IHasActivTiles<T>,
         IValidable,
         IDisposable,

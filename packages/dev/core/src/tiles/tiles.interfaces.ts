@@ -1,5 +1,5 @@
 import { ICloneable, IDisposable, Nullable } from "../types";
-import { IEnvelope, IGeo2, IGeoBounded, IsGeoBounded } from "../geography/geography.interfaces";
+import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
@@ -40,7 +40,7 @@ export interface ITile<T> extends ITileAddressable, IGeoBounded, IBounded {
 
 export function IsTile<T>(b: unknown): b is ITile<T> {
     if (typeof b !== "object" || b === null) return false;
-    return IsGeoBounded(b) && (<any>b).address !== undefined && (<any>b).content !== undefined;
+    return (<any>b).address !== undefined && (<any>b).content !== undefined;
 }
 
 export function IsArrayOfTile<T>(b: unknown): b is Array<ITile<T>> {

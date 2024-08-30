@@ -58,5 +58,5 @@ export interface IGeoBounded {
 
 export function IsGeoBounded(b: unknown): b is IGeoBounded {
     if (typeof b !== "object" || b === null) return false;
-    return (<IGeoBounded>b).geoBounds !== undefined && IsEnvelope((<IGeoBounded>b).geoBounds);
+    return IsEnvelope((<IGeoBounded>b).geoBounds);
 }

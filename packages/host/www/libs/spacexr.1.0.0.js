@@ -2021,7 +2021,7 @@ function IsEnvelope(b) {
 function IsGeoBounded(b) {
     if (typeof b !== "object" || b === null)
         return false;
-    return b.geoBounds !== undefined && IsEnvelope(b.geoBounds);
+    return IsEnvelope(b.geoBounds);
 }
 //# sourceMappingURL=geography.interfaces.js.map
 
@@ -8185,6 +8185,8 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._bindNavigation(this._navigation);
         this._view = this._buildView() ?? new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
         this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
+        this._layerViewAddedObserver = this._layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
+        this._layerViewRemovedObserver = this._layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
     }
     get layers() {
         return this._layers;
@@ -8210,6 +8212,10 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         super.dispose();
         this._navigationUpdatedObserver?.disconnect();
         this._displayPropertyObserver?.disconnect();
+        this._layerAddedObserver?.disconnect();
+        this._layerRemovedObserver?.disconnect();
+        this._layerViewAddedObserver?.disconnect();
+        this._layerViewRemovedObserver?.disconnect();
     }
     setViewMap(center, zoom, rotation) {
         this._navigation.setViewMap(center, zoom, rotation);
@@ -8268,6 +8274,8 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             this.invalidate();
         }
     }
+    _onLayerViewAdded(eventData, eventstate) { }
+    _onLayerViewRemoved(eventData, eventstate) { }
     _onNavigationUpdatedInternal(event, state) {
         if (event) {
             this.invalidate();
@@ -8511,10 +8519,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapLayerView: () => (/* binding */ TileMapLayerView)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
 /* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
 /* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
-/* harmony import */ var _pipeline_tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../pipeline/tiles.pipeline.proxy */ "./dist/tiles/pipeline/tiles.pipeline.proxy.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
 
 
 
@@ -8528,15 +8536,11 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         this._ownView = source === undefined || source === null;
         this._view = this._ownView ? this._buildSource() : source;
         this._view?.linkTo(this);
-        this._tilesTargetProxy = new _pipeline_tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_1__.TargetProxy({
-            updated: this._updatedTile,
-            added: this._addedTile,
-        }, this);
-        this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
+        this._layer.provider.linkTo(this, { accept: this.accept.bind(this) });
     }
     get weightChangedObservable() {
         if (!this._weightChangedObservable) {
-            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
         }
         return this._weightChangedObservable;
     }
@@ -8568,12 +8572,24 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         return this._tiles.has(tile.address.quadkey);
     }
     added(eventData, eventState) {
+        if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsArrayOfTile)(eventData)) {
+            this._addedTile(eventData, eventState);
+            return;
+        }
         this._addedAddress(eventData, eventState);
     }
     removed(eventData, eventState) {
+        if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsArrayOfTile)(eventData)) {
+            this._removedTile(eventData, eventState);
+            return;
+        }
         this._removedAddress(eventData, eventState);
     }
     updated(eventData, eventState) {
+        if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsArrayOfTile)(eventData)) {
+            this._updatedTile(eventData, eventState);
+            return;
+        }
         this._updatedAddress(eventData, eventState);
     }
     dispose() {
@@ -8582,7 +8598,7 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
         if (this._ownView) {
             this._view.dispose();
         }
-        this.layer.provider.unlinkFrom(this._tilesTargetProxy);
+        this.layer.provider.unlinkFrom(this);
         this._tiles.clear();
         this._layerObserver?.disconnect();
     }
@@ -10183,8 +10199,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMetricsProvider: () => (/* binding */ IsTileMetricsProvider),
 /* harmony export */   IsTileSystemBounds: () => (/* binding */ IsTileSystemBounds)
 /* harmony export */ });
-/* harmony import */ var _geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography/geography.interfaces */ "./dist/geography/geography.interfaces.js");
-
 function IsTileAddress(b) {
     if (typeof b !== "object" || b === null)
         return false;
@@ -10203,7 +10217,7 @@ function IsArrayOfTileAddress(b) {
 function IsTile(b) {
     if (typeof b !== "object" || b === null)
         return false;
-    return (0,_geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsGeoBounded)(b) && b.address !== undefined && b.content !== undefined;
+    return b.address !== undefined && b.content !== undefined;
 }
 function IsArrayOfTile(b) {
     if (Array.isArray(b) && b.length) {

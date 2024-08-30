@@ -30,7 +30,7 @@ export interface ITileMapLayerProxy<T> extends IHasActivTiles<T>, IValidable {
     zindex?: number;
 }
 export declare function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T>;
-export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITargetBlock<ITileAddress>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider, IHasView, ITileSelectionContext, IWeighted {
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITargetBlock<ITileAddress | ITile<T>>, IHasActivTiles<T>, IValidable, IDisposable, ITileMetricsProvider, IHasView, ITileSelectionContext, IWeighted {
 }
 export type ImageLayerContentType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas;
 export interface IImageTileMapLayerOptions extends ITileMapLayerOptions<ImageLayerContentType> {

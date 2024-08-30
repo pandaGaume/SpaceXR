@@ -3,9 +3,8 @@ import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../.
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileNavigationState } from "../navigation";
-import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITileView, TileView } from "../pipeline";
-import { TargetProxy } from "../pipeline/tiles.pipeline.proxy";
-import { ITileAddress, ITile, ITileMetrics } from "../tiles.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITileView, TileView } from "../pipeline";
+import { ITileAddress, ITile, ITileMetrics, IsArrayOfTile } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 
 export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerView<T>, ILinkOptions<ITile<T>> {
@@ -16,7 +15,6 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
     private _view: ITileView;
     private _ownView: boolean;
     private _tiles: Map<string, Nullable<ITile<T>>>;
-    private _tilesTargetProxy: ITargetBlock<ITile<T>>;
 
     public constructor(layer: ITileMapLayer<T>, source?: ITileView) {
         super();
@@ -27,17 +25,7 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
         this._view = this._ownView ? this._buildSource() : source!;
 
         this._view?.linkTo(this);
-        // add a link with a filter, based on addresses
-        // the use of the proxy is due to the inhability of Typescript to support
-        // methods polymorphism.
-        this._tilesTargetProxy = new TargetProxy<ITile<T>>(
-            {
-                updated: this._updatedTile,
-                added: this._addedTile,
-            },
-            this
-        );
-        this._layer.provider.linkTo(this._tilesTargetProxy, { accept: this.accept.bind(this) });
+        this._layer.provider.linkTo(this, { accept: this.accept.bind(this) });
     }
 
     public get weightChangedObservable(): Observable<IWeighted> {
@@ -83,16 +71,28 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
         return this._tiles.has(tile.address.quadkey);
     }
 
-    public added(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
-        this._addedAddress(eventData, eventState);
+    public added(eventData: IPipelineMessageType<ITileAddress | ITile<T>>, eventState: EventState): void {
+        if (IsArrayOfTile<T>(eventData)) {
+            this._addedTile(eventData, eventState);
+            return;
+        }
+        this._addedAddress(<IPipelineMessageType<ITileAddress>>eventData, eventState);
     }
 
-    public removed(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
-        this._removedAddress(eventData, eventState);
+    public removed(eventData: IPipelineMessageType<ITileAddress | ITile<T>>, eventState: EventState): void {
+        if (IsArrayOfTile<T>(eventData)) {
+            this._removedTile(eventData, eventState);
+            return;
+        }
+        this._removedAddress(<IPipelineMessageType<ITileAddress>>eventData, eventState);
     }
 
-    public updated(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
-        this._updatedAddress(eventData, eventState);
+    public updated(eventData: IPipelineMessageType<ITileAddress | ITile<T>>, eventState: EventState): void {
+        if (IsArrayOfTile<T>(eventData)) {
+            this._updatedTile(eventData, eventState);
+            return;
+        }
+        this._updatedAddress(<IPipelineMessageType<ITileAddress>>eventData, eventState);
     }
 
     public dispose(): void {
@@ -101,7 +101,7 @@ export class TileMapLayerView<T> extends ValidableBase implements ITileMapLayerV
         if (this._ownView) {
             this._view.dispose();
         }
-        this.layer.provider.unlinkFrom(this._tilesTargetProxy);
+        this.layer.provider.unlinkFrom(this);
         this._tiles.clear();
         this._layerObserver?.disconnect();
     }

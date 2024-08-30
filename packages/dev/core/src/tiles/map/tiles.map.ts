@@ -17,6 +17,8 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layerRemovedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layers: ITileMapLayerContainer<T>;
+    protected _layerViewAddedObserver: Nullable<Observer<Array<ITileMapLayerView<T>>>>;
+    protected _layerViewRemovedObserver: Nullable<Observer<Array<ITileMapLayerView<T>>>>;
     protected _layerViews: ITileMapLayerViewContainer<T>;
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
@@ -47,11 +49,14 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._view = this._buildView() ?? new TileView();
 
         this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
+        this._layerViewAddedObserver = this._layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
+        this._layerViewRemovedObserver = this._layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
     }
 
     public get layers(): ITileMapLayerContainer<T> {
         return this._layers;
     }
+
     public get layerViews(): ITileMapLayerViewContainer<T> {
         return this._layerViews;
     }
@@ -77,6 +82,10 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         super.dispose();
         this._navigationUpdatedObserver?.disconnect();
         this._displayPropertyObserver?.disconnect();
+        this._layerAddedObserver?.disconnect();
+        this._layerRemovedObserver?.disconnect();
+        this._layerViewAddedObserver?.disconnect();
+        this._layerViewRemovedObserver?.disconnect();
     }
 
     // navigation proxy
@@ -147,6 +156,10 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
             this.invalidate();
         }
     }
+
+    protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void {}
+
+    protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void {}
 
     // end navigation proxy
     private _onNavigationUpdatedInternal(event: boolean, state: EventState): void {

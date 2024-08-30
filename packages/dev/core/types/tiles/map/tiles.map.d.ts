@@ -14,6 +14,8 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layerRemovedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layers: ITileMapLayerContainer<T>;
+    protected _layerViewAddedObserver: Nullable<Observer<Array<ITileMapLayerView<T>>>>;
+    protected _layerViewRemovedObserver: Nullable<Observer<Array<ITileMapLayerView<T>>>>;
     protected _layerViews: ITileMapLayerViewContainer<T>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
@@ -37,6 +39,8 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _doValidate(): void;
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
     protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
+    protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void;
+    protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void;
     private _onNavigationUpdatedInternal;
     private _onDisplayPropertyChanged;
     private _bindDisplay;

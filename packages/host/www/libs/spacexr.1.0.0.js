@@ -8014,7 +8014,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.ShapeCollectionEventArgs),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_14__.Tile),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
@@ -9171,7 +9170,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock),
 /* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMipMapping),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_3__.TargetProxy),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
 /* harmony export */   TileView: () => (/* reexport safe */ _tiles_pipeline_view__WEBPACK_IMPORTED_MODULE_1__.TileView),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasTileSelectionContext),
@@ -9180,8 +9178,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.pipeline.interfaces */ "./dist/tiles/pipeline/tiles.pipeline.interfaces.js");
 /* harmony import */ var _tiles_pipeline_view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.pipeline.view */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
 /* harmony import */ var _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.pipeline.link */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
-/* harmony import */ var _tiles_pipeline_proxy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.pipeline.proxy */ "./dist/tiles/pipeline/tiles.pipeline.proxy.js");
-
 
 
 
@@ -9295,38 +9291,6 @@ class TilePipelineLink {
     }
 }
 //# sourceMappingURL=tiles.pipeline.link.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/pipeline/tiles.pipeline.proxy.js":
-/*!*****************************************************!*\
-  !*** ./dist/tiles/pipeline/tiles.pipeline.proxy.js ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TargetProxy: () => (/* binding */ TargetProxy)
-/* harmony export */ });
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils */ "./dist/utils/runtime.js");
-
-class TargetProxy {
-    constructor(delegate, target) {
-        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(delegate !== null && delegate !== undefined);
-        this._delegate = delegate;
-        this._target = target;
-    }
-    added(eventData, eventState) {
-        this._delegate.added?.call(this._target ?? this._delegate, eventData, eventState);
-    }
-    removed(eventData, eventState) {
-        this._delegate.removed?.call(this._target ?? this._delegate, eventData, eventState);
-    }
-    updated(eventData, eventState) {
-        this._delegate.updated?.call(this._target ?? this._delegate, eventData, eventState);
-    }
-}
-//# sourceMappingURL=tiles.pipeline.proxy.js.map
 
 /***/ }),
 
@@ -11791,7 +11755,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions),
 /* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptionsBuilder),

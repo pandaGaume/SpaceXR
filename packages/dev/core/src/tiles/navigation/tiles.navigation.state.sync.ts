@@ -6,7 +6,7 @@ import { ITileNavigationState } from "./tiles.navigation.interfaces";
 export class TileNavigationStateSynchronizer implements IDisposable {
     _source: ITileNavigationState;
     _target: ITileNavigationState;
-    _sourceChangedObserver: Nullable<Observer<ITileNavigationState>>;
+    _sourceChangedObserver?: Nullable<Observer<boolean>>;
     _propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
     _enabled: boolean;
 
@@ -14,7 +14,7 @@ export class TileNavigationStateSynchronizer implements IDisposable {
         this._source = source;
         this._target = target;
         this._enabled = enabled;
-        this._sourceChangedObserver = this._source.stateChangedObservable.add(this._onSourceValidation.bind(this));
+        this._sourceChangedObserver = this._source.validationObservable?.add(this._onSourceValidation.bind(this));
         this._propertyChangedObserver = this._source.propertyChangedObservable.add(this._onSourcePropertyChanged.bind(this));
     }
 
@@ -39,8 +39,8 @@ export class TileNavigationStateSynchronizer implements IDisposable {
         this._enabled = v;
     }
 
-    protected _onSourceValidation(state: ITileNavigationState, eventState: EventState): void {
-        if (this._enabled) {
+    protected _onSourceValidation(state: boolean, eventState: EventState): void {
+        if (state && this._enabled) {
             this._target.validate();
         }
     }

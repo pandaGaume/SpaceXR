@@ -14,7 +14,6 @@ export function hasNavigationState(obj: unknown): obj is IHasNavigationState {
 
 export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
-    stateChangedObservable: Observable<ITileNavigationState>;
 
     center: IGeo2;
     zoom: number;
@@ -44,13 +43,13 @@ export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
 }
 
 export interface ITileNavigationApi<T> {
-    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): T;
-    zoomMap(delta: number): T;
-    zoomInMap(delta: number): T;
-    zoomOutMap(delta: number): T;
-    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): T;
-    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number): T;
-    rotateMap(r: number): T;
+    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): T;
+    zoomMap(delta: number, validate?: boolean): T;
+    zoomInMap(delta: number, validate?: boolean): T;
+    zoomOutMap(delta: number, validate?: boolean): T;
+    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): T;
+    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): T;
+    rotateMap(r: number, validate?: boolean): T;
 }
 
 export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {

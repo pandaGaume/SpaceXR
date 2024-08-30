@@ -3,7 +3,7 @@ import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
 import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
-import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
+import { IGeo2 } from "../../geography/geography.interfaces";
 import { ITileView } from "../pipeline";
 import { ValidableBase } from "../../validable";
 import { IOrderedCollection } from "../../collections/collections.interfaces";
@@ -16,7 +16,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _layers: ITileMapLayerContainer<T>;
     protected _layerViews: IOrderedCollection<ITileMapLayerView<T>>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
-    _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
+    _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
     constructor(display: IDisplay, nav?: ITileNavigationState, container?: ITileMapLayerContainer<T>);
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
@@ -34,7 +34,6 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T>;
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T>;
     rotateMap(r: number): TileMapBase<T>;
-    getGeoBounds(metrics: ITileMetrics): IEnvelope | undefined;
     get isValid(): boolean;
     protected _doValidate(): void;
     private _onNavigationUpdatedInternal;

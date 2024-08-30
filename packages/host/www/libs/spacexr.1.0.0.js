@@ -8222,35 +8222,32 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._displayPropertyObserver?.disconnect();
     }
     setViewMap(center, zoom, rotation) {
-        this._navigation.setViewMap(center, zoom, rotation).validate();
+        this._navigation.setViewMap(center, zoom, rotation);
         return this;
     }
     zoomMap(delta) {
-        this._navigation.zoomMap(delta).validate();
+        this._navigation.zoomMap(delta);
         return this;
     }
     zoomInMap(delta) {
-        this._navigation.zoomInMap(delta).validate();
+        this._navigation.zoomInMap(delta);
         return this;
     }
     zoomOutMap(delta) {
-        this._navigation.zoomOutMap(delta).validate();
+        this._navigation.zoomOutMap(delta);
         return this;
     }
     translateUnitsMap(tx, ty, metrics) {
-        this._navigation.translateUnitsMap(tx, ty, metrics).validate();
+        this._navigation.translateUnitsMap(tx, ty, metrics);
         return this;
     }
     translateMap(lat, lon) {
-        this._navigation.translateMap(lat, lon).validate();
+        this._navigation.translateMap(lat, lon);
         return this;
     }
     rotateMap(r) {
-        this._navigation.rotateMap(r).validate();
+        this._navigation.rotateMap(r);
         return this;
-    }
-    getGeoBounds(metrics) {
-        return undefined;
     }
     get isValid() {
         return super.isValid && this._layers.isValid;
@@ -8271,8 +8268,10 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         }
     }
     _onNavigationUpdatedInternal(event, state) {
-        this.invalidate();
-        this._onNavigationUpdated(event);
+        if (event) {
+            this.invalidate();
+            this._onNavigationUpdated(this._navigation);
+        }
     }
     _onDisplayPropertyChanged(event, state) {
         switch (event.propertyName) {
@@ -8297,7 +8296,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     _bindNavigation(nav) {
         this._navigationUpdatedObserver?.disconnect();
         if (nav) {
-            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
+            this._navigationUpdatedObserver = this._navigation.validationObservable?.add(this._onNavigationUpdatedInternal.bind(this));
         }
         this.invalidate();
         this._onNavigationBinded(nav);
@@ -8975,11 +8974,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
             this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
         return this._propertyChangedObservable;
     }
-    get stateChangedObservable() {
-        this._stateChangedObservable = this._stateChangedObservable || new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
-        return this._stateChangedObservable;
-    }
-    setViewMap(center, zoom, rotation) {
+    setViewMap(center, zoom, rotation, validate) {
         if (center) {
             let lat = 0;
             let lon = 0;
@@ -8999,21 +8994,33 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         if (rotation !== undefined && rotation !== this._azimuth?.value) {
             this.azimuth = new _geography__WEBPACK_IMPORTED_MODULE_4__.Bearing(rotation);
         }
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
-    zoomInMap(delta) {
+    zoomInMap(delta, validate) {
         this.zoom = this._lodf + Math.abs(delta);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
-    zoomMap(delta) {
+    zoomMap(delta, validate) {
         this.zoom = this._lodf + delta;
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
-    zoomOutMap(delta) {
+    zoomOutMap(delta, validate) {
         this.zoom = this._lodf - Math.abs(delta);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
-    translateUnitsMap(tx, ty, metrics) {
+    translateUnitsMap(tx, ty, metrics, validate) {
         const m = metrics ?? _geography__WEBPACK_IMPORTED_MODULE_8__.EPSG3857.Shared;
         if (this._azimuth?.value) {
             const p = this.rotatePointInv(tx, ty, this._cartesianCache);
@@ -9025,9 +9032,12 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
         this.center = m.getPointXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
-    translateMap(lat, lon) {
+    translateMap(lat, lon, validate) {
         if (lat) {
             let dlat;
             let dlon;
@@ -9044,11 +9054,17 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
                 dlon = lon ?? 0;
             }
             this.center = new _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2(this._center.lat + dlat, this._center.lon + dlon);
+            if (validate === undefined || validate === true) {
+                this.validate();
+            }
         }
         return this;
     }
-    rotateMap(r) {
+    rotateMap(r, validate) {
         this.azimuth = new _geography__WEBPACK_IMPORTED_MODULE_4__.Bearing(this._azimuth.value + r);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
     syncWith(state) {
@@ -9064,11 +9080,6 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
     }
     toString() {
         return `center: ${this.center}, zoom: ${this.zoom}, azimuth: ${this.azimuth}`;
-    }
-    _doValidate() {
-        if (this._stateChangedObservable && this._stateChangedObservable.hasObservers()) {
-            this._stateChangedObservable.notifyObservers(this);
-        }
     }
     rotatePointInv(x, y, target) {
         const r = target || _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
@@ -9099,7 +9110,7 @@ class TileNavigationStateSynchronizer {
         this._source = source;
         this._target = target;
         this._enabled = enabled;
-        this._sourceChangedObserver = this._source.stateChangedObservable.add(this._onSourceValidation.bind(this));
+        this._sourceChangedObserver = this._source.validationObservable?.add(this._onSourceValidation.bind(this));
         this._propertyChangedObserver = this._source.propertyChangedObservable.add(this._onSourcePropertyChanged.bind(this));
     }
     dispose() {
@@ -9119,7 +9130,7 @@ class TileNavigationStateSynchronizer {
         this._enabled = v;
     }
     _onSourceValidation(state, eventState) {
-        if (this._enabled) {
+        if (state && this._enabled) {
             this._target.validate();
         }
     }

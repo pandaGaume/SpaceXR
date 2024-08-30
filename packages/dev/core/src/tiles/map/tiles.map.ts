@@ -3,7 +3,7 @@ import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
 import { IDisplay, isTileMapLayerProxy, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { isValidable, Nullable } from "../../types";
-import { IEnvelope, IGeo2 } from "../../geography/geography.interfaces";
+import { IGeo2 } from "../../geography/geography.interfaces";
 import { hasTileSelectionContext, ITileView, TileView } from "../pipeline";
 import { ValidableBase } from "../../validable";
 import { OrderedCollection } from "../../collections/orderedCollection";
@@ -20,7 +20,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _layerViews: IOrderedCollection<ITileMapLayerView<T>>;
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
-    _navigationUpdatedObserver?: Nullable<Observer<ITileNavigationState>>;
+    _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
 
     /// <summary>
@@ -91,42 +91,38 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     // navigation proxy
     public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T> {
-        this._navigation.setViewMap(center, zoom, rotation).validate();
+        this._navigation.setViewMap(center, zoom, rotation);
         return this;
     }
 
     public zoomMap(delta: number): TileMapBase<T> {
-        this._navigation.zoomMap(delta).validate();
+        this._navigation.zoomMap(delta);
         return this;
     }
 
     public zoomInMap(delta: number): TileMapBase<T> {
-        this._navigation.zoomInMap(delta).validate();
+        this._navigation.zoomInMap(delta);
         return this;
     }
 
     public zoomOutMap(delta: number): TileMapBase<T> {
-        this._navigation.zoomOutMap(delta).validate();
+        this._navigation.zoomOutMap(delta);
         return this;
     }
 
     public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T> {
-        this._navigation.translateUnitsMap(tx, ty, metrics).validate();
+        this._navigation.translateUnitsMap(tx, ty, metrics);
         return this;
     }
 
     public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T> {
-        this._navigation.translateMap(lat, lon).validate();
+        this._navigation.translateMap(lat, lon);
         return this;
     }
 
     public rotateMap(r: number): TileMapBase<T> {
-        this._navigation.rotateMap(r).validate();
+        this._navigation.rotateMap(r);
         return this;
-    }
-
-    public getGeoBounds(metrics: ITileMetrics): IEnvelope | undefined {
-        return undefined;
     }
 
     public get isValid(): boolean {
@@ -150,9 +146,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     // end navigation proxy
-    private _onNavigationUpdatedInternal(event: ITileNavigationState, state: EventState): void {
-        this.invalidate();
-        this._onNavigationUpdated(event);
+    private _onNavigationUpdatedInternal(event: boolean, state: EventState): void {
+        if (event) {
+            this.invalidate();
+            this._onNavigationUpdated(this._navigation);
+        }
     }
 
     private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<IDisplay, unknown>, state: EventState): void {
@@ -180,7 +178,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     private _bindNavigation(nav?: ITileNavigationState): void {
         this._navigationUpdatedObserver?.disconnect();
         if (nav) {
-            this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
+            this._navigationUpdatedObserver = this._navigation.validationObservable?.add(this._onNavigationUpdatedInternal.bind(this));
         }
         this.invalidate();
         this._onNavigationBinded(nav);

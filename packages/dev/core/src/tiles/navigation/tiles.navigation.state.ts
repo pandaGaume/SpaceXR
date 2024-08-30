@@ -18,7 +18,6 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     }
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
-    _stateChangedObservable?: Observable<ITileNavigationState>;
 
     _lodf: number;
     _center: IGeo2;
@@ -149,12 +148,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         return this._propertyChangedObservable;
     }
 
-    public get stateChangedObservable(): Observable<ITileNavigationState> {
-        this._stateChangedObservable = this._stateChangedObservable || new Observable<ITileNavigationState>();
-        return this._stateChangedObservable;
-    }
-
-    public setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState {
+    public setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): TileNavigationState {
         if (center) {
             let lat = 0;
             let lon = 0;
@@ -174,25 +168,37 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         if (rotation !== undefined && rotation !== this._azimuth?.value) {
             this.azimuth = new Bearing(rotation);
         }
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
 
-    public zoomInMap(delta: number): TileNavigationState {
+    public zoomInMap(delta: number, validate?: boolean): TileNavigationState {
         this.zoom = this._lodf + Math.abs(delta);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
 
-    public zoomMap(delta: number): TileNavigationState {
+    public zoomMap(delta: number, validate?: boolean): TileNavigationState {
         this.zoom = this._lodf + delta;
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
 
-    public zoomOutMap(delta: number): TileNavigationState {
+    public zoomOutMap(delta: number, validate?: boolean): TileNavigationState {
         this.zoom = this._lodf - Math.abs(delta);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
 
-    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState {
+    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): TileNavigationState {
         const m = metrics ?? EPSG3857.Shared;
         if (this._azimuth?.value) {
             const p = this.rotatePointInv(tx, ty, this._cartesianCache);
@@ -204,10 +210,13 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         pixelCenterXY.x += tx;
         pixelCenterXY.y += ty;
         this.center = m.getPointXYToLatLon(pixelCenterXY.x, pixelCenterXY.y, lod);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
 
-    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState {
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number, validate?: boolean): TileNavigationState {
         if (lat) {
             let dlat;
             let dlon;
@@ -222,12 +231,18 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
                 dlon = lon ?? 0;
             }
             this.center = new Geo2(this._center.lat + dlat, this._center.lon + dlon);
+            if (validate === undefined || validate === true) {
+                this.validate();
+            }
         }
         return this;
     }
 
-    public rotateMap(r: number): TileNavigationState {
+    public rotateMap(r: number, validate?: boolean): TileNavigationState {
         this.azimuth = new Bearing(this._azimuth.value + r);
+        if (validate === undefined || validate === true) {
+            this.validate();
+        }
         return this;
     }
 
@@ -245,13 +260,6 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
 
     public toString(): string {
         return `center: ${this.center}, zoom: ${this.zoom}, azimuth: ${this.azimuth}`;
-    }
-
-    protected _doValidate() {
-        // dispatch event
-        if (this._stateChangedObservable && this._stateChangedObservable.hasObservers()) {
-            this._stateChangedObservable.notifyObservers(this);
-        }
     }
 
     private rotatePointInv<R extends ICartesian2>(x: number, y: number, target?: R): R {

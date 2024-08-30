@@ -9,7 +9,6 @@ import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
     static GetLodScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
-    _stateChangedObservable?: Observable<ITileNavigationState>;
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
@@ -35,17 +34,15 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     get bounds(): ITileSystemBounds;
     set bounds(bounds: ITileSystemBounds);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
-    get stateChangedObservable(): Observable<ITileNavigationState>;
-    setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileNavigationState;
-    zoomInMap(delta: number): TileNavigationState;
-    zoomMap(delta: number): TileNavigationState;
-    zoomOutMap(delta: number): TileNavigationState;
-    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileNavigationState;
-    translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileNavigationState;
-    rotateMap(r: number): TileNavigationState;
+    setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): TileNavigationState;
+    zoomInMap(delta: number, validate?: boolean): TileNavigationState;
+    zoomMap(delta: number, validate?: boolean): TileNavigationState;
+    zoomOutMap(delta: number, validate?: boolean): TileNavigationState;
+    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): TileNavigationState;
+    translateMap(lat: IGeo2 | Array<number> | number, lon?: number, validate?: boolean): TileNavigationState;
+    rotateMap(r: number, validate?: boolean): TileNavigationState;
     syncWith(state: Nullable<ITileNavigationState>): TileNavigationState;
     toString(): string;
-    protected _doValidate(): void;
     private rotatePointInv;
     private _boundsPropertyChanged;
 }

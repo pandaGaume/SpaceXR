@@ -1,7 +1,7 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation";
-import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { ITileView } from "../pipeline";
@@ -14,14 +14,13 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layerRemovedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layers: ITileMapLayerContainer<T>;
-    protected _layerViews: IOrderedCollection<ITileMapLayerView<T>>;
+    protected _layerViews: ITileMapLayerViewContainer<T>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
     constructor(display: IDisplay, nav?: ITileNavigationState, container?: ITileMapLayerContainer<T>);
-    protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
-    protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
     get layers(): ITileMapLayerContainer<T>;
+    get layerViews(): ITileMapLayerViewContainer<T>;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
     get display(): Nullable<IDisplay>;
     get navigation(): ITileNavigationState;
@@ -36,6 +35,8 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     rotateMap(r: number): TileMapBase<T>;
     get isValid(): boolean;
     protected _doValidate(): void;
+    protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
+    protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
     private _onNavigationUpdatedInternal;
     private _onDisplayPropertyChanged;
     private _bindDisplay;

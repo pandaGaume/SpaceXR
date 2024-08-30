@@ -1,7 +1,7 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
 import { isValidable, Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { hasTileSelectionContext, ITileView, TileView } from "../pipeline";
@@ -17,7 +17,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layerRemovedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layers: ITileMapLayerContainer<T>;
-    protected _layerViews: IOrderedCollection<ITileMapLayerView<T>>;
+    protected _layerViews: ITileMapLayerViewContainer<T>;
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
@@ -49,21 +49,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
     }
 
-    protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
-        this._layerViews.add(...eventData.map((l) => this._createLayerView(l)));
-        this.invalidate();
-    }
-
-    protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
-        const toRemove = Array.from(this._layerViews.get((v) => eventData.includes(v.layer)));
-        if (toRemove?.length) {
-            this._layerViews.remove(...toRemove);
-            this.invalidate();
-        }
-    }
-
     public get layers(): ITileMapLayerContainer<T> {
         return this._layers;
+    }
+    public get layerViews(): ITileMapLayerViewContainer<T> {
+        return this._layerViews;
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>> {
@@ -142,6 +132,19 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
             if (hasTileSelectionContext(l)) {
                 l.setContext(n, this.display, layer.metrics, true);
             }
+        }
+    }
+
+    protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
+        this._layerViews.add(...eventData.map((l) => this._createLayerView(l)));
+        this.invalidate();
+    }
+
+    protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
+        const toRemove = Array.from(this._layerViews.get((v) => eventData.includes(v.layer)));
+        if (toRemove?.length) {
+            this._layerViews.remove(...toRemove);
+            this.invalidate();
         }
     }
 

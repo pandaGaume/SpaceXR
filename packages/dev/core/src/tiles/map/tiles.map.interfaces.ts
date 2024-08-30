@@ -69,6 +69,12 @@ export interface IHasTileMapLayerContainer<T> {
     layers: ITileMapLayerContainer<T>;
 }
 
+export interface ITileMapLayerViewContainer<T> extends IOrderedCollection<ITileMapLayerView<T>> {}
+
+export interface IHasTileMapLayerViewContainer<T> {
+    layerViews: ITileMapLayerViewContainer<T>;
+}
+
 export function IsTileMapLayerContainerProxy<T>(b: unknown): b is IHasTileMapLayerContainer<T> {
     if (b === null || typeof b !== "object") return false;
     return (<IHasTileMapLayerContainer<T>>b).layers !== undefined;
@@ -87,4 +93,10 @@ export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
 
-export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, ITileNavigationApi<ITileMap<T>>, IHasNavigationState, IHasDisplay, IDisposable {}
+export interface ITileMap<T>
+    extends IHasTileMapLayerContainer<T>,
+        IHasTileMapLayerViewContainer<T>,
+        ITileNavigationApi<ITileMap<T>>,
+        IHasNavigationState,
+        IHasDisplay,
+        IDisposable {}

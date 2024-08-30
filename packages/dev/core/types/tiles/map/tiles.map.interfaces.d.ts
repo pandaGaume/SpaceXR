@@ -44,6 +44,11 @@ export interface ITileMapLayerContainer<T> extends IOrderedCollection<ITileMapLa
 export interface IHasTileMapLayerContainer<T> {
     layers: ITileMapLayerContainer<T>;
 }
+export interface ITileMapLayerViewContainer<T> extends IOrderedCollection<ITileMapLayerView<T>> {
+}
+export interface IHasTileMapLayerViewContainer<T> {
+    layerViews: ITileMapLayerViewContainer<T>;
+}
 export declare function IsTileMapLayerContainerProxy<T>(b: unknown): b is IHasTileMapLayerContainer<T>;
 export interface IDisplay extends IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
@@ -55,5 +60,5 @@ export interface IPhysicalDisplay extends IDisplay {
 export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
-export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, ITileNavigationApi<ITileMap<T>>, IHasNavigationState, IHasDisplay, IDisposable {
+export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, IHasTileMapLayerViewContainer<T>, ITileNavigationApi<ITileMap<T>>, IHasNavigationState, IHasDisplay, IDisposable {
 }

@@ -1,7 +1,7 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
-import { IDisplay, isTileMapLayerProxy, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { isValidable, Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
 import { hasTileSelectionContext, ITileView, TileView } from "../pipeline";
@@ -131,7 +131,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     protected _doValidate() {
         for (const l of this._layerViews) {
-            const layer: ITileMapLayer<T> = isTileMapLayerProxy<T>(l) ? l.layer : l;
+            const layer: ITileMapLayer<T> = l.layer;
             if (isValidable(l)) {
                 l.validate();
             }

@@ -3,6 +3,7 @@ import { EventState } from "core/events";
 import { ITileMapLayer, ITileMapLayerView, TileMapBase } from "core/tiles";
 import { ElevationLayer } from "./map.elevation.layer";
 import { ElevationMapContentType, IElevationHost } from "./map.elevation.interfaces";
+import { ElevationHost } from "./map.elevation.host";
 
 /**
  * this is internal ype guard to test if the layer is usable as Elevation layer
@@ -45,6 +46,7 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> {
     }
 
     protected _createElevationHost(layer: ITileMapLayer<IDemInfos>): IElevationHost {
-        throw "not implemented";
+        const host = new ElevationHost(layer, this._view);
+        return host;
     }
 }

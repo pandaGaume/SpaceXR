@@ -1,8 +1,7 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
+import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, LayerRenderFn } from "./tiles.map.interfaces";
 import { IMemoryCache } from "../../cache";
-import { Nullable } from "../../types";
 import { IWeighted } from "../../collections/collections.interfaces";
 export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _name: string;
@@ -14,13 +13,10 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _drawTarget?: any;
     _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
-    _provider: ITileProvider<T>;
-    constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
-    get activTiles(): Array<Nullable<ITile<T>>>;
-    getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
-    hasTile(a: ITileAddress): boolean;
+    _provider: ITileContentProvider<T>;
+    constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
     get metrics(): ITileMetrics;
-    get provider(): ITileProvider<T>;
+    get provider(): ITileContentProvider<T>;
     get drawFn(): LayerRenderFn<T> | undefined;
     get drawTarget(): any;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
@@ -36,5 +32,5 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     set enabled(enabled: boolean);
     addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
     dispose(): void;
-    protected _buildProvider(provider: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>, type?: new (...args: any[]) => ITile<T>): ITileProvider<T>;
+    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T>;
 }

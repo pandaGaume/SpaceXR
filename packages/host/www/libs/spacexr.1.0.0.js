@@ -7690,97 +7690,6 @@ XmlDocumentTileCodec.Shared = new XmlDocumentTileCodec();
 
 /***/ }),
 
-/***/ "./dist/tiles/debug/index.js":
-/*!***********************************!*\
-  !*** ./dist/tiles/debug/index.js ***!
-  \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   DebugLayer: () => (/* reexport safe */ _tile_debug_layer__WEBPACK_IMPORTED_MODULE_0__.DebugLayer),
-/* harmony export */   DebugProvider: () => (/* reexport safe */ _tile_debug_provider__WEBPACK_IMPORTED_MODULE_1__.DebugProvider)
-/* harmony export */ });
-/* harmony import */ var _tile_debug_layer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile.debug.layer */ "./dist/tiles/debug/tile.debug.layer.js");
-/* harmony import */ var _tile_debug_provider__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile.debug.provider */ "./dist/tiles/debug/tile.debug.provider.js");
-
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/debug/tile.debug.layer.js":
-/*!**********************************************!*\
-  !*** ./dist/tiles/debug/tile.debug.layer.js ***!
-  \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   DebugLayer: () => (/* binding */ DebugLayer)
-/* harmony export */ });
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography */ "./dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map */ "./dist/tiles/map/tiles.map.layer.js");
-/* harmony import */ var _tile_debug_provider__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.debug.provider */ "./dist/tiles/debug/tile.debug.provider.js");
-
-
-
-class DebugLayer extends _map__WEBPACK_IMPORTED_MODULE_0__.TileMapLayer {
-    constructor(name, data, options, enabled) {
-        const metrics = options?.metrics ?? _geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared;
-        const provider = new _tile_debug_provider__WEBPACK_IMPORTED_MODULE_2__.DebugProvider(name, metrics, data);
-        super(name, provider, options, enabled);
-        this._draw = this._draw ?? this._renderTile.bind(this);
-    }
-    _renderTile(ctx, tile, w, h) {
-        const text = tile.address.quadkey;
-        const localx = 0;
-        const localy = 0;
-        ctx.font = "10px Arial";
-        ctx.fillStyle = "red";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const centerX = localx + w / 2;
-        const centerY = localy + h / 2;
-        ctx.fillText(text, centerX, centerY);
-    }
-}
-//# sourceMappingURL=tile.debug.layer.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/debug/tile.debug.provider.js":
-/*!*************************************************!*\
-  !*** ./dist/tiles/debug/tile.debug.provider.js ***!
-  \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   DebugProvider: () => (/* binding */ DebugProvider)
-/* harmony export */ });
-/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../providers */ "./dist/tiles/providers/tiles.provider.abstract.js");
-
-class DebugProvider extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractTileProvider {
-    constructor(namespace, metrics, data) {
-        super();
-        this._metrics = metrics;
-        this._data = data;
-        this.factory.withMetrics(this._metrics).withNamespace(namespace ?? DebugProvider.DEFAULT_NAMESPACE);
-    }
-    get metrics() {
-        return this._metrics;
-    }
-    _fetchContent(tile, callback) {
-        tile.content = this._data;
-        return tile;
-    }
-}
-DebugProvider.DEFAULT_NAMESPACE = "DebugProvider";
-//# sourceMappingURL=tile.debug.provider.js.map
-
-/***/ }),
-
 /***/ "./dist/tiles/display/index.js":
 /*!*************************************!*\
   !*** ./dist/tiles/display/index.js ***!
@@ -7966,19 +7875,17 @@ EPSG3857.Shared = new EPSG3857();
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_12__.AbstractTileMetrics),
+/* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__.AbstractTileMetrics),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileProvider),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.CanvasTileCodec),
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodec),
 /* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodecOptions),
-/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.CellCoordinateReference),
-/* harmony export */   DebugLayer: () => (/* reexport safe */ _debug_index__WEBPACK_IMPORTED_MODULE_9__.DebugLayer),
-/* harmony export */   DebugProvider: () => (/* reexport safe */ _debug_index__WEBPACK_IMPORTED_MODULE_9__.DebugProvider),
+/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.CellCoordinateReference),
 /* harmony export */   Display: () => (/* reexport safe */ _display_index__WEBPACK_IMPORTED_MODULE_7__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.EPSG3857),
-/* harmony export */   FetchError: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_13__.FetchError),
-/* harmony export */   FetchResult: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.FetchResult),
+/* harmony export */   FetchError: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.FetchError),
+/* harmony export */   FetchResult: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.FetchResult),
 /* harmony export */   Float32Layer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.Float32Layer),
 /* harmony export */   Float32TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodec),
 /* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodecOptions),
@@ -7991,19 +7898,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.ImageLayer),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
-/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsArrayOfTile),
-/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsArrayOfTileAddress),
+/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
+/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTileAddress),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock),
-/* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTile),
-/* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileAddress),
-/* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileCollection),
-/* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileDatasource),
+/* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile),
+/* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
+/* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileCollection),
+/* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileDatasource),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy),
-/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileMetricsProvider),
+/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileMetricsProvider),
 /* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationState),
-/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileSystemBounds),
+/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileSystemBounds),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.JsonTileCodec),
 /* harmony export */   MapZen: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
@@ -8012,12 +7919,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
-/* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.ShapeCollection),
-/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.ShapeCollectionEventArgs),
+/* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
+/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
-/* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_14__.Tile),
+/* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_13__.Tile),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
-/* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_16__.TileCollection),
+/* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_15__.TileCollection),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayer),
@@ -8027,14 +7934,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
 /* harmony export */   TileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileProvider),
-/* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_17__.TileSystemBounds),
-/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.TileVectorRenderer),
+/* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_16__.TileSystemBounds),
+/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TileView),
-/* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_13__.TileWebClient),
-/* harmony export */   TileWebClientOptions: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_13__.TileWebClientOptions),
-/* harmony export */   TileWebClientOptionsBuilder: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_13__.TileWebClientOptionsBuilder),
-/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.VectorTileGeomType),
-/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_15__.WebTileUrlBuilder),
+/* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClient),
+/* harmony export */   TileWebClientOptions: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClientOptions),
+/* harmony export */   TileWebClientOptionsBuilder: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClientOptionsBuilder),
+/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
+/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_14__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
 /* harmony export */   hasNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.hasNavigationApi),
 /* harmony export */   hasNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.hasNavigationState),
@@ -8053,16 +7960,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _address_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./address/index */ "./dist/tiles/address/index.js");
 /* harmony import */ var _display_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./display/index */ "./dist/tiles/display/index.js");
 /* harmony import */ var _geography_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./geography/index */ "./dist/tiles/geography/index.js");
-/* harmony import */ var _debug_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./debug/index */ "./dist/tiles/debug/index.js");
-/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./vector/index */ "./dist/tiles/vector/index.js");
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles.client */ "./dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
-/* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles.urlBuilder */ "./dist/tiles/tiles.urlBuilder.js");
-/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.collection */ "./dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./tiles.system */ "./dist/tiles/tiles.system.js");
-
+/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./vector/index */ "./dist/tiles/vector/index.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tiles.client */ "./dist/tiles/tiles.client.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
+/* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles.urlBuilder */ "./dist/tiles/tiles.urlBuilder.js");
+/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles.collection */ "./dist/tiles/tiles.collection.js");
+/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.system */ "./dist/tiles/tiles.system.js");
 
 
 
@@ -8368,7 +8273,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.interfaces */ "./dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils */ "./dist/utils/runtime.js");
 /* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../providers */ "./dist/tiles/providers/tiles.provider.content.js");
-/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../providers */ "./dist/tiles/providers/tiles.provider.js");
 
 
 
@@ -8386,15 +8290,6 @@ class TileMapLayer {
         this._draw = options?.drawFn;
         this._drawTarget = options?.drawTarget ?? this;
         this._enabled = enabled ?? true;
-    }
-    get activTiles() {
-        return this._provider.activTiles;
-    }
-    getTile(a) {
-        return this._provider.getTile(a);
-    }
-    hasTile(a) {
-        return this._provider.hasTile(a);
     }
     get metrics() {
         return this._provider.metrics;
@@ -8496,12 +8391,8 @@ class TileMapLayer {
         return this;
     }
     dispose() { }
-    _buildProvider(provider, cache, type) {
-        const contentProvider = new _providers__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider(provider, cache);
-        const p = new _providers__WEBPACK_IMPORTED_MODULE_6__.TileProvider(contentProvider);
-        if (type)
-            p.factory.withType(type);
-        return p;
+    _buildProvider(dataSource, cache) {
+        return new _providers__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider(dataSource, cache);
     }
 }
 //# sourceMappingURL=tiles.map.layer.js.map
@@ -8519,23 +8410,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileMapLayerView: () => (/* binding */ TileMapLayerView)
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
+/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../providers */ "./dist/tiles/providers/tiles.provider.abstract.js");
 
 
 
-
-class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractTileProvider {
     constructor(layer, source) {
         super();
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
-        this._tiles = new Map();
         this._ownView = source === undefined || source === null;
         this._view = this._ownView ? this._buildSource() : source;
         this._view?.linkTo(this);
-        this._layer.provider.linkTo(this, { accept: this.accept.bind(this) });
+        this.factory.withMetrics(this._layer.metrics).withNamespace(this._layer.name);
     }
     get weightChangedObservable() {
         if (!this._weightChangedObservable) {
@@ -8555,102 +8443,19 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
     get view() {
         return this._view;
     }
-    get metrics() {
-        return this._layer.metrics;
-    }
-    get activTiles() {
-        return Array.from(this._tiles.values());
-    }
-    getTile(a) {
-        return this._tiles.get(a.quadkey);
-    }
-    hasTile(a) {
-        return this._tiles.has(a.quadkey);
-    }
-    accept(tile) {
-        return this._tiles.has(tile.address.quadkey);
-    }
-    added(eventData, eventState) {
-        if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsArrayOfTile)(eventData)) {
-            this._addedTile(eventData, eventState);
-            return;
-        }
-        this._addedAddress(eventData, eventState);
-    }
-    removed(eventData, eventState) {
-        if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsArrayOfTile)(eventData)) {
-            this._removedTile(eventData, eventState);
-            return;
-        }
-        this._removedAddress(eventData, eventState);
-    }
-    updated(eventData, eventState) {
-        if ((0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsArrayOfTile)(eventData)) {
-            this._updatedTile(eventData, eventState);
-            return;
-        }
-        this._updatedAddress(eventData, eventState);
-    }
     dispose() {
         super.dispose();
         this._view?.unlinkFrom(this);
         if (this._ownView) {
             this._view.dispose();
         }
-        this.layer.provider.unlinkFrom(this);
-        this._tiles.clear();
         this._layerObserver?.disconnect();
     }
     setContext(state, display, metrics, dispatchEvent) {
         this._view?.setContext(state, display, metrics, dispatchEvent);
     }
     _buildSource() {
-        return new _pipeline__WEBPACK_IMPORTED_MODULE_3__.TileView();
-    }
-    _addedAddress(eventData, eventState) {
-        const added = [];
-        for (const a of eventData) {
-            const k = a.quadkey;
-            const t = this._tiles.get(k);
-            if (!t) {
-                this._tiles.set(k, null);
-                added.push(a);
-            }
-        }
-        if (added.length && this._layer.provider.added) {
-            this._layer.provider.added(added, eventState);
-        }
-    }
-    _removedAddress(eventData, eventState) {
-        const removed = [];
-        for (const a of eventData) {
-            const k = a.quadkey;
-            const t = this._tiles.get(k);
-            if (t) {
-                this._tiles.delete(k);
-                removed.push(a);
-            }
-        }
-        if (removed.length && this._layer.provider.removed) {
-            this._layer.provider.removed(removed, eventState);
-        }
-    }
-    _updatedAddress(eventData, eventState) {
-    }
-    _addedTile(eventData, eventState) {
-        for (const t of eventData) {
-            this._tiles.set(t.address.quadkey, t);
-        }
-        this.invalidate();
-    }
-    _removedTile(eventData, eventState) {
-        for (const t of eventData) {
-            this._tiles.delete(t.address.quadkey);
-        }
-        this.invalidate();
-    }
-    _updatedTile(eventData, eventState) {
-        this.invalidate();
+        return new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
     }
     _onLayerPropertyChanged(eventData, eventState) {
         switch (eventData.propertyName) {
@@ -8662,6 +8467,9 @@ class TileMapLayerView extends _validable__WEBPACK_IMPORTED_MODULE_0__.Validable
             }
         }
         this.invalidate();
+    }
+    _fetchContent(tile, callback) {
+        return this._layer.provider.fetchContent(tile, callback);
     }
 }
 //# sourceMappingURL=tiles.map.layerView.js.map
@@ -9495,20 +9303,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractTileProvider: () => (/* binding */ AbstractTileProvider)
 /* harmony export */ });
-/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events/events.observable */ "./dist/events/events.observable.js");
-/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.collection */ "./dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.builder */ "./dist/tiles/tiles.builder.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events/events.observable */ "./dist/events/events.observable.js");
+/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.collection */ "./dist/tiles/tiles.collection.js");
+/* harmony import */ var _tiles_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../tiles.builder */ "./dist/tiles/tiles.builder.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
 
 
 
 
-class AbstractTileProvider {
+
+class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
     constructor(factory, enabled = true) {
+        super();
         this._links = [];
         this._factory = factory ?? this._buildFactory();
         this._enabled = enabled;
-        this._activTiles = new _tiles_collection__WEBPACK_IMPORTED_MODULE_0__.TileCollection();
+        this._activTiles = new _tiles_collection__WEBPACK_IMPORTED_MODULE_1__.TileCollection();
         this._callback = this._onContentFetched.bind(this);
     }
     get geoBounds() {
@@ -9518,7 +9329,7 @@ class AbstractTileProvider {
         return this._activTiles?.bounds;
     }
     get enabledObservable() {
-        this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
         return this._enabledObservable;
     }
     get enabled() {
@@ -9554,20 +9365,20 @@ class AbstractTileProvider {
         return this._activTiles.has(a);
     }
     get updatedObservable() {
-        this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
         return this._updateObservable;
     }
     get addedObservable() {
-        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
         return this._addedObservable;
     }
     get removedObservable() {
-        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
         return this._removedObservable;
     }
     linkTo(target, options) {
         if (this._links.findIndex((l) => l.target === target) === -1) {
-            const link = new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink(this, target, options);
+            const link = new _pipeline__WEBPACK_IMPORTED_MODULE_3__.TilePipelineLink(this, target, options);
             this._links.push(link);
         }
     }
@@ -9612,8 +9423,11 @@ class AbstractTileProvider {
                 console.log(e);
             }
         }
-        if (tiles.length && this._addedObservable) {
-            this._addedObservable.notifyObservers(tiles, -1, this, this);
+        if (tiles.length) {
+            this.invalidate();
+            if (this._addedObservable && this._addedObservable.hasObservers()) {
+                this._addedObservable.notifyObservers(tiles, -1, this, this);
+            }
         }
         return tiles;
     }
@@ -9627,20 +9441,25 @@ class AbstractTileProvider {
                     this._activTiles?.remove(a);
                 }
             }
-            if (tiles.length && this._removedObservable) {
-                this._removedObservable.notifyObservers(tiles, -1, this, this);
+            if (tiles.length) {
+                this.invalidate();
+                if (this._removedObservable && this._removedObservable.hasObservers()) {
+                    this._removedObservable?.notifyObservers(tiles, -1, this, this);
+                }
             }
             return tiles;
         }
         return [];
     }
     _onContentFetched(tile) {
+        this.invalidate();
         if (this.updatedObservable?.hasObservers()) {
             this.updatedObservable.notifyObservers([tile], -1, this, this);
         }
     }
-    _buildFactory() {
-        return new _tiles_builder__WEBPACK_IMPORTED_MODULE_3__.TileBuilder();
+    _buildFactory(type) {
+        const b = new _tiles_builder__WEBPACK_IMPORTED_MODULE_4__.TileBuilder();
+        return type ? b.withType(type) : b;
     }
 }
 //# sourceMappingURL=tiles.provider.abstract.js.map
@@ -11330,6 +11149,7 @@ MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsDisposable: () => (/* binding */ IsDisposable),
+/* harmony export */   IsNumber: () => (/* binding */ IsNumber),
 /* harmony export */   isArrayOfFloatArray: () => (/* binding */ isArrayOfFloatArray),
 /* harmony export */   isFloatArray: () => (/* binding */ isFloatArray),
 /* harmony export */   isValidable: () => (/* binding */ isValidable)
@@ -11355,6 +11175,9 @@ function isValidable(obj) {
     if (typeof obj !== "object" || obj === null)
         return false;
     return obj.validate !== undefined && obj.invalidate !== undefined;
+}
+function IsNumber(value) {
+    return typeof value === "number" && !Number.isNaN(value);
 }
 //# sourceMappingURL=types.js.map
 
@@ -11640,8 +11463,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ColorValue: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
-/* harmony export */   DebugLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.DebugLayer),
-/* harmony export */   DebugProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.DebugProvider),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemTileWebClient),
 /* harmony export */   Display: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Display),
@@ -11689,6 +11510,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
+/* harmony export */   IsNumber: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsNumber),
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTargetBlock),

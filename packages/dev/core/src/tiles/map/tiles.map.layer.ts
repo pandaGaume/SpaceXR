@@ -1,11 +1,10 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { IsTileDatasource, ITile, ITileAddress, ITileDatasource, ITileMetrics, ITileProvider, TileContentType } from "../tiles.interfaces";
+import { IsTileDatasource, ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy, LayerRenderFn } from "./tiles.map.interfaces";
 
 import { Assert } from "../../utils";
 import { IMemoryCache } from "../../cache";
-import { TileContentProvider, TileProvider } from "../providers";
-import { Nullable } from "../../types";
+import { TileContentProvider } from "../providers";
 import { IWeighted } from "../../collections/collections.interfaces";
 
 export class TileMapLayer<T> implements ITileMapLayer<T> {
@@ -20,9 +19,9 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
     _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
 
-    _provider: ITileProvider<T>;
+    _provider: ITileContentProvider<T>;
 
-    public constructor(name: string, provider: ITileProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean) {
+    public constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean) {
         Assert(name !== undefined && name !== null && name !== "", "Invalid layer name.");
         Assert(provider !== undefined && name !== null, "Invalid provider or datasource");
 
@@ -36,22 +35,11 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
         this._enabled = enabled ?? true; // default is enabled
     }
 
-    public get activTiles(): Array<Nullable<ITile<T>>> {
-        return this._provider.activTiles;
-    }
-    public getTile(a: ITileAddress): Nullable<ITile<T>> | undefined {
-        return this._provider.getTile(a);
-    }
-
-    public hasTile(a: ITileAddress): boolean {
-        return this._provider.hasTile(a);
-    }
-
     public get metrics(): ITileMetrics {
         return this._provider.metrics;
     }
 
-    public get provider(): ITileProvider<T> {
+    public get provider(): ITileContentProvider<T> {
         return this._provider;
     }
 
@@ -164,14 +152,7 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
 
     public dispose() {}
 
-    protected _buildProvider(
-        provider: ITileDatasource<T, ITileAddress>,
-        cache?: IMemoryCache<string, TileContentType<T>>,
-        type?: new (...args: any[]) => ITile<T>
-    ): ITileProvider<T> {
-        const contentProvider = new TileContentProvider<T>(provider, cache);
-        const p = new TileProvider(contentProvider);
-        if (type) p.factory.withType(type);
-        return p;
+    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T> {
+        return new TileContentProvider<T>(dataSource, cache);
     }
 }

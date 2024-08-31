@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { IHasView, ITargetBlock, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { IHasActivTiles, ITile, ITileAddress, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
+import { IHasView, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
+import { IHasActivTiles, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
 import { ISize3 } from "../../geometry";
@@ -25,18 +25,16 @@ export function isDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLaye
     return (<IDrawableTileMapLayer<T>>b).drawFn !== undefined;
 }
 
-export interface ITileMapLayer<T> extends IHasActivTiles<T>, ITileMapLayerOptions<T>, ITileMetricsProvider, IWeighted {
+export interface ITileMapLayer<T> extends ITileMapLayerOptions<T>, ITileMetricsProvider, IWeighted {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
-    provider: ITileProvider<T>;
+    provider: ITileContentProvider<T>;
     addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
 }
 
 export interface ITileMapLayerProxy<T> extends IHasActivTiles<T>, IValidable {
-    name: string;
     layer: ITileMapLayer<T>;
-    zindex?: number;
 }
 
 export function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T> {
@@ -44,16 +42,7 @@ export function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T> {
     return (<ITileMapLayerProxy<T>>b).layer !== undefined;
 }
 
-export interface ITileMapLayerView<T>
-    extends ITileMapLayerProxy<T>,
-        ITargetBlock<ITileAddress | ITile<T>>,
-        IHasActivTiles<T>,
-        IValidable,
-        IDisposable,
-        ITileMetricsProvider,
-        IHasView,
-        ITileSelectionContext,
-        IWeighted {}
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileProvider<T>, IValidable, IHasView, ITileSelectionContext, IWeighted {}
 
 export type ImageLayerContentType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas;
 

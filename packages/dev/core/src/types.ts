@@ -52,3 +52,7 @@ export interface IValidable {
     validate(force?: boolean): void;
     revalidate(): void;
 }
+
+export function IsNumber(value: unknown): value is number {
+    return typeof value === "number" && !Number.isNaN(value);
+}

@@ -1,4 +1,4 @@
-import { ICloneable, IDisposable, Nullable } from "../types";
+import { ICloneable, IDisposable, IValidable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
@@ -130,7 +130,7 @@ export interface IHasActivTiles<T> {
     getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
     hasTile(a: ITileAddress): boolean;
 }
-export interface ITileProvider<T> extends ITransformBlock<ITileAddress, ITile<T>>, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+export interface ITileProvider<T> extends ITransformBlock<ITileAddress, ITile<T>>, IValidable, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     enabledObservable: Observable<ITileProvider<T>>;
     enabled: boolean;
     factory: ITileBuilder<T>;

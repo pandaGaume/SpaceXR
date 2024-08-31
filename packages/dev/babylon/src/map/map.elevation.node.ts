@@ -16,7 +16,7 @@ import { IGeo2 } from "core/geography";
 import { ISize2, Size2 } from "core/geometry";
 import { IPointerSource, IWheelSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
-import { Map3dElevationHost } from "./map.elevation.host";
+import { Map3dElevationHost } from "./map.elevation.host.tmp";
 import { ElevationLayer } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { TextUtils } from "core/utils";

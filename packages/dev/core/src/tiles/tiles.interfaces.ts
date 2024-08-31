@@ -1,4 +1,4 @@
-import { ICloneable, IDisposable, Nullable } from "../types";
+import { ICloneable, IDisposable, IValidable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
 import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
@@ -231,7 +231,15 @@ export interface IHasActivTiles<T> {
 /// The main interaction is done using ITransformBlock interface methods.
 /// Basically, a TileProvider may be connected to several ISourceBlock<ITileAddress>, listening for Address to resolve. Fetch or build Tile base on addresses, and finally messaging listeners of ITargetBlock<ITile<T>>.
 /// </summary>
-export interface ITileProvider<T> extends ITransformBlock<ITileAddress, ITile<T>>, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+export interface ITileProvider<T>
+    extends ITransformBlock<ITileAddress, ITile<T>>,
+        IValidable,
+        IHasNamespace,
+        IHasActivTiles<T>,
+        ITileMetricsProvider,
+        IDisposable,
+        IGeoBounded,
+        IBounded {
     enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
     enabled: boolean; // enable/disable the provider
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used

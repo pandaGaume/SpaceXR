@@ -6,8 +6,9 @@ import { TileCollection } from "../tiles.collection";
 import { TileBuilder } from "../tiles.builder";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, TilePipelineLink } from "../pipeline";
 import { Nullable } from "../../types";
+import { ValidableBase } from "../../validable";
 
-export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
+export abstract class AbstractTileProvider<T> extends ValidableBase implements ITileProvider<T> {
     _updateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _addedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _removedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
@@ -24,6 +25,7 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
     _links: Array<ITilePipelineLink<ITile<T>>> = [];
 
     public constructor(factory?: ITileBuilder<T>, enabled = true) {
+        super();
         this._factory = factory ?? this._buildFactory();
         this._enabled = enabled;
         this._activTiles = new TileCollection<T>();
@@ -126,6 +128,7 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
         const data = Array.isArray(eventData) ? eventData : [eventData];
         this._onTileAddressesAdded(data, eventState);
     }
+
     public removed(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
         const data = Array.isArray(eventData) ? eventData : [eventData];
         this._onTileAddressesRemoved(data, eventState);
@@ -161,8 +164,11 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
                 console.log(e);
             }
         }
-        if (tiles.length && this._addedObservable) {
-            this._addedObservable.notifyObservers(tiles, -1, this, this);
+        if (tiles.length) {
+            this.invalidate();
+            if (this._addedObservable && this._addedObservable.hasObservers()) {
+                this._addedObservable.notifyObservers(tiles, -1, this, this);
+            }
         }
         return tiles;
     }
@@ -177,22 +183,28 @@ export abstract class AbstractTileProvider<T> implements ITileProvider<T> {
                     this._activTiles?.remove(a)!;
                 }
             }
-            if (tiles.length && this._removedObservable) {
-                this._removedObservable.notifyObservers(tiles, -1, this, this);
+            if (tiles.length) {
+                this.invalidate();
+                if (this._removedObservable && this._removedObservable.hasObservers()) {
+                    this._removedObservable?.notifyObservers(tiles, -1, this, this);
+                }
             }
+
             return tiles;
         }
         return [];
     }
 
     protected _onContentFetched(tile: ITile<T>): void {
+        this.invalidate();
         if (this.updatedObservable?.hasObservers()) {
             this.updatedObservable.notifyObservers([tile], -1, this, this);
         }
     }
 
-    protected _buildFactory(): ITileBuilder<T> {
-        return new TileBuilder<T>();
+    protected _buildFactory(type?: new (...args: any[]) => ITile<T>): ITileBuilder<T> {
+        const b = new TileBuilder<T>();
+        return type ? b.withType(type) : b;
     }
 
     public abstract _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T>;

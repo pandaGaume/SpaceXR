@@ -1,13 +1,13 @@
 import { Observable } from "../../events";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
-import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileView } from "./tiles.pipeline.interfaces";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileSelectionContextOptions, ITileView } from "../pipeline/tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
 import { ICartesian2, IBounds2, Bounds2, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
-import { TilePipelineLink } from "./tiles.pipeline.link";
+import { TilePipelineLink } from "../pipeline/tiles.pipeline.link";
 import { Bearing } from "../../geography";
-import { IDisplay } from "../map";
+import { IDisplay } from ".";
 
 export class TileView implements ITileView {
     _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
@@ -60,12 +60,12 @@ export class TileView implements ITileView {
         return undefined;
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent: boolean = true): void {
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void {
         if (!state || !display) {
-            this._doClearContext(state, this._activ, dispatchEvent);
+            this._doClearContext(state, this._activ, options);
             return;
         }
-        this._doValidateContext(state, display, metrics, this._activ, dispatchEvent);
+        this._doValidateContext(state, display, metrics, this._activ, options);
     }
 
     protected _doValidateContext(
@@ -73,10 +73,10 @@ export class TileView implements ITileView {
         display: Nullable<IDisplay>,
         metrics: ITileMetrics,
         activAddresses: Map<string, ITileAddress>,
-        dispatchEvent: boolean = true
+        options?: ITileSelectionContextOptions
     ) {
         if (state && display) {
-            const lod = TileAddress.ClampLod(state.lod, metrics);
+            const lod = TileAddress.ClampLod(state.lod, metrics) + (options?.zoomOffset ?? 0);
             const scale = state.scale;
 
             const nwTileXY = Cartesian2.Zero();
@@ -136,7 +136,7 @@ export class TileView implements ITileView {
                 activAddresses.set(a.quadkey, a);
             }
 
-            if (dispatchEvent) {
+            if (options?.dispatchEvent ?? true) {
                 if (deleted.length && this._removedObservable?.hasObservers()) {
                     this._removedObservable.notifyObservers(deleted, -1, this, this);
                 }
@@ -147,12 +147,12 @@ export class TileView implements ITileView {
         }
     }
 
-    private _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress>, dispatchEvent: boolean = true) {
+    private _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress>, options?: ITileSelectionContextOptions) {
         if (state) {
             let deleted = Array.from(activAddresses.values());
             activAddresses.clear();
 
-            if (dispatchEvent) {
+            if (options?.dispatchEvent ?? true) {
                 if (deleted.length && this._removedObservable?.hasObservers()) {
                     this._removedObservable.notifyObservers(deleted, -1, this, this);
                 }

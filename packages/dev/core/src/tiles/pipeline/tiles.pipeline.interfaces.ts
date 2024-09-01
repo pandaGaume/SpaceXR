@@ -65,8 +65,13 @@ export function IsTileMipMapping(b: unknown): b is ITileMipMapping {
     return (<ITileMipMapping>b).split !== undefined && (<ITileMipMapping>b).stitch !== undefined;
 }
 
+export interface ITileSelectionContextOptions {
+    dispatchEvent?: boolean;
+    zoomOffset?: number;
+}
+
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void;
 }
 
 export function hasTileSelectionContext(b: unknown): b is ITileSelectionContext {

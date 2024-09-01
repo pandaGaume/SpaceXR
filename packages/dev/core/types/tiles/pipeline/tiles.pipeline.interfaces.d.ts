@@ -42,8 +42,12 @@ export interface ITileMipMapping {
     stitch?(...tile: Array<ITileAddress>): void;
 }
 export declare function IsTileMipMapping(b: unknown): b is ITileMipMapping;
+export interface ITileSelectionContextOptions {
+    dispatchEvent?: boolean;
+    zoomOffset?: number;
+}
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void;
 }
 export declare function hasTileSelectionContext(b: unknown): b is ITileSelectionContext;
 export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext, ITileMipMapping {

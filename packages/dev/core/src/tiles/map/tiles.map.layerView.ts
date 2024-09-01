@@ -2,10 +2,11 @@ import { IWeighted } from "../../collections/collections.interfaces";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
-import { ITileView, TileView } from "../pipeline";
+import { ITileSelectionContextOptions, ITileView } from "../pipeline";
 import { AbstractTileProvider } from "../providers";
 import { ITile, ITileMetrics } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
+import { TileView } from "./tiles.map.view";
 
 export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITileMapLayerView<T> {
     private _weightChangedObservable?: Observable<IWeighted>;
@@ -67,8 +68,8 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         this._layerObserver?.disconnect();
     }
 
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, dispatchEvent?: boolean): void {
-        this._view?.setContext(state, display, metrics, dispatchEvent);
+    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void {
+        this._view?.setContext(state, display, metrics, options);
     }
 
     protected _buildSource(): ITileView {

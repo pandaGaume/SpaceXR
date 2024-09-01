@@ -4,11 +4,12 @@ import { ITileNavigationState, TileNavigationState } from "../navigation";
 import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
 import { isValidable, Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
-import { hasTileSelectionContext, ITileView, TileView } from "../pipeline";
+import { hasTileSelectionContext, ITileView } from "../pipeline";
 import { ValidableBase } from "../../validable";
 import { OrderedCollection } from "../../collections/orderedCollection";
 import { IOrderedCollection } from "../../collections/collections.interfaces";
 import { TileMapLayerView } from "./tiles.map.layerView";
+import { TileView } from "./tiles.map.view";
 
 export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _display: IDisplay;
@@ -141,7 +142,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
                 const n = offset
                     ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
                     : this.navigation;
-                l.setContext(n, this.display, layer.metrics, true);
+                l.setContext(n, this.display, layer.metrics);
             }
         }
     }

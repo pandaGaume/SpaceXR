@@ -7939,7 +7939,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileProvider),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_16__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
-/* harmony export */   TileView: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TileView),
+/* harmony export */   TileView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileView),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClient),
 /* harmony export */   TileWebClientOptions: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClientOptions),
 /* harmony export */   TileWebClientOptionsBuilder: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClientOptionsBuilder),
@@ -8007,13 +8007,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_map__WEBPACK_IMPORTED_MODULE_0__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _tiles_map_layer__WEBPACK_IMPORTED_MODULE_3__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView),
-/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _typed_index__WEBPACK_IMPORTED_MODULE_2__.TileMapVectorLayer)
+/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _typed_index__WEBPACK_IMPORTED_MODULE_2__.TileMapVectorLayer),
+/* harmony export */   TileView: () => (/* reexport safe */ _tiles_map_view__WEBPACK_IMPORTED_MODULE_5__.TileView)
 /* harmony export */ });
 /* harmony import */ var _tiles_map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.map */ "./dist/tiles/map/tiles.map.js");
 /* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.map.interfaces */ "./dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _typed_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./typed/index */ "./dist/tiles/map/typed/index.js");
 /* harmony import */ var _tiles_map_layer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.map.layer */ "./dist/tiles/map/tiles.map.layer.js");
 /* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.map.view */ "./dist/tiles/map/tiles.map.view.js");
+
 
 
 
@@ -8075,11 +8078,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
 /* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation */ "./dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
 /* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.interfaces.js");
 /* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
 /* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../collections/orderedCollection */ "./dist/collections/orderedCollection.js");
 /* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.map.view */ "./dist/tiles/map/tiles.map.view.js");
+
 
 
 
@@ -8097,7 +8101,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._bindDisplay(this._display);
         this._navigation = nav ?? this._buildNavigationState() ?? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
         this._bindNavigation(this._navigation);
-        this._view = this._buildView() ?? new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        this._view = this._buildView() ?? new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
         this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
         this._layerViewAddedObserver = this._layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
         this._layerViewRemovedObserver = this._layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
@@ -8173,7 +8177,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
                 const n = offset
                     ? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
                     : this.navigation;
-                l.setContext(n, this.display, layer.metrics, true);
+                l.setContext(n, this.display, layer.metrics);
             }
         }
     }
@@ -8251,7 +8255,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         return new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
     }
     _buildView() {
-        return new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
     }
     _createLayerContainerInternal() {
         return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection();
@@ -8420,8 +8424,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileMapLayerView: () => (/* binding */ TileMapLayerView)
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
 /* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../providers */ "./dist/tiles/providers/tiles.provider.abstract.js");
+/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.map.view */ "./dist/tiles/map/tiles.map.view.js");
 
 
 
@@ -8465,11 +8469,11 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         this._view?.unlinkFrom(this);
         this._layerObserver?.disconnect();
     }
-    setContext(state, display, metrics, dispatchEvent) {
-        this._view?.setContext(state, display, metrics, dispatchEvent);
+    setContext(state, display, metrics, options) {
+        this._view?.setContext(state, display, metrics, options);
     }
     _buildSource() {
-        return new _pipeline__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
     }
     _onLayerPropertyChanged(eventData, eventState) {
         switch (eventData.propertyName) {
@@ -8489,6 +8493,175 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
     }
 }
 //# sourceMappingURL=tiles.map.layerView.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/map/tiles.map.view.js":
+/*!******************************************!*\
+  !*** ./dist/tiles/map/tiles.map.view.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TileView: () => (/* binding */ TileView)
+/* harmony export */ });
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _address__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../address */ "./dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _pipeline_tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../pipeline/tiles.pipeline.link */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
+
+
+
+
+class TileView {
+    constructor() {
+        this._activ = new Map();
+        this._links = [];
+    }
+    dispose() {
+        for (const l of this._links) {
+            l.dispose();
+        }
+        this._links = [];
+    }
+    get addedObservable() {
+        this._addedObservable = this._addedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        return this._addedObservable;
+    }
+    get removedObservable() {
+        this._removedObservable = this._removedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        return this._removedObservable;
+    }
+    get updatedObservable() {
+        this._updatedObservable = this._updatedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        return this._updatedObservable;
+    }
+    linkTo(target, options) {
+        if (this._links.findIndex((l) => l.target === target) === -1) {
+            const link = new _pipeline_tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink(this, target, options);
+            this._links.push(link);
+        }
+    }
+    unlinkFrom(target) {
+        const i = this._links.findIndex((l) => l.target === target);
+        if (i !== -1) {
+            const l = this._links.splice(i)[0];
+            l.dispose();
+            return l;
+        }
+        return undefined;
+    }
+    setContext(state, display, metrics, options) {
+        if (!state || !display) {
+            this._doClearContext(state, this._activ, options);
+            return;
+        }
+        this._doValidateContext(state, display, metrics, this._activ, options);
+    }
+    _doValidateContext(state, display, metrics, activAddresses, options) {
+        if (state && display) {
+            const lod = _address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ClampLod(state.lod, metrics) + (options?.zoomOffset ?? 0);
+            const scale = state.scale;
+            const nwTileXY = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
+            const seTileXY = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
+            const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
+            let w = display?.resolution.width ?? 0;
+            let h = display?.resolution.height ?? 0;
+            let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
+            let testRect = state.azimuth?.value ? this._getRectangle(pixelCenterXY, w, h, scale) : null;
+            metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
+            metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
+            const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
+            const x0 = Math.max(0, nwTileXY.x);
+            const y0 = Math.max(0, nwTileXY.y);
+            const x1 = Math.min(maxIndex, seTileXY.x);
+            const y1 = Math.min(maxIndex, seTileXY.y);
+            const remains = new Array();
+            const added = new Array();
+            const tmp = new _address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(0, 0, lod);
+            for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
+                for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
+                    if (testRect) {
+                        const tileRect = this._getTileRectangle(tmp, metrics, pixelCenterXY, state.azimuth);
+                        if (testRect.intersects(tileRect) == false) {
+                            continue;
+                        }
+                    }
+                    const key = tmp.quadkey;
+                    const activ = activAddresses.get(key);
+                    if (activ) {
+                        remains.push(activ);
+                        activAddresses.delete(key);
+                        continue;
+                    }
+                    added.push(tmp.clone());
+                }
+            }
+            let deleted = Array.from(activAddresses.values());
+            activAddresses.clear();
+            for (const a of remains) {
+                activAddresses.set(a.quadkey, a);
+            }
+            for (const a of added) {
+                activAddresses.set(a.quadkey, a);
+            }
+            if (options?.dispatchEvent ?? true) {
+                if (deleted.length && this._removedObservable?.hasObservers()) {
+                    this._removedObservable.notifyObservers(deleted, -1, this, this);
+                }
+                if (added.length && this._addedObservable?.hasObservers()) {
+                    this._addedObservable.notifyObservers(added, -1, this, this);
+                }
+            }
+        }
+    }
+    _doClearContext(state, activAddresses, options) {
+        if (state) {
+            let deleted = Array.from(activAddresses.values());
+            activAddresses.clear();
+            if (options?.dispatchEvent ?? true) {
+                if (deleted.length && this._removedObservable?.hasObservers()) {
+                    this._removedObservable.notifyObservers(deleted, -1, this, this);
+                }
+            }
+        }
+    }
+    _getRectangle(center, w, h, scale, azimuth) {
+        w = w / scale;
+        h = h / scale;
+        const x0 = center.x - w / 2;
+        const y0 = center.y - h / 2;
+        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_4__.Bounds2(x0, y0, w, h);
+        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+    }
+    _getTileRectangle(a, metrics, center, azimuth) {
+        const points = [
+            metrics.getTileXYToPointXY(a.x, a.y),
+            metrics.getTileXYToPointXY(a.x + 1, a.y),
+            metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
+            metrics.getTileXYToPointXY(a.x, a.y + 1),
+        ];
+        return _geometry__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
+    }
+    *_rotatePointsArround(center, azimuth, ...points) {
+        for (const p of points) {
+            yield this._rotatePointArround(p.x, p.y, center, azimuth, p);
+        }
+    }
+    _rotatePointArround(x, y, center, azimuth, target) {
+        const r = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
+        const translatedX = x - center.x;
+        const translatedY = y - center.y;
+        const cos = azimuth?.cos ?? 1;
+        const sin = azimuth?.sin ?? 0;
+        r.x = translatedX * cos - translatedY * sin + center.x;
+        r.y = translatedX * sin + translatedY * cos + center.y;
+        return r;
+    }
+}
+//# sourceMappingURL=tiles.map.view.js.map
 
 /***/ }),
 
@@ -8994,15 +9167,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock),
 /* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMipMapping),
-/* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
-/* harmony export */   TileView: () => (/* reexport safe */ _tiles_pipeline_view__WEBPACK_IMPORTED_MODULE_1__.TileView),
+/* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasTileSelectionContext),
 /* harmony export */   isViewProxy: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.isViewProxy)
 /* harmony export */ });
 /* harmony import */ var _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.pipeline.interfaces */ "./dist/tiles/pipeline/tiles.pipeline.interfaces.js");
-/* harmony import */ var _tiles_pipeline_view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.pipeline.view */ "./dist/tiles/pipeline/tiles.pipeline.view.js");
-/* harmony import */ var _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.pipeline.link */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
-
+/* harmony import */ var _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.pipeline.link */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
 
 
 //# sourceMappingURL=index.js.map
@@ -9115,175 +9285,6 @@ class TilePipelineLink {
     }
 }
 //# sourceMappingURL=tiles.pipeline.link.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/pipeline/tiles.pipeline.view.js":
-/*!****************************************************!*\
-  !*** ./dist/tiles/pipeline/tiles.pipeline.view.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TileView: () => (/* binding */ TileView)
-/* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _address__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../address */ "./dist/tiles/address/tiles.address.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.bounds.js");
-/* harmony import */ var _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.pipeline.link */ "./dist/tiles/pipeline/tiles.pipeline.link.js");
-
-
-
-
-class TileView {
-    constructor() {
-        this._activ = new Map();
-        this._links = [];
-    }
-    dispose() {
-        for (const l of this._links) {
-            l.dispose();
-        }
-        this._links = [];
-    }
-    get addedObservable() {
-        this._addedObservable = this._addedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
-        return this._addedObservable;
-    }
-    get removedObservable() {
-        this._removedObservable = this._removedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
-        return this._removedObservable;
-    }
-    get updatedObservable() {
-        this._updatedObservable = this._updatedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
-        return this._updatedObservable;
-    }
-    linkTo(target, options) {
-        if (this._links.findIndex((l) => l.target === target) === -1) {
-            const link = new _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink(this, target, options);
-            this._links.push(link);
-        }
-    }
-    unlinkFrom(target) {
-        const i = this._links.findIndex((l) => l.target === target);
-        if (i !== -1) {
-            const l = this._links.splice(i)[0];
-            l.dispose();
-            return l;
-        }
-        return undefined;
-    }
-    setContext(state, display, metrics, dispatchEvent = true) {
-        if (!state || !display) {
-            this._doClearContext(state, this._activ, dispatchEvent);
-            return;
-        }
-        this._doValidateContext(state, display, metrics, this._activ, dispatchEvent);
-    }
-    _doValidateContext(state, display, metrics, activAddresses, dispatchEvent = true) {
-        if (state && display) {
-            const lod = _address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ClampLod(state.lod, metrics);
-            const scale = state.scale;
-            const nwTileXY = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
-            const seTileXY = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
-            const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
-            let w = display?.resolution.width ?? 0;
-            let h = display?.resolution.height ?? 0;
-            let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
-            let testRect = state.azimuth?.value ? this._getRectangle(pixelCenterXY, w, h, scale) : null;
-            metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
-            metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
-            const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
-            const x0 = Math.max(0, nwTileXY.x);
-            const y0 = Math.max(0, nwTileXY.y);
-            const x1 = Math.min(maxIndex, seTileXY.x);
-            const y1 = Math.min(maxIndex, seTileXY.y);
-            const remains = new Array();
-            const added = new Array();
-            const tmp = new _address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(0, 0, lod);
-            for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
-                for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
-                    if (testRect) {
-                        const tileRect = this._getTileRectangle(tmp, metrics, pixelCenterXY, state.azimuth);
-                        if (testRect.intersects(tileRect) == false) {
-                            continue;
-                        }
-                    }
-                    const key = tmp.quadkey;
-                    const activ = activAddresses.get(key);
-                    if (activ) {
-                        remains.push(activ);
-                        activAddresses.delete(key);
-                        continue;
-                    }
-                    added.push(tmp.clone());
-                }
-            }
-            let deleted = Array.from(activAddresses.values());
-            activAddresses.clear();
-            for (const a of remains) {
-                activAddresses.set(a.quadkey, a);
-            }
-            for (const a of added) {
-                activAddresses.set(a.quadkey, a);
-            }
-            if (dispatchEvent) {
-                if (deleted.length && this._removedObservable?.hasObservers()) {
-                    this._removedObservable.notifyObservers(deleted, -1, this, this);
-                }
-                if (added.length && this._addedObservable?.hasObservers()) {
-                    this._addedObservable.notifyObservers(added, -1, this, this);
-                }
-            }
-        }
-    }
-    _doClearContext(state, activAddresses, dispatchEvent = true) {
-        if (state) {
-            let deleted = Array.from(activAddresses.values());
-            activAddresses.clear();
-            if (dispatchEvent) {
-                if (deleted.length && this._removedObservable?.hasObservers()) {
-                    this._removedObservable.notifyObservers(deleted, -1, this, this);
-                }
-            }
-        }
-    }
-    _getRectangle(center, w, h, scale, azimuth) {
-        w = w / scale;
-        h = h / scale;
-        const x0 = center.x - w / 2;
-        const y0 = center.y - h / 2;
-        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_4__.Bounds2(x0, y0, w, h);
-        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
-    }
-    _getTileRectangle(a, metrics, center, azimuth) {
-        const points = [
-            metrics.getTileXYToPointXY(a.x, a.y),
-            metrics.getTileXYToPointXY(a.x + 1, a.y),
-            metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
-            metrics.getTileXYToPointXY(a.x, a.y + 1),
-        ];
-        return _geometry__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
-    }
-    *_rotatePointsArround(center, azimuth, ...points) {
-        for (const p of points) {
-            yield this._rotatePointArround(p.x, p.y, center, azimuth, p);
-        }
-    }
-    _rotatePointArround(x, y, center, azimuth, target) {
-        const r = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
-        const translatedX = x - center.x;
-        const translatedY = y - center.y;
-        const cos = azimuth?.cos ?? 1;
-        const sin = azimuth?.sin ?? 0;
-        r.x = translatedX * cos - translatedY * sin + center.x;
-        r.y = translatedX * sin + translatedY * cos + center.y;
-        return r;
-    }
-}
-//# sourceMappingURL=tiles.pipeline.view.js.map
 
 /***/ }),
 

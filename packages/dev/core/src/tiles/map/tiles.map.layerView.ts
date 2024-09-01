@@ -13,15 +13,17 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     private _layer: ITileMapLayer<T>;
     private _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
     private _view: ITileView;
-    private _ownView: boolean;
+    private _navigation: ITileNavigationState;
+    private _display: IDisplay;
 
-    public constructor(layer: ITileMapLayer<T>, source?: ITileView) {
+    public constructor(layer: ITileMapLayer<T>, display: IDisplay, navigation: ITileNavigationState, source: ITileView) {
         super();
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
 
-        this._ownView = source === undefined || source === null;
-        this._view = this._ownView ? this._buildSource() : source!;
+        this._navigation = navigation;
+        this._display = display;
+        this._view = source;
         this._view?.linkTo(this);
 
         // ensure the factory has the right metrics and namespace to build bounds.
@@ -47,6 +49,14 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         return this._layer;
     }
 
+    public get display(): Nullable<IDisplay> {
+        return this._display;
+    }
+
+    public get navigation(): ITileNavigationState {
+        return this._navigation;
+    }
+
     public get view(): ITileView {
         return this._view;
     }
@@ -54,9 +64,6 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     public dispose(): void {
         super.dispose();
         this._view?.unlinkFrom(this);
-        if (this._ownView) {
-            this._view.dispose();
-        }
         this._layerObserver?.disconnect();
     }
 
@@ -81,6 +88,10 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         }
         this.invalidate();
     }
+
+    protected _onNavigationPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {}
+
+    protected _onDisplayPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {}
 
     public _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T> {
         return this._layer.provider.fetchContent(tile, callback);

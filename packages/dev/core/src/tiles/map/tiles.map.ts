@@ -11,7 +11,7 @@ import { IOrderedCollection } from "../../collections/collections.interfaces";
 import { TileMapLayerView } from "./tiles.map.layerView";
 
 export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
-    protected _display: Nullable<IDisplay>;
+    protected _display: IDisplay;
     protected _navigation: ITileNavigationState;
     protected _view: ITileView;
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
@@ -24,6 +24,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
+    _navInstanceCache?: ITileNavigationState;
 
     /// <summary>
     /// Create a new tile map.
@@ -134,11 +135,12 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
             if (isValidable(l)) {
                 l.validate();
             }
-            const offset = layer.zoomOffset ?? 0;
-            const n = offset
-                ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
-                : this.navigation;
+
             if (hasTileSelectionContext(l)) {
+                const offset = layer.zoomOffset ?? 0;
+                const n = offset
+                    ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
+                    : this.navigation;
                 l.setContext(n, this.display, layer.metrics, true);
             }
         }
@@ -257,6 +259,6 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     private _createLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
-        return new TileMapLayerView(layer, this._view);
+        return new TileMapLayerView(layer, this._display, this._navigation, this._view);
     }
 }

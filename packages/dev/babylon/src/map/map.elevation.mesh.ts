@@ -1,51 +1,42 @@
 import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
-import { ITile } from "core/tiles";
-import { IValidable, Nullable, isValidable } from "core/types";
+import { ITile, ITileMetrics, Tile, TileContentType } from "core/tiles";
+import { Nullable } from "core/types";
 import { ElevationTexture } from "./map.elevation.texture";
-import { ValidableBase } from "core/validable";
 
-export interface IElevationMesh extends IValidable {
+export interface IElevationTile extends ITile<IDemInfos> {
     // the mesh used to display the elevation ()
-    surface: AbstractMesh;
+    surface: Nullable<AbstractMesh>;
     // the texture used to display onto the elevation mesh
     textureSource: Nullable<ElevationTexture>;
-    tile: ITile<IDemInfos>;
 }
 
-export interface IElevationTile extends ITile<IElevationMesh> {}
-
-export class ElevationMesh extends ValidableBase implements IElevationMesh {
+export class ElevationTile extends Tile<IDemInfos> implements IElevationTile {
     // elevations related
-    _surface: AbstractMesh;
+    _surface: Nullable<AbstractMesh>;
 
     // texture related
-    _tile: ITile<IDemInfos>;
     _texture: Nullable<ElevationTexture>;
 
-    public constructor(tile: ITile<IDemInfos>, surface: AbstractMesh) {
-        super();
+    public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<IDemInfos> = null, metrics?: ITileMetrics) {
+        super(x, y, levelOfDetail, data, metrics);
+        this._surface = null;
         this._texture = null;
-        this._surface = surface;
-        this._tile = tile;
     }
 
-    public get surface(): AbstractMesh {
+    public get surface(): Nullable<AbstractMesh> {
         return this._surface;
     }
 
-    public get tile(): ITile<IDemInfos> {
-        return this._tile;
+    public set surface(s: Nullable<AbstractMesh>) {
+        this._surface = s;
     }
 
     public get textureSource(): Nullable<ElevationTexture> {
         return this._texture;
     }
 
-    protected _doValidate(): void {
-        const t = this._texture;
-        if (isValidable(t)) {
-            t.validate();
-        }
+    public set textureSource(t: Nullable<ElevationTexture>) {
+        this._texture = t;
     }
 }

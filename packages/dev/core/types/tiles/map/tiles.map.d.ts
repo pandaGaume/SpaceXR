@@ -8,7 +8,7 @@ import { ITileView } from "../pipeline";
 import { ValidableBase } from "../../validable";
 import { IOrderedCollection } from "../../collections/collections.interfaces";
 export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
-    protected _display: Nullable<IDisplay>;
+    protected _display: IDisplay;
     protected _navigation: ITileNavigationState;
     protected _view: ITileView;
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
@@ -20,6 +20,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
     _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
+    _navInstanceCache?: ITileNavigationState;
     constructor(display: IDisplay, nav?: ITileNavigationState, container?: ITileMapLayerContainer<T>);
     get layers(): ITileMapLayerContainer<T>;
     get layerViews(): ITileMapLayerViewContainer<T>;

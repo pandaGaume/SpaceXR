@@ -1,7 +1,7 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { IHasView, ITileSelectionContext } from "../pipeline/tiles.pipeline.interfaces";
-import { IHasActivTiles, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
+import { IHasView } from "../pipeline/tiles.pipeline.interfaces";
+import { IHasActivTiles, IsTileMetricsProvider, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
 import { ISize3 } from "../../geometry";
@@ -20,7 +20,7 @@ export interface ITileMapLayerOptions<T> extends IDrawableTileMapLayer<T> {
     attribution?: string;
 }
 
-export function isDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T> {
+export function IsDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T> {
     if (b === null || typeof b !== "object") return false;
     return (<IDrawableTileMapLayer<T>>b).drawFn !== undefined;
 }
@@ -33,16 +33,19 @@ export interface ITileMapLayer<T> extends ITileMapLayerOptions<T>, ITileMetricsP
     addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
 }
 
+export function IsTileMapLayer<T>(b: unknown): b is ITileMapLayer<T> {
+    if (b === null || typeof b !== "object") return false;
+    return IsTileMetricsProvider(b) && (<ITileMapLayer<T>>b).provider !== undefined && (<ITileMapLayer<T>>b).addTo !== undefined;
+}
+
 export interface ITileMapLayerProxy<T> extends IHasActivTiles<T>, IValidable {
     layer: ITileMapLayer<T>;
 }
 
-export function isTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T> {
+export function IsTileMapLayerProxy<T>(b: unknown): b is ITileMapLayerProxy<T> {
     if (b === null || typeof b !== "object") return false;
     return (<ITileMapLayerProxy<T>>b).layer !== undefined;
 }
-
-export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileProvider<T>, IValidable, IHasView, ITileSelectionContext, IWeighted {}
 
 export type ImageLayerContentType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas;
 
@@ -56,12 +59,6 @@ export interface ITileMapLayerContainer<T> extends IOrderedCollection<ITileMapLa
 
 export interface IHasTileMapLayerContainer<T> {
     layers: ITileMapLayerContainer<T>;
-}
-
-export interface ITileMapLayerViewContainer<T> extends IOrderedCollection<ITileMapLayerView<T>> {}
-
-export interface IHasTileMapLayerViewContainer<T> {
-    layerViews: ITileMapLayerViewContainer<T>;
 }
 
 export function IsTileMapLayerContainerProxy<T>(b: unknown): b is IHasTileMapLayerContainer<T> {
@@ -82,10 +79,14 @@ export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
 
-export interface ITileMap<T>
-    extends IHasTileMapLayerContainer<T>,
-        IHasTileMapLayerViewContainer<T>,
-        ITileNavigationApi<ITileMap<T>>,
-        IHasNavigationState,
-        IHasDisplay,
-        IDisposable {}
+export interface ITileMapCoreProperties extends IHasDisplay, IHasNavigationState, IHasView {}
+
+export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, IHasTileMapLayerViewContainer<T>, ITileNavigationApi<ITileMap<T>>, ITileMapCoreProperties, IDisposable {}
+
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileProvider<T>, IValidable, ITileMapCoreProperties, IWeighted {}
+
+export interface ITileMapLayerViewContainer<T> extends IOrderedCollection<ITileMapLayerView<T>> {}
+
+export interface IHasTileMapLayerViewContainer<T> {
+    layerViews: ITileMapLayerViewContainer<T>;
+}

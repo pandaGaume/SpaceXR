@@ -1,5 +1,5 @@
 import { Scalar } from "../../math";
-import { IDisplay, isDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
+import { IDisplay, IsDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
 import { isValidable } from "../../types";
 
 // intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
@@ -54,7 +54,7 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
                 if (!layer.enabled) {
                     continue;
                 }
-                const render = isDrawableTileMapLayer(layer) ? layer.drawFn?.bind(layer.drawTarget ?? layer) : undefined;
+                const render = IsDrawableTileMapLayer(layer) ? layer.drawFn?.bind(layer.drawTarget ?? layer) : undefined;
                 if (!render) {
                     continue;
                 }

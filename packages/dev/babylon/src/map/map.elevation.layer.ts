@@ -1,22 +1,8 @@
-import { Color4, Material } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { PropertyChangedEventArgs } from "core/events";
-import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
-import { ITileAddress, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, ITileProvider, TileMapLayer } from "core/tiles";
-
-export interface IElevationLayerMaterialOptions {
-    material?: Material; // this is the default material to use. If defined, superseed any other material options.
-    color?: Color4;
-    shininess?: number;
-    textureResolution?: ISize2;
-}
-
-export interface IElevationLayerOptions extends ITileMapLayerOptions<IDemInfos>, IElevationLayerMaterialOptions {
-    exageration?: number;
-    insets?: ICartesian3;
-}
-
-export interface IElevationLayer extends ITileMapLayer<IDemInfos>, IElevationLayerOptions {}
+import { Cartesian3, ICartesian3 } from "core/geometry";
+import { ITileAddress, ITileContentProvider, ITileDatasource, TileMapLayer } from "core/tiles";
+import { IElevationLayerOptions } from "./map.elevation.interfaces";
 
 export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevationLayer {
     public static readonly DefaultExageration: number = 1.0;
@@ -28,7 +14,7 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
     private _exageration?: number;
     private _insets?: ICartesian3;
 
-    public constructor(name: string, provider: ITileProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
+    public constructor(name: string, provider: ITileContentProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
         super(name, provider, options, enabled);
         this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
         this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;

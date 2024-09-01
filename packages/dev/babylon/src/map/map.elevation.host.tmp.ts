@@ -21,7 +21,7 @@ import {
 import { ICartesian2, ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs, EventState, Observable, Observer } from "core/events";
 import { Bearing, IGeo2 } from "core/geography";
-import { ElevationMesh, IElevationMesh, IElevationTile } from "./map.elevation.mesh";
+import { ElevationTile, IElevationMesh, IElevationTile } from "./map.elevation.mesh";
 import { ElevationLayer, IElevationLayerOptions, IElevationLayerMaterialOptions } from "./map.elevation.layer";
 import { IDemInfos } from "core/dem";
 import { Map3dScaleController, HasMapScale } from "./map.scale.controller";
@@ -447,7 +447,7 @@ export class Map3dElevationHost
 
     protected _createElevationTile(tile: ITile<IDemInfos>, mesh: AbstractMesh): IElevationTile {
         const a = tile.address;
-        return new Tile<IElevationMesh>(a.x, a.y, a.levelOfDetail, new ElevationMesh(tile, mesh), this.metrics);
+        return new Tile<IElevationMesh>(a.x, a.y, a.levelOfDetail, new ElevationTile(tile, mesh), this.metrics);
     }
 
     protected _onTileRemoved(tile: ITile<IDemInfos>, eventState: EventState): void {

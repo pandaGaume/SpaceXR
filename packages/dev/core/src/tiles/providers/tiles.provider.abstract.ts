@@ -126,13 +126,28 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
     /// begin ITargetBlock
     public added(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
         const data = Array.isArray(eventData) ? eventData : [eventData];
-        this._onTileAddressesAdded(data, eventState);
+        const tiles = this._onTileAddressesAdded(data, eventState);
+        if (tiles.length) {
+            this.invalidate();
+            this._onTilesAdded(tiles);
+            if (this._addedObservable && this._addedObservable.hasObservers()) {
+                this._addedObservable.notifyObservers(tiles, -1, this, this);
+            }
+        }
     }
 
     public removed(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
         const data = Array.isArray(eventData) ? eventData : [eventData];
-        this._onTileAddressesRemoved(data, eventState);
+        const tiles = this._onTileAddressesRemoved(data, eventState);
+        if (tiles.length) {
+            this.invalidate();
+            this._onTilesRemoved(tiles);
+            if (this._removedObservable && this._removedObservable.hasObservers()) {
+                this._removedObservable?.notifyObservers(tiles, -1, this, this);
+            }
+        }
     }
+
     public updated(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
         // nothing to do here, updating address is not suppose to happen
     }
@@ -164,12 +179,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
                 console.log(e);
             }
         }
-        if (tiles.length) {
-            this.invalidate();
-            if (this._addedObservable && this._addedObservable.hasObservers()) {
-                this._addedObservable.notifyObservers(tiles, -1, this, this);
-            }
-        }
+
         return tiles;
     }
 
@@ -183,12 +193,6 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
                     this._activTiles?.remove(a)!;
                 }
             }
-            if (tiles.length) {
-                this.invalidate();
-                if (this._removedObservable && this._removedObservable.hasObservers()) {
-                    this._removedObservable?.notifyObservers(tiles, -1, this, this);
-                }
-            }
 
             return tiles;
         }
@@ -197,6 +201,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
 
     protected _onContentFetched(tile: ITile<T>): void {
         this.invalidate();
+        this._onTilesUpdated(tile);
         if (this.updatedObservable?.hasObservers()) {
             this.updatedObservable.notifyObservers([tile], -1, this, this);
         }
@@ -206,6 +211,12 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         const b = new TileBuilder<T>();
         return type ? b.withType(type) : b;
     }
+
+    protected _onTilesAdded(tiles: ITile<T> | Array<ITile<T>>): void {}
+
+    protected _onTilesRemoved(tiles: ITile<T> | Array<ITile<T>>): void {}
+
+    protected _onTilesUpdated(tiles: ITile<T> | Array<ITile<T>>): void {}
 
     public abstract _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T>;
 }

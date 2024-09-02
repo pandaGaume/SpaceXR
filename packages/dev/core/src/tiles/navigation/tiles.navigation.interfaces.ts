@@ -4,7 +4,7 @@ import { ITileMetrics, ITileSystemBounds, IsTileSystemBounds } from "../tiles.in
 import { ICloneable, IValidable, Nullable } from "../../types";
 
 export interface IHasNavigationState {
-    navigation: ITileNavigationState;
+    navigation: Nullable<ITileNavigationState>;
 }
 
 export function hasNavigationState(obj: unknown): obj is IHasNavigationState {

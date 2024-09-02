@@ -3,7 +3,7 @@ import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IValidable, Nullable } from "../../types";
 export interface IHasNavigationState {
-    navigation: ITileNavigationState;
+    navigation: Nullable<ITileNavigationState>;
 }
 export declare function hasNavigationState(obj: unknown): obj is IHasNavigationState;
 export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {

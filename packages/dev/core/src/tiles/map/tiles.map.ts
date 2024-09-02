@@ -2,9 +2,9 @@ import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../.
 import { ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState, TileNavigationState } from "../navigation";
 import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
-import { isValidable, Nullable } from "../../types";
+import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
-import { hasTileSelectionContext, ITileView } from "../pipeline";
+import { ITileView } from "../pipeline";
 import { ValidableBase } from "../../validable";
 import { OrderedCollection } from "../../collections/orderedCollection";
 import { IOrderedCollection } from "../../collections/collections.interfaces";
@@ -127,24 +127,12 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     public get isValid(): boolean {
-        return super.isValid && this._layers.isValid;
+        return super.isValid && this._layers?.isValid && this._layerViews?.isValid;
     }
 
     protected _doValidate() {
-        for (const l of this._layerViews) {
-            const layer: ITileMapLayer<T> = l.layer;
-            if (isValidable(l)) {
-                l.validate();
-            }
-
-            if (hasTileSelectionContext(l)) {
-                const offset = layer.zoomOffset ?? 0;
-                const n = offset
-                    ? new TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
-                    : this.navigation;
-                l.setContext(n, this.display, layer.metrics);
-            }
-        }
+        this._layers?.validate();
+        this._layerViews?.validate();
     }
 
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
@@ -189,6 +177,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         if (display) {
             this._display = display;
             this._displayPropertyObserver = this._display?.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
+            if (this._layerViews) {
+                for (const l of this._layerViews) {
+                    l.display = display;
+                }
+            }
         }
         this.invalidate();
         this._onDisplayBinded(display);
@@ -198,6 +191,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._navigationUpdatedObserver?.disconnect();
         if (nav) {
             this._navigationUpdatedObserver = this._navigation.validationObservable?.add(this._onNavigationUpdatedInternal.bind(this));
+            if (this._layerViews) {
+                for (const l of this._layerViews) {
+                    l.navigation = nav;
+                }
+            }
         }
         this.invalidate();
         this._onNavigationBinded(nav);

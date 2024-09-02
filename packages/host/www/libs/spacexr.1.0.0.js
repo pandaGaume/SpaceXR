@@ -8077,14 +8077,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
 /* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation */ "./dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.interfaces.js");
 /* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "./dist/validable.js");
-/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../collections/orderedCollection */ "./dist/collections/orderedCollection.js");
-/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../collections/orderedCollection */ "./dist/collections/orderedCollection.js");
+/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.map.layerView */ "./dist/tiles/map/tiles.map.layerView.js");
 /* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.map.view */ "./dist/tiles/map/tiles.map.view.js");
-
-
 
 
 
@@ -8164,22 +8160,11 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         return this;
     }
     get isValid() {
-        return super.isValid && this._layers.isValid;
+        return super.isValid && this._layers?.isValid && this._layerViews?.isValid;
     }
     _doValidate() {
-        for (const l of this._layerViews) {
-            const layer = l.layer;
-            if ((0,_types__WEBPACK_IMPORTED_MODULE_4__.isValidable)(l)) {
-                l.validate();
-            }
-            if ((0,_pipeline__WEBPACK_IMPORTED_MODULE_5__.hasTileSelectionContext)(l)) {
-                const offset = layer.zoomOffset ?? 0;
-                const n = offset
-                    ? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState(this.navigation.center, this.navigation.lod + offset, this.navigation.azimuth?.value, this.navigation.bounds)
-                    : this.navigation;
-                l.setContext(n, this.display, layer.metrics);
-            }
-        }
+        this._layers?.validate();
+        this._layerViews?.validate();
     }
     _onLayerAdded(eventData, eventstate) {
         this._layerViews.add(...eventData.map((l) => this._createLayerView(l)));
@@ -8216,6 +8201,11 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         if (display) {
             this._display = display;
             this._displayPropertyObserver = this._display?.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
+            if (this._layerViews) {
+                for (const l of this._layerViews) {
+                    l.display = display;
+                }
+            }
         }
         this.invalidate();
         this._onDisplayBinded(display);
@@ -8224,6 +8214,11 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._navigationUpdatedObserver?.disconnect();
         if (nav) {
             this._navigationUpdatedObserver = this._navigation.validationObservable?.add(this._onNavigationUpdatedInternal.bind(this));
+            if (this._layerViews) {
+                for (const l of this._layerViews) {
+                    l.navigation = nav;
+                }
+            }
         }
         this.invalidate();
         this._onNavigationBinded(nav);
@@ -8258,13 +8253,13 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
     }
     _createLayerContainerInternal() {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection();
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_4__.OrderedCollection();
     }
     _createLayerViewContainerInternal(layers) {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._createLayerViewInternal(l)));
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_4__.OrderedCollection(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._createLayerViewInternal(l)));
     }
     _createLayerViewInternal(layer) {
-        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView(layer, this._display, this._navigation, this._view);
+        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_5__.TileMapLayerView(layer, this._display, this._navigation, this._view);
     }
 }
 //# sourceMappingURL=tiles.map.js.map
@@ -8432,10 +8427,14 @@ __webpack_require__.r(__webpack_exports__);
 class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractTileProvider {
     constructor(layer, display, navigation, source) {
         super();
+        this._navigation = null;
+        this._navigationObserver = null;
+        this._display = null;
+        this._displayObserver = null;
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
-        this._navigation = navigation;
-        this._display = display;
+        this.navigation = navigation;
+        this.display = display;
         this._view = source;
         this._view?.linkTo(this);
         this.factory.withMetrics(this._layer.metrics).withNamespace(this._layer.name);
@@ -8461,6 +8460,34 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
     get navigation() {
         return this._navigation;
     }
+    set navigation(value) {
+        if (this._navigation !== value) {
+            const tmp = this._navigation;
+            if (tmp) {
+                this._navigationObserver?.disconnect();
+                this._navigationObserver = null;
+            }
+            this._navigation = value;
+            if (this._navigation) {
+                this._navigationObserver = this._navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+            }
+            this._onNavigationChanged(tmp, value);
+        }
+    }
+    set display(value) {
+        if (this._display !== value) {
+            const tmp = this._display;
+            if (tmp) {
+                this._displayObserver?.disconnect();
+                this._displayObserver = null;
+            }
+            this._display = value;
+            if (this._display) {
+                this._displayObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
+            }
+            this._onDisplayChanged(tmp, value);
+        }
+    }
     get view() {
         return this._view;
     }
@@ -8468,9 +8495,8 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         super.dispose();
         this._view?.unlinkFrom(this);
         this._layerObserver?.disconnect();
-    }
-    setContext(state, display, metrics, options) {
-        this._view?.setContext(state, display, metrics, options);
+        this._displayObserver?.disconnect();
+        this._navigationObserver?.disconnect();
     }
     _buildSource() {
         return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
@@ -8486,10 +8512,25 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         }
         this.invalidate();
     }
-    _onNavigationPropertyChanged(eventData, eventState) { }
-    _onDisplayPropertyChanged(eventData, eventState) { }
+    _onNavigationChanged(oldValue, newValue) {
+        this.invalidate();
+    }
+    _onNavigationPropertyChanged(eventData, eventState) {
+        this.invalidate();
+    }
+    _onDisplayChanged(oldValue, newValue) {
+        this.invalidate();
+    }
+    _onDisplayPropertyChanged(eventData, eventState) {
+        this.invalidate();
+    }
     _fetchContent(tile, callback) {
         return this._layer.provider.fetchContent(tile, callback);
+    }
+    _doValidate() {
+        if (this._view && this._navigation && this._display) {
+            this._view.setContext(this.navigation, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset });
+        }
     }
 }
 //# sourceMappingURL=tiles.map.layerView.js.map

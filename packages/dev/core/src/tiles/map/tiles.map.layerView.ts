@@ -1,10 +1,11 @@
+
 import { IWeighted } from "../../collections/collections.interfaces";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
-import { ITileSelectionContextOptions, ITileView } from "../pipeline";
+import { ITileView } from "../pipeline";
 import { AbstractTileProvider } from "../providers";
-import { ITile, ITileMetrics } from "../tiles.interfaces";
+import { ITile } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { TileView } from "./tiles.map.view";
 
@@ -14,16 +15,19 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     private _layer: ITileMapLayer<T>;
     private _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
     private _view: ITileView;
-    private _navigation: ITileNavigationState;
-    private _display: IDisplay;
+    private _navigation: Nullable<ITileNavigationState> = null;
+    private _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
+    private _display: Nullable<IDisplay> = null;
+    private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
 
     public constructor(layer: ITileMapLayer<T>, display: IDisplay, navigation: ITileNavigationState, source: ITileView) {
         super();
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
 
-        this._navigation = navigation;
-        this._display = display;
+        this.navigation = navigation;
+        this.display = display;
+
         this._view = source;
         this._view?.linkTo(this);
 
@@ -54,8 +58,38 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         return this._display;
     }
 
-    public get navigation(): ITileNavigationState {
+    public get navigation(): Nullable<ITileNavigationState> {
         return this._navigation;
+    }
+
+    public set navigation(value: Nullable<ITileNavigationState>) {
+        if (this._navigation !== value) {
+            const tmp = this._navigation;
+            if (tmp) {
+                this._navigationObserver?.disconnect();
+                this._navigationObserver = null;
+            }
+            this._navigation = value;
+            if (this._navigation) {
+                this._navigationObserver = this._navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+            }
+            this._onNavigationChanged(tmp, value);
+        }
+    }
+
+    public set display(value: Nullable<IDisplay>) {
+        if (this._display !== value) {
+            const tmp = this._display;
+            if (tmp) {
+                this._displayObserver?.disconnect();
+                this._displayObserver = null;
+            }
+            this._display = value;
+            if (this._display) {
+                this._displayObserver = this._display.propertyChangedObservable.add(this._onDisplayPropertyChanged.bind(this));
+            }
+            this._onDisplayChanged(tmp, value);
+        }
     }
 
     public get view(): ITileView {
@@ -66,10 +100,8 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         super.dispose();
         this._view?.unlinkFrom(this);
         this._layerObserver?.disconnect();
-    }
-
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void {
-        this._view?.setContext(state, display, metrics, options);
+        this._displayObserver?.disconnect();
+        this._navigationObserver?.disconnect();
     }
 
     protected _buildSource(): ITileView {
@@ -90,11 +122,29 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         this.invalidate();
     }
 
-    protected _onNavigationPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {}
+    protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
+        this.invalidate();
+    }
 
-    protected _onDisplayPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {}
+    protected _onNavigationPropertyChanged(eventData: PropertyChangedEventArgs<ITileNavigationState, unknown>, eventState: EventState): void {
+        this.invalidate();
+    }
+
+    protected _onDisplayChanged(oldValue: Nullable<IDisplay>, newValue: Nullable<IDisplay>): void {
+        this.invalidate();
+    }
+
+    protected _onDisplayPropertyChanged(eventData: PropertyChangedEventArgs<IDisplay, unknown>, eventState: EventState): void {
+        this.invalidate();
+    }
 
     public _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T> {
         return this._layer.provider.fetchContent(tile, callback);
+    }
+
+    protected _doValidate(): void {
+        if (this._view && this._navigation && this._display) {
+            this._view.setContext(this.navigation, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset });
+        }
     }
 }

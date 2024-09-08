@@ -1,4 +1,3 @@
-
 import { IWeighted } from "../../collections/collections.interfaces";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { Nullable } from "../../types";
@@ -20,7 +19,7 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     private _display: Nullable<IDisplay> = null;
     private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
 
-    public constructor(layer: ITileMapLayer<T>, display: IDisplay, navigation: ITileNavigationState, source: ITileView) {
+    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView) {
         super();
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));

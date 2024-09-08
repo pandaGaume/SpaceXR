@@ -16,22 +16,7 @@ function IsElevationLayer(b: unknown): b is ITileMapLayer<IDemInfos> {
 }
 
 export class ElevationMap extends TileMapBase<ElevationMapContentType> {
-    protected _onLayerAdded(eventData: Array<ITileMapLayer<ElevationMapContentType>>, eventstate: EventState): void {
-        super._onLayerAdded(eventData, eventstate);
-    }
-
-    protected _onLayerRemoved(eventData: Array<ITileMapLayer<ElevationMapContentType>>, eventstate: EventState): void {
-        super._onLayerRemoved(eventData, eventstate);
-    }
-
-    protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<ElevationMapContentType>>, eventstate: EventState): void {
-        super._onLayerViewAdded(eventData, eventstate);
-    }
-
-    protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<ElevationMapContentType>>, eventstate: EventState): void {
-        super._onLayerViewRemoved(eventData, eventstate);
-    }
-
+ 
     /**
      * This is where we create different views, depending the type of layer.
      * Elevation type layer will create specific view, which hold the necessary mechanism to create grid instances
@@ -46,7 +31,6 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> {
     }
 
     protected _createElevationHost(layer: ITileMapLayer<IDemInfos>): IElevationHost {
-        const host = new ElevationHost(layer, this._view);
-        return host;
+        return new ElevationHost(layer, this._display, this._navigation, this._view);
     }
 }

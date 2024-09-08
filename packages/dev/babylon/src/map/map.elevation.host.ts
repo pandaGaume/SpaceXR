@@ -1,8 +1,8 @@
 import { IDemInfos } from "core/dem";
-import { ITileNavigationState, ITileView, TileMapLayerView } from "core/tiles";
+import { IDisplay, ITileNavigationState, ITileView, TileMapLayerView } from "core/tiles";
 import { IElevationHost, IElevationLayer, IsElevationLayer } from "./map.elevation.interfaces";
 import { ElevationGridFactory } from "./map.elevation.host.factory";
-import { AbstractMesh, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Color3, Material, Mesh, Scene, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
 import { ElevationTile, IElevationTile } from "./map.elevation.mesh";
 import { ICartesian2 } from "core/geometry";
 import { Nullable } from "core/types";
@@ -14,15 +14,16 @@ import { Bearing, IGeo2 } from "core/geography";
 export class ElevationHost extends TileMapLayerView<IDemInfos> implements IElevationHost {
     public static TemplateNameSuffix = "grid";
     public static RootNameSuffix = "root";
+    public static MaterialNameSuffix = "material";
 
     // the grid model
     _grid: Mesh;
     _tilesRoot: TransformNode;
     // cached cartesian center
-    _cartesianCenter: Nullable<ICartesian2> = null;
+    _cartesianCenterCache: Nullable<ICartesian2> = null;
 
-    public constructor(layer: IElevationLayer, source: ITileView, scene?: Scene) {
-        super(layer, source);
+    public constructor(layer: IElevationLayer, display: IDisplay, navigation: ITileNavigationState, source: ITileView, scene?: Scene) {
+        super(layer, display, navigation, source);
         this._tilesRoot = this._buildRoot(scene);
         this._grid = this._buildTemplate(scene);
         this.factory.withType(ElevationTile);
@@ -67,18 +68,25 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         super._onLayerPropertyChanged(eventData, eventState);
     }
 
+    protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
+        if (newValue && newValue !== oldValue) {
+            const geo = newValue.center;
+            this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, newValue.lod);
+            this._onCenterChanged(this._cartesianCenterCache);
+            this._onZoomChanged(newValue.scale);
+            this._onAzimuthChanged(newValue.azimuth);
+        }
+    }
+
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case "center": {
                 const geo = event.newValue as IGeo2;
-                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
-                this._onCenterChanged(this._cartesianCenter);
+                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
+                this._onCenterChanged(this._cartesianCenterCache);
                 break;
             }
             case "zoom": {
-                const geo = event.source.center;
-                this._cartesianCenter = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
-                this._onCenterChanged(this._cartesianCenter);
                 this._onZoomChanged(event.source.scale);
                 break;
             }
@@ -87,6 +95,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
                 break;
             }
         }
+        super._onNavigationPropertyChanged(event, state);
     }
 
     public get exageration(): number {
@@ -113,7 +122,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
                 return;
             }
             for (const tile of tiles) {
-                this._setTilePosition(tile, center);
+                this._setTilePosition(tile as IElevationTile, center);
             }
         }
     }
@@ -140,6 +149,13 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         return mesh;
     }
 
+    protected _buildMaterial(name: string, scene?: Scene): Material {
+        const material = new StandardMaterial(name, scene);
+        material.wireframe = true;
+        material.emissiveColor = Color3.White();
+        return material;
+    }
+
     protected _buildGridFactory(): ElevationGridFactory {
         return this._buildGridFactoryInternal();
     }
@@ -153,6 +169,10 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     protected _buildTemplateName(): string {
         return this._buildQualifiedName(`${this.name}_${ElevationHost.TemplateNameSuffix}`);
+    }
+
+    protected _buildMaterialName(): string {
+        return `${this._buildTemplateName()}_${ElevationHost.MaterialNameSuffix}`;
     }
 
     protected _buildRootName(): string {
@@ -208,8 +228,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             m.setParent(this.root);
             // this is theorically not possible to reach this point with a null _cartesianCenter, because
             // the navigation MUST be done in order to trigger tile loading.
-            Assert(this._cartesianCenter != null, "Invalid state on Elevation host: center MUST be set.");
-            this._setTilePosition(tile, this._cartesianCenter);
+            Assert(this._cartesianCenterCache != null, "Invalid state on Elevation host: center MUST be set.");
+            this._setTilePosition(tile, this._cartesianCenterCache);
         }
     }
 

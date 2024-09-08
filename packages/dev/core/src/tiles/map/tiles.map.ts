@@ -11,9 +11,13 @@ import { IOrderedCollection } from "../../collections/collections.interfaces";
 import { TileMapLayerView } from "./tiles.map.layerView";
 import { TileView } from "./tiles.map.view";
 
+
 export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
-    protected _display: IDisplay;
-    protected _navigation: ITileNavigationState;
+    public static readonly DISPLAY_PROPERTY_NAME: string = "display";
+    public static readonly NAVIGATION_PROPERTY_NAME: string = "nav";
+
+    protected _display: Nullable<IDisplay> = null;
+    protected _navigation: Nullable<ITileNavigationState> = null;
     protected _view: ITileView;
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layerRemovedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
@@ -23,8 +27,9 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _layerViews: ITileMapLayerViewContainer<T>;
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileMap<T>, unknown>>;
-    _navigationUpdatedObserver?: Nullable<Observer<boolean>>;
     _displayPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>>;
+    _navigationPropertyObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
+    _navigationValidableObserver?: Nullable<Observer<boolean>>;
     _navInstanceCache?: ITileNavigationState;
 
     /// <summary>
@@ -35,19 +40,14 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     /// <param name="nav">The optional navigation api. May be a NavigationAPI object or a ITileMetrics object. In the second case, it will build a new TileNavigation(metrics).
     //  </param>
     /// </summary>
-    public constructor(display: IDisplay, nav?: ITileNavigationState, container?: ITileMapLayerContainer<T>) {
+    public constructor(display?: Nullable<IDisplay>, nav?: Nullable<ITileNavigationState>, container?: ITileMapLayerContainer<T>) {
         super();
         this._layers = container ?? this._createLayerContainer() ?? this._createLayerContainerInternal();
         this._layerAddedObserver = this._layers.addedObservable.add(this._onLayerAdded.bind(this));
         this._layerRemovedObserver = this._layers.removedObservable.add(this._onLayerRemoved.bind(this));
 
-        this._display = display;
-        this._bindDisplay(this._display);
-
-        // build the navigation state according parameters
-        this._navigation = nav ?? this._buildNavigationState() ?? new TileNavigationState();
-        this._bindNavigation(this._navigation);
-
+        this.display = display ?? null;
+        this.navigation = nav ?? this._buildNavigationState() ?? new TileNavigationState();
         this._view = this._buildView() ?? new TileView();
 
         this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
@@ -72,8 +72,16 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this._display;
     }
 
-    public get navigation(): ITileNavigationState {
+    public set display(value: Nullable<IDisplay>) {
+        this._bindDisplay(value);
+    }
+
+    public get navigation(): Nullable<ITileNavigationState> {
         return this._navigation;
+    }
+
+    public set navigation(value: Nullable<ITileNavigationState>) {
+        this._bindNavigation(value);
     }
 
     public get view(): ITileView {
@@ -82,7 +90,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     public dispose() {
         super.dispose();
-        this._navigationUpdatedObserver?.disconnect();
+        this._navigationValidableObserver?.disconnect();
         this._displayPropertyObserver?.disconnect();
         this._layerAddedObserver?.disconnect();
         this._layerRemovedObserver?.disconnect();
@@ -92,37 +100,37 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     // navigation proxy
     public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T> {
-        this._navigation.setViewMap(center, zoom, rotation);
+        this._navigation?.setViewMap(center, zoom, rotation);
         return this;
     }
 
     public zoomMap(delta: number): TileMapBase<T> {
-        this._navigation.zoomMap(delta);
+        this._navigation?.zoomMap(delta);
         return this;
     }
 
     public zoomInMap(delta: number): TileMapBase<T> {
-        this._navigation.zoomInMap(delta);
+        this._navigation?.zoomInMap(delta);
         return this;
     }
 
     public zoomOutMap(delta: number): TileMapBase<T> {
-        this._navigation.zoomOutMap(delta);
+        this._navigation?.zoomOutMap(delta);
         return this;
     }
 
     public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T> {
-        this._navigation.translateUnitsMap(tx, ty, metrics);
+        this._navigation?.translateUnitsMap(tx, ty, metrics);
         return this;
     }
 
     public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T> {
-        this._navigation.translateMap(lat, lon);
+        this._navigation?.translateMap(lat, lon);
         return this;
     }
 
     public rotateMap(r: number): TileMapBase<T> {
-        this._navigation.rotateMap(r);
+        this._navigation?.rotateMap(r);
         return this;
     }
 
@@ -153,14 +161,14 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void {}
 
     // end navigation proxy
-    private _onNavigationUpdatedInternal(event: boolean, state: EventState): void {
-        if (event) {
+    protected _onNavigationValidationChanged(event: boolean, state: EventState): void {
+        if (event && state.target === this._navigation) {
             this.invalidate();
-            this._onNavigationUpdated(this._navigation);
+            this._onNavigationUpdated(state.target); 
         }
     }
 
-    private _onDisplayPropertyChanged(event: PropertyChangedEventArgs<IDisplay, unknown>, state: EventState): void {
+    protected _onDisplayPropertyChanged(event: PropertyChangedEventArgs<IDisplay, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case "size": {
                 this.invalidate();
@@ -173,32 +181,63 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
+    protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {}
+
     private _bindDisplay(display: Nullable<IDisplay>): void {
-        if (display) {
+        if (this._display != display) {
+            const old = this.display;
+            if (this._display) {
+                this._displayPropertyObserver?.disconnect();
+                this._displayPropertyObserver = null;
+                this._onDisplayUnbinded(this._display);
+            }
+
             this._display = display;
-            this._displayPropertyObserver = this._display?.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
+            if (this._display) {
+                this._displayPropertyObserver = this._display.propertyChangedObservable?.add(this._onDisplayPropertyChanged.bind(this));
+            }
+
             if (this._layerViews) {
                 for (const l of this._layerViews) {
                     l.display = display;
                 }
             }
+            this.invalidate();
+            this._onDisplayBinded(display);
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, old, this._display, TileMapBase.DISPLAY_PROPERTY_NAME), -1, this, this);
+            }
         }
-        this.invalidate();
-        this._onDisplayBinded(display);
     }
 
-    private _bindNavigation(nav?: ITileNavigationState): void {
-        this._navigationUpdatedObserver?.disconnect();
-        if (nav) {
-            this._navigationUpdatedObserver = this._navigation.validationObservable?.add(this._onNavigationUpdatedInternal.bind(this));
+    private _bindNavigation(nav: Nullable<ITileNavigationState>): void {
+        if (this._navigation != nav) {
+            const old = this._navigation;
+            if (this._navigation) {
+                this._navigationValidableObserver?.disconnect();
+                this._navigationValidableObserver = null;
+                this._navigationPropertyObserver?.disconnect();
+                this._navigationPropertyObserver = null;
+                this._onNavigationUnbinded(this._navigation);
+            }
+
+            this._navigation = nav;
+            if (this._navigation) {
+                this._navigationPropertyObserver = this._navigation.propertyChangedObservable?.add(this._onNavigationPropertyChanged.bind(this));
+                this._navigationValidableObserver = this._navigation.validationObservable?.add(this._onNavigationValidationChanged.bind(this));
+            }
+
             if (this._layerViews) {
                 for (const l of this._layerViews) {
                     l.navigation = nav;
                 }
             }
+            this.invalidate();
+            this._onNavigationBinded(nav);
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, old, this._navigation, TileMapBase.NAVIGATION_PROPERTY_NAME), -1, this, this);
+            }
         }
-        this.invalidate();
-        this._onNavigationBinded(nav);
     }
 
     protected _createLayerContainer(): ITileMapLayerContainer<T> {
@@ -221,15 +260,15 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onNavigationUnbinded(nav?: ITileNavigationState): void {
+    protected _onNavigationUnbinded(nav: Nullable<ITileNavigationState>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onNavigationBinded(nav?: ITileNavigationState): void {
+    protected _onNavigationBinded(nav: Nullable<ITileNavigationState>): void {
         /* nothing to do here - overrided by subclasses */
     }
 
-    protected _onNavigationUpdated(nav?: ITileNavigationState): void {
+    protected _onNavigationUpdated(nav: ITileNavigationState): void {
         /* nothing to do here - overrided by subclasses */
     }
 

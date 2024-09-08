@@ -12,6 +12,11 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
     /// Draw the map on the canvas.
     /// </summary>
     public draw(ctx: CanvasRenderingContext2D, xoffset: number = 0, yoffset: number = 0): void {
+        const navigation = this.navigation;
+        if (!navigation) {
+            return;
+        }
+
         if (!ctx || !this._display) {
             return;
         }
@@ -30,7 +35,7 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
             const y = yoffset;
             const w = display.resolution.width;
             const h = display.resolution.height;
-            const scale = this.navigation.scale;
+            const scale = this.navigation?.scale ?? 1.0;
 
             // we clear the canvas
             ctx.clearRect(x, y, w, h);
@@ -39,7 +44,7 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
             ctx.translate(x + w / 2, y + h / 2);
 
             // we rotate the canvas according the navigation azimuth
-            if (this.navigation.azimuth?.value) {
+            if (this.navigation?.azimuth?.value) {
                 // convert azimuth to canvas rotation, which is clockwize, and cartesian
                 const angle = this.navigation.azimuth.value * Scalar.DEG2RAD;
                 ctx.rotate(angle);
@@ -58,9 +63,9 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
                 if (!render) {
                     continue;
                 }
-                const currentLod = this.navigation.lod;
-                const lat = this.navigation.center.lat;
-                const lon = this.navigation.center.lon;
+                const currentLod = navigation.lod;
+                const lat = navigation.center.lat;
+                const lon = navigation.center.lon;
                 const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;

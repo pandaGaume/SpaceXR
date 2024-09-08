@@ -1,6 +1,7 @@
 import { Observable } from "./events";
 import { IDisposable, IValidable } from "./types";
 export declare class ValidableBase implements IValidable, IDisposable {
+    static readonly VALID_PROPERTY_NAME: string;
     _validationObservable?: Observable<boolean>;
     _valid: boolean;
     get isValid(): boolean;

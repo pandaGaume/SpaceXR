@@ -4,7 +4,8 @@ import { VirtualDisplay } from "../display";
 import { ICartesian3 } from "core/geometry";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IDisposable, Nullable } from "core/types";
-import { Geo2, IGeo2 } from "..";
+import { Assert } from "core/utils";
+import { Geo2, IGeo2 } from "core/geography";
 
 export function HasMapScale(obj: unknown): obj is IHasMapScale {
     if (typeof obj !== "object" || obj === null) return false;
@@ -26,10 +27,10 @@ export class Map3dScaleController implements IDisposable {
     }
 
     private _scaleChangedOnservable?: Observable<ICartesian3>;
-    private _observer: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
+    private _observer: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
 
     private _display: VirtualDisplay;
-    private _nav: ITileNavigationState;
+    private _nav: Nullable<ITileNavigationState>;
     private _metrics: ITileMetrics;
     private _currentCenter: IGeo2;
     private _thresholdLat: number = Map3dScaleController.DefaultThresholdLat;
@@ -37,9 +38,15 @@ export class Map3dScaleController implements IDisposable {
     constructor(display: VirtualDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics) {
         this._display = display;
         this._nav = hasNavigationState(nav) ? nav.navigation : nav;
+        Assert(this._nav !== null && this._nav !== undefined, "Invalid parameter: Navigation.");
         this._metrics = metrics;
-        this._observer = this._nav.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
-        this._currentCenter = this._nav.center?.clone() ?? Geo2.Zero();
+        if (this._nav) {
+            this._observer = this._nav.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+            this._currentCenter = this._nav.center?.clone() ?? Geo2.Zero();
+        } else {
+            this._observer = null;
+            this._currentCenter = Geo2.Zero();
+        }
     }
 
     public get thresholdLat(): number {
@@ -77,11 +84,13 @@ export class Map3dScaleController implements IDisposable {
     }
 
     protected _onZoomChanged(): void {
-        this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));
+        if (this._nav) {
+            this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));
+        }
     }
 
     protected _onCenterChanged(): void {
-        if (this._thresholdExceeded(this._currentCenter, this._nav.center)) {
+        if (this._nav && this._thresholdExceeded(this._currentCenter, this._nav.center)) {
             this._currentCenter.lat = this._nav.center.lat;
             this._currentCenter.lon = this._nav.center.lon;
             this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));

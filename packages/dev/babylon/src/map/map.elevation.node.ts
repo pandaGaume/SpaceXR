@@ -18,12 +18,10 @@ import { IPointerSource, IWheelSource, PointerController } from "core/map";
 import { HolographicDisplay } from "../display";
 import { Map3dElevationHost } from "./map.elevation.host.tmp";
 import { ElevationLayer } from "./map.elevation.layer";
-import { IDemInfos } from "core/dem";
 import { TextUtils } from "core/utils";
+import { ElevationMapContentType } from "./map.elevation.interfaces";
+import { ElevationMap } from "./map.elevation";
 
-export type Map3dTextureContentType = CanvasTileSourceSourceContentType;
-export type Map3dElevationContentType = IDemInfos;
-export type Map3dContentType = Map3dTextureContentType | Map3dElevationContentType;
 
 /// <summary>
 /// The 3D grid sampling mode. Default is GRID.
@@ -68,24 +66,16 @@ export interface IMap3dOptions {
 /// The 3D map class.
 /// The map has to be attached to a display object to be able to work. The display object is the holographic display which has to be somewhere in the upper hierarchy BEFORE the map object is parented.
 /// </summary>
-export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Map3dContentType, ITileMapLayer<Map3dContentType>>, ITileNavigationApi<Map3d>, IHasNavigationState {
+export class Map3d extends TransformNode implements IHasTileMapLayerContainer<ElevationMapContentType> {
     public static DefaultTextureSize: number = 1024;
     public static HostSuffix: string = "host";
 
-    // the map logic. This is the main entry point for the map API.
-    private _layers: ITileMapLayerContainer<Map3dContentType, ITileMapLayer<Map3dContentType>>;
-    private _elevationLayersView: ITileMapLayerContainer<Map3dElevationContentType, ITileMapLayer<Map3dElevationContentType>>;
-    private _textureLayersView: ITileMapLayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>;
-
-    private _addLayerObserver: Nullable<Observer<ITileMapLayer<Map3dContentType>>>;
-    private _removeLayerObserver: Nullable<Observer<ITileMapLayer<Map3dContentType>>>;
-    private _validateHostObserver: Nullable<BabylonObserver<Scene>>;
 
     private _targetDisplay: Nullable<HolographicDisplay> = null;
     private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
     private _ownController = false;
 
-    private _elevationHosts: Map<string, Map3dElevationHost>;
+    private _elevationHosts: ElevationMap;
 
     private _navigation: ITileNavigationState;
     private _navigationUpdatedObserver: Nullable<Observer<ITileNavigationState>>;
@@ -99,7 +89,7 @@ export class Map3d extends TransformNode implements IHasTileMapLayerContainer<Ma
         this._textureLayersView = new LayerContainer<Map3dTextureContentType, ITileMapLayer<Map3dTextureContentType>>();
         this._addLayerObserver = this._layers.layerAddedObservable.add(this._onLayerAdded.bind(this));
         this._removeLayerObserver = this._layers.layerRemovedObservable.add(this._onLayerRemoved.bind(this));
-        this._elevationHosts = new Map<string, Map3dElevationHost>();
+        this._elevationHosts = new ElevationMap();
         this._navigation = this._createNavigationState();
         this._navigationUpdatedObserver = this._navigation.stateChangedObservable.add(this._onNavigationUpdatedInternal.bind(this));
         // this is necessary to validate the elevation host

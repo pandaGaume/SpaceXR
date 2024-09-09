@@ -8470,13 +8470,13 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         this._navigationObserver = null;
         this._display = null;
         this._displayObserver = null;
+        this.factory.withMetrics(layer.metrics).withNamespace(layer.name);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
         this.navigation = navigation;
         this.display = display;
         this._view = source;
         this._view?.linkTo(this);
-        this.factory.withMetrics(this._layer.metrics).withNamespace(this._layer.name);
     }
     get weightChangedObservable() {
         if (!this._weightChangedObservable) {

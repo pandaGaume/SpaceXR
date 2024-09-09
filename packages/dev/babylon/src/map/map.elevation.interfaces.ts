@@ -2,12 +2,20 @@ import { TransformNode } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { ICartesian3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { IsTileMapLayer, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
+import { IsTileMapLayer, ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
+import { IValidable } from "core/types";
 
 export type ElevationMapContentType = IDemInfos;
 
+export interface IElevationMap extends ITileMap<ElevationMapContentType>, IValidable {}
+
 export interface IElevationHost extends ITileMapLayerView<IDemInfos> {
-    root: TransformNode;
+    tilesRoot: TransformNode;
+}
+
+export function IsElevationHost(b: unknown): b is IElevationHost {
+    if (typeof b !== "object" || b === null) return false;
+    return (<IElevationHost>b).tilesRoot && (<IElevationHost>b).tilesRoot instanceof TransformNode;
 }
 
 export interface IElevationGridFactory {

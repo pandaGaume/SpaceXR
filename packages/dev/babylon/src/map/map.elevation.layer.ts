@@ -2,7 +2,7 @@ import { IDemInfos } from "core/dem";
 import { PropertyChangedEventArgs } from "core/events";
 import { Cartesian3, ICartesian3 } from "core/geometry";
 import { ITileAddress, ITileContentProvider, ITileDatasource, TileMapLayer } from "core/tiles";
-import { IElevationLayerOptions } from "./map.elevation.interfaces";
+import { IElevationLayer, IElevationLayerOptions } from "./map.elevation.interfaces";
 
 export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevationLayer {
     public static readonly DefaultExageration: number = 1.0;

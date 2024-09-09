@@ -1,4 +1,4 @@
-import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData, Material } from "@babylonjs/core";
+/*import { AbstractMesh, Mesh, Nullable, Scene, TransformNode, VertexData, Material } from "@babylonjs/core";
 import { TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
 import {
     IHasActivTiles,
@@ -199,10 +199,7 @@ export class Map3dElevationHost
     }
     //#endregion
 
-    /**
-     * The mesh used as template for the elevation tiles. This mesh is intended to be decorated with specific material.
-     * @returns the mesh used as template for the elevation tiles.
-     */
+
     public get mesh(): Mesh {
         return this._template;
     }
@@ -513,3 +510,4 @@ export class Map3dElevationHost
         return m;
     }
 }
+*/

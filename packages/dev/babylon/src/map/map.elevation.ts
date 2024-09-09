@@ -1,22 +1,14 @@
 import { IDemInfos } from "core/dem";
-import { EventState } from "core/events";
-import { ITileMapLayer, ITileMapLayerView, TileMapBase } from "core/tiles";
-import { ElevationLayer } from "./map.elevation.layer";
-import { ElevationMapContentType, IElevationHost } from "./map.elevation.interfaces";
+import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
+import { ElevationMapContentType, IElevationHost, IElevationMap, IsElevationLayer } from "./map.elevation.interfaces";
 import { ElevationHost } from "./map.elevation.host";
+import { Nullable } from "@babylonjs/core";
 
-/**
- * this is internal ype guard to test if the layer is usable as Elevation layer
- * @param b thhe object to be tested
- * @returns the object casted as ITileMapLayer<IDemInfos>
- */
-function IsElevationLayer(b: unknown): b is ITileMapLayer<IDemInfos> {
-    if (typeof b !== "object" || b === null) return false;
-    return b instanceof ElevationLayer;
-}
+export class ElevationMap extends TileMapBase<ElevationMapContentType> implements IElevationMap {
+    public constructor(display?: Nullable<IDisplay>, nav?: Nullable<ITileNavigationState>) {
+        super(display, nav);
+    }
 
-export class ElevationMap extends TileMapBase<ElevationMapContentType> {
- 
     /**
      * This is where we create different views, depending the type of layer.
      * Elevation type layer will create specific view, which hold the necessary mechanism to create grid instances
@@ -25,7 +17,8 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> {
      */
     protected _createLayerView(layer: ITileMapLayer<ElevationMapContentType>): ITileMapLayerView<ElevationMapContentType> {
         if (IsElevationLayer(layer)) {
-            return this._createElevationHost(layer);
+            const host = this._createElevationHost(layer);
+            return host;
         }
         return super._createLayerView(layer);
     }

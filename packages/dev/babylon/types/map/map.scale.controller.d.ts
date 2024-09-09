@@ -3,7 +3,7 @@ import { VirtualDisplay } from "../display";
 import { ICartesian3 } from "core/geometry";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { IDisposable } from "core/types";
-import { IGeo2 } from "..";
+import { IGeo2 } from "core/geography";
 export declare function HasMapScale(obj: unknown): obj is IHasMapScale;
 export interface IHasMapScale {
     mapScale: ICartesian3;

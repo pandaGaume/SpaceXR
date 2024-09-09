@@ -22,25 +22,45 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
 
-    public constructor(layer: IElevationLayer, display: IDisplay, navigation: ITileNavigationState, source: ITileView, scene?: Scene) {
+    public constructor(layer: IElevationLayer, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView, scene?: Scene) {
         super(layer, display, navigation, source);
-        this._tilesRoot = this._buildRoot(scene);
-        this._grid = this._buildTemplate(scene);
+        // ensure factory is with correct type.
         this.factory.withType(ElevationTile);
 
+        // build the 3D root
+        this._tilesRoot = this._buildRoot(scene);
+
+        // build the template
+        this._grid = this._buildTemplate(scene);
+
+        // apply navigation and options.
+        this._applyNavigation(this.navigation);
         this._applyExageration(layer.exageration ?? ElevationLayer.DefaultExageration);
     }
 
-    public get root(): TransformNode {
+    public get tilesRoot(): TransformNode {
         return this._tilesRoot;
     }
 
+    protected get isReady(): boolean {
+        return this._tilesRoot !== null && this._tilesRoot !== undefined;
+    }
     protected _buildRoot(scene?: Scene): TransformNode {
         return new TransformNode(this._buildRootName(), scene);
     }
 
     protected _applyExageration(exageration: number, scale: number = 1.0) {
         this._tilesRoot.scaling.z = exageration * scale;
+    }
+
+    protected _applyNavigation(nav: Nullable<ITileNavigationState>) {
+        if (nav) {
+            const geo = nav.center;
+            this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, nav.lod);
+            this._onCenterChanged(this._cartesianCenterCache);
+            this._onZoomChanged(nav.scale);
+            this._onAzimuthChanged(nav.azimuth);
+        }
     }
 
     protected _applyPosition(x: number, y: number, z: number) {
@@ -70,11 +90,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
         if (newValue && newValue !== oldValue) {
-            const geo = newValue.center;
-            this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, newValue.lod);
-            this._onCenterChanged(this._cartesianCenterCache);
-            this._onZoomChanged(newValue.scale);
-            this._onAzimuthChanged(newValue.azimuth);
+            this._applyNavigation(newValue);
         }
     }
 
@@ -107,16 +123,20 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _onZoomChanged(scale: number, exageration: number = ElevationLayer.DefaultExageration): void {
-        this._tilesRoot.scaling.x = this._tilesRoot.scaling.y = scale;
-        this._applyExageration(exageration, scale);
+        if (this.isReady) {
+            this._tilesRoot.scaling.x = this._tilesRoot.scaling.y = scale;
+            this._applyExageration(exageration, scale);
+        }
     }
 
     protected _onAzimuthChanged(azimuth: Bearing): void {
-        this._tilesRoot.rotation.z = azimuth.radian;
+        if (this.isReady) {
+            this._tilesRoot.rotation.z = azimuth.radian;
+        }
     }
 
     protected _onCenterChanged(center: Nullable<ICartesian2>): void {
-        if (center) {
+        if (this.isReady && center) {
             const tiles = this._activTiles;
             if (!tiles || !tiles.count) {
                 return;
@@ -225,7 +245,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             if (!tile.content) {
                 m.setEnabled(false);
             }
-            m.setParent(this.root);
+            m.setParent(this.tilesRoot);
             // this is theorically not possible to reach this point with a null _cartesianCenter, because
             // the navigation MUST be done in order to trigger tile loading.
             Assert(this._cartesianCenterCache != null, "Invalid state on Elevation host: center MUST be set.");

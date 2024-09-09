@@ -21,6 +21,8 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
 
     public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView) {
         super();
+        // ensure the factory has the right metrics and namespace to build bounds.
+        this.factory.withMetrics(layer.metrics).withNamespace(layer.name);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
 
@@ -29,9 +31,6 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
 
         this._view = source;
         this._view?.linkTo(this);
-
-        // ensure the factory has the right metrics and namespace to build bounds.
-        this.factory.withMetrics(this._layer.metrics).withNamespace(this._layer.name);
     }
 
     public get weightChangedObservable(): Observable<IWeighted> {

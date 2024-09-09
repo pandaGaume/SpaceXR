@@ -87,7 +87,7 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
         return data;
     }
 
-    public get context3d(): TransformNode {
+    public get context3D(): TransformNode {
         return this._worldTransform;
     }
 

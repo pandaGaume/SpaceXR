@@ -181,8 +181,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _buildQualifiedName(n: string): string {
-        if (this.namespace) {
-            return `${this.namespace}_${n}`;
+        if (this.namespace && this.namespace !== "") {
+            return `${this.namespace}:${n}`;
         }
         return n;
     }
@@ -241,6 +241,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     protected _onTileAdded(tile: ElevationTile): void {
         const m = this._createInstance(tile);
         if (m) {
+            m.setParent(this._tilesRoot);
             tile.surface = m;
             if (!tile.content) {
                 m.setEnabled(false);
@@ -261,8 +262,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _onTileUpdated(tile: ElevationTile): void {
-        if (tile.surface && !tile.surface.isEnabled) {
-            tile.surface.setEnabled(true);
+        if (tile.surface) {
+            tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
         }
     }
 
@@ -286,13 +287,13 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
             const s = tile.surface;
-            const x = c.x - center.x;
-            const y = c.y - center.y;
+            const x = center.x - c.x;
+            const y = center.y - c.y;
             const p = s.position;
             // the tile system is origin north-west corner, y pointing to the south, x to the east.
-            // our choice is to have the origin at the center of the tile, y pointing to the north, x to the west (this make z up into babylonjs coordinate system)
+            // our choice is to have the origin at the center of the tile, y pointing to the north, x to the east
             // so the minus sign comes from that.
-            p.x = -x;
+            p.x = x;
             p.y = -y;
             p.z = 0;
         }

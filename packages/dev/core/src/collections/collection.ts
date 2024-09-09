@@ -116,6 +116,14 @@ export class Collection<T> extends ValidableBase implements ICollection<T> {
         );
     }
 
+    protected _doValidate(): void {
+        for (const i of this._items) {
+            if (isValidable(i)) {
+                i.validate();
+            }
+        }
+    }
+
     protected _addInternal(items: Array<T>): Array<T> {
         this._items.push(...items);
         return items;

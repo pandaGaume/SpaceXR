@@ -29,7 +29,7 @@ export declare class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     get ratio(): number;
     get pointerSource(): VirtualDisplayInputsSource;
     protected _buildVertexData(): VertexData;
-    get context3d(): TransformNode;
+    get context3D(): TransformNode;
     get resolution(): ISize3;
     get unit(): Unit;
     get dimension(): ISize3;

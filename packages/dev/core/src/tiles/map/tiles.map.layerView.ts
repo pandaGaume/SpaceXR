@@ -22,7 +22,7 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView) {
         super();
         // ensure the factory has the right metrics and namespace to build bounds.
-        this.factory.withMetrics(layer.metrics).withNamespace(layer.name);
+        this.factory.withMetrics(layer.metrics);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
 

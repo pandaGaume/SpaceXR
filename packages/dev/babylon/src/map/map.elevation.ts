@@ -26,4 +26,5 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> implement
     protected _createElevationHost(layer: ITileMapLayer<IDemInfos>): IElevationHost {
         return new ElevationHost(layer, this._display, this._navigation, this._view);
     }
+
 }

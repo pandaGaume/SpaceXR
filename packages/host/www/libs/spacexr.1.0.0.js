@@ -464,6 +464,13 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
             return true;
         }) ?? true);
     }
+    _doValidate() {
+        for (const i of this._items) {
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(i)) {
+                i.validate();
+            }
+        }
+    }
     _addInternal(items) {
         this._items.push(...items);
         return items;
@@ -4839,8 +4846,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math */ "./dist/math/math.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "./dist/tiles/map/tiles.map.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../tiles */ "./dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../types */ "./dist/types.js");
-
 
 
 class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
@@ -4891,9 +4896,6 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;
-                if ((0,_types__WEBPACK_IMPORTED_MODULE_3__.isValidable)(view)) {
-                    view.validate();
-                }
                 const tiles = view.activTiles;
                 for (const tile of tiles) {
                     const b = tile?.bounds;
@@ -8470,7 +8472,7 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         this._navigationObserver = null;
         this._display = null;
         this._displayObserver = null;
-        this.factory.withMetrics(layer.metrics).withNamespace(layer.name);
+        this.factory.withMetrics(layer.metrics);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
         this.navigation = navigation;

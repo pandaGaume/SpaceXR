@@ -5,6 +5,7 @@ import { ElevationMap } from "./map.elevation";
 import { Nullable } from "core/types";
 import { Observer, EventState } from "core/events";
 import { IGeo2 } from "core/geography";
+import { VirtualDisplay } from "../display";
 
 export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<Map3D>, IHasTileMapLayerContainer<ElevationMapContentType> {
     protected _map: IElevationMap;
@@ -65,7 +66,9 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<M
 
     public withDisplay(display: IDisplay): Map3D {
         this._map.display = display;
-        if (display instanceof BABYLON.Node) {
+        if (display instanceof VirtualDisplay) {
+            this.setParent(display.context3D);
+        } else if (display instanceof BABYLON.Node) {
             this.setParent(display);
         }
         return this;

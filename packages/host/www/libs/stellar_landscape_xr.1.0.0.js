@@ -443,7 +443,7 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
         return data;
     }
-    get context3d() {
+    get context3D() {
         return this._worldTransform;
     }
     get resolution() {
@@ -974,8 +974,8 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return this._buildGridFactoryInternal();
     }
     _buildQualifiedName(n) {
-        if (this.namespace) {
-            return `${this.namespace}_${n}`;
+        if (this.namespace && this.namespace !== "") {
+            return `${this.namespace}:${n}`;
         }
         return n;
     }
@@ -1024,6 +1024,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     _onTileAdded(tile) {
         const m = this._createInstance(tile);
         if (m) {
+            m.setParent(this._tilesRoot);
             tile.surface = m;
             if (!tile.content) {
                 m.setEnabled(false);
@@ -1040,8 +1041,8 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         }
     }
     _onTileUpdated(tile) {
-        if (tile.surface && !tile.surface.isEnabled) {
-            tile.surface.setEnabled(true);
+        if (tile.surface) {
+            tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
         }
     }
     _createInstance(tile) {
@@ -1059,10 +1060,10 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
             const s = tile.surface;
-            const x = c.x - center.x;
-            const y = c.y - center.y;
+            const x = center.x - c.x;
+            const y = center.y - c.y;
             const p = s.position;
-            p.x = -x;
+            p.x = x;
             p.y = -y;
             p.z = 0;
         }
@@ -1252,8 +1253,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/map.elevation.interfaces.js");
-/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/map.elevation.js");
+/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/map.elevation.interfaces.js");
+/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/map.elevation.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
+
 
 
 
@@ -1301,17 +1304,20 @@ class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     }
     withDisplay(display) {
         this._map.display = display;
-        if (display instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Node) {
+        if (display instanceof _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay) {
+            this.setParent(display.context3D);
+        }
+        else if (display instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Node) {
             this.setParent(display);
         }
         return this;
     }
     _createMap() {
-        return new _map_elevation__WEBPACK_IMPORTED_MODULE_1__.ElevationMap();
+        return new _map_elevation__WEBPACK_IMPORTED_MODULE_2__.ElevationMap();
     }
     _onLayerViewAdded(eventData, eventState) {
         for (const v of eventData) {
-            if ((0,_map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsElevationHost)(v)) {
+            if ((0,_map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost)(v)) {
                 v.tilesRoot.setParent(this);
             }
         }
@@ -1321,7 +1327,7 @@ class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     }
     _onLayerViewRemoved(eventData, eventState) {
         for (const v of eventData) {
-            if ((0,_map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsElevationHost)(v)) {
+            if ((0,_map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost)(v)) {
                 v.tilesRoot.setParent(null);
             }
         }
@@ -2360,6 +2366,13 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
             }
             return true;
         }) ?? true);
+    }
+    _doValidate() {
+        for (const i of this._items) {
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(i)) {
+                i.validate();
+            }
+        }
     }
     _addInternal(items) {
         this._items.push(...items);
@@ -6982,8 +6995,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math */ "../core/dist/math/math.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
-
 
 
 class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
@@ -7034,9 +7045,6 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;
-                if ((0,_types__WEBPACK_IMPORTED_MODULE_3__.isValidable)(view)) {
-                    view.validate();
-                }
                 const tiles = view.activTiles;
                 for (const tile of tiles) {
                     const b = tile?.bounds;
@@ -10613,7 +10621,7 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         this._navigationObserver = null;
         this._display = null;
         this._displayObserver = null;
-        this.factory.withMetrics(layer.metrics).withNamespace(layer.name);
+        this.factory.withMetrics(layer.metrics);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
         this.navigation = navigation;

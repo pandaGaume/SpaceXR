@@ -1,6 +1,5 @@
 import { Scalar } from "../../math";
 import { IDisplay, IsDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
-import { isValidable } from "../../types";
 
 // intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
 export class Context2DTileMap<T> extends TileMapBase<T> {
@@ -69,12 +68,6 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
                 const metrics = layer.metrics;
                 const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
                 const size = metrics.tileSize;
-
-                // activ tile are comming from the views
-                // ensure the view is validate.
-                if (isValidable(view)) {
-                    view.validate();
-                }
 
                 const tiles = view.activTiles;
                 for (const tile of tiles) {

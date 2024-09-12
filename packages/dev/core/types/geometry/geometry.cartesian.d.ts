@@ -11,8 +11,9 @@ export declare class Cartesian2 implements ICartesian2 {
     static Subtract(a: ICartesian2, b: ICartesian2): ICartesian2;
     static ConvertInPlace(value: ICartesian2, from: Unit, to: Unit): ICartesian2;
     static ConvertToRef(value: ICartesian2, from: Unit, to: Unit, ref?: ICartesian2): ICartesian2;
-    static Zero(): Cartesian2;
-    static One(): Cartesian2;
+    static Zero(): ICartesian2;
+    static One(): ICartesian2;
+    static Infinity(): ICartesian2;
     constructor(x: number, y: number);
     toString(): string;
 }
@@ -29,13 +30,23 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static AreCollinear(a: ICartesian3, b: ICartesian3, c: ICartesian3, epsilon?: number): boolean;
     static IsWithinTheBounds(a: ICartesian3, b: ICartesian3, p: ICartesian3): boolean;
     static AreCoplanar(a: ICartesian3, b: ICartesian3, c: ICartesian3, d: ICartesian3, epsilon?: number): boolean;
-    static MultplyByFloatInPlace(a: ICartesian3, n: number): ICartesian3;
-    static MultplyByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3;
+    static Multiply(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static MultiplyInPlace(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static MultiplyToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
+    static MultiplyByFloatInPlace(a: ICartesian3, n: number): ICartesian3;
+    static MultiplyByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3;
+    static Divide(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static DivideInPlace(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static DivideToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
+    static DivideByFloatInPlace(a: ICartesian3, n: number): ICartesian3;
+    static DivideByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3;
     static Magnitude(a: ICartesian3): number;
     static ConvertInPlace(value: ICartesian3 | ICartesian4, from: Unit, to: Unit): ICartesian3;
     static ConvertToRef(value: ICartesian3 | ICartesian4, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3;
     static Centroid(values: Array<ICartesian3>, ref?: ICartesian3): ICartesian3;
-    static Zero(): Cartesian3;
+    static Zero(): ICartesian3;
+    static One(): ICartesian3;
+    static Infinity(): ICartesian3;
     static FromArray(array: Float32Array | Array<number>, offset?: number, stride?: number): ICartesian3;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;

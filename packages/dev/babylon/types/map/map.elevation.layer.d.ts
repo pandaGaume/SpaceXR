@@ -6,12 +6,12 @@ export declare class ElevationLayer extends TileMapLayer<IDemInfos> implements I
     static readonly DefaultExageration: number;
     static readonly DefaultInsets: ICartesian3;
     static readonly ExagerationPropertyName: string;
-    static readonly InsetsPropertyName: string;
+    static readonly OffsetsPropertyName: string;
     private _exageration?;
-    private _insets?;
+    private _offsets?;
     constructor(name: string, provider: ITileContentProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean);
     get exageration(): number | undefined;
     set exageration(value: number | undefined);
-    get insets(): ICartesian3 | undefined;
-    set insets(value: ICartesian3 | undefined);
+    get offsets(): ICartesian3 | undefined;
+    set offsets(value: ICartesian3 | undefined);
 }

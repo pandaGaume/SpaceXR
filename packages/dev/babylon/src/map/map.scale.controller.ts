@@ -1,6 +1,5 @@
 import { Vector3 } from "@babylonjs/core";
-import { IHasNavigationState, ITileMetrics, ITileNavigationState, hasNavigationState } from "core/tiles";
-import { VirtualDisplay } from "../display";
+import { IHasNavigationState, IPhysicalDisplay, ITileMetrics, ITileNavigationState, hasNavigationState } from "core/tiles";
 import { ICartesian3 } from "core/geometry";
 import { Observable, Observer, PropertyChangedEventArgs } from "core/events";
 import { IDisposable, Nullable } from "core/types";
@@ -16,10 +15,10 @@ export interface IHasMapScale {
     mapScale: ICartesian3;
 }
 
-export class Map3dScaleController implements IDisposable {
+export class Map3DScaleController implements IDisposable {
     public static DefaultThresholdLat: number = 0.01;
 
-    public static GetScale(display: VirtualDisplay, nav: ITileNavigationState, metrics: ITileMetrics): ICartesian3 {
+    public static GetScale(display: IPhysicalDisplay, nav: ITileNavigationState, metrics: ITileMetrics): ICartesian3 {
         const x = metrics.mapScale(nav.center.lat, nav.lod, display.pixelPerUnit.x);
         const y = metrics.mapScale(nav.center.lat, nav.lod, display.pixelPerUnit.y);
         const z = metrics.mapScale(nav.center.lat, nav.lod, display.pixelPerUnit.z);
@@ -29,13 +28,13 @@ export class Map3dScaleController implements IDisposable {
     private _scaleChangedOnservable?: Observable<ICartesian3>;
     private _observer: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
 
-    private _display: VirtualDisplay;
+    private _display: IPhysicalDisplay;
     private _nav: Nullable<ITileNavigationState>;
     private _metrics: ITileMetrics;
     private _currentCenter: IGeo2;
-    private _thresholdLat: number = Map3dScaleController.DefaultThresholdLat;
+    private _thresholdLat: number = Map3DScaleController.DefaultThresholdLat;
 
-    constructor(display: VirtualDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics) {
+    constructor(display: IPhysicalDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics) {
         this._display = display;
         this._nav = hasNavigationState(nav) ? nav.navigation : nav;
         Assert(this._nav !== null && this._nav !== undefined, "Invalid parameter: Navigation.");
@@ -85,7 +84,7 @@ export class Map3dScaleController implements IDisposable {
 
     protected _onZoomChanged(): void {
         if (this._nav) {
-            this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));
+            this.scaleChangedObservable.notifyObservers(Map3DScaleController.GetScale(this._display, this._nav, this._metrics));
         }
     }
 
@@ -93,7 +92,7 @@ export class Map3dScaleController implements IDisposable {
         if (this._nav && this._thresholdExceeded(this._currentCenter, this._nav.center)) {
             this._currentCenter.lat = this._nav.center.lat;
             this._currentCenter.lon = this._nav.center.lon;
-            this.scaleChangedObservable.notifyObservers(Map3dScaleController.GetScale(this._display, this._nav, this._metrics));
+            this.scaleChangedObservable.notifyObservers(Map3DScaleController.GetScale(this._display, this._nav, this._metrics));
         }
     }
 

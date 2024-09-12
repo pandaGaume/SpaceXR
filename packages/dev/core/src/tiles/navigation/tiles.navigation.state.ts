@@ -10,6 +10,10 @@ import { TileSystemBounds } from "../tiles.system";
 import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
 
 export class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
+    public static readonly CENTER_PROPERTY_NAME: string = "center";
+    public static readonly ZOOM_PROPERTY_NAME: string = "zoom";
+    public static readonly AZIMUTH_PROPERTY_NAME: string = "azimuth";
+
     public static GetLodScale(lod: number): number {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
         // scale corresponding to the decimal part
@@ -79,7 +83,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
                 const old = this._center.clone();
                 this._center.lat = lat;
                 this._center.lon = lon;
-                const e = new PropertyChangedEventArgs(this, old, this._center.clone(), "center");
+                const e = new PropertyChangedEventArgs(this, old, this._center.clone(), TileNavigationState.CENTER_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 this.invalidate();
                 return;
@@ -103,7 +107,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
             this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new PropertyChangedEventArgs(this, old, this._lodf, "zoom");
+                const e = new PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
@@ -119,7 +123,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
             this._azimuth = r;
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new PropertyChangedEventArgs(this, old, this._azimuth, "azimuth");
+                const e = new PropertyChangedEventArgs(this, old, this._azimuth, TileNavigationState.AZIMUTH_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }

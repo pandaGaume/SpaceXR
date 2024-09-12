@@ -24,12 +24,12 @@ export interface IElevationGridFactory {
 
 export interface IElevationLayerOptions extends ITileMapLayerOptions<IDemInfos> {
     exageration?: number;
-    insets?: ICartesian3;
+    offsets?: ICartesian3;
 }
 
 export function IsElevationLayerOptions(b: unknown): b is IElevationLayerOptions {
     if (typeof b !== "object" || b === null) return false;
-    return (<IElevationLayerOptions>b).exageration !== undefined || (<IElevationLayerOptions>b).insets !== undefined;
+    return (<IElevationLayerOptions>b).exageration !== undefined || (<IElevationLayerOptions>b).offsets !== undefined;
 }
 
 export function IsElevationLayer(b: unknown): b is IElevationLayer {

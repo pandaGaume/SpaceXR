@@ -4,7 +4,7 @@ import { IHasView } from "../pipeline/tiles.pipeline.interfaces";
 import { IHasActivTiles, IsTileMetricsProvider, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
-import { ISize3 } from "../../geometry";
+import { ICartesian3, ISize3 } from "../../geometry";
 import { IOrderedCollection, IWeighted } from "../../collections/collections.interfaces";
 
 export type LayerRenderFn<T> = (ctx: CanvasRenderingContext2D, tile: ITile<T>, width: number, height: number) => void;
@@ -73,6 +73,13 @@ export interface IDisplay extends IDisposable {
 
 export interface IPhysicalDisplay extends IDisplay {
     dimension: ISize3;
+    pixelPerUnit: ICartesian3;
+    dpi: number;
+}
+
+export function IsPhysicalDisplay(b: unknown): b is IPhysicalDisplay {
+    if (b === null || typeof b !== "object") return false;
+    return (<IPhysicalDisplay>b).resolution !== undefined && (<IPhysicalDisplay>b).dimension !== undefined && (<IPhysicalDisplay>b).pixelPerUnit !== undefined;
 }
 
 export interface IHasDisplay {

@@ -57,11 +57,15 @@ export class Cartesian2 implements ICartesian2 {
         return ref;
     }
 
-    public static Zero() {
+    public static Zero(): ICartesian2 {
         return new Cartesian2(0, 0);
     }
-    public static One() {
+    public static One(): ICartesian2 {
         return new Cartesian2(1, 1);
+    }
+
+    public static Infinity(): ICartesian2 {
+        return new Cartesian2(Infinity, Infinity);
     }
 
     public constructor(public x: number, public y: number) {}
@@ -159,18 +163,62 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return (
             m1 <= EPSILON ||
             m2 <= EPSILON ||
-            Cartesian3.AreCollinear(Cartesian3.Zero(), Cartesian3.MultplyByFloatInPlace(n1, 1.0 / m1), Cartesian3.MultplyByFloatInPlace(n2, 1.0 / m2))
+            Cartesian3.AreCollinear(Cartesian3.Zero(), Cartesian3.MultiplyByFloatInPlace(n1, 1.0 / m1), Cartesian3.MultiplyByFloatInPlace(n2, 1.0 / m2))
         );
     }
 
-    public static MultplyByFloatInPlace(a: ICartesian3, n: number): ICartesian3 {
-        return Cartesian3.MultplyByFloatToRef(a, n, a);
+    public static Multiply(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return Cartesian3.MultiplyToRef(a, b, Cartesian3.Zero());
     }
 
-    public static MultplyByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3 {
+    public static MultiplyInPlace(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return Cartesian3.MultiplyToRef(a, b, a);
+    }
+
+    public static MultiplyToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3 {
+        ref.x = a.x * b.x;
+        ref.y = a.y * b.y;
+        ref.z = a.z * b.z;
+        return ref;
+    }
+
+    public static MultiplyByFloatInPlace(a: ICartesian3, n: number): ICartesian3 {
+        return Cartesian3.MultiplyByFloatToRef(a, n, a);
+    }
+
+    public static MultiplyByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3 {
         ref.x = a.x * n;
         ref.y = a.y * n;
         ref.z = a.z * n;
+        return ref;
+    }
+
+    public static Divide(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return Cartesian3.DivideToRef(a, b, Cartesian3.Zero());
+    }
+
+    public static DivideInPlace(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return Cartesian3.DivideToRef(a, b, a);
+    }
+
+    public static DivideToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3 {
+        ref.x = b.x ? a.x / b.x : Infinity;
+        ref.y = b.y ? a.y / b.y : Infinity;
+        ref.z = b.z ? a.z / b.z : Infinity;
+        return ref;
+    }
+
+    public static DivideByFloatInPlace(a: ICartesian3, n: number): ICartesian3 {
+        return Cartesian3.DivideByFloatToRef(a, n, a);
+    }
+
+    public static DivideByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3 {
+        if (n === 0) {
+            ref.x = ref.y = ref.z = Infinity;
+        }
+        ref.x = a.x / n;
+        ref.y = a.y / n;
+        ref.z = a.z / n;
         return ref;
     }
 
@@ -209,9 +257,18 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return ref;
     }
 
-    public static Zero() {
+    public static Zero(): ICartesian3 {
         return new Cartesian3(0, 0, 0);
     }
+
+    public static One(): ICartesian3 {
+        return new Cartesian3(1.0, 1.0, 1.0);
+    }
+
+    public static Infinity(): ICartesian3 {
+        return new Cartesian3(Infinity, Infinity, Infinity);
+    }
+
     public static FromArray(array: Float32Array | Array<number>, offset: number = 0, stride: number = 3): ICartesian3 {
         let i = 0;
         const x = array[offset + i];

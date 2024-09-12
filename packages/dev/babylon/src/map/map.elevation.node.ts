@@ -1,23 +1,22 @@
 import * as BABYLON from "@babylonjs/core";
-import { IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileMapLayerView, ITileMetrics, ITileNavigationApi } from "core/tiles";
-import { ElevationMapContentType, IElevationMap, IsElevationHost } from "./map.elevation.interfaces";
+import { IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi } from "core/tiles";
+import { ElevationMapContentType, IElevationMap } from "./map.elevation.interfaces";
 import { ElevationMap } from "./map.elevation";
 import { Nullable } from "core/types";
-import { Observer, EventState } from "core/events";
+import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
 
+/// <sumary>
+/// Act as proxy for Elevation Map, and bind the rendering evenyt of the scene
+/// </sumary>
 export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<Map3D>, IHasTileMapLayerContainer<ElevationMapContentType> {
     protected _map: IElevationMap;
-    protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayerView<ElevationMapContentType>>>>;
-    protected _layerRemovededObserver: Nullable<Observer<Array<ITileMapLayerView<ElevationMapContentType>>>>;
     protected _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
 
     public constructor(name: string, options?: any, scene?: BABYLON.Scene) {
         super(name, scene);
         this._map = this._createMap();
-        this._layerAddedObserver = this.map.layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
-        this._layerRemovededObserver = this.map.layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
         this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
     }
 
@@ -67,41 +66,23 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<M
     public withDisplay(display: IDisplay): Map3D {
         this._map.display = display;
         if (display instanceof VirtualDisplay) {
-            this.setParent(display.context3D);
+            this.parent = display.context3D;
         } else if (display instanceof BABYLON.Node) {
-            this.setParent(display);
+            this.parent = display;
         }
         return this;
     }
 
     protected _createMap(): IElevationMap {
-        return new ElevationMap();
-    }
-
-    protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<ElevationMapContentType>>, eventState: EventState): void {
-        for (const v of eventData) {
-            if (IsElevationHost(v)) {
-                v.tilesRoot.setParent(this);
-            }
-        }
+        return new ElevationMap(this);
     }
 
     protected _onBeforeRender(eventData: BABYLON.Scene, eventState: EventState): void {
         this._map.validate();
     }
 
-    protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<ElevationMapContentType>>, eventState: EventState): void {
-        for (const v of eventData) {
-            if (IsElevationHost(v)) {
-                v.tilesRoot.setParent(null);
-            }
-        }
-    }
-
     public dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void {
         this._beforeRenderObserver?.remove();
-        this._layerAddedObserver?.disconnect();
-        this._layerRemovededObserver?.disconnect();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
     }

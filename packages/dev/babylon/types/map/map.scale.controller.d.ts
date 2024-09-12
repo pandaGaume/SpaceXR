@@ -1,5 +1,4 @@
-import { IHasNavigationState, ITileMetrics, ITileNavigationState } from "core/tiles";
-import { VirtualDisplay } from "../display";
+import { IHasNavigationState, IPhysicalDisplay, ITileMetrics, ITileNavigationState } from "core/tiles";
 import { ICartesian3 } from "core/geometry";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { IDisposable } from "core/types";
@@ -8,9 +7,9 @@ export declare function HasMapScale(obj: unknown): obj is IHasMapScale;
 export interface IHasMapScale {
     mapScale: ICartesian3;
 }
-export declare class Map3dScaleController implements IDisposable {
+export declare class Map3DScaleController implements IDisposable {
     static DefaultThresholdLat: number;
-    static GetScale(display: VirtualDisplay, nav: ITileNavigationState, metrics: ITileMetrics): ICartesian3;
+    static GetScale(display: IPhysicalDisplay, nav: ITileNavigationState, metrics: ITileMetrics): ICartesian3;
     private _scaleChangedOnservable?;
     private _observer;
     private _display;
@@ -18,7 +17,7 @@ export declare class Map3dScaleController implements IDisposable {
     private _metrics;
     private _currentCenter;
     private _thresholdLat;
-    constructor(display: VirtualDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics);
+    constructor(display: IPhysicalDisplay, nav: ITileNavigationState | IHasNavigationState, metrics: ITileMetrics);
     get thresholdLat(): number;
     set thresholdLat(v: number);
     get scaleChangedObservable(): Observable<ICartesian3>;

@@ -9,14 +9,14 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
     public static readonly DefaultInsets: ICartesian3 = Cartesian3.Zero();
 
     public static readonly ExagerationPropertyName: string = "exageration";
-    public static readonly InsetsPropertyName: string = "insets";
+    public static readonly OffsetsPropertyName: string = "offsets";
 
     private _exageration?: number;
-    private _insets?: ICartesian3;
+    private _offsets?: ICartesian3;
 
     public constructor(name: string, provider: ITileContentProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
         super(name, provider, options, enabled);
-        this._insets = options?.insets ?? ElevationLayer.DefaultInsets;
+        this._offsets = options?.offsets ?? ElevationLayer.DefaultInsets;
         this._exageration = options?.exageration ?? ElevationLayer.DefaultExageration;
     }
 
@@ -38,21 +38,21 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
         this._exageration = value;
     }
 
-    public get insets(): ICartesian3 | undefined {
-        return this._insets;
+    public get offsets(): ICartesian3 | undefined {
+        return this._offsets;
     }
 
-    public set insets(value: ICartesian3 | undefined) {
-        if (this._insets === value) return;
+    public set offsets(value: ICartesian3 | undefined) {
+        if (this._offsets === value) return;
 
         if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-            const oldValue = this._insets;
-            this._insets = value;
-            const args = new PropertyChangedEventArgs<ElevationLayer, ICartesian3>(this, oldValue, this._insets, ElevationLayer.InsetsPropertyName);
+            const oldValue = this._offsets;
+            this._offsets = value;
+            const args = new PropertyChangedEventArgs<ElevationLayer, ICartesian3>(this, oldValue, this._offsets, ElevationLayer.OffsetsPropertyName);
             this._propertyChangedObservable.notifyObservers(args, -1, this, this);
             return;
         }
 
-        this._insets = value;
+        this._offsets = value;
     }
 }

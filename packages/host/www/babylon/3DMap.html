@@ -153,15 +153,13 @@
 
                 // build the map
                 const mapNode = new SPACEXR.Map3D("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
+                mapNode.position.z = 0.1;
 
                 // build layer options
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
                     exageration: 1,
-                    insets: new BABYLON.Vector3(0, 0, 0.1),
-                    color: new BABYLON.Color4(0.5, 0.5, 0.8),
-                    shininess: 0,
-                    textureResolution: { width: 512, height: 512 },
+                    offsets: new BABYLON.Vector3(0, 0, 0.1)
                 };
 
                 // build layer and add it to the map
@@ -192,7 +190,7 @@
                 }
                 const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
 
-                const showAxes = false;
+                const showAxes = true;
                 if (showAxes) {
                     const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
                     axes.xAxis.parent = display;

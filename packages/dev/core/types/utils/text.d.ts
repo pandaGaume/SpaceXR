@@ -1,3 +1,4 @@
 export declare class TextUtils {
-    static BuildNameWithSuffix(name: string, suffix: string): string;
+    static DEFAULT_SEPARATOR: string;
+    static BuildNameWithSuffix(name: string, suffix: string, separator?: string): string;
 }

@@ -1475,6 +1475,43 @@ Ellipsoid.Clarke1880 = Ellipsoid.FromAAndInverseF("Clarke1880", 6378249.145, 293
 
 /***/ }),
 
+/***/ "./dist/geodesy/geodesy.scale.js":
+/*!***************************************!*\
+  !*** ./dist/geodesy/geodesy.scale.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MapScale: () => (/* binding */ MapScale)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.cartesian.js");
+
+class MapScale {
+    static GetScale(displaySize, resolution, metrics, lat, LOD) {
+        const worldSize = resolution * metrics.groundResolution(lat, LOD);
+        return displaySize / worldSize;
+    }
+    static GetScale3(displaySize, resolution, metrics, lat, LOD) {
+        const groundRes = metrics.groundResolution(lat, LOD);
+        const x = displaySize.width / (resolution.width * groundRes);
+        const y = displaySize.height / (resolution.height * groundRes);
+        let z = groundRes;
+        if (displaySize.thickness) {
+            z = (displaySize.thickness / resolution.thickness) * groundRes;
+        }
+        return new _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x, y, z);
+    }
+    static GetLOD(scale, displaySize, resolution, lat, ellipsoidSemiMajorAxis, tileSize) {
+        const constantFactor = (resolution * Math.cos(lat) * 2 * Math.PI * ellipsoidSemiMajorAxis) / (displaySize * tileSize);
+        const LOD = Math.log2(scale * constantFactor);
+        return LOD;
+    }
+}
+//# sourceMappingURL=geodesy.scale.js.map
+
+/***/ }),
+
 /***/ "./dist/geodesy/geodesy.system.js":
 /*!****************************************!*\
   !*** ./dist/geodesy/geodesy.system.js ***!
@@ -1610,6 +1647,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CartesianMode: () => (/* reexport safe */ _geodesy_system__WEBPACK_IMPORTED_MODULE_1__.CartesianMode),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid),
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ _geodesy_system__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
+/* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_scale__WEBPACK_IMPORTED_MODULE_4__.MapScale),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ _calculators__WEBPACK_IMPORTED_MODULE_3__.PythagoreanFlatEarthCalculator),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _calculators__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator)
 /* harmony export */ });
@@ -1617,6 +1655,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geodesy_system__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geodesy.system */ "./dist/geodesy/geodesy.system.js");
 /* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geodesy.calculators */ "./dist/geodesy/geodesy.calculators.js");
 /* harmony import */ var _calculators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./calculators */ "./dist/geodesy/calculators/index.js");
+/* harmony import */ var _geodesy_scale__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geodesy.scale */ "./dist/geodesy/geodesy.scale.js");
+
 
 
 
@@ -2843,6 +2883,9 @@ class Cartesian2 {
     static One() {
         return new Cartesian2(1, 1);
     }
+    static Infinity() {
+        return new Cartesian2(Infinity, Infinity);
+    }
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -2908,15 +2951,51 @@ class Cartesian3 extends Cartesian2 {
         const EPSILON = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON;
         return (m1 <= EPSILON ||
             m2 <= EPSILON ||
-            Cartesian3.AreCollinear(Cartesian3.Zero(), Cartesian3.MultplyByFloatInPlace(n1, 1.0 / m1), Cartesian3.MultplyByFloatInPlace(n2, 1.0 / m2)));
+            Cartesian3.AreCollinear(Cartesian3.Zero(), Cartesian3.MultiplyByFloatInPlace(n1, 1.0 / m1), Cartesian3.MultiplyByFloatInPlace(n2, 1.0 / m2)));
     }
-    static MultplyByFloatInPlace(a, n) {
-        return Cartesian3.MultplyByFloatToRef(a, n, a);
+    static Multiply(a, b) {
+        return Cartesian3.MultiplyToRef(a, b, Cartesian3.Zero());
     }
-    static MultplyByFloatToRef(a, n, ref) {
+    static MultiplyInPlace(a, b) {
+        return Cartesian3.MultiplyToRef(a, b, a);
+    }
+    static MultiplyToRef(a, b, ref) {
+        ref.x = a.x * b.x;
+        ref.y = a.y * b.y;
+        ref.z = a.z * b.z;
+        return ref;
+    }
+    static MultiplyByFloatInPlace(a, n) {
+        return Cartesian3.MultiplyByFloatToRef(a, n, a);
+    }
+    static MultiplyByFloatToRef(a, n, ref) {
         ref.x = a.x * n;
         ref.y = a.y * n;
         ref.z = a.z * n;
+        return ref;
+    }
+    static Divide(a, b) {
+        return Cartesian3.DivideToRef(a, b, Cartesian3.Zero());
+    }
+    static DivideInPlace(a, b) {
+        return Cartesian3.DivideToRef(a, b, a);
+    }
+    static DivideToRef(a, b, ref) {
+        ref.x = b.x ? a.x / b.x : Infinity;
+        ref.y = b.y ? a.y / b.y : Infinity;
+        ref.z = b.z ? a.z / b.z : Infinity;
+        return ref;
+    }
+    static DivideByFloatInPlace(a, n) {
+        return Cartesian3.DivideByFloatToRef(a, n, a);
+    }
+    static DivideByFloatToRef(a, n, ref) {
+        if (n === 0) {
+            ref.x = ref.y = ref.z = Infinity;
+        }
+        ref.x = a.x / n;
+        ref.y = a.y / n;
+        ref.z = a.z / n;
         return ref;
     }
     static Magnitude(a) {
@@ -2950,6 +3029,12 @@ class Cartesian3 extends Cartesian2 {
     }
     static Zero() {
         return new Cartesian3(0, 0, 0);
+    }
+    static One() {
+        return new Cartesian3(1.0, 1.0, 1.0);
+    }
+    static Infinity() {
+        return new Cartesian3(Infinity, Infinity, Infinity);
     }
     static FromArray(array, offset = 0, stride = 3) {
         let i = 0;
@@ -7907,6 +7992,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
 /* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTileAddress),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsDrawableTileMapLayer),
+/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsPhysicalDisplay),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile),
 /* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
@@ -8007,6 +8093,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Float32Layer: () => (/* reexport safe */ _typed_index__WEBPACK_IMPORTED_MODULE_2__.Float32Layer),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _typed_index__WEBPACK_IMPORTED_MODULE_2__.ImageLayer),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsDrawableTileMapLayer),
+/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsPhysicalDisplay),
 /* harmony export */   IsTileMapLayer: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileMapLayer),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileMapLayerProxy),
@@ -8041,6 +8128,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsDrawableTileMapLayer: () => (/* binding */ IsDrawableTileMapLayer),
+/* harmony export */   IsPhysicalDisplay: () => (/* binding */ IsPhysicalDisplay),
 /* harmony export */   IsTileMapLayer: () => (/* binding */ IsTileMapLayer),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* binding */ IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* binding */ IsTileMapLayerProxy)
@@ -8066,6 +8154,11 @@ function IsTileMapLayerContainerProxy(b) {
     if (b === null || typeof b !== "object")
         return false;
     return b.layers !== undefined;
+}
+function IsPhysicalDisplay(b) {
+    if (b === null || typeof b !== "object")
+        return false;
+    return b.resolution !== undefined && b.dimension !== undefined && b.pixelPerUnit !== undefined;
 }
 //# sourceMappingURL=tiles.map.interfaces.js.map
 
@@ -9007,7 +9100,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
                 const old = this._center.clone();
                 this._center.lat = lat;
                 this._center.lon = lon;
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._center.clone(), "center");
+                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._center.clone(), TileNavigationState.CENTER_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 this.invalidate();
                 return;
@@ -9029,7 +9122,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
             this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, "zoom");
+                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
@@ -9043,7 +9136,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
             this._azimuth = r;
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._azimuth, "azimuth");
+                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._azimuth, TileNavigationState.AZIMUTH_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
@@ -9186,6 +9279,9 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         this.setViewMap(this._center, this._lodf);
     }
 }
+TileNavigationState.CENTER_PROPERTY_NAME = "center";
+TileNavigationState.ZOOM_PROPERTY_NAME = "zoom";
+TileNavigationState.AZIMUTH_PROPERTY_NAME = "azimuth";
 //# sourceMappingURL=tiles.navigation.state.js.map
 
 /***/ }),
@@ -11384,10 +11480,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextUtils: () => (/* binding */ TextUtils)
 /* harmony export */ });
 class TextUtils {
-    static BuildNameWithSuffix(name, suffix) {
-        return `${name}.${suffix}`;
+    static BuildNameWithSuffix(name, suffix, separator) {
+        return `${name}${separator ?? TextUtils.DEFAULT_SEPARATOR}${suffix}`;
     }
 }
+TextUtils.DEFAULT_SEPARATOR = ".";
 //# sourceMappingURL=text.js.map
 
 /***/ }),
@@ -11618,6 +11715,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsNumber),
+/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsPhysicalDisplay),
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTargetBlock),
@@ -11640,6 +11738,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
 /* harmony export */   Line: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Line),
 /* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
+/* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapZenNormalsDecoder),

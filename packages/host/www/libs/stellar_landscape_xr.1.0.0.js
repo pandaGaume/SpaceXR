@@ -907,8 +907,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     _onNavigationPropertyChanged(event, state) {
         switch (event.propertyName) {
             case core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileNavigationState.CENTER_PROPERTY_NAME: {
-                const geo = event.newValue;
-                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
+                this._cartesianCenterCache = null;
                 this._onCenterChanged();
                 this._onZoomChanged();
                 break;
@@ -1051,7 +1050,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
                     if (!tile.content) {
                         m.setEnabled(false);
                     }
-                    const center = this._getCenter();
+                    const center = this._getCenter(true);
                     if (center) {
                         this._setTilePosition(tile, center);
                     }
@@ -1074,20 +1073,12 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         const instance = this._grid.createInstance(tile.quadkey);
         return instance;
     }
-    _setActivTilePositions(center) {
-        for (const t of this._activTiles) {
-            this._setTilePosition(t, center);
-        }
-    }
     _setTilePosition(tile, center) {
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
-            const s = tile.surface;
-            const x = center.x - c.x;
-            const y = center.y - c.y;
-            const p = s.position;
-            p.x = x;
-            p.y = y;
+            const p = tile.surface.position;
+            p.x = center.x - c.x;
+            p.y = center.y - c.y;
             p.z = 0;
         }
     }
@@ -1309,14 +1300,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/map.elevation.js");
+/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/map.elevation.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.source.js");
+
 
 
 
 class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     constructor(name, options, scene) {
         super(name, scene);
+        this._controller = null;
+        this._ownController = false;
         this._map = this._createMap();
         this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
     }
@@ -1358,19 +1353,36 @@ class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
         this._map.display = display;
         if (display instanceof _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay) {
             this.parent = display.context3D;
+            return this._withPointerControl(display.pointerSource);
         }
         else if (display instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Node) {
             this.parent = display;
         }
         return this;
     }
+    _withPointerControl(controller) {
+        if (this._controller === controller)
+            return this;
+        if (this._controller && this._ownController) {
+            this._controller.dispose();
+        }
+        if (controller instanceof core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController) {
+            this._controller = controller;
+        }
+        else {
+            this._controller = new core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController(controller, this);
+            this._ownController = true;
+        }
+        return this;
+    }
     _createMap() {
-        return new _map_elevation__WEBPACK_IMPORTED_MODULE_2__.ElevationMap(this);
+        return new _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationMap(this);
     }
     _onBeforeRender(eventData, eventState) {
         this._map.validate();
     }
     dispose(doNotRecurse, disposeMaterialAndTextures) {
+        this._controller?.dispose();
         this._beforeRenderObserver?.remove();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
@@ -11305,12 +11317,17 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         if (this._lodf != lodf) {
             const old = this._lodf;
             this._lodf = lodf;
-            this._lod = Math.round(this._lodf);
+            const lod = Math.round(this._lodf);
+            this._lod = lod;
+            let event = null;
             this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
-            if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
-                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                if (event) {
+                    this._propertyChangedObservable.notifyObservers(event, -1, this, this);
+                }
+                event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
+                this._propertyChangedObservable.notifyObservers(event, -1, this, this);
             }
         }
     }
@@ -11468,6 +11485,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
 }
 TileNavigationState.CENTER_PROPERTY_NAME = "center";
 TileNavigationState.ZOOM_PROPERTY_NAME = "zoom";
+TileNavigationState.LOD_PROPERTY_NAME = "lod";
 TileNavigationState.AZIMUTH_PROPERTY_NAME = "azimuth";
 //# sourceMappingURL=tiles.navigation.state.js.map
 

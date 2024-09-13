@@ -12,6 +12,7 @@ import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
 export class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
     public static readonly CENTER_PROPERTY_NAME: string = "center";
     public static readonly ZOOM_PROPERTY_NAME: string = "zoom";
+    public static readonly LOD_PROPERTY_NAME: string = "lod";
     public static readonly AZIMUTH_PROPERTY_NAME: string = "azimuth";
 
     public static GetLodScale(lod: number): number {
@@ -103,12 +104,25 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         if (this._lodf != lodf) {
             const old = this._lodf;
             this._lodf = lodf;
-            this._lod = Math.round(this._lodf);
+            const lod = Math.round(this._lodf);
+            let event: Nullable<PropertyChangedEventArgs<ITileNavigationState, unknown>> = null;
+            if (this._lod != lod) {
+                const oldLod = this._lod;
+                this._lod = lod;
+                if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                    event = new PropertyChangedEventArgs(this, oldLod, this._lod, TileNavigationState.LOD_PROPERTY_NAME);
+                }
+            }
+
             this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
-            if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
-                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                if (event) {
+                    this._propertyChangedObservable.notifyObservers(event, -1, this, this);
+                }
+                event = new PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
+                this._propertyChangedObservable.notifyObservers(event, -1, this, this);
             }
         }
     }

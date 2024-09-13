@@ -108,7 +108,7 @@
             }
 
             async function createScene(canvas, engine) {
-                const unit = 10;
+                const unit = 3;
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
@@ -190,7 +190,7 @@
                 }
                 const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
 
-                const showAxes = true;
+                const showAxes = false;
                 if (showAxes) {
                     const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
                     axes.xAxis.parent = display;

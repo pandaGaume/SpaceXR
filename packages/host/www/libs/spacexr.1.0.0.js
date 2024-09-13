@@ -9118,12 +9118,23 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         if (this._lodf != lodf) {
             const old = this._lodf;
             this._lodf = lodf;
-            this._lod = Math.round(this._lodf);
+            const lod = Math.round(this._lodf);
+            let event = null;
+            if (this._lod != lod) {
+                const oldLod = this._lod;
+                this._lod = lod;
+                if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                    event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, oldLod, this._lod, TileNavigationState.LOD_PROPERTY_NAME);
+                }
+            }
             this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
-            if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
-                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                if (event) {
+                    this._propertyChangedObservable.notifyObservers(event, -1, this, this);
+                }
+                event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
+                this._propertyChangedObservable.notifyObservers(event, -1, this, this);
             }
         }
     }
@@ -9281,6 +9292,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
 }
 TileNavigationState.CENTER_PROPERTY_NAME = "center";
 TileNavigationState.ZOOM_PROPERTY_NAME = "zoom";
+TileNavigationState.LOD_PROPERTY_NAME = "lod";
 TileNavigationState.AZIMUTH_PROPERTY_NAME = "azimuth";
 //# sourceMappingURL=tiles.navigation.state.js.map
 

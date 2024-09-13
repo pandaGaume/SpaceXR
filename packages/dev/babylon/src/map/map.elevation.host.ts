@@ -9,7 +9,6 @@ import { Nullable } from "core/types";
 import { TextUtils } from "core/utils";
 import { ElevationLayer } from "./map.elevation.layer";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { IGeo2 } from "core/geography";
 
 export class ElevationHost extends TileMapLayerView<IDemInfos> implements IElevationHost {
     public static TEMPLATE_SUFFIX = "grid";
@@ -107,8 +106,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
         switch (event.propertyName) {
             case TileNavigationState.CENTER_PROPERTY_NAME: {
-                const geo = event.newValue as IGeo2;
-                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, event.source.lod);
+                this._cartesianCenterCache = null; // invalidate the cache
                 this._onCenterChanged();
                 this._onZoomChanged(); // scale is function of the latitude
                 break;
@@ -273,7 +271,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
                     if (!tile.content) {
                         m.setEnabled(false);
                     }
-                    const center = this._getCenter();
+                    const center = this._getCenter(true);
                     if (center) {
                         this._setTilePosition(tile, center);
                     }
@@ -300,22 +298,13 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         return instance;
     }
 
-    protected _setActivTilePositions(center: ICartesian2) {
-        for (const t of this._activTiles) {
-            this._setTilePosition(t as IElevationTile, center);
-        }
-    }
-
     protected _setTilePosition(tile: IElevationTile, center: ICartesian2): void {
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
-            const s = tile.surface;
-            const x = center.x - c.x;
-            const y = center.y - c.y;
-            const p = s.position;
+            const p = tile.surface.position;
             // the tile system is origin north-west corner, y pointing to the south, x to the east.
-            p.x = x;
-            p.y = y;
+            p.x = center.x - c.x;
+            p.y = center.y - c.y;
             p.z = 0;
         }
     }

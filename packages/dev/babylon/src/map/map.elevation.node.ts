@@ -6,13 +6,16 @@ import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
+import { IPointerSource, IWheelSource, PointerController } from "core/map";
 
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering evenyt of the scene
 /// </sumary>
 export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<Map3D>, IHasTileMapLayerContainer<ElevationMapContentType> {
-    protected _map: IElevationMap;
-    protected _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
+    private _map: IElevationMap;
+    private _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
+    private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
+    private _ownController = false;
 
     public constructor(name: string, options?: any, scene?: BABYLON.Scene) {
         super(name, scene);
@@ -67,8 +70,24 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<M
         this._map.display = display;
         if (display instanceof VirtualDisplay) {
             this.parent = display.context3D;
+            return this._withPointerControl(display.pointerSource);
         } else if (display instanceof BABYLON.Node) {
             this.parent = display;
+        }
+        return this;
+    }
+
+    protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): Map3D {
+        if (this._controller === controller) return this;
+
+        if (this._controller && this._ownController) {
+            this._controller.dispose();
+        }
+        if (controller instanceof PointerController) {
+            this._controller = controller;
+        } else {
+            this._controller = new PointerController(controller, this);
+            this._ownController = true;
         }
         return this;
     }
@@ -82,6 +101,7 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<M
     }
 
     public dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void {
+        this._controller?.dispose();
         this._beforeRenderObserver?.remove();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);

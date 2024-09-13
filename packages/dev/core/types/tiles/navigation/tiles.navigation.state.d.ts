@@ -9,6 +9,7 @@ import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
 export declare class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
     static readonly CENTER_PROPERTY_NAME: string;
     static readonly ZOOM_PROPERTY_NAME: string;
+    static readonly LOD_PROPERTY_NAME: string;
     static readonly AZIMUTH_PROPERTY_NAME: string;
     static GetLodScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;

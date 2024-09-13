@@ -5,13 +5,14 @@ import { Observable, PropertyChangedEventArgs } from "core/events";
 import { Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
 export declare class VirtualDisplay extends Mesh implements IPhysicalDisplay {
-    static SD: ISize2;
+    static QVGA: ISize2;
+    static VGA: ISize2;
     static QHD: ISize2;
     static HD: ISize2;
     static WXGA: ISize2;
     static FullHD: ISize2;
     static UltraHD: ISize2;
-    static UltraHD_2: ISize2;
+    static UltraHD2: ISize2;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
     _worldTransform: TransformNode;
     _dimension: ISize3;

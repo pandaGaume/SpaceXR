@@ -502,13 +502,14 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         this._worldTransform.dispose(doNotRecurse, disposeMaterialAndTextures);
     }
 }
-VirtualDisplay.SD = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(640, 480);
+VirtualDisplay.QVGA = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(320, 240);
+VirtualDisplay.VGA = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(640, 480);
 VirtualDisplay.QHD = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(960, 540);
 VirtualDisplay.HD = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(1280, 720);
 VirtualDisplay.WXGA = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(1280, 800);
 VirtualDisplay.FullHD = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(1980, 1080);
 VirtualDisplay.UltraHD = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(3840, 2160);
-VirtualDisplay.UltraHD_2 = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(7680, 4320);
+VirtualDisplay.UltraHD2 = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(7680, 4320);
 //# sourceMappingURL=display.virtual.js.map
 
 /***/ }),
@@ -972,6 +973,10 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
             data.uvs = grid.uvs;
             data.applyToMesh(mesh);
         }
+        const material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
+        if (material) {
+            mesh.material = material;
+        }
         return mesh;
     }
     _buildMesh(name, scene) {
@@ -981,7 +986,6 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     _buildMaterial(name, scene) {
         const material = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(name, scene);
         material.wireframe = true;
-        material.emissiveColor = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color3.White();
         return material;
     }
     _buildGridFactory() {

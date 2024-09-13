@@ -8,13 +8,14 @@ import { Length, Quantity, Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
 
 export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
-    public static SD: ISize2 = new Size2(640, 480);
+    public static QVGA: ISize2 = new Size2(320, 240);
+    public static VGA: ISize2 = new Size2(640, 480);
     public static QHD: ISize2 = new Size2(960, 540);
     public static HD: ISize2 = new Size2(1280, 720);
     public static WXGA: ISize2 = new Size2(1280, 800);
     public static FullHD: ISize2 = new Size2(1980, 1080);
     public static UltraHD: ISize2 = new Size2(3840, 2160);
-    public static UltraHD_2: ISize2 = new Size2(7680, 4320);
+    public static UltraHD2: ISize2 = new Size2(7680, 4320);
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
 

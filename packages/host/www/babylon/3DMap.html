@@ -108,7 +108,7 @@
             }
 
             async function createScene(canvas, engine) {
-                const unit = 1;
+                const unit = 10;
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
@@ -137,7 +137,7 @@
                     height: 2.4 * unit,
                 };
 
-                const resolution = SPACEXR.VirtualDisplay.SD;
+                const resolution = SPACEXR.VirtualDisplay.QVGA;
 
                 // set the virtual display
                 const buildClipPlane = true;

@@ -2,7 +2,7 @@ import { IDemInfos } from "core/dem";
 import { IDisplay, IPhysicalDisplay, IsPhysicalDisplay, ITileMetrics, ITileNavigationState, ITileView, TileMapLayerView, TileNavigationState } from "core/tiles";
 import { IElevationHost, IElevationLayer, IElevationLayerOptions, IsElevationLayer } from "./map.elevation.interfaces";
 import { ElevationGridFactory } from "./map.elevation.host.factory";
-import { AbstractMesh, Color3, Material, Mesh, Scene, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Scene, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
 import { ElevationTile, IElevationTile } from "./map.elevation.mesh";
 import { ICartesian2 } from "core/geometry";
 import { Nullable } from "core/types";
@@ -164,7 +164,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         return undefined;
     }
 
-    protected _buildTemplate(scene?: Scene) {
+    protected _buildTemplate(scene?: Scene): Mesh {
         const mesh = this._buildMesh(this._buildTemplateName() ?? this.name, scene);
         const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
         const grid = gridFactory.buildTopology(this.metrics.tileSize);
@@ -178,6 +178,11 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             data.uvs = grid.uvs;
             data.applyToMesh(mesh);
         }
+        const material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
+        if (material) {
+            mesh.material = material;
+        }
+
         return mesh;
     }
 
@@ -189,7 +194,6 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     protected _buildMaterial(name: string, scene?: Scene): Material {
         const material = new StandardMaterial(name, scene);
         material.wireframe = true;
-        material.emissiveColor = Color3.White();
         return material;
     }
 

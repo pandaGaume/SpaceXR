@@ -128,8 +128,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _onZoomChanged(): void {
-        if (this.isReady && this.navigation && IsPhysicalDisplay(this.display)) {
-            this._setScale(this.navigation, this.display, this.layer, this.metrics);
+        if (this.isReady && this._isNavigationValid() && IsPhysicalDisplay(this.display)) {
+            this._setScale(this.navigation!, this.display, this.layer, this.metrics);
         }
     }
 
@@ -155,7 +155,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         if (nav) {
             if (force || !this._cartesianCenterCache) {
                 const geo = nav.center;
-                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, nav.lod);
+                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._getClampedLOD());
             }
             return this._cartesianCenterCache;
         }
@@ -259,6 +259,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     protected _onTileAdded(tile: ElevationTile): void {
         if (this._tilesRoot) {
+//            console.log(`Tile Added(${tile.quadkey}, LOD=${tile.levelOfDetail})`);
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
                 const m = this._createInstance(tile);
                 if (m) {
@@ -281,6 +282,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _onTileRemoved(tile: ElevationTile): void {
+//        console.log(`Tile Removed(${tile.quadkey}, LOD=${tile.levelOfDetail})`);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
@@ -307,5 +309,10 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             p.y = center.y - c.y;
             p.z = 0;
         }
+    }
+
+    protected _doValidate(): void {
+        console.log("setContext LOD=", this.navigation?.lod);
+        super._doValidate();
     }
 }

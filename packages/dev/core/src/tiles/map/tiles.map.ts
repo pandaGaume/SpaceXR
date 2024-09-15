@@ -1,6 +1,5 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileMetrics } from "../tiles.interfaces";
-import { ITileNavigationState, TileNavigationState } from "../navigation";
+import { ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
 import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
@@ -10,7 +9,7 @@ import { OrderedCollection } from "../../collections/orderedCollection";
 import { IOrderedCollection } from "../../collections/collections.interfaces";
 import { TileMapLayerView } from "./tiles.map.layerView";
 import { TileView } from "./tiles.map.view";
-
+import { TileNavigationApi } from "../navigation/tiles.navigation.api";
 
 export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     public static readonly DISPLAY_PROPERTY_NAME: string = "display";
@@ -18,6 +17,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
 
     protected _display: Nullable<IDisplay> = null;
     protected _navigation: Nullable<ITileNavigationState> = null;
+    protected _api: Nullable<ITileNavigationApi> = null;
     protected _view: ITileView;
     protected _layerAddedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
     protected _layerRemovedObserver: Nullable<Observer<Array<ITileMapLayer<T>>>>;
@@ -42,15 +42,15 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     /// </summary>
     public constructor(display?: Nullable<IDisplay>, nav?: Nullable<ITileNavigationState>, container?: ITileMapLayerContainer<T>) {
         super();
-        this._layers = container ?? this._createLayerContainer() ?? this._createLayerContainerInternal();
+        this._layers = container ?? this._buildLayerContainer() ?? this._buildLayerContainerInternal();
         this._layerAddedObserver = this._layers.addedObservable.add(this._onLayerAdded.bind(this));
         this._layerRemovedObserver = this._layers.removedObservable.add(this._onLayerRemoved.bind(this));
 
         this.display = display ?? null;
-        this.navigation = nav ?? this._buildNavigationState() ?? new TileNavigationState();
+        this.navigationState = nav ?? this._buildNavigationState() ?? new TileNavigationState();
         this._view = this._buildView() ?? new TileView();
 
-        this._layerViews = this._createLayerViewContainer(this._layers) ?? this._createLayerViewContainerInternal(this._layers);
+        this._layerViews = this._buildLayerViewContainer(this._layers) ?? this._buildLayerViewContainerInternal(this._layers);
         this._layerViewAddedObserver = this._layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
         this._layerViewRemovedObserver = this._layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
     }
@@ -76,11 +76,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._bindDisplay(value);
     }
 
-    public get navigation(): Nullable<ITileNavigationState> {
+    public get navigationState(): Nullable<ITileNavigationState> {
         return this._navigation;
     }
 
-    public set navigation(value: Nullable<ITileNavigationState>) {
+    public set navigationState(value: Nullable<ITileNavigationState>) {
         this._bindNavigation(value);
     }
 
@@ -99,38 +99,59 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     // navigation proxy
-    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): TileMapBase<T> {
-        this._navigation?.setViewMap(center, zoom, rotation);
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number): ITileNavigationApi {
+        this._api?.setViewMap(center, zoom, rotation);
+        for (const v of this._layerViews) {
+            v.navigationApi?.setViewMap(center, zoom, rotation);
+        }
         return this;
     }
 
-    public zoomMap(delta: number): TileMapBase<T> {
-        this._navigation?.zoomMap(delta);
+    public zoomMap(delta: number): ITileNavigationApi {
+        this._api?.zoomMap(delta);
+        for (const v of this._layerViews) {
+            v.navigationApi?.zoomMap(delta);
+        }
         return this;
     }
 
-    public zoomInMap(delta: number): TileMapBase<T> {
-        this._navigation?.zoomInMap(delta);
+    public zoomInMap(delta: number): ITileNavigationApi {
+        this._api?.zoomInMap(delta);
+        for (const v of this._layerViews) {
+            v.navigationApi?.zoomInMap(delta);
+        }
         return this;
     }
 
-    public zoomOutMap(delta: number): TileMapBase<T> {
-        this._navigation?.zoomOutMap(delta);
+    public zoomOutMap(delta: number): ITileNavigationApi {
+        this._api?.zoomOutMap(delta);
+        for (const v of this._layerViews) {
+            v.navigationApi?.zoomOutMap(delta);
+        }
         return this;
     }
 
-    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics): TileMapBase<T> {
-        this._navigation?.translateUnitsMap(tx, ty, metrics);
+    public translateUnitsMap(tx: number, ty: number): ITileNavigationApi {
+        this._api?.translateUnitsMap(tx, ty);
+        for (const v of this._layerViews) {
+            v.navigationApi?.translateUnitsMap(tx, ty);
+        }
         return this;
     }
 
-    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): TileMapBase<T> {
-        this._navigation?.translateMap(lat, lon);
+    public translateMap(lat: IGeo2 | Array<number> | number, lon?: number): ITileNavigationApi {
+        this._api?.translateMap(lat, lon);
+        for (const v of this._layerViews) {
+            v.navigationApi?.translateMap(lat, lon);
+        }
         return this;
     }
 
-    public rotateMap(r: number): TileMapBase<T> {
-        this._navigation?.rotateMap(r);
+    public rotateMap(r: number): ITileNavigationApi {
+        this._api?.rotateMap(r);
+        for (const v of this._layerViews) {
+            v.navigationApi?.rotateMap(r);
+        }
         return this;
     }
 
@@ -156,15 +177,28 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void {}
+    protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void {
+        this._updateLayerNavigations(eventData);
+    }
 
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void {}
+
+    protected _updateLayerNavigations(layers: Iterable<ITileMapLayerView<T>>): void {
+        if (layers) {
+            const nav = this.navigationState;
+            if (nav) {
+                for (const layerView of layers) {
+                    layerView.navigationState?.copy(nav);
+                }
+            }
+        }
+    }
 
     // end navigation proxy
     protected _onNavigationValidationChanged(event: boolean, state: EventState): void {
         if (event && state.target === this._navigation) {
             this.invalidate();
-            this._onNavigationUpdated(state.target); 
+            this._onNavigationUpdated(state.target);
         }
     }
 
@@ -218,20 +252,19 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
                 this._navigationValidableObserver = null;
                 this._navigationPropertyObserver?.disconnect();
                 this._navigationPropertyObserver = null;
+                this._api?.dispose();
+                this._api = null;
                 this._onNavigationUnbinded(this._navigation);
             }
 
             this._navigation = nav;
             if (this._navigation) {
+                this._api = new TileNavigationApi(this._navigation);
                 this._navigationPropertyObserver = this._navigation.propertyChangedObservable?.add(this._onNavigationPropertyChanged.bind(this));
                 this._navigationValidableObserver = this._navigation.validationObservable?.add(this._onNavigationValidationChanged.bind(this));
+                this._updateLayerNavigations(this._layerViews);
             }
 
-            if (this._layerViews) {
-                for (const l of this._layerViews) {
-                    l.navigation = nav;
-                }
-            }
             this.invalidate();
             this._onNavigationBinded(nav);
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
@@ -240,16 +273,16 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
     }
 
-    protected _createLayerContainer(): ITileMapLayerContainer<T> {
-        return this._createLayerContainerInternal();
+    protected _buildLayerContainer(): ITileMapLayerContainer<T> {
+        return this._buildLayerContainerInternal();
     }
 
-    protected _createLayerViewContainer(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
-        return this._createLayerViewContainerInternal(layers);
+    protected _buildLayerViewContainer(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
+        return this._buildLayerViewContainerInternal(layers);
     }
 
     protected _createLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
-        return this._createLayerViewInternal(layer);
+        return this._buildLayerViewInternal(layer);
     }
 
     protected _onDisplayUnbinded(display: Nullable<IDisplay>): void {
@@ -288,15 +321,15 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return new TileView();
     }
 
-    private _createLayerContainerInternal(): ITileMapLayerContainer<T> {
+    private _buildLayerContainerInternal(): ITileMapLayerContainer<T> {
         return new OrderedCollection<ITileMapLayer<T>>();
     }
 
-    private _createLayerViewContainerInternal(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
-        return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._createLayerViewInternal(l)));
+    private _buildLayerViewContainerInternal(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
+        return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._buildLayerViewInternal(l)));
     }
 
-    private _createLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
-        return new TileMapLayerView(layer, this._display, this._navigation, this._view);
+    private _buildLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
+        return new TileMapLayerView(layer, this._display, this._view);
     }
 }

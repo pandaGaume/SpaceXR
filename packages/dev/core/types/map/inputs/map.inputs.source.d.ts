@@ -10,7 +10,7 @@ export declare class PointerController<S extends IPointerSource & IWheelSource> 
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
-    constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi<unknown>);
+    constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi);
     dispose(): void;
     protected _attachControl(src: S): void;
     protected _detachControl(src: S): void;

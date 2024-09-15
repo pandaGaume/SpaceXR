@@ -1,5 +1,5 @@
 import { Observable } from "../../events/events.observable";
-import { IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
+import { IHasNavigationApi, IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
 import { IHasView } from "../pipeline/tiles.pipeline.interfaces";
 import { IHasActivTiles, IsTileMetricsProvider, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
@@ -88,9 +88,9 @@ export interface IHasDisplay {
 
 export interface ITileMapCoreProperties extends IHasDisplay, IHasNavigationState, IHasView {}
 
-export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, IHasTileMapLayerViewContainer<T>, ITileNavigationApi<ITileMap<T>>, ITileMapCoreProperties, IDisposable {}
+export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, IHasTileMapLayerViewContainer<T>, ITileNavigationApi, ITileMapCoreProperties, IDisposable {}
 
-export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileProvider<T>, IValidable, ITileMapCoreProperties, IWeighted {}
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileProvider<T>, IValidable, ITileMapCoreProperties, IWeighted, IHasNavigationApi {}
 
 export interface ITileMapLayerViewContainer<T> extends IOrderedCollection<ITileMapLayerView<T>> {}
 

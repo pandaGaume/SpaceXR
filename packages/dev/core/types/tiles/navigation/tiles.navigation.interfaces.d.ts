@@ -1,12 +1,12 @@
 import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
-import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
-import { ICloneable, IValidable, Nullable } from "../../types";
+import { ITileSystemBounds } from "../tiles.interfaces";
+import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
 export interface IHasNavigationState {
-    navigation: Nullable<ITileNavigationState>;
+    navigationState: Nullable<ITileNavigationState>;
 }
-export declare function hasNavigationState(obj: unknown): obj is IHasNavigationState;
-export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {
+export declare function HasNavigationState(obj: unknown): obj is IHasNavigationState;
+export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     center: IGeo2;
     zoom: number;
@@ -14,22 +14,21 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
     bounds: ITileSystemBounds;
     lod: number;
     scale: number;
-    minZoom?: number;
-    maxZoom?: number;
-    syncWith(state: Nullable<ITileNavigationState>): void;
+    copy(state: ITileNavigationState): ITileNavigationState;
+    syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
 }
 export declare function IsTileNavigationState(b: unknown): b is ITileNavigationState;
-export interface ITileNavigationApi<T> {
-    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): T;
-    zoomMap(delta: number, validate?: boolean): T;
-    zoomInMap(delta: number, validate?: boolean): T;
-    zoomOutMap(delta: number, validate?: boolean): T;
-    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): T;
-    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): T;
-    rotateMap(r: number, validate?: boolean): T;
+export interface ITileNavigationApi extends IHasNavigationState, IDisposable {
+    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): ITileNavigationApi;
+    zoomMap(delta: number, validate?: boolean): ITileNavigationApi;
+    zoomInMap(delta: number, validate?: boolean): ITileNavigationApi;
+    zoomOutMap(delta: number, validate?: boolean): ITileNavigationApi;
+    translateUnitsMap(tx: number, ty: number, validate?: boolean): ITileNavigationApi;
+    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): ITileNavigationApi;
+    rotateMap(r: number, validate?: boolean): ITileNavigationApi;
 }
-export declare function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T>;
-export interface IHasNavigationApi<T> {
-    navigationApi: ITileNavigationApi<T>;
+export declare function IsTileNavigationApi(b: unknown): b is ITileNavigationApi;
+export interface IHasNavigationApi {
+    navigationApi: Nullable<ITileNavigationApi>;
 }
-export declare function hasNavigationApi<T>(obj: unknown): obj is IHasNavigationApi<T>;
+export declare function HasNavigationApi<T>(obj: unknown): obj is IHasNavigationApi;

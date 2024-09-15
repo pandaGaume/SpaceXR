@@ -927,7 +927,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return _map_elevation_layer__WEBPACK_IMPORTED_MODULE_4__.ElevationLayer.DefaultExageration;
     }
     _onZoomChanged() {
-        if (this.isReady && this.navigation && (0,core_tiles__WEBPACK_IMPORTED_MODULE_6__.IsPhysicalDisplay)(this.display)) {
+        if (this.isReady && this._isNavigationValid() && (0,core_tiles__WEBPACK_IMPORTED_MODULE_6__.IsPhysicalDisplay)(this.display)) {
             this._setScale(this.navigation, this.display, this.layer, this.metrics);
         }
     }
@@ -951,7 +951,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         if (nav) {
             if (force || !this._cartesianCenterCache) {
                 const geo = nav.center;
-                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, nav.lod);
+                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._getClampedLOD());
             }
             return this._cartesianCenterCache;
         }
@@ -1040,6 +1040,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     }
     _onTileAdded(tile) {
         if (this._tilesRoot) {
+            console.log(`Tile Added(${tile.quadkey}, LOD=${tile.levelOfDetail})`);
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
                 const m = this._createInstance(tile);
                 if (m) {
@@ -1059,6 +1060,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         }
     }
     _onTileRemoved(tile) {
+        console.log(`Tile Removed(${tile.quadkey}, LOD=${tile.levelOfDetail})`);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
@@ -1081,6 +1083,10 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
             p.y = center.y - c.y;
             p.z = 0;
         }
+    }
+    _doValidate() {
+        console.log("setContext LOD=", this.navigation?.lod);
+        super._doValidate();
     }
 }
 ElevationHost.TEMPLATE_SUFFIX = "grid";
@@ -10752,8 +10758,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileMapLayerView: () => (/* binding */ TileMapLayerView)
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _address__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../address */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../providers */ "../core/dist/tiles/providers/tiles.provider.abstract.js");
 /* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
+
 
 
 
@@ -10861,9 +10869,20 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.AbstractT
         return this._layer.provider.fetchContent(tile, callback);
     }
     _doValidate() {
-        if (this._view && this._navigation && this._display) {
-            this._view.setContext(this.navigation, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset });
+        if (this._isNavigationValid()) {
+            this._view.setContext(this.navigation, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset ?? 0 });
         }
+    }
+    _isNavigationValid() {
+        if (this._view && this._navigation && this._display) {
+            const lod = this._navigation.lod + (this.layer.zoomOffset ?? 0);
+            return this._getClampedLOD() == lod;
+        }
+        return false;
+    }
+    _getClampedLOD() {
+        const zoomOffset = this.layer.zoomOffset ?? 0;
+        return _address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ClampLod((this.navigation?.lod ?? 0) + zoomOffset, this.metrics);
     }
 }
 //# sourceMappingURL=tiles.map.layerView.js.map
@@ -10936,8 +10955,12 @@ class TileView {
     }
     _doValidateContext(state, display, metrics, activAddresses, options) {
         if (state && display) {
-            const lod = _address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ClampLod(state.lod, metrics) + (options?.zoomOffset ?? 0);
-            const scale = state.scale;
+            const target = state.lod + (options?.zoomOffset ?? 0);
+            const lod = _address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ClampLod(target, metrics);
+            if (target != lod) {
+                return;
+            }
+            let scale = state.scale;
             const nwTileXY = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
             const seTileXY = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
             const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
@@ -11318,8 +11341,14 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
             const old = this._lodf;
             this._lodf = lodf;
             const lod = Math.round(this._lodf);
-            this._lod = lod;
             let event = null;
+            if (this._lod != lod) {
+                const oldLod = this._lod;
+                this._lod = lod;
+                if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
+                    event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, oldLod, this._lod, TileNavigationState.LOD_PROPERTY_NAME);
+                }
+            }
             this._scale = TileNavigationState.GetLodScale(this._lodf);
             this.invalidate();
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {

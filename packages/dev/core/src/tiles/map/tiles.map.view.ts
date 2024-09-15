@@ -76,8 +76,13 @@ export class TileView implements ITileView {
         options?: ITileSelectionContextOptions
     ) {
         if (state && display) {
-            const lod = TileAddress.ClampLod(state.lod, metrics) + (options?.zoomOffset ?? 0);
-            const scale = state.scale;
+            const target = state.lod + (options?.zoomOffset ?? 0);
+            const lod = TileAddress.ClampLod(target, metrics);
+            // TODO : we might adapt the scale depending the diff between lod and state.lod
+            if (target != lod) {
+                return;
+            }
+            let scale = state.scale;
 
             const nwTileXY = Cartesian2.Zero();
             const seTileXY = Cartesian2.Zero();

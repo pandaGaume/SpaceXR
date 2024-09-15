@@ -2,7 +2,7 @@ import { ITileSystemBounds } from "./tiles.interfaces";
 import { Observable, PropertyChangedEventArgs } from "../events";
 import { Nullable } from "../types";
 export declare class TileSystemBounds implements ITileSystemBounds {
-    static Intersection(bounds: Array<ITileSystemBounds>): Nullable<TileSystemBounds>;
+    static Intersection(bounds: Array<ITileSystemBounds>): Nullable<ITileSystemBounds>;
     static Union(bounds: Array<ITileSystemBounds>): Nullable<ITileSystemBounds>;
     static DefaultLOD: number;
     static DefaultMinLOD: number;
@@ -22,8 +22,8 @@ export declare class TileSystemBounds implements ITileSystemBounds {
     constructor(p?: Partial<ITileSystemBounds>);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
     unionInPlace(bounds: ITileSystemBounds): void;
-    copyInPlace(bounds: ITileSystemBounds): void;
-    clone(): TileSystemBounds;
+    copy(bounds: ITileSystemBounds): void;
+    clone(): ITileSystemBounds;
     intersectionInPlace(bounds: ITileSystemBounds): void;
     get minLOD(): number;
     set minLOD(v: number);

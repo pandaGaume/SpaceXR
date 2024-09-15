@@ -4,7 +4,7 @@ import { IPointerTarget, IWheelTarget, IDragTarget } from "./map.inputs.interfac
 export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarget<T>, IDragTarget<T> {
     static readonly DEFAULT_ZOOM_INCREMENT = 0.1;
 
-    _target: ITileNavigationApi<unknown>;
+    _target: ITileNavigationApi;
     _zoomIncrement?: number;
 
     _offsetX: number;
@@ -16,7 +16,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
     _isDragging: boolean;
     _button: number;
 
-    public constructor(target: ITileNavigationApi<unknown>, zoomIncrement?: number) {
+    public constructor(target: ITileNavigationApi, zoomIncrement?: number) {
         this._target = target;
         this._offsetX = 0;
         this._offsetY = 0;
@@ -39,7 +39,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
 
     public onPointerLostCapture(src: T, x: number, y: number, id?: number): void {}
 
-    public get target(): ITileNavigationApi<unknown> {
+    public get target(): ITileNavigationApi {
         return this._target;
     }
 

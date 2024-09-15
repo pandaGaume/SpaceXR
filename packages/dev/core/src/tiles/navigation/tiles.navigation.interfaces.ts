@@ -1,18 +1,18 @@
 import { IGeo2, IsLocation, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
-import { ITileMetrics, ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
-import { ICloneable, IValidable, Nullable } from "../../types";
+import { ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
+import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
 
 export interface IHasNavigationState {
-    navigation: Nullable<ITileNavigationState>;
+    navigationState: Nullable<ITileNavigationState>;
 }
 
-export function hasNavigationState(obj: unknown): obj is IHasNavigationState {
+export function HasNavigationState(obj: unknown): obj is IHasNavigationState {
     if (typeof obj !== "object" || obj === null) return false;
-    return (<IHasNavigationState>obj).navigation !== undefined;
+    return (<IHasNavigationState>obj).navigationState !== undefined;
 }
 
-export interface ITileNavigationState extends ITileNavigationApi<ITileNavigationState>, IValidable, ICloneable<ITileNavigationState> {
+export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
 
     center: IGeo2;
@@ -22,16 +22,14 @@ export interface ITileNavigationState extends ITileNavigationApi<ITileNavigation
 
     lod: number; // Math.round(zoom)
     scale: number; // scale corresponding to the decimal part of zoom
-    minZoom?: number;
-    maxZoom?: number;
 
-    syncWith(state: Nullable<ITileNavigationState>): void;
+    copy(state: ITileNavigationState): ITileNavigationState;
+    syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
 }
 
 export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
     if (b === null || typeof b !== "object") return false;
     return (
-        IsTileNavigationApi<ITileNavigationState>(b) &&
         (<ITileNavigationState>b).center !== undefined &&
         IsLocation((<ITileNavigationState>b).center) &&
         (<ITileNavigationState>b).zoom !== undefined &&
@@ -42,33 +40,33 @@ export function IsTileNavigationState(b: unknown): b is ITileNavigationState {
     );
 }
 
-export interface ITileNavigationApi<T> {
-    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): T;
-    zoomMap(delta: number, validate?: boolean): T;
-    zoomInMap(delta: number, validate?: boolean): T;
-    zoomOutMap(delta: number, validate?: boolean): T;
-    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): T;
-    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): T;
-    rotateMap(r: number, validate?: boolean): T;
+export interface ITileNavigationApi extends IHasNavigationState, IDisposable {
+    setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): ITileNavigationApi;
+    zoomMap(delta: number, validate?: boolean): ITileNavigationApi;
+    zoomInMap(delta: number, validate?: boolean): ITileNavigationApi;
+    zoomOutMap(delta: number, validate?: boolean): ITileNavigationApi;
+    translateUnitsMap(tx: number, ty: number, validate?: boolean): ITileNavigationApi;
+    translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): ITileNavigationApi;
+    rotateMap(r: number, validate?: boolean): ITileNavigationApi;
 }
 
-export function IsTileNavigationApi<T>(b: unknown): b is ITileNavigationApi<T> {
+export function IsTileNavigationApi(b: unknown): b is ITileNavigationApi {
     if (b === null || typeof b !== "object") return false;
     return (
-        (<ITileNavigationApi<T>>b).setViewMap !== undefined &&
-        (<ITileNavigationApi<T>>b).zoomInMap !== undefined &&
-        (<ITileNavigationApi<T>>b).zoomOutMap !== undefined &&
-        (<ITileNavigationApi<T>>b).translateUnitsMap !== undefined &&
-        (<ITileNavigationApi<T>>b).translateMap !== undefined &&
-        (<ITileNavigationApi<T>>b).rotateMap !== undefined
+        (<ITileNavigationApi>b).setViewMap !== undefined &&
+        (<ITileNavigationApi>b).zoomInMap !== undefined &&
+        (<ITileNavigationApi>b).zoomOutMap !== undefined &&
+        (<ITileNavigationApi>b).translateUnitsMap !== undefined &&
+        (<ITileNavigationApi>b).translateMap !== undefined &&
+        (<ITileNavigationApi>b).rotateMap !== undefined
     );
 }
 
-export interface IHasNavigationApi<T> {
-    navigationApi: ITileNavigationApi<T>;
+export interface IHasNavigationApi {
+    navigationApi: Nullable<ITileNavigationApi>;
 }
 
-export function hasNavigationApi<T>(obj: unknown): obj is IHasNavigationApi<T> {
+export function HasNavigationApi<T>(obj: unknown): obj is IHasNavigationApi {
     if (typeof obj !== "object" || obj === null) return false;
-    return (<IHasNavigationApi<T>>obj).navigationApi !== undefined;
+    return (<IHasNavigationApi>obj).navigationApi !== undefined;
 }

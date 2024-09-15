@@ -1,24 +1,23 @@
-import { PropertyChangedEventArgs, Observable, Observer } from "../../events";
+import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
 import { ITileNavigationState } from "./tiles.navigation.interfaces";
-import { IDisposable, Nullable } from "../../types";
+import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
-import { ITileMetrics, ITileSystemBounds } from "../tiles.interfaces";
+import { ITileSystemBounds } from "../tiles.interfaces";
 import { ICartesian2 } from "../../geometry";
 import { IGeo2, Bearing } from "../../geography";
 import { TileNavigationStateSynchronizer } from "./tiles.navigation.state.sync";
-export declare class TileNavigationState extends ValidableBase implements ITileNavigationState, IDisposable {
+export declare class TileNavigationState extends ValidableBase implements ITileNavigationState {
     static readonly CENTER_PROPERTY_NAME: string;
     static readonly ZOOM_PROPERTY_NAME: string;
     static readonly LOD_PROPERTY_NAME: string;
     static readonly AZIMUTH_PROPERTY_NAME: string;
+    static readonly BOUNDS_PROPERTY_NAME: string;
     static GetLodScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _lodf: number;
     _center: IGeo2;
     _azimuth: Bearing;
     _bounds: ITileSystemBounds;
-    _minZoom?: number;
-    _maxZoom?: number;
     _cartesianCache: ICartesian2;
     _lod: number;
     _scale: number;
@@ -38,15 +37,8 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     get bounds(): ITileSystemBounds;
     set bounds(bounds: ITileSystemBounds);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
-    setViewMap(center?: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): TileNavigationState;
-    zoomInMap(delta: number, validate?: boolean): TileNavigationState;
-    zoomMap(delta: number, validate?: boolean): TileNavigationState;
-    zoomOutMap(delta: number, validate?: boolean): TileNavigationState;
-    translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): TileNavigationState;
-    translateMap(lat: IGeo2 | Array<number> | number, lon?: number, validate?: boolean): TileNavigationState;
-    rotateMap(r: number, validate?: boolean): TileNavigationState;
+    copy(other: ITileNavigationState): TileNavigationState;
     syncWith(state: Nullable<ITileNavigationState>): TileNavigationState;
     toString(): string;
-    private rotatePointInv;
-    private _boundsPropertyChanged;
+    protected _boundsPropertyChanged(e: PropertyChangedEventArgs<unknown, unknown>, state: EventState): void;
 }

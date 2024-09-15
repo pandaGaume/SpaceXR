@@ -45,4 +45,5 @@ export declare class ElevationHost extends TileMapLayerView<IDemInfos> implement
     protected _onTileUpdated(tile: ElevationTile): void;
     protected _createInstance(tile: ElevationTile): AbstractMesh;
     protected _setTilePosition(tile: IElevationTile, center: ICartesian2): void;
+    protected _doValidate(): void;
 }

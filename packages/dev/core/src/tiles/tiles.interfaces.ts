@@ -123,7 +123,7 @@ export interface ITileSystemBounds extends ICloneable<ITileSystemBounds> {
 
     unionInPlace(bounds: ITileSystemBounds): void;
     intersectionInPlace(bounds: ITileSystemBounds): void;
-    copyInPlace(bounds: ITileSystemBounds): void;
+    copy(bounds: ITileSystemBounds): void;
 }
 
 export function IsTileSystemBounds(b: unknown): b is ITileSystemBounds {

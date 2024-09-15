@@ -1,7 +1,8 @@
 import { IWeighted } from "../../collections/collections.interfaces";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
 import { Nullable } from "../../types";
-import { ITileNavigationState } from "../navigation";
+import { ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
+import { TileNavigationApi } from "../navigation/tiles.navigation.api";
 import { ITileView } from "../pipeline";
 import { AbstractTileProvider } from "../providers";
 import { ITile } from "../tiles.interfaces";
@@ -14,23 +15,29 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     private _layer: ITileMapLayer<T>;
     private _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
     private _view: ITileView;
+    private _ownView: boolean = false;
     private _navigation: Nullable<ITileNavigationState> = null;
     private _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
+    private _api: Nullable<ITileNavigationApi> = null;
     private _display: Nullable<IDisplay> = null;
     private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
 
-    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView) {
+    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
         super();
         // ensure the factory has the right metrics and namespace to build bounds.
         this.factory.withMetrics(layer.metrics);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
 
-        this.navigation = navigation;
+        this.navigationState = this._buildNavigation();
         this.display = display;
 
-        this._view = source;
+        this._view = source ?? this._buildSource();
         this._view?.linkTo(this);
+    }
+
+    public get navigationApi(): Nullable<ITileNavigationApi> {
+        return this._api;
     }
 
     public get weightChangedObservable(): Observable<IWeighted> {
@@ -56,19 +63,22 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         return this._display;
     }
 
-    public get navigation(): Nullable<ITileNavigationState> {
+    public get navigationState(): Nullable<ITileNavigationState> {
         return this._navigation;
     }
 
-    public set navigation(value: Nullable<ITileNavigationState>) {
+    public set navigationState(value: Nullable<ITileNavigationState>) {
         if (this._navigation !== value) {
             const tmp = this._navigation;
             if (tmp) {
                 this._navigationObserver?.disconnect();
                 this._navigationObserver = null;
+                this._api?.dispose();
+                this._api = null;
             }
             this._navigation = value;
             if (this._navigation) {
+                this._api = new TileNavigationApi(this._navigation, this.metrics);
                 this._navigationObserver = this._navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
             }
             this._onNavigationChanged(tmp, value);
@@ -96,14 +106,23 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
 
     public dispose(): void {
         super.dispose();
+        this._navigation?.dispose();
         this._view?.unlinkFrom(this);
+        if (this._ownView) {
+            this._view?.dispose();
+        }
         this._layerObserver?.disconnect();
         this._displayObserver?.disconnect();
         this._navigationObserver?.disconnect();
     }
 
     protected _buildSource(): ITileView {
+        this._ownView = true;
         return new TileView();
+    }
+
+    protected _buildNavigation(): ITileNavigationState {
+        return new TileNavigationState(undefined, undefined, undefined, this.metrics);
     }
 
     protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {
@@ -141,8 +160,6 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     }
 
     protected _doValidate(): void {
-        if (this._view && this._navigation && this._display) {
-            this._view.setContext(this.navigation, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset });
-        }
+        this._view.setContext(this.navigationState, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset ?? 0 });
     }
 }

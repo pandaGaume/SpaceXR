@@ -77,7 +77,7 @@
                 compass.addEventListener('click', handleCompassClick);
 
                 // listen to azimuth change.
-                map.navigation.propertyChangedObservable.add((p,e)=> {
+                map.navigationState.propertyChangedObservable.add((p,e)=> {
                     if (p.propertyName === 'azimuth'){
                        updateCompassRotation(p.newValue?.value??0);
                     }

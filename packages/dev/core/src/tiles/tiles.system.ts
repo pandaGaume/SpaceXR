@@ -4,18 +4,21 @@ import { Observable, PropertyChangedEventArgs } from "../events";
 import { Nullable } from "../types";
 
 export class TileSystemBounds implements ITileSystemBounds {
-    public static Intersection(bounds: Array<ITileSystemBounds>): Nullable<TileSystemBounds> {
+    public static Intersection(bounds: Array<ITileSystemBounds>): Nullable<ITileSystemBounds> {
         if (!bounds || bounds.length === 0) {
             return null;
         }
-        const result = new TileSystemBounds();
-        for (const bound of bounds) {
-            result.intersectionInPlace(bound);
+        const result = bounds[0].clone();
+        for (let i = 1; i < bounds.length; i++) {
+            result.intersectionInPlace(bounds[i]);
         }
         return result;
     }
 
     public static Union(bounds: Array<ITileSystemBounds>): Nullable<ITileSystemBounds> {
+        if (!bounds || bounds.length === 0) {
+            return null;
+        }
         const result = bounds[0].clone();
         for (let i = 1; i < bounds.length; i++) {
             result.unionInPlace(bounds[i]);
@@ -66,7 +69,7 @@ export class TileSystemBounds implements ITileSystemBounds {
         }
     }
 
-    public copyInPlace(bounds: ITileSystemBounds): void {
+    public copy(bounds: ITileSystemBounds): void {
         if (bounds) {
             this.minLOD = bounds.minLOD;
             this.maxLOD = bounds.maxLOD;
@@ -77,7 +80,7 @@ export class TileSystemBounds implements ITileSystemBounds {
         }
     }
 
-    public clone(): TileSystemBounds {
+    public clone(): ITileSystemBounds {
         return new TileSystemBounds(this);
     }
 

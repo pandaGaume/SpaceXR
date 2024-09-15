@@ -2,7 +2,7 @@ import { ITileNavigationApi } from "../../tiles";
 import { IPointerTarget, IWheelTarget, IDragTarget } from "./map.inputs.interfaces";
 export declare class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarget<T>, IDragTarget<T> {
     static readonly DEFAULT_ZOOM_INCREMENT = 0.1;
-    _target: ITileNavigationApi<unknown>;
+    _target: ITileNavigationApi;
     _zoomIncrement?: number;
     _offsetX: number;
     _offsetY: number;
@@ -10,13 +10,13 @@ export declare class InputsNavigationTarget<T> implements IPointerTarget<T>, IWh
     _startY: number;
     _isDragging: boolean;
     _button: number;
-    constructor(target: ITileNavigationApi<unknown>, zoomIncrement?: number);
+    constructor(target: ITileNavigationApi, zoomIncrement?: number);
     onPointerOver(src: T, x: number, y: number, id?: number): void;
     onPointerLeave(src: T, x: number, y: number, id?: number): void;
     onPointerCancel(src: T, x: number, y: number, id?: number): void;
     onPointerGotCapture(src: T, x: number, y: number, id?: number): void;
     onPointerLostCapture(src: T, x: number, y: number, id?: number): void;
-    get target(): ITileNavigationApi<unknown>;
+    get target(): ITileNavigationApi;
     get zoomIncrement(): number | undefined;
     set zoomIncrement(value: number | undefined);
     onWheel(src: T, delta: number): void;

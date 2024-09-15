@@ -1,4 +1,3 @@
-
 import { EventState, Observer } from "../../events";
 import { ITileNavigationApi } from "../../tiles";
 import { IDisposable, Nullable } from "../../types";
@@ -16,7 +15,7 @@ export class PointerController<S extends IPointerSource & IWheelSource> implemen
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
 
-    public constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi<unknown>) {
+    public constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi) {
         this._src = src;
         this._target = target instanceof InputsNavigationTarget ? target : new InputsNavigationTarget(target);
         this._attachControl(this._src);

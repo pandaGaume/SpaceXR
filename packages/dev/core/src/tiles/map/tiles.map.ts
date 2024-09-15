@@ -165,7 +165,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
-        this._layerViews.add(...eventData.map((l) => this._createLayerView(l)));
+        this._layerViews.add(...eventData.map((l) => this._buildLayerView(l)));
         this.invalidate();
     }
 
@@ -281,7 +281,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this._buildLayerViewContainerInternal(layers);
     }
 
-    protected _createLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
+    protected _buildLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
         return this._buildLayerViewInternal(layer);
     }
 
@@ -326,7 +326,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     private _buildLayerViewContainerInternal(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>> {
-        return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._buildLayerViewInternal(l)));
+        return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
     }
 
     private _buildLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<T> {

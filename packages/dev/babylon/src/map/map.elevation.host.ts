@@ -14,6 +14,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     public static TEMPLATE_SUFFIX = "grid";
     public static ROOT_SUFFIX = "root";
     public static MATERIAL_SUFFIX = "material";
+    public static INSTANCE_ROOT_NAME = "root";
 
     // the grid model
     _grid: Mesh;
@@ -21,8 +22,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
 
-    public constructor(layer: IElevationLayer, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView, scene?: Scene) {
-        super(layer, display, navigation, source);
+    public constructor(layer: IElevationLayer, display: Nullable<IDisplay>, source: ITileView, scene?: Scene) {
+        super(layer, display, source);
         // ensure factory is with correct type.
         this.factory.withType(ElevationTile);
 
@@ -34,7 +35,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         this._grid.setEnabled(false);
 
         // apply navigation and options.
-        this._applyNavigation(this.navigation);
+        this._applyNavigation(this.navigationState);
     }
 
     public get tilesRoot(): TransformNode {
@@ -128,14 +129,13 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _onZoomChanged(): void {
-        if (this.isReady && this._isNavigationValid() && IsPhysicalDisplay(this.display)) {
-            this._setScale(this.navigation!, this.display, this.layer, this.metrics);
+        if (this.isReady && IsPhysicalDisplay(this.display)) {
+            this._setScale(this.navigationState!, this.display, this.layer, this.metrics);
         }
     }
 
     protected _onCenterChanged(): void {
-        const navigation = this.navigation;
-        if (this.isReady && navigation) {
+        if (this.isReady) {
             const tiles = this._activTiles;
             if (!tiles || !tiles.count) {
                 return;
@@ -151,11 +151,11 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _getCenter(force: boolean = false): ICartesian2 | undefined {
-        const nav = this.navigation;
+        const nav = this.navigationState;
         if (nav) {
             if (force || !this._cartesianCenterCache) {
                 const geo = nav.center;
-                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, this._getClampedLOD());
+                this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, nav.lod);
             }
             return this._cartesianCenterCache;
         }
@@ -259,9 +259,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     protected _onTileAdded(tile: ElevationTile): void {
         if (this._tilesRoot) {
-//            console.log(`Tile Added(${tile.quadkey}, LOD=${tile.levelOfDetail})`);
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
-                const m = this._createInstance(tile);
+                const m = this._buildInstance(tile);
                 if (m) {
                     m.parent = this._tilesRoot;
 
@@ -282,7 +281,6 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _onTileRemoved(tile: ElevationTile): void {
-//        console.log(`Tile Removed(${tile.quadkey}, LOD=${tile.levelOfDetail})`);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
@@ -295,9 +293,14 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         }
     }
 
-    protected _createInstance(tile: ElevationTile): AbstractMesh {
-        const instance = this._grid.createInstance(tile.quadkey);
+    protected _buildInstance(tile: ElevationTile): AbstractMesh {
+        const instance = this._grid.createInstance(this._buildInstanceName(tile));
         return instance;
+    }
+
+    protected _buildInstanceName(tile: ElevationTile): string {
+        const k = tile.quadkey;
+        return k != "" ? k : ElevationHost.INSTANCE_ROOT_NAME;
     }
 
     protected _setTilePosition(tile: IElevationTile, center: ICartesian2): void {
@@ -309,10 +312,5 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             p.y = center.y - c.y;
             p.z = 0;
         }
-    }
-
-    protected _doValidate(): void {
-        console.log("setContext LOD=", this.navigation?.lod);
-        super._doValidate();
     }
 }

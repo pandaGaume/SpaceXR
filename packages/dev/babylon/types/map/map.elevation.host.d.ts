@@ -11,10 +11,11 @@ export declare class ElevationHost extends TileMapLayerView<IDemInfos> implement
     static TEMPLATE_SUFFIX: string;
     static ROOT_SUFFIX: string;
     static MATERIAL_SUFFIX: string;
+    static INSTANCE_ROOT_NAME: string;
     _grid: Mesh;
     _tilesRoot: TransformNode;
     _cartesianCenterCache: Nullable<ICartesian2>;
-    constructor(layer: IElevationLayer, display: Nullable<IDisplay>, navigation: Nullable<ITileNavigationState>, source: ITileView, scene?: Scene);
+    constructor(layer: IElevationLayer, display: Nullable<IDisplay>, source: ITileView, scene?: Scene);
     get tilesRoot(): TransformNode;
     protected get isReady(): boolean;
     protected _buildRoot(scene?: Scene): TransformNode;
@@ -43,7 +44,7 @@ export declare class ElevationHost extends TileMapLayerView<IDemInfos> implement
     protected _onTileAdded(tile: ElevationTile): void;
     protected _onTileRemoved(tile: ElevationTile): void;
     protected _onTileUpdated(tile: ElevationTile): void;
-    protected _createInstance(tile: ElevationTile): AbstractMesh;
+    protected _buildInstance(tile: ElevationTile): AbstractMesh;
+    protected _buildInstanceName(tile: ElevationTile): string;
     protected _setTilePosition(tile: IElevationTile, center: ICartesian2): void;
-    protected _doValidate(): void;
 }

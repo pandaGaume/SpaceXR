@@ -8297,7 +8297,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layerViews?.validate();
     }
     _onLayerAdded(eventData, eventstate) {
-        this._layerViews.add(...eventData.map((l) => this._createLayerView(l)));
+        this._layerViews.add(...eventData.map((l) => this._buildLayerView(l)));
         this.invalidate();
     }
     _onLayerRemoved(eventData, eventstate) {
@@ -8396,7 +8396,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     _buildLayerViewContainer(layers) {
         return this._buildLayerViewContainerInternal(layers);
     }
-    _createLayerView(layer) {
+    _buildLayerView(layer) {
         return this._buildLayerViewInternal(layer);
     }
     _onDisplayUnbinded(display) {
@@ -8423,7 +8423,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection();
     }
     _buildLayerViewContainerInternal(layers) {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection(...Array.from(this._layers).map((l) => this._createLayerView(l) ?? this._buildLayerViewInternal(l)));
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
     }
     _buildLayerViewInternal(layer) {
         return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView(layer, this._display, this._view);

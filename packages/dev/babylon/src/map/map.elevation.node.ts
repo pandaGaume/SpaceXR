@@ -1,5 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
-import { IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileMetrics, ITileNavigationApi } from "core/tiles";
+import { IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileNavigationApi } from "core/tiles";
 import { ElevationMapContentType, IElevationMap } from "./map.elevation.interfaces";
 import { ElevationMap } from "./map.elevation";
 import { Nullable } from "core/types";
@@ -11,7 +11,7 @@ import { IPointerSource, IWheelSource, PointerController } from "core/map";
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering evenyt of the scene
 /// </sumary>
-export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<Map3D>, IHasTileMapLayerContainer<ElevationMapContentType> {
+export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, IHasTileMapLayerContainer<ElevationMapContentType> {
     private _map: IElevationMap;
     private _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
     private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
@@ -27,37 +27,41 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<M
         return this._map.layers;
     }
 
-    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): Map3D {
+    public get navigationState() {
+        return this._map.navigationState;
+    }
+
+    public setViewMap(center: IGeo2 | Array<number>, zoom?: number, rotation?: number, validate?: boolean): ITileNavigationApi {
         this._map.setViewMap(center, zoom, rotation, validate);
         return this;
     }
 
-    public zoomMap(delta: number, validate?: boolean): Map3D {
+    public zoomMap(delta: number, validate?: boolean): ITileNavigationApi {
         this._map.zoomMap(delta, validate);
         return this;
     }
 
-    public zoomInMap(delta: number, validate?: boolean): Map3D {
+    public zoomInMap(delta: number, validate?: boolean): ITileNavigationApi {
         this._map.zoomInMap(delta, validate);
         return this;
     }
 
-    public zoomOutMap(delta: number, validate?: boolean): Map3D {
+    public zoomOutMap(delta: number, validate?: boolean): ITileNavigationApi {
         this._map.zoomOutMap(delta, validate);
         return this;
     }
 
-    public translateUnitsMap(tx: number, ty: number, metrics?: ITileMetrics, validate?: boolean): Map3D {
-        this._map.translateUnitsMap(tx, ty, metrics, validate);
+    public translateUnitsMap(tx: number, ty: number, validate?: boolean): ITileNavigationApi {
+        this._map.translateUnitsMap(tx, ty, validate);
         return this;
     }
 
-    public translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): Map3D {
+    public translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): ITileNavigationApi {
         this._map.translateMap(dlat, dlon, validate);
         return this;
     }
 
-    public rotateMap(r: number, validate?: boolean): Map3D {
+    public rotateMap(r: number, validate?: boolean): ITileNavigationApi {
         this._map.rotateMap(r, validate);
         return this;
     }
@@ -86,7 +90,7 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi<M
         if (controller instanceof PointerController) {
             this._controller = controller;
         } else {
-            this._controller = new PointerController(controller, this);
+            this._controller = new PointerController(controller, this._map);
             this._ownController = true;
         }
         return this;

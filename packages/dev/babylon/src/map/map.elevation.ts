@@ -12,7 +12,7 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> implement
         super(display, nav);
         this._root = root;
         // lazzy initialization.
-        this._onNavigationBinded(this.navigation);
+        this._onNavigationBinded(this.navigationState);
         this._onDisplayBinded(this.display);
     }
 
@@ -22,20 +22,20 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> implement
      * @param layer
      * @returns the layer view created
      */
-    protected _createLayerView(layer: ITileMapLayer<ElevationMapContentType>): ITileMapLayerView<ElevationMapContentType> {
+    protected _buildLayerView(layer: ITileMapLayer<ElevationMapContentType>): ITileMapLayerView<ElevationMapContentType> {
         if (IsElevationLayer(layer)) {
-            const host = this._createElevationHost(layer);
-            return host;
+            return this._buildElevationHost(layer);
         }
-        return super._createLayerView(layer);
+        return super._buildLayerView(layer);
     }
 
-    protected _createElevationHost(layer: ITileMapLayer<IDemInfos>): IElevationHost {
-        return new ElevationHost(layer, this._display, this._navigation, this._view);
+    protected _buildElevationHost(layer: ITileMapLayer<IDemInfos>): IElevationHost {
+        return new ElevationHost(layer, this._display, this._view);
     }
 
     // when navigation propertie's changed
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
+        super._onNavigationPropertyChanged(event, state);
         if (event.propertyName === TileNavigationState.AZIMUTH_PROPERTY_NAME) {
             this._rotateMap(event.source);
         }
@@ -43,21 +43,19 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> implement
 
     protected _rotateMap(nav: Nullable<ITileNavigationState>) {
         if (this._root) {
-            this._root.rotation.z = this.navigation?.azimuth.radian ?? 0;
+            this._root.rotation.z = this.navigationState?.azimuth.radian ?? 0;
         }
     }
 
     // when the navigation object has changed - very unlikely.
     protected _onNavigationBinded(nav: Nullable<ITileNavigationState>): void {
+        super._onNavigationBinded(nav);
         this._rotateMap(nav);
     }
 
-    protected _onDisplayBinded(display: Nullable<IDisplay>): void {}
-
-    protected _onDisplayResized(display: IDisplay): void {}
-
     // bind the tile root to this root
     protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<ElevationMapContentType>>, eventState: EventState): void {
+        super._onLayerViewAdded(eventData, eventState);
         for (const v of eventData) {
             if (IsElevationHost(v)) {
                 v.tilesRoot.parent = this._root;
@@ -67,6 +65,7 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> implement
 
     // unbind the tile root from this root
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<ElevationMapContentType>>, eventState: EventState): void {
+        super._onLayerViewRemoved(eventData, eventState);
         for (const v of eventData) {
             if (IsElevationHost(v)) {
                 v.tilesRoot.parent = null;

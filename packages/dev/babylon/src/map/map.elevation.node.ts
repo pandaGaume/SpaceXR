@@ -9,7 +9,7 @@ import { VirtualDisplay } from "../display";
 import { IPointerSource, IWheelSource, PointerController } from "core/map";
 
 /// <sumary>
-/// Act as proxy for Elevation Map, and bind the rendering evenyt of the scene
+/// Act as proxy for Elevation Map, and bind the rendering event of the scene
 /// </sumary>
 export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, IHasTileMapLayerContainer<ElevationMapContentType> {
     private _map: IElevationMap;

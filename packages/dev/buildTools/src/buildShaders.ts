@@ -15,23 +15,18 @@ ShaderStore.##SHADERSTORE_PLACEHOLDER##[name] = shader;
 /**
  * Get the shaders name from their path.
  * @param filename
+ * @returns the shader name
  */
-function getShaderName(filename: string): string | undefined {
+function getShaderName(filename: string) {
     const parts = filename.split(".");
-    if (parts[1] !== "glsl") {
-        if (parts[1].toLowerCase() === "fragment") {
-            return `${parts[0]}FragmentShader`;
-        }
-        if (parts[1].toLowerCase() === "vertex") {
-            return `${parts[0]}VertexShader`;
-        }
-        return undefined;
+    if (parts[1] !== "fx") {
+        return parts[0] + (parts[1] === "fragment" ? "Pixel" : parts[1] === "compute" ? "Compute" : "Vertex") + "Shader";
     } else {
         return parts[0];
     }
 }
 
-export function buildShaders(filePath: string) {
+export function buildShaders(filePath: string): void {
     const isVerbose = checkArgs("--verbose", true);
     isVerbose && console.log("Generating shaders for " + filePath);
 
@@ -44,13 +39,15 @@ export function buildShaders(filePath: string) {
         console.log(`file name :${filename} do not follow naming pattern convention. Must be xxxx.vertex.glsl or xxxx.fragment.glsl.`);
         return;
     }
-    const tsFilename = filename.replace(".glsl", ".ts");
-    let glslData = content.toString();
+    const tsFilename = filename.replace(".fx", ".ts").replace(".wgsl", ".ts").replace(".glsl", ".ts");
+    const isWGSL = directory.indexOf("shadersWGSL") > -1;
+    const appendDirName = isWGSL ? "WGSL" : "";
+    let fxData = content.toString();
 
     isVerbose && console.log(`directory:${directory}, shaderName:${shaderName}, ts file name:${tsFilename}`);
 
     // Remove Trailing whitespace...
-    glslData = glslData
+    fxData = fxData
         .replace(/^\uFEFF/, "")
         .replace(/(\/\/)+.*$/gm, "")
         .replace(/\t+/gm, " ")
@@ -68,11 +65,11 @@ export function buildShaders(filePath: string) {
         .replace(/;\n([^#])/g, ";$1");
 
     const isInclude = directory.indexOf("includes") > -1;
-    const shaderStore = isInclude ? `IncludesShadersStore` : `ShadersStore`;
+    const shaderStore = isInclude ? `IncludesShadersStore${appendDirName}` : `ShadersStore${appendDirName}`;
 
     // Fill template in.
     let tsContent = tsShaderTemplate.replaceAll("##NAME_PLACEHOLDER##", shaderName);
-    tsContent = tsContent.replaceAll("##SHADER_PLACEHOLDER##", glslData);
+    tsContent = tsContent.replaceAll("##SHADER_PLACEHOLDER##", fxData);
     tsContent = tsContent.replace("##SHADERSTORE_PLACEHOLDER##", shaderStore);
 
     const tsShaderFilename = path.join(directory, tsFilename);

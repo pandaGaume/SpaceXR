@@ -1,4 +1,4 @@
-export declare const lightCommonsDeclaration: {
+export declare const lightCommonsDeclarationVertexShader: {
     name: string;
     shader: string;
 };

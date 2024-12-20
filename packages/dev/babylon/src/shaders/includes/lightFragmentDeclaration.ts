@@ -2,7 +2,7 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-const name = "lightFragmentDeclaration";
+const name = "lightFragmentDeclarationVertexShader";
 const shader = `#if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
 #include<lightDefinition>
 #include<lightCommonsDeclaration>
@@ -11,4 +11,4 @@ flat in vec4 vColor;#elif defined(GOUREAUD_SHADING)
 in vec4 vColor;#endif
 `;
 ShaderStore.IncludesShadersStore[name] = shader;
-/** @internal */ export const lightFragmentDeclaration = { name, shader };
+/** @internal */ export const lightFragmentDeclarationVertexShader = { name, shader };

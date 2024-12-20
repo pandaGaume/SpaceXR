@@ -2,7 +2,7 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-const name = "lightDefinition";
+const name = "lightDefinitionVertexShader";
 const shader = `struct PointLight{vec3 position;vec3 color;float intensity;};struct SpotLight{vec3 position;vec3 direction;vec3 color;float innerCutoff;float outerCutoff;float exponent;float intensity;};struct HemisphericLight{vec3 skyColor;vec3 groundColor;vec3 direction;float intensity;};#if defined(SPECULAR)
 vec3 calculatePhongSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float shininess,vec3 lightColor){vec3 reflectDir=reflect(-lightDir,normal);float spec=pow(max(dot(viewDir,reflectDir),0.0),shininess);return lightColor*spec;}vec3 calculateBlinnPhongSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float shininess,vec3 lightColor){vec3 halfDir=normalize(lightDir+viewDir);float spec=pow(max(dot(normal,halfDir),0.0),shininess);return lightColor*spec;}#endif
 vec3 calculateHemisphericLight( HemisphericLight light,vec3 normal#if defined(SPECULAR)
@@ -45,4 +45,4 @@ vec3 lightColor=calculateSpotLight(spotLights[i],normal,lightDir,viewDir,shinine
 vec3 lightColor=calculateSpotLight(spotLights[i],normal,lightDir);#endif
 color+=lightColor;}return clamp(color+ambient,0.0,1.0);}`;
 ShaderStore.IncludesShadersStore[name] = shader;
-/** @internal */ export const lightDefinition = { name, shader };
+/** @internal */ export const lightDefinitionVertexShader = { name, shader };

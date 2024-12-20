@@ -824,12 +824,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/map.elevation.interfaces.js");
-/* harmony import */ var _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./map.elevation.host.factory */ "./dist/map/map.elevation.host.factory.js");
+/* harmony import */ var _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./map.elevation.host.factory */ "./dist/map/map.elevation.host.factory.js");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.mesh */ "./dist/map/map.elevation.mesh.js");
-/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
+/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
 /* harmony import */ var _map_elevation_layer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.elevation.layer */ "./dist/map/map.elevation.layer.js");
+/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../materials */ "./dist/materials/materials.map.js");
+
 
 
 
@@ -978,7 +980,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return mesh;
     }
     _buildMaterial(name, scene) {
-        const material = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(name, scene);
+        const material = new _materials__WEBPACK_IMPORTED_MODULE_7__.Map3dMaterial(name, scene);
         material.wireframe = true;
         return material;
     }
@@ -992,16 +994,16 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return n;
     }
     _buildTemplateName() {
-        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_7__.TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
+        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_8__.TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
     }
     _buildMaterialName() {
-        return core_utils__WEBPACK_IMPORTED_MODULE_7__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
+        return core_utils__WEBPACK_IMPORTED_MODULE_8__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
     }
     _buildRootName() {
-        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_7__.TextUtils.BuildNameWithSuffix(this.name, ElevationHost.ROOT_SUFFIX));
+        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_8__.TextUtils.BuildNameWithSuffix(this.name, ElevationHost.ROOT_SUFFIX));
     }
     _buildGridFactoryInternal() {
-        return new _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_8__.ElevationGridFactory();
+        return new _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_9__.ElevationGridFactory();
     }
     _onTilesAdded(tiles) {
         if (Array.isArray(tiles)) {
@@ -1405,12 +1407,168 @@ class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ElevationTexture: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.ElevationTexture),
+/* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials_ellipsoidalMap__WEBPACK_IMPORTED_MODULE_3__.EllipsoidalMapMaterial),
+/* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials_map__WEBPACK_IMPORTED_MODULE_1__.Map3dMaterial),
 /* harmony export */   Texture3: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.Texture3),
+/* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials_webMap__WEBPACK_IMPORTED_MODULE_2__.WebMapMaterial),
 /* harmony export */   WebMapTexture: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.WebMapTexture)
 /* harmony export */ });
 /* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/index.js");
+/* harmony import */ var _materials_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./materials.map */ "./dist/materials/materials.map.js");
+/* harmony import */ var _materials_webMap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./materials.webMap */ "./dist/materials/materials.webMap.js");
+/* harmony import */ var _materials_ellipsoidalMap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./materials.ellipsoidalMap */ "./dist/materials/materials.ellipsoidalMap.js");
+
+
+
 
 //# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/materials/materials.ellipsoidalMap.js":
+/*!****************************************************!*\
+  !*** ./dist/materials/materials.ellipsoidalMap.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EllipsoidalMapMaterial: () => (/* binding */ EllipsoidalMapMaterial)
+/* harmony export */ });
+/* harmony import */ var _materials_map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials.map */ "./dist/materials/materials.map.js");
+
+class EllipsoidalMapMaterial extends _materials_map__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial {
+    constructor(name, scene) {
+        super(name, scene, EllipsoidalMapMaterial.ShaderName);
+    }
+}
+EllipsoidalMapMaterial.ClassName = "EllipsoidalMapMaterial";
+EllipsoidalMapMaterial.ShaderName = "ellipsoidalmap";
+//# sourceMappingURL=materials.ellipsoidalMap.js.map
+
+/***/ }),
+
+/***/ "./dist/materials/materials.map.js":
+/*!*****************************************!*\
+  !*** ./dist/materials/materials.map.js ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Map3dMaterial: () => (/* binding */ Map3dMaterial)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMaterial {
+    constructor(name, scene, shaderName) {
+        super(name, scene);
+        this._shaderName = null;
+        this._shaderName = shaderName ?? Map3dMaterial.DefaultShaderName;
+    }
+    getClassName() {
+        return "Map3dMaterial";
+    }
+    isReadyForSubMesh(mesh, subMesh, useInstances) {
+        const drawWrapper = subMesh._drawWrapper;
+        if (this.isFrozen) {
+            if (drawWrapper.effect && drawWrapper._wasPreviouslyReady && drawWrapper._wasPreviouslyUsingInstances === useInstances) {
+                return true;
+            }
+        }
+        const defines = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialDefines();
+        const scene = this.getScene();
+        if (this._isReadyForSubMesh(subMesh)) {
+            return true;
+        }
+        const attribs = [
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind,
+        ];
+        const uniforms = [
+            Map3dMaterial.ViewProjectionMatrixUniformName,
+        ];
+        const samplers = new Array();
+        const uniformBuffers = new Array();
+        defines.INSTANCES = true;
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialHelper.PushAttributesForInstances(attribs);
+        defines.rebuild();
+        const fallbacks = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.EffectFallbacks();
+        const engine = scene.getEngine();
+        subMesh.setEffect(engine.createEffect(this._shaderName, {
+            attributes: attribs,
+            uniformsNames: uniforms,
+            uniformBuffersNames: uniformBuffers,
+            samplers: samplers,
+            defines: defines.toString(),
+            fallbacks: fallbacks,
+            onCompiled: this._onEffectCompiled.bind(this),
+            onError: this.onError,
+        }, engine), defines, this._materialContext);
+        if (!subMesh.effect || !subMesh.effect.isReady()) {
+            return false;
+        }
+        defines._renderId = scene.getRenderId();
+        drawWrapper._wasPreviouslyReady = true;
+        drawWrapper._wasPreviouslyUsingInstances = !!useInstances;
+        return true;
+    }
+    bindForSubMesh(world, mesh, subMesh) {
+        const defines = subMesh.materialDefines;
+        if (!defines) {
+            return;
+        }
+        const effect = subMesh.effect;
+        if (!effect) {
+            return;
+        }
+        this._activeEffect = effect;
+        const scene = this.getScene();
+        this._bindMatrix(effect, world, scene);
+        if (this._mustRebind(scene, effect, subMesh)) {
+        }
+    }
+    _bindMatrix(effect, world, scene) {
+        effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
+    }
+    dispose(forceDisposeEffect) {
+        super.dispose(forceDisposeEffect);
+    }
+    _onEffectCompiled(effect) {
+        console.log("DEFINES:", effect.defines);
+        console.log("VERTEX:", effect.vertexSourceCode);
+        console.log("FRAGMENT:", effect.fragmentSourceCode);
+        if (this.onCompiled) {
+            this.onCompiled(effect);
+        }
+    }
+}
+Map3dMaterial.DefaultShaderName = "map";
+Map3dMaterial.ViewProjectionMatrixUniformName = "viewProjection";
+//# sourceMappingURL=materials.map.js.map
+
+/***/ }),
+
+/***/ "./dist/materials/materials.webMap.js":
+/*!********************************************!*\
+  !*** ./dist/materials/materials.webMap.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   WebMapMaterial: () => (/* binding */ WebMapMaterial)
+/* harmony export */ });
+/* harmony import */ var _materials_map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials.map */ "./dist/materials/materials.map.js");
+
+class WebMapMaterial extends _materials_map__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial {
+    constructor(name, scene) {
+        super(name, scene, WebMapMaterial.ShaderName);
+    }
+}
+WebMapMaterial.ClassName = "WebMapMaterial";
+WebMapMaterial.ShaderName = "webmap";
+//# sourceMappingURL=materials.webMap.js.map
 
 /***/ }),
 
@@ -1736,10 +1894,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/tiles/index.js":
-/*!*****************************!*\
-  !*** ./dist/tiles/index.js ***!
-  \*****************************/
+/***/ "./dist/tiles/3d/index.js":
+/*!********************************!*\
+  !*** ./dist/tiles/3d/index.js ***!
+  \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1749,9 +1907,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Tile3DContent: () => (/* reexport safe */ _tile3d_content__WEBPACK_IMPORTED_MODULE_1__.Tile3DContent),
 /* harmony export */   Tile3DContentGroup: () => (/* reexport safe */ _tile3d_content__WEBPACK_IMPORTED_MODULE_1__.Tile3DContentGroup)
 /* harmony export */ });
-/* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/tile3d.js");
-/* harmony import */ var _tile3d_content__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.content */ "./dist/tiles/tile3d.content.js");
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/tile3d.interfaces.js");
+/* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/3d/tile3d.js");
+/* harmony import */ var _tile3d_content__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.content */ "./dist/tiles/3d/tile3d.content.js");
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 
 
 
@@ -1759,10 +1917,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/tiles/tile3d.content.js":
-/*!**************************************!*\
-  !*** ./dist/tiles/tile3d.content.js ***!
-  \**************************************/
+/***/ "./dist/tiles/3d/tile3d.content.js":
+/*!*****************************************!*\
+  !*** ./dist/tiles/3d/tile3d.content.js ***!
+  \*****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1772,7 +1930,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/tile3d.interfaces.js");
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 
 
 class Tile3DContentGroup extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
@@ -1819,10 +1977,10 @@ class Tile3DContent extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transfo
 
 /***/ }),
 
-/***/ "./dist/tiles/tile3d.interfaces.js":
-/*!*****************************************!*\
-  !*** ./dist/tiles/tile3d.interfaces.js ***!
-  \*****************************************/
+/***/ "./dist/tiles/3d/tile3d.interfaces.js":
+/*!********************************************!*\
+  !*** ./dist/tiles/3d/tile3d.interfaces.js ***!
+  \********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1838,10 +1996,10 @@ var RefinementStrategy;
 
 /***/ }),
 
-/***/ "./dist/tiles/tile3d.js":
-/*!******************************!*\
-  !*** ./dist/tiles/tile3d.js ***!
-  \******************************/
+/***/ "./dist/tiles/3d/tile3d.js":
+/*!*********************************!*\
+  !*** ./dist/tiles/3d/tile3d.js ***!
+  \*********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -13871,17 +14029,17 @@ var __webpack_exports__ = {};
   \***********************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   clipFragment: () => (/* binding */ clipFragment)
+/* harmony export */   clipFragmentVertexShader: () => (/* binding */ clipFragmentVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "clipFragment";
+const name = "clipFragmentVertexShader";
 const shader = `#if defined(CLIP_PLANES)
 bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipFragment = { name, shader };
+const clipFragmentVertexShader = { name, shader };
 //# sourceMappingURL=clipFragment.js.map
 })();
 
@@ -13893,17 +14051,17 @@ var __webpack_exports__ = {};
   \**********************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   clipFragmentDeclaration: () => (/* binding */ clipFragmentDeclaration)
+/* harmony export */   clipFragmentDeclarationVertexShader: () => (/* binding */ clipFragmentDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "clipFragmentDeclaration";
+const name = "clipFragmentDeclarationVertexShader";
 const shader = `#if defined(CLIP_PLANES)
 varying vec4 vfClipDistance;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipFragmentDeclaration = { name, shader };
+const clipFragmentDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=clipFragmentDeclaration.js.map
 })();
 
@@ -13915,17 +14073,17 @@ var __webpack_exports__ = {};
   \*********************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   clipVertex: () => (/* binding */ clipVertex)
+/* harmony export */   clipVertexVertexShader: () => (/* binding */ clipVertexVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "clipVertex";
+const name = "clipVertexVertexShader";
 const shader = `#if defined(CLIP_PLANES)
 vfClipDistance.x=clipDistance(worldPosition.xyz,uNorthClip);vfClipDistance.y=clipDistance(worldPosition.xyz,uSouthClip);vfClipDistance.z=clipDistance(worldPosition.xyz,uEastClip);vfClipDistance.w=clipDistance(worldPosition.xyz,uWestClip);#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipVertex = { name, shader };
+const clipVertexVertexShader = { name, shader };
 //# sourceMappingURL=clipVertex.js.map
 })();
 
@@ -13937,17 +14095,17 @@ var __webpack_exports__ = {};
   \********************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   clipVertexDeclaration: () => (/* binding */ clipVertexDeclaration)
+/* harmony export */   clipVertexDeclarationVertexShader: () => (/* binding */ clipVertexDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "clipVertexDeclaration";
+const name = "clipVertexDeclarationVertexShader";
 const shader = `#if defined(CLIP_PLANES)
 struct Plane{vec3 point;vec3 normal;};float clipDistance(vec3 worldPos,Plane plane ){vec3 p=worldPos-plane.point;return dot(p,plane.normal);}uniform Plane uNorthClip;uniform Plane uSouthClip;uniform Plane uEastClip;uniform Plane uWestClip;out vec4 vfClipDistance;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipVertexDeclaration = { name, shader };
+const clipVertexDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=clipVertexDeclaration.js.map
 })();
 
@@ -13959,15 +14117,15 @@ var __webpack_exports__ = {};
   \*************************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   elevationVertexDeclaration: () => (/* binding */ elevationVertexDeclaration)
+/* harmony export */   elevationVertexDeclarationVertexShader: () => (/* binding */ elevationVertexDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "elevationVertexDeclaration";
+const name = "elevationVertexDeclarationVertexShader";
 const shader = `vec3 elevation_rgbaToNormal(vec4 rgba){float x=(2.0*rgba.r)-1.0;float y=(2.0*rgba.g)-1.0;float z=(rgba.b*255.0-128.0)/127.0;return normalize(vec3(x,y,z));}uniform highp sampler2DArray uAltitudes;uniform highp sampler2DArray uNormals;uniform highp vec2 uAltRange;uniform highp float uMapScale;in vec4 demIds;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const elevationVertexDeclaration = { name, shader };
+const elevationVertexDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=elevationVertexDeclaration.js.map
 })();
 
@@ -13979,15 +14137,15 @@ var __webpack_exports__ = {};
   \*****************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   geodesyDeclaration: () => (/* binding */ geodesyDeclaration)
+/* harmony export */   geodesyDeclarationVertexShader: () => (/* binding */ geodesyDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "geodesyDeclaration";
+const name = "geodesyDeclarationVertexShader";
 const shader = `struct Ellipsoid {float _a;float _ee;float _p1mee;};vec4 toECEF(Ellipsoid ref,vec4 trigo,float alt) {float sin_lambda=trigo.x;float cos_lambda=trigo.y;float sin_phi=trigo.z;float cos_phi=trigo.w;float N=ref._a/sqrt(1.0-ref._ee*sin_lambda*sin_lambda);float tmp=(alt+N)*cos_lambda;float x=tmp*cos_phi;float y=tmp*sin_phi;float z=(alt+ref._p1mee*N)*sin_lambda;return vec4(x,y,z,1.0);}uniform Ellipsoid ellipsoid;uniform mat4 enuTransform;uniform sampler2D altitudes;uniform sampler2D lonLT;uniform sampler2D latLT;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const geodesyDeclaration = { name, shader };
+const geodesyDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=geodesyDeclaration.js.map
 })();
 
@@ -13999,17 +14157,17 @@ var __webpack_exports__ = {};
   \**********************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   lightCommonsDeclaration: () => (/* binding */ lightCommonsDeclaration)
+/* harmony export */   lightCommonsDeclarationVertexShader: () => (/* binding */ lightCommonsDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "lightCommonsDeclaration";
+const name = "lightCommonsDeclarationVertexShader";
 const shader = `uniform vec3 uAmbientLight;uniform HemisphericLight uHemiLight;uniform PointLight uPointLights[MAX_POINT_LIGHTS];uniform SpotLight uSpotLights[MAX_SPOT_LIGHTS];uniform int uNumPointLights;uniform int uNumSpotLights;#if defined(SPECULAR)
 uniform float uShininess;uniform vec3 uViewPosition;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightCommonsDeclaration = { name, shader };
+const lightCommonsDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=lightCommonsDeclaration.js.map
 })();
 
@@ -14021,12 +14179,12 @@ var __webpack_exports__ = {};
   \**************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   lightDefinition: () => (/* binding */ lightDefinition)
+/* harmony export */   lightDefinitionVertexShader: () => (/* binding */ lightDefinitionVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "lightDefinition";
+const name = "lightDefinitionVertexShader";
 const shader = `struct PointLight{vec3 position;vec3 color;float intensity;};struct SpotLight{vec3 position;vec3 direction;vec3 color;float innerCutoff;float outerCutoff;float exponent;float intensity;};struct HemisphericLight{vec3 skyColor;vec3 groundColor;vec3 direction;float intensity;};#if defined(SPECULAR)
 vec3 calculatePhongSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float shininess,vec3 lightColor){vec3 reflectDir=reflect(-lightDir,normal);float spec=pow(max(dot(viewDir,reflectDir),0.0),shininess);return lightColor*spec;}vec3 calculateBlinnPhongSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float shininess,vec3 lightColor){vec3 halfDir=normalize(lightDir+viewDir);float spec=pow(max(dot(normal,halfDir),0.0),shininess);return lightColor*spec;}#endif
 vec3 calculateHemisphericLight( HemisphericLight light,vec3 normal#if defined(SPECULAR)
@@ -14069,7 +14227,7 @@ vec3 lightColor=calculateSpotLight(spotLights[i],normal,lightDir,viewDir,shinine
 vec3 lightColor=calculateSpotLight(spotLights[i],normal,lightDir);#endif
 color+=lightColor;}return clamp(color+ambient,0.0,1.0);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightDefinition = { name, shader };
+const lightDefinitionVertexShader = { name, shader };
 //# sourceMappingURL=lightDefinition.js.map
 })();
 
@@ -14081,12 +14239,12 @@ var __webpack_exports__ = {};
   \***********************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   lightFragmentDeclaration: () => (/* binding */ lightFragmentDeclaration)
+/* harmony export */   lightFragmentDeclarationVertexShader: () => (/* binding */ lightFragmentDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "lightFragmentDeclaration";
+const name = "lightFragmentDeclarationVertexShader";
 const shader = `#if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
 #include<lightDefinition>
 #include<lightCommonsDeclaration>
@@ -14095,7 +14253,7 @@ flat in vec4 vColor;#elif defined(GOUREAUD_SHADING)
 in vec4 vColor;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightFragmentDeclaration = { name, shader };
+const lightFragmentDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=lightFragmentDeclaration.js.map
 })();
 
@@ -14107,12 +14265,12 @@ var __webpack_exports__ = {};
   \*********************************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   lightVertexDeclaration: () => (/* binding */ lightVertexDeclaration)
+/* harmony export */   lightVertexDeclarationVertexShader: () => (/* binding */ lightVertexDeclarationVertexShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "lightVertexDeclaration";
+const name = "lightVertexDeclarationVertexShader";
 const shader = `#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING) 
 #include<lightDefinition>
 #include<lightCommonsDeclaration>
@@ -14123,8 +14281,50 @@ out vec4 vColor;#endif
 out vec3 vNormal;out vec3 vPosition;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightVertexDeclaration = { name, shader };
+const lightVertexDeclarationVertexShader = { name, shader };
 //# sourceMappingURL=lightVertexDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!**************************************!*\
+  !*** ./dist/shaders/map.fragment.js ***!
+  \**************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   mapPixelShader: () => (/* binding */ mapPixelShader)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "mapPixelShader";
+const shader = `precision highp float;void main(void) {gl_FragColor=vec4(1.0,1.0,1.0,1.0); }`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
+const mapPixelShader = { name, shader };
+//# sourceMappingURL=map.fragment.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!************************************!*\
+  !*** ./dist/shaders/map.vertex.js ***!
+  \************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   mapVertexShader: () => (/* binding */ mapVertexShader)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "mapVertexShader";
+const shader = `precision highp float;#include<instancesDeclaration>
+in vec3 position;uniform mat4 viewProjection;void main(void) {#include<instancesVertex>
+vec4 pos=vec4(position.xyz,1.0);vec4 worldPosition=finalWorld*pos;gl_Position=viewProjection*worldPosition;}`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
+const mapVertexShader = { name, shader };
+//# sourceMappingURL=map.vertex.js.map
 })();
 
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
@@ -14135,12 +14335,12 @@ var __webpack_exports__ = {};
   \*****************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   webmapFragmentShader: () => (/* binding */ webmapFragmentShader)
+/* harmony export */   webmapPixelShader: () => (/* binding */ webmapPixelShader)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-const name = "webmapFragmentShader";
+const name = "webmapPixelShader";
 const shader = `#include<lightFragmentDeclaration>
 #include<clipFragmentDeclaration>
 #if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
@@ -14156,7 +14356,7 @@ vec3 lightColor= calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointL
 gl_FragColor= texColor;#endif
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const webmapFragmentShader = { name, shader };
+const webmapPixelShader = { name, shader };
 //# sourceMappingURL=webmap.fragment.js.map
 })();
 
@@ -14249,6 +14449,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ElevationTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.ElevationTexture),
 /* harmony export */   ElevationTile: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationTile),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Ellipsoid),
+/* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.EllipsoidalMapMaterial),
 /* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Envelope),
 /* harmony export */   EquatorialVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.EquatorialVector),
 /* harmony export */   EventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.EventArgs),
@@ -14328,6 +14529,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Line),
 /* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Luminosity),
 /* harmony export */   Map3D: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.Map3D),
+/* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Map3dMaterial),
 /* harmony export */   MapDisplay: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.MapDisplay),
 /* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapZen),
@@ -14363,7 +14565,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.RGBTileCodec),
 /* harmony export */   Range: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Range),
-/* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy),
+/* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy),
 /* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.RegionCode),
 /* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Scalar),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.ShapeCollection),
@@ -14385,9 +14587,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TextUtils),
 /* harmony export */   Texture3: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Texture3),
 /* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Tile),
-/* harmony export */   Tile3D: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
-/* harmony export */   Tile3DContent: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile3DContent),
-/* harmony export */   Tile3DContentGroup: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile3DContentGroup),
+/* harmony export */   Tile3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
+/* harmony export */   Tile3DContent: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DContent),
+/* harmony export */   Tile3DContentGroup: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DContentGroup),
 /* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
 /* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TileCollection),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TileContentProvider),
@@ -14413,6 +14615,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplayInputsSource),
 /* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Voltage),
 /* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Volume),
+/* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.WebMapMaterial),
 /* harmony export */   WebMapTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.WebMapTexture),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.XmlDocumentTileCodec),
@@ -14438,7 +14641,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isValidable),
 /* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.isViewProxy)
 /* harmony export */ });
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
+/* harmony import */ var _tiles_3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles/3d */ "./dist/tiles/3d/index.js");
 /* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./materials */ "./dist/materials/index.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./display */ "./dist/display/index.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ "./dist/map/index.js");

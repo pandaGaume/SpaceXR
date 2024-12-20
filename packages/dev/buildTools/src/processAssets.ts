@@ -3,7 +3,7 @@ import * as path from "path";
 import { checkArgs } from "./utils";
 import { buildShaders } from "./buildShaders";
 
-const KnownAssetsExtensions = ["glsl", "wglsl", "png"];
+const KnownAssetsExtensions = ["glsl", "wgsl", "fx"];
 
 export async function processAssets(options: { extensions: string[] } = { extensions: KnownAssetsExtensions }): Promise<number> {
     // select file extensions
@@ -25,7 +25,11 @@ export async function processAssets(options: { extensions: string[] } = { extens
 }
 
 export function processFile(file: string) {
-    if (path.extname(file) === ".glsl") {
+    var ext = path.extname(file);
+    if (ext.startsWith(".")) {
+        ext = ext.slice(1);
+    }
+    if (KnownAssetsExtensions.includes(ext)) {
         buildShaders(file);
     }
 }

@@ -2,13 +2,14 @@ import { IDemInfos } from "core/dem";
 import { IDisplay, IPhysicalDisplay, IsPhysicalDisplay, ITileMetrics, ITileNavigationState, ITileView, TileMapLayerView, TileNavigationState } from "core/tiles";
 import { IElevationHost, IElevationLayer, IElevationLayerOptions, IsElevationLayer } from "./map.elevation.interfaces";
 import { ElevationGridFactory } from "./map.elevation.host.factory";
-import { AbstractMesh, Material, Mesh, Scene, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { ElevationTile, IElevationTile } from "./map.elevation.mesh";
 import { ICartesian2 } from "core/geometry";
 import { Nullable } from "core/types";
 import { TextUtils } from "core/utils";
 import { ElevationLayer } from "./map.elevation.layer";
 import { EventState, PropertyChangedEventArgs } from "core/events";
+import { Map3dMaterial } from "../materials";
 
 export class ElevationHost extends TileMapLayerView<IDemInfos> implements IElevationHost {
     public static TEMPLATE_SUFFIX = "grid";
@@ -30,7 +31,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         // build the 3D root
         this._tilesRoot = this._buildRoot(scene);
 
-        // build the template
+        // build the template ( including the material)
         this._grid = this._buildTemplate(scene);
         this._grid.setEnabled(false);
 
@@ -190,7 +191,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     protected _buildMaterial(name: string, scene?: Scene): Material {
-        const material = new StandardMaterial(name, scene);
+        const material = new Map3dMaterial(name, scene);
         material.wireframe = true;
         return material;
     }

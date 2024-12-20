@@ -1,5 +1,5 @@
 export * from "./types";
-export * from "./tiles";
+export * from "./tiles/3d";
 export * from "./materials";
 export * from "./display";
 export * from "./map";

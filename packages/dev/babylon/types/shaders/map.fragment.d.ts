@@ -1,4 +1,4 @@
-export declare const mapFragmentShader: {
+export declare const mapPixelShader: {
     name: string;
     shader: string;
 };

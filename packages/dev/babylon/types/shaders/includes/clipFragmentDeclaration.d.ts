@@ -1,4 +1,4 @@
-export declare const clipFragmentDeclarationVertexShader: {
+export declare const clipFragmentDeclaration: {
     name: string;
     shader: string;
 };

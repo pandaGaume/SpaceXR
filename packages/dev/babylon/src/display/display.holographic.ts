@@ -1,7 +1,8 @@
-import { Nullable, Observable, Scene, Vector3 } from "@babylonjs/core";
-import { ClipIndex, ClipPlaneDefinition, IHolographicBox } from "./display.holographic.bounds";
+import { Nullable, Scene, Vector3 } from "@babylonjs/core";
+import { ClipIndex, ClipPlaneDefinition, HolographicBoundsType, IHolographicBox } from "./display.holographic.bounds";
 import { VirtualDisplay } from "./display.virtual";
 import { ISize3 } from "core/geometry";
+import { Observable } from "core/events";
 
 export class HolographicDisplay extends VirtualDisplay implements IHolographicBox {
     public static BuildLateralClipPlanes(display: VirtualDisplay): Array<ClipPlaneDefinition> {
@@ -72,5 +73,9 @@ export class HolographicDisplay extends VirtualDisplay implements IHolographicBo
             world.push(new ClipPlaneDefinition(plane.index, p, n));
         }
         return world;
+    }
+
+    public get type(): HolographicBoundsType {
+        return HolographicBoundsType.BOX;
     }
 }

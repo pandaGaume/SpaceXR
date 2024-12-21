@@ -19,7 +19,7 @@ ShaderStore.##SHADERSTORE_PLACEHOLDER##[name] = shader;
  */
 function getShaderName(filename: string) {
     const parts = filename.split(".");
-    if (parts[1] !== "fx") {
+    if (parts[1] != "fx" && parts[1] != "glsl" && parts[1] != "wgsl") {
         return parts[0] + (parts[1] === "fragment" ? "Pixel" : parts[1] === "compute" ? "Compute" : "Vertex") + "Shader";
     } else {
         return parts[0];

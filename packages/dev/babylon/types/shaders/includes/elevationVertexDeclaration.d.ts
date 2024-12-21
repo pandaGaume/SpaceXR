@@ -1,4 +1,4 @@
-export declare const elevationVertexDeclarationVertexShader: {
+export declare const elevationVertexDeclaration: {
     name: string;
     shader: string;
 };

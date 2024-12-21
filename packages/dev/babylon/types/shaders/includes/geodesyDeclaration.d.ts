@@ -1,4 +1,4 @@
-export declare const geodesyDeclarationVertexShader: {
+export declare const geodesyDeclaration: {
     name: string;
     shader: string;
 };

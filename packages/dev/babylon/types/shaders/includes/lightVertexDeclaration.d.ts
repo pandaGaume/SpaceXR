@@ -1,4 +1,4 @@
-export declare const lightVertexDeclarationVertexShader: {
+export declare const lightVertexDeclaration: {
     name: string;
     shader: string;
 };

@@ -2,7 +2,7 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-const name = "lightVertexDeclarationVertexShader";
+const name = "lightVertexDeclaration";
 const shader = `#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING) 
 #include<lightDefinition>
 #include<lightCommonsDeclaration>
@@ -13,4 +13,4 @@ out vec4 vColor;#endif
 out vec3 vNormal;out vec3 vPosition;#endif
 `;
 ShaderStore.IncludesShadersStore[name] = shader;
-/** @internal */ export const lightVertexDeclarationVertexShader = { name, shader };
+/** @internal */ export const lightVertexDeclaration = { name, shader };

@@ -2,9 +2,9 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-const name = "clipFragmentDeclarationVertexShader";
+const name = "clipFragmentDeclaration";
 const shader = `#if defined(CLIP_PLANES)
 varying vec4 vfClipDistance;#endif
 `;
 ShaderStore.IncludesShadersStore[name] = shader;
-/** @internal */ export const clipFragmentDeclarationVertexShader = { name, shader };
+/** @internal */ export const clipFragmentDeclaration = { name, shader };

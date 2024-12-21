@@ -4,7 +4,9 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
+#include<clipVertexDeclaration>
 in vec3 position;uniform mat4 viewProjection;void main(void) {#include<instancesVertex>
-vec4 pos=vec4(position.xyz,1.0);vec4 worldPosition=finalWorld*pos;gl_Position=viewProjection*worldPosition;}`;
+vec4 pos=vec4(position.xyz,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
+gl_Position=viewProjection*worldPosition;}`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const mapVertexShader = { name, shader };

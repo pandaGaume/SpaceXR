@@ -1,4 +1,4 @@
-export declare const clipVertexVertexShader: {
+export declare const clipVertex: {
     name: string;
     shader: string;
 };

@@ -1,4 +1,5 @@
 import { Nullable, Vector3 } from "@babylonjs/core";
+import { Observable } from "core/events";
 
 export enum HolographicBoundsType {
     BOX,
@@ -24,6 +25,8 @@ export class ClipPlaneDefinition {
 }
 
 export interface IHolographicBox extends IHolographicBounds {
+    clipPlanesAddedObservable: Observable<Array<ClipPlaneDefinition>>;
+    clipPlanesRemovedObservable: Observable<Array<ClipPlaneDefinition>>;
     clipPlanes: Nullable<Array<ClipPlaneDefinition>>;
     clipPlanesWorld: Nullable<Array<ClipPlaneDefinition>>;
 }

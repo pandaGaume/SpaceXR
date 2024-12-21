@@ -8,6 +8,7 @@ export declare enum HolographicBoundsType {
 export interface IHolographicBounds {
     type?: HolographicBoundsType;
 }
+export declare function IsHolographicBounds(obj: any): obj is IHolographicBounds;
 export declare enum ClipIndex {
     North = 0,
     South = 1,

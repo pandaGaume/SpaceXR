@@ -15,6 +15,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ClipPlaneDefinition: () => (/* binding */ ClipPlaneDefinition),
 /* harmony export */   HasHolographicBounds: () => (/* binding */ HasHolographicBounds),
 /* harmony export */   HolographicBoundsType: () => (/* binding */ HolographicBoundsType),
+/* harmony export */   IsHolographicBounds: () => (/* binding */ IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* binding */ IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* binding */ IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* binding */ IsHolographicSphere)
@@ -25,6 +26,9 @@ var HolographicBoundsType;
     HolographicBoundsType[HolographicBoundsType["CYLINDER"] = 1] = "CYLINDER";
     HolographicBoundsType[HolographicBoundsType["SPHERE"] = 2] = "SPHERE";
 })(HolographicBoundsType || (HolographicBoundsType = {}));
+function IsHolographicBounds(obj) {
+    return typeof obj === "object" && obj !== null && (obj.type === undefined || Object.values(HolographicBoundsType).includes(obj.type));
+}
 var ClipIndex;
 (function (ClipIndex) {
     ClipIndex[ClipIndex["North"] = 0] = "North";
@@ -532,6 +536,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   HasHolographicBounds: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.HasHolographicBounds),
 /* harmony export */   HolographicBoundsType: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.HolographicBoundsType),
 /* harmony export */   HolographicDisplay: () => (/* reexport safe */ _display_holographic__WEBPACK_IMPORTED_MODULE_2__.HolographicDisplay),
+/* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicSphere),
@@ -988,8 +993,8 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     }
     _buildMaterial(name, scene) {
         const material = new _materials__WEBPACK_IMPORTED_MODULE_7__.Map3dMaterial(name, scene);
-        if ((0,_display__WEBPACK_IMPORTED_MODULE_8__.IsHolographicBox)(this.display)) {
-            material.holographicBox = this.display;
+        if ((0,_display__WEBPACK_IMPORTED_MODULE_8__.IsHolographicBounds)(this.display)) {
+            material.holographicBounds = this.display;
         }
         material.wireframe = true;
         return material;
@@ -1485,23 +1490,31 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     getClassName() {
         return "Map3dMaterial";
     }
-    get holographicBox() {
+    get holographicBounds() {
         return this._holoBounds;
     }
-    set holographicBox(value) {
+    set holographicBounds(value) {
         if (this._holoBounds !== value) {
-            if (this._holoBounds) {
-                this._clipPlanesAddedObservers?.disconnect();
-                this._clipPlanesRemovedObservers?.disconnect();
-                this._clipPlanesAddedObservers = null;
-                this._clipPlanesRemovedObservers = null;
-            }
+            this._unbindHolographicBounds();
             this._holoBounds = value;
-            if (this._holoBounds) {
+            this._bindHolographicBounds();
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+        }
+    }
+    _unbindHolographicBounds() {
+        if (this._holoBounds) {
+            this._clipPlanesAddedObservers?.disconnect();
+            this._clipPlanesRemovedObservers?.disconnect();
+            this._clipPlanesAddedObservers = null;
+            this._clipPlanesRemovedObservers = null;
+        }
+    }
+    _bindHolographicBounds() {
+        if (this._holoBounds) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox)(this._holoBounds)) {
                 this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
                 this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
             }
-            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
         }
     }
     isReadyForSubMesh(mesh, subMesh, useInstances) {
@@ -1578,7 +1591,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
     }
     _bindClipPlanes(effect) {
-        if (this._holoBounds) {
+        if (this._holoBounds && (0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox)(this._holoBounds)) {
             const clips = this._holoBounds.clipPlanesWorld;
             if (clips) {
                 this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.North);
@@ -14575,6 +14588,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayerOptions),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsGeoBounded),
+/* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicSphere),

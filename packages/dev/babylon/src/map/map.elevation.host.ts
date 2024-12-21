@@ -10,7 +10,7 @@ import { TextUtils } from "core/utils";
 import { ElevationLayer } from "./map.elevation.layer";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { Map3dMaterial } from "../materials";
-import { IsHolographicBox } from "../display";
+import { IsHolographicBounds } from "../display";
 
 export class ElevationHost extends TileMapLayerView<IDemInfos> implements IElevationHost {
     public static TEMPLATE_SUFFIX = "grid";
@@ -193,8 +193,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     protected _buildMaterial(name: string, scene?: Scene): Material {
         const material = new Map3dMaterial(name, scene);
-        if (IsHolographicBox(this.display)) {
-            material.holographicBox = this.display;
+        if (IsHolographicBounds(this.display)) {
+            material.holographicBounds = this.display;
         }
         material.wireframe = true;
         return material;

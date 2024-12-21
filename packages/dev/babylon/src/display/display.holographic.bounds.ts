@@ -11,6 +11,10 @@ export interface IHolographicBounds {
     type?: HolographicBoundsType;
 }
 
+export function IsHolographicBounds(obj: any): obj is IHolographicBounds {
+    return typeof obj === "object" && obj !== null && (obj.type === undefined || Object.values(HolographicBoundsType).includes(obj.type));
+}
+
 export enum ClipIndex {
     North,
     South,

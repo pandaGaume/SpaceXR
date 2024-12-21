@@ -14,7 +14,7 @@ import {
     SubMesh,
     VertexBuffer,
 } from "@babylonjs/core";
-import { ClipIndex, ClipPlaneDefinition, IHolographicBox } from "../display";
+import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox } from "../display";
 import { Observer } from "core/events";
 
 export interface IMap3dMaterial {}
@@ -32,7 +32,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _shaderName: Nullable<string> = null;
 
     // the optional holographix box where the material is used
-    private _holoBounds: Nullable<IHolographicBox> = null;
+    private _holoBounds: Nullable<IHolographicBounds> = null;
     // the observers for the holographic box clip planes
     private _clipPlanesAddedObservers: Nullable<Observer<Array<ClipPlaneDefinition>>> = null;
     private _clipPlanesRemovedObservers: Nullable<Observer<Array<ClipPlaneDefinition>>> = null;
@@ -46,26 +46,34 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         return "Map3dMaterial";
     }
 
-    public get holographicBox(): Nullable<IHolographicBox> {
+    public get holographicBounds(): Nullable<IHolographicBounds> {
         return this._holoBounds;
     }
 
-    public set holographicBox(value: Nullable<IHolographicBox>) {
+    public set holographicBounds(value: Nullable<IHolographicBounds>) {
         if (this._holoBounds !== value) {
-            if (this._holoBounds) {
-                this._clipPlanesAddedObservers?.disconnect();
-                this._clipPlanesRemovedObservers?.disconnect();
-                this._clipPlanesAddedObservers = null;
-                this._clipPlanesRemovedObservers = null;
-            }
+            this._unbindHolographicBounds();
             this._holoBounds = value;
+            this._bindHolographicBounds();
+            this.markAsDirty(Material.AttributesDirtyFlag);
+        }
+    }
 
-            if (this._holoBounds) {
+    protected _unbindHolographicBounds(): void {
+        if (this._holoBounds) {
+            this._clipPlanesAddedObservers?.disconnect();
+            this._clipPlanesRemovedObservers?.disconnect();
+            this._clipPlanesAddedObservers = null;
+            this._clipPlanesRemovedObservers = null;
+        }
+    }
+
+    protected _bindHolographicBounds(): void {
+        if (this._holoBounds) {
+            if (IsHolographicBox(this._holoBounds)) {
                 this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
                 this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
             }
-
-            this.markAsDirty(Material.AttributesDirtyFlag);
         }
     }
 
@@ -183,7 +191,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _bindClipPlanes(effect: Effect): void {
-        if (this._holoBounds) {
+        if (this._holoBounds && IsHolographicBox(this._holoBounds)) {
             const clips = this._holoBounds.clipPlanesWorld;
             if (clips) {
                 this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);

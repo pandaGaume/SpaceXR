@@ -42,10 +42,10 @@ export function IsHolographicBox(obj: unknown): obj is IHolographicBox {
 
 export interface IHolographicCylinder extends IHolographicBounds {
     radius: number;
-    height: number;
+    height: Vector3;
 }
 
-export function IsHolographicCylinder(obj: unknown): obj is IHolographicBox {
+export function IsHolographicCylinder(obj: unknown): obj is IHolographicCylinder {
     if (typeof obj !== "object" || obj === null) return false;
     return (<IHolographicBox>obj).type === HolographicBoundsType.CYLINDER;
 }
@@ -54,7 +54,7 @@ export interface IHolographicSphere extends IHolographicBounds {
     radius: number;
 }
 
-export function IsHolographicSphere(obj: unknown): obj is IHolographicBox {
+export function IsHolographicSphere(obj: unknown): obj is IHolographicSphere {
     if (typeof obj !== "object" || obj === null) return false;
     return (<IHolographicBox>obj).type === HolographicBoundsType.SPHERE;
 }

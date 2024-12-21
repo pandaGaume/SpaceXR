@@ -12,9 +12,10 @@ import {
     PushMaterial,
     Scene,
     SubMesh,
+    Vector3,
     VertexBuffer,
 } from "@babylonjs/core";
-import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox } from "../display";
+import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { Observer } from "core/events";
 
 export interface IMap3dMaterial {}
@@ -23,10 +24,16 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static DefaultShaderName: string = "map";
 
     public static ViewProjectionMatrixUniformName: string = "viewProjection";
+
+    // clip planes uniforms in case of holographic box
     public static NorthClipPlaneUniformName: string = "uNorthClip";
     public static SouthClipPlaneUniformName: string = "uSouthClip";
     public static EastClipPlaneUniformName: string = "uEastClip";
     public static WestClipPlaneUniformName: string = "uWestClip";
+
+    // radius and height for holographic sphere and cylinder
+    public static RadiusUniformName: string = "uRadiusClip";
+    public static HeightUniformName: string = "uHeightClip";
 
     // the name of the shader used by the material
     protected _shaderName: Nullable<string> = null;
@@ -107,15 +114,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const uniformBuffers = new Array<string>();
 
         if (this._holoBounds) {
-            defines.CLIP_PLANES = true;
-            const properties = ["point", "normal"];
-            uniforms.push(
-                // clip planes
-                ...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties),
-                ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties),
-                ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties),
-                ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties)
-            );
+            this._pushUniformsForBounds(defines, uniforms);
         }
 
         // we heavily rely on instances
@@ -178,6 +177,35 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
+    protected _pushUniformsForBounds(defines: MaterialDefines, uniforms: Array<string>) {
+        if (IsHolographicBox(this._holoBounds)) {
+            defines.HOLOGRAPHIC_BOUNDS_BOX = true;
+            const properties = ["point", "normal"];
+            uniforms.push(
+                // clip planes
+                ...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties),
+                ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties),
+                ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties),
+                ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties)
+            );
+        } else if (IsHolographicSphere(this._holoBounds)) {
+            throw new Error("Sphere bounds Not supported");
+            defines.HOLOGRAPHIC_BOUNDS_SPHERE = true;
+            uniforms.push(
+                // sphere properties
+                Map3dMaterial.RadiusUniformName
+            );
+        } else if (IsHolographicCylinder(this._holoBounds)) {
+            throw new Error("Cylinder bounds Not supported");
+            defines.HOLOGRAPHIC_BOUNDS_CYLINDER = true;
+            uniforms.push(
+                // cylinder properties
+                Map3dMaterial.RadiusUniformName,
+                Map3dMaterial.HeightUniformName
+            );
+        }
+    }
+
     protected _onClipPlanesAdded(planes: Array<ClipPlaneDefinition>): void {
         this.markAsDirty(Material.AttributesDirtyFlag);
     }
@@ -191,13 +219,20 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _bindClipPlanes(effect: Effect): void {
-        if (this._holoBounds && IsHolographicBox(this._holoBounds)) {
-            const clips = this._holoBounds.clipPlanesWorld;
-            if (clips) {
-                this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);
-                this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, ClipIndex.South);
-                this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, ClipIndex.East);
-                this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, ClipIndex.West);
+        if (this._holoBounds) {
+            if (IsHolographicBox(this._holoBounds)) {
+                const clips = this._holoBounds.clipPlanesWorld;
+                if (clips) {
+                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, ClipIndex.North);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, ClipIndex.South);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, ClipIndex.East);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, ClipIndex.West);
+                }
+            } else if (IsHolographicSphere(this._holoBounds)) {
+                effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
+            } else if (IsHolographicCylinder(this._holoBounds)) {
+                effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
+                effect.setVector3(Map3dMaterial.HeightUniformName, this._holoBounds.height ?? new Vector3(0, Number.MAX_SAFE_INTEGER, 0));
             }
         }
     }

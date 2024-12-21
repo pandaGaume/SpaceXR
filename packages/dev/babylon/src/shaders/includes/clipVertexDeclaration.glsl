@@ -1,5 +1,5 @@
 
-#if defined(CLIP_PLANES)
+#if defined(HOLOGRAPHIC_BOUNDS_BOX)
 struct Plane
 {
     vec3 point;
@@ -20,3 +20,16 @@ uniform Plane uWestClip;
 out vec4 vfClipDistance;
 #endif
 
+#if defined(HOLOGRAPHIC_BOUNDS_SPHERE)
+
+uniform float uRadiusClip;
+out vec4 vfClipDistance;
+#endif
+
+#if defined(HOLOGRAPHIC_BOUNDS_CYLINDER)
+
+uniform float uRadiusClip;
+uniform vec3 uHeightClip;
+out vec4 vfClipDistance;
+
+#endif

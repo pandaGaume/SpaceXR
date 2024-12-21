@@ -1538,9 +1538,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         const samplers = new Array();
         const uniformBuffers = new Array();
         if (this._holoBounds) {
-            defines.CLIP_PLANES = true;
-            const properties = ["point", "normal"];
-            uniforms.push(...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
+            this._pushUniformsForBounds(defines, uniforms);
         }
         defines.INSTANCES = true;
         _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialHelper.PushAttributesForInstances(attribs);
@@ -1581,6 +1579,23 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             this._bindClipPlanes(effect);
         }
     }
+    _pushUniformsForBounds(defines, uniforms) {
+        if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox)(this._holoBounds)) {
+            defines.HOLOGRAPHIC_BOUNDS_BOX = true;
+            const properties = ["point", "normal"];
+            uniforms.push(...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
+        }
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicSphere)(this._holoBounds)) {
+            throw new Error("Sphere bounds Not supported");
+            defines.HOLOGRAPHIC_BOUNDS_SPHERE = true;
+            uniforms.push(Map3dMaterial.RadiusUniformName);
+        }
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicCylinder)(this._holoBounds)) {
+            throw new Error("Cylinder bounds Not supported");
+            defines.HOLOGRAPHIC_BOUNDS_CYLINDER = true;
+            uniforms.push(Map3dMaterial.RadiusUniformName, Map3dMaterial.HeightUniformName);
+        }
+    }
     _onClipPlanesAdded(planes) {
         this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
     }
@@ -1591,13 +1606,22 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
     }
     _bindClipPlanes(effect) {
-        if (this._holoBounds && (0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox)(this._holoBounds)) {
-            const clips = this._holoBounds.clipPlanesWorld;
-            if (clips) {
-                this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.North);
-                this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.South);
-                this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.East);
-                this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.West);
+        if (this._holoBounds) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox)(this._holoBounds)) {
+                const clips = this._holoBounds.clipPlanesWorld;
+                if (clips) {
+                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.North);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.South);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.East);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.West);
+                }
+            }
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicSphere)(this._holoBounds)) {
+                effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
+            }
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicCylinder)(this._holoBounds)) {
+                effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
+                effect.setVector3(Map3dMaterial.HeightUniformName, this._holoBounds.height ?? new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, Number.MAX_SAFE_INTEGER, 0));
             }
         }
     }
@@ -1629,6 +1653,8 @@ Map3dMaterial.NorthClipPlaneUniformName = "uNorthClip";
 Map3dMaterial.SouthClipPlaneUniformName = "uSouthClip";
 Map3dMaterial.EastClipPlaneUniformName = "uEastClip";
 Map3dMaterial.WestClipPlaneUniformName = "uWestClip";
+Map3dMaterial.RadiusUniformName = "uRadiusClip";
+Map3dMaterial.HeightUniformName = "uHeightClip";
 //# sourceMappingURL=materials.map.js.map
 
 /***/ }),
@@ -14119,7 +14145,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "clipFragment";
-const shader = `#if defined(CLIP_PLANES)
+const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX) || defined(HOLOGRAPHIC_BOUNDS_CYLINDER) || defined(HOLOGRAPHIC_BOUNDS_SPHERE)
 bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
@@ -14141,7 +14167,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "clipFragmentDeclaration";
-const shader = `#if defined(CLIP_PLANES)
+const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX) || defined(HOLOGRAPHIC_BOUNDS_CYLINDER) || defined(HOLOGRAPHIC_BOUNDS_SPHERE)
 varying vec4 vfClipDistance;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
@@ -14163,8 +14189,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "clipVertex";
-const shader = `#if defined(CLIP_PLANES)
+const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX)
 vfClipDistance.x=clipDistance(worldPosition.xyz,uNorthClip);vfClipDistance.y=clipDistance(worldPosition.xyz,uSouthClip);vfClipDistance.z=clipDistance(worldPosition.xyz,uEastClip);vfClipDistance.w=clipDistance(worldPosition.xyz,uWestClip);#endif
+#if defined(HOLOGRAPHIC_BOUNDS_SPHERE)
+vfClipDistance=vec4( uRadiusClip-length(worldPosition.xyz));#endif
+#if defined(HOLOGRAPHIC_BOUNDS_CYLINDER)
+vfClipDistance=vec4( 0.0f);#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
 const clipVertex = { name, shader };
@@ -14185,8 +14215,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "clipVertexDeclaration";
-const shader = `#if defined(CLIP_PLANES)
+const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX)
 struct Plane{vec3 point;vec3 normal;};float clipDistance(vec3 worldPos,Plane plane ){vec3 p=worldPos-plane.point;return dot(p,plane.normal);}uniform Plane uNorthClip;uniform Plane uSouthClip;uniform Plane uEastClip;uniform Plane uWestClip;out vec4 vfClipDistance;#endif
+#if defined(HOLOGRAPHIC_BOUNDS_SPHERE)
+uniform float uRadiusClip;out vec4 vfClipDistance;#endif
+#if defined(HOLOGRAPHIC_BOUNDS_CYLINDER)
+uniform float uRadiusClip;uniform vec3 uHeightClip;out vec4 vfClipDistance;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
 const clipVertexDeclaration = { name, shader };

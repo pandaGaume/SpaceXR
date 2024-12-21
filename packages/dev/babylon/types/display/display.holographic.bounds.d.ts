@@ -32,13 +32,13 @@ export interface IHolographicBox extends IHolographicBounds {
 export declare function IsHolographicBox(obj: unknown): obj is IHolographicBox;
 export interface IHolographicCylinder extends IHolographicBounds {
     radius: number;
-    height: number;
+    height: Vector3;
 }
-export declare function IsHolographicCylinder(obj: unknown): obj is IHolographicBox;
+export declare function IsHolographicCylinder(obj: unknown): obj is IHolographicCylinder;
 export interface IHolographicSphere extends IHolographicBounds {
     radius: number;
 }
-export declare function IsHolographicSphere(obj: unknown): obj is IHolographicBox;
+export declare function IsHolographicSphere(obj: unknown): obj is IHolographicSphere;
 export interface IHasHolographicBounds {
     holographicBounds: Nullable<IHolographicBounds>;
 }

@@ -2,7 +2,7 @@ import { BaseTexture, ISize, Nullable, Scene, ThinEngine } from "@babylonjs/core
 export interface ITexture3Layer {
     host?: ITexture3;
     depth: number;
-    update(data: Nullable<ArrayBufferView> | TexImageSource, row: number, column: number, width?: number, height?: number): void;
+    update(data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
     release(): void;
 }
 export interface ITexture3CreationOptions {
@@ -18,7 +18,7 @@ export interface ITexture3CreationOptions {
 export interface ITexture3 extends ISize {
     depth: number;
     count: number;
-    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row: number, column: number, width?: number, height?: number): void;
+    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
     release(depth: number): void;
     reserve(): ITexture3Layer | undefined;
 }

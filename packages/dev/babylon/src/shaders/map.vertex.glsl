@@ -6,6 +6,9 @@ precision highp float;
 // this is declaration to clip map along the hologram sides
 #include<clipVertexDeclaration>
 
+// this is the declaration of the function to compute geometry related to elevation data.
+#include<elevationVertexDeclaration>
+
 // Attributes
 in vec3 position;
 

@@ -1,9 +1,9 @@
 import { IDemInfos } from "core/dem";
 import { IDisplay, IPhysicalDisplay, IsPhysicalDisplay, ITileMetrics, ITileNavigationState, ITileView, TileMapLayerView, TileNavigationState } from "core/tiles";
-import { IElevationHost, IElevationLayer, IElevationLayerOptions, IsElevationLayer } from "./map.elevation.interfaces";
+import { IElevationHost, IElevationLayer, IElevationLayerOptions, IElevationTile, IsElevationLayer } from "./map.elevation.interfaces";
 import { ElevationGridFactory } from "./map.elevation.host.factory";
-import { AbstractMesh, Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
-import { ElevationTile, IElevationTile } from "./map.elevation.mesh";
+import { AbstractMesh, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { ElevationTile } from "./map.elevation.mesh";
 import { ICartesian2 } from "core/geometry";
 import { Nullable } from "core/types";
 import { TextUtils } from "core/utils";
@@ -20,6 +20,8 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     // the grid model
     _grid: Mesh;
+    _material: Map3dMaterial;
+
     _tilesRoot: TransformNode;
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
@@ -34,6 +36,10 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
         // build the template ( including the material)
         this._grid = this._buildTemplate(scene);
+        this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
+        if (this._material) {
+            this._grid.material = this._material;
+        }
         this._grid.setEnabled(false);
 
         // apply navigation and options.
@@ -178,11 +184,6 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             data.uvs = grid.uvs;
             data.applyToMesh(mesh);
         }
-        const material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
-        if (material) {
-            mesh.material = material;
-        }
-
         return mesh;
     }
 
@@ -191,7 +192,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         return mesh;
     }
 
-    protected _buildMaterial(name: string, scene?: Scene): Material {
+    protected _buildMaterial(name: string, scene?: Scene): Map3dMaterial {
         const material = new Map3dMaterial(name, scene);
         if (IsHolographicBounds(this.display)) {
             material.holographicBounds = this.display;
@@ -228,39 +229,9 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     }
 
     /**
-     * this is the place where we gona build the instance of the templates. Depending the content of the tile,
-     * the instance will be disabled if the content is not yet ready.
+     * this is the place where we gona build the instance of the templates.
      * @param tiles an array of tiles or a tile
      */
-    protected _onTilesAdded(tiles: ElevationTile | Array<ElevationTile>): void {
-        if (Array.isArray(tiles)) {
-            for (const t of tiles) {
-                this._onTileAdded(t);
-            }
-        } else {
-            this._onTileAdded(tiles);
-        }
-    }
-
-    protected _onTilesRemoved(tiles: ElevationTile | Array<ElevationTile>): void {
-        if (Array.isArray(tiles)) {
-            for (const t of tiles) {
-                this._onTileRemoved(t);
-            }
-        } else {
-            this._onTileRemoved(tiles);
-        }
-    }
-
-    protected _onTilesUpdated(tiles: ElevationTile | Array<ElevationTile>): void {
-        if (Array.isArray(tiles)) {
-            for (const t of tiles) {
-                this._onTileUpdated(t);
-            }
-        } else {
-            this._onTileUpdated(tiles);
-        }
-    }
 
     protected _onTileAdded(tile: ElevationTile): void {
         if (this._tilesRoot) {
@@ -282,10 +253,12 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
                     }
                 }
             });
+            this._material?.addTile(tile);
         }
     }
 
     protected _onTileRemoved(tile: ElevationTile): void {
+        this._material?.removeTile(tile);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
@@ -295,6 +268,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     protected _onTileUpdated(tile: ElevationTile): void {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
+            this._material?.updateTile(tile);
         }
     }
 

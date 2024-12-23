@@ -125,11 +125,14 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
 
     /// begin ITargetBlock
     public added(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        const tiles = this._onTileAddressesAdded(data, eventState);
+        const tiles = this._onTileAddressesAdded(eventData, eventState);
         if (tiles.length) {
             this.invalidate();
-            this._onTilesAdded(tiles);
+            if (tiles.length === 1) {
+                this._onTileAdded(tiles[0]);
+            } else {
+                this._onTilesAdded(tiles);
+            }
             if (this._addedObservable && this._addedObservable.hasObservers()) {
                 this._addedObservable.notifyObservers(tiles, -1, this, this);
             }
@@ -137,11 +140,14 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
     }
 
     public removed(eventData: IPipelineMessageType<ITileAddress>, eventState: EventState): void {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        const tiles = this._onTileAddressesRemoved(data, eventState);
+        const tiles = this._onTileAddressesRemoved(eventData, eventState);
         if (tiles.length) {
             this.invalidate();
-            this._onTilesRemoved(tiles);
+            if (tiles.length === 1) {
+                this._onTileRemoved(tiles[0]);
+            } else {
+                this._onTilesRemoved(tiles);
+            }
             if (this._removedObservable && this._removedObservable.hasObservers()) {
                 this._removedObservable?.notifyObservers(tiles, -1, this, this);
             }
@@ -201,7 +207,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
 
     protected _onContentFetched(tile: ITile<T>): void {
         this.invalidate();
-        this._onTilesUpdated(tile);
+        this._onTileUpdated(tile);
         if (this.updatedObservable?.hasObservers()) {
             this.updatedObservable.notifyObservers([tile], -1, this, this);
         }
@@ -212,11 +218,26 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return type ? b.withType(type) : b;
     }
 
-    protected _onTilesAdded(tiles: ITile<T> | Array<ITile<T>>): void {}
+    protected _onTilesAdded(tiles: Array<ITile<T>>): void {
+        for (const t of tiles) {
+            this._onTileAdded(t);
+        }
+    }
+    protected _onTileAdded(tiles: ITile<T>): void {}
 
-    protected _onTilesRemoved(tiles: ITile<T> | Array<ITile<T>>): void {}
+    protected _onTilesRemoved(tiles: Array<ITile<T>>): void {
+        for (const t of tiles) {
+            this._onTileRemoved(t);
+        }
+    }
+    protected _onTileRemoved(tiles: ITile<T>): void {}
 
-    protected _onTilesUpdated(tiles: ITile<T> | Array<ITile<T>>): void {}
+    protected _onTilesUpdated(tiles: Array<ITile<T>>): void {
+        for (const t of tiles) {
+            this._onTileUpdated(t);
+        }
+    }
+    protected _onTileUpdated(tiles: ITile<T>): void {}
 
     public abstract _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T>;
 }

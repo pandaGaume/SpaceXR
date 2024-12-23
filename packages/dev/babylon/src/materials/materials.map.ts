@@ -1,8 +1,10 @@
 import {
     AbstractMesh,
+    Constants,
     Effect,
     EffectFallbacks,
     IEffectCreationOptions,
+    InstancedMesh,
     Material,
     MaterialDefines,
     MaterialHelper,
@@ -12,13 +14,56 @@ import {
     PushMaterial,
     Scene,
     SubMesh,
+    Vector2,
     Vector3,
     VertexBuffer,
 } from "@babylonjs/core";
-import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
+import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { Observer } from "core/events";
+import { ElevationTile } from "../map";
+import { ITexture3Layer, Texture3 } from "./textures";
+import { IsTileMetricsProvider } from "core/tiles";
+import { ICartesian3 } from "core/geometry";
+import { Range } from "core/math";
 
-export interface IMap3dMaterial {}
+class AreaInfos {
+    layer: ITexture3Layer;
+    adjacentIds: Array<number> = [-1, -1, -1, -1];
+    isReady: boolean = false;
+
+    public constructor(layer: ITexture3Layer) {
+        this.layer = layer;
+    }
+}
+
+export enum Map3dLayerKind {
+    Elevation = 0,
+    Normal = 1,
+    Texture = 2,
+}
+
+// internal class used to hold the tile pool texture areas
+class TileLayout {
+    public constructor(public tile: ElevationTile, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
+
+    getArea(kind: Map3dLayerKind): Nullable<AreaInfos> {
+        return this.areas[kind];
+    }
+
+    setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void {
+        this.areas[kind] = value;
+    }
+}
+
+// this is where we define the functional interface for the material, including the behaviors for the holographic bounds,
+// the elevations and the texture mapping
+export interface IMap3dMaterial extends IHasHolographicBounds {
+    mapScale: ICartesian3;
+
+    addTile(tiles: ElevationTile): void;
+    removeTile(tiles: ElevationTile): void;
+    updateTile(tiles: ElevationTile): void;
+}
 
 export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static DefaultShaderName: string = "map";
@@ -35,6 +80,13 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static RadiusUniformName: string = "uRadiusClip";
     public static HeightUniformName: string = "uHeightClip";
 
+    // altitude range and map scale for the material
+    public static AltRangeUniformName: string = "uAltRange";
+    public static MapScaleUniformName: string = "uMapScale";
+
+    // Samplers for the material
+    public static ElevationSamplerUniformName: string = "uAltitudes";
+
     // the name of the shader used by the material
     protected _shaderName: Nullable<string> = null;
 
@@ -43,6 +95,15 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     // the observers for the holographic box clip planes
     private _clipPlanesAddedObservers: Nullable<Observer<Array<ClipPlaneDefinition>>> = null;
     private _clipPlanesRemovedObservers: Nullable<Observer<Array<ClipPlaneDefinition>>> = null;
+
+    private _elevationSampler: Nullable<Texture3> = null;
+
+    // the elevation related properties.
+    private _elevationRange: Nullable<Range> = null;
+    private _mapScale: ICartesian3 = Vector3.One();
+
+    // the layout and meta properties of each tiles
+    protected _tileLayouts: Map<string, TileLayout> = new Map<string, TileLayout>();
 
     public constructor(name: string, scene?: Scene, shaderName?: string) {
         super(name, scene);
@@ -66,21 +127,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    protected _unbindHolographicBounds(): void {
-        if (this._holoBounds) {
-            this._clipPlanesAddedObservers?.disconnect();
-            this._clipPlanesRemovedObservers?.disconnect();
-            this._clipPlanesAddedObservers = null;
-            this._clipPlanesRemovedObservers = null;
-        }
+    public get mapScale(): ICartesian3 {
+        return this._mapScale;
     }
 
-    protected _bindHolographicBounds(): void {
-        if (this._holoBounds) {
-            if (IsHolographicBox(this._holoBounds)) {
-                this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
-                this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
-            }
+    public set mapScale(value: ICartesian3) {
+        if (this._mapScale !== value) {
+            this._mapScale = value;
+            this.markAsDirty(Material.AttributesDirtyFlag);
         }
     }
 
@@ -108,9 +162,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const uniforms = [
             // babylon related
             Map3dMaterial.ViewProjectionMatrixUniformName,
+            // elevations
+            Map3dMaterial.AltRangeUniformName,
+            Map3dMaterial.MapScaleUniformName,
         ];
 
-        const samplers = new Array<string>();
+        const samplers = [Map3dMaterial.ElevationSamplerUniformName];
         const uniformBuffers = new Array<string>();
 
         if (this._holoBounds) {
@@ -174,6 +231,114 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         if (this._mustRebind(scene, effect, subMesh)) {
             // Clip planes
             this._bindClipPlanes(effect);
+            // samplers
+            this._bindSamplers(effect);
+            // Elevations.
+            this._bindElevations(effect);
+        }
+    }
+
+    public addTile(tile: ElevationTile): void {
+        // ensure elevation sampler is ready
+        this._ensureElevationSamplersReady(tile, this);
+
+        // prepare the elevation sampler.
+        let elevationArea: ITexture3Layer | undefined = undefined;
+
+        try {
+            this._elevationSampler?.reserve();
+            if (!elevationArea) {
+                // this is the place where we need to reallocate some depth into the samplers
+                this._growSamplersDepth();
+                elevationArea = this._elevationSampler?.reserve();
+            }
+        } catch (e) {
+            throw e;
+        }
+        if (elevationArea) {
+            // Build the layout for the tile
+            const layout = new TileLayout(tile);
+            this._tileLayouts.set(tile.address.quadkey, layout);
+            const areaInfos = new AreaInfos(elevationArea);
+            layout.setArea(Map3dLayerKind.Elevation, areaInfos);
+            const elevations = tile.content?.elevations;
+            if (elevations) {
+                // we process the dem content and update the elevation range
+                this._updateElevationRange(tile);
+                // update the area
+                elevationArea.update(elevations);
+                areaInfos.isReady = true;
+            } else {
+                // disabling the surface, waiting for the data
+                tile.surface?.setEnabled(false);
+                areaInfos.isReady = false;
+            }
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    public removeTile(tile: ElevationTile): void {
+        const key = tile.address.quadkey;
+        const layout = this._tileLayouts.get(key);
+        if (layout) {
+            layout.getArea(Map3dLayerKind.Elevation)?.layer.release();
+            this._tileLayouts.delete(key);
+            this._elevationRange = null; // invalidate the elevation range
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    public updateTile(tile: ElevationTile): void {
+        // this happens when the tile content is set or updated
+        const layout = this._tileLayouts.get(tile.address.quadkey);
+        if (layout) {
+            const elevations = tile.content?.elevations;
+            if (elevations) {
+                // we update the elevation range
+                this._updateElevationRange(tile);
+                layout.tile.surface?.setEnabled(true);
+                const area = layout.getArea(Map3dLayerKind.Elevation);
+                if (area) {
+                    area.layer.update(elevations);
+                    area.isReady = true;
+                }
+            }
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    public dispose(forceDisposeEffect?: boolean): void {
+        super.dispose(forceDisposeEffect);
+        this._elevationSampler?.dispose();
+    }
+
+    protected _getElevationRange(): Range {
+        if (this._elevationRange === null) {
+            this._elevationRange = this._buildElevationRange();
+        }
+        return this._elevationRange;
+    }
+
+    protected _buildElevationRange(): Range {
+        let range: Nullable<Range> = null;
+        for (let b of this._tileLayouts.values()) {
+            const infos = b.tile.content;
+            if (infos) {
+                if (range === null) {
+                    range = new Range(infos.min.z, infos.max.z);
+                    continue;
+                }
+                range.unionInPlace(infos.min.z, infos.max.z);
+            }
+        }
+        return range ?? new Range(0, 0);
+    }
+
+    protected _updateElevationRange(elevationTile: ElevationTile): void {
+        const infos = elevationTile.content;
+        if (infos) {
+            this._getElevationRange().unionInPlace(infos.min.z, infos.max.z);
+            this.markAsDirty(Material.AttributesDirtyFlag);
         }
     }
 
@@ -218,6 +383,21 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
     }
 
+    protected _bindElevations(effect: Effect): void {
+        const r = this._getElevationRange();
+        effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(r.min, r.max));
+        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.x);
+    }
+
+    protected _bindHolographicBounds(): void {
+        if (this._holoBounds) {
+            if (IsHolographicBox(this._holoBounds)) {
+                this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
+                this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
+            }
+        }
+    }
+
     protected _bindClipPlanes(effect: Effect): void {
         if (this._holoBounds) {
             if (IsHolographicBox(this._holoBounds)) {
@@ -245,8 +425,18 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public dispose(forceDisposeEffect?: boolean): void {
-        super.dispose(forceDisposeEffect);
+    protected _bindSamplers(effect: Effect): void {
+        effect.setTexture(Map3dMaterial.ElevationSamplerUniformName, this._elevationSampler);
+    }
+
+    protected _unbindHolographicBounds(): void {
+        if (this._holoBounds) {
+            this._clipPlanesAddedObservers?.disconnect();
+            this._clipPlanesRemovedObservers?.disconnect();
+            this._clipPlanesAddedObservers = null;
+            this._clipPlanesRemovedObservers = null;
+            this.markAsDirty(Material.AttributesDirtyFlag);
+        }
     }
 
     protected _prepareUniforms(name: string, ...properties: string[]): string[] {
@@ -254,11 +444,95 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _onEffectCompiled(effect: Effect): void {
-        console.log("DEFINES:", effect.defines);
-        console.log("VERTEX:", effect.vertexSourceCode);
-        console.log("FRAGMENT:", effect.fragmentSourceCode);
+        // console.log("DEFINES:", effect.defines);
+        // console.log("VERTEX:", effect.vertexSourceCode);
+        // console.log("FRAGMENT:", effect.fragmentSourceCode);
         if (this.onCompiled) {
             this.onCompiled(effect);
         }
+    }
+
+    protected _buildElevationSampler(width: number, height?: number, depth?: number): void {
+        height = height ?? width;
+        const maxDepth = depth ?? this._getElevationSamplerDepth();
+        const generateMipMap = false;
+        const scene = this.getScene();
+        this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, maxDepth, generateMipMap, scene);
+    }
+
+    protected _buildSampler(kind: Map3dLayerKind, width: number, height: number, depth: number, generateMipMap: boolean, scene: Scene): Nullable<Texture3> {
+        switch (kind) {
+            case Map3dLayerKind.Elevation: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: Constants.TEXTUREFORMAT_R,
+                    textureType: Constants.TEXTURETYPE_FLOAT,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
+                    generateMipMap: generateMipMap,
+                };
+                return new Texture3(scene, options);
+            }
+            case Map3dLayerKind.Normal: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: Constants.TEXTUREFORMAT_RGB,
+                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
+                    generateMipMap: generateMipMap,
+                };
+                return new Texture3(scene, options);
+            }
+            case Map3dLayerKind.Texture: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: Constants.TEXTUREFORMAT_RGB,
+                    textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
+                    generateMipMap: generateMipMap,
+                };
+                // this is where we leverage the Map3dTexture class to handle the layer texture
+                return new Texture3(scene, options);
+            }
+            default: {
+                return null;
+            }
+        }
+    }
+
+    protected _ensureElevationSamplersReady(tile: ElevationTile, src: any): void {
+        if (!this._elevationSampler) {
+            let size = IsTileMetricsProvider(src) ? src.metrics.tileSize : 0;
+            if (!size) {
+                size = Math.sqrt(tile.content?.elevations?.length ?? 0);
+            }
+            if (size) {
+                this._buildElevationSampler(size);
+                const mesh = tile.surface instanceof InstancedMesh ? tile.surface.sourceMesh : (tile.surface as Mesh);
+                this._registerInstanceBuffers(mesh);
+                this.markAsDirty(Material.TextureDirtyFlag);
+            }
+        }
+    }
+
+    protected _registerInstanceBuffers(target: Mesh): void {
+        //target.registerInstancedBuffer(Map3dMaterial.DemIdsAttName, 4);
+    }
+
+    protected _getElevationSamplerDepth(): number {
+        return 24; // for dev purpose we set a fixed number of tiles
+    }
+
+    protected _growSamplersDepth(): void {
+        // this is the place we gonna grow the depth of the samplers
+        // TODO
     }
 }

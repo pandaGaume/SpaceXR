@@ -1,9 +1,10 @@
-import { TransformNode } from "@babylonjs/core";
+import { AbstractMesh, TransformNode } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { ICartesian3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { ImageLayerContentType, IsTileMapLayer, ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
-import { IValidable } from "core/types";
+import { ImageLayerContentType, IsTile, IsTileMapLayer, ITile, ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
+import { IValidable, Nullable } from "core/types";
+import { ElevationTexture } from "../materials/textures";
 
 export type ElevationMapContentType = IDemInfos | ImageLayerContentType;
 
@@ -37,3 +38,14 @@ export function IsElevationLayer(b: unknown): b is IElevationLayer {
 }
 
 export interface IElevationLayer extends ITileMapLayer<IDemInfos>, IElevationLayerOptions {}
+
+export interface IElevationTile extends ITile<IDemInfos> {
+    // the mesh used to display the elevation ()
+    surface: Nullable<AbstractMesh>;
+    // the texture used to display onto the elevation mesh
+    textureSource: Nullable<ElevationTexture>;
+}
+
+export function IsElevationTile(b: unknown): b is IElevationTile {
+    return IsTile<IDemInfos>(b) && (<IElevationTile>b).surface !== undefined;
+}

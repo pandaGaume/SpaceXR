@@ -3,7 +3,7 @@ import { BaseTexture, Constants, ISize, Nullable, Scene, ThinEngine } from "@bab
 export interface ITexture3Layer {
     host?: ITexture3;
     depth: number;
-    update(data: Nullable<ArrayBufferView> | TexImageSource, row: number, column: number, width?: number, height?: number): void;
+    update(data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
     release(): void;
 }
 
@@ -22,7 +22,7 @@ export interface ITexture3 extends ISize {
     depth: number; // the number of possible layers.
     count: number; // the number of layers in use.
 
-    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row: number, column: number, width?: number, height?: number): void;
+    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
     release(depth: number): void;
     reserve(): ITexture3Layer | undefined;
 }
@@ -36,7 +36,7 @@ class Texture3Layer implements ITexture3Layer {
         this._depth = id;
     }
 
-    public update(data: Nullable<ArrayBufferView> | TexImageSource, row: number = 0, column: number = 0, width?: number, height?: number): void {
+    public update(data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void {
         this._host?.update(this._depth, data, row, column, width, height);
     }
 
@@ -133,14 +133,14 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         return a;
     }
 
-    public update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row: number = 0, column: number = 0, width?: number, height?: number): void {
+    public update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void {
         const engine = this._getEngine();
         if (engine && this._texture) {
             engine.__SpaceXR__updateSubRawTexture2DArray(
                 this._texture,
                 0, // specifying the level of detail - 0 is the base image
-                row, // row where pixel data should go
-                column, // column where pixel data should go
+                row ?? 0, // row where pixel data should go
+                column ?? 0, // column where pixel data should go
                 depth, // array "index" for pixels
                 width ?? this._w, // width of pixel data
                 height ?? this._h, // height of pixel data

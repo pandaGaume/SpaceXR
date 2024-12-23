@@ -9697,22 +9697,30 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
         return undefined;
     }
     added(eventData, eventState) {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        const tiles = this._onTileAddressesAdded(data, eventState);
+        const tiles = this._onTileAddressesAdded(eventData, eventState);
         if (tiles.length) {
             this.invalidate();
-            this._onTilesAdded(tiles);
+            if (tiles.length === 1) {
+                this._onTileAdded(tiles[0]);
+            }
+            else {
+                this._onTilesAdded(tiles);
+            }
             if (this._addedObservable && this._addedObservable.hasObservers()) {
                 this._addedObservable.notifyObservers(tiles, -1, this, this);
             }
         }
     }
     removed(eventData, eventState) {
-        const data = Array.isArray(eventData) ? eventData : [eventData];
-        const tiles = this._onTileAddressesRemoved(data, eventState);
+        const tiles = this._onTileAddressesRemoved(eventData, eventState);
         if (tiles.length) {
             this.invalidate();
-            this._onTilesRemoved(tiles);
+            if (tiles.length === 1) {
+                this._onTileRemoved(tiles[0]);
+            }
+            else {
+                this._onTilesRemoved(tiles);
+            }
             if (this._removedObservable && this._removedObservable.hasObservers()) {
                 this._removedObservable?.notifyObservers(tiles, -1, this, this);
             }
@@ -9760,7 +9768,7 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
     }
     _onContentFetched(tile) {
         this.invalidate();
-        this._onTilesUpdated(tile);
+        this._onTileUpdated(tile);
         if (this.updatedObservable?.hasObservers()) {
             this.updatedObservable.notifyObservers([tile], -1, this, this);
         }
@@ -9769,9 +9777,24 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
         const b = new _tiles_builder__WEBPACK_IMPORTED_MODULE_4__.TileBuilder();
         return type ? b.withType(type) : b;
     }
-    _onTilesAdded(tiles) { }
-    _onTilesRemoved(tiles) { }
-    _onTilesUpdated(tiles) { }
+    _onTilesAdded(tiles) {
+        for (const t of tiles) {
+            this._onTileAdded(t);
+        }
+    }
+    _onTileAdded(tiles) { }
+    _onTilesRemoved(tiles) {
+        for (const t of tiles) {
+            this._onTileRemoved(t);
+        }
+    }
+    _onTileRemoved(tiles) { }
+    _onTilesUpdated(tiles) {
+        for (const t of tiles) {
+            this._onTileUpdated(t);
+        }
+    }
+    _onTileUpdated(tiles) { }
 }
 //# sourceMappingURL=tiles.provider.abstract.js.map
 

@@ -2,10 +2,10 @@ import { TransformNode } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { ICartesian3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { IsTileMapLayer, ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
+import { ImageLayerContentType, IsTileMapLayer, ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
 import { IValidable } from "core/types";
 
-export type ElevationMapContentType = IDemInfos;
+export type ElevationMapContentType = IDemInfos | ImageLayerContentType;
 
 export interface IElevationMap extends ITileMap<ElevationMapContentType>, IValidable {}
 

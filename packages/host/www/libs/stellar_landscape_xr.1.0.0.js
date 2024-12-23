@@ -1749,8 +1749,8 @@ class Texture3Layer {
         this._host = host;
         this._depth = id;
     }
-    update(data) {
-        this._host?.update(this._depth, data);
+    update(data, row = 0, column = 0, width, height) {
+        this._host?.update(this._depth, data, row, column, width, height);
     }
     release() {
         if (this._host) {
@@ -1819,10 +1819,10 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
         }
         return a;
     }
-    update(depth, data) {
+    update(depth, data, row = 0, column = 0, width, height) {
         const engine = this._getEngine();
         if (engine && this._texture) {
-            engine.__SpaceXR__updateSubRawTexture2DArray(this._texture, 0, 0, 0, depth, this._w, this._h, 1, data, this._texture.format, this._texture.type);
+            engine.__SpaceXR__updateSubRawTexture2DArray(this._texture, 0, row, column, depth, width ?? this._w, height ?? this._h, 1, data, this._texture.format, this._texture.type);
         }
     }
     release(depth) {

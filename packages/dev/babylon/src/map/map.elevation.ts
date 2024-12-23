@@ -22,7 +22,7 @@ export class ElevationMap extends TileMapBase<ElevationMapContentType> implement
      * @param layer
      * @returns the layer view created
      */
-    protected _buildLayerView(layer: ITileMapLayer<ElevationMapContentType>): ITileMapLayerView<ElevationMapContentType> {
+    protected _buildLayerView(layer: ITileMapLayer<ElevationMapContentType>): ITileMapLayerView<any> {
         if (IsElevationLayer(layer)) {
             return this._buildElevationHost(layer);
         }

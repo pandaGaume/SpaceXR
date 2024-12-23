@@ -281,7 +281,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this._buildLayerViewContainerInternal(layers);
     }
 
-    protected _buildLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
+    protected _buildLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<any> {
         return this._buildLayerViewInternal(layer);
     }
 
@@ -329,7 +329,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return new OrderedCollection<ITileMapLayerView<T>>(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
     }
 
-    private _buildLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<T> {
+    private _buildLayerViewInternal(layer: ITileMapLayer<T>): ITileMapLayerView<any> {
         return new TileMapLayerView(layer, this._display, this._view);
     }
 }

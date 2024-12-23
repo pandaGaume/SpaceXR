@@ -253,12 +253,12 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
                     }
                 }
             });
-            this._material?.addTile(tile);
+            this._material?.addTile(tile, this);
         }
     }
 
     protected _onTileRemoved(tile: ElevationTile): void {
-        this._material?.removeTile(tile);
+        this._material?.removeTile(tile, this);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
@@ -268,7 +268,7 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
     protected _onTileUpdated(tile: ElevationTile): void {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
-            this._material?.updateTile(tile);
+            this._material?.updateTile(tile, this);
         }
     }
 

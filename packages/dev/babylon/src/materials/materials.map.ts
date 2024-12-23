@@ -25,10 +25,10 @@ import { ITexture3Layer, Texture3 } from "./textures";
 import { IsTileMetricsProvider } from "core/tiles";
 import { ICartesian3 } from "core/geometry";
 import { Range } from "core/math";
+import { IDemInfos } from "core/dem";
 
 class AreaInfos {
     layer: ITexture3Layer;
-    adjacentIds: Array<number> = [-1, -1, -1, -1];
     isReady: boolean = false;
 
     public constructor(layer: ITexture3Layer) {
@@ -60,13 +60,15 @@ class TileLayout {
 export interface IMap3dMaterial extends IHasHolographicBounds {
     mapScale: ICartesian3;
 
-    addTile(tiles: ElevationTile): void;
-    removeTile(tiles: ElevationTile): void;
-    updateTile(tiles: ElevationTile): void;
+    addTile(tiles: ElevationTile, source: any): void;
+    removeTile(tiles: ElevationTile, source: any): void;
+    updateTile(tiles: ElevationTile, source: any): void;
 }
 
 export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     public static DefaultShaderName: string = "map";
+
+    public static SamplerDepthsAttName: string = "depths";
 
     public static ViewProjectionMatrixUniformName: string = "viewProjection";
 
@@ -157,6 +159,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const attribs = [
             // babylon related
             VertexBuffer.PositionKind,
+            VertexBuffer.UVKind,
+
+            // instance related
+            Map3dMaterial.SamplerDepthsAttName,
         ];
 
         const uniforms = [
@@ -238,15 +244,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public addTile(tile: ElevationTile): void {
+    public addTile(tile: ElevationTile, source: any): void {
         // ensure elevation sampler is ready
-        this._ensureElevationSamplersReady(tile, this);
+        this._ensureElevationSamplersReady(tile, source);
 
         // prepare the elevation sampler.
         let elevationArea: ITexture3Layer | undefined = undefined;
-
         try {
-            this._elevationSampler?.reserve();
+            elevationArea = this._elevationSampler?.reserve();
             if (!elevationArea) {
                 // this is the place where we need to reallocate some depth into the samplers
                 this._growSamplersDepth();
@@ -255,29 +260,31 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         } catch (e) {
             throw e;
         }
-        if (elevationArea) {
+        if (elevationArea !== undefined) {
+            // bind the depth to the instance buffer
+            const surface = tile.surface;
+            if (surface) {
+                surface.instancedBuffers.depths = new Vector3(elevationArea?.depth, 0, 0);
+            }
+
             // Build the layout for the tile
             const layout = new TileLayout(tile);
             this._tileLayouts.set(tile.address.quadkey, layout);
             const areaInfos = new AreaInfos(elevationArea);
             layout.setArea(Map3dLayerKind.Elevation, areaInfos);
-            const elevations = tile.content?.elevations;
-            if (elevations) {
-                // we process the dem content and update the elevation range
-                this._updateElevationRange(tile);
-                // update the area
-                elevationArea.update(elevations);
+            if (tile.content) {
+                this._updateElevationSampler(tile.content, elevationArea);
                 areaInfos.isReady = true;
+                this.markAsDirty(Material.TextureDirtyFlag);
             } else {
                 // disabling the surface, waiting for the data
                 tile.surface?.setEnabled(false);
                 areaInfos.isReady = false;
             }
-            this.markAsDirty(Material.TextureDirtyFlag);
         }
     }
 
-    public removeTile(tile: ElevationTile): void {
+    public removeTile(tile: ElevationTile, source: any): void {
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
@@ -288,28 +295,73 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public updateTile(tile: ElevationTile): void {
+    public updateTile(tile: ElevationTile, source: any): void {
         // this happens when the tile content is set or updated
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
-            const elevations = tile.content?.elevations;
-            if (elevations) {
+            // bind the depth to the instance buffer
+            const surface = tile.surface;
+            if (surface) {
+                const d = layout.getArea(Map3dLayerKind.Elevation)?.layer.depth;
+                surface.instancedBuffers.depths = new Vector3(d, 0, 0);
+            }
+
+            if (tile.content) {
                 // we update the elevation range
-                this._updateElevationRange(tile);
-                layout.tile.surface?.setEnabled(true);
                 const area = layout.getArea(Map3dLayerKind.Elevation);
                 if (area) {
-                    area.layer.update(elevations);
+                    this._updateElevationSampler(tile.content, area.layer);
                     area.isReady = true;
+                    layout.tile.surface?.setEnabled(true);
+                    this.markAsDirty(Material.TextureDirtyFlag);
                 }
             }
-            this.markAsDirty(Material.TextureDirtyFlag);
         }
     }
 
     public dispose(forceDisposeEffect?: boolean): void {
         super.dispose(forceDisposeEffect);
         this._elevationSampler?.dispose();
+    }
+
+    protected _updateElevationSampler(infos: IDemInfos, elevationArea: ITexture3Layer) {
+        const elevations = infos.elevations;
+
+        if (elevations) {
+            let w = elevationArea.host?.width ?? 0;
+            let h = elevationArea.host?.height ?? 0;
+
+            if (w && h) {
+                w--;
+                h--;
+                const lastRow = this._getLastRow(elevations, w, h);
+                // NOTE : return a copy of the last coumn + and additional value at the end
+                const lastColumn = this._getLastColumnPlusCorner(elevations, w, h);
+                // we process the dem content and update the elevation range
+                this._updateElevationRange(infos);
+                // update the main area
+                elevationArea.update(elevations, 0, 0, w, h);
+
+                // update the last row and column
+                elevationArea.update(lastRow, 0, h, w, 1);
+                elevationArea.update(lastColumn, w, 0, 1, h + 1);
+            }
+        }
+    }
+
+    protected _getLastColumnPlusCorner(elevations: Float32Array, w: number, h: number): Float32Array {
+        const lastColumn = new Float32Array(h + 1);
+        for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
+            lastColumn[i] = elevations[w1];
+        }
+        lastColumn[h] = lastColumn[h - 1];
+        return lastColumn;
+    }
+
+    protected _getLastRow(elevations: Float32Array, w: number, h: number): Float32Array {
+        const startIndex = (h - 1) * w;
+        const lastRow = elevations.subarray(startIndex, startIndex + w);
+        return new Float32Array(lastRow); // Copy to a new array if needed
     }
 
     protected _getElevationRange(): Range {
@@ -334,8 +386,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         return range ?? new Range(0, 0);
     }
 
-    protected _updateElevationRange(elevationTile: ElevationTile): void {
-        const infos = elevationTile.content;
+    protected _updateElevationRange(infos: IDemInfos): void {
         if (infos) {
             this._getElevationRange().unionInPlace(infos.min.z, infos.max.z);
             this.markAsDirty(Material.AttributesDirtyFlag);
@@ -508,23 +559,32 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
+    protected _tryGetSize(tile: ElevationTile, src: any): number {
+        let size = IsTileMetricsProvider(src) ? src.metrics.tileSize : 0;
+        if (!size) {
+            size = Math.sqrt(tile.content?.elevations?.length ?? 0);
+        }
+        return size;
+    }
+
     protected _ensureElevationSamplersReady(tile: ElevationTile, src: any): void {
         if (!this._elevationSampler) {
-            let size = IsTileMetricsProvider(src) ? src.metrics.tileSize : 0;
-            if (!size) {
-                size = Math.sqrt(tile.content?.elevations?.length ?? 0);
-            }
+            let size = this._tryGetSize(tile, src);
             if (size) {
-                this._buildElevationSampler(size);
+                // here we gona build the elevation sampler with a size of N+1 because we add a row at the bottom and a column on the right
+                // to keep the definition of the grid which is N+1 x N+1
+                this._buildElevationSampler(size + 1);
                 const mesh = tile.surface instanceof InstancedMesh ? tile.surface.sourceMesh : (tile.surface as Mesh);
-                this._registerInstanceBuffers(mesh);
-                this.markAsDirty(Material.TextureDirtyFlag);
+                if (mesh) {
+                    this._registerInstanceBuffers(mesh);
+                    this.markAsDirty(Material.TextureDirtyFlag);
+                }
             }
         }
     }
 
     protected _registerInstanceBuffers(target: Mesh): void {
-        //target.registerInstancedBuffer(Map3dMaterial.DemIdsAttName, 4);
+        target.registerInstancedBuffer(Map3dMaterial.SamplerDepthsAttName, 3);
     }
 
     protected _getElevationSamplerDepth(): number {

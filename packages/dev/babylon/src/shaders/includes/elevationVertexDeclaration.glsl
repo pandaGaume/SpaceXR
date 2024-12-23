@@ -23,5 +23,5 @@ uniform highp sampler2DArray uNormals;
 uniform highp vec2 uAltRange;
 uniform highp float uMapScale;
     
-// the depth of the dem textures. ids[0] is the current, while ids[1],ids[2] and ids[3] are the neighbors    
-in vec4 demIds;
+// the depth of the dem, normals and image textures.    
+in vec3 depths;

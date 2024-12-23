@@ -11,17 +11,22 @@ precision highp float;
 
 // Attributes
 in vec3 position;
-
+in vec2 uv;
 // Uniforms
 uniform mat4 viewProjection;
 
 
 void main(void) {
 
+    vec3 v = vec3(uv.xy, depths[0]);
+
     // babylon specific which give you the finalWorld matrix
     #include<instancesVertex>
 
-    vec4 pos = vec4(position.xyz, 1.0);
+    // get the position
+    float rawAltitude = float(texture(uAltitudes, v));
+    float alt = (rawAltitude -uAltRange.x) * uMapScale;
+    vec4 pos = vec4(position.xy, alt, 1.0);
     vec4 worldPosition = finalWorld * pos;
     
     // clip map

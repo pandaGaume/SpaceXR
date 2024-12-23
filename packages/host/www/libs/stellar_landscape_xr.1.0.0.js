@@ -1039,11 +1039,11 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
                     }
                 }
             });
-            this._material?.addTile(tile);
+            this._material?.addTile(tile, this);
         }
     }
     _onTileRemoved(tile) {
-        this._material?.removeTile(tile);
+        this._material?.removeTile(tile, this);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
@@ -1052,7 +1052,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     _onTileUpdated(tile) {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
-            this._material?.updateTile(tile);
+            this._material?.updateTile(tile, this);
         }
     }
     _buildInstance(tile) {
@@ -1467,7 +1467,6 @@ __webpack_require__.r(__webpack_exports__);
 
 class AreaInfos {
     constructor(layer) {
-        this.adjacentIds = [-1, -1, -1, -1];
         this.isReady = false;
         this.layer = layer;
     }
@@ -1540,6 +1539,8 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
         const attribs = [
             _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind,
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind,
+            Map3dMaterial.SamplerDepthsAttName,
         ];
         const uniforms = [
             Map3dMaterial.ViewProjectionMatrixUniformName,
@@ -1592,11 +1593,11 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             this._bindElevations(effect);
         }
     }
-    addTile(tile) {
-        this._ensureElevationSamplersReady(tile, this);
+    addTile(tile, source) {
+        this._ensureElevationSamplersReady(tile, source);
         let elevationArea = undefined;
         try {
-            this._elevationSampler?.reserve();
+            elevationArea = this._elevationSampler?.reserve();
             if (!elevationArea) {
                 this._growSamplersDepth();
                 elevationArea = this._elevationSampler?.reserve();
@@ -1605,25 +1606,27 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         catch (e) {
             throw e;
         }
-        if (elevationArea) {
+        if (elevationArea !== undefined) {
+            const surface = tile.surface;
+            if (surface) {
+                surface.instancedBuffers.depths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(elevationArea?.depth, 0, 0);
+            }
             const layout = new TileLayout(tile);
             this._tileLayouts.set(tile.address.quadkey, layout);
             const areaInfos = new AreaInfos(elevationArea);
             layout.setArea(Map3dLayerKind.Elevation, areaInfos);
-            const elevations = tile.content?.elevations;
-            if (elevations) {
-                this._updateElevationRange(tile);
-                elevationArea.update(elevations);
+            if (tile.content) {
+                this._updateElevationSampler(tile.content, elevationArea);
                 areaInfos.isReady = true;
+                this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
             }
             else {
                 tile.surface?.setEnabled(false);
                 areaInfos.isReady = false;
             }
-            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
         }
     }
-    removeTile(tile) {
+    removeTile(tile, source) {
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
@@ -1633,25 +1636,58 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
         }
     }
-    updateTile(tile) {
+    updateTile(tile, source) {
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
-            const elevations = tile.content?.elevations;
-            if (elevations) {
-                this._updateElevationRange(tile);
-                layout.tile.surface?.setEnabled(true);
+            const surface = tile.surface;
+            if (surface) {
+                const d = layout.getArea(Map3dLayerKind.Elevation)?.layer.depth;
+                surface.instancedBuffers.depths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(d, 0, 0);
+            }
+            if (tile.content) {
                 const area = layout.getArea(Map3dLayerKind.Elevation);
                 if (area) {
-                    area.layer.update(elevations);
+                    this._updateElevationSampler(tile.content, area.layer);
                     area.isReady = true;
+                    layout.tile.surface?.setEnabled(true);
+                    this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
                 }
             }
-            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
         }
     }
     dispose(forceDisposeEffect) {
         super.dispose(forceDisposeEffect);
         this._elevationSampler?.dispose();
+    }
+    _updateElevationSampler(infos, elevationArea) {
+        const elevations = infos.elevations;
+        if (elevations) {
+            let w = elevationArea.host?.width ?? 0;
+            let h = elevationArea.host?.height ?? 0;
+            if (w && h) {
+                w--;
+                h--;
+                const lastRow = this._getLastRow(elevations, w, h);
+                const lastColumn = this._getLastColumnPlusCorner(elevations, w, h);
+                this._updateElevationRange(infos);
+                elevationArea.update(elevations, 0, 0, w, h);
+                elevationArea.update(lastRow, 0, h, w, 1);
+                elevationArea.update(lastColumn, w, 0, 1, h + 1);
+            }
+        }
+    }
+    _getLastColumnPlusCorner(elevations, w, h) {
+        const lastColumn = new Float32Array(h + 1);
+        for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
+            lastColumn[i] = elevations[w1];
+        }
+        lastColumn[h] = lastColumn[h - 1];
+        return lastColumn;
+    }
+    _getLastRow(elevations, w, h) {
+        const startIndex = (h - 1) * w;
+        const lastRow = elevations.subarray(startIndex, startIndex + w);
+        return new Float32Array(lastRow);
     }
     _getElevationRange() {
         if (this._elevationRange === null) {
@@ -1673,8 +1709,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
         return range ?? new core_math__WEBPACK_IMPORTED_MODULE_1__.Range(0, 0);
     }
-    _updateElevationRange(elevationTile) {
-        const infos = elevationTile.content;
+    _updateElevationRange(infos) {
         if (infos) {
             this._getElevationRange().unionInPlace(infos.min.z, infos.max.z);
             this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
@@ -1819,21 +1854,28 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             }
         }
     }
+    _tryGetSize(tile, src) {
+        let size = (0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileMetricsProvider)(src) ? src.metrics.tileSize : 0;
+        if (!size) {
+            size = Math.sqrt(tile.content?.elevations?.length ?? 0);
+        }
+        return size;
+    }
     _ensureElevationSamplersReady(tile, src) {
         if (!this._elevationSampler) {
-            let size = (0,core_tiles__WEBPACK_IMPORTED_MODULE_4__.IsTileMetricsProvider)(src) ? src.metrics.tileSize : 0;
-            if (!size) {
-                size = Math.sqrt(tile.content?.elevations?.length ?? 0);
-            }
+            let size = this._tryGetSize(tile, src);
             if (size) {
-                this._buildElevationSampler(size);
+                this._buildElevationSampler(size + 1);
                 const mesh = tile.surface instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InstancedMesh ? tile.surface.sourceMesh : tile.surface;
-                this._registerInstanceBuffers(mesh);
-                this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
+                if (mesh) {
+                    this._registerInstanceBuffers(mesh);
+                    this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
+                }
             }
         }
     }
     _registerInstanceBuffers(target) {
+        target.registerInstancedBuffer(Map3dMaterial.SamplerDepthsAttName, 3);
     }
     _getElevationSamplerDepth() {
         return 24;
@@ -1842,6 +1884,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
 }
 Map3dMaterial.DefaultShaderName = "map";
+Map3dMaterial.SamplerDepthsAttName = "depths";
 Map3dMaterial.ViewProjectionMatrixUniformName = "viewProjection";
 Map3dMaterial.NorthClipPlaneUniformName = "uNorthClip";
 Map3dMaterial.SouthClipPlaneUniformName = "uSouthClip";
@@ -14461,7 +14504,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "elevationVertexDeclaration";
-const shader = `vec3 elevation_rgbaToNormal(vec4 rgba){float x=(2.0*rgba.r)-1.0;float y=(2.0*rgba.g)-1.0;float z=(rgba.b*255.0-128.0)/127.0;return normalize(vec3(x,y,z));}uniform highp sampler2DArray uAltitudes;uniform highp sampler2DArray uNormals;uniform highp vec2 uAltRange;uniform highp float uMapScale;in vec4 demIds;`;
+const shader = `vec3 elevation_rgbaToNormal(vec4 rgba){float x=(2.0*rgba.r)-1.0;float y=(2.0*rgba.g)-1.0;float z=(rgba.b*255.0-128.0)/127.0;return normalize(vec3(x,y,z));}uniform highp sampler2DArray uAltitudes;uniform highp sampler2DArray uNormals;uniform highp vec2 uAltRange;uniform highp float uMapScale;in vec3 depths;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
 const elevationVertexDeclaration = { name, shader };
 //# sourceMappingURL=elevationVertexDeclaration.js.map
@@ -14662,8 +14705,8 @@ const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 #include<elevationVertexDeclaration>
-in vec3 position;uniform mat4 viewProjection;void main(void) {#include<instancesVertex>
-vec4 pos=vec4(position.xyz,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,depths[0]);#include<instancesVertex>
+float rawAltitude=float(texture(uAltitudes,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
 gl_Position=viewProjection*worldPosition;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const mapVertexShader = { name, shader };

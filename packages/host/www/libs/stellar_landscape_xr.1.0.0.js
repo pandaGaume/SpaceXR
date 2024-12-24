@@ -782,16 +782,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ElevationGridFactory {
-    static InitZ(column, row, w, h) {
-        let i = column == w - 1 ? 1 : 0;
-        let j = row == h - 1 ? 2 : 0;
-        return i + j;
-    }
-    static InitUV(column, row, w, h) {
-        let u = column == w - 1 ? 0 : column / (w - 2);
-        let v = row == h - 1 ? 0 : row / (h - 2);
-        return [u, v];
-    }
     buildTopology(options) {
         const o = this._buildTerrainOptions(options);
         const data = new core_meshes__WEBPACK_IMPORTED_MODULE_1__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
@@ -800,16 +790,14 @@ class ElevationGridFactory {
     _buildTerrainOptions(options) {
         if ((0,core_types__WEBPACK_IMPORTED_MODULE_2__.IsNumber)(options)) {
             const s = options;
-            return new core_meshes__WEBPACK_IMPORTED_MODULE_1__.TerrainGridOptionsBuilder()
+            return (new core_meshes__WEBPACK_IMPORTED_MODULE_1__.TerrainGridOptionsBuilder()
                 .withColumns(s + 1)
                 .withRows(s + 1)
                 .withScale(-1, 1)
                 .withInvertIndices(true)
-                .withZInitializer(ElevationGridFactory.InitZ)
                 .withUvs(true)
-                .withUVInitializer(ElevationGridFactory.InitUV)
                 .withNormals(true)
-                .build();
+                .build());
         }
         if (options instanceof core_meshes__WEBPACK_IMPORTED_MODULE_1__.TerrainGridOptionsBuilder) {
             return options.build();
@@ -868,6 +856,9 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     }
     get tilesRoot() {
         return this._tilesRoot;
+    }
+    get grid() {
+        return this._grid;
     }
     get isReady() {
         return this._tilesRoot !== null && this._tilesRoot !== undefined;
@@ -1866,11 +1857,15 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             let size = this._tryGetSize(tile, src);
             if (size) {
                 this._buildElevationSampler(size + 1);
-                const mesh = tile.surface instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InstancedMesh ? tile.surface.sourceMesh : tile.surface;
-                if (mesh) {
-                    this._registerInstanceBuffers(mesh);
-                    this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
-                }
+            }
+            this._ensureInstanceBufferReady(src.grid);
+        }
+    }
+    _ensureInstanceBufferReady(target) {
+        if (target) {
+            const mesh = target instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InstancedMesh ? target.sourceMesh : target;
+            if (mesh.instancedBuffers?.depth === undefined) {
+                this._registerInstanceBuffers(mesh);
             }
         }
     }
@@ -14705,7 +14700,7 @@ const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 #include<elevationVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,depths[0]);#include<instancesVertex>
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,depths.x);#include<instancesVertex>
 float rawAltitude=float(texture(uAltitudes,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
 gl_Position=viewProjection*worldPosition;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;

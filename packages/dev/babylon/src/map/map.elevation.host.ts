@@ -50,6 +50,10 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
         return this._tilesRoot;
     }
 
+    public get grid(): Mesh {
+        return this._grid;
+    }
+
     protected get isReady(): boolean {
         return this._tilesRoot !== null && this._tilesRoot !== undefined;
     }

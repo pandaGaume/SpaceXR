@@ -19,6 +19,7 @@ export declare class ElevationHost extends TileMapLayerView<IDemInfos> implement
     _cartesianCenterCache: Nullable<ICartesian2>;
     constructor(layer: IElevationLayer, display: Nullable<IDisplay>, source: ITileView, scene?: Scene);
     get tilesRoot(): TransformNode;
+    get grid(): Mesh;
     protected get isReady(): boolean;
     protected _buildRoot(scene?: Scene): TransformNode;
     protected _applyNavigation(nav: Nullable<ITileNavigationState>): void;

@@ -6,7 +6,7 @@ const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 #include<elevationVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,depths[0]);#include<instancesVertex>
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,depths.x);#include<instancesVertex>
 float rawAltitude=float(texture(uAltitudes,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
 gl_Position=viewProjection*worldPosition;}`;
 ShaderStore.ShadersStore[name] = shader;

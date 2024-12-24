@@ -18,7 +18,7 @@ uniform mat4 viewProjection;
 
 void main(void) {
 
-    vec3 v = vec3(uv.xy, depths[0]);
+    vec3 v = vec3(uv.xy, depths.x);
 
     // babylon specific which give you the finalWorld matrix
     #include<instancesVertex>

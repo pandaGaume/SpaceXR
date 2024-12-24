@@ -18,9 +18,9 @@ import {
     Vector3,
     VertexBuffer,
 } from "@babylonjs/core";
-import { ClipIndex, ClipPlaneDefinition, IHasHolographicBounds, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
+import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { Observer } from "core/events";
-import { ElevationTile } from "../map";
+import { IElevationHost, IElevationTile, IMap3dMaterial } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { IsTileMetricsProvider } from "core/tiles";
 import { ICartesian3 } from "core/geometry";
@@ -44,7 +44,7 @@ export enum Map3dLayerKind {
 
 // internal class used to hold the tile pool texture areas
 class TileLayout {
-    public constructor(public tile: ElevationTile, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
+    public constructor(public tile: IElevationTile, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
 
     getArea(kind: Map3dLayerKind): Nullable<AreaInfos> {
         return this.areas[kind];
@@ -53,16 +53,6 @@ class TileLayout {
     setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void {
         this.areas[kind] = value;
     }
-}
-
-// this is where we define the functional interface for the material, including the behaviors for the holographic bounds,
-// the elevations and the texture mapping
-export interface IMap3dMaterial extends IHasHolographicBounds {
-    mapScale: ICartesian3;
-
-    addTile(tiles: ElevationTile, source: any): void;
-    removeTile(tiles: ElevationTile, source: any): void;
-    updateTile(tiles: ElevationTile, source: any): void;
 }
 
 export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
@@ -244,8 +234,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public addTile(tile: ElevationTile, source: any): void {
+    public addTile(tile: IElevationTile, source: IElevationHost): void {
         // ensure elevation sampler is ready
+        // this is done only once for the material
         this._ensureElevationSamplersReady(tile, source);
 
         // prepare the elevation sampler.
@@ -284,7 +275,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public removeTile(tile: ElevationTile, source: any): void {
+    public removeTile(tile: IElevationTile, source: IElevationHost): void {
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
@@ -295,11 +286,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public updateTile(tile: ElevationTile, source: any): void {
+    public updateTile(tile: IElevationTile, source: IElevationHost): void {
         // this happens when the tile content is set or updated
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
-            // bind the depth to the instance buffer
+            // bind the depth to the instance buffer if was not previously setted
             const surface = tile.surface;
             if (surface) {
                 const d = layout.getArea(Map3dLayerKind.Elevation)?.layer.depth;
@@ -559,7 +550,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    protected _tryGetSize(tile: ElevationTile, src: any): number {
+    protected _tryGetSize(tile: IElevationTile, src: any): number {
         let size = IsTileMetricsProvider(src) ? src.metrics.tileSize : 0;
         if (!size) {
             size = Math.sqrt(tile.content?.elevations?.length ?? 0);
@@ -567,18 +558,23 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         return size;
     }
 
-    protected _ensureElevationSamplersReady(tile: ElevationTile, src: any): void {
+    protected _ensureElevationSamplersReady(tile: IElevationTile, src: IElevationHost): void {
         if (!this._elevationSampler) {
             let size = this._tryGetSize(tile, src);
             if (size) {
                 // here we gona build the elevation sampler with a size of N+1 because we add a row at the bottom and a column on the right
                 // to keep the definition of the grid which is N+1 x N+1
                 this._buildElevationSampler(size + 1);
-                const mesh = tile.surface instanceof InstancedMesh ? tile.surface.sourceMesh : (tile.surface as Mesh);
-                if (mesh) {
-                    this._registerInstanceBuffers(mesh);
-                    this.markAsDirty(Material.TextureDirtyFlag);
-                }
+            }
+            this._ensureInstanceBufferReady(src.grid);
+        }
+    }
+
+    protected _ensureInstanceBufferReady(target: AbstractMesh): void {
+        if (target) {
+            const mesh = target instanceof InstancedMesh ? target.sourceMesh : (target as Mesh);
+            if (mesh.instancedBuffers?.depth === undefined) {
+                this._registerInstanceBuffers(mesh);
             }
         }
     }

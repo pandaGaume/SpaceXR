@@ -1012,39 +1012,71 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     _buildGridFactoryInternal() {
         return new _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_10__.ElevationGridFactory();
     }
-    _onTileAdded(tile) {
+    _onTilesAdded(tiles) {
         if (this._tilesRoot) {
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
-                const m = this._buildInstance(tile);
-                if (m) {
-                    m.parent = this._tilesRoot;
-                    m.scaling.x = m.scaling.y = this.metrics.tileSize;
-                    m.scaling.z = 1.0;
-                    tile.surface = m;
-                    if (!tile.content) {
-                        m.setEnabled(false);
-                    }
-                    const center = this._getCenter(true);
-                    if (center) {
-                        this._setTilePosition(tile, center);
-                    }
+                for (const t of tiles) {
+                    this._onTileAdded(t);
                 }
             });
-            this._material?.addTile(tile, this);
+        }
+        else {
+            super._onTilesAdded(tiles);
+        }
+    }
+    _onTileAdded(tile) {
+        const m = this._buildInstance(tile);
+        if (m) {
+            m.parent = this._tilesRoot;
+            m.scaling.x = m.scaling.y = this.metrics.tileSize;
+            m.scaling.z = 1.0;
+            tile.surface = m;
+            if (!tile.content) {
+                m.setEnabled(false);
+            }
+            const center = this._getCenter(true);
+            if (center) {
+                this._setTilePosition(tile, center);
+            }
+        }
+        this._material?.addTile(tile, this);
+    }
+    _onTilesRemoved(tiles) {
+        if (this._tilesRoot) {
+            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
+                for (const t of tiles) {
+                    this._onTileRemoved(t);
+                }
+            });
+        }
+        else {
+            super._onTilesRemoved(tiles);
         }
     }
     _onTileRemoved(tile) {
-        this._material?.removeTile(tile, this);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
+        }
+        this._material?.removeTile(tile, this);
+    }
+    _onTilesUpdated(tiles) {
+        if (this._tilesRoot) {
+            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
+                for (const t of tiles) {
+                    this._onTileUpdated(t);
+                }
+            });
+        }
+        else {
+            super._onTilesUpdated(tiles);
         }
     }
     _onTileUpdated(tile) {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
-            this._material?.updateTile(tile, this);
         }
+        this._material?.updateTile(tile, this);
     }
     _buildInstance(tile) {
         const instance = this._grid.createInstance(this._buildInstanceName(tile));
@@ -1585,6 +1617,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     addTile(tile, source) {
+        console.log("Adding tile", tile.address.quadkey);
         this._ensureElevationSamplersReady(tile, source);
         let elevationArea = undefined;
         try {
@@ -1595,12 +1628,18 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             }
         }
         catch (e) {
+            console.log("Exception ", e);
             throw e;
         }
         if (elevationArea !== undefined) {
+            console.log("Elevation area added", tile.address.quadkey);
             const surface = tile.surface;
             if (surface) {
+                console.log("set depth", tile.address.quadkey);
                 surface.instancedBuffers.depths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(elevationArea?.depth, 0, 0);
+            }
+            else {
+                console.log("No surface", tile.address.quadkey);
             }
             const layout = new TileLayout(tile);
             this._tileLayouts.set(tile.address.quadkey, layout);
@@ -1611,13 +1650,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 areaInfos.isReady = true;
                 this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
             }
-            else {
-                tile.surface?.setEnabled(false);
-                areaInfos.isReady = false;
-            }
         }
     }
     removeTile(tile, source) {
+        console.log("Remove tile", tile.address.quadkey);
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
@@ -1628,10 +1664,12 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     updateTile(tile, source) {
+        console.log("Update tile", tile.address.quadkey);
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
             const surface = tile.surface;
             if (surface) {
+                console.log("set depth", tile.address.quadkey);
                 const d = layout.getArea(Map3dLayerKind.Elevation)?.layer.depth;
                 surface.instancedBuffers.depths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(d, 0, 0);
             }

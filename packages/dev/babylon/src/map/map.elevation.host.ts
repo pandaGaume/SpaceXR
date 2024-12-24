@@ -237,43 +237,75 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
      * @param tiles an array of tiles or a tile
      */
 
-    protected _onTileAdded(tile: ElevationTile): void {
+    protected _onTilesAdded(tiles: Array<ElevationTile>): void {
         if (this._tilesRoot) {
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
-                const m = this._buildInstance(tile);
-                if (m) {
-                    m.parent = this._tilesRoot;
-
-                    m.scaling.x = m.scaling.y = this.metrics.tileSize;
-                    m.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
-
-                    tile.surface = m;
-                    if (!tile.content) {
-                        m.setEnabled(false);
-                    }
-                    const center = this._getCenter(true);
-                    if (center) {
-                        this._setTilePosition(tile, center);
-                    }
+                for (const t of tiles) {
+                    this._onTileAdded(t);
                 }
             });
-            this._material?.addTile(tile, this);
+        } else {
+            super._onTilesAdded(tiles);
+        }
+    }
+
+    protected _onTileAdded(tile: ElevationTile): void {
+        const m = this._buildInstance(tile);
+        if (m) {
+            m.parent = this._tilesRoot;
+
+            m.scaling.x = m.scaling.y = this.metrics.tileSize;
+            m.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
+
+            tile.surface = m;
+            if (!tile.content) {
+                m.setEnabled(false);
+            }
+            const center = this._getCenter(true);
+            if (center) {
+                this._setTilePosition(tile, center);
+            }
+        }
+        this._material?.addTile(tile, this);
+    }
+
+    protected _onTilesRemoved(tiles: Array<ElevationTile>): void {
+        if (this._tilesRoot) {
+            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
+                for (const t of tiles) {
+                    this._onTileRemoved(t);
+                }
+            });
+        } else {
+            super._onTilesRemoved(tiles);
         }
     }
 
     protected _onTileRemoved(tile: ElevationTile): void {
-        this._material?.removeTile(tile, this);
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
+        }
+        this._material?.removeTile(tile, this);
+    }
+
+    protected _onTilesUpdated(tiles: Array<ElevationTile>): void {
+        if (this._tilesRoot) {
+            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
+                for (const t of tiles) {
+                    this._onTileUpdated(t);
+                }
+            });
+        } else {
+            super._onTilesUpdated(tiles);
         }
     }
 
     protected _onTileUpdated(tile: ElevationTile): void {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
-            this._material?.updateTile(tile, this);
         }
+        this._material?.updateTile(tile, this);
     }
 
     protected _buildInstance(tile: ElevationTile): AbstractMesh {

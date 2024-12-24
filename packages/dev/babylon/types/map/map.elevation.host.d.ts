@@ -41,8 +41,11 @@ export declare class ElevationHost extends TileMapLayerView<IDemInfos> implement
     protected _buildMaterialName(): string;
     protected _buildRootName(): string;
     private _buildGridFactoryInternal;
+    protected _onTilesAdded(tiles: Array<ElevationTile>): void;
     protected _onTileAdded(tile: ElevationTile): void;
+    protected _onTilesRemoved(tiles: Array<ElevationTile>): void;
     protected _onTileRemoved(tile: ElevationTile): void;
+    protected _onTilesUpdated(tiles: Array<ElevationTile>): void;
     protected _onTileUpdated(tile: ElevationTile): void;
     protected _buildInstance(tile: ElevationTile): AbstractMesh;
     protected _buildInstanceName(tile: ElevationTile): string;

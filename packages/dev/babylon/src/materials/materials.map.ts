@@ -235,6 +235,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     public addTile(tile: IElevationTile, source: IElevationHost): void {
+        console.log("Adding tile", tile.address.quadkey);
         // ensure elevation sampler is ready
         // this is done only once for the material
         this._ensureElevationSamplersReady(tile, source);
@@ -249,13 +250,19 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 elevationArea = this._elevationSampler?.reserve();
             }
         } catch (e) {
+            console.log("Exception ", e);
             throw e;
         }
         if (elevationArea !== undefined) {
+            console.log("Elevation area added", tile.address.quadkey);
+
             // bind the depth to the instance buffer
             const surface = tile.surface;
             if (surface) {
+                console.log("set depth", tile.address.quadkey);
                 surface.instancedBuffers.depths = new Vector3(elevationArea?.depth, 0, 0);
+            } else {
+                console.log("No surface", tile.address.quadkey);
             }
 
             // Build the layout for the tile
@@ -267,15 +274,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 this._updateElevationSampler(tile.content, elevationArea);
                 areaInfos.isReady = true;
                 this.markAsDirty(Material.TextureDirtyFlag);
-            } else {
-                // disabling the surface, waiting for the data
-                tile.surface?.setEnabled(false);
-                areaInfos.isReady = false;
             }
         }
     }
 
     public removeTile(tile: IElevationTile, source: IElevationHost): void {
+        console.log("Remove tile", tile.address.quadkey);
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
@@ -287,12 +291,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     public updateTile(tile: IElevationTile, source: IElevationHost): void {
+        console.log("Update tile", tile.address.quadkey);
         // this happens when the tile content is set or updated
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
             // bind the depth to the instance buffer if was not previously setted
             const surface = tile.surface;
             if (surface) {
+                console.log("set depth", tile.address.quadkey);
                 const d = layout.getArea(Map3dLayerKind.Elevation)?.layer.depth;
                 surface.instancedBuffers.depths = new Vector3(d, 0, 0);
             }

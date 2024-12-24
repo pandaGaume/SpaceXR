@@ -21,6 +21,18 @@ export function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress> {
     return false;
 }
 
+export enum NeighborsAddress {
+    NW,
+    N,
+    NE,
+    W,
+    A,
+    E,
+    SW,
+    S,
+    SE,
+}
+
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;

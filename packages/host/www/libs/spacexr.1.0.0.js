@@ -8014,6 +8014,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
+/* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
@@ -10314,7 +10315,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileCollection: () => (/* binding */ IsTileCollection),
 /* harmony export */   IsTileDatasource: () => (/* binding */ IsTileDatasource),
 /* harmony export */   IsTileMetricsProvider: () => (/* binding */ IsTileMetricsProvider),
-/* harmony export */   IsTileSystemBounds: () => (/* binding */ IsTileSystemBounds)
+/* harmony export */   IsTileSystemBounds: () => (/* binding */ IsTileSystemBounds),
+/* harmony export */   NeighborsAddress: () => (/* binding */ NeighborsAddress)
 /* harmony export */ });
 function IsTileAddress(b) {
     if (typeof b !== "object" || b === null)
@@ -10331,6 +10333,18 @@ function IsArrayOfTileAddress(b) {
     }
     return false;
 }
+var NeighborsAddress;
+(function (NeighborsAddress) {
+    NeighborsAddress[NeighborsAddress["NW"] = 0] = "NW";
+    NeighborsAddress[NeighborsAddress["N"] = 1] = "N";
+    NeighborsAddress[NeighborsAddress["NE"] = 2] = "NE";
+    NeighborsAddress[NeighborsAddress["W"] = 3] = "W";
+    NeighborsAddress[NeighborsAddress["A"] = 4] = "A";
+    NeighborsAddress[NeighborsAddress["E"] = 5] = "E";
+    NeighborsAddress[NeighborsAddress["SW"] = 6] = "SW";
+    NeighborsAddress[NeighborsAddress["S"] = 7] = "S";
+    NeighborsAddress[NeighborsAddress["SE"] = 8] = "SE";
+})(NeighborsAddress || (NeighborsAddress = {}));
 function IsTile(b) {
     if (typeof b !== "object" || b === null)
         return false;
@@ -11887,6 +11901,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MoonState: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.MoonState),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.MorganKeenanClass),
 /* harmony export */   MouseInputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.MouseInputController),
+/* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),

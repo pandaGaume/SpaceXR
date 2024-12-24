@@ -6,6 +6,17 @@ import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
 export declare function IsTileAddress(b: unknown): b is ITileAddress;
 export declare function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress>;
+export declare enum NeighborsAddress {
+    NW = 0,
+    N = 1,
+    NE = 2,
+    W = 3,
+    A = 4,
+    E = 5,
+    SW = 6,
+    S = 7,
+    SE = 8
+}
 export interface ITileAddress extends ICartesian2 {
     levelOfDetail: number;
     quadkey: string;

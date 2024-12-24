@@ -22,10 +22,11 @@ import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, I
 import { Observer } from "core/events";
 import { IElevationHost, IElevationTile, IMap3dMaterial } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
-import { IsTileMetricsProvider } from "core/tiles";
+import { IsTileMetricsProvider, NeighborsAddress, TileAddress } from "core/tiles";
 import { ICartesian3 } from "core/geometry";
 import { Range } from "core/math";
 import { IDemInfos } from "core/dem";
+import { ElevationHelpers } from "./materials.elevationHelpers";
 
 class AreaInfos {
     layer: ITexture3Layer;
@@ -271,7 +272,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             const areaInfos = new AreaInfos(elevationArea);
             layout.setArea(Map3dLayerKind.Elevation, areaInfos);
             if (tile.content) {
-                this._updateElevationSampler(tile.content, elevationArea);
+                // update the sampler, which mean set the texture data.
+                // this is the place where the data are copied from the tile content to the sampler
+                // and the border are fileld with values related to the neibourghs tiles.
+                this._updateElevationSampler(tile, elevationArea);
                 areaInfos.isReady = true;
                 this.markAsDirty(Material.TextureDirtyFlag);
             }
@@ -307,7 +311,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 // we update the elevation range
                 const area = layout.getArea(Map3dLayerKind.Elevation);
                 if (area) {
-                    this._updateElevationSampler(tile.content, area.layer);
+                    // if not done during the add, it's update the sampler, which mean set the texture data.
+                    // this is the place where the data are copied from the tile content to the sampler
+                    // and the border are fileld with values related to the neibourghs tiles.
+                    this._updateElevationSampler(tile, area.layer);
                     area.isReady = true;
                     layout.tile.surface?.setEnabled(true);
                     this.markAsDirty(Material.TextureDirtyFlag);
@@ -321,44 +328,99 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this._elevationSampler?.dispose();
     }
 
-    protected _updateElevationSampler(infos: IDemInfos, elevationArea: ITexture3Layer) {
-        const elevations = infos.elevations;
-
-        if (elevations) {
+    protected _updateElevationSampler(tile: IElevationTile, elevationArea: ITexture3Layer) {
+        if (tile.content && tile.content.elevations) {
             let w = elevationArea.host?.width ?? 0;
             let h = elevationArea.host?.height ?? 0;
 
             if (w && h) {
+                const elevations = tile.content.elevations;
                 w--;
                 h--;
-                const lastRow = this._getLastRow(elevations, w, h);
-                // NOTE : return a copy of the last coumn + and additional value at the end
-                const lastColumn = this._getLastColumnPlusCorner(elevations, w, h);
                 // we process the dem content and update the elevation range
-                this._updateElevationRange(infos);
+                this._updateElevationRange(tile.content);
                 // update the main area
                 elevationArea.update(elevations, 0, 0, w, h);
 
-                // update the last row and column
-                elevationArea.update(lastRow, 0, h, w, 1);
-                elevationArea.update(lastColumn, w, 0, 1, h + 1);
+                const quadkey = tile.address.quadkey;
+                const keys = TileAddress.ToNeigborsKey(quadkey);
+
+                // checking the north neigbour
+                let k = keys[NeighborsAddress.N];
+                let layout;
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout?.tile.content?.elevations) {
+                        // we update the last row of the north neigbour with the first row of the current tile
+                        const firstRow = ElevationHelpers.GetFirstRow(elevations, w);
+                        layout.getArea(Map3dLayerKind.Elevation)?.layer.update(firstRow, 0, h, w, 1);
+                    }
+                }
+
+                // checking the east neigbour
+                k = keys[NeighborsAddress.E];
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout?.tile.content?.elevations) {
+                        // we update the last column of the current tile with the value of the first column of the east neigbour
+                        const firstColumn = ElevationHelpers.GetFirstColumn(layout.tile.content.elevations, w, h);
+                        elevationArea.update(firstColumn, w, 0, 1, h);
+                    } else {
+                        // we duplicate the last column of the current tile
+                        const lastColumn = ElevationHelpers.GetLastColumn(elevations, w, h);
+                        elevationArea.update(lastColumn, w, 0, 1, h);
+                    }
+                }
+
+                // checking the south-east neigbour
+                k = keys[NeighborsAddress.SE];
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout?.tile.content?.elevations) {
+                        // we update the last value of the last row of the current tile with the first value of the first row of the south-east neigbour
+                        const first = ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
+                        elevationArea.update(first, w, h, 1, 1);
+                    }
+                }
+
+                // checking the south neigbour
+                k = keys[NeighborsAddress.S];
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout?.tile.content?.elevations) {
+                        // we update the last row of the current tile with the first row of the south neigbour
+                        const firstRow = ElevationHelpers.GetFirstRow(layout.tile.content.elevations, w);
+                        elevationArea.update(firstRow, 0, h, w, 1);
+                    } else {
+                        // we duplicate the last row of the current tile
+                        const lastRow = ElevationHelpers.GetLastRow(elevations, w, h);
+                        elevationArea.update(lastRow, 0, h, w, 1);
+                    }
+                }
+
+                // checking the west neigbour
+                k = keys[NeighborsAddress.W];
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout?.tile.content?.elevations) {
+                        // we update the last column of the current tile with the first column of the west neigbour
+                        const firstColumn = ElevationHelpers.GetFirstColumn(elevations, w, h);
+                        layout.getArea(Map3dLayerKind.Elevation)?.layer.update(firstColumn, w, 0, 1, h);
+                    }
+                }
+
+                // checking the north-west neigbour
+                k = keys[NeighborsAddress.NW];
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout?.tile.content?.elevations) {
+                        // we update the last value of the first row of the current tile with the first value of the last row of the north-west neigbour
+                        const first = ElevationHelpers.GetElevationAt(elevations, w, h, 0, 0);
+                        layout.getArea(Map3dLayerKind.Elevation)?.layer.update(first, w, h, 1, 1);
+                    }
+                }
             }
         }
-    }
-
-    protected _getLastColumnPlusCorner(elevations: Float32Array, w: number, h: number): Float32Array {
-        const lastColumn = new Float32Array(h + 1);
-        for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
-            lastColumn[i] = elevations[w1];
-        }
-        lastColumn[h] = lastColumn[h - 1];
-        return lastColumn;
-    }
-
-    protected _getLastRow(elevations: Float32Array, w: number, h: number): Float32Array {
-        const startIndex = (h - 1) * w;
-        const lastRow = elevations.subarray(startIndex, startIndex + w);
-        return new Float32Array(lastRow); // Copy to a new array if needed
     }
 
     protected _getElevationRange(): Range {

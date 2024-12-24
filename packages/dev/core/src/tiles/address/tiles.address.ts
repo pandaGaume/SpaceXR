@@ -61,6 +61,15 @@ export class TileAddress implements ITileAddress {
         return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
     }
 
+    /// <summary>
+    /// Returns the tile addresses of the neighbors of the specified tile.
+    // layout of the returned array is as follows:
+    /// 0, 1, 2
+    /// 3, 4, 5
+    /// 6, 7, 8
+    /// with 4 being the specified tile.
+    // you may use NeighborsAddress enum for the purpose of indexing the array.
+    /// </summary>
     public static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[] {
         const max = Math.pow(2, a.levelOfDetail);
         const n = [

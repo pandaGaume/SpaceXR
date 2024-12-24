@@ -1423,7 +1423,6 @@ class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ElevationHelpers: () => (/* reexport safe */ _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers),
 /* harmony export */   ElevationTexture: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.ElevationTexture),
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials_ellipsoidalMap__WEBPACK_IMPORTED_MODULE_3__.EllipsoidalMapMaterial),
 /* harmony export */   Map3dLayerKind: () => (/* reexport safe */ _materials_map__WEBPACK_IMPORTED_MODULE_1__.Map3dLayerKind),
@@ -1436,61 +1435,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _materials_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./materials.map */ "./dist/materials/materials.map.js");
 /* harmony import */ var _materials_webMap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./materials.webMap */ "./dist/materials/materials.webMap.js");
 /* harmony import */ var _materials_ellipsoidalMap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./materials.ellipsoidalMap */ "./dist/materials/materials.ellipsoidalMap.js");
-/* harmony import */ var _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./materials.elevationHelpers */ "./dist/materials/materials.elevationHelpers.js");
-
 
 
 
 
 //# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/materials/materials.elevationHelpers.js":
-/*!******************************************************!*\
-  !*** ./dist/materials/materials.elevationHelpers.js ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ElevationHelpers: () => (/* binding */ ElevationHelpers)
-/* harmony export */ });
-class ElevationHelpers {
-    static GetLastColumn(elevations, w, h, duplicateLast = false) {
-        const lastColumn = new Float32Array(h + (duplicateLast ? 1 : 0));
-        for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
-            lastColumn[i] = elevations[w1];
-        }
-        if (duplicateLast) {
-            lastColumn[h] = lastColumn[h - 1];
-        }
-        return lastColumn;
-    }
-    static GetLastRow(elevations, w, h) {
-        const startIndex = (h - 1) * w;
-        const lastRow = elevations.subarray(startIndex, startIndex + w);
-        return new Float32Array(lastRow);
-    }
-    static GetFirstColumn(elevations, w, h, duplicateFirst = false) {
-        const firstColumn = new Float32Array(h + (duplicateFirst ? 1 : 0));
-        for (let i = 0; i < h; i++) {
-            firstColumn[i] = elevations[i * w];
-        }
-        if (duplicateFirst) {
-            firstColumn[h] = firstColumn[h - 1];
-        }
-        return firstColumn;
-    }
-    static GetFirstRow(elevations, w) {
-        const firstRow = elevations.subarray(0, w);
-        return new Float32Array(firstRow);
-    }
-    static GetElevationAt(elevations, w, h, x, y) {
-        return new Float32Array([elevations[x + y * w]]);
-    }
-}
-//# sourceMappingURL=materials.elevationHelpers.js.map
 
 /***/ }),
 
@@ -1535,7 +1484,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
-/* harmony import */ var _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./materials.elevationHelpers */ "./dist/materials/materials.elevationHelpers.js");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.helpers.js");
 
 
 
@@ -1671,29 +1620,17 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     addTile(tile, source) {
-        console.log("Adding tile", tile.address.quadkey);
         this._ensureElevationSamplersReady(tile, source);
         let elevationArea = undefined;
-        try {
+        elevationArea = this._elevationSampler?.reserve();
+        if (!elevationArea) {
+            this._growSamplersDepth();
             elevationArea = this._elevationSampler?.reserve();
-            if (!elevationArea) {
-                this._growSamplersDepth();
-                elevationArea = this._elevationSampler?.reserve();
-            }
-        }
-        catch (e) {
-            console.log("Exception ", e);
-            throw e;
         }
         if (elevationArea !== undefined) {
-            console.log("Elevation area added", tile.address.quadkey);
             const surface = tile.surface;
             if (surface) {
-                console.log("set depth", tile.address.quadkey);
                 surface.instancedBuffers.depths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(elevationArea?.depth, 0, 0);
-            }
-            else {
-                console.log("No surface", tile.address.quadkey);
             }
             const layout = new TileLayout(tile);
             this._tileLayouts.set(tile.address.quadkey, layout);
@@ -1707,7 +1644,6 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     removeTile(tile, source) {
-        console.log("Remove tile", tile.address.quadkey);
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
@@ -1718,12 +1654,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     updateTile(tile, source) {
-        console.log("Update tile", tile.address.quadkey);
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
             const surface = tile.surface;
             if (surface) {
-                console.log("set depth", tile.address.quadkey);
                 const d = layout.getArea(Map3dLayerKind.Elevation)?.layer.depth;
                 surface.instancedBuffers.depths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(d, 0, 0);
             }
@@ -1759,7 +1693,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstRow = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstRow(elevations, w);
+                        const firstRow = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstRow(elevations, w);
                         layout.getArea(Map3dLayerKind.Elevation)?.layer.update(firstRow, 0, h, w, 1);
                     }
                 }
@@ -1767,11 +1701,11 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstColumn = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstColumn(layout.tile.content.elevations, w, h);
+                        const firstColumn = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstColumn(layout.tile.content.elevations, w, h);
                         elevationArea.update(firstColumn, w, 0, 1, h);
                     }
                     else {
-                        const lastColumn = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetLastColumn(elevations, w, h);
+                        const lastColumn = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetLastColumn(elevations, w, h);
                         elevationArea.update(lastColumn, w, 0, 1, h);
                     }
                 }
@@ -1779,7 +1713,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const first = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
+                        const first = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
                         elevationArea.update(first, w, h, 1, 1);
                     }
                 }
@@ -1787,11 +1721,11 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstRow = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstRow(layout.tile.content.elevations, w);
+                        const firstRow = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstRow(layout.tile.content.elevations, w);
                         elevationArea.update(firstRow, 0, h, w, 1);
                     }
                     else {
-                        const lastRow = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetLastRow(elevations, w, h);
+                        const lastRow = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetLastRow(elevations, w, h);
                         elevationArea.update(lastRow, 0, h, w, 1);
                     }
                 }
@@ -1799,7 +1733,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstColumn = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstColumn(elevations, w, h);
+                        const firstColumn = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstColumn(elevations, w, h);
                         layout.getArea(Map3dLayerKind.Elevation)?.layer.update(firstColumn, w, 0, 1, h);
                     }
                 }
@@ -1807,7 +1741,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const first = _materials_elevationHelpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(elevations, w, h, 0, 0);
+                        const first = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(elevations, w, h, 0, 0);
                         layout.getArea(Map3dLayerKind.Elevation)?.layer.update(first, w, h, 1, 1);
                     }
                 }
@@ -3047,6 +2981,134 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
 
 /***/ }),
 
+/***/ "../core/dist/dem/dem.helpers.js":
+/*!***************************************!*\
+  !*** ../core/dist/dem/dem.helpers.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ElevationHelpers: () => (/* binding */ ElevationHelpers)
+/* harmony export */ });
+class ElevationHelpers {
+    static cubicInterpolate(v0, v1, v2, v3, t) {
+        return v1 + 0.5 * t * (v2 - v0 + t * (2 * v0 - 5 * v1 + 4 * v2 - v3 + t * (3 * (v1 - v2) + v3 - v0)));
+    }
+    static getSafeElevation(elevations, w, h, xi, yi) {
+        const clampedX = Math.min(Math.max(0, xi), w - 1);
+        const clampedY = Math.min(Math.max(0, yi), h - 1);
+        return elevations[clampedX + clampedY * w];
+    }
+    static GetElevationBilinear(elevations, w, h, xNorm, yNorm) {
+        const x = xNorm * (w - 1);
+        const y = yNorm * (h - 1);
+        const x0 = Math.floor(x);
+        const y0 = Math.floor(y);
+        const x1 = Math.min(x0 + 1, w - 1);
+        const y1 = Math.min(y0 + 1, h - 1);
+        const q11 = elevations[x0 + y0 * w];
+        const q21 = elevations[x1 + y0 * w];
+        const q12 = elevations[x0 + y1 * w];
+        const q22 = elevations[x1 + y1 * w];
+        const dx = x - x0;
+        const dy = y - y0;
+        const r1 = q11 * (1 - dx) + q21 * dx;
+        const r2 = q12 * (1 - dx) + q22 * dx;
+        return r1 * (1 - dy) + r2 * dy;
+    }
+    static GetElevationCubic(elevations, w, h, xNorm, yNorm) {
+        const x = xNorm * (w - 1);
+        const y = yNorm * (h - 1);
+        const x0 = Math.floor(x);
+        const y0 = Math.floor(y);
+        const dx = x - x0;
+        const dy = y - y0;
+        const values = [];
+        for (let j = -1; j <= 2; j++) {
+            const row = [];
+            for (let i = -1; i <= 2; i++) {
+                row.push(ElevationHelpers.getSafeElevation(elevations, w, h, x0 + i, y0 + j));
+            }
+            values.push(row);
+        }
+        const interpolatedRows = values.map((row) => ElevationHelpers.cubicInterpolate(row[0], row[1], row[2], row[3], dx));
+        return ElevationHelpers.cubicInterpolate(interpolatedRows[0], interpolatedRows[1], interpolatedRows[2], interpolatedRows[3], dy);
+    }
+    static GetLastColumn(elevations, w, h) {
+        const lastColumn = new Float32Array(h);
+        for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
+            lastColumn[i] = elevations[w1];
+        }
+        return lastColumn;
+    }
+    static GetLastRow(elevations, w, h) {
+        const startIndex = (h - 1) * w;
+        return new Float32Array(elevations.subarray(startIndex, startIndex + w));
+    }
+    static GetFirstColumn(elevations, w, h, duplicateFirst = false) {
+        const firstColumn = new Float32Array(h + (duplicateFirst ? 1 : 0));
+        for (let i = 0; i < h; i++) {
+            firstColumn[i] = elevations[i * w];
+        }
+        if (duplicateFirst) {
+            firstColumn[h] = firstColumn[h - 1];
+        }
+        return firstColumn;
+    }
+    static GetFirstRow(elevations, w) {
+        return new Float32Array(elevations.subarray(0, w));
+    }
+    static GetElevationAt(elevations, w, h, x, y) {
+        return new Float32Array([elevations[x + y * w]]);
+    }
+    static GetColumn(elevations, w, h, colIndex) {
+        const column = new Float32Array(h);
+        for (let i = 0; i < h; i++) {
+            column[i] = elevations[colIndex + i * w];
+        }
+        return column;
+    }
+    static GetRow(elevations, w, rowIndex) {
+        const startIndex = rowIndex * w;
+        return new Float32Array(elevations.subarray(startIndex, startIndex + w));
+    }
+    static GetArea(elevations, w, h, startX, startY, areaWidth, areaHeight) {
+        const area = new Float32Array(areaWidth * areaHeight);
+        for (let y = 0; y < areaHeight; y++) {
+            const sourceStart = (startY + y) * w + startX;
+            const destStart = y * areaWidth;
+            area.set(elevations.subarray(sourceStart, sourceStart + areaWidth), destStart);
+        }
+        return area;
+    }
+    static CompareElevations(array1, array2, epsilon) {
+        if (array1.length !== array2.length) {
+            return false;
+        }
+        for (let i = 0; i < array1.length; i++) {
+            if (Math.abs(array1[i] - array2[i]) > epsilon) {
+                return false;
+            }
+        }
+        return true;
+    }
+    static GetElevationsBetween(elevations, w, h, x1Norm, y1Norm, x2Norm, y2Norm, steps) {
+        const result = new Float32Array(steps);
+        const dxNorm = (x2Norm - x1Norm) / (steps - 1);
+        const dyNorm = (y2Norm - y1Norm) / (steps - 1);
+        for (let i = 0; i < steps; i++) {
+            const xNorm = x1Norm + dxNorm * i;
+            const yNorm = y1Norm + dyNorm * i;
+            result[i] = ElevationHelpers.GetElevationBilinear(elevations, w, h, xNorm, yNorm);
+        }
+        return result;
+    }
+}
+//# sourceMappingURL=dem.helpers.js.map
+
+/***/ }),
+
 /***/ "../core/dist/dem/dem.infos.js":
 /*!*************************************!*\
   !*** ../core/dist/dem/dem.infos.js ***!
@@ -3308,11 +3370,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_infos__WEBPACK_IMPORTED_MODULE_1__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_tileclient__WEBPACK_IMPORTED_MODULE_2__.DemTileWebClient),
+/* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_helpers__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ _dem_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsDemInfos)
 /* harmony export */ });
 /* harmony import */ var _dem_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dem.interfaces */ "../core/dist/dem/dem.interfaces.js");
 /* harmony import */ var _dem_infos__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dem.infos */ "../core/dist/dem/dem.infos.js");
 /* harmony import */ var _dem_tileclient__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
+/* harmony import */ var _dem_helpers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./dem.helpers */ "../core/dist/dem/dem.helpers.js");
+
 
 
 
@@ -7328,6 +7393,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemTileWebClient),
 /* harmony export */   Display: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.EPSG3857),
+/* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.ElevationHelpers),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid),
 /* harmony export */   Envelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Envelope),
 /* harmony export */   EquatorialVector: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.EquatorialVector),
@@ -14973,7 +15039,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.EPSG3857),
 /* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationGridFactory),
-/* harmony export */   ElevationHelpers: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.ElevationHelpers),
+/* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.ElevationHelpers),
 /* harmony export */   ElevationHost: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationHost),
 /* harmony export */   ElevationLayer: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
 /* harmony export */   ElevationMap: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationMap),

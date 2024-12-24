@@ -145,10 +145,10 @@ export class TerrainNormalizedGridBuilder implements IVerticesDataBuilder {
         // positions origin center of the grid with cartesian coordinate.
         // uvs origin upper left with v vertical and u horizontal.
         for (let row = 0; row < h; row++) {
-            let v = row * dy;
+            let v = row == h - 1 ? 1 : row * dy;
             const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
-                const u = column * dx;
+                const u = column == w - 1 ? 1 : column * dx;
                 const x = (x0 + u) * sx;
                 const z: number = this._o?.zInitializer ? <number>this._o.zInitializer(column, row, w, h, ...params) : 0;
                 if (this._o?.invertYZ) positions.push(x, z, y);

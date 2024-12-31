@@ -194,19 +194,18 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         }
 
         const current = this._getPickingInfos(scene);
-        if (current && current.pickedPoint) {
+        const c = current?.getTextureCoordinates();
+        if (c) {
             if (this._currentPosition) {
                 pointerInfo.skipOnPointerObservable = true;
                 // move
-                const pixelXY = this._display.getPixelToRef(current.pickedPoint);
+                //const pixelXY = this._display.getPixelToRef(current.pickedPoint);
+                const pixelXY = this._display.getPixelToRef0(c);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                     const buttonIndex = (<any>pointerInfo.event).button;
                     const pointerId = (<any>pointerInfo.event).pointerId;
                     const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
-                    const c = current.getTextureCoordinates();
-                    if (c) {
-                        e.textureCoordinates = c;
-                    }
+                    e.textureCoordinates = c;
                     this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
@@ -222,12 +221,12 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
                 this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
             }
             // then move
-            const pixelXY = this._display.getPixelToRef(current.pickedPoint);
+            const pixelXY = this._display.getPixelToRef0(c);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                 const buttonIndex = (<any>pointerInfo.event).button;
                 const pointerId = (<any>pointerInfo.event).pointerId;
                 const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
-
+                e.textureCoordinates = c;
                 this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
             }
             this._currentPosition = pixelXY;

@@ -86,7 +86,7 @@
                 );
                 const displayMesh = display.node;
 
-                displayMesh.position.y = 90;
+                //displayMesh.position.y = 90;
                 //display.rotation.x = -Math.PI / 2;
                 //display.rotation.z = -Math.PI / 2;
 
@@ -115,6 +115,10 @@
                 });
 
                 camera.setTarget(displayMesh);
+                const showAxes = true;
+                if (showAxes) {
+                    const mainaxes = new BABYLON.Debug.AxesViewer(scene, w / 20);
+                }
 
                 return scene;
             }

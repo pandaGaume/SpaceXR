@@ -44,7 +44,7 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static Magnitude(a: ICartesian3): number;
     static ConvertInPlace(value: ICartesian3 | ICartesian4, from: Unit, to: Unit): ICartesian3;
     static ConvertToRef(value: ICartesian3 | ICartesian4, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3;
-    static Centroid(values: Array<ICartesian3>, ref?: ICartesian3): ICartesian3;
+    static Centroid(values: Array<ICartesian3> | Float32Array | Array<number>, ref?: ICartesian3): ICartesian3;
     static Zero(): ICartesian3;
     static One(): ICartesian3;
     static Infinity(): ICartesian3;

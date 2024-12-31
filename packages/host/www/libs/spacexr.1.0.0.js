@@ -3149,12 +3149,22 @@ class Cartesian3 extends Cartesian2 {
         let x = 0;
         let y = 0;
         let z = 0;
-        for (let i = 0; i < values.length; i++) {
-            x += values[i].x;
-            y += values[i].y;
-            z += values[i].z;
+        let count = values.length;
+        if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isCartesianArray)(values)) {
+            for (let i = 0; i < values.length; i++) {
+                x += values[i].x;
+                y += values[i].y;
+                z += values[i].z;
+            }
         }
-        const count = values.length;
+        else {
+            count = values.length / 3;
+            for (let i = 0; i < values.length;) {
+                x += values[i++];
+                y += values[i++];
+                z += values[i++];
+            }
+        }
         ref = ref ?? Cartesian3.Zero();
         ref.x = x / count;
         ref.y = y / count;

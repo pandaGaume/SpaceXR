@@ -1,6 +1,6 @@
 import { Quantity, Scalar, Unit } from "../math";
 import { Bounds2 } from "./geometry.bounds";
-import { ICartesian2, ICartesian3, ICartesian4, RegionCode } from "./geometry.interfaces";
+import { ICartesian2, ICartesian3, ICartesian4, isCartesianArray, RegionCode } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
     public static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number> {
@@ -242,18 +242,26 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return ref;
     }
 
-    public static Centroid(values: Array<ICartesian3>, ref?: ICartesian3): ICartesian3 {
+    public static Centroid(values: Array<ICartesian3> | Float32Array | Array<number>, ref?: ICartesian3): ICartesian3 {
         let x = 0;
         let y = 0;
         let z = 0;
+        let count = values.length;
 
-        for (let i = 0; i < values.length; i++) {
-            x += values[i].x;
-            y += values[i].y;
-            z += values[i].z;
+        if (isCartesianArray(values)) {
+            for (let i = 0; i < values.length; i++) {
+                x += values[i].x;
+                y += values[i].y;
+                z += values[i].z;
+            }
+        } else {
+            count = values.length / 3;
+            for (let i = 0; i < values.length; ) {
+                x += values[i++];
+                y += values[i++];
+                z += values[i++];
+            }
         }
-
-        const count = values.length;
         ref = ref ?? Cartesian3.Zero();
         ref.x = x / count;
         ref.y = y / count;

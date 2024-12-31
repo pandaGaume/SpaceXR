@@ -95,11 +95,12 @@
                 // set the virtual display
                 const buildClipPlane = true;
                 const display = new SPACEXR.HolographicDisplay("holographicDisplay", size, resolution, scene);
-                display.material = createGlassMaterial(scene);
-                display.rotation.x = (3 * Math.PI) / 2;
-                display.freezeWorldMatrix();
+                const displayMesh = display.node;
+                displayMesh.material = createGlassMaterial(scene);
+                displayMesh.rotation.x = (3 * Math.PI) / 2;
+                displayMesh.freezeWorldMatrix();
 
-                camera.setTarget(display);
+                camera.setTarget(displayMesh);
 
                 // build the map options
                 const mapOptions = {};

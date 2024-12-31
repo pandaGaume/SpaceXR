@@ -324,18 +324,16 @@ class VirtualDisplayInputsSource {
             return;
         }
         const current = this._getPickingInfos(scene);
-        if (current && current.pickedPoint) {
+        const c = current?.getTextureCoordinates();
+        if (c) {
             if (this._currentPosition) {
                 pointerInfo.skipOnPointerObservable = true;
-                const pixelXY = this._display.getPixelToRef(current.pickedPoint);
+                const pixelXY = this._display.getPixelToRef0(c);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                     const buttonIndex = pointerInfo.event.button;
                     const pointerId = pointerInfo.event.pointerId;
                     const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
-                    const c = current.getTextureCoordinates();
-                    if (c) {
-                        e.textureCoordinates = c;
-                    }
+                    e.textureCoordinates = c;
                     this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
@@ -348,11 +346,12 @@ class VirtualDisplayInputsSource {
                 const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
                 this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
             }
-            const pixelXY = this._display.getPixelToRef(current.pickedPoint);
+            const pixelXY = this._display.getPixelToRef0(c);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                 const buttonIndex = pointerInfo.event.button;
                 const pointerId = pointerInfo.event.pointerId;
                 const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
+                e.textureCoordinates = c;
                 this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
             }
             this._currentPosition = pixelXY;
@@ -406,8 +405,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
-/* harmony import */ var _display_inputs_scene__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./display.inputs.scene */ "./dist/display/display.inputs.scene.js");
-/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _display_inputs_scene__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./display.inputs.scene */ "./dist/display/display.inputs.scene.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
 /* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.units.js");
 
 
@@ -425,14 +425,17 @@ class VirtualDisplay {
             this._node = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
             const data = this._buildVertexData(this._dimension);
             data.applyToMesh(this._node);
+            this._center = core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
         }
         else {
             this._node = scene;
+            const vertices = scene.getVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind);
+            this._center = vertices ? core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Centroid(vertices) : core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
         }
         this._worldTransform = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`${name}_context`, this._node.getScene());
         this._worldTransform.parent = this._node;
         this._node.isPickable = true;
-        this._pointerSource = new _display_inputs_scene__WEBPACK_IMPORTED_MODULE_3__.VirtualDisplayInputsSource(this);
+        this._pointerSource = new _display_inputs_scene__WEBPACK_IMPORTED_MODULE_4__.VirtualDisplayInputsSource(this);
         this._unit = unit;
     }
     get node() {
@@ -443,7 +446,7 @@ class VirtualDisplay {
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new core_events__WEBPACK_IMPORTED_MODULE_4__.Observable();
+            this._propertyChangedObservable = new core_events__WEBPACK_IMPORTED_MODULE_5__.Observable();
         }
         return this._propertyChangedObservable;
     }
@@ -493,25 +496,10 @@ class VirtualDisplay {
     get aspectRatio() {
         return this._ratio;
     }
-    getInverseWorldMatrix() {
-        if (this._node.isWorldMatrixFrozen) {
-            this._inverseWorldMatrix = this._inverseWorldMatrix || this._node.worldMatrixFromCache.invertToRef(this._inverseWorldMatrix || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
-        }
-        else {
-            const cached = this._node.worldMatrixFromCache;
-            const world = this._node.getWorldMatrix();
-            if (!world.equals(cached) || !this._inverseWorldMatrix) {
-                this._inverseWorldMatrix = world.invertToRef(this._inverseWorldMatrix || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
-            }
-        }
-        return this._inverseWorldMatrix;
-    }
-    getPixelToRef(pickedCoordinates, pixel) {
-        const invWorld = this.getInverseWorldMatrix();
-        const transformed = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinatesToRef(pickedCoordinates, invWorld, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[0]);
+    getPixelToRef0(pickedCoordinates, pixel) {
         pixel = pixel || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
-        pixel.x = Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
-        pixel.y = Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
+        pixel.x = Math.round(pickedCoordinates.x * this._resolution.width);
+        pixel.y = Math.round(pickedCoordinates.y * this._resolution.height);
         return pixel;
     }
     getXYZWorldVectors() {
@@ -5596,12 +5584,22 @@ class Cartesian3 extends Cartesian2 {
         let x = 0;
         let y = 0;
         let z = 0;
-        for (let i = 0; i < values.length; i++) {
-            x += values[i].x;
-            y += values[i].y;
-            z += values[i].z;
+        let count = values.length;
+        if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isCartesianArray)(values)) {
+            for (let i = 0; i < values.length; i++) {
+                x += values[i].x;
+                y += values[i].y;
+                z += values[i].z;
+            }
         }
-        const count = values.length;
+        else {
+            count = values.length / 3;
+            for (let i = 0; i < values.length;) {
+                x += values[i++];
+                y += values[i++];
+                z += values[i++];
+            }
+        }
         ref = ref ?? Cartesian3.Zero();
         ref.x = x / count;
         ref.y = y / count;

@@ -1,6 +1,6 @@
-import { Matrix, Mesh, Scene, TmpVectors, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { Matrix, Mesh, Nullable, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
 
-import { ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
+import { Cartesian3, ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
 
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
@@ -23,12 +23,14 @@ export class VirtualDisplay implements IPhysicalDisplay {
 
     _dimension: ISize3;
     _halfDimension: ISize3;
-    _resolution: ISize3;
     _ppu: Vector3;
     _ratio: Vector3;
-    _pointerSource: VirtualDisplayInputsSource;
     _unit: Unit;
+
+    _resolution: ISize3;
+    _pointerSource: VirtualDisplayInputsSource;
     _node: Mesh;
+    _center: ICartesian3;
 
     // cached
     _inverseWorldMatrix?: Matrix;
@@ -48,8 +50,11 @@ export class VirtualDisplay implements IPhysicalDisplay {
             this._node = new Mesh(name, scene);
             const data = this._buildVertexData(this._dimension);
             data.applyToMesh(this._node);
+            this._center = Cartesian3.Zero();
         } else {
             this._node = scene;
+            const vertices = scene.getVerticesData(VertexBuffer.PositionKind);
+            this._center = vertices ? Cartesian3.Centroid(vertices) : Cartesian3.Zero();
         }
         this._worldTransform = new TransformNode(`${name}_context`, this._node.getScene());
         this._worldTransform.parent = this._node;
@@ -145,26 +150,10 @@ export class VirtualDisplay implements IPhysicalDisplay {
         return this._ratio;
     }
 
-    public getInverseWorldMatrix(): Matrix {
-        if (this._node.isWorldMatrixFrozen) {
-            // fast track
-            this._inverseWorldMatrix = this._inverseWorldMatrix || this._node.worldMatrixFromCache.invertToRef(this._inverseWorldMatrix || Matrix.Zero());
-        } else {
-            const cached = this._node.worldMatrixFromCache;
-            const world = this._node.getWorldMatrix();
-            if (!world.equals(cached) || !this._inverseWorldMatrix) {
-                this._inverseWorldMatrix = world.invertToRef(this._inverseWorldMatrix || Matrix.Zero());
-            }
-        }
-        return this._inverseWorldMatrix;
-    }
-
-    public getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2 {
-        const invWorld = this.getInverseWorldMatrix();
-        const transformed = Vector3.TransformCoordinatesToRef(pickedCoordinates, invWorld, TmpVectors.Vector3[0]);
+    public getPixelToRef0(pickedCoordinates: Vector2, pixel?: Vector2): Vector2 {
         pixel = pixel || Vector2.Zero();
-        pixel.x = Math.round((this._halfDimension.width - transformed.x) * this._ppu.x);
-        pixel.y = Math.round((this._halfDimension.height - transformed.y) * this._ppu.y);
+        pixel.x = Math.round(pickedCoordinates.x * this._resolution.width);
+        pixel.y = Math.round(pickedCoordinates.y * this._resolution.height);
         return pixel;
     }
 

@@ -17,12 +17,13 @@ export declare class VirtualDisplay implements IPhysicalDisplay {
     _worldTransform: TransformNode;
     _dimension: ISize3;
     _halfDimension: ISize3;
-    _resolution: ISize3;
     _ppu: Vector3;
     _ratio: Vector3;
-    _pointerSource: VirtualDisplayInputsSource;
     _unit: Unit;
+    _resolution: ISize3;
+    _pointerSource: VirtualDisplayInputsSource;
     _node: Mesh;
+    _center: ICartesian3;
     _inverseWorldMatrix?: Matrix;
     constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Mesh | Scene, unit?: Unit);
     get node(): Mesh;
@@ -41,8 +42,7 @@ export declare class VirtualDisplay implements IPhysicalDisplay {
     get pixelPerUnit(): ICartesian3;
     get dpi(): number;
     get aspectRatio(): ICartesian3;
-    getInverseWorldMatrix(): Matrix;
-    getPixelToRef(pickedCoordinates: Vector3, pixel?: Vector2): Vector2;
+    getPixelToRef0(pickedCoordinates: Vector2, pixel?: Vector2): Vector2;
     getXYZWorldVectors(): Array<Vector3>;
     dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void;
 }

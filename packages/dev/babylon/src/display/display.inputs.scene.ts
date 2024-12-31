@@ -164,7 +164,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
 
     private _onPointerDown(pointerInfo: BABYLON.PointerInfoPre): void {
         if (this._currentPosition) {
-            const pixelXY = this._currentPosition; //this._display.getPixelToRef(pickedPoint);
+            const pixelXY = this._currentPosition;
             const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, pointerInfo.event.button);
             if (this._onPointerDownObservable && this._onPointerDownObservable.hasObservers()) {
                 this._onPointerDownObservable.notifyObservers(e, -1, this, this);
@@ -189,7 +189,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         }
 
         var meshUnderPointer = scene.meshUnderPointer;
-        if (meshUnderPointer && meshUnderPointer !== this._display) {
+        if (meshUnderPointer && meshUnderPointer !== this._display.node) {
             return;
         }
 
@@ -258,7 +258,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
     }
 
     protected _pickFilter(mesh: BABYLON.Nullable<any>): boolean {
-        return mesh == this._display;
+        return mesh == this._display.node;
     }
 
     protected _getScene(): BABYLON.Scene {

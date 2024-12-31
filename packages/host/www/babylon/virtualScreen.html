@@ -85,13 +85,15 @@
                     buildClipPlane,
                     scene
                 );
-                display.position.y = 90;
-                display.rotation.x = -Math.PI / 2;
-                display.rotation.z = -Math.PI / 2;
+                const displayMesh = display.node;
 
-                display.material = new BABYLON.GridMaterial("displayMaterial", scene);
+                displayMesh.position.y = 90;
+                //display.rotation.x = -Math.PI / 2;
+                //display.rotation.z = -Math.PI / 2;
 
-                display.freezeWorldMatrix();
+                displayMesh.material = new BABYLON.GridMaterial("displayMaterial", scene);
+
+                displayMesh.freezeWorldMatrix();
 
                 display.pointerSource.onPointerUpObservable.add((eventData, eventState) => {
                     console.log("Pointer up on display");
@@ -106,14 +108,14 @@
                 });
 
                 display.pointerSource.onPointerEnterObservable.add((eventData, eventState) => {
-                    console.log("Pointer enter on display");
+                    console.log("Pointer enter in display");
                 });
 
                 display.pointerSource.onPointerOutObservable.add((eventData, eventState) => {
-                    console.log("Pointer out on display");
+                    console.log("Pointer out of display");
                 });
 
-                camera.setTarget(display);
+                camera.setTarget(displayMesh);
 
                 return scene;
             }

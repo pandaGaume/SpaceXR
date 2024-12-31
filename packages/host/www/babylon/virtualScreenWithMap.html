@@ -75,14 +75,15 @@
                 const display = new SPACEXR.MapDisplay("display", { height: h, width: w }, SPACEXR.WebMapTexture.Options4K(), scene);
                 const map = display.map.setViewMap(defaultCenter, defaultLod);
                 const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.SatelliteClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(map);
+                const displayMesh = display.node;
 
-                display.position.y = 90;
-                display.rotation.x = -Math.PI / 2;
-                display.rotation.z = -Math.PI / 2;
+                displayMesh.position.y = 90;
+                displayMesh.rotation.x = -Math.PI / 2;
+                displayMesh.rotation.z = -Math.PI / 2;
 
-                display.freezeWorldMatrix();
+                displayMesh.freezeWorldMatrix();
 
-                camera.setTarget(display);
+                camera.setTarget(displayMesh);
 
                 const showAxes = false;
                 if (showAxes) {

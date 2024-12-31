@@ -88,6 +88,14 @@
         {
             "type": "chrome",
             "request": "launch",
+            "name": "Launch HangingMonitor with map on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/hangingMonitor.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
             "name": "Launch 3D map on chrome",
             "url": "http://localhost:1338/packages/host/www/babylon/3DMap.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",

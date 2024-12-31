@@ -15,10 +15,12 @@ export class HolographicDisplay extends VirtualDisplay implements IHolographicBo
         const nEast = new Vector3(1, 0, 0);
         const nWest = new Vector3(-1, 0, 0);
 
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.North, display.position.add(nNorth.scale(halfHeight)), nSouth));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.South, display.position.add(nSouth.scale(halfHeight)), nNorth));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.East, display.position.add(nEast.scale(halfWidth)), nWest));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.West, display.position.add(nWest.scale(halfWidth)), nEast));
+        const position = display.node.position;
+
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.North, position.add(nNorth.scale(halfHeight)), nSouth));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.South, position.add(nSouth.scale(halfHeight)), nNorth));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.East, position.add(nEast.scale(halfWidth)), nWest));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.West, position.add(nWest.scale(halfWidth)), nEast));
 
         return clipPlanes;
     }
@@ -29,9 +31,9 @@ export class HolographicDisplay extends VirtualDisplay implements IHolographicBo
 
         const nTop = new Vector3(0, 0, 1);
         const nBottom = new Vector3(0, 0, -1);
-
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.Top, display.position.add(nTop.scale(halfThickness)), nBottom));
-        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.Bottom, display.position.add(nBottom.scale(halfThickness)), nTop));
+        const position = display.node.position;
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.Top, position.add(nTop.scale(halfThickness)), nBottom));
+        clipPlanes.push(new ClipPlaneDefinition(ClipIndex.Bottom, position.add(nBottom.scale(halfThickness)), nTop));
 
         return clipPlanes;
     }
@@ -66,7 +68,7 @@ export class HolographicDisplay extends VirtualDisplay implements IHolographicBo
     public get clipPlanesWorld(): Nullable<Array<ClipPlaneDefinition>> {
         if (!this._clipPlanes || this._clipPlanes.length === 0) return null;
         const world = new Array<ClipPlaneDefinition>();
-        const transform = this.getWorldMatrix();
+        const transform = this.node.getWorldMatrix();
         for (const plane of this._clipPlanes) {
             const p = Vector3.TransformCoordinates(plane.point, transform);
             const n = Vector3.TransformNormal(plane.normal, transform);

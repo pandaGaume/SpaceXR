@@ -7,7 +7,7 @@ import { Observable, PropertyChangedEventArgs } from "core/events";
 import { Length, Quantity, Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
 
-export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
+export class VirtualDisplay implements IPhysicalDisplay {
     public static QVGA: ISize2 = new Size2(320, 240);
     public static VGA: ISize2 = new Size2(640, 480);
     public static QHD: ISize2 = new Size2(960, 540);
@@ -28,13 +28,14 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     _ratio: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
     _unit: Unit;
+    _node: Mesh;
 
     // cached
     _inverseWorldMatrix?: Matrix;
 
-    public constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene, unit: Unit = Length.Units.meter) {
-        super(name, scene);
+    public constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Mesh | Scene, unit: Unit = Length.Units.meter) {
         this._dimension = Size3.FromSize(dimension);
+
         this._halfDimension = new Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.thickness / 2);
         this._resolution = Size3.FromSize(resolution);
         this._ppu = new Vector3(
@@ -43,13 +44,26 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
             this._dimension.thickness ? this._resolution.thickness / this._dimension.thickness : 0
         );
         this._ratio = new Vector3(this._ppu.x / this._ppu.y, this._ppu.z / this._ppu.y, this._ppu.z / this._ppu.x);
-        const data = this._buildVertexData();
-        data.applyToMesh(this);
-        this._worldTransform = new TransformNode(`${name}_context`, scene);
-        this._worldTransform.parent = this;
-        this.isPickable = true; // enable pointer events
+        if (scene == undefined || scene instanceof Scene) {
+            this._node = new Mesh(name, scene);
+            const data = this._buildVertexData(this._dimension);
+            data.applyToMesh(this._node);
+        } else {
+            this._node = scene;
+        }
+        this._worldTransform = new TransformNode(`${name}_context`, this._node.getScene());
+        this._worldTransform.parent = this._node;
+        this._node.isPickable = true; // enable pointer events
         this._pointerSource = new VirtualDisplayInputsSource(this);
         this._unit = unit;
+    }
+
+    public get node(): Mesh {
+        return this._node;
+    }
+
+    public getScene(): Scene {
+        return this._node.getScene();
     }
 
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<IDisplay, unknown>> {
@@ -75,13 +89,13 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
         return this._pointerSource;
     }
 
-    protected _buildVertexData(): VertexData {
+    protected _buildVertexData(dimension: ISize2): VertexData {
         const data = new VertexData();
-        const sx = this.dimension.width;
-        const sy = this.dimension.height;
+        const sx = dimension.width;
+        const sy = dimension.height;
 
         data.positions = [0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0];
-        data.indices = [2, 0, 3, 0, 2, 1];
+        data.indices = [2, 1, 0, 0, 3, 2];
         data.normals = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1];
         data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
 
@@ -132,12 +146,12 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     }
 
     public getInverseWorldMatrix(): Matrix {
-        if (this.isWorldMatrixFrozen) {
+        if (this._node.isWorldMatrixFrozen) {
             // fast track
-            this._inverseWorldMatrix = this._inverseWorldMatrix || this.worldMatrixFromCache.invertToRef(this._inverseWorldMatrix || Matrix.Zero());
+            this._inverseWorldMatrix = this._inverseWorldMatrix || this._node.worldMatrixFromCache.invertToRef(this._inverseWorldMatrix || Matrix.Zero());
         } else {
-            const cached = this.worldMatrixFromCache;
-            const world = this.getWorldMatrix();
+            const cached = this._node.worldMatrixFromCache;
+            const world = this._node.getWorldMatrix();
             if (!world.equals(cached) || !this._inverseWorldMatrix) {
                 this._inverseWorldMatrix = world.invertToRef(this._inverseWorldMatrix || Matrix.Zero());
             }
@@ -155,8 +169,8 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     }
 
     public getXYZWorldVectors(): Array<Vector3> {
-        const transform = this.getWorldMatrix();
-        const p = this.getAbsolutePosition();
+        const transform = this._node.getWorldMatrix();
+        const p = this._node.getAbsolutePosition();
         return [
             Vector3.TransformCoordinates(Vector3.Right(), transform).subtractInPlace(p),
             Vector3.TransformCoordinates(Vector3.Up(), transform).subtractInPlace(p),
@@ -165,7 +179,7 @@ export class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     }
 
     public dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void {
-        super.dispose(doNotRecurse, disposeMaterialAndTextures);
+        this._node.dispose(doNotRecurse, disposeMaterialAndTextures);
         this._worldTransform.dispose(doNotRecurse, disposeMaterialAndTextures);
     }
 }

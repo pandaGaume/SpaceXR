@@ -97,10 +97,11 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
         const nSouth = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, -1, 0);
         const nEast = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(1, 0, 0);
         const nWest = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(-1, 0, 0);
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.North, display.position.add(nNorth.scale(halfHeight)), nSouth));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.South, display.position.add(nSouth.scale(halfHeight)), nNorth));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.East, display.position.add(nEast.scale(halfWidth)), nWest));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.West, display.position.add(nWest.scale(halfWidth)), nEast));
+        const position = display.node.position;
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.North, position.add(nNorth.scale(halfHeight)), nSouth));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.South, position.add(nSouth.scale(halfHeight)), nNorth));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.East, position.add(nEast.scale(halfWidth)), nWest));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.West, position.add(nWest.scale(halfWidth)), nEast));
         return clipPlanes;
     }
     static buildHorizontalClipPlanes(display) {
@@ -108,8 +109,9 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
         const halfThickness = display.halfDimension.thickness;
         const nTop = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, 1);
         const nBottom = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, -1);
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.Top, display.position.add(nTop.scale(halfThickness)), nBottom));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.Bottom, display.position.add(nBottom.scale(halfThickness)), nTop));
+        const position = display.node.position;
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.Top, position.add(nTop.scale(halfThickness)), nBottom));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.Bottom, position.add(nBottom.scale(halfThickness)), nTop));
         return clipPlanes;
     }
     constructor(name, dimension, resolution, scene) {
@@ -136,7 +138,7 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
         if (!this._clipPlanes || this._clipPlanes.length === 0)
             return null;
         const world = new Array();
-        const transform = this.getWorldMatrix();
+        const transform = this.node.getWorldMatrix();
         for (const plane of this._clipPlanes) {
             const p = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(plane.point, transform);
             const n = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformNormal(plane.normal, transform);
@@ -318,7 +320,7 @@ class VirtualDisplayInputsSource {
             return;
         }
         var meshUnderPointer = scene.meshUnderPointer;
-        if (meshUnderPointer && meshUnderPointer !== this._display) {
+        if (meshUnderPointer && meshUnderPointer !== this._display.node) {
             return;
         }
         const current = this._getDisplayPosition(scene);
@@ -377,7 +379,7 @@ class VirtualDisplayInputsSource {
         return null;
     }
     _pickFilter(mesh) {
-        return mesh == this._display;
+        return mesh == this._display.node;
     }
     _getScene() {
         return this._display.getScene();
@@ -408,21 +410,32 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
+class VirtualDisplay {
     constructor(name, dimension, resolution, scene, unit = core_math__WEBPACK_IMPORTED_MODULE_1__.Length.Units.meter) {
-        super(name, scene);
         this._dimension = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(dimension);
         this._halfDimension = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.thickness / 2);
         this._resolution = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(resolution);
         this._ppu = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._resolution.width / this._dimension.width, this._resolution.height / this._dimension.height, this._dimension.thickness ? this._resolution.thickness / this._dimension.thickness : 0);
         this._ratio = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._ppu.x / this._ppu.y, this._ppu.z / this._ppu.y, this._ppu.z / this._ppu.x);
-        const data = this._buildVertexData();
-        data.applyToMesh(this);
-        this._worldTransform = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`${name}_context`, scene);
-        this._worldTransform.parent = this;
-        this.isPickable = true;
+        if (scene == undefined || scene instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Scene) {
+            this._node = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
+            const data = this._buildVertexData(this._dimension);
+            data.applyToMesh(this._node);
+        }
+        else {
+            this._node = scene;
+        }
+        this._worldTransform = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`${name}_context`, this._node.getScene());
+        this._worldTransform.parent = this._node;
+        this._node.isPickable = true;
         this._pointerSource = new _display_inputs_scene__WEBPACK_IMPORTED_MODULE_3__.VirtualDisplayInputsSource(this);
         this._unit = unit;
+    }
+    get node() {
+        return this._node;
+    }
+    getScene() {
+        return this._node.getScene();
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable) {
@@ -442,12 +455,12 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
     get pointerSource() {
         return this._pointerSource;
     }
-    _buildVertexData() {
+    _buildVertexData(dimension) {
         const data = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData();
-        const sx = this.dimension.width;
-        const sy = this.dimension.height;
+        const sx = dimension.width;
+        const sy = dimension.height;
         data.positions = [0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0];
-        data.indices = [2, 0, 3, 0, 2, 1];
+        data.indices = [2, 1, 0, 0, 3, 2];
         data.normals = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1];
         data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
         return data;
@@ -477,12 +490,12 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         return this._ratio;
     }
     getInverseWorldMatrix() {
-        if (this.isWorldMatrixFrozen) {
-            this._inverseWorldMatrix = this._inverseWorldMatrix || this.worldMatrixFromCache.invertToRef(this._inverseWorldMatrix || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
+        if (this._node.isWorldMatrixFrozen) {
+            this._inverseWorldMatrix = this._inverseWorldMatrix || this._node.worldMatrixFromCache.invertToRef(this._inverseWorldMatrix || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
         }
         else {
-            const cached = this.worldMatrixFromCache;
-            const world = this.getWorldMatrix();
+            const cached = this._node.worldMatrixFromCache;
+            const world = this._node.getWorldMatrix();
             if (!world.equals(cached) || !this._inverseWorldMatrix) {
                 this._inverseWorldMatrix = world.invertToRef(this._inverseWorldMatrix || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
             }
@@ -498,8 +511,8 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         return pixel;
     }
     getXYZWorldVectors() {
-        const transform = this.getWorldMatrix();
-        const p = this.getAbsolutePosition();
+        const transform = this._node.getWorldMatrix();
+        const p = this._node.getAbsolutePosition();
         return [
             _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Right(), transform).subtractInPlace(p),
             _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Up(), transform).subtractInPlace(p),
@@ -507,7 +520,7 @@ class VirtualDisplay extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh {
         ];
     }
     dispose(doNotRecurse, disposeMaterialAndTextures) {
-        super.dispose(doNotRecurse, disposeMaterialAndTextures);
+        this._node.dispose(doNotRecurse, disposeMaterialAndTextures);
         this._worldTransform.dispose(doNotRecurse, disposeMaterialAndTextures);
     }
 }
@@ -734,13 +747,16 @@ class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
     constructor(name, dimension, options, scene) {
         options = options ?? _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture.OptionsHD();
         super(name, dimension, options, scene);
-        this._map = this._createTextureMap(name, options, scene ?? this.getScene());
-        this.material = this._createMaterial(name, this._map, scene ?? this.getScene());
-        this._target = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget(this._map?.map);
+        this._content = this._createTextureMap(name, options, this.getScene());
+        this.node.material = this._createMaterial(name, this._content, this.getScene());
+        this._target = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget(this._content?.map);
         this._controller = new core_map__WEBPACK_IMPORTED_MODULE_4__.PointerController(this.pointerSource, this._target);
     }
+    get content() {
+        return this._content;
+    }
     get map() {
-        return this._map;
+        return this._content.map;
     }
     _createTextureMap(name, options, scene) {
         options = options ?? _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture.OptionsHD();
@@ -5556,6 +5572,9 @@ class Cartesian3 extends Cartesian2 {
         ref.z = a.z / n;
         return ref;
     }
+    static Distance(a, b) {
+        return Cartesian3.Magnitude(Cartesian3.Subtract(b, a));
+    }
     static Magnitude(a) {
         return Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
     }
@@ -6170,6 +6189,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "../core/dist/utils/runtime.js");
 /* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_simplify__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.simplify */ "../core/dist/geometry/geometry.simplify.js");
+
 
 
 class PlaneDefinition {
@@ -6229,7 +6250,8 @@ class PlaneCruncher {
                 return { x: p.x, y: p.y };
             });
             const hull = this._grahamScan(transformed);
-            const convertedHull = hull.map((p) => {
+            const simplified = _geometry_simplify__WEBPACK_IMPORTED_MODULE_2__.PolylineSimplifier.Shared.simplify(hull);
+            const convertedHull = simplified.map((p) => {
                 const point = { x: p.x, y: p.y, z: 0 };
                 return this._transformPoint(point, inv);
             });

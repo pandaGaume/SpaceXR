@@ -3,27 +3,32 @@ import { VirtualDisplay, VirtualDisplayInputsSource } from "../display";
 import { IMapTextureOptions, WebMapTexture } from "../materials";
 import { ISize2 } from "core/geometry";
 import { IPointerSource, IWheelSource, InputsNavigationTarget, PointerController } from "core/map";
+import { ITileMap } from "core/tiles";
 
 export class MapDisplay extends VirtualDisplay {
     static MaterialSuffix = "material";
     static TextureSuffix = "texture";
 
-    _map: WebMapTexture;
+    _content: WebMapTexture;
     _target: InputsNavigationTarget<VirtualDisplayInputsSource>;
     _controller: PointerController<IPointerSource & IWheelSource>;
 
     public constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene) {
         options = options ?? WebMapTexture.OptionsHD();
         super(name, dimension, options, scene);
-        this._map = this._createTextureMap(name, options, scene ?? this.getScene());
-        this.material = this._createMaterial(name, this._map, scene ?? this.getScene());
+        this._content = this._createTextureMap(name, options, this.getScene());
+        this.node.material = this._createMaterial(name, this._content, this.getScene());
 
-        this._target = new InputsNavigationTarget(this._map?.map);
+        this._target = new InputsNavigationTarget(this._content?.map);
         this._controller = new PointerController(this.pointerSource, this._target);
     }
 
-    get map(): WebMapTexture {
-        return this._map;
+    get content(): WebMapTexture {
+        return this._content;
+    }
+
+    get map(): ITileMap<unknown> {
+        return this._content.map;
     }
 
     protected _createTextureMap(name: string, options: IMapTextureOptions, scene: Scene): WebMapTexture {

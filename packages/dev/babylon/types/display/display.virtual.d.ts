@@ -4,7 +4,7 @@ import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
-export declare class VirtualDisplay extends Mesh implements IPhysicalDisplay {
+export declare class VirtualDisplay implements IPhysicalDisplay {
     static QVGA: ISize2;
     static VGA: ISize2;
     static QHD: ISize2;
@@ -22,14 +22,17 @@ export declare class VirtualDisplay extends Mesh implements IPhysicalDisplay {
     _ratio: Vector3;
     _pointerSource: VirtualDisplayInputsSource;
     _unit: Unit;
+    _node: Mesh;
     _inverseWorldMatrix?: Matrix;
-    constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Scene, unit?: Unit);
+    constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Mesh | Scene, unit?: Unit);
+    get node(): Mesh;
+    getScene(): Scene;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<IDisplay, unknown>>;
     get width(): number;
     get height(): number;
     get ratio(): number;
     get pointerSource(): VirtualDisplayInputsSource;
-    protected _buildVertexData(): VertexData;
+    protected _buildVertexData(dimension: ISize2): VertexData;
     get context3D(): TransformNode;
     get resolution(): ISize3;
     get unit(): Unit;

@@ -2,6 +2,7 @@ import { Nullable } from "../types";
 import { Assert } from "../utils";
 import { Cartesian2, Cartesian3 } from "./geometry.cartesian";
 import { ICartesian2, ICartesian3, IPlane } from "./geometry.interfaces";
+import { PolylineSimplifier } from "./geometry.simplify";
 
 export class PlaneDefinition implements IPlane {
     private _point: ICartesian3;
@@ -73,6 +74,7 @@ export class PlaneCruncher {
             const m = this._multiplyMatrices(r, t);
             const inv = this._invertMatrix(m);
 
+            // transform to project onto XY plane
             const transformed = Array.from(g.indices).map((i) => {
                 let p = Cartesian3.FromArray(this._positions!, i * 3);
                 p = this._transformPoint(p, m);
@@ -80,8 +82,10 @@ export class PlaneCruncher {
             });
 
             const hull = this._grahamScan(transformed);
+            const simplified = PolylineSimplifier.Shared.simplify(hull);
 
-            const convertedHull = hull.map((p) => {
+            // transform back
+            const convertedHull = simplified.map((p) => {
                 const point = { x: p.x, y: p.y, z: 0 };
                 return this._transformPoint(point, inv);
             });

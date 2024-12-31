@@ -222,6 +222,10 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return ref;
     }
 
+    public static Distance(a: ICartesian3, b: ICartesian3): number {
+        return Cartesian3.Magnitude(Cartesian3.Subtract(b, a));
+    }
+
     public static Magnitude(a: ICartesian3): number {
         return Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
     }

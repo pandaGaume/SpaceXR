@@ -40,6 +40,7 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static DivideToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
     static DivideByFloatInPlace(a: ICartesian3, n: number): ICartesian3;
     static DivideByFloatToRef(a: ICartesian3, n: number, ref: ICartesian3): ICartesian3;
+    static Distance(a: ICartesian3, b: ICartesian3): number;
     static Magnitude(a: ICartesian3): number;
     static ConvertInPlace(value: ICartesian3 | ICartesian4, from: Unit, to: Unit): ICartesian3;
     static ConvertToRef(value: ICartesian3 | ICartesian4, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3;

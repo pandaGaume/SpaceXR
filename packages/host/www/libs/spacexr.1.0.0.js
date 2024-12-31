@@ -3129,6 +3129,9 @@ class Cartesian3 extends Cartesian2 {
         ref.z = a.z / n;
         return ref;
     }
+    static Distance(a, b) {
+        return Cartesian3.Magnitude(Cartesian3.Subtract(b, a));
+    }
     static Magnitude(a) {
         return Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
     }
@@ -3743,6 +3746,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "./dist/utils/runtime.js");
 /* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_simplify__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.simplify */ "./dist/geometry/geometry.simplify.js");
+
 
 
 class PlaneDefinition {
@@ -3802,7 +3807,8 @@ class PlaneCruncher {
                 return { x: p.x, y: p.y };
             });
             const hull = this._grahamScan(transformed);
-            const convertedHull = hull.map((p) => {
+            const simplified = _geometry_simplify__WEBPACK_IMPORTED_MODULE_2__.PolylineSimplifier.Shared.simplify(hull);
+            const convertedHull = simplified.map((p) => {
                 const point = { x: p.x, y: p.y, z: 0 };
                 return this._transformPoint(point, inv);
             });

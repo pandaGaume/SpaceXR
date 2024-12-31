@@ -4,6 +4,17 @@ import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
+export declare enum VirtualDisplayUVMode {
+    KEEP = 0,
+    STRETCH_U = 1,
+    STRETCH_V = 2,
+    STRETCH = 3
+}
+export declare class VirtualDisplayOptions {
+    resolution?: ISize2;
+    target?: Mesh;
+    uvMode: VirtualDisplayUVMode;
+}
 export declare class VirtualDisplay implements IPhysicalDisplay {
     static QVGA: ISize2;
     static VGA: ISize2;
@@ -20,6 +31,7 @@ export declare class VirtualDisplay implements IPhysicalDisplay {
     _ppu: Vector3;
     _ratio: Vector3;
     _unit: Unit;
+    _uvs: Array<number>;
     _resolution: ISize3;
     _pointerSource: VirtualDisplayInputsSource;
     _node: Mesh;
@@ -33,6 +45,7 @@ export declare class VirtualDisplay implements IPhysicalDisplay {
     get height(): number;
     get ratio(): number;
     get pointerSource(): VirtualDisplayInputsSource;
+    protected _buildUvs(mesh: Mesh): Array<number>;
     protected _buildVertexData(dimension: ISize2): VertexData;
     get context3D(): TransformNode;
     get resolution(): ISize3;

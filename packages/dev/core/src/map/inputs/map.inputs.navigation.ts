@@ -100,14 +100,18 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
     public onDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void {
         switch (buttonIndex) {
             case 0: {
-                // translate the center of the map according the drag displacement
-                // then we have to negate the drag displacement
-                this._target.translateUnitsMap(-dx, -dy);
+                if (dx || dy) {
+                    // translate the center of the map according the drag displacement
+                    // then we have to negate the drag displacement.
+                    this._target.translateUnitsMap(-dx, -dy);
+                }
                 break;
             }
             case 2: {
-                // rotate the map according the drag displacement
-                this._target.rotateMap(dx);
+                if (dx) {
+                    // rotate the map according the drag displacement
+                    this._target.rotateMap(dx);
+                }
                 break;
             }
         }

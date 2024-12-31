@@ -1,4 +1,4 @@
-import { Matrix, Mesh, Nullable, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
+import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
 
 import { Cartesian3, ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
 
@@ -6,6 +6,28 @@ import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { Length, Quantity, Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
+
+export enum VirtualDisplayUVMode {
+    KEEP = 0,
+    STRETCH_U = 1,
+    STRETCH_V = 2,
+    STRETCH = 3,
+}
+
+export class VirtualDisplayOptions {
+    resolution?: ISize2;
+    target?: Mesh;
+    uvMode: VirtualDisplayUVMode = VirtualDisplayUVMode.KEEP;
+}
+
+enum UVKind {
+    MIN_U,
+    MIN_V,
+    MAX_U,
+    MAX_V,
+    DU,
+    DV,
+}
 
 export class VirtualDisplay implements IPhysicalDisplay {
     public static QVGA: ISize2 = new Size2(320, 240);
@@ -26,6 +48,7 @@ export class VirtualDisplay implements IPhysicalDisplay {
     _ppu: Vector3;
     _ratio: Vector3;
     _unit: Unit;
+    _uvs: Array<number>;
 
     _resolution: ISize3;
     _pointerSource: VirtualDisplayInputsSource;
@@ -56,6 +79,7 @@ export class VirtualDisplay implements IPhysicalDisplay {
             const vertices = scene.getVerticesData(VertexBuffer.PositionKind);
             this._center = vertices ? Cartesian3.Centroid(vertices) : Cartesian3.Zero();
         }
+        this._uvs = this._buildUvs(this._node);
         this._worldTransform = new TransformNode(`${name}_context`, this._node.getScene());
         this._worldTransform.parent = this._node;
         this._node.isPickable = true; // enable pointer events
@@ -94,15 +118,40 @@ export class VirtualDisplay implements IPhysicalDisplay {
         return this._pointerSource;
     }
 
+    protected _buildUvs(mesh: Mesh): Array<number> {
+        // Extract UV data
+        const uvs = mesh.getVerticesData(VertexBuffer.UVKind);
+        if (uvs) {
+            let minU = Infinity;
+            let minV = Infinity;
+            let maxU = -Infinity;
+            let maxV = -Infinity;
+
+            // Iterate over the UV data (interleaved U and V)
+            for (let i = 0; i < uvs.length; i += 2) {
+                const u = uvs[i]; // U coordinate
+                const v = uvs[i + 1]; // V coordinate
+
+                // Update bounding box
+                if (u < minU) minU = u;
+                if (v < minV) minV = v;
+                if (u > maxU) maxU = u;
+                if (v > maxV) maxV = v;
+            }
+            return [minU, minV, maxU, maxV, maxU - minU, maxV - minV];
+        }
+        return [];
+    }
+
     protected _buildVertexData(dimension: ISize2): VertexData {
         const data = new VertexData();
         const sx = dimension.width;
         const sy = dimension.height;
 
-        data.positions = [0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0];
-        data.indices = [2, 1, 0, 0, 3, 2];
+        data.positions = [0.5 * sx, -0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
+        data.indices = [0, 3, 1, 3, 2, 1];
         data.normals = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1];
-        data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
+        data.uvs = [0, 0, 0, 1, 1, 1, 1, 0];
 
         return data;
     }
@@ -152,8 +201,13 @@ export class VirtualDisplay implements IPhysicalDisplay {
 
     public getPixelToRef0(pickedCoordinates: Vector2, pixel?: Vector2): Vector2 {
         pixel = pixel || Vector2.Zero();
-        pixel.x = Math.round(pickedCoordinates.x * this._resolution.width);
-        pixel.y = Math.round(pickedCoordinates.y * this._resolution.height);
+
+        let d = pickedCoordinates.x - this._uvs[UVKind.MIN_U];
+        let t = d / this._uvs[UVKind.DU];
+        pixel.x = Math.round(t * this._resolution.width);
+        d = pickedCoordinates.y - this._uvs[UVKind.MIN_V];
+        t = d / this._uvs[UVKind.DV];
+        pixel.y = this._resolution.height - Math.round(t * this._resolution.height);
         return pixel;
     }
 

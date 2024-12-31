@@ -400,7 +400,9 @@ class VirtualDisplayInputsSource {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   VirtualDisplay: () => (/* binding */ VirtualDisplay)
+/* harmony export */   VirtualDisplay: () => (/* binding */ VirtualDisplay),
+/* harmony export */   VirtualDisplayOptions: () => (/* binding */ VirtualDisplayOptions),
+/* harmony export */   VirtualDisplayUVMode: () => (/* binding */ VirtualDisplayUVMode)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
@@ -414,6 +416,27 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var VirtualDisplayUVMode;
+(function (VirtualDisplayUVMode) {
+    VirtualDisplayUVMode[VirtualDisplayUVMode["KEEP"] = 0] = "KEEP";
+    VirtualDisplayUVMode[VirtualDisplayUVMode["STRETCH_U"] = 1] = "STRETCH_U";
+    VirtualDisplayUVMode[VirtualDisplayUVMode["STRETCH_V"] = 2] = "STRETCH_V";
+    VirtualDisplayUVMode[VirtualDisplayUVMode["STRETCH"] = 3] = "STRETCH";
+})(VirtualDisplayUVMode || (VirtualDisplayUVMode = {}));
+class VirtualDisplayOptions {
+    constructor() {
+        this.uvMode = VirtualDisplayUVMode.KEEP;
+    }
+}
+var UVKind;
+(function (UVKind) {
+    UVKind[UVKind["MIN_U"] = 0] = "MIN_U";
+    UVKind[UVKind["MIN_V"] = 1] = "MIN_V";
+    UVKind[UVKind["MAX_U"] = 2] = "MAX_U";
+    UVKind[UVKind["MAX_V"] = 3] = "MAX_V";
+    UVKind[UVKind["DU"] = 4] = "DU";
+    UVKind[UVKind["DV"] = 5] = "DV";
+})(UVKind || (UVKind = {}));
 class VirtualDisplay {
     constructor(name, dimension, resolution, scene, unit = core_math__WEBPACK_IMPORTED_MODULE_1__.Length.Units.meter) {
         this._dimension = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(dimension);
@@ -432,6 +455,7 @@ class VirtualDisplay {
             const vertices = scene.getVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind);
             this._center = vertices ? core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Centroid(vertices) : core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
         }
+        this._uvs = this._buildUvs(this._node);
         this._worldTransform = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`${name}_context`, this._node.getScene());
         this._worldTransform.parent = this._node;
         this._node.isPickable = true;
@@ -462,14 +486,37 @@ class VirtualDisplay {
     get pointerSource() {
         return this._pointerSource;
     }
+    _buildUvs(mesh) {
+        const uvs = mesh.getVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind);
+        if (uvs) {
+            let minU = Infinity;
+            let minV = Infinity;
+            let maxU = -Infinity;
+            let maxV = -Infinity;
+            for (let i = 0; i < uvs.length; i += 2) {
+                const u = uvs[i];
+                const v = uvs[i + 1];
+                if (u < minU)
+                    minU = u;
+                if (v < minV)
+                    minV = v;
+                if (u > maxU)
+                    maxU = u;
+                if (v > maxV)
+                    maxV = v;
+            }
+            return [minU, minV, maxU, maxV, maxU - minU, maxV - minV];
+        }
+        return [];
+    }
     _buildVertexData(dimension) {
         const data = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData();
         const sx = dimension.width;
         const sy = dimension.height;
-        data.positions = [0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0, 0.5 * sx, -0.5 * sy, 0];
-        data.indices = [2, 1, 0, 0, 3, 2];
+        data.positions = [0.5 * sx, -0.5 * sy, 0, 0.5 * sx, 0.5 * sy, 0, -0.5 * sx, 0.5 * sy, 0, -0.5 * sx, -0.5 * sy, 0];
+        data.indices = [0, 3, 1, 3, 2, 1];
         data.normals = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1];
-        data.uvs = [0, 0, 1, 0, 1, 1, 0, 1];
+        data.uvs = [0, 0, 0, 1, 1, 1, 1, 0];
         return data;
     }
     get context3D() {
@@ -498,8 +545,12 @@ class VirtualDisplay {
     }
     getPixelToRef0(pickedCoordinates, pixel) {
         pixel = pixel || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
-        pixel.x = Math.round(pickedCoordinates.x * this._resolution.width);
-        pixel.y = Math.round(pickedCoordinates.y * this._resolution.height);
+        let d = pickedCoordinates.x - this._uvs[UVKind.MIN_U];
+        let t = d / this._uvs[UVKind.DU];
+        pixel.x = Math.round(t * this._resolution.width);
+        d = pickedCoordinates.y - this._uvs[UVKind.MIN_V];
+        t = d / this._uvs[UVKind.DV];
+        pixel.y = this._resolution.height - Math.round(t * this._resolution.height);
         return pixel;
     }
     getXYZWorldVectors() {
@@ -546,7 +597,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicSphere),
 /* harmony export */   VirtualDisplay: () => (/* reexport safe */ _display_virtual__WEBPACK_IMPORTED_MODULE_0__.VirtualDisplay),
-/* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayInputsSource)
+/* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayInputsSource),
+/* harmony export */   VirtualDisplayOptions: () => (/* reexport safe */ _display_virtual__WEBPACK_IMPORTED_MODULE_0__.VirtualDisplayOptions),
+/* harmony export */   VirtualDisplayUVMode: () => (/* reexport safe */ _display_virtual__WEBPACK_IMPORTED_MODULE_0__.VirtualDisplayUVMode)
 /* harmony export */ });
 /* harmony import */ var _display_virtual__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./display.virtual */ "./dist/display/display.virtual.js");
 /* harmony import */ var _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./display.inputs.scene */ "./dist/display/display.inputs.scene.js");
@@ -2230,7 +2283,7 @@ WebMapTexture.DefaultOptions = {
     generateMipMaps: false,
     samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE,
     format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGBA,
-    invertY: false,
+    invertY: true,
 };
 //# sourceMappingURL=textures.webMapTexture.js.map
 
@@ -8119,11 +8172,15 @@ class InputsNavigationTarget {
     onDrag(src, dx, dy, buttonIndex, id) {
         switch (buttonIndex) {
             case 0: {
-                this._target.translateUnitsMap(-dx, -dy);
+                if (dx || dy) {
+                    this._target.translateUnitsMap(-dx, -dy);
+                }
                 break;
             }
             case 2: {
-                this._target.rotateMap(dx);
+                if (dx) {
+                    this._target.rotateMap(dx);
+                }
                 break;
             }
         }
@@ -15244,6 +15301,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.VectorTileGeomType),
 /* harmony export */   VirtualDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplay),
 /* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplayInputsSource),
+/* harmony export */   VirtualDisplayOptions: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplayOptions),
+/* harmony export */   VirtualDisplayUVMode: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplayUVMode),
 /* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Voltage),
 /* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Volume),
 /* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.WebMapMaterial),

@@ -5434,11 +5434,15 @@ class InputsNavigationTarget {
     onDrag(src, dx, dy, buttonIndex, id) {
         switch (buttonIndex) {
             case 0: {
-                this._target.translateUnitsMap(-dx, -dy);
+                if (dx || dy) {
+                    this._target.translateUnitsMap(-dx, -dy);
+                }
                 break;
             }
             case 2: {
-                this._target.rotateMap(dx);
+                if (dx) {
+                    this._target.rotateMap(dx);
+                }
                 break;
             }
         }

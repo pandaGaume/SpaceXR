@@ -193,16 +193,20 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
             return;
         }
 
-        const current = this._getDisplayPosition(scene);
-        if (current) {
+        const current = this._getPickingInfos(scene);
+        if (current && current.pickedPoint) {
             if (this._currentPosition) {
                 pointerInfo.skipOnPointerObservable = true;
                 // move
-                const pixelXY = this._display.getPixelToRef(current);
+                const pixelXY = this._display.getPixelToRef(current.pickedPoint);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                     const buttonIndex = (<any>pointerInfo.event).button;
                     const pointerId = (<any>pointerInfo.event).pointerId;
                     const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
+                    const c = current.getTextureCoordinates();
+                    if (c) {
+                        e.textureCoordinates = c;
+                    }
                     this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
@@ -218,7 +222,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
                 this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
             }
             // then move
-            const pixelXY = this._display.getPixelToRef(current);
+            const pixelXY = this._display.getPixelToRef(current.pickedPoint);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                 const buttonIndex = (<any>pointerInfo.event).button;
                 const pointerId = (<any>pointerInfo.event).pointerId;
@@ -249,10 +253,10 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         }
     }
 
-    protected _getDisplayPosition(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.Vector3> {
+    protected _getPickingInfos(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.PickingInfo> {
         var pickinfo = scene.pick(scene.pointerX, scene.pointerY, this._pickFilter.bind(this));
         if (pickinfo.hit) {
-            return pickinfo.pickedPoint;
+            return pickinfo;
         }
         return null;
     }

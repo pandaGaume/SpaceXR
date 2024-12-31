@@ -1,4 +1,4 @@
-import { Material, Scene, StandardMaterial } from "@babylonjs/core";
+import { Material, Mesh, Scene, StandardMaterial } from "@babylonjs/core";
 import { VirtualDisplay, VirtualDisplayInputsSource } from "../display";
 import { IMapTextureOptions, WebMapTexture } from "../materials";
 import { ISize2 } from "core/geometry";
@@ -13,7 +13,7 @@ export class MapDisplay extends VirtualDisplay {
     _target: InputsNavigationTarget<VirtualDisplayInputsSource>;
     _controller: PointerController<IPointerSource & IWheelSource>;
 
-    public constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Scene) {
+    public constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Mesh | Scene) {
         options = options ?? WebMapTexture.OptionsHD();
         super(name, dimension, options, scene);
         this._content = this._createTextureMap(name, options, this.getScene());

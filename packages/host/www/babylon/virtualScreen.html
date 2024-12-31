@@ -82,7 +82,6 @@
                     "display",
                     { height: h, width: w, thickness: t },
                     { width: 320, height: 180, thickness: 720 }, // in 'pixel', ratio of 16/9
-                    buildClipPlane,
                     scene
                 );
                 const displayMesh = display.node;
@@ -104,7 +103,7 @@
                 });
 
                 display.pointerSource.onPointerMoveObservable.add((eventData, eventState) => {
-                    console.log(`${eventData.x}, ${eventData.y}`);
+                    console.log(`x=${eventData.x}, y=${eventData.y}, u=${eventData.textureCoordinates?.x}, v=${eventData.textureCoordinates?.y}`);
                 });
 
                 display.pointerSource.onPointerEnterObservable.add((eventData, eventState) => {

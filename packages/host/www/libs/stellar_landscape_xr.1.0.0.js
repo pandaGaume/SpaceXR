@@ -323,15 +323,19 @@ class VirtualDisplayInputsSource {
         if (meshUnderPointer && meshUnderPointer !== this._display.node) {
             return;
         }
-        const current = this._getDisplayPosition(scene);
-        if (current) {
+        const current = this._getPickingInfos(scene);
+        if (current && current.pickedPoint) {
             if (this._currentPosition) {
                 pointerInfo.skipOnPointerObservable = true;
-                const pixelXY = this._display.getPixelToRef(current);
+                const pixelXY = this._display.getPixelToRef(current.pickedPoint);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                     const buttonIndex = pointerInfo.event.button;
                     const pointerId = pointerInfo.event.pointerId;
                     const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
+                    const c = current.getTextureCoordinates();
+                    if (c) {
+                        e.textureCoordinates = c;
+                    }
                     this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
@@ -344,7 +348,7 @@ class VirtualDisplayInputsSource {
                 const e = new core_map_inputs__WEBPACK_IMPORTED_MODULE_2__.Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
                 this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
             }
-            const pixelXY = this._display.getPixelToRef(current);
+            const pixelXY = this._display.getPixelToRef(current.pickedPoint);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
                 const buttonIndex = pointerInfo.event.button;
                 const pointerId = pointerInfo.event.pointerId;
@@ -371,10 +375,10 @@ class VirtualDisplayInputsSource {
             }
         }
     }
-    _getDisplayPosition(scene) {
+    _getPickingInfos(scene) {
         var pickinfo = scene.pick(scene.pointerX, scene.pointerY, this._pickFilter.bind(this));
         if (pickinfo.hit) {
-            return pickinfo.pickedPoint;
+            return pickinfo;
         }
         return null;
     }
@@ -7929,6 +7933,12 @@ class Cartesian2WithInfos extends _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesi
     }
     get pointerId() {
         return this._pointerId;
+    }
+    get textureCoordinates() {
+        return this._textureCoordinates;
+    }
+    set textureCoordinates(v) {
+        this._textureCoordinates = v;
     }
 }
 //# sourceMappingURL=map.inputs.cartesian.js.map

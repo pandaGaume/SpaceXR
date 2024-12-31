@@ -37,7 +37,7 @@ export declare class VirtualDisplayInputsSource implements IPointerSource, IWhee
     private _onPointerUp;
     private _onPointerMove;
     private _onWheel;
-    protected _getDisplayPosition(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.Vector3>;
+    protected _getPickingInfos(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.PickingInfo>;
     protected _pickFilter(mesh: BABYLON.Nullable<any>): boolean;
     protected _getScene(): BABYLON.Scene;
 }

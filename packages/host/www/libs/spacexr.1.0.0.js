@@ -5237,6 +5237,12 @@ class Cartesian2WithInfos extends _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesi
     get pointerId() {
         return this._pointerId;
     }
+    get textureCoordinates() {
+        return this._textureCoordinates;
+    }
+    set textureCoordinates(v) {
+        this._textureCoordinates = v;
+    }
 }
 //# sourceMappingURL=map.inputs.cartesian.js.map
 

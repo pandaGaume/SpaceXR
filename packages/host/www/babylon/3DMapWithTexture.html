@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Exemple d'un ecrans virtuel</title>
+        <!--script src="https://cdn.babylonjs.com/babylon.js"></script-->
+        <script src="../libs/babylon.js"></script>
+        <!--script src="../libs/babylon.inspector.bundle.js"></script-->
+        <!--script src="../libs/babylon.glTF2FileLoader.min.js"></script-->
+
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+
+        <style>
+            html,
+            body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #mapcontainer {
+                position: relative;
+                width: 100%;
+                height: 70%;
+                margin: 0px auto;
+            }
+
+            #mapcanvas3d {
+                width: 100%;
+                height: 100%;
+            }
+            .babylon-purple-bg {
+                background-color: #34344a;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapcontainer">
+            <canvas id="mapcanvas3d"></canvas>
+        </div>
+        <script>
+            const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc;
+            const defaultLod = 12;
+
+            function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
+                // Create a PBR material
+                const glass = new BABYLON.PBRMaterial("glass", scene);
+                glass.reflectionTexture = reflectionTexture;
+                glass.refractionTexture = refractionTexture;
+                glass.linkRefractionWithTransparency = true;
+                glass.indexOfRefraction = 0.52;
+                glass.alpha = 0.5;
+                glass.microSurface = 1; // Controls the roughness of the material
+                glass.albedoColor = new BABYLON.Color3(0.1, 0.1, 0.3);
+                glass.roughness = 0.2;
+                glass.backFaceCulling = false;
+                return glass;
+            }
+
+            async function createScene(canvas, engine) {
+                const unit = 3;
+                const scene = new BABYLON.Scene(engine);
+                // Parameters: name, alpha, beta, radius, target position, scene
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
+
+                camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+                camera.wheelPrecision = 50;
+                camera.minZ = 0;
+                camera.upperBetaLimit = Math.PI / 2 - Math.PI / 10;
+
+                // This attaches the camera to the canvas
+                camera.attachControl(canvas, true);
+
+                // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+                // Default intensity is 1. Let's dim the light a small amount
+                light.intensity = 0.8;
+                light.diffuse = new BABYLON.Color3(1, 1, 1);
+
+                //const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(10, 2, 0), scene);
+                //pointLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
+                //pointLight.intensity = 1;
+
+                // create a basic table
+                const size = {
+                    width: 3.2 * unit,
+                    height: 2.4 * unit,
+                };
+
+                const resolution = SPACEXR.VirtualDisplay.QVGA;
+
+                // set the virtual display
+                const buildClipPlane = true;
+                const display = new SPACEXR.HolographicDisplay("holographicDisplay", size, resolution, scene);
+                const displayMesh = display.node;
+                displayMesh.material = createGlassMaterial(scene);
+                displayMesh.rotation.x = (3 * Math.PI) / 2;
+                displayMesh.freezeWorldMatrix();
+
+                camera.setTarget(displayMesh);
+
+                // build the map options
+                const mapOptions = {};
+
+                // build the map
+                const mapNode = new SPACEXR.Map3D("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
+                mapNode.position.z = 0.1;
+
+                // build layer options
+                const demLayerOptions = {
+                    attribution: SPACEXR.MapZen.Attribution,
+                    exageration: 1.5,
+                };
+
+                // build layer and add it to the map
+                //const filter = new SPACEXR.MedianFilter(3,30);
+                const demCodecOptions = {
+                    //filter: filter
+                };
+                let client = SPACEXR.MapZen.DemClient(demCodecOptions);
+                const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(mapNode);
+
+                const imageLayerOptions = {
+                    zoomOffset: 1,
+                    alpha: 0.5,
+                    background: "rgb(.5,.5,.5)",
+                };
+
+                client = SPACEXR.Google.SatelliteClient2d();
+                const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(mapNode);
+
+                /*const material = demLayer.material;
+                const debugLayerOptions = {
+                    function:material?.debug
+                }
+                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
+
+                const showAxes = false;
+                if (showAxes) {
+                    const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
+                    axes.xAxis.parent = display;
+                    axes.yAxis.parent = display;
+                    axes.zAxis.parent = display;
+
+                    const mainaxes = new BABYLON.Debug.AxesViewer(scene, size.width / 5);
+                }
+
+                return scene;
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
+                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+                const scene = await createScene(canvas, engine); //Call the createScene function
+
+                scene.debugLayer.show();
+
+                // initialize XR
+                //var xr = await scene.createDefaultXRExperienceAsync();
+
+                // Register a render loop to repeatedly render the scene
+                engine.runRenderLoop(function () {
+                    scene.render();
+                });
+
+                // Watch for browser/canvas resize events
+                window.addEventListener("resize", function () {
+                    engine.resize();
+                });
+            };
+        </script>
+    </body>
+</html>

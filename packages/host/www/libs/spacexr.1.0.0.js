@@ -4132,6 +4132,9 @@ class Size3 extends Size2 {
     static Zero() {
         return new Size3(0, 0, 0);
     }
+    static IsEmpty(size) {
+        return size.width === 0 && size.height === 0 && (size.thickness ?? 0) === 0;
+    }
     static FromSize(size) {
         if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsSize3)(size)) {
             return new Size3(size.width, size.height, size.thickness);

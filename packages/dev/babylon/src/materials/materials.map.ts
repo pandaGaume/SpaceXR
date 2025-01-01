@@ -250,10 +250,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public addTile(tile: IElevationTile, source: IElevationHost): void {
+    public addTile(tile: IElevationTile, source?: IElevationHost): void {
         // ensure elevation sampler is ready
         // this is done only once for the material
-        this._ensureElevationSamplersReady(tile, source);
+        if (source && IsTileMetricsProvider(source)) {
+            this._ensureElevationSamplersReady(tile, source);
+        }
 
         // prepare the elevation sampler.
         let elevationArea: ITexture3Layer | undefined = undefined;
@@ -449,7 +451,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 range.unionInPlace(infos.min.z, infos.max.z);
             }
         }
-        return range ?? new Range(0, 0);
+        return range ?? new Range(Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
     }
 
     protected _updateElevationRange(infos: IDemInfos): void {
@@ -571,7 +573,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     protected _buildElevationSampler(width: number, height?: number, depth?: number): void {
         height = height ?? width;
-        const maxDepth = depth ?? this._getElevationSamplerDepth();
+        const maxDepth = depth ?? this._getElevationSamplerDepth(width, height);
         const generateMipMap = false;
         const scene = this.getScene();
         this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, maxDepth, generateMipMap, scene);
@@ -658,12 +660,39 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         target.registerInstancedBuffer(Map3dMaterial.SamplerDepthsAttName, 3);
     }
 
-    protected _getElevationSamplerDepth(): number {
-        return Map3dMaterial.DefaultElevationTextureDepth; // for dev purpose we set a fixed number of tiles
+    protected _getElevationSamplerDepth(width: number, height: number): number {
+        if (Size3.IsEmpty(this._displayResolution)) {
+            return Map3dMaterial.DefaultElevationTextureDepth; // we set a fixed number of tiles
+        }
+
+        // we calculate the number of tiles that can be displayed on the screen
+        // using empiric formula based on surface, trying to minimize the number of tiles
+        const a = this._displayResolution.width / width;
+        const b = this._displayResolution.height / height;
+        const N = Math.ceil(a * b + 2 * (a + b));
+        return N;
     }
 
     protected _growElevationSamplersDepth(): void {
         // this is the place we gonna grow the depth of the samplers
-        // TODO
+        // this may happen when we deal with multiple LOD, has we do not want to waste memory at setup time with a huge buffer
+        const currentDepth = this._elevationSampler?.depth ?? 0;
+        const newDepth = Math.ceil(currentDepth * 1.2);
+        console.log(`Need to Grow elevation samplers depth from ${currentDepth} to ${newDepth}`);
+        const width = this._elevationSampler?.width ?? 0;
+        const height = this._elevationSampler?.height ?? 0;
+
+        const existingTiles = Array.from(this._tileLayouts.values()).map((v) => v.tile);
+
+        this._tileLayouts.clear();
+        this._elevationSampler?.dispose();
+
+        const generateMipMap = false;
+        const scene = this.getScene();
+        this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.Elevation, width, height, newDepth, generateMipMap, scene);
+
+        for (let tile of existingTiles) {
+            this.addTile(tile);
+        }
     }
 }

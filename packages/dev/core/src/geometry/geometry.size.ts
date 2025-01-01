@@ -50,6 +50,10 @@ export class Size3 extends Size2 implements ISize3 {
         return new Size3(0, 0, 0);
     }
 
+    public static IsEmpty(size: ISize3): boolean {
+        return size.width === 0 && size.height === 0 && (size.thickness ?? 0) === 0;
+    }
+
     public static FromSize(size: ISize2 | ISize3): Size3 {
         if (IsSize3(size)) {
             return new Size3(size.width, size.height, size.thickness);

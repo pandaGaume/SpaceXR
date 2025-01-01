@@ -16,6 +16,7 @@ export declare class Size3 extends Size2 implements ISize3 {
     static ConvertInPlace(size: ISize3, from: Unit, to: Unit): ISize3;
     static ConvertToRef(size: ISize3, from: Unit, to: Unit, ref?: ISize3): ISize3;
     static Zero(): Size3;
+    static IsEmpty(size: ISize3): boolean;
     static FromSize(size: ISize2 | ISize3): Size3;
     constructor(width: number, height: number, thickness?: number);
     get hasThickness(): boolean;

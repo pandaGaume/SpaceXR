@@ -2,10 +2,17 @@ import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
+import { ICartesian3 } from "../../geometry";
 export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
 }
 export declare function HasNavigationState(obj: unknown): obj is IHasNavigationState;
+export interface ICameraState {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
+    position: ICartesian3;
+    target: ICartesian3;
+    fov: number;
+}
 export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     center: IGeo2;
@@ -14,6 +21,7 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     bounds: ITileSystemBounds;
     lod: number;
     scale: number;
+    camera?: ICameraState;
     copy(state: ITileNavigationState): ITileNavigationState;
     syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
 }

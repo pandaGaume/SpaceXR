@@ -1,5 +1,5 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
-import { ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ICameraState, ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileSystemBounds } from "../tiles.interfaces";
@@ -12,6 +12,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     static readonly LOD_PROPERTY_NAME: string;
     static readonly AZIMUTH_PROPERTY_NAME: string;
     static readonly BOUNDS_PROPERTY_NAME: string;
+    static readonly CAMERA_PROPERTY_NAME: string;
     static GetLodScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _lodf: number;
@@ -21,6 +22,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _cartesianCache: ICartesian2;
     _lod: number;
     _scale: number;
+    _camera?: ICameraState;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
     constructor(center?: IGeo2 | Array<number>, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
@@ -34,6 +36,8 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     set zoom(lodf: number);
     get azimuth(): Bearing;
     set azimuth(r: Bearing);
+    get camera(): ICameraState | undefined;
+    set camera(c: ICameraState);
     get bounds(): ITileSystemBounds;
     set bounds(bounds: ITileSystemBounds);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;

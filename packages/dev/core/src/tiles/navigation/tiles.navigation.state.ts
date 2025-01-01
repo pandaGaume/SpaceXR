@@ -1,5 +1,5 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
-import { ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ICameraState, ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileSystemBounds } from "../tiles.interfaces";
@@ -14,6 +14,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     public static readonly LOD_PROPERTY_NAME: string = "lod";
     public static readonly AZIMUTH_PROPERTY_NAME: string = "azimuth";
     public static readonly BOUNDS_PROPERTY_NAME: string = "bounds";
+    public static readonly CAMERA_PROPERTY_NAME: string = "camera";
 
     public static GetLodScale(lod: number): number {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
@@ -33,6 +34,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
     _lod: number;
     _scale: number;
+    _camera?: ICameraState;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
 
@@ -141,6 +143,22 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         }
     }
 
+    public get camera(): ICameraState | undefined {
+        return this._camera;
+    }
+
+    public set camera(c: ICameraState) {
+        if (this._camera !== c) {
+            const old = this._camera;
+            this._camera = c;
+            this.invalidate();
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, old, this._camera, TileNavigationState.CAMERA_PROPERTY_NAME);
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
+        }
+    }
+
     public get bounds(): ITileSystemBounds {
         return this._bounds;
     }
@@ -159,6 +177,9 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         }
     }
 
+    /// <summary>
+    /// An observable that notifies subscribers of changes to properties in the state.
+    /// </summary>
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>> {
         if (!this._propertyChangedObservable) this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>();
         return this._propertyChangedObservable;

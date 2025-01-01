@@ -1777,6 +1777,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                         const first = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
                         elevationArea.update(first, w, h, 1, 1);
                     }
+                    else {
+                        const last = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(elevations, w, h, w - 1, h - 1);
+                        elevationArea.update(last, w, h, 1, 1);
+                    }
                 }
                 k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.S];
                 if (k) {

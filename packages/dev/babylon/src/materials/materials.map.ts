@@ -367,6 +367,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                         // we update the last value of the last row of the current tile with the first value of the first row of the south-east neigbour
                         const first = ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
                         elevationArea.update(first, w, h, 1, 1);
+                    } else {
+                        // we duplicate the last value of the last row of the current tile
+                        const last = ElevationHelpers.GetElevationAt(elevations, w, h, w - 1, h - 1);
+                        elevationArea.update(last, w, h, 1, 1);
                     }
                 }
 

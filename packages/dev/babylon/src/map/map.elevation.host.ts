@@ -198,8 +198,11 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
 
     protected _buildMaterial(name: string, scene?: Scene): Map3dMaterial {
         const material = new Map3dMaterial(name, scene);
-        if (IsHolographicBounds(this.display)) {
-            material.holographicBounds = this.display;
+        if (this.display) {
+            if (IsHolographicBounds(this.display)) {
+                material.holographicBounds = this.display;
+            }
+            material.displayResolution = this.display?.resolution;
         }
         material.wireframe = true;
         return material;

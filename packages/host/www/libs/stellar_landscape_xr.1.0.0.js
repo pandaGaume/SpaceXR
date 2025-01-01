@@ -1046,8 +1046,11 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     }
     _buildMaterial(name, scene) {
         const material = new _materials__WEBPACK_IMPORTED_MODULE_7__.Map3dMaterial(name, scene);
-        if ((0,_display__WEBPACK_IMPORTED_MODULE_8__.IsHolographicBounds)(this.display)) {
-            material.holographicBounds = this.display;
+        if (this.display) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_8__.IsHolographicBounds)(this.display)) {
+                material.holographicBounds = this.display;
+            }
+            material.displayResolution = this.display?.resolution;
         }
         material.wireframe = true;
         return material;
@@ -1540,12 +1543,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
-/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
-/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.helpers.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.helpers.js");
+
 
 
 
@@ -1587,6 +1592,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         this._elevationRange = null;
         this._mapScale = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.One();
         this._tileLayouts = new Map();
+        this._displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.Zero();
         this._shaderName = shaderName ?? Map3dMaterial.DefaultShaderName;
     }
     getClassName() {
@@ -1600,6 +1606,15 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             this._unbindHolographicBounds();
             this._holoBounds = value;
             this._bindHolographicBounds();
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+        }
+    }
+    get displayResolution() {
+        return this._displayResolution;
+    }
+    set displayResolution(value) {
+        if (this._displayResolution !== value) {
+            this._displayResolution = value;
             this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
         }
     }
@@ -1685,7 +1700,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         let elevationArea = undefined;
         elevationArea = this._elevationSampler?.reserve();
         if (!elevationArea) {
-            this._growSamplersDepth();
+            this._growElevationSamplersDepth();
             elevationArea = this._elevationSampler?.reserve();
         }
         if (elevationArea !== undefined) {
@@ -1748,65 +1763,65 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 this._updateElevationRange(tile.content);
                 elevationArea.update(elevations, 0, 0, w, h);
                 const quadkey = tile.address.quadkey;
-                const keys = core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileAddress.ToNeigborsKey(quadkey);
-                let k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.N];
+                const keys = core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ToNeigborsKey(quadkey);
+                let k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_3__.NeighborsAddress.N];
                 let layout;
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstRow = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstRow(elevations, w);
+                        const firstRow = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetFirstRow(elevations, w);
                         layout.getArea(Map3dLayerKind.Elevation)?.layer.update(firstRow, 0, h, w, 1);
                     }
                 }
-                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.E];
+                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_3__.NeighborsAddress.E];
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstColumn = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstColumn(layout.tile.content.elevations, w, h);
+                        const firstColumn = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetFirstColumn(layout.tile.content.elevations, w, h);
                         elevationArea.update(firstColumn, w, 0, 1, h);
                     }
                     else {
-                        const lastColumn = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetLastColumn(elevations, w, h);
+                        const lastColumn = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetLastColumn(elevations, w, h);
                         elevationArea.update(lastColumn, w, 0, 1, h);
                     }
                 }
-                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.SE];
+                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_3__.NeighborsAddress.SE];
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const first = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
+                        const first = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
                         elevationArea.update(first, w, h, 1, 1);
                     }
                     else {
-                        const last = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(elevations, w, h, w - 1, h - 1);
+                        const last = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetElevationAt(elevations, w, h, w - 1, h - 1);
                         elevationArea.update(last, w, h, 1, 1);
                     }
                 }
-                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.S];
+                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_3__.NeighborsAddress.S];
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstRow = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstRow(layout.tile.content.elevations, w);
+                        const firstRow = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetFirstRow(layout.tile.content.elevations, w);
                         elevationArea.update(firstRow, 0, h, w, 1);
                     }
                     else {
-                        const lastRow = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetLastRow(elevations, w, h);
+                        const lastRow = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetLastRow(elevations, w, h);
                         elevationArea.update(lastRow, 0, h, w, 1);
                     }
                 }
-                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.W];
+                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_3__.NeighborsAddress.W];
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const firstColumn = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetFirstColumn(elevations, w, h);
+                        const firstColumn = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetFirstColumn(elevations, w, h);
                         layout.getArea(Map3dLayerKind.Elevation)?.layer.update(firstColumn, w, 0, 1, h);
                     }
                 }
-                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_2__.NeighborsAddress.NW];
+                k = keys[core_tiles__WEBPACK_IMPORTED_MODULE_3__.NeighborsAddress.NW];
                 if (k) {
                     layout = this._tileLayouts.get(k);
                     if (layout?.tile.content?.elevations) {
-                        const first = core_dem__WEBPACK_IMPORTED_MODULE_3__.ElevationHelpers.GetElevationAt(elevations, w, h, 0, 0);
+                        const first = core_dem__WEBPACK_IMPORTED_MODULE_4__.ElevationHelpers.GetElevationAt(elevations, w, h, 0, 0);
                         layout.getArea(Map3dLayerKind.Elevation)?.layer.update(first, w, h, 1, 1);
                     }
                 }
@@ -1825,13 +1840,13 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             const infos = b.tile.content;
             if (infos) {
                 if (range === null) {
-                    range = new core_math__WEBPACK_IMPORTED_MODULE_4__.Range(infos.min.z, infos.max.z);
+                    range = new core_math__WEBPACK_IMPORTED_MODULE_5__.Range(infos.min.z, infos.max.z);
                     continue;
                 }
                 range.unionInPlace(infos.min.z, infos.max.z);
             }
         }
-        return range ?? new core_math__WEBPACK_IMPORTED_MODULE_4__.Range(0, 0);
+        return range ?? new core_math__WEBPACK_IMPORTED_MODULE_5__.Range(0, 0);
     }
     _updateElevationRange(infos) {
         if (infos) {
@@ -1840,17 +1855,17 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     _pushUniformsForBounds(defines, uniforms) {
-        if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicBox)(this._holoBounds)) {
+        if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicBox)(this._holoBounds)) {
             defines.HOLOGRAPHIC_BOUNDS_BOX = true;
             const properties = ["point", "normal"];
             uniforms.push(...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
         }
-        else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicSphere)(this._holoBounds)) {
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicSphere)(this._holoBounds)) {
             throw new Error("Sphere bounds Not supported");
             defines.HOLOGRAPHIC_BOUNDS_SPHERE = true;
             uniforms.push(Map3dMaterial.RadiusUniformName);
         }
-        else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicCylinder)(this._holoBounds)) {
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicCylinder)(this._holoBounds)) {
             throw new Error("Cylinder bounds Not supported");
             defines.HOLOGRAPHIC_BOUNDS_CYLINDER = true;
             uniforms.push(Map3dMaterial.RadiusUniformName, Map3dMaterial.HeightUniformName);
@@ -1872,7 +1887,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindHolographicBounds() {
         if (this._holoBounds) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicBox)(this._holoBounds)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicBox)(this._holoBounds)) {
                 this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
                 this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
             }
@@ -1880,19 +1895,19 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindClipPlanes(effect) {
         if (this._holoBounds) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicBox)(this._holoBounds)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicBox)(this._holoBounds)) {
                 const clips = this._holoBounds.clipPlanesWorld;
                 if (clips) {
-                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.North);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.South);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.East);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.West);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.North);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.South);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.East);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.West);
                 }
             }
-            else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicSphere)(this._holoBounds)) {
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicSphere)(this._holoBounds)) {
                 effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
             }
-            else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicCylinder)(this._holoBounds)) {
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicCylinder)(this._holoBounds)) {
                 effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
                 effect.setVector3(Map3dMaterial.HeightUniformName, this._holoBounds.height ?? new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, Number.MAX_SAFE_INTEGER, 0));
             }
@@ -1945,7 +1960,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                     internalFormat: scene.getEngine()._gl.R16F,
                     generateMipMap: generateMipMap,
                 };
-                return new _textures__WEBPACK_IMPORTED_MODULE_6__.Texture3(scene, options);
+                return new _textures__WEBPACK_IMPORTED_MODULE_7__.Texture3(scene, options);
             }
             case Map3dLayerKind.Normal: {
                 const options = {
@@ -1958,7 +1973,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                     internalFormat: scene.getEngine()._gl.RGB8,
                     generateMipMap: generateMipMap,
                 };
-                return new _textures__WEBPACK_IMPORTED_MODULE_6__.Texture3(scene, options);
+                return new _textures__WEBPACK_IMPORTED_MODULE_7__.Texture3(scene, options);
             }
             case Map3dLayerKind.Texture: {
                 const options = {
@@ -1971,7 +1986,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                     internalFormat: scene.getEngine()._gl.RGB8,
                     generateMipMap: generateMipMap,
                 };
-                return new _textures__WEBPACK_IMPORTED_MODULE_6__.Texture3(scene, options);
+                return new _textures__WEBPACK_IMPORTED_MODULE_7__.Texture3(scene, options);
             }
             default: {
                 return null;
@@ -1979,7 +1994,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     _tryGetSize(tile, src) {
-        let size = (0,core_tiles__WEBPACK_IMPORTED_MODULE_2__.IsTileMetricsProvider)(src) ? src.metrics.tileSize : 0;
+        let size = (0,core_tiles__WEBPACK_IMPORTED_MODULE_3__.IsTileMetricsProvider)(src) ? src.metrics.tileSize : 0;
         if (!size) {
             size = Math.sqrt(tile.content?.elevations?.length ?? 0);
         }
@@ -2006,11 +2021,12 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         target.registerInstancedBuffer(Map3dMaterial.SamplerDepthsAttName, 3);
     }
     _getElevationSamplerDepth() {
-        return 24;
+        return Map3dMaterial.DefaultElevationTextureDepth;
     }
-    _growSamplersDepth() {
+    _growElevationSamplersDepth() {
     }
 }
+Map3dMaterial.DefaultElevationTextureDepth = 16;
 Map3dMaterial.DefaultShaderName = "map";
 Map3dMaterial.SamplerDepthsAttName = "depths";
 Map3dMaterial.ViewProjectionMatrixUniformName = "viewProjection";

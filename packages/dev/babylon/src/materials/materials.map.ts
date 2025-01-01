@@ -23,7 +23,7 @@ import { Observer } from "core/events";
 import { IElevationHost, IElevationTile, IMap3dMaterial } from "../map";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { IsTileMetricsProvider, NeighborsAddress, TileAddress } from "core/tiles";
-import { ICartesian3 } from "core/geometry";
+import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { Range } from "core/math";
 import { ElevationHelpers, IDemInfos } from "core/dem";
 
@@ -56,6 +56,8 @@ class TileLayout {
 }
 
 export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
+    public static DefaultElevationTextureDepth: number = 16;
+
     public static DefaultShaderName: string = "map";
 
     public static SamplerDepthsAttName: string = "depths";
@@ -97,6 +99,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     // the layout and meta properties of each tiles
     protected _tileLayouts: Map<string, TileLayout> = new Map<string, TileLayout>();
 
+    // the resolution of the display
+    private _displayResolution: ISize3 = Size3.Zero();
+
     public constructor(name: string, scene?: Scene, shaderName?: string) {
         super(name, scene);
         this._shaderName = shaderName ?? Map3dMaterial.DefaultShaderName;
@@ -115,6 +120,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             this._unbindHolographicBounds();
             this._holoBounds = value;
             this._bindHolographicBounds();
+            this.markAsDirty(Material.AttributesDirtyFlag);
+        }
+    }
+
+    public get displayResolution(): ISize3 {
+        return this._displayResolution;
+    }
+
+    public set displayResolution(value: ISize3) {
+        if (this._displayResolution !== value) {
+            this._displayResolution = value;
             this.markAsDirty(Material.AttributesDirtyFlag);
         }
     }
@@ -245,7 +261,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         elevationArea = this._elevationSampler?.reserve();
         if (!elevationArea) {
             // this is the place where we need to reallocate some depth into the samplers
-            this._growSamplersDepth();
+            this._growElevationSamplersDepth();
             elevationArea = this._elevationSampler?.reserve();
         }
 
@@ -643,10 +659,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _getElevationSamplerDepth(): number {
-        return 24; // for dev purpose we set a fixed number of tiles
+        return Map3dMaterial.DefaultElevationTextureDepth; // for dev purpose we set a fixed number of tiles
     }
 
-    protected _growSamplersDepth(): void {
+    protected _growElevationSamplersDepth(): void {
         // this is the place we gonna grow the depth of the samplers
         // TODO
     }

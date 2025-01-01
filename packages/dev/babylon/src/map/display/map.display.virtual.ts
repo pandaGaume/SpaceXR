@@ -1,9 +1,9 @@
 import { Material, Mesh, Scene, StandardMaterial } from "@babylonjs/core";
-import { VirtualDisplay, VirtualDisplayInputsSource } from "../display";
-import { IMapTextureOptions, WebMapTexture } from "../materials";
 import { ISize2 } from "core/geometry";
 import { IPointerSource, IWheelSource, InputsNavigationTarget, PointerController } from "core/map";
 import { ITileMap } from "core/tiles";
+import { VirtualDisplay, VirtualDisplayInputsSource } from "../../display";
+import { IMapTextureOptions, WebMapTexture } from "../../materials";
 
 export class MapDisplay extends VirtualDisplay {
     static MaterialSuffix = "material";

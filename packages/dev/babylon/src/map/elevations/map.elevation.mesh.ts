@@ -2,7 +2,7 @@ import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { ITileMetrics, Tile, TileContentType } from "core/tiles";
 import { Nullable } from "core/types";
-import { ElevationTexture } from "../materials";
+import { ElevationTexture } from "../../materials";
 import { IElevationTile } from "./map.elevation.interfaces";
 
 export class ElevationTile extends Tile<IDemInfos> implements IElevationTile {

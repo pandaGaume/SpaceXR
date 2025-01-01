@@ -728,35 +728,32 @@ _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR__cre
 
 /***/ }),
 
-/***/ "./dist/map/index.js":
-/*!***************************!*\
-  !*** ./dist/map/index.js ***!
-  \***************************/
+/***/ "./dist/map/elevation/index.js":
+/*!*************************************!*\
+  !*** ./dist/map/elevation/index.js ***!
+  \*************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_3__.ElevationGridFactory),
-/* harmony export */   ElevationHost: () => (/* reexport safe */ _map_elevation_host__WEBPACK_IMPORTED_MODULE_2__.ElevationHost),
-/* harmony export */   ElevationLayer: () => (/* reexport safe */ _map_elevation_layer__WEBPACK_IMPORTED_MODULE_4__.ElevationLayer),
-/* harmony export */   ElevationMap: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_6__.ElevationMap),
-/* harmony export */   ElevationTile: () => (/* reexport safe */ _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_5__.ElevationTile),
-/* harmony export */   IsElevationHost: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsElevationHost),
-/* harmony export */   IsElevationLayer: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsElevationLayer),
-/* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsElevationLayerOptions),
-/* harmony export */   IsElevationTile: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsElevationTile),
-/* harmony export */   Map3D: () => (/* reexport safe */ _map_elevation_node__WEBPACK_IMPORTED_MODULE_7__.Map3D),
-/* harmony export */   MapDisplay: () => (/* reexport safe */ _map_display_virtual__WEBPACK_IMPORTED_MODULE_0__.MapDisplay)
+/* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_2__.ElevationGridFactory),
+/* harmony export */   ElevationHost: () => (/* reexport safe */ _map_elevation_host__WEBPACK_IMPORTED_MODULE_1__.ElevationHost),
+/* harmony export */   ElevationLayer: () => (/* reexport safe */ _map_elevation_layer__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
+/* harmony export */   ElevationMap: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_5__.ElevationMap),
+/* harmony export */   ElevationTile: () => (/* reexport safe */ _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_4__.ElevationTile),
+/* harmony export */   IsElevationHost: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsElevationHost),
+/* harmony export */   IsElevationLayer: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsElevationLayer),
+/* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsElevationLayerOptions),
+/* harmony export */   IsElevationTile: () => (/* reexport safe */ _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsElevationTile),
+/* harmony export */   Map3D: () => (/* reexport safe */ _map_elevation_node__WEBPACK_IMPORTED_MODULE_6__.Map3D)
 /* harmony export */ });
-/* harmony import */ var _map_display_virtual__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.display.virtual */ "./dist/map/map.display.virtual.js");
-/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/map.elevation.interfaces.js");
-/* harmony import */ var _map_elevation_host__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.host */ "./dist/map/map.elevation.host.js");
-/* harmony import */ var _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation.host.factory */ "./dist/map/map.elevation.host.factory.js");
-/* harmony import */ var _map_elevation_layer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.elevation.layer */ "./dist/map/map.elevation.layer.js");
-/* harmony import */ var _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.elevation.mesh */ "./dist/map/map.elevation.mesh.js");
-/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/map.elevation.js");
-/* harmony import */ var _map_elevation_node__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map.elevation.node */ "./dist/map/map.elevation.node.js");
-
+/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/elevation/map.elevation.interfaces.js");
+/* harmony import */ var _map_elevation_host__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.elevation.host */ "./dist/map/elevation/map.elevation.host.js");
+/* harmony import */ var _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.host.factory */ "./dist/map/elevation/map.elevation.host.factory.js");
+/* harmony import */ var _map_elevation_layer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation.layer */ "./dist/map/elevation/map.elevation.layer.js");
+/* harmony import */ var _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.elevation.mesh */ "./dist/map/elevation/map.elevation.mesh.js");
+/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/elevation/map.elevation.js");
+/* harmony import */ var _map_elevation_node__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.elevation.node */ "./dist/map/elevation/map.elevation.node.js");
 
 
 
@@ -768,67 +765,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/map/map.display.virtual.js":
-/*!*****************************************!*\
-  !*** ./dist/map/map.display.virtual.js ***!
-  \*****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   MapDisplay: () => (/* binding */ MapDisplay)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
-/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../materials */ "./dist/materials/textures/textures.webMapTexture.js");
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.navigation.js");
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.source.js");
-
-
-
-
-class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
-    constructor(name, dimension, options, scene) {
-        options = options ?? _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture.OptionsHD();
-        super(name, dimension, options, scene);
-        this._content = this._createTextureMap(name, options, this.getScene());
-        this.node.material = this._createMaterial(name, this._content, this.getScene());
-        this._target = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget(this._content?.map);
-        this._controller = new core_map__WEBPACK_IMPORTED_MODULE_4__.PointerController(this.pointerSource, this._target);
-    }
-    get content() {
-        return this._content;
-    }
-    get map() {
-        return this._content.map;
-    }
-    _createTextureMap(name, options, scene) {
-        options = options ?? _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture.OptionsHD();
-        return new _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture(this._createTextureName(name), options, scene);
-    }
-    _createMaterial(name, texture, scene) {
-        const material = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(this._createMaterialName(name), scene);
-        material.diffuseTexture = texture;
-        return material;
-    }
-    _createMaterialName(name) {
-        return `${name}_${MapDisplay.MaterialSuffix}`;
-    }
-    _createTextureName(name) {
-        return `${name}_${MapDisplay.TextureSuffix}`;
-    }
-}
-MapDisplay.MaterialSuffix = "material";
-MapDisplay.TextureSuffix = "texture";
-//# sourceMappingURL=map.display.virtual.js.map
-
-/***/ }),
-
-/***/ "./dist/map/map.elevation.host.factory.js":
-/*!************************************************!*\
-  !*** ./dist/map/map.elevation.host.factory.js ***!
-  \************************************************/
+/***/ "./dist/map/elevation/map.elevation.host.factory.js":
+/*!**********************************************************!*\
+  !*** ./dist/map/elevation/map.elevation.host.factory.js ***!
+  \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -870,10 +810,10 @@ class ElevationGridFactory {
 
 /***/ }),
 
-/***/ "./dist/map/map.elevation.host.js":
-/*!****************************************!*\
-  !*** ./dist/map/map.elevation.host.js ***!
-  \****************************************/
+/***/ "./dist/map/elevation/map.elevation.host.js":
+/*!**************************************************!*\
+  !*** ./dist/map/elevation/map.elevation.host.js ***!
+  \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -883,15 +823,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.layerView.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/map.elevation.interfaces.js");
-/* harmony import */ var _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./map.elevation.host.factory */ "./dist/map/map.elevation.host.factory.js");
+/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/elevation/map.elevation.interfaces.js");
+/* harmony import */ var _map_elevation_host_factory__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./map.elevation.host.factory */ "./dist/map/elevation/map.elevation.host.factory.js");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.mesh */ "./dist/map/map.elevation.mesh.js");
+/* harmony import */ var _map_elevation_mesh__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.mesh */ "./dist/map/elevation/map.elevation.mesh.js");
 /* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
-/* harmony import */ var _map_elevation_layer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.elevation.layer */ "./dist/map/map.elevation.layer.js");
-/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../materials */ "./dist/materials/materials.map.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _map_elevation_layer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.elevation.layer */ "./dist/map/elevation/map.elevation.layer.js");
+/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../materials */ "./dist/materials/materials.map.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../display */ "./dist/display/display.holographic.bounds.js");
 
 
 
@@ -1168,10 +1108,10 @@ ElevationHost.INSTANCE_ROOT_NAME = "root";
 
 /***/ }),
 
-/***/ "./dist/map/map.elevation.interfaces.js":
-/*!**********************************************!*\
-  !*** ./dist/map/map.elevation.interfaces.js ***!
-  \**********************************************/
+/***/ "./dist/map/elevation/map.elevation.interfaces.js":
+/*!********************************************************!*\
+  !*** ./dist/map/elevation/map.elevation.interfaces.js ***!
+  \********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1207,10 +1147,10 @@ function IsElevationTile(b) {
 
 /***/ }),
 
-/***/ "./dist/map/map.elevation.js":
-/*!***********************************!*\
-  !*** ./dist/map/map.elevation.js ***!
-  \***********************************/
+/***/ "./dist/map/elevation/map.elevation.js":
+/*!*********************************************!*\
+  !*** ./dist/map/elevation/map.elevation.js ***!
+  \*********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1219,8 +1159,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/map.elevation.interfaces.js");
-/* harmony import */ var _map_elevation_host__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.host */ "./dist/map/map.elevation.host.js");
+/* harmony import */ var _map_elevation_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.elevation.interfaces */ "./dist/map/elevation/map.elevation.interfaces.js");
+/* harmony import */ var _map_elevation_host__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.elevation.host */ "./dist/map/elevation/map.elevation.host.js");
 
 
 
@@ -1276,10 +1216,10 @@ class ElevationMap extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
 
 /***/ }),
 
-/***/ "./dist/map/map.elevation.layer.js":
-/*!*****************************************!*\
-  !*** ./dist/map/map.elevation.layer.js ***!
-  \*****************************************/
+/***/ "./dist/map/elevation/map.elevation.layer.js":
+/*!***************************************************!*\
+  !*** ./dist/map/elevation/map.elevation.layer.js ***!
+  \***************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1337,10 +1277,10 @@ ElevationLayer.OffsetsPropertyName = "offsets";
 
 /***/ }),
 
-/***/ "./dist/map/map.elevation.mesh.js":
-/*!****************************************!*\
-  !*** ./dist/map/map.elevation.mesh.js ***!
-  \****************************************/
+/***/ "./dist/map/elevation/map.elevation.mesh.js":
+/*!**************************************************!*\
+  !*** ./dist/map/elevation/map.elevation.mesh.js ***!
+  \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1372,10 +1312,10 @@ class ElevationTile extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
 
 /***/ }),
 
-/***/ "./dist/map/map.elevation.node.js":
-/*!****************************************!*\
-  !*** ./dist/map/map.elevation.node.js ***!
-  \****************************************/
+/***/ "./dist/map/elevation/map.elevation.node.js":
+/*!**************************************************!*\
+  !*** ./dist/map/elevation/map.elevation.node.js ***!
+  \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1384,8 +1324,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/map.elevation.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
+/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/elevation/map.elevation.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../display */ "./dist/display/display.virtual.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.source.js");
 
 
@@ -15267,13 +15207,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.DemTileWebClient),
 /* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.EPSG3857),
-/* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationGridFactory),
+/* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationGridFactory),
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.ElevationHelpers),
-/* harmony export */   ElevationHost: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationHost),
-/* harmony export */   ElevationLayer: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
-/* harmony export */   ElevationMap: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationMap),
+/* harmony export */   ElevationHost: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationHost),
+/* harmony export */   ElevationLayer: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
+/* harmony export */   ElevationMap: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationMap),
 /* harmony export */   ElevationTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.ElevationTexture),
-/* harmony export */   ElevationTile: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationTile),
+/* harmony export */   ElevationTile: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationTile),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Ellipsoid),
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.EllipsoidalMapMaterial),
 /* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Envelope),
@@ -15321,10 +15261,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsDemInfos),
 /* harmony export */   IsDisposable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsDisposable),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsDrawableTileMapLayer),
-/* harmony export */   IsElevationHost: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost),
-/* harmony export */   IsElevationLayer: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayer),
-/* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayerOptions),
-/* harmony export */   IsElevationTile: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.IsElevationTile),
+/* harmony export */   IsElevationHost: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost),
+/* harmony export */   IsElevationLayer: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayer),
+/* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayerOptions),
+/* harmony export */   IsElevationTile: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.IsElevationTile),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsGeoBounded),
 /* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBounds),
@@ -15356,10 +15296,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Length: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Length),
 /* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Line),
 /* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Luminosity),
-/* harmony export */   Map3D: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.Map3D),
+/* harmony export */   Map3D: () => (/* reexport safe */ _map_elevation__WEBPACK_IMPORTED_MODULE_3__.Map3D),
 /* harmony export */   Map3dLayerKind: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Map3dLayerKind),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Map3dMaterial),
-/* harmony export */   MapDisplay: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.MapDisplay),
 /* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.MapZenDemUrlBuilder),
@@ -15477,7 +15416,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles/3d */ "./dist/tiles/3d/index.js");
 /* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./materials */ "./dist/materials/index.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./display */ "./dist/display/index.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ "./dist/map/index.js");
+/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map/elevation */ "./dist/map/elevation/index.js");
 /* harmony import */ var _engines__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./engines */ "./dist/engines/index.js");
 /* harmony import */ var _meshes__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./meshes */ "./dist/meshes/index.js");
 /* harmony import */ var core_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/index */ "../core/dist/index.js");

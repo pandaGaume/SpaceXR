@@ -1,2 +1,1 @@
-export * from "./elevation/index";
 export * from "./map.display.virtual";

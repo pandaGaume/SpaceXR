@@ -5,7 +5,7 @@ import { ElevationMap } from "./map.elevation";
 import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
-import { VirtualDisplay } from "../display";
+import { VirtualDisplay } from "../../display";
 import { IPointerSource, IWheelSource, PointerController } from "core/map";
 
 /// <sumary>

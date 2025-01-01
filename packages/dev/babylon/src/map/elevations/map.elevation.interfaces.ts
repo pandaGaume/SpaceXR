@@ -4,8 +4,8 @@ import { ICartesian3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
 import { ImageLayerContentType, IsTile, IsTileMapLayer, ITile, ITileMap, ITileMapLayer, ITileMapLayerOptions, ITileMapLayerView } from "core/tiles";
 import { IValidable, Nullable } from "core/types";
-import { ElevationTexture } from "../materials/textures";
-import { IHasHolographicBounds } from "../display";
+import { ElevationTexture } from "../../materials/textures";
+import { IHasHolographicBounds } from "../../display";
 
 export type ElevationMapContentType = IDemInfos | ImageLayerContentType;
 

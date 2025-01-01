@@ -73,7 +73,7 @@
 
                 // construire la carte.
                 // display may be a canvas or a display object if we want to set scale or other options.
-                const map = new SPACEXR.CanvasMap("myMap", canvas).setViewMap(defaultCenter, defaultLod);
+                const map = new SPACEXR.CanvasMap(canvas).setViewMap(defaultCenter, defaultLod);
                 const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution: SPACEXR.Google.Attribution }).addTo(map);
 
                 const navigationManager = new SPACEXR.InputsNavigationTarget(map);
@@ -97,7 +97,7 @@
                 compass.addEventListener("click", handleCompassClick);
 
                 // listen to azimuth change.
-                map.navigation.propertyChangedObservable.add((p, e) => {
+                map.navigationState.propertyChangedObservable.add((p, e) => {
                     if (p.propertyName === "azimuth") {
                         updateCompassRotation(p.newValue?.value ?? 0);
                     }
@@ -123,9 +123,9 @@
                 options.alpha = 0.8;
                 options.invertY = true;
                 const name = "MapTexture";
-                var map = new SPACEXR.WebMapTexture(name, options, scene);
-                const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.StreetClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(map);
-                return map;
+                var texture = new SPACEXR.WebMapTexture(name, options, scene);
+                const l = new SPACEXR.ImageLayer(`${name}.layer`, SPACEXR.Google.StreetClient2d(), { attribution: SPACEXR.Google.Attribution }).addTo(texture.map);
+                return texture;
             }
 
             async function createScene(canvas, engine, map2d) {
@@ -163,7 +163,7 @@
 
                 ground.material = material;
 
-                texture.navigation.syncWith(map2d.navigation);
+                texture.map.navigationState.syncWith(map2d.navigation);
 
                 scene.onBeforeRenderObservable.add(() => {
                     map2d.validate();

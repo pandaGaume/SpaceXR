@@ -20,7 +20,7 @@ import {
 } from "@babylonjs/core";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { Observer } from "core/events";
-import { IElevationHost, IElevationTile, IMap3dMaterial } from "../map";
+import { IElevationHost, IElevationTile, IMap3dMaterial } from "../map/elevations";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { IsTileMetricsProvider, NeighborsAddress, TileAddress } from "core/tiles";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";

@@ -6,10 +6,9 @@ import { ElevationTexture } from "../materials";
 import { IElevationTile } from "./map.elevation.interfaces";
 
 export class ElevationTile extends Tile<IDemInfos> implements IElevationTile {
-    // elevations related
+    // 3D related
     _surface: Nullable<AbstractMesh>;
-
-    // texture related
+    // Elevation related
     _texture: Nullable<ElevationTexture>;
 
     public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<IDemInfos> = null, metrics?: ITileMetrics) {

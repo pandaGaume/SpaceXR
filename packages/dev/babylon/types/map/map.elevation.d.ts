@@ -6,7 +6,7 @@ import { EventState, PropertyChangedEventArgs } from "core/events";
 export declare class ElevationMap extends TileMapBase<ElevationMapContentType> implements IElevationMap {
     _root: TransformNode;
     constructor(root: TransformNode, display?: Nullable<IDisplay>, nav?: Nullable<ITileNavigationState>);
-    protected _buildLayerView(layer: ITileMapLayer<ElevationMapContentType>): ITileMapLayerView<any>;
+    protected _buildLayerView(layer: ITileMapLayer<ElevationMapContentType>): Nullable<ITileMapLayerView<any>>;
     protected _buildElevationHost(layer: ITileMapLayer<IDemInfos>): IElevationHost;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _rotateMap(nav: Nullable<ITileNavigationState>): void;

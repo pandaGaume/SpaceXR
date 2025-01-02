@@ -1,2 +1,2 @@
-export * from "./elevation/index";
-export * from "./map.display.virtual";
+export * from "./elevations/index";
+export * from "./display/index";

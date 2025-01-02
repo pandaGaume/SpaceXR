@@ -3,6 +3,9 @@ precision highp float;
 // declare the varying for clipping
 #include<clipFragmentDeclaration>
 
+in vec2 vUvs;
+flat in int vId;
+
 void main(void) {
      
      // test is the fragment is inside the clip map

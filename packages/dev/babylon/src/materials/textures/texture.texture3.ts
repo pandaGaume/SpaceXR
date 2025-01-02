@@ -25,6 +25,7 @@ export interface ITexture3 extends ISize {
     update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
     release(depth: number): void;
     reserve(): ITexture3Layer | undefined;
+    ensureRoomFor(count: number): boolean;
 }
 
 class Texture3Layer implements ITexture3Layer {
@@ -61,6 +62,7 @@ export class Texture3 extends BaseTexture implements ITexture3 {
     _h: number; // the height of the texture.
     _count: number; // the number of layers in use.
     _layers: Array<Nullable<ITexture3Layer>>;
+    _internalFormat?: number;
 
     public constructor(
         sceneOrEngine: Nullable<Scene | ThinEngine>,
@@ -90,7 +92,6 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         depth = depth ?? 1;
         format = format ?? Constants.TEXTUREFORMAT_RGBA;
         textureType = textureType ?? Constants.TEXTURETYPE_UNSIGNED_INT;
-        internalFormat = internalFormat ?? format;
         generateMipmaps = generateMipmaps ?? false;
         samplingMode = samplingMode ?? Constants.TEXTURE_NEAREST_NEAREST;
 
@@ -98,6 +99,8 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         this._count = 0;
         this._w = width;
         this._h = height;
+        // save internal format for later use on copy
+        this._internalFormat = internalFormat;
 
         this._texture = this._getEngine()!.__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
         this.wrapU = this.wrapV = Constants.TEXTURE_CLAMP_ADDRESSMODE;
@@ -112,7 +115,6 @@ export class Texture3 extends BaseTexture implements ITexture3 {
     public get depth(): number {
         return this._layers.length;
     }
-
     public get count(): number {
         return this._count;
     }
@@ -160,6 +162,50 @@ export class Texture3 extends BaseTexture implements ITexture3 {
             layer.release(); // release the layer internally
         }
         //console.log(`released layer ${depth} used: ${this.count} / ${this.depth}`);
+    }
+
+    public ensureRoomFor(count: number): boolean {
+        const oldTexture = this._texture;
+        if (!oldTexture) {
+            return false;
+        }
+        if (this.depth - this.count >= count) {
+            return true; // Enough space already
+        }
+
+        const gl = this._getEngine()?._gl;
+        if (!gl) {
+            return false;
+        }
+        const maxLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
+        const targetDepth = count + this.depth;
+
+        let newDepth = this.depth;
+        do {
+            newDepth = Math.max(count, Math.ceil(this.depth * 1.3));
+        } while (newDepth < targetDepth);
+
+        newDepth = Math.min(newDepth, maxLayers);
+
+        if (newDepth < targetDepth) {
+            console.log(`Max supported texture layers:${maxLayers}, asked for ${targetDepth}`);
+            return false;
+        }
+        console.log(`Grow texture layers from ${this.depth} to ${newDepth}`);
+
+        const engine = this._getEngine();
+        if (!engine) {
+            return false;
+        }
+        // Create a new texture with larger depth
+        const newTexture = engine.__SpaceXR__createRawTexture2DArray(this._w, this._h, newDepth, oldTexture.format, oldTexture.samplingMode, oldTexture.type, this._internalFormat);
+        engine.__SpaceXR__copyRawTexture2DArray(oldTexture, newTexture);
+
+        // Replace the old texture with the new one
+        oldTexture.dispose();
+        this._texture = newTexture;
+        this._layers = this._layers.concat(new Array(newDepth - this._layers.length).fill(null)); // Reset layers array
+        return true;
     }
 
     protected _buildLayer(z: number): ITexture3Layer {

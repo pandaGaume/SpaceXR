@@ -15,6 +15,8 @@ in vec2 uv;
 // Uniforms
 uniform mat4 viewProjection;
 
+out vec2 vUvs;
+flat out int vId;
 
 void main(void) {
 
@@ -33,4 +35,12 @@ void main(void) {
     #include<clipVertex>
     
     gl_Position = viewProjection * worldPosition;
+
+    // Step 1: Sample UVs
+    v.z = depths.z; // The UV depth is stored in depths.z
+    vUvs = v.z < 0.0 ? uv : texture(uSurfaceUvs, v).xy; // Sample UVs if depth is valid
+
+    // Step 2: Sample Surface ID
+    v.z = depths.w; // The surface ID depth is stored in depths.w
+    vId = v.z < 0.0 ? 0 : int(texture(uSurfaceIds, v).x); // Sample ID if depth is valid
 }

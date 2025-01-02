@@ -260,7 +260,9 @@ export class ElevationHost extends TileMapLayerView<IDemInfos> implements IEleva
             m.scaling.x = m.scaling.y = this.metrics.tileSize;
             m.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
 
+            // set the surface 3D
             tile.surface = m;
+
             if (!tile.content) {
                 m.setEnabled(false);
             }

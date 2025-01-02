@@ -29,6 +29,8 @@ declare module "@babylonjs/core/Engines/thinEngine" {
             textureType: number,
             internalFormat?: number
         ): InternalTexture;
+
+        __SpaceXR__copyRawTexture2DArray(oldTexture: InternalTexture, newTexture: InternalTexture): void;
     }
 }
 
@@ -163,6 +165,55 @@ export function _makeCreateRawTextureFunction(is3D: boolean) {
 }
 
 ThinEngine.prototype.__SpaceXR__createRawTexture2DArray = _makeCreateRawTextureFunction(false);
+
+export function _makeCopyRawTextureFunction() {
+    return function (this: ThinEngine, oldTexture: InternalTexture, newTexture: InternalTexture): void {
+        // Create a framebuffer for the source texture
+        const framebuffer = this._gl.createFramebuffer();
+        // When a framebuffer is bound (gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)), rendering operations target the attached textures or renderbuffers.
+        // The output is stored in the framebuffer’s attachments, not shown on the screen
+        this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, framebuffer);
+
+        for (let i = 0; i < oldTexture.depth && i < newTexture.depth; i++) {
+            // Attach the current layer of the old texture to the framebuffer
+            this._gl.framebufferTextureLayer(
+                this._gl.FRAMEBUFFER,
+                this._gl.COLOR_ATTACHMENT0,
+                oldTexture._hardwareTexture?.underlyingResource,
+                0, // Mipmap level
+                i // Layer index
+            );
+
+            // Check framebuffer completeness
+            if (this._gl.checkFramebufferStatus(this._gl.FRAMEBUFFER) !== this._gl.FRAMEBUFFER_COMPLETE) {
+                console.error(`Framebuffer not complete for layer ${i}`);
+                continue;
+            }
+
+            // Bind the new texture as the destination
+            this._gl.bindTexture(this._gl.TEXTURE_2D_ARRAY, newTexture._hardwareTexture?.underlyingResource);
+
+            // Copy data from the source layer to the destination layer
+            this._gl.copyTexSubImage3D(
+                this._gl.TEXTURE_2D_ARRAY, // Target
+                0, // Level
+                0, // X offset
+                0, // Y offset
+                i, // Z offset (layer index in the new texture)
+                0, // X of source texture
+                0, // Y of source texture
+                oldTexture.width, // Width
+                oldTexture.height // Height
+            );
+        }
+
+        // Clean up
+        // When no framebuffer is bound (gl.bindFramebuffer(gl.FRAMEBUFFER, null)), rendering operations go directly to the screen.
+        this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
+        this._gl.deleteFramebuffer(framebuffer);
+    };
+}
+ThinEngine.prototype.__SpaceXR__copyRawTexture2DArray = _makeCopyRawTextureFunction();
 
 ///////////////////////////////
 // End Thin Engine Extension //

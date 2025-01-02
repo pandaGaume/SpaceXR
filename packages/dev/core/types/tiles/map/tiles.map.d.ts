@@ -55,7 +55,7 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     private _bindNavigation;
     protected _buildLayerContainer(): ITileMapLayerContainer<T>;
     protected _buildLayerViewContainer(layers: ITileMapLayerContainer<T>): IOrderedCollection<ITileMapLayerView<T>>;
-    protected _buildLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<any>;
+    protected _buildLayerView(layer: ITileMapLayer<T>): Nullable<ITileMapLayerView<any>>;
     protected _onDisplayUnbinded(display: Nullable<IDisplay>): void;
     protected _onDisplayBinded(display: Nullable<IDisplay>): void;
     protected _onNavigationUnbinded(nav: Nullable<ITileNavigationState>): void;

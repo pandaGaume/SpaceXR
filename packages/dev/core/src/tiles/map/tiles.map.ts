@@ -165,8 +165,11 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
     }
 
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
-        this._layerViews.add(...eventData.map((l) => this._buildLayerView(l)));
-        this.invalidate();
+        const views = eventData.map((l) => this._buildLayerView(l)).filter((i): i is ITileMapLayerView<T> => i !== null && i !== undefined);
+        if (views.length > 0) {
+            this._layerViews.add(...views);
+            this.invalidate();
+        }
     }
 
     protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
@@ -281,7 +284,7 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         return this._buildLayerViewContainerInternal(layers);
     }
 
-    protected _buildLayerView(layer: ITileMapLayer<T>): ITileMapLayerView<any> {
+    protected _buildLayerView(layer: ITileMapLayer<T>): Nullable<ITileMapLayerView<any>> {
         return this._buildLayerViewInternal(layer);
     }
 

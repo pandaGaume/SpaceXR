@@ -8460,8 +8460,11 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layerViews?.validate();
     }
     _onLayerAdded(eventData, eventstate) {
-        this._layerViews.add(...eventData.map((l) => this._buildLayerView(l)));
-        this.invalidate();
+        const views = eventData.map((l) => this._buildLayerView(l)).filter((i) => i !== null && i !== undefined);
+        if (views.length > 0) {
+            this._layerViews.add(...views);
+            this.invalidate();
+        }
     }
     _onLayerRemoved(eventData, eventstate) {
         const toRemove = Array.from(this._layerViews.get((v) => eventData.includes(v.layer)));

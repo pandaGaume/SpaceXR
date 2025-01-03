@@ -26,5 +26,8 @@ uniform highp sampler2DArray uSurfaceUvs; // the uvs of the surface GL_RG32F
 uniform highp vec2 uAltRange;
 uniform highp float uMapScale;
 
-// the depth of the dem, normals, uvs and image textures.    
-in vec4 depths;
+// the depth of the dem 0=current, 1=East, 2=South, 3=SouthEast 
+in vec4 elevationDepths;
+in vec4 normalDepths;
+// the depth of uvs and texture 
+in vec2 textureDepths;

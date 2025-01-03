@@ -4,7 +4,7 @@
 import { ShaderStore } from "@babylonjs/core";
 const name = "mapPixelShader";
 const shader = `precision highp float;#include<clipFragmentDeclaration>
-in vec2 vUvs;flat in int vId;void main(void) {#include<clipFragment>
-gl_FragColor=vec4(1.0,1.0,1.0,1.0); }`;
+in vec2 vUvs;flat in int vId;flat in vec3 vColor;void main(void) {#include<clipFragment>
+gl_FragColor=vec4(vColor,1.0); }`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const mapPixelShader = { name, shader };

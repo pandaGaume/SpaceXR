@@ -26,7 +26,7 @@ import { ITexture3Layer, Texture3 } from "./textures";
 import { IsTileMetricsProvider, NeighborsAddress, TileAddress } from "core/tiles";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { Range } from "core/math";
-import { ElevationBuffer, ElevationHelpers, IDemInfos } from "core/dem";
+import { IDemInfos } from "core/dem";
 
 class AreaInfos {
     layer: ITexture3Layer;
@@ -61,8 +61,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
 
     public static DefaultShaderName: string = "map";
 
-    public static SamplerDepthsAttName: string = "depths";
-    public static SamplerDepthsSize = 4;
+    public static ElevationDepthsAttName: string = "elevationDepths";
+    public static ElevationDepthsSize = 4;
+    public static NormalDepthsAttName: string = "normalDepths";
+    public static NormalDepthsSize = 4;
+    public static TextureDepthsAttName: string = "textureDepths";
+    public static TextureDepthsSize = 2;
 
     public static ViewProjectionMatrixUniformName: string = "viewProjection";
 
@@ -176,7 +180,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             VertexBuffer.UVKind,
 
             // instance related
-            Map3dMaterial.SamplerDepthsAttName,
+            Map3dMaterial.ElevationDepthsAttName,
+            Map3dMaterial.NormalDepthsAttName,
+            Map3dMaterial.TextureDepthsAttName,
         ];
 
         const uniforms = [
@@ -264,64 +270,89 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     public addTile(tile: IElevationTile, source?: IElevationHost): void {
+        const surface = tile.surface;
+        if (!surface) {
+            throw new Error("Tile surface is not defined");
+        }
+        const key = tile.address.quadkey;
+        let layout = this._tileLayouts.get(key);
+        if (layout) {
+            // we do NOT duplicate the tile
+            return;
+        }
+
         // ensure elevation sampler is ready
         // this is done only once for the material
         if (source && IsTileMetricsProvider(source)) {
             this._ensureElevationSamplersReady(tile, source);
         }
-        const key = tile.address.quadkey;
-        let layout = this._tileLayouts.get(key);
-        if (layout) {
-            return;
-        }
-        const surface = tile.surface;
-        if (!surface) {
-            return;
-        }
 
         // prepare the mesh.
-        surface.instancedBuffers.depths = new Vector4(-1, -1, -1, -1);
+        // the depth of the dem x=current, y=East, z=South, w=SouthEast
+        const elevationDepths = new Vector4(-1, -1, -1, -1);
+        surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName] = elevationDepths;
+        // the depth of the normal x=current, y=East, z=South, w=SouthEast
+        const normalDepths = new Vector4(-1, -1, -1, -1);
+        surface.instancedBuffers[Map3dMaterial.NormalDepthsAttName] = normalDepths;
+        // the depth of the texture x=uvs, y=ids
+        surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = new Vector2(-1, -1);
 
         // prepare the elevation sampler.
-        let elevationArea = this._reserveArea(this._elevationSampler, "Elevation sampler is full");
+        let elevationArea = this._reserveArea(this._elevationSampler);
         if (elevationArea === undefined) {
             return;
         }
 
         // prepare the normal sampler.
-        let normalArea = this._reserveArea(this._normalSampler, "Normal sampler is full");
+        let normalArea = this._reserveArea(this._normalSampler);
         if (normalArea === undefined) {
             elevationArea.release();
             return;
         }
 
-        const depthsAtt = surface?.instancedBuffers.depths;
-        if (depthsAtt) {
-            depthsAtt.x = elevationArea.depth;
-            depthsAtt.y = normalArea.depth;
-        }
-
         // Build the layout for the tile
         layout = new TileLayout(tile);
         this._tileLayouts.set(tile.address.quadkey, layout);
+
         // ELEVATION
+        elevationDepths.x = elevationArea.depth;
+
         let areaInfos = new AreaInfos(elevationArea);
-        layout.setArea(Map3dLayerKind.ELEVATION, areaInfos);
+        let kind = Map3dLayerKind.ELEVATION;
+        layout.setArea(kind, areaInfos);
         if (tile.content?.elevations) {
             this._updateElevationRange(tile.content);
-            this._updateElevationSampler(tile, areaInfos.layer, Map3dLayerKind.ELEVATION, (t) => t.content?.elevations);
+            this._updateElevation(tile.content.elevations, areaInfos.layer);
+            this._updateNeighbourgs(tile, kind, (t) => t.surface?.instancedBuffers[Map3dMaterial.ElevationDepthsAttName]);
             layout.tile.surface?.setEnabled(true);
             this.markAsDirty(Material.TextureDirtyFlag);
         }
+
         // NORMAL
+        normalDepths.x = normalArea.depth;
+
         areaInfos = new AreaInfos(normalArea);
-        layout.setArea(Map3dLayerKind.NORMAL, areaInfos);
+        kind = Map3dLayerKind.NORMAL;
+        layout.setArea(kind, areaInfos);
+        if (tile.content?.normals) {
+            //this._updateNeighbourgs(tile, kind, (t) => t.surface?.instancedBuffers[Map3dMaterial.NormalDepthsAttName]);
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    protected _updateElevation(data: Float32Array, layer: ITexture3Layer): void {
+        layer.update(data);
     }
 
     public removeTile(tile: IElevationTile, source: IElevationHost): void {
         const key = tile.address.quadkey;
         const layout = this._tileLayouts.get(key);
         if (layout) {
+            if (tile.surface) {
+                tile.surface.instancedBuffers.elevationDepths.x = -1;
+                this._updateNeighbourgs(tile, Map3dLayerKind.ELEVATION, (t) => t.surface?.instancedBuffers[Map3dMaterial.ElevationDepthsAttName]);
+                //this._updateNeighbourgs(tile, Map3dLayerKind.NORMAL, (t) => t.surface?.instancedBuffers[Map3dMaterial.NormalDepthsAttName]);
+            }
             layout.getArea(Map3dLayerKind.ELEVATION)?.layer.release();
             layout.getArea(Map3dLayerKind.NORMAL)?.layer.release();
             this._tileLayouts.delete(key);
@@ -334,23 +365,23 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         // this happens when the tile content is set or updated
         const layout = this._tileLayouts.get(tile.address.quadkey);
         if (layout) {
-            // bind the depth to the instance buffer if was not previously setted
-            const surface = tile.surface;
-            if (surface) {
-                const d = layout.getArea(Map3dLayerKind.ELEVATION)?.layer.depth;
-                surface.instancedBuffers.depths = new Vector4(d, -1, -1, -1);
-            }
-
             if (tile.content?.elevations) {
+                const kind = Map3dLayerKind.ELEVATION;
                 // we update the elevation range
-                const areaInfos = layout.getArea(Map3dLayerKind.ELEVATION);
+                const areaInfos = layout.getArea(kind);
                 if (areaInfos) {
-                    // if not done during the add, it's update the sampler, which mean set the texture data.
-                    // this is the place where the data are copied from the tile content to the sampler
-                    // and the border are fileld with values related to the neibourghs tiles.
                     this._updateElevationRange(tile.content);
-                    this._updateElevationSampler(tile, areaInfos.layer, Map3dLayerKind.ELEVATION, (t) => t.content?.elevations);
+                    this._updateElevation(tile.content.elevations, areaInfos.layer);
+                    this._updateNeighbourgs(tile, kind, (t) => t.surface?.instancedBuffers[Map3dMaterial.ElevationDepthsAttName]);
                     layout.tile.surface?.setEnabled(true);
+                    this.markAsDirty(Material.TextureDirtyFlag);
+                }
+            }
+            if (tile.content?.normals) {
+                const kind = Map3dLayerKind.NORMAL;
+                const areaInfos = layout.getArea(kind);
+                if (areaInfos) {
+                    //this._updateNeighbourgs(tile, kind, (t) => t.surface?.instancedBuffers[Map3dMaterial.NormalDepthsAttName]);
                     this.markAsDirty(Material.TextureDirtyFlag);
                 }
             }
@@ -379,122 +410,83 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         return area;
     }
 
-    protected _updateElevationSampler(
-        tile: IElevationTile,
-        textureLayer: ITexture3Layer,
-        kind: Map3dLayerKind,
-        accessor: (tile: IElevationTile) => Nullable<ElevationBuffer> | undefined
-    ) {
-        const buffer = accessor(tile);
-        if (buffer) {
-            let w = textureLayer.host?.width ?? 0;
-            let h = textureLayer.host?.height ?? 0;
+    protected _updateNeighbourgs(tile: IElevationTile, kind: Map3dLayerKind, accessor: (tile: IElevationTile) => Vector4 | undefined) {
+        const quadkey = tile.address.quadkey;
+        const keys = TileAddress.ToNeigborsKey(quadkey);
 
-            if (w && h) {
-                w--;
-                h--;
-                // update the main area
-                textureLayer.update(buffer, 0, 0, w, h);
-
-                const quadkey = tile.address.quadkey;
-                const keys = TileAddress.ToNeigborsKey(quadkey);
-
-                // checking the north-west neigbour
-                let k = keys[NeighborsAddress.NW];
-                let layout;
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout) {
-                        const area = layout.getArea(kind);
-                        if (area) {
-                            // we update the last value of the last row of the north-west neigbour with the first value of the firt row of the current tile
-                            const v = ElevationHelpers.GetElevationAt(buffer, w, h, 0, 0);
-                            area.layer.update(v, w, h, 1, 1);
-                        }
-                    }
+        const currentDepths = accessor(tile);
+        if (!currentDepths) {
+            return;
+        }
+        // checking the north-west neigbour
+        let k = keys[NeighborsAddress.NW];
+        let layout;
+        if (k) {
+            layout = this._tileLayouts.get(k);
+            if (layout) {
+                const depths = accessor(layout.tile);
+                if (depths) {
+                    depths.w = currentDepths.x;
                 }
+            }
+        }
 
-                // checking the north neigbour
-                k = keys[NeighborsAddress.N];
-
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout) {
-                        const area = layout.getArea(kind);
-                        if (area) {
-                            // we update the last row of the north neigbour with the first row of the current tile
-                            const firstRow = ElevationHelpers.GetFirstRow(buffer, w);
-                            area.layer.update(firstRow, 0, h, w, 1);
-                        }
-                    }
+        // checking the north neigbour
+        k = keys[NeighborsAddress.N];
+        if (k) {
+            layout = this._tileLayouts.get(k);
+            if (layout) {
+                const depths = accessor(layout.tile);
+                if (depths) {
+                    depths.z = currentDepths.x;
                 }
+            }
+        }
 
-                // checking the east neigbour
-                k = keys[NeighborsAddress.E];
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout) {
-                        const data = accessor(layout.tile);
-                        if (data) {
-                            // we update the last column of the current tile with the value of the first column of the east neigbour
-                            const firstColumn = ElevationHelpers.GetFirstColumn(data, w, h);
-                            textureLayer.update(firstColumn, w, 0, 1, h);
-                        } else {
-                            // we duplicate the last column of the current tile
-                            const lastColumn = ElevationHelpers.GetLastColumn(buffer, w, h);
-                            textureLayer.update(lastColumn, w, 0, 1, h);
-                        }
-                    }
-                }
+        // checking the east neigbour
+        k = keys[NeighborsAddress.E];
+        if (k) {
+            layout = this._tileLayouts.get(k);
+            if (layout) {
+                const depths = accessor(layout.tile);
+                currentDepths.y = depths?.x ?? -1;
+            } else {
+                currentDepths.y = -1;
+            }
+        }
 
-                // checking the south-east neigbour
-                k = keys[NeighborsAddress.SE];
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout) {
-                        // we update the last value of the last row of the current tile with the first value of the first row of the south-east neigbour
-                        const data = accessor(layout.tile);
-                        if (data) {
-                            const first = ElevationHelpers.GetElevationAt(data, w, h, 0, 0);
-                            textureLayer.update(first, w, h, 1, 1);
-                        } else {
-                            // we duplicate the last value of the last row of the current tile
-                            const last = ElevationHelpers.GetElevationAt(buffer, w, h, w - 1, h - 1);
-                            textureLayer.update(last, w, h, 1, 1);
-                        }
-                    }
-                }
+        // checking the south-east neigbour
+        k = keys[NeighborsAddress.SE];
+        if (k) {
+            layout = this._tileLayouts.get(k);
+            if (layout) {
+                const depths = accessor(layout.tile);
+                currentDepths.w = depths?.x ?? -1;
+            } else {
+                currentDepths.w = -1;
+            }
+        }
 
-                // checking the south neigbour
-                k = keys[NeighborsAddress.S];
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout) {
-                        // we update the last row of the current tile with the first row of the south neigbour
-                        const data = accessor(layout.tile);
-                        if (data) {
-                            const firstRow = ElevationHelpers.GetFirstRow(data, w);
-                            textureLayer.update(firstRow, 0, h, w, 1);
-                        } else {
-                            // we duplicate the last row of the current tile
-                            const lastRow = ElevationHelpers.GetLastRow(buffer, w, h);
-                            textureLayer.update(lastRow, 0, h, w, 1);
-                        }
-                    }
-                }
+        // checking the south neigbour
+        k = keys[NeighborsAddress.S];
+        if (k) {
+            layout = this._tileLayouts.get(k);
+            if (layout) {
+                const depths = accessor(layout.tile);
+                currentDepths.z = depths?.x ?? -1;
+            } else {
+                currentDepths.z = -1;
+            }
+        }
 
-                // checking the west neigbour
-                k = keys[NeighborsAddress.W];
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout) {
-                        const area = layout.getArea(kind);
-                        if (area) {
-                            // we update the last column of the  west neigbour with the first column of the current tile
-                            const firstColumn = ElevationHelpers.GetFirstColumn(buffer, w, h);
-                            area.layer.update(firstColumn, w, 0, 1, h);
-                        }
-                    }
+        // checking the west neigbour
+        k = keys[NeighborsAddress.W];
+        if (k) {
+            layout = this._tileLayouts.get(k);
+            if (layout) {
+                const depths = accessor(layout.tile);
+                if (depths) {
+                    depths.y = currentDepths.x;
                 }
             }
         }
@@ -573,7 +565,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     protected _bindElevations(effect: Effect): void {
         const r = this._getElevationRange();
         effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(r.min, r.max));
-        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.x);
+        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.z);
     }
 
     protected _bindHolographicBounds(): void {
@@ -683,11 +675,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                     depth: depth,
                     format: Constants.TEXTUREFORMAT_R,
                     textureType: Constants.TEXTURETYPE_FLOAT, // the input is Float32Array
-                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
                     internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
                     generateMipMap: generateMipMap,
                 };
-                return new Texture3(scene, options);
+                const t = new Texture3(scene, options);
+                return t;
             }
             case Map3dLayerKind.NORMAL: {
                 const options = {
@@ -696,7 +689,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                     depth: depth,
                     format: Constants.TEXTUREFORMAT_RGB,
                     textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
-                    samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
                     internalFormat: scene.getEngine()._gl.RGB8, // force internal format to save half space
                     generateMipMap: generateMipMap,
                 };
@@ -762,10 +755,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
             if (size) {
                 // here we gona build the elevation sampler with a size of N+1 because we add a row at the bottom and a column on the right
                 // to keep the definition of the grid which is N+1 x N+1
-                this._buildElevationSampler(size + 1);
-                this._buildNormalSampler(size + 1);
-                this._buildSurfaceUVSampler(size + 1);
-                this._buildSurfaceIDSampler(size + 1);
+                this._buildElevationSampler(size);
+                this._buildNormalSampler(size);
+                this._buildSurfaceUVSampler(size);
+                this._buildSurfaceIDSampler(size);
             }
             this._ensureInstanceBufferReady(src.grid);
         }
@@ -781,7 +774,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     }
 
     protected _registerInstanceBuffers(target: Mesh): void {
-        target.registerInstancedBuffer(Map3dMaterial.SamplerDepthsAttName, Map3dMaterial.SamplerDepthsSize);
+        target.registerInstancedBuffer(Map3dMaterial.ElevationDepthsAttName, Map3dMaterial.ElevationDepthsSize);
+        target.registerInstancedBuffer(Map3dMaterial.NormalDepthsAttName, Map3dMaterial.NormalDepthsSize);
+        target.registerInstancedBuffer(Map3dMaterial.TextureDepthsAttName, Map3dMaterial.TextureDepthsSize);
     }
 
     protected _getElevationSamplerDepth(width: number, height: number): number {
@@ -796,27 +791,4 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const N = Math.ceil(a * b + 2 * (a + b));
         return N;
     }
-
-    /*    protected _growElevationSamplersDepth(): void {
-        // this is the place we gonna grow the depth of the samplers
-        // this may happen when we deal with multiple LOD, has we do not want to waste memory at setup time with a huge buffer
-        const currentDepth = this._elevationSampler?.depth ?? 0;
-        const newDepth = Math.ceil(currentDepth * 1.2);
-        console.log(`Need to Grow elevation samplers depth from ${currentDepth} to ${newDepth}`);
-        const width = this._elevationSampler?.width ?? 0;
-        const height = this._elevationSampler?.height ?? 0;
-
-        const existingTiles = Array.from(this._tileLayouts.values()).map((v) => v.tile);
-
-        this._tileLayouts.clear();
-        this._elevationSampler?.dispose();
-
-        const generateMipMap = false;
-        const scene = this.getScene();
-        this._elevationSampler = <Texture3>this._buildSampler(Map3dLayerKind.ELEVATION, width, height, newDepth, generateMipMap, scene);
-
-        for (let tile of existingTiles) {
-            this.addTile(tile);
-        }
-    }*/
 }

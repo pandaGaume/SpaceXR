@@ -42,7 +42,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         const results = await Promise.allSettled(requests);
 
         let elevations: Nullable<Float32Array> = null;
-        let normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null;
+        let normals: Nullable<Uint8ClampedArray> = null;
 
         // elevations
         if (results[0].status == "fulfilled") {
@@ -58,7 +58,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         // normals
         if (results.length > 1) {
             if (results[1].status == "fulfilled") {
-                normals = <Nullable<Uint8ClampedArray | HTMLImageElement>>results[1].value.content;
+                normals = <Nullable<Uint8ClampedArray>>results[1].value.content;
             }
         }
         if (normals == null) {

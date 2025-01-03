@@ -7,7 +7,7 @@ export interface IDemInfos {
     delta: number;
     mean: number;
     elevations: Nullable<Float32Array>;
-    normals: Nullable<Uint8ClampedArray | HTMLImageElement>;
+    normals: Nullable<Uint8ClampedArray>;
     toString(): string;
     getDemInfoView(pos: ICartesian2, size: ISize2): IDemInfos;
 }

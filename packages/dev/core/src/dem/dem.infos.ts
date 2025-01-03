@@ -14,10 +14,10 @@ export class DemInfos implements IDemInfos {
     _delta: number = 0;
     _mean: number = 0;
     _elevations: Nullable<Float32Array> = null;
-    _normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null;
+    _normals: Nullable<Uint8ClampedArray > = null;
     _stride: number = 0;
 
-    public constructor(elevations: Nullable<Float32Array>, normals: Nullable<Uint8ClampedArray | HTMLImageElement> = null, stride?: number, pos?: ICartesian2, size?: ISize2) {
+    public constructor(elevations: Nullable<Float32Array>, normals: Nullable<Uint8ClampedArray> = null, stride?: number, pos?: ICartesian2, size?: ISize2) {
         this._elevations = elevations;
         this._normals = normals;
 
@@ -73,7 +73,7 @@ export class DemInfos implements IDemInfos {
     public get elevations(): Nullable<Float32Array> {
         return this._elevations;
     }
-    public get normals(): Nullable<Uint8ClampedArray | HTMLImageElement> {
+    public get normals(): Nullable<Uint8ClampedArray> {
         return this._normals;
     }
 

@@ -26,12 +26,10 @@ import { ITexture3Layer, Texture3 } from "./textures";
 import { IsTileMetricsProvider, NeighborsAddress, TileAddress } from "core/tiles";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { Range } from "core/math";
-import { ElevationHelpers, IDemInfos } from "core/dem";
+import { ElevationBuffer, ElevationHelpers, IDemInfos } from "core/dem";
 
 class AreaInfos {
     layer: ITexture3Layer;
-    isReady: boolean = false;
-
     public constructor(layer: ITexture3Layer) {
         this.layer = layer;
     }
@@ -271,7 +269,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         if (source && IsTileMetricsProvider(source)) {
             this._ensureElevationSamplersReady(tile, source);
         }
-
+        const key = tile.address.quadkey;
+        let layout = this._tileLayouts.get(key);
+        if (layout) {
+            return;
+        }
         const surface = tile.surface;
         if (!surface) {
             return;
@@ -281,33 +283,39 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         surface.instancedBuffers.depths = new Vector4(-1, -1, -1, -1);
 
         // prepare the elevation sampler.
-        let elevationArea = this._elevationSampler?.reserve();
-        if (!elevationArea) {
-            // this is the place where we need to reallocate some depth into the samplers
-            this._elevationSampler?.ensureRoomFor(1);
-            elevationArea = this._elevationSampler?.reserve();
+        let elevationArea = this._reserveArea(this._elevationSampler, "Elevation sampler is full");
+        if (elevationArea === undefined) {
+            return;
         }
 
-        if (elevationArea) {
-            const depthsAtt = surface?.instancedBuffers.depths;
-            if (depthsAtt) {
-                depthsAtt.x = elevationArea.depth;
-            }
-
-            // Build the layout for the tile
-            const layout = new TileLayout(tile);
-            this._tileLayouts.set(tile.address.quadkey, layout);
-            const areaInfos = new AreaInfos(elevationArea);
-            layout.setArea(Map3dLayerKind.ELEVATION, areaInfos);
-            if (tile.content) {
-                // update the sampler, which mean set the texture data.
-                // this is the place where the data are copied from the tile content to the sampler
-                // and the border are fileld with values related to the neibourghs tiles.
-                this._updateElevationSampler(tile, elevationArea);
-                areaInfos.isReady = true;
-                this.markAsDirty(Material.TextureDirtyFlag);
-            }
+        // prepare the normal sampler.
+        let normalArea = this._reserveArea(this._normalSampler, "Normal sampler is full");
+        if (normalArea === undefined) {
+            elevationArea.release();
+            return;
         }
+
+        const depthsAtt = surface?.instancedBuffers.depths;
+        if (depthsAtt) {
+            depthsAtt.x = elevationArea.depth;
+            depthsAtt.y = normalArea.depth;
+        }
+
+        // Build the layout for the tile
+        layout = new TileLayout(tile);
+        this._tileLayouts.set(tile.address.quadkey, layout);
+        // ELEVATION
+        let areaInfos = new AreaInfos(elevationArea);
+        layout.setArea(Map3dLayerKind.ELEVATION, areaInfos);
+        if (tile.content?.elevations) {
+            this._updateElevationRange(tile.content);
+            this._updateElevationSampler(tile, areaInfos.layer, Map3dLayerKind.ELEVATION, (t) => t.content?.elevations);
+            layout.tile.surface?.setEnabled(true);
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+        // NORMAL
+        areaInfos = new AreaInfos(normalArea);
+        layout.setArea(Map3dLayerKind.NORMAL, areaInfos);
     }
 
     public removeTile(tile: IElevationTile, source: IElevationHost): void {
@@ -315,6 +323,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         const layout = this._tileLayouts.get(key);
         if (layout) {
             layout.getArea(Map3dLayerKind.ELEVATION)?.layer.release();
+            layout.getArea(Map3dLayerKind.NORMAL)?.layer.release();
             this._tileLayouts.delete(key);
             this._elevationRange = null; // invalidate the elevation range
             this.markAsDirty(Material.TextureDirtyFlag);
@@ -332,15 +341,15 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 surface.instancedBuffers.depths = new Vector4(d, -1, -1, -1);
             }
 
-            if (tile.content) {
+            if (tile.content?.elevations) {
                 // we update the elevation range
-                const area = layout.getArea(Map3dLayerKind.ELEVATION);
-                if (area) {
+                const areaInfos = layout.getArea(Map3dLayerKind.ELEVATION);
+                if (areaInfos) {
                     // if not done during the add, it's update the sampler, which mean set the texture data.
                     // this is the place where the data are copied from the tile content to the sampler
                     // and the border are fileld with values related to the neibourghs tiles.
-                    this._updateElevationSampler(tile, area.layer);
-                    area.isReady = true;
+                    this._updateElevationRange(tile.content);
+                    this._updateElevationSampler(tile, areaInfos.layer, Map3dLayerKind.ELEVATION, (t) => t.content?.elevations);
                     layout.tile.surface?.setEnabled(true);
                     this.markAsDirty(Material.TextureDirtyFlag);
                 }
@@ -353,33 +362,70 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         this._elevationSampler?.dispose();
     }
 
-    protected _updateElevationSampler(tile: IElevationTile, elevationArea: ITexture3Layer) {
-        if (tile.content && tile.content.elevations) {
-            let w = elevationArea.host?.width ?? 0;
-            let h = elevationArea.host?.height ?? 0;
+    protected _reserveArea(sampler: Nullable<Texture3>, mess?: string): ITexture3Layer | undefined {
+        if (!sampler) {
+            return undefined;
+        }
+
+        let area = sampler.reserve();
+        if (!area) {
+            if (mess) {
+                console.log(mess);
+            }
+            // this is the place where we need to reallocate some depth into the samplers
+            sampler.ensureRoomFor(1);
+            area = sampler.reserve();
+        }
+        return area;
+    }
+
+    protected _updateElevationSampler(
+        tile: IElevationTile,
+        textureLayer: ITexture3Layer,
+        kind: Map3dLayerKind,
+        accessor: (tile: IElevationTile) => Nullable<ElevationBuffer> | undefined
+    ) {
+        const buffer = accessor(tile);
+        if (buffer) {
+            let w = textureLayer.host?.width ?? 0;
+            let h = textureLayer.host?.height ?? 0;
 
             if (w && h) {
-                const elevations = tile.content.elevations;
-                //const normals = tile.content.normals;
                 w--;
                 h--;
-                // we process the dem content and update the elevation range
-                this._updateElevationRange(tile.content);
                 // update the main area
-                elevationArea.update(elevations, 0, 0, w, h);
+                textureLayer.update(buffer, 0, 0, w, h);
 
                 const quadkey = tile.address.quadkey;
                 const keys = TileAddress.ToNeigborsKey(quadkey);
 
-                // checking the north neigbour
-                let k = keys[NeighborsAddress.N];
+                // checking the north-west neigbour
+                let k = keys[NeighborsAddress.NW];
                 let layout;
                 if (k) {
                     layout = this._tileLayouts.get(k);
-                    if (layout?.tile.content?.elevations) {
-                        // we update the last row of the north neigbour with the first row of the current tile
-                        const firstRow = ElevationHelpers.GetFirstRow(elevations, w);
-                        layout.getArea(Map3dLayerKind.ELEVATION)?.layer.update(firstRow, 0, h, w, 1);
+                    if (layout) {
+                        const area = layout.getArea(kind);
+                        if (area) {
+                            // we update the last value of the last row of the north-west neigbour with the first value of the firt row of the current tile
+                            const v = ElevationHelpers.GetElevationAt(buffer, w, h, 0, 0);
+                            area.layer.update(v, w, h, 1, 1);
+                        }
+                    }
+                }
+
+                // checking the north neigbour
+                k = keys[NeighborsAddress.N];
+
+                if (k) {
+                    layout = this._tileLayouts.get(k);
+                    if (layout) {
+                        const area = layout.getArea(kind);
+                        if (area) {
+                            // we update the last row of the north neigbour with the first row of the current tile
+                            const firstRow = ElevationHelpers.GetFirstRow(buffer, w);
+                            area.layer.update(firstRow, 0, h, w, 1);
+                        }
                     }
                 }
 
@@ -387,14 +433,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 k = keys[NeighborsAddress.E];
                 if (k) {
                     layout = this._tileLayouts.get(k);
-                    if (layout?.tile.content?.elevations) {
-                        // we update the last column of the current tile with the value of the first column of the east neigbour
-                        const firstColumn = ElevationHelpers.GetFirstColumn(layout.tile.content.elevations, w, h);
-                        elevationArea.update(firstColumn, w, 0, 1, h);
-                    } else {
-                        // we duplicate the last column of the current tile
-                        const lastColumn = ElevationHelpers.GetLastColumn(elevations, w, h);
-                        elevationArea.update(lastColumn, w, 0, 1, h);
+                    if (layout) {
+                        const data = accessor(layout.tile);
+                        if (data) {
+                            // we update the last column of the current tile with the value of the first column of the east neigbour
+                            const firstColumn = ElevationHelpers.GetFirstColumn(data, w, h);
+                            textureLayer.update(firstColumn, w, 0, 1, h);
+                        } else {
+                            // we duplicate the last column of the current tile
+                            const lastColumn = ElevationHelpers.GetLastColumn(buffer, w, h);
+                            textureLayer.update(lastColumn, w, 0, 1, h);
+                        }
                     }
                 }
 
@@ -402,14 +451,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 k = keys[NeighborsAddress.SE];
                 if (k) {
                     layout = this._tileLayouts.get(k);
-                    if (layout?.tile.content?.elevations) {
+                    if (layout) {
                         // we update the last value of the last row of the current tile with the first value of the first row of the south-east neigbour
-                        const first = ElevationHelpers.GetElevationAt(layout.tile.content.elevations, w, h, 0, 0);
-                        elevationArea.update(first, w, h, 1, 1);
-                    } else {
-                        // we duplicate the last value of the last row of the current tile
-                        const last = ElevationHelpers.GetElevationAt(elevations, w, h, w - 1, h - 1);
-                        elevationArea.update(last, w, h, 1, 1);
+                        const data = accessor(layout.tile);
+                        if (data) {
+                            const first = ElevationHelpers.GetElevationAt(data, w, h, 0, 0);
+                            textureLayer.update(first, w, h, 1, 1);
+                        } else {
+                            // we duplicate the last value of the last row of the current tile
+                            const last = ElevationHelpers.GetElevationAt(buffer, w, h, w - 1, h - 1);
+                            textureLayer.update(last, w, h, 1, 1);
+                        }
                     }
                 }
 
@@ -417,14 +469,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 k = keys[NeighborsAddress.S];
                 if (k) {
                     layout = this._tileLayouts.get(k);
-                    if (layout?.tile.content?.elevations) {
+                    if (layout) {
                         // we update the last row of the current tile with the first row of the south neigbour
-                        const firstRow = ElevationHelpers.GetFirstRow(layout.tile.content.elevations, w);
-                        elevationArea.update(firstRow, 0, h, w, 1);
-                    } else {
-                        // we duplicate the last row of the current tile
-                        const lastRow = ElevationHelpers.GetLastRow(elevations, w, h);
-                        elevationArea.update(lastRow, 0, h, w, 1);
+                        const data = accessor(layout.tile);
+                        if (data) {
+                            const firstRow = ElevationHelpers.GetFirstRow(data, w);
+                            textureLayer.update(firstRow, 0, h, w, 1);
+                        } else {
+                            // we duplicate the last row of the current tile
+                            const lastRow = ElevationHelpers.GetLastRow(buffer, w, h);
+                            textureLayer.update(lastRow, 0, h, w, 1);
+                        }
                     }
                 }
 
@@ -432,21 +487,13 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
                 k = keys[NeighborsAddress.W];
                 if (k) {
                     layout = this._tileLayouts.get(k);
-                    if (layout?.tile.content?.elevations) {
-                        // we update the last column of the current tile with the first column of the west neigbour
-                        const firstColumn = ElevationHelpers.GetFirstColumn(elevations, w, h);
-                        layout.getArea(Map3dLayerKind.ELEVATION)?.layer.update(firstColumn, w, 0, 1, h);
-                    }
-                }
-
-                // checking the north-west neigbour
-                k = keys[NeighborsAddress.NW];
-                if (k) {
-                    layout = this._tileLayouts.get(k);
-                    if (layout?.tile.content?.elevations) {
-                        // we update the last value of the first row of the current tile with the first value of the last row of the north-west neigbour
-                        const first = ElevationHelpers.GetElevationAt(elevations, w, h, 0, 0);
-                        layout.getArea(Map3dLayerKind.ELEVATION)?.layer.update(first, w, h, 1, 1);
+                    if (layout) {
+                        const area = layout.getArea(kind);
+                        if (area) {
+                            // we update the last column of the  west neigbour with the first column of the current tile
+                            const firstColumn = ElevationHelpers.GetFirstColumn(buffer, w, h);
+                            area.layer.update(firstColumn, w, 0, 1, h);
+                        }
                     }
                 }
             }
@@ -475,7 +522,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         return range ?? new Range(Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
     }
 
-    protected _updateElevationRange(infos: IDemInfos): void {
+    protected _updateElevationRange(infos: Nullable<IDemInfos>): void {
         if (infos) {
             this._getElevationRange().unionInPlace(infos.min.z, infos.max.z);
             this.markAsDirty(Material.AttributesDirtyFlag);

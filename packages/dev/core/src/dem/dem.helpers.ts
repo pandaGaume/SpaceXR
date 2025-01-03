@@ -1,3 +1,5 @@
+export type ElevationBuffer = Float64Array | Float32Array | Uint32Array | Uint16Array | Uint8Array | Uint8ClampedArray | Int32Array | Int16Array | Int8Array;
+
 export class ElevationHelpers {
     /**
      * Performs cubic interpolation between four values.
@@ -8,20 +10,20 @@ export class ElevationHelpers {
      * @param t The interpolation factor (0.0 to 1.0).
      * @returns The interpolated value.
      */
-    private static cubicInterpolate(v0: number, v1: number, v2: number, v3: number, t: number): number {
+    private static _cubicInterpolate(v0: number, v1: number, v2: number, v3: number, t: number): number {
         return v1 + 0.5 * t * (v2 - v0 + t * (2 * v0 - 5 * v1 + 4 * v2 - v3 + t * (3 * (v1 - v2) + v3 - v0)));
     }
 
     /**
      * Safely retrieves an elevation value, clamping indices to valid ranges.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param xi The x-coordinate to retrieve.
      * @param yi The y-coordinate to retrieve.
      * @returns The elevation value at the clamped (xi, yi).
      */
-    private static getSafeElevation(elevations: Float32Array, w: number, h: number, xi: number, yi: number): number {
+    private static getSafeElevation(elevations: ElevationBuffer, w: number, h: number, xi: number, yi: number): number {
         const clampedX = Math.min(Math.max(0, xi), w - 1);
         const clampedY = Math.min(Math.max(0, yi), h - 1);
         return elevations[clampedX + clampedY * w];
@@ -29,14 +31,14 @@ export class ElevationHelpers {
 
     /**
      * Computes the elevation at a normalized position using bilinear interpolation.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param xNorm Normalized x-coordinate (0.0 to 1.0).
      * @param yNorm Normalized y-coordinate (0.0 to 1.0).
      * @returns The interpolated elevation value.
      */
-    public static GetElevationBilinear(elevations: Float32Array, w: number, h: number, xNorm: number, yNorm: number): number {
+    public static GetElevationBilinear(elevations: ElevationBuffer, w: number, h: number, xNorm: number, yNorm: number): number {
         const x = xNorm * (w - 1);
         const y = yNorm * (h - 1);
 
@@ -61,14 +63,14 @@ export class ElevationHelpers {
 
     /**
      * Computes the elevation at a normalized position using cubic interpolation.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param xNorm Normalized x-coordinate (0.0 to 1.0).
      * @param yNorm Normalized y-coordinate (0.0 to 1.0).
      * @returns The interpolated elevation value.
      */
-    public static GetElevationCubic(elevations: Float32Array, w: number, h: number, xNorm: number, yNorm: number): number {
+    public static GetElevationCubic(elevations: ElevationBuffer, w: number, h: number, xNorm: number, yNorm: number): number {
         const x = xNorm * (w - 1);
         const y = yNorm * (h - 1);
 
@@ -89,21 +91,22 @@ export class ElevationHelpers {
         }
 
         // Perform cubic interpolation row by row
-        const interpolatedRows = values.map((row) => ElevationHelpers.cubicInterpolate(row[0], row[1], row[2], row[3], dx));
+        const interpolatedRows = values.map((row) => ElevationHelpers._cubicInterpolate(row[0], row[1], row[2], row[3], dx));
 
         // Perform cubic interpolation across the resulting column
-        return ElevationHelpers.cubicInterpolate(interpolatedRows[0], interpolatedRows[1], interpolatedRows[2], interpolatedRows[3], dy);
+        return ElevationHelpers._cubicInterpolate(interpolatedRows[0], interpolatedRows[1], interpolatedRows[2], interpolatedRows[3], dy);
     }
 
     /**
      * Retrieves the last column of the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
-     * @returns A new Float32Array containing the last column values.
+     * @returns A new ElevationBuffer containing the last column values.
      */
-    public static GetLastColumn(elevations: Float32Array, w: number, h: number): Float32Array {
-        const lastColumn = new Float32Array(h);
+    public static GetLastColumn<T extends ElevationBuffer>(elevations: T, w: number, h: number): T {
+        // Use the constructor of the array type
+        const lastColumn = new (elevations.constructor as { new (length: number): T })(h);
         for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
             lastColumn[i] = elevations[w1];
         }
@@ -112,26 +115,31 @@ export class ElevationHelpers {
 
     /**
      * Retrieves the last row of the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
-     * @returns A new Float32Array containing the last row values.
+     * @returns A new ElevationBuffer containing the last row values.
      */
-    public static GetLastRow(elevations: Float32Array, w: number, h: number): Float32Array {
+    public static GetLastRow<T extends ElevationBuffer>(elevations: T, w: number, h: number): T {
         const startIndex = (h - 1) * w;
-        return new Float32Array(elevations.subarray(startIndex, startIndex + w));
+        return new (elevations.constructor as { new (buffer: ArrayBuffer, byteOffset?: number, length?: number): T })(
+            elevations.buffer,
+            elevations.byteOffset + startIndex * elevations.BYTES_PER_ELEMENT,
+            w
+        );
     }
 
     /**
      * Retrieves the first column of the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param duplicateFirst Whether to duplicate the last value.
-     * @returns A new Float32Array containing the first column values.
+     * @returns A new ElevationBuffer containing the first column values.
      */
-    public static GetFirstColumn(elevations: Float32Array, w: number, h: number, duplicateFirst: boolean = false): Float32Array {
-        const firstColumn = new Float32Array(h + (duplicateFirst ? 1 : 0));
+    public static GetFirstColumn<T extends ElevationBuffer>(elevations: T, w: number, h: number, duplicateFirst: boolean = false): T {
+        // Use the constructor of the array type
+        const firstColumn = new (elevations.constructor as { new (length: number): T })(h + (duplicateFirst ? 1 : 0));
         for (let i = 0; i < h; i++) {
             firstColumn[i] = elevations[i * w];
         }
@@ -143,37 +151,44 @@ export class ElevationHelpers {
 
     /**
      * Retrieves the first row of the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
-     * @returns A new Float32Array containing the first row values.
+     * @returns A new ElevationBuffer containing the first row values.
      */
-    public static GetFirstRow(elevations: Float32Array, w: number): Float32Array {
-        return new Float32Array(elevations.subarray(0, w));
+    public static GetFirstRow<T extends ElevationBuffer>(elevations: T, w: number): T {
+        return new (elevations.constructor as { new (buffer: ArrayBuffer, byteOffset?: number, length?: number): T })(elevations.buffer, elevations.byteOffset, w);
     }
 
     /**
      * Retrieves the elevation value at a specific (x, y) position.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param x The x-coordinate.
      * @param y The y-coordinate.
-     * @returns A new Float32Array containing the elevation value.
+     * @returns A new ElevationBuffer containing the elevation value.
      */
-    public static GetElevationAt(elevations: Float32Array, w: number, h: number, x: number, y: number): Float32Array {
-        return new Float32Array([elevations[x + y * w]]);
+    public static GetElevationAt<T extends ElevationBuffer>(elevations: T, w: number, h: number, x: number, y: number): T {
+        if (x < 0 || x >= w || y < 0 || y >= h) {
+            throw new Error("Coordinates out of bounds");
+        }
+
+        const index = x + y * w;
+        const target = new (elevations.constructor as { new (length: number): T })(1);
+        target[0] = elevations[index];
+        return target;
     }
 
     /**
      * Retrieves a specific column from the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param colIndex The index of the column to retrieve.
-     * @returns A new Float32Array containing the column values.
+     * @returns A new ElevationBuffer containing the column values.
      */
-    public static GetColumn(elevations: Float32Array, w: number, h: number, colIndex: number): Float32Array {
-        const column = new Float32Array(h);
+    public static GetColumn<T extends ElevationBuffer>(elevations: ElevationBuffer, w: number, h: number, colIndex: number): ElevationBuffer {
+        const column = new (elevations.constructor as { new (length: number): T })(h);
         for (let i = 0; i < h; i++) {
             column[i] = elevations[colIndex + i * w];
         }
@@ -182,34 +197,50 @@ export class ElevationHelpers {
 
     /**
      * Retrieves a specific row from the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param rowIndex The index of the row to retrieve.
-     * @returns A new Float32Array containing the row values.
+     * @returns A new ElevationBuffer containing the row values.
      */
-    public static GetRow(elevations: Float32Array, w: number, rowIndex: number): Float32Array {
+    public static GetRow<T extends ElevationBuffer>(elevations: T, w: number, rowIndex: number): T {
         const startIndex = rowIndex * w;
-        return new Float32Array(elevations.subarray(startIndex, startIndex + w));
+        const endIndex = startIndex + w;
+
+        if (startIndex < 0 || endIndex > elevations.length) {
+            throw new Error("Row index out of bounds");
+        }
+
+        return new (elevations.constructor as { new (buffer: ArrayBuffer, byteOffset?: number, length?: number): T })(
+            elevations.buffer,
+            elevations.byteOffset + startIndex * elevations.BYTES_PER_ELEMENT,
+            w
+        );
     }
 
     /**
      * Retrieves a rectangular area from the elevation grid.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param startX The starting x-coordinate of the area.
      * @param startY The starting y-coordinate of the area.
      * @param areaWidth The width of the area.
      * @param areaHeight The height of the area.
-     * @returns A new Float32Array containing the values in the specified area.
+     * @returns A new ElevationBuffer containing the values in the specified area.
      */
-    public static GetArea(elevations: Float32Array, w: number, h: number, startX: number, startY: number, areaWidth: number, areaHeight: number): Float32Array {
-        const area = new Float32Array(areaWidth * areaHeight);
+    public static GetArea<T extends ElevationBuffer>(elevations: T, w: number, h: number, startX: number, startY: number, areaWidth: number, areaHeight: number): T {
+        if (startX < 0 || startY < 0 || startX + areaWidth > w || startY + areaHeight > h) {
+            throw new Error("Specified area is out of bounds.");
+        }
+
+        const area = new (elevations.constructor as { new (length: number): T })(areaWidth * areaHeight);
+
         for (let y = 0; y < areaHeight; y++) {
             const sourceStart = (startY + y) * w + startX;
             const destStart = y * areaWidth;
             area.set(elevations.subarray(sourceStart, sourceStart + areaWidth), destStart);
         }
+
         return area;
     }
 
@@ -220,7 +251,7 @@ export class ElevationHelpers {
      * @param epsilon The tolerance value for comparison.
      * @returns `true` if all elements are within the epsilon tolerance; otherwise, `false`.
      */
-    public static CompareElevations(array1: Float32Array, array2: Float32Array, epsilon: number): boolean {
+    public static CompareElevations(array1: ElevationBuffer, array2: ElevationBuffer, epsilon: number): boolean {
         if (array1.length !== array2.length) {
             return false;
         }
@@ -234,7 +265,7 @@ export class ElevationHelpers {
 
     /**
      * Computes an array of elevation values along a line between two normalized points.
-     * @param elevations The elevation data as a 1D Float32Array.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
      * @param w The width of the elevation grid.
      * @param h The height of the elevation grid.
      * @param x1Norm Normalized x-coordinate of the starting point (0.0 to 1.0).
@@ -242,10 +273,10 @@ export class ElevationHelpers {
      * @param x2Norm Normalized x-coordinate of the ending point (0.0 to 1.0).
      * @param y2Norm Normalized y-coordinate of the ending point (0.0 to 1.0).
      * @param steps The number of steps to divide the line.
-     * @returns A Float32Array containing the elevation values at each step.
+     * @returns A ElevationBuffer containing the elevation values at each step.
      */
-    public static GetElevationsBetween(
-        elevations: Float32Array,
+    public static GetElevationsBetween<T extends ElevationBuffer>(
+        elevations: ElevationBuffer,
         w: number,
         h: number,
         x1Norm: number,
@@ -253,8 +284,9 @@ export class ElevationHelpers {
         x2Norm: number,
         y2Norm: number,
         steps: number
-    ): Float32Array {
-        const result = new Float32Array(steps);
+    ): ElevationBuffer {
+        const result = new (elevations.constructor as { new (length: number): T })(steps);
+
         const dxNorm = (x2Norm - x1Norm) / (steps - 1);
         const dyNorm = (y2Norm - y1Norm) / (steps - 1);
 
@@ -265,5 +297,45 @@ export class ElevationHelpers {
         }
 
         return result;
+    }
+
+    /**
+     * Normalizes the elevation data to a specified range.
+     * Each value in the elevation buffer is linearly scaled between `minRange` and `maxRange`.
+     *
+     * @template T - The type of the ElevationBuffer (e.g., Float32Array, Int16Array).
+     * @param elevations - The elevation data as a 1D ElevationBuffer.
+     * @param minRange - The minimum value of the normalized range (default is 0).
+     * @param maxRange - The maximum value of the normalized range (default is 1).
+     * @returns A new ElevationBuffer of the same type, containing normalized elevation values.
+     * @throws Will throw an error if all values in the elevation buffer are identical, as normalization is not possible.
+     *
+     * @example
+     * const elevations = new Float32Array([10, 20, 30, 40, 50]);
+     *
+     * // Normalize to [0, 1]
+     * const normalized = ElevationHelpers.Normalize(elevations, 0, 1);
+     * console.log(normalized); // Float32Array [ 0, 0.25, 0.5, 0.75, 1 ]
+     *
+     * // Normalize to [-1, 1]
+     * const normalizedToNegative = ElevationHelpers.Normalize(elevations, -1, 1);
+     * console.log(normalizedToNegative); // Float32Array [ -1, -0.5, 0, 0.5, 1 ]
+     */
+    public static Normalize<T extends ElevationBuffer>(elevations: T, minRange: number = 0, maxRange: number = 1): T {
+        const minValue = Math.min(...elevations);
+        const maxValue = Math.max(...elevations);
+
+        if (minValue === maxValue) {
+            throw new Error("Normalization is not possible when all values are identical.");
+        }
+
+        const normalized = new (elevations.constructor as { new (length: number): T })(elevations.length);
+        const scale = (maxRange - minRange) / (maxValue - minValue);
+
+        for (let i = 0; i < elevations.length; i++) {
+            normalized[i] = minRange + (elevations[i] - minValue) * scale;
+        }
+
+        return normalized;
     }
 }

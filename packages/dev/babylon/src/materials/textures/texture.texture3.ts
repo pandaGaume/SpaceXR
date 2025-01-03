@@ -29,7 +29,7 @@ export interface ITexture3 extends ISize {
 }
 
 class Texture3Layer implements ITexture3Layer {
-    _host?: ITexture3;
+    _host: ITexture3;
     _depth: number;
 
     constructor(host: ITexture3, id: number) {
@@ -38,21 +38,18 @@ class Texture3Layer implements ITexture3Layer {
     }
 
     public update(data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void {
-        this._host?.update(this._depth, data, row, column, width, height);
+        this._host.update(this._depth, data, row, column, width, height);
     }
 
     public release(): void {
-        if (this._host) {
-            this._host.release(this._depth);
-            this._host = undefined;
-        }
-    }
+        this._host.release(this._depth);
+     }
 
     public get depth(): number {
         return this._depth;
     }
 
-    public get host(): ITexture3 | undefined {
+    public get host(): ITexture3 {
         return this._host;
     }
 }
@@ -155,13 +152,13 @@ export class Texture3 extends BaseTexture implements ITexture3 {
     }
 
     public release(depth: number): void {
-        if (this._count > 0 && depth >= 0 && depth < this.depth && this._layers[depth] !== null) {
-            const layer = this._layers[depth]!;
-            this._layers[depth] = null;
-            this._count--;
-            layer.release(); // release the layer internally
+        if (this._count > 0 && depth >= 0 && depth < this.depth) {
+            const layer = this._layers[depth];
+            if (layer) {
+                this._layers[depth] = null;
+                this._count--;
+            }
         }
-        //console.log(`released layer ${depth} used: ${this.count} / ${this.depth}`);
     }
 
     public ensureRoomFor(count: number): boolean {
@@ -209,6 +206,10 @@ export class Texture3 extends BaseTexture implements ITexture3 {
     }
 
     protected _buildLayer(z: number): ITexture3Layer {
-        return new Texture3Layer(this, z);
+        const layer = new Texture3Layer(this, z);
+        if (!layer.host) {
+            console.error(`Layer host was not set correctly for depth: ${z}`);
+        }
+        return layer;
     }
 }

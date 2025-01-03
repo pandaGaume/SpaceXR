@@ -565,7 +565,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ElevationHelpers: () => (/* binding */ ElevationHelpers)
 /* harmony export */ });
 class ElevationHelpers {
-    static cubicInterpolate(v0, v1, v2, v3, t) {
+    static _cubicInterpolate(v0, v1, v2, v3, t) {
         return v1 + 0.5 * t * (v2 - v0 + t * (2 * v0 - 5 * v1 + 4 * v2 - v3 + t * (3 * (v1 - v2) + v3 - v0)));
     }
     static getSafeElevation(elevations, w, h, xi, yi) {
@@ -605,11 +605,11 @@ class ElevationHelpers {
             }
             values.push(row);
         }
-        const interpolatedRows = values.map((row) => ElevationHelpers.cubicInterpolate(row[0], row[1], row[2], row[3], dx));
-        return ElevationHelpers.cubicInterpolate(interpolatedRows[0], interpolatedRows[1], interpolatedRows[2], interpolatedRows[3], dy);
+        const interpolatedRows = values.map((row) => ElevationHelpers._cubicInterpolate(row[0], row[1], row[2], row[3], dx));
+        return ElevationHelpers._cubicInterpolate(interpolatedRows[0], interpolatedRows[1], interpolatedRows[2], interpolatedRows[3], dy);
     }
     static GetLastColumn(elevations, w, h) {
-        const lastColumn = new Float32Array(h);
+        const lastColumn = new elevations.constructor(h);
         for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
             lastColumn[i] = elevations[w1];
         }
@@ -617,10 +617,10 @@ class ElevationHelpers {
     }
     static GetLastRow(elevations, w, h) {
         const startIndex = (h - 1) * w;
-        return new Float32Array(elevations.subarray(startIndex, startIndex + w));
+        return new elevations.constructor(elevations.buffer, elevations.byteOffset + startIndex * elevations.BYTES_PER_ELEMENT, w);
     }
     static GetFirstColumn(elevations, w, h, duplicateFirst = false) {
-        const firstColumn = new Float32Array(h + (duplicateFirst ? 1 : 0));
+        const firstColumn = new elevations.constructor(h + (duplicateFirst ? 1 : 0));
         for (let i = 0; i < h; i++) {
             firstColumn[i] = elevations[i * w];
         }
@@ -630,13 +630,19 @@ class ElevationHelpers {
         return firstColumn;
     }
     static GetFirstRow(elevations, w) {
-        return new Float32Array(elevations.subarray(0, w));
+        return new elevations.constructor(elevations.buffer, elevations.byteOffset, w);
     }
     static GetElevationAt(elevations, w, h, x, y) {
-        return new Float32Array([elevations[x + y * w]]);
+        if (x < 0 || x >= w || y < 0 || y >= h) {
+            throw new Error("Coordinates out of bounds");
+        }
+        const index = x + y * w;
+        const target = new elevations.constructor(1);
+        target[0] = elevations[index];
+        return target;
     }
     static GetColumn(elevations, w, h, colIndex) {
-        const column = new Float32Array(h);
+        const column = new elevations.constructor(h);
         for (let i = 0; i < h; i++) {
             column[i] = elevations[colIndex + i * w];
         }
@@ -644,10 +650,17 @@ class ElevationHelpers {
     }
     static GetRow(elevations, w, rowIndex) {
         const startIndex = rowIndex * w;
-        return new Float32Array(elevations.subarray(startIndex, startIndex + w));
+        const endIndex = startIndex + w;
+        if (startIndex < 0 || endIndex > elevations.length) {
+            throw new Error("Row index out of bounds");
+        }
+        return new elevations.constructor(elevations.buffer, elevations.byteOffset + startIndex * elevations.BYTES_PER_ELEMENT, w);
     }
     static GetArea(elevations, w, h, startX, startY, areaWidth, areaHeight) {
-        const area = new Float32Array(areaWidth * areaHeight);
+        if (startX < 0 || startY < 0 || startX + areaWidth > w || startY + areaHeight > h) {
+            throw new Error("Specified area is out of bounds.");
+        }
+        const area = new elevations.constructor(areaWidth * areaHeight);
         for (let y = 0; y < areaHeight; y++) {
             const sourceStart = (startY + y) * w + startX;
             const destStart = y * areaWidth;
@@ -667,7 +680,7 @@ class ElevationHelpers {
         return true;
     }
     static GetElevationsBetween(elevations, w, h, x1Norm, y1Norm, x2Norm, y2Norm, steps) {
-        const result = new Float32Array(steps);
+        const result = new elevations.constructor(steps);
         const dxNorm = (x2Norm - x1Norm) / (steps - 1);
         const dyNorm = (y2Norm - y1Norm) / (steps - 1);
         for (let i = 0; i < steps; i++) {
@@ -676,6 +689,19 @@ class ElevationHelpers {
             result[i] = ElevationHelpers.GetElevationBilinear(elevations, w, h, xNorm, yNorm);
         }
         return result;
+    }
+    static Normalize(elevations, minRange = 0, maxRange = 1) {
+        const minValue = Math.min(...elevations);
+        const maxValue = Math.max(...elevations);
+        if (minValue === maxValue) {
+            throw new Error("Normalization is not possible when all values are identical.");
+        }
+        const normalized = new elevations.constructor(elevations.length);
+        const scale = (maxRange - minRange) / (maxValue - minValue);
+        for (let i = 0; i < elevations.length; i++) {
+            normalized[i] = minRange + (elevations[i] - minValue) * scale;
+        }
+        return normalized;
     }
 }
 //# sourceMappingURL=dem.helpers.js.map

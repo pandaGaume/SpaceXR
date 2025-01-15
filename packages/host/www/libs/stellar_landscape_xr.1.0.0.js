@@ -790,7 +790,7 @@ class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
         super(name, dimension, options, scene);
         this._content = this._createTextureMap(name, options, this.getScene());
         this.node.material = this._createMaterial(name, this._content, this.getScene());
-        this._target = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget(this._content?.map);
+        this._target = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget(this._content?.map, core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT, options?.invertY);
         this._controller = new core_map__WEBPACK_IMPORTED_MODULE_4__.PointerController(this.pointerSource, this._target);
     }
     get content() {
@@ -5968,11 +5968,6 @@ class Cartesian3 extends Cartesian2 {
         epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON;
         return _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.x, b.x, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.y, b.y, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.z, b.z, epsilon);
     }
-    static Copy(a, b) {
-        a.x = b.x;
-        a.y = b.y;
-        a.z = b.z;
-    }
     constructor(x, y, z = 0.0) {
         super(x, y);
         this.z = z;
@@ -7809,7 +7804,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsPhysicalDisplay),
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
-/* harmony export */   IsSourceBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsSourceBlock),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTile),
 /* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
@@ -7878,7 +7872,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions),
 /* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptionsBuilder),
@@ -8405,7 +8398,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InputsNavigationTarget: () => (/* binding */ InputsNavigationTarget)
 /* harmony export */ });
 class InputsNavigationTarget {
-    constructor(target, zoomIncrement) {
+    constructor(target, zoomIncrement, invertY) {
         this._target = target;
         this._offsetX = 0;
         this._offsetY = 0;
@@ -8414,6 +8407,7 @@ class InputsNavigationTarget {
         this._button = 0;
         this._isDragging = false;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT;
+        this._inverty = invertY;
     }
     onPointerOver(src, x, y, id) { }
     onPointerLeave(src, x, y, id) { }
@@ -8439,7 +8433,7 @@ class InputsNavigationTarget {
             const dy = y - this._offsetY;
             this._offsetX += dx;
             this._offsetY += dy;
-            this.onDrag(src, dx, dy, this._button);
+            this.onDrag(src, dx, this._inverty ? dy : -dy, this._button);
         }
     }
     onPointerOut(src, x, y, id) {
@@ -11182,7 +11176,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTileAddress),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsDrawableTileMapLayer),
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsPhysicalDisplay),
-/* harmony export */   IsSourceBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsSourceBlock),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile),
 /* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
@@ -11207,7 +11200,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_13__.Tile),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
@@ -11365,14 +11357,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapBase: () => (/* binding */ TileMapBase)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
 /* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
-/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../collections/orderedCollection */ "../core/dist/collections/orderedCollection.js");
-/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles.map.layerView */ "../core/dist/tiles/map/tiles.map.layerView.js");
-/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
-/* harmony import */ var _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../navigation/tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
+/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../collections/orderedCollection */ "../core/dist/collections/orderedCollection.js");
+/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.map.layerView */ "../core/dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
+/* harmony import */ var _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navigation/tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
 
 
 
@@ -11391,11 +11383,10 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layerRemovedObserver = this._layers.removedObservable.add(this._onLayerRemoved.bind(this));
         this.display = display ?? null;
         this.navigationState = nav ?? this._buildNavigationState() ?? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
-        this._view = this._buildSharedView() ?? this._buildSharedViewInternal();
+        this._view = this._buildView() ?? new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
         this._layerViews = this._buildLayerViewContainer(this._layers) ?? this._buildLayerViewContainerInternal(this._layers);
         this._layerViewAddedObserver = this._layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
         this._layerViewRemovedObserver = this._layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
-        this._layerViewsWithSingleView = this._buildSingleViewList(this._layerViews);
     }
     get layers() {
         return this._layers;
@@ -11405,7 +11396,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         return this._propertyChangedObservable;
     }
     get display() {
@@ -11434,49 +11425,49 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     }
     setViewMap(center, zoom, rotation) {
         this._api?.setViewMap(center, zoom, rotation);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.setViewMap(center, zoom, rotation);
         }
         return this;
     }
     zoomMap(delta) {
         this._api?.zoomMap(delta);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.zoomMap(delta);
         }
         return this;
     }
     zoomInMap(delta) {
         this._api?.zoomInMap(delta);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.zoomInMap(delta);
         }
         return this;
     }
     zoomOutMap(delta) {
         this._api?.zoomOutMap(delta);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.zoomOutMap(delta);
         }
         return this;
     }
     translateUnitsMap(tx, ty) {
         this._api?.translateUnitsMap(tx, ty);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.translateUnitsMap(tx, ty);
         }
         return this;
     }
     translateMap(lat, lon) {
         this._api?.translateMap(lat, lon);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.translateMap(lat, lon);
         }
         return this;
     }
     rotateMap(r) {
         this._api?.rotateMap(r);
-        for (const v of this._layerViewsWithSingleView) {
+        for (const v of this._layerViews) {
             v.navigationApi?.rotateMap(r);
         }
         return this;
@@ -11504,11 +11495,8 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     }
     _onLayerViewAdded(eventData, eventstate) {
         this._updateLayerNavigations(eventData);
-        this._layerViewsWithSingleView = this._buildSingleViewList(this._layerViews);
     }
-    _onLayerViewRemoved(eventData, eventstate) {
-        this._layerViewsWithSingleView = this._buildSingleViewList(this._layerViews);
-    }
+    _onLayerViewRemoved(eventData, eventstate) { }
     _updateLayerNavigations(layers) {
         if (layers) {
             const nav = this.navigationState;
@@ -11558,7 +11546,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             this.invalidate();
             this._onDisplayBinded(display);
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, old, this._display, TileMapBase.DISPLAY_PROPERTY_NAME), -1, this, this);
+                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_4__.PropertyChangedEventArgs(this, old, this._display, TileMapBase.DISPLAY_PROPERTY_NAME), -1, this, this);
             }
         }
     }
@@ -11576,7 +11564,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             }
             this._navigation = nav;
             if (this._navigation) {
-                this._api = new _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_4__.TileNavigationApi(this._navigation);
+                this._api = new _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_5__.TileNavigationApi(this._navigation);
                 this._navigationPropertyObserver = this._navigation.propertyChangedObservable?.add(this._onNavigationPropertyChanged.bind(this));
                 this._navigationValidableObserver = this._navigation.validationObservable?.add(this._onNavigationValidationChanged.bind(this));
                 this._updateLayerNavigations(this._layerViews);
@@ -11584,7 +11572,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             this.invalidate();
             this._onNavigationBinded(nav);
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, old, this._navigation, TileMapBase.NAVIGATION_PROPERTY_NAME), -1, this, this);
+                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_4__.PropertyChangedEventArgs(this, old, this._navigation, TileMapBase.NAVIGATION_PROPERTY_NAME), -1, this, this);
             }
         }
     }
@@ -11614,35 +11602,17 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     _buildNavigationState() {
         return new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
     }
-    _buildSharedView() {
-        return this._buildSharedViewInternal();
-    }
-    _buildViewForLayer(layer, sharedView) {
-        return sharedView;
+    _buildView() {
+        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
     }
     _buildLayerContainerInternal() {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_5__.OrderedCollection();
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection();
     }
     _buildLayerViewContainerInternal(layers) {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_5__.OrderedCollection(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
     }
     _buildLayerViewInternal(layer) {
-        const view = this._buildViewForLayer(layer, this._view) ?? this._view;
-        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_6__.TileMapLayerView(layer, this._display, view);
-    }
-    _buildSharedViewInternal() {
-        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_7__.TileView();
-    }
-    _buildSingleViewList(list) {
-        const tmp = [];
-        const result = [];
-        for (const layerView of list) {
-            if (tmp.findIndex((v) => v === layerView.view) >= 0) {
-                continue;
-            }
-            result.push(layerView);
-        }
-        return result;
+        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView(layer, this._display, this._view);
     }
 }
 TileMapBase.DISPLAY_PROPERTY_NAME = "display";
@@ -12466,39 +12436,10 @@ class CameraState {
             this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         return this._propertyChangedObservable;
     }
-    setState(position, target, fov) {
-        const oldState = {
-            position: this._position,
-            target: this._target,
-            fov: this._fov,
-        };
-        let stateChanged = false;
-        if (this._position !== position) {
-            this._position = position;
-            stateChanged = true;
-        }
-        if (this._target !== target) {
-            this._target = target;
-            stateChanged = true;
-        }
-        if (this._fov !== fov) {
-            this._fov = fov;
-            stateChanged = true;
-        }
-        if (stateChanged && this._propertyChangedObservable?.hasObservers()) {
-            const newState = {
-                position: this._position,
-                target: this._target,
-                fov: this._fov,
-            };
-            const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldState, newState, "state");
-            this._propertyChangedObservable.notifyObservers(e, -1, this, this);
-        }
-    }
-    get globalPosition() {
+    get position() {
         return this._position;
     }
-    set globalPosition(value) {
+    set position(value) {
         if (this._position !== value) {
             const old = this._position;
             this._position = value;
@@ -12790,18 +12731,14 @@ class TileNavigationStateSynchronizer {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   IsSourceBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsSourceBlock),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock),
 /* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMipMapping),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_pipeline_target_proxy__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasTileSelectionContext),
 /* harmony export */   isViewProxy: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.isViewProxy)
 /* harmony export */ });
 /* harmony import */ var _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.pipeline.interfaces */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
 /* harmony import */ var _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.pipeline.link */ "../core/dist/tiles/pipeline/tiles.pipeline.link.js");
-/* harmony import */ var _tiles_pipeline_target_proxy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.pipeline.target.proxy */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
-
 
 
 //# sourceMappingURL=index.js.map
@@ -12816,7 +12753,6 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   IsSourceBlock: () => (/* binding */ IsSourceBlock),
 /* harmony export */   IsTargetBlock: () => (/* binding */ IsTargetBlock),
 /* harmony export */   IsTileMipMapping: () => (/* binding */ IsTileMipMapping),
 /* harmony export */   hasTileSelectionContext: () => (/* binding */ hasTileSelectionContext),
@@ -12825,14 +12761,7 @@ __webpack_require__.r(__webpack_exports__);
 function IsTargetBlock(b) {
     if (b === null || typeof b !== "object")
         return false;
-    const obj = b;
-    return typeof obj.added === "function" && typeof obj.removed === "function" && typeof obj.updated === "function";
-}
-function IsSourceBlock(b) {
-    if (b === null || typeof b !== "object")
-        return false;
-    const obj = b;
-    return typeof obj.linkTo === "function" && typeof obj.unlinkFrom === "function";
+    return b.added !== undefined && b.removed !== undefined && b.updated !== undefined;
 }
 function IsTileMipMapping(b) {
     if (b === null || typeof b !== "object")
@@ -12922,36 +12851,6 @@ class TilePipelineLink {
     }
 }
 //# sourceMappingURL=tiles.pipeline.link.js.map
-
-/***/ }),
-
-/***/ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js":
-/*!******************************************************************!*\
-  !*** ../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js ***!
-  \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TargetProxy: () => (/* binding */ TargetProxy)
-/* harmony export */ });
-class TargetProxy {
-    constructor(added, removed, updated) {
-        this._added = added;
-        this._removed = removed;
-        this._updated = updated;
-    }
-    get added() {
-        return this._added;
-    }
-    get removed() {
-        return this._removed;
-    }
-    get updated() {
-        return this._updated;
-    }
-}
-//# sourceMappingURL=tiles.pipeline.target.proxy.js.map
 
 /***/ }),
 
@@ -15677,7 +15576,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsPhysicalDisplay),
 /* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsSize3),
-/* harmony export */   IsSourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsSourceBlock),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTile),
 /* harmony export */   IsTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.IsTileAddress),
@@ -15752,7 +15650,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.SunTrajectoryConfig),
 /* harmony export */   SurfaceTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.SurfaceTexture),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptions),
 /* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_6__.TerrainGridOptionsBuilder),

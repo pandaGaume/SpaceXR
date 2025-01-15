@@ -19,7 +19,7 @@ export class MapDisplay extends VirtualDisplay {
         this._content = this._createTextureMap(name, options, this.getScene());
         this.node.material = this._createMaterial(name, this._content, this.getScene());
 
-        this._target = new InputsNavigationTarget(this._content?.map);
+        this._target = new InputsNavigationTarget(this._content?.map, InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT, options?.invertY);
         this._controller = new PointerController(this.pointerSource, this._target);
     }
 

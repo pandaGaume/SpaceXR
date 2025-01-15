@@ -76,7 +76,12 @@
                         const h = SPACEXR.Cartesian3.Distance(hull[0], hull[1]);
                         const w = SPACEXR.Cartesian3.Distance(hull[1], hull[2]);
 
-                        const textureOptions = { ...SPACEXR.WebMapTexture.Options4K(), invertY: false };
+                        const textureOptions = {
+                            ...SPACEXR.WebMapTexture.Options4K(),
+                            invertY: false,
+                            generateMipMaps: true,
+                            samplingMode: BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
+                        };
                         // build the display using the point list.
                         const display = new SPACEXR.MapDisplay("display", { width: w, height: h }, textureOptions, mesh);
 

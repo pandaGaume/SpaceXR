@@ -5405,7 +5405,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InputsNavigationTarget: () => (/* binding */ InputsNavigationTarget)
 /* harmony export */ });
 class InputsNavigationTarget {
-    constructor(target, zoomIncrement) {
+    constructor(target, zoomIncrement, invertY) {
         this._target = target;
         this._offsetX = 0;
         this._offsetY = 0;
@@ -5414,6 +5414,7 @@ class InputsNavigationTarget {
         this._button = 0;
         this._isDragging = false;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT;
+        this._inverty = invertY;
     }
     onPointerOver(src, x, y, id) { }
     onPointerLeave(src, x, y, id) { }
@@ -5439,7 +5440,7 @@ class InputsNavigationTarget {
             const dy = y - this._offsetY;
             this._offsetX += dx;
             this._offsetY += dy;
-            this.onDrag(src, dx, dy, this._button);
+            this.onDrag(src, dx, this._inverty ? dy : -dy, this._button);
         }
     }
     onPointerOut(src, x, y, id) {

@@ -6,6 +6,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
 
     _target: ITileNavigationApi;
     _zoomIncrement?: number;
+    _inverty?: boolean;
 
     _offsetX: number;
     _offsetY: number;
@@ -16,7 +17,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
     _isDragging: boolean;
     _button: number;
 
-    public constructor(target: ITileNavigationApi, zoomIncrement?: number) {
+    public constructor(target: ITileNavigationApi, zoomIncrement?: number, invertY?: boolean) {
         this._target = target;
         this._offsetX = 0;
         this._offsetY = 0;
@@ -27,6 +28,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
         this._button = 0;
         this._isDragging = false;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT;
+        this._inverty = invertY;
     }
 
     public onPointerOver(src: T, x: number, y: number, id?: number): void {}
@@ -66,7 +68,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
             // mettre à jour les variables de décalage
             this._offsetX += dx;
             this._offsetY += dy;
-            this.onDrag(src, dx, dy, this._button);
+            this.onDrag(src, dx, this._inverty ? dy : -dy, this._button);
         }
     }
 

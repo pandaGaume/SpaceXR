@@ -4,13 +4,14 @@ export declare class InputsNavigationTarget<T> implements IPointerTarget<T>, IWh
     static readonly DEFAULT_ZOOM_INCREMENT = 0.1;
     _target: ITileNavigationApi;
     _zoomIncrement?: number;
+    _inverty?: boolean;
     _offsetX: number;
     _offsetY: number;
     _startX: number;
     _startY: number;
     _isDragging: boolean;
     _button: number;
-    constructor(target: ITileNavigationApi, zoomIncrement?: number);
+    constructor(target: ITileNavigationApi, zoomIncrement?: number, invertY?: boolean);
     onPointerOver(src: T, x: number, y: number, id?: number): void;
     onPointerLeave(src: T, x: number, y: number, id?: number): void;
     onPointerCancel(src: T, x: number, y: number, id?: number): void;

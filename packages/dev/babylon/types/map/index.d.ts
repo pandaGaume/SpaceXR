@@ -1,2 +1,2 @@
-export * from "./elevations/index";
-export * from "./display/index";
+export * from "./elevations";
+export * from "./display";

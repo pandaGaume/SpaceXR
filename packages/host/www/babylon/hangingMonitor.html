@@ -47,7 +47,6 @@
             const defaultCenter = [27.98817689833976, 86.92491071824738]; // everest
             const defaultLod = 12;
 
-
             async function createScene(canvas, engine) {
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
@@ -65,7 +64,7 @@
                 light.diffuse = new BABYLON.Color3(1, 1, 1);
 
                 BABYLON.SceneLoader.ImportMesh(null, "../models/", "hanging_monitor.glb", scene, function (meshes) {
-                    var mesh = scene.getMeshByName("screen_hanging_monitor_0");
+                    var mesh = scene.getMeshByName("screen");
                     if (mesh) {
                         // extract planes and hull definition from source mesh
                         const planeCruncher = new SPACEXR.PlaneCruncher()
@@ -77,8 +76,9 @@
                         const h = SPACEXR.Cartesian3.Distance(hull[0], hull[1]);
                         const w = SPACEXR.Cartesian3.Distance(hull[1], hull[2]);
 
+                        const textureOptions = { ...SPACEXR.WebMapTexture.Options4K(), invertY: false };
                         // build the display using the point list.
-                        const display = new SPACEXR.MapDisplay("display", { width: w, height: h }, SPACEXR.WebMapTexture.Options4K(), mesh);
+                        const display = new SPACEXR.MapDisplay("display", { width: w, height: h }, textureOptions, mesh);
 
                         // Add center, zoom and layers to the map
                         const map = display.map.setViewMap(defaultCenter, defaultLod);

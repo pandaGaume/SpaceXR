@@ -6,7 +6,7 @@ import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../../display";
-import { IPointerSource, IWheelSource, PointerController } from "core/map";
+import { InputsNavigationTarget, IPointerSource, IWheelSource, PointerController } from "core/map";
 
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering event of the scene
@@ -90,7 +90,8 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, 
         if (controller instanceof PointerController) {
             this._controller = controller;
         } else {
-            this._controller = new PointerController(controller, this._map);
+            const input = new InputsNavigationTarget(this._map, InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT, true);
+            this._controller = new PointerController(controller, input);
             this._ownController = true;
         }
         return this;

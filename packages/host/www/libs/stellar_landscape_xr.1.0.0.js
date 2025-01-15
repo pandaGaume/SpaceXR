@@ -1429,9 +1429,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/elevations/map.elevation.js");
+/* harmony import */ var _map_elevation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.elevation */ "./dist/map/elevations/map.elevation.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../display */ "./dist/display/display.virtual.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.source.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.navigation.js");
 
 
 
@@ -1502,13 +1503,14 @@ class Map3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
             this._controller = controller;
         }
         else {
-            this._controller = new core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController(controller, this._map);
+            const input = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget(this._map, core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT, true);
+            this._controller = new core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController(controller, input);
             this._ownController = true;
         }
         return this;
     }
     _createMap() {
-        return new _map_elevation__WEBPACK_IMPORTED_MODULE_3__.ElevationMap(this);
+        return new _map_elevation__WEBPACK_IMPORTED_MODULE_4__.ElevationMap(this);
     }
     _onBeforeRender(eventData, eventState) {
         this._map.validate();
@@ -2536,7 +2538,7 @@ WebMapTexture.DefaultOptions = {
     generateMipMaps: false,
     samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE,
     format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGBA,
-    invertY: true,
+    invertY: false,
 };
 //# sourceMappingURL=textures.webMapTexture.js.map
 

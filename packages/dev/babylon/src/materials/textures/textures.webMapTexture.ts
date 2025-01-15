@@ -23,7 +23,7 @@ export class WebMapTexture extends BABYLON.Texture {
         generateMipMaps: false,
         samplingMode: BABYLON.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE,
         format: BABYLON.Constants.TEXTUREFORMAT_RGBA,
-        invertY: true,
+        invertY: false,
     };
 
     public static Options(o?: Partial<IMapTextureOptions>): IMapTextureOptions {

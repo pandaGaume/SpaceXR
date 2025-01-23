@@ -1,10 +1,23 @@
 import { AbstractMesh, Scene, TransformNode } from "@babylonjs/core";
-import { IDisplay, IImageTileMapLayer, ImageLayerContentType, ITileView, TileMapLayerView } from "core/tiles";
+import {
+    IDisplay,
+    IImageTileMapLayer,
+    ImageLayerContentType,
+    IPhysicalDisplay,
+    IsPhysicalDisplay,
+    ITileMapLayer,
+    ITileMetrics,
+    ITileNavigationState,
+    ITileView,
+    TileMapLayerView,
+    TileNavigationState,
+} from "core/tiles";
 import { Nullable } from "core/types";
-import { IElevationHost, ITileMapLayerViewWithElevation } from "./map.interfaces";
+import { IElevationHost, ITileMapLayerViewWithElevation, ITileWithElevation } from "./map.interfaces";
 import { Map3D } from "./map";
 import { ICartesian2 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
+import { EventState, PropertyChangedEventArgs } from "core/events";
 
 export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerContentType> implements ITileMapLayerViewWithElevation {
     _tilesRoot: TransformNode;
@@ -26,6 +39,14 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
 
     public get tilesRoot(): TransformNode {
         return this._tilesRoot;
+    }
+
+    public get exageration(): number {
+        return 1;
+    }
+
+    protected get isReady(): boolean {
+        return this._tilesRoot !== null && this._tilesRoot !== undefined;
     }
 
     protected _buildRoot(scene?: Scene): TransformNode {
@@ -119,7 +140,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         return k != "" ? k : Map3D.INSTANCE_ROOT_NAME;
     }
 
-    protected _setTilePosition(tile: TileWithElevation, center: ICartesian2): void {
+    protected _setTilePosition(tile: ITileWithElevation, center: ICartesian2): void {
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
             const p = tile.surface.position;
@@ -127,6 +148,101 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
             p.x = center.x - c.x;
             p.y = center.y - c.y;
             p.z = 0;
+        }
+    }
+
+    protected _applyNavigation(nav: Nullable<ITileNavigationState>) {
+        if (nav) {
+            this._onCenterChanged();
+            this._onZoomChanged();
+        }
+    }
+
+    private _setScale(nav: ITileNavigationState, display: IPhysicalDisplay, layer: ITileMapLayer<ImageLayerContentType>, metrics: ITileMetrics) {
+        const groundResolution = metrics.groundResolution(nav.center.lat, nav.lod);
+        const x = display.dimension.width / (display.resolution.width * groundResolution);
+        const y = display.dimension.height / (display.resolution.height * groundResolution);
+        let z = Math.max(x, y);
+        if (display.dimension.thickness && display.resolution.thickness) {
+            z = display.dimension.thickness / (display.resolution.thickness * groundResolution);
+        }
+
+        // x & y are unitless, so we define the size in meter using scale and groundResolution
+        this._tilesRoot.scaling.x = x * groundResolution * nav.scale;
+        this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
+
+        // z data are already in meter so they just need to be scaled, and exagerated.
+        this._tilesRoot.scaling.z = z * this.exageration * nav.scale;
+    }
+
+    protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
+        if (newValue && newValue !== oldValue) {
+            this._applyNavigation(newValue);
+        }
+    }
+    /*
+        private _setPosition(x: number, y: number, z: number) {
+        this._tilesRoot.position.set(x, y, z);
+    }
+
+    
+    
+    protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {
+        // we survey the weight property of the layer to update the current view and messaging the map container that it need
+        // to sort the layers again.
+        if (IsElevationLayer(eventData.source)) {
+            switch (eventData.propertyName) {
+                case ElevationLayer.ExagerationPropertyName: {
+                    this._onZoomChanged();
+                    break;
+                }
+                case ElevationLayer.OffsetsPropertyName: {
+                    const insets = eventData.source.offsets;
+                    if (insets) {
+                        this._setPosition(insets.x, insets.y, insets.z);
+                    }
+                    break;
+                }
+            }
+        }
+        super._onLayerPropertyChanged(eventData, eventState);
+    }*/
+
+    protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
+        switch (event.propertyName) {
+            case TileNavigationState.CENTER_PROPERTY_NAME: {
+                this._cartesianCenterCache = null; // invalidate the cache
+                this._onCenterChanged();
+                this._onZoomChanged(); // scale is function of the latitude
+                break;
+            }
+            case TileNavigationState.ZOOM_PROPERTY_NAME: {
+                this._onZoomChanged();
+                break;
+            }
+        }
+        super._onNavigationPropertyChanged(event, state);
+    }
+
+    protected _onZoomChanged(): void {
+        if (this.isReady && IsPhysicalDisplay(this.display)) {
+            this._setScale(this.navigationState!, this.display, this.layer, this.metrics);
+        }
+    }
+
+    protected _onCenterChanged(): void {
+        if (this.isReady) {
+            const tiles = this._activTiles;
+            if (!tiles || !tiles.count) {
+                return;
+            }
+
+            const center = this._getCenter(true);
+            if (center) {
+                for (const tile of tiles) {
+                    this._setTilePosition(tile as ITileWithElevation, center);
+                }
+            }
         }
     }
 

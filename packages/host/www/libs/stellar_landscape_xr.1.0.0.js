@@ -1120,6 +1120,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
 /* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
 
@@ -1139,6 +1141,12 @@ class TileMapLayerViewWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_
     }
     get tilesRoot() {
         return this._tilesRoot;
+    }
+    get exageration() {
+        return 1;
+    }
+    get isReady() {
+        return this._tilesRoot !== null && this._tilesRoot !== undefined;
     }
     _buildRoot(scene) {
         return new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(this._buildRootName(), scene);
@@ -1227,6 +1235,63 @@ class TileMapLayerViewWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_
             p.x = center.x - c.x;
             p.y = center.y - c.y;
             p.z = 0;
+        }
+    }
+    _applyNavigation(nav) {
+        if (nav) {
+            this._onCenterChanged();
+            this._onZoomChanged();
+        }
+    }
+    _setScale(nav, display, layer, metrics) {
+        const groundResolution = metrics.groundResolution(nav.center.lat, nav.lod);
+        const x = display.dimension.width / (display.resolution.width * groundResolution);
+        const y = display.dimension.height / (display.resolution.height * groundResolution);
+        let z = Math.max(x, y);
+        if (display.dimension.thickness && display.resolution.thickness) {
+            z = display.dimension.thickness / (display.resolution.thickness * groundResolution);
+        }
+        this._tilesRoot.scaling.x = x * groundResolution * nav.scale;
+        this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
+        this._tilesRoot.scaling.z = z * this.exageration * nav.scale;
+    }
+    _onNavigationChanged(oldValue, newValue) {
+        if (newValue && newValue !== oldValue) {
+            this._applyNavigation(newValue);
+        }
+    }
+    _onNavigationPropertyChanged(event, state) {
+        switch (event.propertyName) {
+            case core_tiles__WEBPACK_IMPORTED_MODULE_4__.TileNavigationState.CENTER_PROPERTY_NAME: {
+                this._cartesianCenterCache = null;
+                this._onCenterChanged();
+                this._onZoomChanged();
+                break;
+            }
+            case core_tiles__WEBPACK_IMPORTED_MODULE_4__.TileNavigationState.ZOOM_PROPERTY_NAME: {
+                this._onZoomChanged();
+                break;
+            }
+        }
+        super._onNavigationPropertyChanged(event, state);
+    }
+    _onZoomChanged() {
+        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_5__.IsPhysicalDisplay)(this.display)) {
+            this._setScale(this.navigationState, this.display, this.layer, this.metrics);
+        }
+    }
+    _onCenterChanged() {
+        if (this.isReady) {
+            const tiles = this._activTiles;
+            if (!tiles || !tiles.count) {
+                return;
+            }
+            const center = this._getCenter(true);
+            if (center) {
+                for (const tile of tiles) {
+                    this._setTilePosition(tile, center);
+                }
+            }
         }
     }
     _getCenter(force = false) {
@@ -10551,8 +10616,7 @@ function IsDrawableTileMapLayer(b) {
 function IsTileMapLayer(b) {
     if (b === null || typeof b !== "object")
         return false;
-    const a = (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMetricsProvider)(b);
-    return a && b.provider !== undefined && b.addTo !== undefined;
+    return (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMetricsProvider)(b) && b.provider !== undefined && b.addTo !== undefined;
 }
 function IsTileMapLayerProxy(b) {
     if (b === null || typeof b !== "object")

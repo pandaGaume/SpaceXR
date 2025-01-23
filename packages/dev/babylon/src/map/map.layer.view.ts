@@ -15,22 +15,35 @@ import {
 import { Nullable } from "core/types";
 import { IElevationHost, ITileMapLayerViewWithElevation, ITileWithElevation } from "./map.interfaces";
 import { Map3D } from "./map";
-import { ICartesian2 } from "core/geometry";
+import { ICartesian2, ICartesian3 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
-import { EventState, PropertyChangedEventArgs } from "core/events";
+import { EventState, Observer, PropertyChangedEventArgs } from "core/events";
+import { ElevationLayer } from "../dem/dem.layer";
+import { IElevationLayerOptions, IsElevationLayer } from "../dem";
 
-export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerContentType> implements ITileMapLayerViewWithElevation {
+export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerContentType> implements ITileMapLayerViewWithElevation, IElevationLayerOptions {
+    public static DefaultExageration: number = 1.0;
+
     _tilesRoot: TransformNode;
     _elevationHost: IElevationHost;
+    _elevationLayerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null;
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
 
     public constructor(host: IElevationHost, layer: IImageTileMapLayer, display: Nullable<IDisplay>, source: ITileView, scene?: Scene) {
         super(layer, display, source);
+        if (host === null || host === undefined) {
+            throw new Error("Elevation host is required.");
+        }
         this._elevationHost = host;
         // ensure factory is with correct type.
         this.factory.withType(TileWithElevation);
+        // build the roor for the tiles
         this._tilesRoot = this._buildRoot(scene);
+        // register to elevation layer properties updates.
+        if (this._elevationHost.elevation) {
+            this._elevationLayerObserver = this._elevationHost.elevation.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
+        }
     }
 
     public get elevationHost(): IElevationHost {
@@ -41,8 +54,18 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         return this._tilesRoot;
     }
 
-    public get exageration(): number {
-        return 1;
+    public get exageration(): number | undefined {
+        return this._elevationHost.elevation?.exageration ?? 1.0;
+    }
+
+    public get offset(): ICartesian3 | undefined {
+        return this._elevationHost.elevation?.offsets;
+    }
+
+    public dispose(): void {
+        super.dispose();
+        this._elevationLayerObserver?.disconnect();
+        this._elevationLayerObserver = null;
     }
 
     protected get isReady(): boolean {
@@ -172,7 +195,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
 
         // z data are already in meter so they just need to be scaled, and exagerated.
-        this._tilesRoot.scaling.z = z * this.exageration * nav.scale;
+        this._tilesRoot.scaling.z = z * (this.exageration ?? TileMapLayerViewWithElevation.DefaultExageration) * nav.scale;
     }
 
     protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
@@ -180,14 +203,12 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
             this._applyNavigation(newValue);
         }
     }
-    /*
-        private _setPosition(x: number, y: number, z: number) {
+
+    private _setPosition(x: number, y: number, z: number) {
         this._tilesRoot.position.set(x, y, z);
     }
 
-    
-    
-    protected _onLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {
+    protected _onElevationLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {
         // we survey the weight property of the layer to update the current view and messaging the map container that it need
         // to sort the layers again.
         if (IsElevationLayer(eventData.source)) {
@@ -206,7 +227,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
             }
         }
         super._onLayerPropertyChanged(eventData, eventState);
-    }*/
+    }
 
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void {
         switch (event.propertyName) {

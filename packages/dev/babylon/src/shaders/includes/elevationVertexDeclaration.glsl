@@ -20,14 +20,9 @@ vec3 elevation_rgbaToNormal(vec4 rgba)
 
 uniform highp sampler2DArray uAltitudes;
 uniform highp sampler2DArray uNormals;
-uniform mediump isampler2DArray uSurfaceIds; // the ids of the surface GL_R16I
-uniform highp sampler2DArray uSurfaceUvs; // the uvs of the surface GL_RG32F
 
 uniform highp vec2 uAltRange;
 uniform highp float uMapScale;
 
-// the depth of the dem 0=current, 1=East, 2=South, 3=SouthEast 
-in vec4 elevationDepths;
-in vec4 normalDepths;
 // the depth of uvs and texture 
-in vec2 textureDepths;
+in vec4 samplerDepths;

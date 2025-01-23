@@ -1,4 +1,4 @@
-import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
+import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
 import { IElevationGridFactory, IElevationHost, IElevationHostOptions, IMap3D, IMap3dMaterial, Map3DContentType } from "./map.interfaces";
 import { Mesh, Scene, TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
@@ -30,5 +30,7 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     protected _buildTemplateName(): string;
     protected _buildMaterialName(): string;
     protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial;
+    protected _onDisplayBinded(display: IDisplay): void;
+    protected _bindDisplayInternal(display: IDisplay): void;
     private _buildGridFactoryInternal;
 }

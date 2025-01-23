@@ -1,4 +1,4 @@
-import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState } from "core/tiles";
+import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState } from "core/tiles";
 import { IElevationGridFactory, IElevationHost, IElevationHostOptions, IMap3D, IMap3dMaterial, IsTileMapLayerViewWithElevation, Map3DContentType } from "./map.interfaces";
 import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { Nullable } from "core/types";
@@ -153,15 +153,23 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     }
 
     protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial {
-        const material = new Map3dMaterial(name, scene);
-        if (this.display) {
+        return new Map3dMaterial(name, scene);
+    }
+
+    protected _onDisplayBinded(display: IDisplay): void {
+        super._onDisplayBinded(display);
+        this._bindDisplayInternal(display);
+    }
+
+    protected _bindDisplayInternal(display: IDisplay): void {
+        if (display && this._material) {
             if (IsHolographicBounds(this.display)) {
-                material.holographicBounds = this.display;
+                this._material.holographicBounds = this.display;
             }
-            material.displayResolution = this.display?.resolution;
+            if (this.display?.resolution) {
+                this._material.displayResolution = this.display.resolution;
+            }
         }
-        material.wireframe = true;
-        return material;
     }
 
     private _buildGridFactoryInternal(): IElevationGridFactory {

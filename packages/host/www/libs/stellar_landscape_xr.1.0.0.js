@@ -39,8 +39,33 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ElevationLayer: () => (/* binding */ ElevationLayer)
 /* harmony export */ });
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.layer.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.args.js");
+
 
 class ElevationLayer extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapLayer {
+    constructor(name, provider, options, enabled) {
+        super(name, provider, options, enabled);
+    }
+    get exageration() {
+        return this._exageration;
+    }
+    set exageration(value) {
+        if (this._exageration !== value) {
+            const old = this._exageration;
+            this._exageration = value;
+            this.propertyChangedObservable.notifyObservers(new core_events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, value, ElevationLayer.ExagerationPropertyName));
+        }
+    }
+    get offsets() {
+        return this._offsets;
+    }
+    set offsets(value) {
+        if (this._offsets !== value) {
+            const old = this._offsets;
+            this._offsets = value;
+            this.propertyChangedObservable.notifyObservers(new core_events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, value, ElevationLayer.OffsetsPropertyName));
+        }
+    }
 }
 ElevationLayer.ExagerationPropertyName = "exageration";
 ElevationLayer.OffsetsPropertyName = "offsets";
@@ -939,16 +964,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ElevationGridFactory {
-    static InitZ(column, row, w, h) {
-        let i = column == w - 1 ? 1 : 0;
-        let j = row == h - 1 ? 2 : 0;
-        return i + j;
-    }
-    static InitUV(column, row, w, h) {
-        let u = column == w - 1 ? 0 : column / (w - 2);
-        let v = row == h - 1 ? 0 : row / (h - 2);
-        return [u, v];
-    }
     buildTopology(options) {
         const o = this._buildTerrainOptions(options);
         const data = new core_meshes__WEBPACK_IMPORTED_MODULE_1__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
@@ -962,9 +977,7 @@ class ElevationGridFactory {
                 .withRows(s + 1)
                 .withScale(-1, 1)
                 .withInvertIndices(true)
-                .withZInitializer(ElevationGridFactory.InitZ)
                 .withUvs(true)
-                .withUVInitializer(ElevationGridFactory.InitUV)
                 .withNormals(true)
                 .build();
         }
@@ -1138,15 +1151,21 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
         return core_utils__WEBPACK_IMPORTED_MODULE_6__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), Map3D.MATERIAL_SUFFIX);
     }
     _buildMaterial(name, scene) {
-        const material = new _materials__WEBPACK_IMPORTED_MODULE_7__.Map3dMaterial(name, scene);
-        if (this.display) {
+        return new _materials__WEBPACK_IMPORTED_MODULE_7__.Map3dMaterial(name, scene);
+    }
+    _onDisplayBinded(display) {
+        super._onDisplayBinded(display);
+        this._bindDisplayInternal(display);
+    }
+    _bindDisplayInternal(display) {
+        if (display && this._material) {
             if ((0,_display__WEBPACK_IMPORTED_MODULE_8__.IsHolographicBounds)(this.display)) {
-                material.holographicBounds = this.display;
+                this._material.holographicBounds = this.display;
             }
-            material.displayResolution = this.display?.resolution;
+            if (this.display?.resolution) {
+                this._material.displayResolution = this.display.resolution;
+            }
         }
-        material.wireframe = true;
-        return material;
     }
     _buildGridFactoryInternal() {
         return new _map_grid_factory__WEBPACK_IMPORTED_MODULE_9__.ElevationGridFactory();
@@ -1550,6 +1569,7 @@ class TileWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials_ellipsoidalMap__WEBPACK_IMPORTED_MODULE_3__.EllipsoidalMapMaterial),
+/* harmony export */   Map3dLayerKind: () => (/* reexport safe */ _materials_map__WEBPACK_IMPORTED_MODULE_1__.Map3dLayerKind),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials_map__WEBPACK_IMPORTED_MODULE_1__.Map3dMaterial),
 /* harmony export */   SurfaceTexture: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.SurfaceTexture),
 /* harmony export */   Texture3: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.Texture3),
@@ -1599,26 +1619,376 @@ EllipsoidalMapMaterial.ShaderName = "ellipsoidalmap";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Map3dLayerKind: () => (/* binding */ Map3dLayerKind),
 /* harmony export */   Map3dMaterial: () => (/* binding */ Map3dMaterial)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
 
 
-class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial {
-    constructor(name, scene) {
-        super(name, scene);
-        this.holographicBounds = null;
-        this.mapScale = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.One();
-        this.displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.Zero();
-        this.wireframe = true;
+
+
+var Map3dLayerKind;
+(function (Map3dLayerKind) {
+    Map3dLayerKind[Map3dLayerKind["ELEVATION"] = 0] = "ELEVATION";
+    Map3dLayerKind[Map3dLayerKind["NORMAL"] = 1] = "NORMAL";
+    Map3dLayerKind[Map3dLayerKind["TEXTURE"] = 2] = "TEXTURE";
+})(Map3dLayerKind || (Map3dLayerKind = {}));
+class AreaInfos {
+    constructor(layer) {
+        this.layer = layer;
     }
-    addTile(tiles, source) { }
-    removeTile(tiles, source) { }
-    updateTile(tiles, source) { }
 }
+class TileLayout {
+    constructor(tile, areas = [null, null, null]) {
+        this.tile = tile;
+        this.areas = areas;
+    }
+    getArea(kind) {
+        return this.areas[kind];
+    }
+    setArea(kind, value) {
+        this.areas[kind] = value;
+    }
+}
+class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMaterial {
+    constructor(name, scene, shaderName) {
+        super(name, scene);
+        this._shaderName = null;
+        this._holoBounds = null;
+        this._clipPlanesAddedObservers = null;
+        this._clipPlanesRemovedObservers = null;
+        this._textureSampler = null;
+        this._mapScale = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.One();
+        this._tileLayouts = new Map();
+        this._displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.Zero();
+        this._shaderName = shaderName ?? Map3dMaterial.DefaultShaderName;
+    }
+    getClassName() {
+        return "Map3dMaterial";
+    }
+    get holographicBounds() {
+        return this._holoBounds;
+    }
+    set holographicBounds(value) {
+        if (this._holoBounds !== value) {
+            this._unbindHolographicBounds();
+            this._holoBounds = value;
+            this._bindHolographicBounds();
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+        }
+    }
+    get displayResolution() {
+        return this._displayResolution;
+    }
+    set displayResolution(value) {
+        if (this._displayResolution !== value) {
+            this._displayResolution = value;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+        }
+    }
+    get mapScale() {
+        return this._mapScale;
+    }
+    set mapScale(value) {
+        if (this._mapScale !== value) {
+            this._mapScale = value;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+        }
+    }
+    isReadyForSubMesh(mesh, subMesh, useInstances) {
+        const drawWrapper = subMesh._drawWrapper;
+        if (this.isFrozen) {
+            if (drawWrapper.effect && drawWrapper._wasPreviouslyReady && drawWrapper._wasPreviouslyUsingInstances === useInstances) {
+                return true;
+            }
+        }
+        const defines = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialDefines();
+        const scene = this.getScene();
+        if (this._isReadyForSubMesh(subMesh)) {
+            return true;
+        }
+        const attribs = [
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind,
+            _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind,
+            Map3dMaterial.TextureDepthsAttName,
+        ];
+        const uniforms = [
+            Map3dMaterial.ViewProjectionMatrixUniformName,
+            Map3dMaterial.AltRangeUniformName,
+            Map3dMaterial.MapScaleUniformName,
+        ];
+        const samplers = [Map3dMaterial.TextureSamplerUniformName];
+        const uniformBuffers = new Array();
+        if (this._holoBounds) {
+            this._pushUniformsForBounds(defines, uniforms);
+        }
+        defines.INSTANCES = true;
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialHelper.PushAttributesForInstances(attribs);
+        defines.rebuild();
+        const fallbacks = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.EffectFallbacks();
+        const engine = scene.getEngine();
+        subMesh.setEffect(engine.createEffect(this._shaderName, {
+            attributes: attribs,
+            uniformsNames: uniforms,
+            uniformBuffersNames: uniformBuffers,
+            samplers: samplers,
+            defines: defines.toString(),
+            fallbacks: fallbacks,
+            onCompiled: this._onEffectCompiled.bind(this),
+            onError: this.onError,
+        }, engine), defines, this._materialContext);
+        if (!subMesh.effect || !subMesh.effect.isReady()) {
+            return false;
+        }
+        defines._renderId = scene.getRenderId();
+        drawWrapper._wasPreviouslyReady = true;
+        drawWrapper._wasPreviouslyUsingInstances = !!useInstances;
+        return true;
+    }
+    bindForSubMesh(world, mesh, subMesh) {
+        const defines = subMesh.materialDefines;
+        if (!defines) {
+            return;
+        }
+        const effect = subMesh.effect;
+        if (!effect) {
+            return;
+        }
+        this._activeEffect = effect;
+        const scene = this.getScene();
+        this._bindMatrix(effect, world, scene);
+        if (this._mustRebind(scene, effect, subMesh)) {
+            this._bindClipPlanes(effect);
+            this._bindSamplers(effect);
+        }
+    }
+    addTile(tile, source) {
+        const surface = tile.surface;
+        if (!surface) {
+            throw new Error("Tile surface is not defined");
+        }
+        this._ensureTextureSamplersReady(tile, source);
+        const key = tile.address.quadkey;
+        let layout = new TileLayout(tile);
+        this._tileLayouts.set(key, layout);
+        let textureArea = this._reserveArea(this._textureSampler);
+        if (textureArea === undefined) {
+            return;
+        }
+        const textureDepths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(textureArea.depth, -1, -1, -1);
+        surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
+        let areaInfos = new AreaInfos(textureArea);
+        let kind = Map3dLayerKind.TEXTURE;
+        layout.setArea(kind, areaInfos);
+        if (tile.content) {
+            areaInfos.layer.update(tile.content);
+            tile.surface?.setEnabled(true);
+        }
+        this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
+    }
+    removeTile(tile, source) {
+        const key = tile.address.quadkey;
+        const layout = this._tileLayouts.get(key);
+        if (layout) {
+            if (tile.surface) {
+                tile.surface.instancedBuffers.textureDepths.x = -1;
+            }
+            layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
+            this._tileLayouts.delete(key);
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
+        }
+    }
+    updateTile(tile, source) {
+        const key = tile.address.quadkey;
+        const layout = this._tileLayouts.get(key);
+        if (layout) {
+            if (tile.content) {
+                let kind = Map3dLayerKind.TEXTURE;
+                let areaInfos = layout.getArea(kind);
+                if (areaInfos) {
+                    areaInfos.layer.update(tile.content);
+                    tile.surface?.setEnabled(true);
+                    this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
+                }
+            }
+        }
+    }
+    dispose(forceDisposeEffect) {
+        super.dispose(forceDisposeEffect);
+        this._textureSampler?.dispose();
+    }
+    _reserveArea(sampler, mess) {
+        if (!sampler) {
+            return undefined;
+        }
+        let area = sampler.reserve();
+        if (!area) {
+            if (mess) {
+                console.log(mess);
+            }
+            sampler.ensureRoomFor(1);
+            area = sampler.reserve();
+        }
+        return area;
+    }
+    _ensureTextureSamplersReady(tile, src) {
+        if (!this._textureSampler) {
+            let size = src.metrics.tileSize;
+            this._textureSampler = this._buildTextureSampler(size, size);
+            this._ensureInstanceBufferReady(src.elevationHost.grid);
+        }
+    }
+    _ensureInstanceBufferReady(target) {
+        if (target) {
+            const mesh = target instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.InstancedMesh ? target.sourceMesh : target;
+            if (mesh.instancedBuffers?.depth === undefined) {
+                this._registerInstanceBuffers(mesh);
+            }
+        }
+    }
+    _registerInstanceBuffers(target) {
+        target.registerInstancedBuffer(Map3dMaterial.TextureDepthsAttName, Map3dMaterial.TextureDepthsSize);
+    }
+    _buildTextureSampler(width, height, depth) {
+        height = height ?? width;
+        const maxDepth = depth ?? this._getOverallSamplerDepth(width, height);
+        const generateMipMap = false;
+        const scene = this.getScene();
+        return this._buildSampler(Map3dLayerKind.TEXTURE, width, height, maxDepth, generateMipMap, scene);
+    }
+    _buildSampler(kind, width, height, depth, generateMipMap, scene) {
+        switch (kind) {
+            case Map3dLayerKind.TEXTURE: {
+                const options = {
+                    width: width,
+                    height: height,
+                    depth: depth,
+                    format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGB,
+                    textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_BYTE,
+                    samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
+                    internalFormat: scene.getEngine()._gl.RGB8,
+                    generateMipMap: generateMipMap,
+                };
+                return new _textures__WEBPACK_IMPORTED_MODULE_2__.Texture3(scene, options);
+            }
+            default: {
+                return null;
+            }
+        }
+    }
+    _getOverallSamplerDepth(width, height) {
+        if (core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.IsEmpty(this._displayResolution)) {
+            return Map3dMaterial.DefaultElevationTextureDepth;
+        }
+        const a = this._displayResolution.width / width;
+        const b = this._displayResolution.height / height;
+        const N = Math.ceil(a * b + 2 * (a + b));
+        return N;
+    }
+    _bindMatrix(effect, world, scene) {
+        effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
+    }
+    _bindClipPlanes(effect) {
+        if (this._holoBounds) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicBox)(this._holoBounds)) {
+                const clips = this._holoBounds.clipPlanesWorld;
+                if (clips) {
+                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_3__.ClipIndex.North);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_3__.ClipIndex.South);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_3__.ClipIndex.East);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_3__.ClipIndex.West);
+                }
+            }
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicSphere)(this._holoBounds)) {
+                effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
+            }
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicCylinder)(this._holoBounds)) {
+                effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
+                effect.setVector3(Map3dMaterial.HeightUniformName, this._holoBounds.height ?? new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, Number.MAX_SAFE_INTEGER, 0));
+            }
+        }
+    }
+    _bindClipPlane(effect, planes, name, index) {
+        let clipPlane = planes[index];
+        if (clipPlane) {
+            effect.setVector3(`${name}.point`, clipPlane.point);
+            effect.setVector3(`${name}.normal`, clipPlane.normal);
+        }
+    }
+    _bindSamplers(effect) {
+        effect.setTexture(Map3dMaterial.TextureSamplerUniformName, this._textureSampler);
+    }
+    _bindHolographicBounds() {
+        if (this._holoBounds) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicBox)(this._holoBounds)) {
+                this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
+                this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
+            }
+        }
+    }
+    _unbindHolographicBounds() {
+        if (this._holoBounds) {
+            this._clipPlanesAddedObservers?.disconnect();
+            this._clipPlanesRemovedObservers?.disconnect();
+            this._clipPlanesAddedObservers = null;
+            this._clipPlanesRemovedObservers = null;
+            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+        }
+    }
+    _pushUniformsForBounds(defines, uniforms) {
+        if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicBox)(this._holoBounds)) {
+            defines.HOLOGRAPHIC_BOUNDS_BOX = true;
+            const properties = ["point", "normal"];
+            uniforms.push(...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
+        }
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicSphere)(this._holoBounds)) {
+            throw new Error("Sphere bounds Not supported");
+            defines.HOLOGRAPHIC_BOUNDS_SPHERE = true;
+            uniforms.push(Map3dMaterial.RadiusUniformName);
+        }
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_3__.IsHolographicCylinder)(this._holoBounds)) {
+            throw new Error("Cylinder bounds Not supported");
+            defines.HOLOGRAPHIC_BOUNDS_CYLINDER = true;
+            uniforms.push(Map3dMaterial.RadiusUniformName, Map3dMaterial.HeightUniformName);
+        }
+    }
+    _prepareUniforms(name, ...properties) {
+        return properties.map((p) => `${name}.${p}`);
+    }
+    _onClipPlanesAdded(planes) {
+        this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+    }
+    _onClipPlanesRemoved(planes) {
+        this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
+    }
+    _onEffectCompiled(effect) {
+        if (this.onCompiled) {
+            this.onCompiled(effect);
+        }
+    }
+}
+Map3dMaterial.DefaultElevationTextureDepth = 16;
+Map3dMaterial.DefaultShaderName = "map";
+Map3dMaterial.ElevationDepthsAttName = "elevationDepths";
+Map3dMaterial.ElevationDepthsSize = 4;
+Map3dMaterial.NormalDepthsAttName = "normalDepths";
+Map3dMaterial.NormalDepthsSize = 4;
+Map3dMaterial.TextureDepthsAttName = "textureDepths";
+Map3dMaterial.TextureDepthsSize = 4;
+Map3dMaterial.ViewProjectionMatrixUniformName = "viewProjection";
+Map3dMaterial.NorthClipPlaneUniformName = "uNorthClip";
+Map3dMaterial.SouthClipPlaneUniformName = "uSouthClip";
+Map3dMaterial.EastClipPlaneUniformName = "uEastClip";
+Map3dMaterial.WestClipPlaneUniformName = "uWestClip";
+Map3dMaterial.RadiusUniformName = "uRadiusClip";
+Map3dMaterial.HeightUniformName = "uHeightClip";
+Map3dMaterial.AltRangeUniformName = "uAltRange";
+Map3dMaterial.MapScaleUniformName = "uMapScale";
+Map3dMaterial.TextureSamplerUniformName = "uTextures";
 //# sourceMappingURL=materials.map.js.map
 
 /***/ }),
@@ -14567,7 +14937,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
 const name = "elevationVertexDeclaration";
-const shader = `vec3 elevation_rgbaToNormal(vec4 rgba){float x=(2.0*rgba.r)-1.0;float y=(2.0*rgba.g)-1.0;float z=(rgba.b*255.0-128.0)/127.0;return normalize(vec3(x,y,z));}uniform highp sampler2DArray uAltitudes;uniform highp sampler2DArray uNormals;uniform mediump isampler2DArray uSurfaceIds; uniform highp sampler2DArray uSurfaceUvs; uniform highp vec2 uAltRange;uniform highp float uMapScale;in vec4 elevationDepths;in vec4 normalDepths;in vec2 textureDepths;`;
+const shader = `vec3 elevation_rgbaToNormal(vec4 rgba){float x=(2.0*rgba.r)-1.0;float y=(2.0*rgba.g)-1.0;float z=(rgba.b*255.0-128.0)/127.0;return normalize(vec3(x,y,z));}uniform highp sampler2DArray uAltitudes;uniform highp sampler2DArray uNormals;uniform highp vec2 uAltRange;uniform highp float uMapScale;in vec4 samplerDepths;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
 const elevationVertexDeclaration = { name, shader };
 //# sourceMappingURL=elevationVertexDeclaration.js.map
@@ -14732,6 +15102,46 @@ const lightVertexDeclaration = { name, shader };
 // This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
 (() => {
 var __webpack_exports__ = {};
+/*!******************************************************************!*\
+  !*** ./dist/shaders/includes/textureDepthFragmentDeclaration.js ***!
+  \******************************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   textureDepthFragmentDeclaration: () => (/* binding */ textureDepthFragmentDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "textureDepthFragmentDeclaration";
+const shader = `uniform highp sampler2DArray uTextures;in vec2 vUvs;flat in float depth;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const textureDepthFragmentDeclaration = { name, shader };
+//# sourceMappingURL=textureDepthFragmentDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
+/*!****************************************************************!*\
+  !*** ./dist/shaders/includes/textureDepthVertexDeclaration.js ***!
+  \****************************************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   textureDepthVertexDeclaration: () => (/* binding */ textureDepthVertexDeclaration)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+const name = "textureDepthVertexDeclaration";
+const shader = `in vec4 textureDepths;out vec2 vUvs;flat out float depth;`;
+_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
+const textureDepthVertexDeclaration = { name, shader };
+//# sourceMappingURL=textureDepthVertexDeclaration.js.map
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+var __webpack_exports__ = {};
 /*!**************************************!*\
   !*** ./dist/shaders/map.fragment.js ***!
   \**************************************/
@@ -14744,8 +15154,9 @@ __webpack_require__.r(__webpack_exports__);
 
 const name = "mapPixelShader";
 const shader = `precision highp float;#include<clipFragmentDeclaration>
-in vec2 vUvs;flat in int vId;flat in vec3 vColor;void main(void) {#include<clipFragment>
-gl_FragColor=vec4(vColor,1.0); }`;
+#include<textureDepthFragmentDeclaration>
+void main(void) {#include<clipFragment>
+gl_FragColor=texture(uTextures,vec3(vUvs,depth));}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const mapPixelShader = { name, shader };
 //# sourceMappingURL=map.fragment.js.map
@@ -14767,10 +15178,10 @@ __webpack_require__.r(__webpack_exports__);
 const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
-#include<elevationVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;out vec2 vUvs;flat out int vId;flat out vec3 vColor;void main(void) {int i=int(position.z);if( i==0){vColor=vec3(1.0,1.0,1.0);}else if( i==1){vColor=vec3(1.0,0.0,0.0);}else if( i==2){vColor=vec3(0.0,1.0,0.0);}else{vColor=vec3(0.0,0.0,1.0);}float depth=elevationDepths[i];vec3 v=vec3(uv.xy,depth);if( depth<0.0){v.x=v.x==0.0 ? 1.0 : v.x;v.y=v.y==0.0 ? 1.0 : v.y; v.z=depth=elevationDepths[0];}#include<instancesVertex>
-float rawAltitude=float(texture(uAltitudes,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
-gl_Position=viewProjection*worldPosition;v.z=textureDepths.x; vUvs=v.z<0.0 ? uv : texture(uSurfaceUvs,v).xy; v.z=textureDepths.y; vId=v.z<0.0 ? 0 : int(texture(uSurfaceIds,v).x); }`;
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;#include<textureDepthVertexDeclaration>
+void main(void) {#include<instancesVertex>
+float alt=0.0;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
+gl_Position=viewProjection*worldPosition;vUvs=vec2(1.0-uv.x,uv.y);depth= textureDepths.x;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const mapVertexShader = { name, shader };
 //# sourceMappingURL=map.vertex.js.map
@@ -14978,6 +15389,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Line),
 /* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
 /* harmony export */   Map3D: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.Map3D),
+/* harmony export */   Map3dLayerKind: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Map3dLayerKind),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Map3dMaterial),
 /* harmony export */   MapDisplay: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.MapDisplay),
 /* harmony export */   MapNode: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.MapNode),

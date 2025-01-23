@@ -18,6 +18,6 @@ export class EllipsoidalMapMaterial extends Map3dMaterial {
      * @param scene The scene the material belongs to.
      */
     public constructor(name: string, scene: Scene) {
-        super(name, scene, EllipsoidalMapMaterial.ShaderName);
+        super(name, scene); //, EllipsoidalMapMaterial.ShaderName);
     }
 }

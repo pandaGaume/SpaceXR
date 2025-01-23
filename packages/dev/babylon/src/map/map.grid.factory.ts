@@ -1,8 +1,9 @@
 import { VertexData } from "@babylonjs/core";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
 import { IsNumber } from "core/types";
+import { IElevationGridFactory } from "./map.interfaces";
 
-export class ElevationGridFactory {
+export class ElevationGridFactory implements IElevationGridFactory {
     private static InitZ(column: number, row: number, w: number, h: number): number {
         let i = column == w - 1 ? 1 : 0;
         let j = row == h - 1 ? 2 : 0;

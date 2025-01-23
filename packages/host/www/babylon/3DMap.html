@@ -61,7 +61,7 @@
             }
 
             async function createScene(canvas, engine) {
-                const unit = 3;
+                const unit = 1;
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
@@ -106,7 +106,7 @@
                 const mapOptions = {};
 
                 // build the map
-                const mapNode = new SPACEXR.Map3D("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
+                const mapNode = new SPACEXR.MapNode("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
                 mapNode.position.z = 0.1;
 
                 // build layer options
@@ -117,26 +117,19 @@
 
                 // build layer and add it to the map
                 //const filter = new SPACEXR.MedianFilter(3,30);
-                const demCodecOptions = {
-                    //filter: filter
-                };
-                let client = SPACEXR.MapZen.DemClient(demCodecOptions);
-                const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(mapNode);
+                //const demCodecOptions = {
+                //filter: filter
+                //};
+                //let client = SPACEXR.MapZen.DemClient(demCodecOptions);
+                // const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(mapNode);
 
                 //const imageLayerOptions = {
-                //    zoomOffset: 1,
                 //    alpha: 0.5,
                 //    background: "rgb(.5,.5,.5)",
                 //};
 
-                //client = SPACEXR.Google.SatelliteClient2d();
-                //const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(map);
-
-                /*const material = demLayer.material;
-                const debugLayerOptions = {
-                    function:material?.debug
-                }
-                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
+                let client = SPACEXR.Google.SatelliteClient2d();
+                const t = new SPACEXR.ImageLayer(`${client.name}`, client).addTo(mapNode);
 
                 const showAxes = false;
                 if (showAxes) {

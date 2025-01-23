@@ -6345,7 +6345,7 @@ class TerrainGridOptions {
         return new TerrainGridOptions(this);
     }
 }
-TerrainGridOptions.DefaultGridSize = 256;
+TerrainGridOptions.DefaultGridSize = 32;
 TerrainGridOptions.DefaultInvertIndices = false;
 TerrainGridOptions.DefaultScale = 1;
 TerrainGridOptions.Shared = new TerrainGridOptions({
@@ -8333,7 +8333,8 @@ function IsDrawableTileMapLayer(b) {
 function IsTileMapLayer(b) {
     if (b === null || typeof b !== "object")
         return false;
-    return (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMetricsProvider)(b) && b.provider !== undefined && b.addTo !== undefined;
+    const a = (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMetricsProvider)(b);
+    return a && b.provider !== undefined && b.addTo !== undefined;
 }
 function IsTileMapLayerProxy(b) {
     if (b === null || typeof b !== "object")

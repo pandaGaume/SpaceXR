@@ -1,18 +1,18 @@
 import * as BABYLON from "@babylonjs/core";
 import { IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileNavigationApi } from "core/tiles";
-import { ElevationMapContentType, IElevationMap } from "./map.elevation.interfaces";
-import { ElevationMap } from "./map.elevation";
 import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
-import { VirtualDisplay } from "../../display";
+import { VirtualDisplay } from "../display";
 import { InputsNavigationTarget, IPointerSource, IWheelSource, PointerController } from "core/map";
+import { IMap3D, Map3DContentType } from "./map.interfaces";
+import { Map3D } from "./map";
 
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering event of the scene
 /// </sumary>
-export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, IHasTileMapLayerContainer<ElevationMapContentType> {
-    private _map: IElevationMap;
+export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi, IHasTileMapLayerContainer<Map3DContentType> {
+    private _map: IMap3D;
     private _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
     private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
     private _ownController = false;
@@ -23,7 +23,7 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, 
         this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
     }
 
-    public get layers(): ITileMapLayerContainer<ElevationMapContentType> {
+    public get layers(): ITileMapLayerContainer<Map3DContentType> {
         return this._map.layers;
     }
 
@@ -66,11 +66,11 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, 
         return this;
     }
 
-    public get map(): IElevationMap {
+    public get map(): IMap3D {
         return this._map;
     }
 
-    public withDisplay(display: IDisplay): Map3D {
+    public withDisplay(display: IDisplay): MapNode {
         this._map.display = display;
         if (display instanceof VirtualDisplay) {
             this.parent = display.context3D;
@@ -81,7 +81,7 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, 
         return this;
     }
 
-    protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): Map3D {
+    protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): MapNode {
         if (this._controller === controller) return this;
 
         if (this._controller && this._ownController) {
@@ -97,8 +97,8 @@ export class Map3D extends BABYLON.TransformNode implements ITileNavigationApi, 
         return this;
     }
 
-    protected _createMap(): IElevationMap {
-        return new ElevationMap(this);
+    protected _createMap(): IMap3D {
+        return new Map3D(this);
     }
 
     protected _onBeforeRender(eventData: BABYLON.Scene, eventState: EventState): void {

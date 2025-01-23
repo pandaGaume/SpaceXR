@@ -4,7 +4,7 @@ import { FloatArray, Nullable } from "../types";
 type InitializerFn = (column: number, row: number, w: number, h: number, ...data: any[]) => number | number[];
 
 export class TerrainGridOptions {
-    public static DefaultGridSize = 256;
+    public static DefaultGridSize = 32;
     public static DefaultInvertIndices = false;
     public static DefaultScale = 1;
 

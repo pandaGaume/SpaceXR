@@ -1123,13 +1123,14 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
         return mesh;
     }
     _buildTerrainGridOptions(options) {
-        return (options ??
+        const o = options ??
             new core_meshes__WEBPACK_IMPORTED_MODULE_5__.TerrainGridOptionsBuilder()
                 .withColumns(core_meshes__WEBPACK_IMPORTED_MODULE_5__.TerrainGridOptions.DefaultGridSize + 1)
                 .withRows(core_meshes__WEBPACK_IMPORTED_MODULE_5__.TerrainGridOptions.DefaultGridSize + 1)
-                .withUvs(true)
-                .withNormals(true)
-                .build());
+                .build();
+        o.uvs = true;
+        o.normals = false;
+        return o;
     }
     _buildMesh(name, scene) {
         const mesh = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);

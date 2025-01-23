@@ -27,6 +27,7 @@ void main(void) {
     #include<clipVertex>
     
     gl_Position = viewProjection * worldPosition;
+
     vUvs = vec2(1.0-uv.x, uv.y);
     depth =  textureDepths.x;
 }

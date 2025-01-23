@@ -117,15 +117,17 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     }
 
     protected _buildTerrainGridOptions(options?: TerrainGridOptions): TerrainGridOptions {
-        return (
+        const o =
             options ??
             new TerrainGridOptionsBuilder()
                 .withColumns(TerrainGridOptions.DefaultGridSize + 1)
                 .withRows(TerrainGridOptions.DefaultGridSize + 1)
-                .withUvs(true)
-                .withNormals(true)
-                .build()
-        );
+                .build();
+        // ensure uvs are created
+        o.uvs = true;
+        // disabling normals
+        o.normals = false;
+        return o;
     }
 
     protected _buildMesh(name: string, scene?: Scene): Mesh {

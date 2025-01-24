@@ -35,7 +35,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     // the grid model
     _grid: Mesh;
-    _material: IMap3dMaterial;
+    _material: IMap3dMaterial<T>;
     _exageration?: number;
 
     // properties observers
@@ -82,7 +82,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return this._grid;
     }
 
-    public get material(): IMap3dMaterial {
+    public get material(): IMap3dMaterial<T> {
         return this._material;
     }
 
@@ -139,7 +139,9 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
                 this._setTilePosition(tile, center);
             }
         }
-        this.material?.addTile(tile, this);
+        if (this.material.added) {
+            this.material.added([tile], new EventState(-1, false, this, this));
+        }
     }
 
     protected _onTilesRemoved(tiles: Array<ITileWithMesh<T>>): void {
@@ -159,7 +161,9 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
             tile.surface.dispose();
             tile.surface = null;
         }
-        this.material?.removeTile(tile, this);
+        if (this.material.removed) {
+            this.material.removed([tile], new EventState(-1, false, this, this));
+        }
     }
 
     protected _onTilesUpdated(tiles: Array<ITileWithMesh<T>>): void {
@@ -178,7 +182,9 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
         }
-        this.material?.updateTile(tile, this);
+        if (this.material.updated) {
+            this.material.updated([tile], new EventState(-1, false, this, this));
+        }
     }
 
     protected _buildInstance(tile: ITileWithMesh<T>): AbstractMesh {
@@ -232,11 +238,10 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
     }
 
     protected _onElevationLayerPropertyChanged(eventData: PropertyChangedEventArgs<unknown, unknown>, eventState: EventState): void {
-        // we survey the weight property of the layer to update the current view and messaging the map container that it need
-        // to sort the layers again.
         if (IsElevationLayer(eventData.source)) {
             switch (eventData.propertyName) {
                 case ElevationLayer.ExagerationPropertyName: {
+                    this._exageration = eventData.source.exageration;
                     this._onZoomChanged();
                     break;
                 }
@@ -302,8 +307,8 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return undefined;
     }
 
-    protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial {
-        return new Map3dMaterial(name, scene);
+    protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial<T> {
+        return new Map3dMaterial<T>(name, scene);
     }
 
     protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh {

@@ -1,7 +1,7 @@
 import { IDemInfos } from "core/dem";
 import { ICartesian3, ISize3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { ImageLayerContentType, IsTile, ITile, ITileMap, ITileMapLayerView } from "core/tiles";
+import { ImageLayerContentType, IsTile, ITargetBlock, ITile, ITileMap, ITileMapLayerView } from "core/tiles";
 import { IValidable, Nullable } from "core/types";
 import { AbstractMesh, Mesh, TransformNode } from "@babylonjs/core";
 import { IHasHolographicBounds } from "../display";
@@ -21,7 +21,7 @@ export interface IElevationHost<T extends ImageLayerContentType> extends ITileMa
     // the grid model
     grid: Mesh;
     // the material model
-    material: IMap3dMaterial;
+    material: IMap3dMaterial<T>;
     // the elevation scale
     exageration?: number;
 }
@@ -45,11 +45,7 @@ export function IsElevationHost<T extends ImageLayerContentType>(b: unknown): b 
 
 // this is where we define the functional interface for the material, including the behaviors for the holographic bounds,
 // the elevations and the texture mapping
-export interface IMap3dMaterial extends IHasHolographicBounds {
+export interface IMap3dMaterial<T extends ImageLayerContentType> extends IHasHolographicBounds, ITargetBlock<ITileWithMesh<T> | IDemInfos> {
     mapScale: ICartesian3;
     displayResolution: ISize3;
-
-    addTile<T extends ImageLayerContentType>(tiles: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void;
-    removeTile<T extends ImageLayerContentType>(tiles: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void;
-    updateTile<T extends ImageLayerContentType>(tiles: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void;
 }

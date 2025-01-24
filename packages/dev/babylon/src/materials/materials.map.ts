@@ -22,8 +22,8 @@ import { IElevationHost, IMap3dMaterial, IsElevationHost, IsTileWithMesh, ITileW
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
-import { Observer } from "core/events";
-import { ImageLayerContentType, ITile, ITileMapLayerView } from "core/tiles";
+import { EventState, Observer } from "core/events";
+import { ImageLayerContentType, IPipelineMessageType } from "core/tiles";
 import { IDemInfos } from "core/dem";
 
 export enum Map3dLayerKind {
@@ -52,7 +52,7 @@ class TileLayout<T extends ImageLayerContentType> {
     }
 }
 
-export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
+export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial implements IMap3dMaterial<T> {
     public static ClassName: string = "Map3dMaterial";
     public static ShaderName: string = "map";
 
@@ -251,67 +251,78 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public addTile<T extends ImageLayerContentType>(tile: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void {
-        if (IsTileWithMesh(tile)) {
-            const surface = tile.surface;
-            if (!surface) {
-                throw new Error("Tile surface is not defined");
-            }
+    public added(data: IPipelineMessageType<ITileWithMesh<T> | IDemInfos>, state: EventState): void {
+        if (IsElevationHost(state.currentTarget)) {
+            for (const tile of data) {
+                if (IsTileWithMesh<ImageLayerContentType>(tile)) {
+                    const surface = tile.surface;
+                    if (!surface) {
+                        throw new Error("Tile surface is not defined");
+                    }
 
-            if (IsElevationHost(source)) {
-                this._ensureTextureSamplersReady(source);
-            }
+                    this._ensureTextureSamplersReady(state.currentTarget);
 
-            const key = tile.address.quadkey;
-            let layout = new TileLayout(tile);
-            this._tileLayouts.set(key, layout);
+                    const key = tile.address.quadkey;
+                    let layout = new TileLayout(tile);
+                    this._tileLayouts.set(key, layout);
 
-            let textureArea = this._reserveArea(this._textureSampler);
-            if (textureArea === undefined) {
-                return;
-            }
+                    let textureArea = this._reserveArea(this._textureSampler);
+                    if (textureArea === undefined) {
+                        return;
+                    }
 
-            // the depth of the texture x=uvs, y=ids
-            const textureDepths = new Vector4(textureArea.depth, -1, -1, -1);
-            surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
+                    // the depth of the texture x=uvs, y=ids
+                    const textureDepths = new Vector4(textureArea.depth, -1, -1, -1);
+                    surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
 
-            let areaInfos = new AreaInfos(textureArea);
-            let kind = Map3dLayerKind.TEXTURE;
-            layout.setArea(kind, areaInfos);
-            if (tile.content) {
-                areaInfos.layer.update(tile.content);
-                tile.surface?.setEnabled(true);
-            }
-            this.markAsDirty(Material.TextureDirtyFlag);
-        }
-    }
-
-    public removeTile<T extends ImageLayerContentType>(tile: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void {
-        if (IsTileWithMesh(tile)) {
-            const key = tile.address.quadkey;
-            const layout = this._tileLayouts.get(key);
-            if (layout) {
-                if (tile.surface) {
-                    tile.surface.instancedBuffers.textureDepths.x = -1;
-                }
-                layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
-                this._tileLayouts.delete(key);
-                this.markAsDirty(Material.TextureDirtyFlag);
-            }
-        }
-    }
-    public updateTile<T extends ImageLayerContentType>(tile: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void {
-        if (IsTileWithMesh(tile)) {
-            const key = tile.address.quadkey;
-            const layout = this._tileLayouts.get(key);
-            if (layout) {
-                if (tile.content) {
+                    let areaInfos = new AreaInfos(textureArea);
                     let kind = Map3dLayerKind.TEXTURE;
-                    let areaInfos = layout.getArea(kind);
-                    if (areaInfos) {
+                    layout.setArea(kind, areaInfos);
+                    if (tile.content) {
                         areaInfos.layer.update(tile.content);
                         tile.surface?.setEnabled(true);
+                    }
+                    this.markAsDirty(Material.TextureDirtyFlag);
+                }
+            }
+        }
+    }
+
+    public removed(data: IPipelineMessageType<ITileWithMesh<T> | IDemInfos>, state: EventState): void {
+        if (IsElevationHost(state.currentTarget)) {
+            for (const tile of data) {
+                if (IsTileWithMesh<ImageLayerContentType>(tile)) {
+                    const key = tile.address.quadkey;
+                    const layout = this._tileLayouts.get(key);
+                    if (layout) {
+                        if (tile.surface) {
+                            tile.surface.instancedBuffers.textureDepths.x = -1;
+                        }
+                        layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
+                        this._tileLayouts.delete(key);
                         this.markAsDirty(Material.TextureDirtyFlag);
+                    }
+                }
+            }
+        }
+    }
+
+    public updated(data: IPipelineMessageType<ITileWithMesh<T> | IDemInfos>, state: EventState): void {
+        if (IsElevationHost(state.currentTarget)) {
+            for (const tile of data) {
+                if (IsTileWithMesh<ImageLayerContentType>(tile)) {
+                    const key = tile.address.quadkey;
+                    const layout = this._tileLayouts.get(key);
+                    if (layout) {
+                        if (tile.content) {
+                            let kind = Map3dLayerKind.TEXTURE;
+                            let areaInfos = layout.getArea(kind);
+                            if (areaInfos) {
+                                areaInfos.layer.update(tile.content);
+                                tile.surface?.setEnabled(true);
+                                this.markAsDirty(Material.TextureDirtyFlag);
+                            }
+                        }
                     }
                 }
             }

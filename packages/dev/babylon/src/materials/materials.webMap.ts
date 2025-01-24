@@ -1,5 +1,6 @@
 import { Scene } from "@babylonjs/core";
 import { Map3dMaterial } from "./materials.map";
+import { ImageLayerContentType } from "core/tiles";
 
 /**
  * The `WebMapMaterial` class represents a special material used for rendering map tiles.
@@ -8,7 +9,7 @@ import { Map3dMaterial } from "./materials.map";
  * function within a `Map3D` object, rendering the map content as a plane with rectangular
  * boundaries.
  */
-export class WebMapMaterial extends Map3dMaterial {
+export class WebMapMaterial<T extends ImageLayerContentType> extends Map3dMaterial<T> {
     public static ClassName: string = "WebMapMaterial";
     public static ShaderName: string = "webmap";
 

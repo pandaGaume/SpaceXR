@@ -1,5 +1,6 @@
 import { Scene } from "@babylonjs/core";
 import { Map3dMaterial } from "./materials.map";
+import { ImageLayerContentType } from "core/tiles";
 
 /**
  * The `EllipsoidalMapMaterial` class represents a special material used for rendering map tiles.
@@ -9,7 +10,7 @@ import { Map3dMaterial } from "./materials.map";
  * rendering the map content on an ellipsoidal surface with defined boundaries.
  */
 
-export class EllipsoidalMapMaterial extends Map3dMaterial {
+export class EllipsoidalMapMaterial<T extends ImageLayerContentType> extends Map3dMaterial<T> {
     public static ClassName: string = "EllipsoidalMapMaterial";
     public static ShaderName: string = "ellipsoidalmap";
     /**

@@ -1,7 +1,6 @@
-import { AbstractMesh, Scene, TransformNode } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import {
     IDisplay,
-    IImageTileMapLayer,
     ImageLayerContentType,
     IPhysicalDisplay,
     IsPhysicalDisplay,
@@ -13,53 +12,86 @@ import {
     TileNavigationState,
 } from "core/tiles";
 import { Nullable } from "core/types";
-import { IElevationHost, ITileMapLayerViewWithElevation, ITileWithElevation } from "./map.interfaces";
-import { Map3D } from "./map";
-import { ICartesian2, ICartesian3 } from "core/geometry";
-import { TileWithElevation } from "./map.tile";
+import { IElevationGridFactory, IElevationHost, IMap3dMaterial, ITileWithMesh } from "./map.interfaces";
+import { ICartesian2 } from "core/geometry";
+import { TileWithMesh } from "./map.tile";
 import { EventState, Observer, PropertyChangedEventArgs } from "core/events";
 import { ElevationLayer } from "../dem/dem.layer";
-import { IElevationLayerOptions, IsElevationLayer } from "../dem";
+import { IsElevationLayer } from "../dem";
+import { ElevationGridFactory } from "./map.grid.factory";
+import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
+import { TextUtils } from "core/utils";
+import { Map3dMaterial } from "../materials";
+import { IsHolographicBounds } from "../display";
 
-export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerContentType> implements ITileMapLayerViewWithElevation, IElevationLayerOptions {
+export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> implements IElevationHost<T> {
     public static DefaultExageration: number = 1.0;
+    public static TEMPLATE_SUFFIX = "grid";
+    public static MATERIAL_SUFFIX = "material";
+    public static INSTANCE_ROOT_NAME = "root";
 
+    // the root of the tiles instances
     _tilesRoot: TransformNode;
-    _elevationHost: IElevationHost;
+
+    // the grid model
+    _grid: Mesh;
+    _material: IMap3dMaterial;
+    _exageration?: number;
+
+    // properties observers
     _elevationLayerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null;
+
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
 
-    public constructor(host: IElevationHost, layer: IImageTileMapLayer, display: Nullable<IDisplay>, source: ITileView, scene?: Scene) {
+    public constructor(root: TransformNode, layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
         super(layer, display, source);
-        if (host === null || host === undefined) {
-            throw new Error("Elevation host is required.");
-        }
-        this._elevationHost = host;
-        // ensure factory is with correct type.
-        this.factory.withType(TileWithElevation);
-        // build the roor for the tiles
+
+        const scene = root.getScene();
+
+        // build the root for the tiles
         this._tilesRoot = this._buildRoot(scene);
-        // register to elevation layer properties updates.
-        if (this._elevationHost.elevation) {
-            this._elevationLayerObserver = this._elevationHost.elevation.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
+        // set the parent
+        this._tilesRoot.parent = root;
+
+        const o = this._buildTerrainGridOptions();
+        this._grid = this._buildTemplate(o, scene);
+        this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
+        if (this._material && this._material instanceof Material) {
+            this._grid.material = this._material;
+            if (display) {
+                this._bindDisplayInternal(display);
+            }
         }
+        this._grid.setEnabled(false);
+
+        // ensure factory is with correct type.
+        this.factory.withType(TileWithMesh);
+
+        // register to elevation layer properties updates.
+        //if (this._elevationHost.elevation) {
+        //    this._elevationLayerObserver = this._elevationHost.elevation.propertyChangedObservable.add(this._onElevationLayerPropertyChanged.bind(this));
+        //}
     }
 
-    public get elevationHost(): IElevationHost {
-        return this._elevationHost;
+    public get name(): string {
+        return this._tilesRoot.name;
+    }
+
+    public get grid(): Mesh {
+        return this._grid;
+    }
+
+    public get material(): IMap3dMaterial {
+        return this._material;
     }
 
     public get tilesRoot(): TransformNode {
         return this._tilesRoot;
     }
 
-    public get exageration(): number | undefined {
-        return this._elevationHost.elevation?.exageration ?? 1.0;
-    }
-
-    public get offset(): ICartesian3 | undefined {
-        return this._elevationHost.elevation?.offsets;
+    public get exageration(): number {
+        return this._exageration ?? ElevationHost.DefaultExageration;
     }
 
     public dispose(): void {
@@ -76,11 +108,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         return new TransformNode(this._buildRootName(), scene);
     }
 
-    protected _buildRootName(): string {
-        return `${this.layer.name}-root`;
-    }
-
-    protected _onTilesAdded(tiles: Array<TileWithElevation>): void {
+    protected _onTilesAdded(tiles: Array<ITileWithMesh<T>>): void {
         if (this._tilesRoot) {
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
                 for (const t of tiles) {
@@ -92,7 +120,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         }
     }
 
-    protected _onTileAdded(tile: TileWithElevation): void {
+    protected _onTileAdded(tile: ITileWithMesh<T>): void {
         const m = this._buildInstance(tile);
         if (m) {
             m.parent = this._tilesRoot;
@@ -111,10 +139,10 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
                 this._setTilePosition(tile, center);
             }
         }
-        this.elevationHost.material?.addTile(tile, this);
+        this.material?.addTile(tile, this);
     }
 
-    protected _onTilesRemoved(tiles: Array<TileWithElevation>): void {
+    protected _onTilesRemoved(tiles: Array<ITileWithMesh<T>>): void {
         if (this._tilesRoot) {
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
                 for (const t of tiles) {
@@ -126,15 +154,15 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         }
     }
 
-    protected _onTileRemoved(tile: TileWithElevation): void {
+    protected _onTileRemoved(tile: ITileWithMesh<T>): void {
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
         }
-        this.elevationHost.material?.removeTile(tile, this);
+        this.material?.removeTile(tile, this);
     }
 
-    protected _onTilesUpdated(tiles: Array<TileWithElevation>): void {
+    protected _onTilesUpdated(tiles: Array<ITileWithMesh<T>>): void {
         if (this._tilesRoot) {
             this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
                 for (const t of tiles) {
@@ -146,24 +174,19 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         }
     }
 
-    protected _onTileUpdated(tile: TileWithElevation): void {
+    protected _onTileUpdated(tile: ITileWithMesh<T>): void {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
         }
-        this.elevationHost.material?.updateTile(tile, this);
+        this.material?.updateTile(tile, this);
     }
 
-    protected _buildInstance(tile: TileWithElevation): AbstractMesh {
-        const instance = this._elevationHost.grid.createInstance(this._buildInstanceName(tile));
+    protected _buildInstance(tile: ITileWithMesh<T>): AbstractMesh {
+        const instance = this.grid.createInstance(this._buildInstanceName(tile));
         return instance;
     }
 
-    protected _buildInstanceName(tile: TileWithElevation): string {
-        const k = tile.quadkey;
-        return k != "" ? k : Map3D.INSTANCE_ROOT_NAME;
-    }
-
-    protected _setTilePosition(tile: ITileWithElevation, center: ICartesian2): void {
+    protected _setTilePosition(tile: ITileWithMesh<T>, center: ICartesian2): void {
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
             const p = tile.surface.position;
@@ -181,7 +204,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         }
     }
 
-    private _setScale(nav: ITileNavigationState, display: IPhysicalDisplay, layer: ITileMapLayer<ImageLayerContentType>, metrics: ITileMetrics) {
+    private _setScale(nav: ITileNavigationState, display: IPhysicalDisplay, layer: ITileMapLayer<T>, metrics: ITileMetrics) {
         const groundResolution = metrics.groundResolution(nav.center.lat, nav.lod);
         const x = display.dimension.width / (display.resolution.width * groundResolution);
         const y = display.dimension.height / (display.resolution.height * groundResolution);
@@ -195,7 +218,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
         this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
 
         // z data are already in meter so they just need to be scaled, and exagerated.
-        this._tilesRoot.scaling.z = z * (this.exageration ?? TileMapLayerViewWithElevation.DefaultExageration) * nav.scale;
+        this._tilesRoot.scaling.z = z * (this.exageration ?? ElevationHost.DefaultExageration) * nav.scale;
     }
 
     protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
@@ -261,7 +284,7 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
             const center = this._getCenter(true);
             if (center) {
                 for (const tile of tiles) {
-                    this._setTilePosition(tile as ITileWithElevation, center);
+                    this._setTilePosition(tile as ITileWithMesh<T>, center);
                 }
             }
         }
@@ -277,5 +300,88 @@ export class TileMapLayerViewWithElevation extends TileMapLayerView<ImageLayerCo
             return this._cartesianCenterCache;
         }
         return undefined;
+    }
+
+    protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial {
+        return new Map3dMaterial(name, scene);
+    }
+
+    protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh {
+        const mesh = this._buildMesh(this._buildTemplateName() ?? this.name, scene);
+        const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
+        const grid = gridFactory.buildTopology(options);
+        if (grid instanceof VertexData) {
+            grid.applyToMesh(mesh);
+        } else {
+            const data = new VertexData();
+            data.indices = grid.indices;
+            data.normals = grid.normals;
+            data.positions = grid.positions;
+            data.uvs = grid.uvs;
+            data.applyToMesh(mesh);
+        }
+        return mesh;
+    }
+
+    protected _buildTerrainGridOptions(): TerrainGridOptions {
+        return new TerrainGridOptionsBuilder()
+            .withColumns(TerrainGridOptions.DefaultGridSize + 1)
+            .withRows(TerrainGridOptions.DefaultGridSize + 1)
+            .withUvs(true)
+            .withNormals(false)
+            .build();
+    }
+
+    protected _buildMesh(name: string, scene?: Scene): Mesh {
+        const mesh = new Mesh(name, scene);
+        return mesh;
+    }
+
+    protected _buildGridFactory(): IElevationGridFactory {
+        return this._buildGridFactoryInternal();
+    }
+
+    protected _onDisplayChanged(oldValue: Nullable<IDisplay>, newValue: Nullable<IDisplay>): void {
+        this._bindDisplayInternal(newValue);
+        this.invalidate();
+    }
+
+    protected _buildQualifiedName(n: string): string {
+        if (this.name && this.name !== "") {
+            return `${this._tilesRoot.name}:${n}`;
+        }
+        return n;
+    }
+
+    protected _buildRootName(): string {
+        return `${this.layer.name}-root`;
+    }
+
+    protected _buildInstanceName(tile: ITileWithMesh<T>): string {
+        const k = tile.quadkey;
+        return k != "" ? k : ElevationHost.INSTANCE_ROOT_NAME;
+    }
+
+    protected _buildTemplateName(): string {
+        return this._buildQualifiedName(TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
+    }
+
+    protected _buildMaterialName(): string {
+        return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
+    }
+
+    private _bindDisplayInternal(display: Nullable<IDisplay>): void {
+        if (display && this._material) {
+            if (IsHolographicBounds(this.display)) {
+                this.material.holographicBounds = this.display;
+            }
+            if (this.display?.resolution) {
+                this.material.displayResolution = this.display.resolution;
+            }
+        }
+    }
+
+    private _buildGridFactoryInternal(): IElevationGridFactory {
+        return new ElevationGridFactory();
     }
 }

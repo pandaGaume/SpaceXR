@@ -4,4 +4,5 @@ export declare class EllipsoidalMapMaterial extends Map3dMaterial {
     static ClassName: string;
     static ShaderName: string;
     constructor(name: string, scene: Scene);
+    getClassName(): string;
 }

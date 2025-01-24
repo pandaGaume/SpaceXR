@@ -1,71 +1,24 @@
-import { Observable } from "../../events";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
-import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileSelectionContextOptions, ITileView } from "../pipeline/tiles.pipeline.interfaces";
+import { ITileSelectionContextOptions } from "../pipeline/tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
 import { ICartesian2, IBounds2, Bounds2, Cartesian2 } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
-import { TilePipelineLink } from "../pipeline/tiles.pipeline.link";
+
 import { Bearing } from "../../geography";
 import { IDisplay } from ".";
+import { TileViewBase } from "./tiles.map.view.base";
 
-export class TileView implements ITileView {
-    _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
-    _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
-    _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+export class TileView extends TileViewBase {
+    _offset: number = 0;
 
-    _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
-
-    // internal pipeline links
-    _links: Array<ITilePipelineLink<ITileAddress>> = [];
-
-    public dispose(): void {
-        // dispose the links
-        for (const l of this._links) {
-            l.dispose();
-        }
-        this._links = [];
+    public constructor(offset: number = 0) {
+        super();
+        this._offset = offset;
     }
 
-    public get addedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
-        return this._addedObservable!;
-    }
-
-    public get removedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._removedObservable = this._removedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
-        return this._removedObservable!;
-    }
-
-    public get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._updatedObservable = this._updatedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
-        return this._updatedObservable!;
-    }
-
-    public linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions<ITileAddress>): void {
-        // a view may be linked to several targets, so we need to keep track of them.
-        if (this._links.findIndex((l) => l.target === target) === -1) {
-            const link = new TilePipelineLink(this, target, options);
-            this._links.push(link);
-        }
-    }
-
-    public unlinkFrom(target: ITargetBlock<ITileAddress>): ITilePipelineLink<ITileAddress> | undefined {
-        const i = this._links.findIndex((l) => l.target === target);
-        if (i !== -1) {
-            const l = this._links.splice(i)[0];
-            l.dispose();
-            return l;
-        }
-        return undefined;
-    }
-
-    public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void {
-        if (!state || !display) {
-            this._doClearContext(state, this._activ, options);
-            return;
-        }
-        this._doValidateContext(state, display, metrics, this._activ, options);
+    public get offset(): number {
+        return this._offset;
     }
 
     protected _doValidateContext(
@@ -76,7 +29,8 @@ export class TileView implements ITileView {
         options?: ITileSelectionContextOptions
     ) {
         if (state && display) {
-            const target = state.lod + (options?.zoomOffset ?? 0);
+            const offset = this._offset + (options?.zoomOffset ?? 0);
+            const target = state.lod + offset;
             const lod = TileAddress.ClampLod(target, metrics);
             // TODO : we might adapt the scale depending the diff between lod and state.lod
             if (target != lod) {
@@ -88,8 +42,9 @@ export class TileView implements ITileView {
             const seTileXY = Cartesian2.Zero();
 
             const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
-            let w = display?.resolution.width ?? 0;
-            let h = display?.resolution.height ?? 0;
+            const r = offset == 0 ? 1.0 : offset > 0 ? Math.pow(2, offset) : 1.0 / Math.pow(2, -offset);
+            let w = (display?.resolution.width ?? 0) * r;
+            let h = (display?.resolution.height ?? 0) * r;
 
             let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
             // if azimuth is set, then we need to keep reference of the original rectangle to optimize the tile selection.
@@ -147,19 +102,6 @@ export class TileView implements ITileView {
                 }
                 if (added.length && this._addedObservable?.hasObservers()) {
                     this._addedObservable.notifyObservers(added, -1, this, this);
-                }
-            }
-        }
-    }
-
-    private _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress>, options?: ITileSelectionContextOptions) {
-        if (state) {
-            let deleted = Array.from(activAddresses.values());
-            activAddresses.clear();
-
-            if (options?.dispatchEvent ?? true) {
-                if (deleted.length && this._removedObservable?.hasObservers()) {
-                    this._removedObservable.notifyObservers(deleted, -1, this, this);
                 }
             }
         }

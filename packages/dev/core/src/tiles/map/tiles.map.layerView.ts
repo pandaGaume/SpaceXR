@@ -1,11 +1,11 @@
 import { IWeighted } from "../../collections/collections.interfaces";
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { Nullable } from "../../types";
+import { IsDisposable, Nullable } from "../../types";
 import { ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
 import { TileNavigationApi } from "../navigation/tiles.navigation.api";
-import { ITileView } from "../pipeline";
+import { hasTileSelectionContext, ISourceBlock, ITileSelectionContext, ITileView } from "../pipeline";
 import { AbstractTileProvider } from "../providers";
-import { ITile } from "../tiles.interfaces";
+import { ITile, ITileAddress } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { TileView } from "./tiles.map.view";
 
@@ -14,15 +14,16 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
 
     private _layer: ITileMapLayer<T>;
     private _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
-    private _view: ITileView;
-    private _ownView: boolean = false;
+    private _source: ISourceBlock<ITileAddress>;
+    private _selectionContext?: ITileSelectionContext;
+    private _ownSource: boolean = false;
     private _navigation: Nullable<ITileNavigationState> = null;
     private _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
     private _api: Nullable<ITileNavigationApi> = null;
     private _display: Nullable<IDisplay> = null;
     private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
 
-    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
+    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ISourceBlock<ITileAddress>, selectionContext?: ITileSelectionContext) {
         super();
         // ensure the factory has the right metrics and namespace to build bounds.
         this.factory.withMetrics(layer.metrics);
@@ -32,8 +33,15 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         this.navigationState = this._buildNavigation();
         this.display = display;
 
-        this._view = source ?? this._buildSource();
-        this._view?.linkTo(this);
+        this._source = source ?? this._buildSource();
+        this._source?.linkTo(this);
+
+        if (!selectionContext) {
+            if (hasTileSelectionContext(this._source)) {
+                selectionContext = this._source as ITileSelectionContext;
+            }
+        }
+        this._selectionContext = selectionContext;
     }
 
     public get navigationApi(): Nullable<ITileNavigationApi> {
@@ -100,16 +108,16 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
         }
     }
 
-    public get view(): ITileView {
-        return this._view;
+    public get source(): ISourceBlock<ITileAddress> {
+        return this._source;
     }
 
     public dispose(): void {
         super.dispose();
         this._navigation?.dispose();
-        this._view?.unlinkFrom(this);
-        if (this._ownView) {
-            this._view?.dispose();
+        this._source?.unlinkFrom(this);
+        if (this._ownSource && IsDisposable(this._source)) {
+            this._source?.dispose();
         }
         this._layerObserver?.disconnect();
         this._displayObserver?.disconnect();
@@ -117,7 +125,7 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     }
 
     protected _buildSource(): ITileView {
-        this._ownView = true;
+        this._ownSource = true;
         return new TileView();
     }
 
@@ -160,6 +168,6 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     }
 
     protected _doValidate(): void {
-        this._view.setContext(this.navigationState, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset ?? 0 });
+        this._selectionContext?.setContext(this.navigationState, this._display, this.metrics, { zoomOffset: this.layer.zoomOffset ?? 0 });
     }
 }

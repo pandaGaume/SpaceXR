@@ -1,6 +1,5 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationApi, IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { IHasView } from "../pipeline/tiles.pipeline.interfaces";
 import { IHasActivTiles, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
@@ -55,7 +54,7 @@ export declare function IsPhysicalDisplay(b: unknown): b is IPhysicalDisplay;
 export interface IHasDisplay {
     display: Nullable<IDisplay>;
 }
-export interface ITileMapCoreProperties extends IHasDisplay, IHasNavigationState, IHasView {
+export interface ITileMapCoreProperties extends IHasDisplay, IHasNavigationState {
 }
 export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, IHasTileMapLayerViewContainer<T>, ITileNavigationApi, ITileMapCoreProperties, IDisposable {
 }

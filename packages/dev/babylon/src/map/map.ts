@@ -1,51 +1,25 @@
-import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState } from "core/tiles";
-import { IElevationGridFactory, IElevationHost, IElevationHostOptions, IMap3D, IMap3dMaterial, IsTileMapLayerViewWithElevation, Map3DContentType } from "./map.interfaces";
-import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileMapLayerView, TileNavigationState, TileView } from "core/tiles";
+import { IMap3D, IsElevationHost, Map3DContentType } from "./map.interfaces";
+import { TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { Map3dMaterial } from "../materials";
-import { TextUtils } from "core/utils";
-import { ElevationGridFactory } from "./map.grid.factory";
-import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { IsHolographicBounds } from "../display";
-import { TileMapLayerViewWithElevation } from "./map.layer.view";
+import { ElevationHost } from "./map.layer.view.elevation";
+import { ElevationLayer } from "../dem";
 
-export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationHost {
-    public static TEMPLATE_SUFFIX = "grid";
+export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D {
+    public static DefaultLodElevationShift = 3;
+
     public static ROOT_SUFFIX = "root";
-    public static MATERIAL_SUFFIX = "material";
-    public static INSTANCE_ROOT_NAME = "root";
 
     _root: TransformNode;
 
-    // the grid model
-    _grid: Mesh;
-    _material: IMap3dMaterial;
-
-    public constructor(root: TransformNode, options?: IElevationHostOptions) {
+    public constructor(root: TransformNode) {
         super();
         this._root = root;
-
-        // build the template ( including the material)
-        const scene = this._root.getScene();
-        this._grid = this._buildTemplate(options?.gridOptions, scene);
-        this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
-        if (this._material && this._material instanceof Material) {
-            this._grid.material = this._material;
-        }
-        this._grid.setEnabled(false);
     }
 
     public get name(): string {
         return this._root.name;
-    }
-
-    public get grid(): Mesh {
-        return this._grid;
-    }
-
-    public get material(): IMap3dMaterial {
-        return this._material;
     }
 
     /**
@@ -55,7 +29,10 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      * @returns the layer view created
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
-        return new TileMapLayerViewWithElevation(this, <any>layer, this.display, this.view, this._root.getScene());
+        if (layer instanceof ElevationLayer) {
+            return new TileMapLayerView(layer, this._display, new TileView());
+        }
+        return new ElevationHost(this._root, <any>layer, this.display, this.view);
     }
 
     // when navigation propertie's changed
@@ -82,7 +59,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void {
         super._onLayerViewAdded(eventData, eventState);
         for (const v of eventData) {
-            if (IsTileMapLayerViewWithElevation(v)) {
+            if (IsElevationHost(v)) {
                 v.tilesRoot.parent = this._root;
             }
         }
@@ -92,89 +69,9 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void {
         super._onLayerViewRemoved(eventData, eventState);
         for (const v of eventData) {
-            if (IsTileMapLayerViewWithElevation(v)) {
+            if (IsElevationHost(v)) {
                 v.tilesRoot.parent = null;
             }
         }
-    }
-
-    protected _buildTemplate(options?: TerrainGridOptions, scene?: Scene): Mesh {
-        const o = this._buildTerrainGridOptions(options);
-        const mesh = this._buildMesh(this._buildTemplateName() ?? this._root.name, scene);
-        const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
-        const grid = gridFactory.buildTopology(o);
-        if (grid instanceof VertexData) {
-            grid.applyToMesh(mesh);
-        } else {
-            const data = new VertexData();
-            data.indices = grid.indices;
-            data.normals = grid.normals;
-            data.positions = grid.positions;
-            data.uvs = grid.uvs;
-            data.applyToMesh(mesh);
-        }
-        return mesh;
-    }
-
-    protected _buildTerrainGridOptions(options?: TerrainGridOptions): TerrainGridOptions {
-        const o =
-            options ??
-            new TerrainGridOptionsBuilder()
-                .withColumns(TerrainGridOptions.DefaultGridSize + 1)
-                .withRows(TerrainGridOptions.DefaultGridSize + 1)
-                .build();
-        // ensure uvs are created
-        o.uvs = true;
-        // disabling normals
-        o.normals = false;
-        return o;
-    }
-
-    protected _buildMesh(name: string, scene?: Scene): Mesh {
-        const mesh = new Mesh(name, scene);
-        return mesh;
-    }
-
-    protected _buildGridFactory(): IElevationGridFactory {
-        return this._buildGridFactoryInternal();
-    }
-
-    protected _buildQualifiedName(n: string): string {
-        if (this.name && this.name !== "") {
-            return `${this._root.name}:${n}`;
-        }
-        return n;
-    }
-
-    protected _buildTemplateName(): string {
-        return this._buildQualifiedName(TextUtils.BuildNameWithSuffix(this.name, Map3D.TEMPLATE_SUFFIX));
-    }
-
-    protected _buildMaterialName(): string {
-        return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), Map3D.MATERIAL_SUFFIX);
-    }
-
-    protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial {
-        return new Map3dMaterial(name, scene);
-    }
-
-    protected _onDisplayBinded(display: IDisplay): void {
-        super._onDisplayBinded(display);
-        this._bindDisplayInternal(display);
-    }
-
-    protected _bindDisplayInternal(display: IDisplay): void {
-        if (display && this._material) {
-            if (IsHolographicBounds(this.display)) {
-                this._material.holographicBounds = this.display;
-            }
-            if (this.display?.resolution) {
-                this._material.displayResolution = this.display.resolution;
-            }
-        }
-    }
-
-    private _buildGridFactoryInternal(): IElevationGridFactory {
-        return new ElevationGridFactory();
     }
 }

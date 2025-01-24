@@ -18,11 +18,13 @@ import {
     Constants,
     Vector4,
 } from "@babylonjs/core";
-import { IMap3dMaterial, ITileMapLayerViewWithElevation, ITileWithElevation } from "../map/map.interfaces";
+import { IElevationHost, IMap3dMaterial, IsElevationHost, IsTileWithMesh, ITileWithMesh } from "../map/map.interfaces";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { Observer } from "core/events";
+import { ImageLayerContentType, ITile, ITileMapLayerView } from "core/tiles";
+import { IDemInfos } from "core/dem";
 
 export enum Map3dLayerKind {
     ELEVATION = 0,
@@ -38,8 +40,8 @@ class AreaInfos {
 }
 
 // internal class used to hold the tile pool texture areas
-class TileLayout {
-    public constructor(public tile: ITileWithElevation, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
+class TileLayout<T extends ImageLayerContentType> {
+    public constructor(public tile: ITileWithMesh<T>, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
 
     getArea(kind: Map3dLayerKind): Nullable<AreaInfos> {
         return this.areas[kind];
@@ -51,9 +53,10 @@ class TileLayout {
 }
 
 export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
-    public static DefaultElevationTextureDepth: number = 16;
+    public static ClassName: string = "Map3dMaterial";
+    public static ShaderName: string = "map";
 
-    public static DefaultShaderName: string = "map";
+    public static DefaultElevationTextureDepth: number = 16;
 
     public static ElevationDepthsAttName: string = "elevationDepths";
     public static ElevationDepthsSize = 4;
@@ -97,18 +100,18 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
     private _mapScale: ICartesian3 = Vector3.One();
 
     // the layout and meta properties of each tiles
-    protected _tileLayouts: Map<string, TileLayout> = new Map<string, TileLayout>();
+    protected _tileLayouts: Map<string, TileLayout<any>> = new Map<string, TileLayout<any>>();
 
     // the resolution of the display
     private _displayResolution: ISize3 = Size3.Zero();
 
     public constructor(name: string, scene?: Scene, shaderName?: string) {
         super(name, scene);
-        this._shaderName = shaderName ?? Map3dMaterial.DefaultShaderName;
+        this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
     }
 
     public getClassName(): string {
-        return "Map3dMaterial";
+        return Map3dMaterial.ClassName;
     }
 
     public get holographicBounds(): Nullable<IHolographicBounds> {
@@ -248,60 +251,68 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         }
     }
 
-    public addTile(tile: ITileWithElevation, source: ITileMapLayerViewWithElevation): void {
-        const surface = tile.surface;
-        if (!surface) {
-            throw new Error("Tile surface is not defined");
-        }
-
-        this._ensureTextureSamplersReady(tile, source);
-
-        const key = tile.address.quadkey;
-        let layout = new TileLayout(tile);
-        this._tileLayouts.set(key, layout);
-
-        let textureArea = this._reserveArea(this._textureSampler);
-        if (textureArea === undefined) {
-            return;
-        }
-
-        // the depth of the texture x=uvs, y=ids
-        const textureDepths = new Vector4(textureArea.depth, -1, -1, -1);
-        surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
-
-        let areaInfos = new AreaInfos(textureArea);
-        let kind = Map3dLayerKind.TEXTURE;
-        layout.setArea(kind, areaInfos);
-        if (tile.content) {
-            areaInfos.layer.update(tile.content);
-            tile.surface?.setEnabled(true);
-        }
-        this.markAsDirty(Material.TextureDirtyFlag);
-    }
-
-    public removeTile(tile: ITileWithElevation, source: ITileMapLayerViewWithElevation): void {
-        const key = tile.address.quadkey;
-        const layout = this._tileLayouts.get(key);
-        if (layout) {
-            if (tile.surface) {
-                tile.surface.instancedBuffers.textureDepths.x = -1;
+    public addTile<T extends ImageLayerContentType>(tile: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void {
+        if (IsTileWithMesh(tile)) {
+            const surface = tile.surface;
+            if (!surface) {
+                throw new Error("Tile surface is not defined");
             }
-            layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
-            this._tileLayouts.delete(key);
+
+            if (IsElevationHost(source)) {
+                this._ensureTextureSamplersReady(source);
+            }
+
+            const key = tile.address.quadkey;
+            let layout = new TileLayout(tile);
+            this._tileLayouts.set(key, layout);
+
+            let textureArea = this._reserveArea(this._textureSampler);
+            if (textureArea === undefined) {
+                return;
+            }
+
+            // the depth of the texture x=uvs, y=ids
+            const textureDepths = new Vector4(textureArea.depth, -1, -1, -1);
+            surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
+
+            let areaInfos = new AreaInfos(textureArea);
+            let kind = Map3dLayerKind.TEXTURE;
+            layout.setArea(kind, areaInfos);
+            if (tile.content) {
+                areaInfos.layer.update(tile.content);
+                tile.surface?.setEnabled(true);
+            }
             this.markAsDirty(Material.TextureDirtyFlag);
         }
     }
-    public updateTile(tile: ITileWithElevation, source: ITileMapLayerViewWithElevation): void {
-        const key = tile.address.quadkey;
-        const layout = this._tileLayouts.get(key);
-        if (layout) {
-            if (tile.content) {
-                let kind = Map3dLayerKind.TEXTURE;
-                let areaInfos = layout.getArea(kind);
-                if (areaInfos) {
-                    areaInfos.layer.update(tile.content);
-                    tile.surface?.setEnabled(true);
-                    this.markAsDirty(Material.TextureDirtyFlag);
+
+    public removeTile<T extends ImageLayerContentType>(tile: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void {
+        if (IsTileWithMesh(tile)) {
+            const key = tile.address.quadkey;
+            const layout = this._tileLayouts.get(key);
+            if (layout) {
+                if (tile.surface) {
+                    tile.surface.instancedBuffers.textureDepths.x = -1;
+                }
+                layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
+                this._tileLayouts.delete(key);
+                this.markAsDirty(Material.TextureDirtyFlag);
+            }
+        }
+    }
+    public updateTile<T extends ImageLayerContentType>(tile: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void {
+        if (IsTileWithMesh(tile)) {
+            const key = tile.address.quadkey;
+            const layout = this._tileLayouts.get(key);
+            if (layout) {
+                if (tile.content) {
+                    let kind = Map3dLayerKind.TEXTURE;
+                    let areaInfos = layout.getArea(kind);
+                    if (areaInfos) {
+                        areaInfos.layer.update(tile.content);
+                        tile.surface?.setEnabled(true);
+                        this.markAsDirty(Material.TextureDirtyFlag);
+                    }
                 }
             }
         }
@@ -329,11 +340,11 @@ export class Map3dMaterial extends PushMaterial implements IMap3dMaterial {
         return area;
     }
 
-    protected _ensureTextureSamplersReady(tile: ITileWithElevation, src: ITileMapLayerViewWithElevation): void {
+    protected _ensureTextureSamplersReady<T extends ImageLayerContentType>(src: IElevationHost<T>): void {
         if (!this._textureSampler) {
             let size = src.metrics.tileSize;
             this._textureSampler = this._buildTextureSampler(size, size);
-            this._ensureInstanceBufferReady(src.elevationHost.grid);
+            this._ensureInstanceBufferReady(src.grid);
         }
     }
 

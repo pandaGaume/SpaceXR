@@ -5,7 +5,7 @@ import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
 import { InputsNavigationTarget, IPointerSource, IWheelSource, PointerController } from "core/map";
-import { IElevationHostOptions, IMap3D, Map3DContentType } from "./map.interfaces";
+import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
 
 /// <sumary>
@@ -17,9 +17,9 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
     private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
     private _ownController = false;
 
-    public constructor(name: string, options?: IElevationHostOptions, scene?: BABYLON.Scene) {
+    public constructor(name: string, scene?: BABYLON.Scene) {
         super(name, scene);
-        this._map = this._createMap(options);
+        this._map = this._createMap();
         this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
     }
 
@@ -97,8 +97,8 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         return this;
     }
 
-    protected _createMap(options?: IElevationHostOptions): IMap3D {
-        return new Map3D(this, options);
+    protected _createMap(): IMap3D {
+        return new Map3D(this);
     }
 
     protected _onBeforeRender(eventData: BABYLON.Scene, eventState: EventState): void {

@@ -1,11 +1,10 @@
 import { IDemInfos } from "core/dem";
 import { ICartesian3, ISize3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { ImageLayerContentType, IsTileMapLayerProxy, ITile, ITileMap, ITileMapLayerView } from "core/tiles";
+import { ImageLayerContentType, IsTile, ITile, ITileMap, ITileMapLayerView } from "core/tiles";
 import { IValidable, Nullable } from "core/types";
 import { AbstractMesh, Mesh, TransformNode } from "@babylonjs/core";
 import { IHasHolographicBounds } from "../display";
-import { IElevationLayer } from "../dem/dem.interfaces";
 
 export type Map3DContentType = IDemInfos | ImageLayerContentType;
 
@@ -17,38 +16,31 @@ export interface IElevationGridFactory {
     buildTopology(options: number | TerrainGridOptions | TerrainGridOptionsBuilder): IVerticesData;
 }
 
-export interface IElevationHostOptions {
-    gridOptions?: TerrainGridOptions;
-}
-
-export interface IElevationHost {
+export interface IElevationHost<T extends ImageLayerContentType> extends ITileMapLayerView<T> {
+    tilesRoot: TransformNode;
     // the grid model
     grid: Mesh;
     // the material model
     material: IMap3dMaterial;
-    // the optional elevation layer.
-    elevation?: IElevationLayer;
+    // the elevation scale
+    exageration?: number;
 }
 
-export interface ITileWithElevation extends ITile<ImageLayerContentType> {
+export interface ITileWithMesh<T> extends ITile<T> {
     surface: Nullable<AbstractMesh>;
 }
 
-export interface ITileMapLayerViewWithElevation extends ITileMapLayerView<ImageLayerContentType> {
-    elevationHost: IElevationHost;
-    tilesRoot: TransformNode;
+export function IsTileWithMesh<T>(b: unknown): b is ITileWithMesh<T> {
+    if (b === null || typeof b !== "object") return false;
+    const obj = b as Partial<ITileWithMesh<T>>;
+    return obj.surface !== undefined && IsTile(b);
 }
 
-export function IsTileWithElevation(b: unknown): b is ITileWithElevation {
-    if (b === null || typeof b !== "object") return false;
-    return (<ITileWithElevation>b).surface !== undefined;
-}
-
-export function IsTileMapLayerViewWithElevation(b: unknown): b is ITileMapLayerViewWithElevation {
+export function IsElevationHost<T extends ImageLayerContentType>(b: unknown): b is IElevationHost<T> {
     if (b === null || typeof b !== "object") return false;
 
-    const obj = b as Partial<ITileMapLayerViewWithElevation>;
-    return IsTileMapLayerProxy<ImageLayerContentType>(b) && obj.elevationHost !== undefined && obj.tilesRoot !== undefined;
+    const obj = b as Partial<IElevationHost<T>>;
+    return obj.grid !== undefined && obj.material !== undefined && obj.tilesRoot !== undefined;
 }
 
 // this is where we define the functional interface for the material, including the behaviors for the holographic bounds,
@@ -57,7 +49,7 @@ export interface IMap3dMaterial extends IHasHolographicBounds {
     mapScale: ICartesian3;
     displayResolution: ISize3;
 
-    addTile(tiles: ITileWithElevation, source: ITileMapLayerViewWithElevation): void;
-    removeTile(tiles: ITileWithElevation, source: ITileMapLayerViewWithElevation): void;
-    updateTile(tiles: ITileWithElevation, source: ITileMapLayerViewWithElevation): void;
+    addTile<T extends ImageLayerContentType>(tiles: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void;
+    removeTile<T extends ImageLayerContentType>(tiles: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void;
+    updateTile<T extends ImageLayerContentType>(tiles: ITile<IDemInfos> | ITileWithMesh<T>, source: ITileMapLayerView<IDemInfos> | IElevationHost<T>): void;
 }

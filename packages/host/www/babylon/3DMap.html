@@ -102,16 +102,8 @@
 
                 camera.setTarget(displayMesh);
 
-                // build the map options
-                const mapOptions = {
-                    gridOptions: {
-                        columns: 33,
-                        rows: 33,
-                    },
-                };
-
                 // build the map
-                const mapNode = new SPACEXR.MapNode("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
+                const mapNode = new SPACEXR.MapNode("map", scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
                 mapNode.position.z = 0.1;
 
                 // build layer options

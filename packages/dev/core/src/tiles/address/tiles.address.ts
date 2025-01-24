@@ -4,6 +4,86 @@ import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { IBounds2, Bounds2 } from "../../geometry";
 
 export class TileAddress implements ITileAddress {
+    public static Split(a: ITileAddress, metrics: ITileMetrics): Nullable<ITileAddress[]> {
+        if (a.levelOfDetail == metrics.maxLOD) {
+            return null;
+        }
+        const baseX = a.x * 2;
+        const baseY = a.y * 2;
+        const childLod = a.levelOfDetail + 1;
+
+        return [
+            new TileAddress(baseX, baseY, childLod),
+            new TileAddress(baseX + 1, baseY, childLod),
+            new TileAddress(baseX, baseY + 1, childLod),
+            new TileAddress(baseX + 1, baseY + 1, childLod),
+        ];
+    }
+
+    public static ShiftMultiple(addresses: ITileAddress[], N: number, metrics: ITileMetrics): ITileAddress[] {
+        const uniqueQuadKeys = new Set<string>();
+
+        // Reuse the shift function and collect results
+        addresses.forEach((address) => {
+            const shifted = TileAddress.Shift(address, N, metrics);
+
+            if (Array.isArray(shifted)) {
+                // Add all child quadkeys to the set
+                shifted.forEach((child) => {
+                    uniqueQuadKeys.add(child.quadkey);
+                });
+            } else if (shifted) {
+                // Add the single parent quadkey to the set
+                uniqueQuadKeys.add(shifted.quadkey);
+            }
+        });
+
+        // Convert unique quadkeys back to ITileAddress objects
+        return Array.from(uniqueQuadKeys).map((key) => TileAddress.QuadKeyToTileXY(key));
+    }
+
+    public static Shift(a: ITileAddress | ITileAddress[], N: number, metrics: ITileMetrics): Nullable<ITileAddress | ITileAddress[]> {
+        if (Array.isArray(a)) {
+            return TileAddress.ShiftMultiple(a, N, metrics);
+        }
+
+        let currentKey = a.quadkey;
+        let currentLod = a.levelOfDetail;
+
+        if (N === 0) {
+            return a; // Return the original address if N is 0
+        }
+
+        if (N > 0) {
+            // Cap at maxLOD
+            const maxShift = metrics.maxLOD - currentLod;
+            const effectiveShift = Math.min(N, maxShift);
+
+            // Generate child tiles up to the effectiveShift level
+            let keys: string[] = [currentKey];
+
+            for (let level = 0; level < effectiveShift; level++) {
+                keys = keys.flatMap((key) => TileAddress.ToChildsKey(key));
+            }
+
+            // Convert quadkeys back to ITileAddress
+            return keys.map((key) => TileAddress.QuadKeyToTileXY(key));
+        }
+
+        // Cap at minLOD
+        const maxShift = currentLod - metrics.minLOD;
+        const effectiveShift = Math.min(Math.abs(N), maxShift);
+
+        // Move up to parent tile |effectiveShift| levels
+        for (let level = 0; level < effectiveShift; level++) {
+            currentKey = TileAddress.ToParentKey(currentKey);
+            currentLod--;
+        }
+
+        // Convert the final parent key back to ITileAddress
+        return TileAddress.QuadKeyToTileXY(currentKey);
+    }
+
     public static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds2 {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
         return Bounds2.FromPoints(...points);

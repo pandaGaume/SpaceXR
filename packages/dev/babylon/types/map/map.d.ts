@@ -1,36 +1,18 @@
-import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
-import { IElevationGridFactory, IElevationHost, IElevationHostOptions, IMap3D, IMap3dMaterial, Map3DContentType } from "./map.interfaces";
-import { Mesh, Scene, TransformNode } from "@babylonjs/core";
+import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
+import { IMap3D, Map3DContentType } from "./map.interfaces";
+import { TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { TerrainGridOptions } from "core/meshes";
-export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationHost {
-    static TEMPLATE_SUFFIX: string;
+export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D {
+    static DefaultLodElevationShift: number;
     static ROOT_SUFFIX: string;
-    static MATERIAL_SUFFIX: string;
-    static INSTANCE_ROOT_NAME: string;
     _root: TransformNode;
-    _grid: Mesh;
-    _material: IMap3dMaterial;
-    constructor(root: TransformNode, options?: IElevationHostOptions);
+    constructor(root: TransformNode);
     get name(): string;
-    get grid(): Mesh;
-    get material(): IMap3dMaterial;
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>>;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _rotateMap(nav: Nullable<ITileNavigationState>): void;
     protected _onNavigationBinded(nav: Nullable<ITileNavigationState>): void;
     protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void;
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void;
-    protected _buildTemplate(options?: TerrainGridOptions, scene?: Scene): Mesh;
-    protected _buildTerrainGridOptions(options?: TerrainGridOptions): TerrainGridOptions;
-    protected _buildMesh(name: string, scene?: Scene): Mesh;
-    protected _buildGridFactory(): IElevationGridFactory;
-    protected _buildQualifiedName(n: string): string;
-    protected _buildTemplateName(): string;
-    protected _buildMaterialName(): string;
-    protected _buildMaterial(name: string, scene?: Scene): IMap3dMaterial;
-    protected _onDisplayBinded(display: IDisplay): void;
-    protected _bindDisplayInternal(display: IDisplay): void;
-    private _buildGridFactoryInternal;
 }

@@ -255,6 +255,11 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
         if (IsElevationHost(state.currentTarget)) {
             for (const tile of data) {
                 if (IsTileWithMesh<ImageLayerContentType>(tile)) {
+                    const key = tile.address.quadkey;
+                    if (this._tileLayouts.has(key)) {
+                        continue;
+                    }
+
                     const surface = tile.surface;
                     if (!surface) {
                         throw new Error("Tile surface is not defined");
@@ -262,7 +267,6 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
 
                     this._ensureTextureSamplersReady(state.currentTarget);
 
-                    const key = tile.address.quadkey;
                     let layout = new TileLayout(tile);
                     this._tileLayouts.set(key, layout);
 

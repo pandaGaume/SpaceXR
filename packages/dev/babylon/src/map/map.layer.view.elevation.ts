@@ -4,6 +4,8 @@ import {
     ImageLayerContentType,
     IPhysicalDisplay,
     IsPhysicalDisplay,
+    IsTargetBlock,
+    ITile,
     ITileMapLayer,
     ITileMetrics,
     ITileNavigationState,
@@ -57,8 +59,13 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         const o = this._buildTerrainGridOptions();
         this._grid = this._buildTemplate(o, scene);
         this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
-        if (this._material && this._material instanceof Material) {
-            this._grid.material = this._material;
+        if (this._material) {
+            if (IsTargetBlock<ITile<T>>(this._material)) {
+                this.linkTo(this._material);
+            }
+            if (this._material instanceof Material) {
+                this._grid.material = this._material;
+            }
             if (display) {
                 this._bindDisplayInternal(display);
             }
@@ -108,18 +115,6 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return new TransformNode(this._buildRootName(), scene);
     }
 
-    protected _onTilesAdded(tiles: Array<ITileWithMesh<T>>): void {
-        if (this._tilesRoot) {
-            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
-                for (const t of tiles) {
-                    this._onTileAdded(t);
-                }
-            });
-        } else {
-            super._onTilesAdded(tiles);
-        }
-    }
-
     protected _onTileAdded(tile: ITileWithMesh<T>): void {
         const m = this._buildInstance(tile);
         if (m) {
@@ -144,46 +139,16 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         }
     }
 
-    protected _onTilesRemoved(tiles: Array<ITileWithMesh<T>>): void {
-        if (this._tilesRoot) {
-            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
-                for (const t of tiles) {
-                    this._onTileRemoved(t);
-                }
-            });
-        } else {
-            super._onTilesRemoved(tiles);
-        }
-    }
-
     protected _onTileRemoved(tile: ITileWithMesh<T>): void {
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
-        }
-        if (this.material.removed) {
-            this.material.removed([tile], new EventState(-1, false, this, this));
-        }
-    }
-
-    protected _onTilesUpdated(tiles: Array<ITileWithMesh<T>>): void {
-        if (this._tilesRoot) {
-            this._tilesRoot.getScene().onBeforeRenderObservable.addOnce(() => {
-                for (const t of tiles) {
-                    this._onTileUpdated(t);
-                }
-            });
-        } else {
-            super._onTilesUpdated(tiles);
         }
     }
 
     protected _onTileUpdated(tile: ITileWithMesh<T>): void {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
-        }
-        if (this.material.updated) {
-            this.material.updated([tile], new EventState(-1, false, this, this));
         }
     }
 

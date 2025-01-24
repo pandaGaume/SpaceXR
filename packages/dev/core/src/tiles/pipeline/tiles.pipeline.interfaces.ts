@@ -16,7 +16,7 @@ export interface ITargetBlock<T> {
 
 export function IsTargetBlock<T>(b: unknown): b is ITargetBlock<T> {
     if (b === null || typeof b !== "object") return false;
-    return (<ITargetBlock<T>>b).added !== undefined && (<ITargetBlock<T>>b).removed !== undefined && (<ITargetBlock<T>>b).updated !== undefined;
+    return (<ITargetBlock<T>>b).added !== undefined || (<ITargetBlock<T>>b).removed !== undefined || (<ITargetBlock<T>>b).updated !== undefined;
 }
 
 export interface ILinkOptions<T> {

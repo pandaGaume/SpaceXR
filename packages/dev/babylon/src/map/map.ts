@@ -1,25 +1,61 @@
 import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileMapLayerView, TileNavigationState, TileView } from "core/tiles";
-import { IMap3D, IsElevationHost, Map3DContentType } from "./map.interfaces";
+import { IElevationOptions, IMap3D, IsElevationHost, Map3DContentType } from "./map.interfaces";
 import { TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { ElevationHost } from "./map.layer.view.elevation";
 import { ElevationLayer } from "../dem";
+import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
 
-export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D {
-    public static DefaultLodElevationShift = 3;
+export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
+    public static DefaultGridSize: number = 32;
+    public static DefaultExageration: number = 1.0;
 
     public static ROOT_SUFFIX = "root";
 
     _root: TransformNode;
+    _gridSize: number | ISize2;
+    _offset?: ICartesian3;
+    _exageration?: number;
 
     public constructor(root: TransformNode) {
         super();
         this._root = root;
+        this._gridSize = Map3D.DefaultGridSize;
+        this._offset = Cartesian3.Zero();
+        this._exageration = Map3D.DefaultExageration;
     }
 
     public get name(): string {
         return this._root.name;
+    }
+
+    public get root(): TransformNode {
+        return this._root;
+    }
+
+    public get gridSize(): number | ISize2 {
+        return this._gridSize;
+    }
+
+    public set gridSize(value: number | ISize2) {
+        this._gridSize = value;
+    }
+
+    public get offset(): ICartesian3 | undefined {
+        return this._offset;
+    }
+
+    public set offset(value: ICartesian3 | undefined) {
+        this._offset = value;
+    }
+
+    public get exageration(): number | undefined {
+        return this._exageration;
+    }
+
+    public set exageration(value: number | undefined) {
+        this._exageration = value;
     }
 
     /**
@@ -33,7 +69,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D {
             const v = new TileMapLayerView(layer, this._display, new TileView());
             return v;
         }
-        return new ElevationHost(this._root, <any>layer, this.display, this.view);
+        return new ElevationHost(this._root, this, <any>layer, this.display, this.view);
     }
 
     // when navigation propertie's changed

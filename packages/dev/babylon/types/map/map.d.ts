@@ -1,14 +1,26 @@
 import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
-import { IMap3D, Map3DContentType } from "./map.interfaces";
+import { IElevationOptions, IMap3D, Map3DContentType } from "./map.interfaces";
 import { TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D {
-    static DefaultLodElevationShift: number;
+import { ICartesian3, ISize2 } from "core/geometry";
+export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
+    static DefaultGridSize: number;
+    static DefaultExageration: number;
     static ROOT_SUFFIX: string;
     _root: TransformNode;
+    _gridSize: number | ISize2;
+    _offset?: ICartesian3;
+    _exageration?: number;
     constructor(root: TransformNode);
     get name(): string;
+    get root(): TransformNode;
+    get gridSize(): number | ISize2;
+    set gridSize(value: number | ISize2);
+    get offset(): ICartesian3 | undefined;
+    set offset(value: ICartesian3 | undefined);
+    get exageration(): number | undefined;
+    set exageration(value: number | undefined);
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>>;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _rotateMap(nav: Nullable<ITileNavigationState>): void;

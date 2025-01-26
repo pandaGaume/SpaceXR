@@ -60,9 +60,11 @@ export function IsHasGridElevation(b: unknown): b is IHasGridElevation {
     return obj?.elevationInfos !== undefined && obj?.gridSize !== undefined;
 }
 
+export interface ITileWithGridElevation<T> extends ITileWithMesh<T>, IHasGridElevation {}
+
 export interface IMap3DMaterial<T extends ImageLayerContentType> extends IHasHolographicBounds {
     mapScale: ICartesian3;
     displayResolution: ISize3;
 
-    imagesTarget: ITargetBlock<ITileWithMesh<T>>;
+    imagesTarget: ITargetBlock<ITileWithGridElevation<T>>;
 }

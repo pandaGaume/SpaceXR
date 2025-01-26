@@ -1,12 +1,12 @@
 import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, ITile, ITileMetrics, Tile, TileContentType } from "core/tiles";
-import { IHasGridElevation, ITileWithMesh } from "./map.interfaces";
+import { IHasGridElevation, ITileWithGridElevation } from "./map.interfaces";
 import { Nullable } from "core/types";
 import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { EventState, Observable } from "core/events";
 import { ISize2 } from "core/geometry";
 
-export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> implements ITileWithMesh<T>, IHasGridElevation, ITargetBlock<ITile<IDemInfos>> {
+export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> implements ITileWithGridElevation<T>, ITargetBlock<ITile<IDemInfos>> {
     // 3D related
     _surface: Nullable<AbstractMesh>;
     _demInfos: Nullable<IDemInfos>;

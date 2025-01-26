@@ -18,12 +18,13 @@ import {
     Constants,
     Vector4,
 } from "@babylonjs/core";
-import { IElevationHost, IMap3DMaterial, IsElevationHost, IsTileWithMesh, ITileWithMesh } from "../map/map.interfaces";
+import { IElevationHost, IHasGridElevation, IMap3DMaterial, IsElevationHost, IsTileWithMesh, ITileWithGridElevation } from "../map/map.interfaces";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
 import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, TargetProxy } from "core/tiles";
+import { IDisposable } from "core/types";
 
 export enum Map3dLayerKind {
     ELEVATION = 0,
@@ -39,8 +40,12 @@ class AreaInfos {
 }
 
 // internal class used to hold the tile pool texture areas
-class TileLayout<T extends ImageLayerContentType> {
-    public constructor(public tile: ITileWithMesh<T>, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {}
+class TileLayout<T extends ImageLayerContentType> implements IDisposable {
+    _elevationObserver: Nullable<Observer<IHasGridElevation>>;
+
+    public constructor(public tile: ITileWithGridElevation<T>, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {
+        this._elevationObserver = tile.elevationUpdateObservable.add(this.onElevationUpdated.bind(this));
+    }
 
     getArea(kind: Map3dLayerKind): Nullable<AreaInfos> {
         return this.areas[kind];
@@ -48,6 +53,15 @@ class TileLayout<T extends ImageLayerContentType> {
 
     setArea(kind: Map3dLayerKind, value: Nullable<AreaInfos>): void {
         this.areas[kind] = value;
+    }
+
+    onElevationUpdated(data: IHasGridElevation, state: EventState) {}
+
+    dispose() {
+        this._elevationObserver?.disconnect();
+        for (const a of this.areas) {
+            a?.layer?.release();
+        }
     }
 }
 
@@ -104,15 +118,15 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
     // the resolution of the display
     private _displayResolution: ISize3 = Size3.Zero();
 
-    private _imagesTarget: ITargetBlock<ITileWithMesh<T>>;
+    private _imagesTarget: ITargetBlock<ITileWithGridElevation<T>>;
 
     public constructor(name: string, scene?: Scene, shaderName?: string) {
         super(name, scene);
         this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
-        this._imagesTarget = new TargetProxy<ITileWithMesh<T>>(this.imagesAdded.bind(this), this.imagesRemoved.bind(this), this.imagesUpdated.bind(this));
+        this._imagesTarget = new TargetProxy<ITileWithGridElevation<T>>(this.imagesAdded.bind(this), this.imagesRemoved.bind(this), this.imagesUpdated.bind(this));
     }
 
-    public get imagesTarget(): ITargetBlock<ITileWithMesh<T>> {
+    public get imagesTarget(): ITargetBlock<ITileWithGridElevation<T>> {
         return this._imagesTarget;
     }
 
@@ -257,7 +271,7 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
         }
     }
 
-    protected imagesAdded(data: IPipelineMessageType<ITileWithMesh<T>>, state: EventState): void {
+    protected imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
         if (IsElevationHost(state.currentTarget)) {
             for (const tile of data) {
                 if (IsTileWithMesh<ImageLayerContentType>(tile)) {
@@ -298,7 +312,7 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
         }
     }
 
-    protected imagesRemoved(data: IPipelineMessageType<ITileWithMesh<T>>, state: EventState): void {
+    protected imagesRemoved(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
         if (IsElevationHost(state.currentTarget)) {
             for (const tile of data) {
                 if (IsTileWithMesh<ImageLayerContentType>(tile)) {
@@ -308,7 +322,7 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
                         if (tile.surface) {
                             tile.surface.instancedBuffers.textureDepths.x = -1;
                         }
-                        layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
+                        layout.dispose();
                         this._tileLayouts.delete(key);
                         this.markAsDirty(Material.TextureDirtyFlag);
                     }
@@ -317,7 +331,7 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
         }
     }
 
-    protected imagesUpdated(data: IPipelineMessageType<ITileWithMesh<T>>, state: EventState): void {
+    protected imagesUpdated(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
         if (IsElevationHost(state.currentTarget)) {
             for (const tile of data) {
                 if (IsTileWithMesh<ImageLayerContentType>(tile)) {

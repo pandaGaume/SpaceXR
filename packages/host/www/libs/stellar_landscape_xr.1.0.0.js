@@ -1795,12 +1795,20 @@ class TileLayout {
     constructor(tile, areas = [null, null, null]) {
         this.tile = tile;
         this.areas = areas;
+        this._elevationObserver = tile.elevationUpdateObservable.add(this.onElevationUpdated.bind(this));
     }
     getArea(kind) {
         return this.areas[kind];
     }
     setArea(kind, value) {
         this.areas[kind] = value;
+    }
+    onElevationUpdated(data, state) { }
+    dispose() {
+        this._elevationObserver?.disconnect();
+        for (const a of this.areas) {
+            a?.layer?.release();
+        }
     }
 }
 class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMaterial {
@@ -1962,7 +1970,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                         if (tile.surface) {
                             tile.surface.instancedBuffers.textureDepths.x = -1;
                         }
-                        layout.getArea(Map3dLayerKind.TEXTURE)?.layer.release();
+                        layout.dispose();
                         this._tileLayouts.delete(key);
                         this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
                     }

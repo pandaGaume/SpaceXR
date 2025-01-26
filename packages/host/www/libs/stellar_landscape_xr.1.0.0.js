@@ -1795,7 +1795,7 @@ class TileLayout {
     constructor(tile, areas = [null, null, null]) {
         this.tile = tile;
         this.areas = areas;
-        this._elevationObserver = tile.elevationUpdateObservable.add(this.onElevationUpdated.bind(this));
+        this._elevationObserver = tile.elevationUpdateObservable.add(this.onElevationInfosUpdated.bind(this));
     }
     getArea(kind) {
         return this.areas[kind];
@@ -1803,7 +1803,18 @@ class TileLayout {
     setArea(kind, value) {
         this.areas[kind] = value;
     }
-    onElevationUpdated(data, state) { }
+    onElevationInfosUpdated(data, state) {
+        let area = this.areas[Map3dLayerKind.ELEVATION];
+        if (area != null) {
+            let content = data.elevationInfos?.elevations;
+            if (content) {
+                area.layer.update(content);
+            }
+        }
+        area = this.areas[Map3dLayerKind.NORMAL];
+        if (area != null) {
+        }
+    }
     dispose() {
         this._elevationObserver?.disconnect();
         for (const a of this.areas) {

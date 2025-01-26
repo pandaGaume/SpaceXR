@@ -44,7 +44,7 @@ class TileLayout<T extends ImageLayerContentType> implements IDisposable {
     _elevationObserver: Nullable<Observer<IHasGridElevation>>;
 
     public constructor(public tile: ITileWithGridElevation<T>, public areas: Array<Nullable<AreaInfos>> = [null, null, null]) {
-        this._elevationObserver = tile.elevationUpdateObservable.add(this.onElevationUpdated.bind(this));
+        this._elevationObserver = tile.elevationUpdateObservable.add(this.onElevationInfosUpdated.bind(this));
     }
 
     getArea(kind: Map3dLayerKind): Nullable<AreaInfos> {
@@ -55,7 +55,24 @@ class TileLayout<T extends ImageLayerContentType> implements IDisposable {
         this.areas[kind] = value;
     }
 
-    onElevationUpdated(data: IHasGridElevation, state: EventState) {}
+    onElevationInfosUpdated(data: IHasGridElevation, state: EventState) {
+        // update the elevations
+        let area = this.areas[Map3dLayerKind.ELEVATION];
+        if (area != null) {
+            // this is where we gonna update the elevation.
+            let content = data.elevationInfos?.elevations;
+            if (content) {
+                // we need to update the whole elevation range.
+                // finally set the data.
+                area.layer.update(content);
+            }
+        }
+
+        // update the normals
+        area = this.areas[Map3dLayerKind.NORMAL];
+        if (area != null) {
+        }
+    }
 
     dispose() {
         this._elevationObserver?.disconnect();

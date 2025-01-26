@@ -18,7 +18,7 @@ import {
     Constants,
     Vector4,
 } from "@babylonjs/core";
-import { IElevationHost, IHasGridElevation, IMap3DMaterial, IsElevationHost, IsTileWithMesh, ITileWithGridElevation } from "../map/map.interfaces";
+import { IElevationHost, IHasGridElevation, IMap3DMaterial, IsElevationHost, IsHasGridElevation, ITileWithGridElevation } from "../map/map.interfaces";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
@@ -289,9 +289,10 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
     }
 
     protected imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
-        if (IsElevationHost(state.currentTarget)) {
+        const host = state.currentTarget;
+        if (IsElevationHost(host)) {
             for (const tile of data) {
-                if (IsTileWithMesh<ImageLayerContentType>(tile)) {
+                if (IsHasGridElevation(tile)) {
                     const key = tile.address.quadkey;
                     if (this._tileLayouts.has(key)) {
                         continue;
@@ -302,7 +303,7 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
                         throw new Error("Tile surface is not defined");
                     }
 
-                    this._ensureTextureSamplersReady(state.currentTarget);
+                    this._ensureTextureSamplersReady(host);
 
                     let layout = new TileLayout(tile);
                     this._tileLayouts.set(key, layout);
@@ -330,39 +331,35 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
     }
 
     protected imagesRemoved(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
-        if (IsElevationHost(state.currentTarget)) {
-            for (const tile of data) {
-                if (IsTileWithMesh<ImageLayerContentType>(tile)) {
-                    const key = tile.address.quadkey;
-                    const layout = this._tileLayouts.get(key);
-                    if (layout) {
-                        if (tile.surface) {
-                            tile.surface.instancedBuffers.textureDepths.x = -1;
-                        }
-                        layout.dispose();
-                        this._tileLayouts.delete(key);
-                        this.markAsDirty(Material.TextureDirtyFlag);
+        for (const tile of data) {
+            if (IsHasGridElevation(tile)) {
+                const key = tile.address.quadkey;
+                const layout = this._tileLayouts.get(key);
+                if (layout) {
+                    if (tile.surface) {
+                        tile.surface.instancedBuffers.textureDepths.x = -1;
                     }
+                    layout.dispose();
+                    this._tileLayouts.delete(key);
+                    this.markAsDirty(Material.TextureDirtyFlag);
                 }
             }
         }
     }
 
     protected imagesUpdated(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
-        if (IsElevationHost(state.currentTarget)) {
-            for (const tile of data) {
-                if (IsTileWithMesh<ImageLayerContentType>(tile)) {
-                    const key = tile.address.quadkey;
-                    const layout = this._tileLayouts.get(key);
-                    if (layout) {
-                        if (tile.content) {
-                            let kind = Map3dLayerKind.TEXTURE;
-                            let areaInfos = layout.getArea(kind);
-                            if (areaInfos) {
-                                areaInfos.layer.update(tile.content);
-                                tile.surface?.setEnabled(true);
-                                this.markAsDirty(Material.TextureDirtyFlag);
-                            }
+        for (const tile of data) {
+            if (IsHasGridElevation(tile)) {
+                const key = tile.address.quadkey;
+                const layout = this._tileLayouts.get(key);
+                if (layout) {
+                    if (tile.content) {
+                        let kind = Map3dLayerKind.TEXTURE;
+                        let areaInfos = layout.getArea(kind);
+                        if (areaInfos) {
+                            areaInfos.layer.update(tile.content);
+                            tile.surface?.setEnabled(true);
+                            this.markAsDirty(Material.TextureDirtyFlag);
                         }
                     }
                 }

@@ -1939,9 +1939,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     imagesAdded(data, state) {
-        if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost)(state.currentTarget)) {
+        const host = state.currentTarget;
+        if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost)(host)) {
             for (const tile of data) {
-                if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsTileWithMesh)(tile)) {
+                if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsHasGridElevation)(tile)) {
                     const key = tile.address.quadkey;
                     if (this._tileLayouts.has(key)) {
                         continue;
@@ -1950,7 +1951,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                     if (!surface) {
                         throw new Error("Tile surface is not defined");
                     }
-                    this._ensureTextureSamplersReady(state.currentTarget);
+                    this._ensureTextureSamplersReady(host);
                     let layout = new TileLayout(tile);
                     this._tileLayouts.set(key, layout);
                     let textureArea = this._reserveArea(this._textureSampler);
@@ -1972,38 +1973,34 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     imagesRemoved(data, state) {
-        if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost)(state.currentTarget)) {
-            for (const tile of data) {
-                if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsTileWithMesh)(tile)) {
-                    const key = tile.address.quadkey;
-                    const layout = this._tileLayouts.get(key);
-                    if (layout) {
-                        if (tile.surface) {
-                            tile.surface.instancedBuffers.textureDepths.x = -1;
-                        }
-                        layout.dispose();
-                        this._tileLayouts.delete(key);
-                        this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
+        for (const tile of data) {
+            if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsHasGridElevation)(tile)) {
+                const key = tile.address.quadkey;
+                const layout = this._tileLayouts.get(key);
+                if (layout) {
+                    if (tile.surface) {
+                        tile.surface.instancedBuffers.textureDepths.x = -1;
                     }
+                    layout.dispose();
+                    this._tileLayouts.delete(key);
+                    this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
                 }
             }
         }
     }
     imagesUpdated(data, state) {
-        if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsElevationHost)(state.currentTarget)) {
-            for (const tile of data) {
-                if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsTileWithMesh)(tile)) {
-                    const key = tile.address.quadkey;
-                    const layout = this._tileLayouts.get(key);
-                    if (layout) {
-                        if (tile.content) {
-                            let kind = Map3dLayerKind.TEXTURE;
-                            let areaInfos = layout.getArea(kind);
-                            if (areaInfos) {
-                                areaInfos.layer.update(tile.content);
-                                tile.surface?.setEnabled(true);
-                                this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
-                            }
+        for (const tile of data) {
+            if ((0,_map_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsHasGridElevation)(tile)) {
+                const key = tile.address.quadkey;
+                const layout = this._tileLayouts.get(key);
+                if (layout) {
+                    if (tile.content) {
+                        let kind = Map3dLayerKind.TEXTURE;
+                        let areaInfos = layout.getArea(kind);
+                        if (areaInfos) {
+                            areaInfos.layer.update(tile.content);
+                            tile.surface?.setEnabled(true);
+                            this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
                         }
                     }
                 }

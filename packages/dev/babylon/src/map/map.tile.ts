@@ -1,27 +1,38 @@
 import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, ITile, ITileMetrics, Tile, TileContentType } from "core/tiles";
-import { IHasElevation, ITileWithMesh } from "./map.interfaces";
+import { IHasGridElevation, ITileWithMesh } from "./map.interfaces";
 import { Nullable } from "core/types";
 import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
 import { EventState } from "core/events";
+import { ISize2 } from "core/geometry";
 
-export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> implements ITileWithMesh<T>, IHasElevation, ITargetBlock<ITile<IDemInfos>> {
+export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> implements ITileWithMesh<T>, IHasGridElevation, ITargetBlock<ITile<IDemInfos>> {
     // 3D related
     _surface: Nullable<AbstractMesh>;
     _demInfos: Nullable<IDemInfos>;
+    _gridSize: Nullable<ISize2>;
 
     public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T> = null, metrics?: ITileMetrics) {
         super(x, y, levelOfDetail, data, metrics);
         this._surface = null;
         this._demInfos = null;
+        this._gridSize = null;
     }
 
     public get elevationInfos(): Nullable<IDemInfos> {
         return this._demInfos;
     }
 
-    public set elevationInfos(d: Nullable<IDemInfos>) {
-        this._demInfos = d;
+    public set elevationInfos(v: Nullable<IDemInfos>) {
+        this._demInfos = v;
+    }
+
+    public get gridSize(): Nullable<ISize2> {
+        return this._gridSize;
+    }
+
+    public set gridSize(v: Nullable<ISize2>) {
+        this._gridSize = v;
     }
 
     public get surface(): Nullable<AbstractMesh> {
@@ -32,9 +43,85 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
         this._surface = s;
     }
 
-    public added(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {}
+    public added(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+        if (this._isHasNecessaryElevationInfos()) {
+            for (const t of data) {
+                if (this.address.quadkey.startsWith(t.address.quadkey)) {
+                    if (t.address.quadkey.length === this.address.quadkey.length) {
+                        this._addElevation(t, state);
+                        return;
+                    }
+                    // we have parent data
+                    this._addParentElevation(t, state);
+                    return;
+                }
 
-    public removed(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {}
+                if (t.address.quadkey.startsWith(this.address.quadkey)) {
+                    // we have child data
+                    this._addChildElevation(t, state);
+                    return;
+                }
+            }
+        }
+    }
 
-    public updated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {}
+    public removed(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+        if (this._isHasNecessaryElevationInfos()) {
+            for (const t of data) {
+                if (this.address.quadkey.startsWith(t.address.quadkey)) {
+                    if (t.address.quadkey.length === this.address.quadkey.length) {
+                        this._removeElevation(t, state);
+                        return;
+                    }
+                    // we have parent data
+                    this._removeParentElevation(t, state);
+                    return;
+                }
+
+                if (t.address.quadkey.startsWith(this.address.quadkey)) {
+                    // we have child data
+                    this._removeChildElevation(t, state);
+                    return;
+                }
+            }
+        }
+    }
+
+    public updated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+        if (this._isHasNecessaryElevationInfos()) {
+            for (const t of data) {
+                if (this.address.quadkey.startsWith(t.address.quadkey)) {
+                    if (t.address.quadkey.length === this.address.quadkey.length) {
+                        this._updateElevation(t, state);
+                        return;
+                    }
+                    // we have parent data
+                    this._updateParentElevation(t, state);
+                    return;
+                }
+
+                if (t.address.quadkey.startsWith(this.address.quadkey)) {
+                    // we have child data
+                    this._updateChildElevation(t, state);
+                    return;
+                }
+            }
+        }
+    }
+
+    protected _addParentElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _addElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _addChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
+
+    protected _removeParentElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _removeElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _removeChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
+
+    protected _updateParentElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _updateElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _updateChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
+
+    protected _isHasNecessaryElevationInfos(): boolean {
+        return this._gridSize !== null && this._gridSize.width > 0 && this._gridSize.height > 0;
+    }
 }

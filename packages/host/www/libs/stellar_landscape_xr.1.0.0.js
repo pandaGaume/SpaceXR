@@ -1154,17 +1154,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.layerView.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
-/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _map_grid_factory__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./map.grid.factory */ "./dist/map/map.grid.factory.js");
-/* harmony import */ var core_meshes__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/meshes */ "../core/dist/meshes/terrain.grid.js");
-/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
-/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../materials */ "./dist/materials/materials.map.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _map_grid_factory__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./map.grid.factory */ "./dist/map/map.grid.factory.js");
+/* harmony import */ var core_meshes__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/meshes */ "../core/dist/meshes/terrain.grid.js");
+/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
+/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../materials */ "./dist/materials/materials.map.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
 
 
 
@@ -1181,6 +1182,13 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         this._cartesianCenterCache = null;
         this._elevationOptions = options;
         this._elevationTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TargetProxy(this._elevationAdded.bind(this), this._elevationRemoved.bind(this), this._elevationUpdated.bind(this));
+        if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_3__.IsSize)(this._elevationOptions.gridSize)) {
+            this._cachedSize = this._elevationOptions.gridSize;
+        }
+        else {
+            const d = this._elevationOptions.gridSize;
+            this._cachedSize = new core_geometry__WEBPACK_IMPORTED_MODULE_4__.Size2(d, d);
+        }
         const scene = root.getScene();
         this._tilesRoot = this._buildRoot(scene);
         this._tilesRoot.parent = root;
@@ -1188,7 +1196,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         this._grid = this._buildTemplate(o, scene);
         this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
         if (this._material) {
-            if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_3__.IsTargetBlock)(this._material.imagesTarget)) {
+            if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_5__.IsTargetBlock)(this._material.imagesTarget)) {
                 this.linkTo(this._material.imagesTarget);
             }
             if (this._material instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material) {
@@ -1199,7 +1207,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
             }
         }
         this._grid.setEnabled(false);
-        this.factory.withType(_map_tile__WEBPACK_IMPORTED_MODULE_4__.TileWithElevation);
+        this.factory.withType(_map_tile__WEBPACK_IMPORTED_MODULE_6__.TileWithElevation);
     }
     get elevationsTarget() {
         return this._elevationTarget;
@@ -1238,6 +1246,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
             m.scaling.x = m.scaling.y = this.metrics.tileSize;
             m.scaling.z = 1.0;
             tile.surface = m;
+            tile.gridSize = this._cachedSize;
             if (!tile.content) {
                 m.setEnabled(false);
             }
@@ -1296,13 +1305,13 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
     }
     _onNavigationPropertyChanged(event, state) {
         switch (event.propertyName) {
-            case core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileNavigationState.CENTER_PROPERTY_NAME: {
+            case core_tiles__WEBPACK_IMPORTED_MODULE_7__.TileNavigationState.CENTER_PROPERTY_NAME: {
                 this._cartesianCenterCache = null;
                 this._onCenterChanged();
                 this._onZoomChanged();
                 break;
             }
-            case core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileNavigationState.ZOOM_PROPERTY_NAME: {
+            case core_tiles__WEBPACK_IMPORTED_MODULE_7__.TileNavigationState.ZOOM_PROPERTY_NAME: {
                 this._onZoomChanged();
                 break;
             }
@@ -1310,7 +1319,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         super._onNavigationPropertyChanged(event, state);
     }
     _onZoomChanged() {
-        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_6__.IsPhysicalDisplay)(this.display)) {
+        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_8__.IsPhysicalDisplay)(this.display)) {
             this._setScale(this.navigationState, this.display, this.layer, this.metrics);
         }
     }
@@ -1340,7 +1349,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return undefined;
     }
     _buildMaterial(name, scene) {
-        return new _materials__WEBPACK_IMPORTED_MODULE_7__.Map3dMaterial(name, scene);
+        return new _materials__WEBPACK_IMPORTED_MODULE_9__.Map3dMaterial(name, scene);
     }
     _buildTemplate(options, scene) {
         const mesh = this._buildMesh(this._buildTemplateName() ?? this.name, scene);
@@ -1360,10 +1369,10 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return mesh;
     }
     _buildTerrainGridOptions() {
-        let w = core_meshes__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions.DefaultGridSize;
-        let h = core_meshes__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions.DefaultGridSize;
+        let w = core_meshes__WEBPACK_IMPORTED_MODULE_10__.TerrainGridOptions.DefaultGridSize;
+        let h = core_meshes__WEBPACK_IMPORTED_MODULE_10__.TerrainGridOptions.DefaultGridSize;
         if (this._elevationOptions?.gridSize) {
-            if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_9__.IsSize)(this._elevationOptions.gridSize)) {
+            if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_3__.IsSize)(this._elevationOptions.gridSize)) {
                 w = this._elevationOptions.gridSize.width;
                 h = this._elevationOptions.gridSize.height;
             }
@@ -1372,7 +1381,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
                 h = this._elevationOptions.gridSize;
             }
         }
-        return new core_meshes__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptionsBuilder()
+        return new core_meshes__WEBPACK_IMPORTED_MODULE_10__.TerrainGridOptionsBuilder()
             .withColumns(w + 1)
             .withRows(h + 1)
             .withUvs(true)
@@ -1404,44 +1413,50 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         return k != "" ? k : ElevationHost.INSTANCE_ROOT_NAME;
     }
     _buildTemplateName() {
-        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_10__.TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
+        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_11__.TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
     }
     _buildMaterialName() {
-        return core_utils__WEBPACK_IMPORTED_MODULE_10__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
+        return core_utils__WEBPACK_IMPORTED_MODULE_11__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
     }
     _elevationAdded(data, state) {
         if (data && data.length > 0) {
-            const newState = new core_events__WEBPACK_IMPORTED_MODULE_11__.EventState(-1, false, state.currentTarget, this);
-            for (const t of this._activTiles) {
-                if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_3__.IsTargetBlock)(t) && t.added) {
-                    t.added(data, newState);
+            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+                const newState = new core_events__WEBPACK_IMPORTED_MODULE_12__.EventState(-1, false, state.currentTarget, this);
+                for (const t of this._activTiles) {
+                    if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_5__.IsTargetBlock)(t) && t.added) {
+                        t.added(data, newState);
+                    }
                 }
-            }
+            });
         }
     }
     _elevationRemoved(data, state) {
         if (data && data.length > 0) {
-            const newState = new core_events__WEBPACK_IMPORTED_MODULE_11__.EventState(-1, false, state.currentTarget, this);
-            for (const t of this._activTiles) {
-                if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_3__.IsTargetBlock)(t) && t.removed) {
-                    t.removed(data, newState);
+            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+                const newState = new core_events__WEBPACK_IMPORTED_MODULE_12__.EventState(-1, false, state.currentTarget, this);
+                for (const t of this._activTiles) {
+                    if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_5__.IsTargetBlock)(t) && t.removed) {
+                        t.removed(data, newState);
+                    }
                 }
-            }
+            });
         }
     }
     _elevationUpdated(data, state) {
         if (data && data.length > 0) {
-            const newState = new core_events__WEBPACK_IMPORTED_MODULE_11__.EventState(-1, false, state.currentTarget, this);
-            for (const t of this._activTiles) {
-                if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_3__.IsTargetBlock)(t) && t.updated) {
-                    t.updated(data, newState);
+            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+                const newState = new core_events__WEBPACK_IMPORTED_MODULE_12__.EventState(-1, false, state.currentTarget, this);
+                for (const t of this._activTiles) {
+                    if ((0,core_tiles__WEBPACK_IMPORTED_MODULE_5__.IsTargetBlock)(t) && t.updated) {
+                        t.updated(data, newState);
+                    }
                 }
-            }
+            });
         }
     }
     _bindDisplayInternal(display) {
         if (display && this._material) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_12__.IsHolographicBounds)(this.display)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_13__.IsHolographicBounds)(this.display)) {
                 this.material.holographicBounds = this.display;
             }
             if (this.display?.resolution) {
@@ -1450,7 +1465,7 @@ class ElevationHost extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer
         }
     }
     _buildGridFactoryInternal() {
-        return new _map_grid_factory__WEBPACK_IMPORTED_MODULE_13__.ElevationGridFactory();
+        return new _map_grid_factory__WEBPACK_IMPORTED_MODULE_14__.ElevationGridFactory();
     }
 }
 ElevationHost.DefaultExageration = 1.0;
@@ -1587,12 +1602,19 @@ class TileWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
         super(x, y, levelOfDetail, data, metrics);
         this._surface = null;
         this._demInfos = null;
+        this._gridSize = null;
     }
     get elevationInfos() {
         return this._demInfos;
     }
-    set elevationInfos(d) {
-        this._demInfos = d;
+    set elevationInfos(v) {
+        this._demInfos = v;
+    }
+    get gridSize() {
+        return this._gridSize;
+    }
+    set gridSize(v) {
+        this._gridSize = v;
     }
     get surface() {
         return this._surface;
@@ -1600,9 +1622,78 @@ class TileWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
     set surface(s) {
         this._surface = s;
     }
-    added(data, state) { }
-    removed(data, state) { }
-    updated(data, state) { }
+    added(data, state) {
+        if (this._isHasNecessaryElevationInfos()) {
+            for (const t of data) {
+                if (this.address.quadkey.startsWith(t.address.quadkey)) {
+                    if (t.address.quadkey.length === this.address.quadkey.length) {
+                        this._addElevation(t, state);
+                        return;
+                    }
+                    this._addParentElevation(t, state);
+                    return;
+                }
+                if (t.address.quadkey.startsWith(this.address.quadkey)) {
+                    this._addChildElevation(t, state);
+                    return;
+                }
+            }
+        }
+    }
+    removed(data, state) {
+        if (this._isHasNecessaryElevationInfos()) {
+            for (const t of data) {
+                if (this.address.quadkey.startsWith(t.address.quadkey)) {
+                    if (t.address.quadkey.length === this.address.quadkey.length) {
+                        this._removeElevation(t, state);
+                        return;
+                    }
+                    this._removeParentElevation(t, state);
+                    return;
+                }
+                if (t.address.quadkey.startsWith(this.address.quadkey)) {
+                    this._removeChildElevation(t, state);
+                    return;
+                }
+            }
+        }
+    }
+    updated(data, state) {
+        if (this._isHasNecessaryElevationInfos()) {
+            for (const t of data) {
+                if (this.address.quadkey.startsWith(t.address.quadkey)) {
+                    if (t.address.quadkey.length === this.address.quadkey.length) {
+                        this._updateElevation(t, state);
+                        return;
+                    }
+                    this._updateParentElevation(t, state);
+                    return;
+                }
+                if (t.address.quadkey.startsWith(this.address.quadkey)) {
+                    this._updateChildElevation(t, state);
+                    return;
+                }
+            }
+        }
+    }
+    _addParentElevation(data, state) {
+        console.log(`add parent elevation ${data.quadkey} of ${this.quadkey}`);
+    }
+    _addElevation(data, state) {
+        console.log(`add elevation ${data.quadkey}`);
+    }
+    _addChildElevation(data, state) {
+        console.log(`add child elevation ${data.quadkey} of ${this.quadkey}`);
+    }
+    _removeParentElevation(data, state) { }
+    _removeElevation(data, state) { }
+    _removeChildElevation(data, state) { }
+    _updateParentElevation(data, state) { }
+    _updateElevation(data, state) { }
+    _updateChildElevation(data, state) { }
+    _isHasNecessaryElevationInfos() {
+        return this._gridSize !== null && this._gridSize.width > 0 && this._gridSize.height > 0;
+    }
 }
 //# sourceMappingURL=map.tile.js.map
 

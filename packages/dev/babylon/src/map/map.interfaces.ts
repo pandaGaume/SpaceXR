@@ -47,13 +47,14 @@ export function IsTileWithMesh<T>(b: unknown): b is ITileWithMesh<T> {
     return obj.surface !== undefined && IsTile(b);
 }
 
-export interface IHasElevation {
+export interface IHasGridElevation {
     elevationInfos: Nullable<IDemInfos>;
+    gridSize: Nullable<ISize2>;
 }
 
-export function IsHasElevation(b: unknown): b is IHasElevation {
+export function IsHasElevation(b: unknown): b is IHasGridElevation {
     if (b === null || typeof b !== "object") return false;
-    return (b as Partial<IHasElevation>).elevationInfos !== undefined;
+    return (b as Partial<IHasGridElevation>).elevationInfos !== undefined;
 }
 
 export interface IMap3DMaterial<T extends ImageLayerContentType> extends IHasHolographicBounds {

@@ -18,7 +18,7 @@ import {
 } from "core/tiles";
 import { Nullable } from "core/types";
 import { IElevationGridFactory, IElevationHost, IElevationOptions, IMap3DMaterial, ITileWithMesh } from "./map.interfaces";
-import { ICartesian2, IsSize } from "core/geometry";
+import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { ElevationGridFactory } from "./map.grid.factory";
@@ -45,12 +45,19 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
+    _cachedSize: ISize2;
 
     public constructor(root: TransformNode, options: IElevationOptions, layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
         super(layer, display, source);
 
         this._elevationOptions = options;
         this._elevationTarget = new TargetProxy<ITile<IDemInfos>>(this._elevationAdded.bind(this), this._elevationRemoved.bind(this), this._elevationUpdated.bind(this));
+        if (IsSize(this._elevationOptions.gridSize)) {
+            this._cachedSize = this._elevationOptions.gridSize;
+        } else {
+            const d = this._elevationOptions.gridSize;
+            this._cachedSize = new Size2(d, d);
+        }
 
         // build the root for the tiles
         const scene = root.getScene();
@@ -117,7 +124,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return new TransformNode(this._buildRootName(), scene);
     }
 
-    protected _onTileAdded(tile: ITileWithMesh<T>): void {
+    protected _onTileAdded(tile: TileWithElevation<T>): void {
         const m = this._buildInstance(tile);
         if (m) {
             m.parent = this._tilesRoot;
@@ -127,6 +134,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
             // set the surface 3D
             tile.surface = m;
+            tile.gridSize = this._cachedSize;
 
             if (!tile.content) {
                 m.setEnabled(false);
@@ -329,34 +337,40 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     protected _elevationAdded(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (data && data.length > 0) {
-            const newState = new EventState(-1, false, state.currentTarget, this);
-            for (const t of this._activTiles) {
-                if (IsTargetBlock<ITile<IDemInfos>>(t) && t.added) {
-                    t.added(data, newState);
+            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+                const newState = new EventState(-1, false, state.currentTarget, this);
+                for (const t of this._activTiles) {
+                    if (IsTargetBlock<ITile<IDemInfos>>(t) && t.added) {
+                        t.added(data, newState);
+                    }
                 }
-            }
+            });
         }
     }
 
     protected _elevationRemoved(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (data && data.length > 0) {
-            const newState = new EventState(-1, false, state.currentTarget, this);
-            for (const t of this._activTiles) {
-                if (IsTargetBlock<ITile<IDemInfos>>(t) && t.removed) {
-                    t.removed(data, newState);
+            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+                const newState = new EventState(-1, false, state.currentTarget, this);
+                for (const t of this._activTiles) {
+                    if (IsTargetBlock<ITile<IDemInfos>>(t) && t.removed) {
+                        t.removed(data, newState);
+                    }
                 }
-            }
+            });
         }
     }
 
     protected _elevationUpdated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (data && data.length > 0) {
-            const newState = new EventState(-1, false, state.currentTarget, this);
-            for (const t of this._activTiles) {
-                if (IsTargetBlock<ITile<IDemInfos>>(t) && t.updated) {
-                    t.updated(data, newState);
+            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+                const newState = new EventState(-1, false, state.currentTarget, this);
+                for (const t of this._activTiles) {
+                    if (IsTargetBlock<ITile<IDemInfos>>(t) && t.updated) {
+                        t.updated(data, newState);
+                    }
                 }
-            }
+            });
         }
     }
 

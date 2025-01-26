@@ -9906,9 +9906,9 @@ class TilePipelineLink {
         this._source = source;
         this._target = target;
         this._options = options;
-        this._addedObserver = source.addedObservable.add(this._onAdded.bind(this));
-        this._removedObserver = source.removedObservable.add(this._onRemoved.bind(this));
-        this._updatedObserver = source.updatedObservable.add(this._onUpdated.bind(this));
+        this._addedObserver = source.addedObservable.add(this.forwardAdded.bind(this));
+        this._removedObserver = source.removedObservable.add(this.forwardRemoved.bind(this));
+        this._updatedObserver = source.updatedObservable.add(this.forwardUpdated.bind(this));
     }
     get source() {
         return this._source;
@@ -9927,21 +9927,21 @@ class TilePipelineLink {
         this._removedObserver = null;
         this._updatedObserver = null;
     }
-    _onAdded(eventData, eventState) {
+    forwardAdded(eventData, eventState) {
         if (this._target && this._target.added) {
             const filter = this._options?.acceptAdded ?? this.options?.accept;
             eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.added(eventData, eventState);
         }
     }
-    _onRemoved(eventData, eventState) {
+    forwardRemoved(eventData, eventState) {
         if (this._target && this._target.removed) {
             const filter = this._options?.acceptRemoved ?? this.options?.accept;
             eventData = filter ? this._filter(eventData, filter) : eventData;
             this._target.removed(eventData, eventState);
         }
     }
-    _onUpdated(eventData, eventState) {
+    forwardUpdated(eventData, eventState) {
         if (this._target && this._target.updated) {
             const filter = this._options?.acceptUpdated ?? this.options?.accept;
             eventData = filter ? this._filter(eventData, filter) : eventData;
@@ -10098,21 +10098,25 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
         this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
         return this._removedObservable;
     }
-    linkTo(target, options) {
+    linkTo(target, options, ...args) {
         if (this._links.findIndex((l) => l.target === target) === -1) {
             const link = new _pipeline__WEBPACK_IMPORTED_MODULE_3__.TilePipelineLink(this, target, options);
             this._links.push(link);
+            this._onLinked(link);
         }
     }
+    _onLinked(link) { }
     unlinkFrom(target) {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];
+            this._onUnlinked(l);
             l.dispose();
             return l;
         }
         return undefined;
     }
+    _onUnlinked(link) { }
     added(eventData, eventState) {
         const tiles = this._onTileAddressesAdded(eventData, eventState);
         if (tiles.length) {

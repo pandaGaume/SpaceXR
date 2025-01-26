@@ -11,6 +11,7 @@ import {
     ITileMapLayer,
     ITileMetrics,
     ITileNavigationState,
+    ITilePipelineLink,
     ITileView,
     TargetProxy,
     TileMapLayerView,
@@ -27,6 +28,18 @@ import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
 import { IDemInfos } from "core/dem";
+
+export class ElevationLayerView<T extends IDemInfos> extends TileMapLayerView<T> {
+    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
+        super(layer, display, source);
+    }
+
+    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {
+        super._onLinked(link);
+        // we are forwarding the tile to the newly linked
+        link.forwardAdded(Array.from(this._activTiles), new EventState(-1, false, this, this));
+    }
+}
 
 export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> implements IElevationHost {
     public static DefaultExageration: number = 1.0;

@@ -22,9 +22,9 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
         this._target = target;
         this._options = options;
 
-        this._addedObserver = source.addedObservable.add(this._onAdded.bind(this));
-        this._removedObserver = source.removedObservable.add(this._onRemoved.bind(this));
-        this._updatedObserver = source.updatedObservable.add(this._onUpdated.bind(this));
+        this._addedObserver = source.addedObservable.add(this.forwardAdded.bind(this));
+        this._removedObserver = source.removedObservable.add(this.forwardRemoved.bind(this));
+        this._updatedObserver = source.updatedObservable.add(this.forwardUpdated.bind(this));
     }
 
     public get source(): ISourceBlock<T> {
@@ -48,7 +48,7 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
         this._updatedObserver = null;
     }
 
-    protected _onAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void {
+    public forwardAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void {
         if (this._target && this._target.added) {
             const filter = this._options?.acceptAdded ?? this.options?.accept;
             eventData = filter ? this._filter(eventData, filter) : eventData;
@@ -56,7 +56,7 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
         }
     }
 
-    protected _onRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void {
+    public forwardRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void {
         if (this._target && this._target.removed) {
             const filter = this._options?.acceptRemoved ?? this.options?.accept;
             eventData = filter ? this._filter(eventData, filter) : eventData;
@@ -64,7 +64,7 @@ export class TilePipelineLink<T> implements ITilePipelineLink<T> {
         }
     }
 
-    protected _onUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void {
+    public forwardUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void {
         if (this._target && this._target.updated) {
             const filter = this._options?.acceptUpdated ?? this.options?.accept;
             eventData = filter ? this._filter(eventData, filter) : eventData;

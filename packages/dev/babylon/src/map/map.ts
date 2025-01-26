@@ -1,9 +1,9 @@
-import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileMapLayerView, TileNavigationState, TileView } from "core/tiles";
+import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
 import { IElevationOptions, IMap3D, IsElevationHost, Map3DContentType } from "./map.interfaces";
 import { TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { ElevationHost } from "./map.layer.view.elevation";
+import { ElevationHost, ElevationLayerView } from "./map.layer.view.elevation";
 import { ElevationLayer } from "../dem";
 import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
 
@@ -66,7 +66,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            return new TileMapLayerView(layer, this._display, new TileView());
+            return new ElevationLayerView(layer, this._display, new TileView());
         }
         return new ElevationHost(this._root, this, <any>layer, this.display, this.view);
     }

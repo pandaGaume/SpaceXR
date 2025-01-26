@@ -13,8 +13,8 @@ export declare class TilePipelineLink<T> implements ITilePipelineLink<T> {
     get target(): ITargetBlock<T>;
     get options(): ILinkOptions<T> | undefined;
     dispose(): void;
-    protected _onAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-    protected _onRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-    protected _onUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    forwardAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    forwardRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    forwardUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
     protected _filter(eventData: IPipelineMessageType<T>, filter: (data: T) => boolean): IPipelineMessageType<T>;
 }

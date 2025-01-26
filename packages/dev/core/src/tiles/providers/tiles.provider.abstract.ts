@@ -102,24 +102,30 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return this._removedObservable!;
     }
 
-    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions<ITile<T>>): void {
+    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions<ITile<T>>, ...args: Array<any>): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             // avoid linking twice to the same target
             const link = new TilePipelineLink(this, target, options);
             this._links.push(link);
+            this._onLinked(link);
         }
     }
+
+    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {}
 
     public unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];
+            this._onUnlinked(l);
             l.dispose();
             return l;
         }
         return undefined;
     }
+
+    protected _onUnlinked(link: ITilePipelineLink<ITile<T>>): void {}
 
     /// end ISourceBlock
 

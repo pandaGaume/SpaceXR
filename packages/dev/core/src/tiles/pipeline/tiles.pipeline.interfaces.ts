@@ -47,6 +47,10 @@ export interface ITilePipelineLink<T> extends IDisposable {
     source: ISourceBlock<T>;
     target: ITargetBlock<T>;
     options?: ILinkOptions<T>;
+
+    forwardAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    forwardRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void;
+    forwardUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
 }
 
 export interface ITilePipelineComponent extends IDisposable {

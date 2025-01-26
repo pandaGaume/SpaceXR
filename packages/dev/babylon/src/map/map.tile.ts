@@ -3,7 +3,7 @@ import { IHasGridElevation, ITileWithMesh } from "./map.interfaces";
 import { Nullable } from "core/types";
 import { AbstractMesh } from "@babylonjs/core";
 import { IDemInfos } from "core/dem";
-import { EventState } from "core/events";
+import { EventState, Observable } from "core/events";
 import { ISize2 } from "core/geometry";
 
 export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> implements ITileWithMesh<T>, IHasGridElevation, ITargetBlock<ITile<IDemInfos>> {
@@ -11,12 +11,20 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
     _surface: Nullable<AbstractMesh>;
     _demInfos: Nullable<IDemInfos>;
     _gridSize: Nullable<ISize2>;
+    _elevationUpdateObservable?: Observable<IHasGridElevation>;
 
     public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T> = null, metrics?: ITileMetrics) {
         super(x, y, levelOfDetail, data, metrics);
         this._surface = null;
         this._demInfos = null;
         this._gridSize = null;
+    }
+
+    public get elevationUpdateObservable(): Observable<IHasGridElevation> {
+        if (!this._elevationUpdateObservable) {
+            this._elevationUpdateObservable = new Observable<IHasGridElevation>();
+        }
+        return this._elevationUpdateObservable;
     }
 
     public get elevationInfos(): Nullable<IDemInfos> {

@@ -3,26 +3,30 @@ import {
     IDisplay,
     ImageLayerContentType,
     IPhysicalDisplay,
+    IPipelineMessageType,
     IsPhysicalDisplay,
     IsTargetBlock,
+    ITargetBlock,
     ITile,
     ITileMapLayer,
     ITileMetrics,
     ITileNavigationState,
     ITileView,
+    TargetProxy,
     TileMapLayerView,
     TileNavigationState,
 } from "core/tiles";
 import { Nullable } from "core/types";
 import { IElevationGridFactory, IElevationHost, IElevationOptions, IMap3DMaterial, ITileWithMesh } from "./map.interfaces";
 import { ICartesian2, IsSize } from "core/geometry";
-import { TileWithMesh } from "./map.tile";
-import { EventState, Observer, PropertyChangedEventArgs } from "core/events";
+import { TileWithElevation } from "./map.tile";
+import { EventState, PropertyChangedEventArgs } from "core/events";
 import { ElevationGridFactory } from "./map.grid.factory";
 import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
 import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
+import { IDemInfos } from "core/dem";
 
 export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> implements IElevationHost {
     public static DefaultExageration: number = 1.0;
@@ -37,9 +41,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
     _grid: Mesh;
     _material: IMap3DMaterial<T>;
     _elevationOptions: IElevationOptions;
-
-    // properties observers
-    _elevationLayerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>> = null;
+    _elevationTarget: ITargetBlock<ITile<IDemInfos>>;
 
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
@@ -48,6 +50,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         super(layer, display, source);
 
         this._elevationOptions = options;
+        this._elevationTarget = new TargetProxy<ITile<IDemInfos>>(this._elevationAdded.bind(this), this._elevationRemoved.bind(this), this._elevationUpdated.bind(this));
 
         // build the root for the tiles
         const scene = root.getScene();
@@ -72,7 +75,11 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         this._grid.setEnabled(false);
 
         // ensure factory is with correct type.
-        this.factory.withType(TileWithMesh);
+        this.factory.withType(TileWithElevation);
+    }
+
+    public get elevationsTarget(): ITargetBlock<ITile<IDemInfos>> {
+        return this._elevationTarget;
     }
 
     public get name(): string {
@@ -100,8 +107,6 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     public dispose(): void {
         super.dispose();
-        this._elevationLayerObserver?.disconnect();
-        this._elevationLayerObserver = null;
     }
 
     protected get isReady(): boolean {
@@ -320,6 +325,39 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     protected _buildMaterialName(): string {
         return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
+    }
+
+    protected _elevationAdded(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+        if (data && data.length > 0) {
+            const newState = new EventState(-1, false, state.currentTarget, this);
+            for (const t of this._activTiles) {
+                if (IsTargetBlock<ITile<IDemInfos>>(t) && t.added) {
+                    t.added(data, newState);
+                }
+            }
+        }
+    }
+
+    protected _elevationRemoved(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+        if (data && data.length > 0) {
+            const newState = new EventState(-1, false, state.currentTarget, this);
+            for (const t of this._activTiles) {
+                if (IsTargetBlock<ITile<IDemInfos>>(t) && t.removed) {
+                    t.removed(data, newState);
+                }
+            }
+        }
+    }
+
+    protected _elevationUpdated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+        if (data && data.length > 0) {
+            const newState = new EventState(-1, false, state.currentTarget, this);
+            for (const t of this._activTiles) {
+                if (IsTargetBlock<ITile<IDemInfos>>(t) && t.updated) {
+                    t.updated(data, newState);
+                }
+            }
+        }
     }
 
     private _bindDisplayInternal(display: Nullable<IDisplay>): void {

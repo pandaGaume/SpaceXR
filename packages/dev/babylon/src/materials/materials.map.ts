@@ -23,8 +23,7 @@ import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
-import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, ITile, TargetProxy } from "core/tiles";
-import { IDemInfos } from "core/dem";
+import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, TargetProxy } from "core/tiles";
 
 export enum Map3dLayerKind {
     ELEVATION = 0,
@@ -106,21 +105,15 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
     private _displayResolution: ISize3 = Size3.Zero();
 
     private _imagesTarget: ITargetBlock<ITileWithMesh<T>>;
-    private _elevationsTarget: ITargetBlock<ITile<IDemInfos>>;
 
     public constructor(name: string, scene?: Scene, shaderName?: string) {
         super(name, scene);
         this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
         this._imagesTarget = new TargetProxy<ITileWithMesh<T>>(this.imagesAdded.bind(this), this.imagesRemoved.bind(this), this.imagesUpdated.bind(this));
-        this._elevationsTarget = new TargetProxy<ITile<IDemInfos>>(this.elevationsAdded.bind(this), this.elevationsRemoved.bind(this), this.elevationsUpdated.bind(this));
     }
 
     public get imagesTarget(): ITargetBlock<ITileWithMesh<T>> {
         return this._imagesTarget;
-    }
-
-    public get elevationsTarget(): ITargetBlock<ITile<IDemInfos>> {
-        return this._elevationsTarget;
     }
 
     public getClassName(): string {
@@ -263,12 +256,6 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
             this._bindSamplers(effect);
         }
     }
-
-    protected elevationsAdded(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {}
-
-    protected elevationsRemoved(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {}
-
-    protected elevationsUpdated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {}
 
     protected imagesAdded(data: IPipelineMessageType<ITileWithMesh<T>>, state: EventState): void {
         if (IsElevationHost(state.currentTarget)) {

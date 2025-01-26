@@ -27,6 +27,7 @@ export interface IElevationHost extends ITileMetricsProvider {
     tilesRoot: TransformNode;
     grid: Mesh;
     elevationOptions: IElevationOptions;
+    elevationsTarget: ITargetBlock<ITile<IDemInfos>>;
 }
 
 export function IsElevationHost(b: unknown): b is IElevationHost {
@@ -46,10 +47,18 @@ export function IsTileWithMesh<T>(b: unknown): b is ITileWithMesh<T> {
     return obj.surface !== undefined && IsTile(b);
 }
 
+export interface IHasElevation {
+    elevationInfos: Nullable<IDemInfos>;
+}
+
+export function IsHasElevation(b: unknown): b is IHasElevation {
+    if (b === null || typeof b !== "object") return false;
+    return (b as Partial<IHasElevation>).elevationInfos !== undefined;
+}
+
 export interface IMap3DMaterial<T extends ImageLayerContentType> extends IHasHolographicBounds {
     mapScale: ICartesian3;
     displayResolution: ISize3;
 
     imagesTarget: ITargetBlock<ITileWithMesh<T>>;
-    elevationsTarget: ITargetBlock<ITile<IDemInfos>>;
 }

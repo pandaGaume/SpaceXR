@@ -66,8 +66,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            const v = new TileMapLayerView(layer, this._display, new TileView());
-            return v;
+            return new TileMapLayerView(layer, this._display, new TileView());
         }
         return new ElevationHost(this._root, this, <any>layer, this.display, this.view);
     }
@@ -98,6 +97,19 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         for (const v of eventData) {
             if (IsElevationHost(v)) {
                 v.tilesRoot.parent = this._root;
+                for (const l of this.layerViews) {
+                    if (l instanceof ElevationHost) {
+                        continue;
+                    }
+                    l.linkTo(<any>v.elevationsTarget);
+                }
+                continue;
+            }
+            for (const l of this.layerViews) {
+                if (l instanceof ElevationHost) {
+                    v.linkTo(<any>l.elevationsTarget);
+                    continue;
+                }
             }
         }
     }

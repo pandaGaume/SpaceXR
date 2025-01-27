@@ -1,7 +1,7 @@
 import { IDemInfos } from "core/dem";
 import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { ImageLayerContentType, IsTile, ITargetBlock, ITile, ITileMap, ITileMetricsProvider } from "core/tiles";
+import { ImageLayerContentType, IsTile, ITargetBlock, ITile, ITileMap } from "core/tiles";
 import { IValidable, Nullable } from "core/types";
 import { AbstractMesh, Mesh, TransformNode } from "@babylonjs/core";
 import { IHasHolographicBounds } from "../display";
@@ -12,6 +12,8 @@ export type Map3DContentType = IDemInfos | ImageLayerContentType;
 export interface IMap3D extends ITileMap<Map3DContentType>, IValidable {
     root: TransformNode;
     name: string;
+    grid: Mesh;
+    elevationOptions: IElevationOptions;
 }
 
 export interface IElevationGridFactory {
@@ -22,20 +24,6 @@ export interface IElevationOptions {
     gridSize: number | ISize2;
     offset?: ICartesian3;
     exageration?: number;
-}
-
-export interface IElevationHost extends ITileMetricsProvider {
-    tilesRoot: TransformNode;
-    grid: Mesh;
-    elevationOptions: IElevationOptions;
-    elevationsTarget: ITargetBlock<ITile<IDemInfos>>;
-}
-
-export function IsElevationHost(b: unknown): b is IElevationHost {
-    if (b === null || typeof b !== "object") return false;
-
-    const obj = b as Partial<IElevationHost>;
-    return obj.grid !== undefined && obj.tilesRoot !== undefined && obj.elevationOptions !== undefined;
 }
 
 export interface ITileWithMesh<T> extends ITile<T> {

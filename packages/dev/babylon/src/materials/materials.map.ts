@@ -18,13 +18,14 @@ import {
     Constants,
     Vector4,
 } from "@babylonjs/core";
-import { IElevationHost, IHasGridElevation, IMap3DMaterial, IsElevationHost, IsHasGridElevation, ITileWithGridElevation } from "../map/map.interfaces";
+import { IHasGridElevation, IMap3DMaterial, IsHasGridElevation, ITileWithGridElevation } from "../map/map.interfaces";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
 import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, TargetProxy } from "core/tiles";
 import { IDisposable } from "core/types";
+import { ElevationHost } from "../map";
 
 export enum Map3dLayerKind {
     ELEVATION = 0,
@@ -290,7 +291,7 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
 
     protected imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<T>>, state: EventState): void {
         const host = state.currentTarget;
-        if (IsElevationHost(host)) {
+        if (host instanceof ElevationHost) {
             for (const tile of data) {
                 if (IsHasGridElevation(tile)) {
                     const key = tile.address.quadkey;
@@ -389,11 +390,11 @@ export class Map3dMaterial<T extends ImageLayerContentType> extends PushMaterial
         return area;
     }
 
-    protected _ensureTextureSamplersReady<T extends ImageLayerContentType>(src: IElevationHost): void {
+    protected _ensureTextureSamplersReady<T extends ImageLayerContentType>(src: ElevationHost<T>): void {
         if (!this._textureSampler) {
             let size = src.metrics.tileSize;
             this._textureSampler = this._buildTextureSampler(size, size);
-            this._ensureInstanceBufferReady(src.grid);
+            this._ensureInstanceBufferReady(src._map.grid);
         }
     }
 

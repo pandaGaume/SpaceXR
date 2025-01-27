@@ -1,4 +1,4 @@
-import { AbstractMesh, Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { AbstractMesh, Material, Mesh, Scene, TransformNode } from "@babylonjs/core";
 import {
     IDisplay,
     ImageLayerContentType,
@@ -18,15 +18,10 @@ import {
     TileNavigationState,
 } from "core/tiles";
 import { Nullable } from "core/types";
-import { IElevationGridFactory, IElevationHost, IElevationOptions, IMap3DMaterial, ITileWithMesh } from "./map.interfaces";
+import { IMap3D, ITileWithMesh } from "./map.interfaces";
 import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { ElevationGridFactory } from "./map.grid.factory";
-import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
-import { TextUtils } from "core/utils";
-import { Map3dMaterial } from "../materials";
-import { IsHolographicBounds } from "../display";
 import { IDemInfos } from "core/dem";
 
 export class ElevationLayerView<T extends IDemInfos> extends TileMapLayerView<T> {
@@ -41,88 +36,69 @@ export class ElevationLayerView<T extends IDemInfos> extends TileMapLayerView<T>
     }
 }
 
-export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> implements IElevationHost {
+export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> {
     public static DefaultExageration: number = 1.0;
     public static TEMPLATE_SUFFIX = "grid";
     public static MATERIAL_SUFFIX = "material";
     public static INSTANCE_ROOT_NAME = "root";
 
+    // the owner
+    _map: IMap3D;
+
     // the root of the tiles instances
     _tilesRoot: TransformNode;
 
     // the grid model
-    _grid: Mesh;
-    _material: IMap3DMaterial<T>;
-    _elevationOptions: IElevationOptions;
     _elevationTarget: ITargetBlock<ITile<IDemInfos>>;
 
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
     _cachedSize: ISize2;
 
-    public constructor(root: TransformNode, options: IElevationOptions, layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
+    public constructor(map: IMap3D, layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
         super(layer, display, source);
+        // ensure factory is with correct type.
+        this.factory.withType(TileWithElevation);
 
-        this._elevationOptions = options;
+        this._map = map;
         this._elevationTarget = new TargetProxy<ITile<IDemInfos>>(this._elevationAdded.bind(this), this._elevationRemoved.bind(this), this._elevationUpdated.bind(this));
-        if (IsSize(this._elevationOptions.gridSize)) {
-            this._cachedSize = this._elevationOptions.gridSize;
+        const gridSize = map.elevationOptions?.gridSize;
+        if (IsSize(gridSize)) {
+            this._cachedSize = gridSize;
         } else {
-            const d = this._elevationOptions.gridSize;
+            const d = gridSize;
             this._cachedSize = new Size2(d, d);
         }
 
         // build the root for the tiles
-        const scene = root.getScene();
+        const scene = map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
         // set the parent
-        this._tilesRoot.parent = root;
-
-        const o = this._buildTerrainGridOptions();
-        this._grid = this._buildTemplate(o, scene);
-        this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
-        if (this._material) {
-            if (IsTargetBlock<ITile<T>>(this._material.imagesTarget)) {
-                this.linkTo(this._material.imagesTarget);
-            }
-            if (this._material instanceof Material) {
-                this._grid.material = this._material;
-            }
-            if (display) {
-                this._bindDisplayInternal(display);
-            }
-        }
-        this._grid.setEnabled(false);
-
-        // ensure factory is with correct type.
-        this.factory.withType(TileWithElevation);
+        this._tilesRoot.parent = map.root;
     }
 
     public get elevationsTarget(): ITargetBlock<ITile<IDemInfos>> {
         return this._elevationTarget;
     }
 
+    public get map(): IMap3D {
+        return this._map;
+    }
+
+    public get grid(): Mesh {
+        return this._map.grid;
+    }
+
+    public get material(): Nullable<Material> {
+        return this._map.grid.material;
+    }
+
     public get name(): string {
         return this._tilesRoot.name;
     }
 
-    public get grid(): Mesh {
-        return this._grid;
-    }
-
     public get tilesRoot(): TransformNode {
         return this._tilesRoot;
-    }
-    public get elevationOptions(): IElevationOptions {
-        return this._elevationOptions;
-    }
-
-    public get material(): IMap3DMaterial<T> {
-        return this._material;
-    }
-
-    public get exageration(): number {
-        return this._elevationOptions?.exageration ?? ElevationHost.DefaultExageration;
     }
 
     public dispose(): void {
@@ -173,7 +149,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
     }
 
     protected _buildInstance(tile: ITileWithMesh<T>): AbstractMesh {
-        const instance = this.grid.createInstance(this._buildInstanceName(tile));
+        const instance = this._map.grid.createInstance(this._buildInstanceName(tile));
         return instance;
     }
 
@@ -209,7 +185,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
 
         // z data are already in meter so they just need to be scaled, and exagerated.
-        this._tilesRoot.scaling.z = z * (this.exageration ?? ElevationHost.DefaultExageration) * nav.scale;
+        this._tilesRoot.scaling.z = z * (this._map.elevationOptions?.exageration ?? ElevationHost.DefaultExageration) * nav.scale;
     }
 
     protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
@@ -268,69 +244,6 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return undefined;
     }
 
-    protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial<T> {
-        return new Map3dMaterial<T>(name, scene);
-    }
-
-    protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh {
-        const mesh = this._buildMesh(this._buildTemplateName() ?? this.name, scene);
-        const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
-        const grid = gridFactory.buildTopology(options);
-        if (grid instanceof VertexData) {
-            grid.applyToMesh(mesh);
-        } else {
-            const data = new VertexData();
-            data.indices = grid.indices;
-            data.normals = grid.normals;
-            data.positions = grid.positions;
-            data.uvs = grid.uvs;
-            data.applyToMesh(mesh);
-        }
-        return mesh;
-    }
-
-    protected _buildTerrainGridOptions(): TerrainGridOptions {
-        let w = TerrainGridOptions.DefaultGridSize;
-        let h = TerrainGridOptions.DefaultGridSize;
-        if (this._elevationOptions?.gridSize) {
-            if (IsSize(this._elevationOptions.gridSize)) {
-                w = this._elevationOptions.gridSize.width;
-                h = this._elevationOptions.gridSize.height;
-            } else {
-                w = this._elevationOptions.gridSize;
-                h = this._elevationOptions.gridSize;
-            }
-        }
-
-        return new TerrainGridOptionsBuilder()
-            .withColumns(w + 1)
-            .withRows(h + 1)
-            .withUvs(true)
-            .withNormals(false)
-            .build();
-    }
-
-    protected _buildMesh(name: string, scene?: Scene): Mesh {
-        const mesh = new Mesh(name, scene);
-        return mesh;
-    }
-
-    protected _buildGridFactory(): IElevationGridFactory {
-        return this._buildGridFactoryInternal();
-    }
-
-    protected _onDisplayChanged(oldValue: Nullable<IDisplay>, newValue: Nullable<IDisplay>): void {
-        this._bindDisplayInternal(newValue);
-        this.invalidate();
-    }
-
-    protected _buildQualifiedName(n: string): string {
-        if (this.name && this.name !== "") {
-            return `${this._tilesRoot.name}:${n}`;
-        }
-        return n;
-    }
-
     protected _buildRootName(): string {
         return `${this.layer.name}-root`;
     }
@@ -340,17 +253,9 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return k != "" ? k : ElevationHost.INSTANCE_ROOT_NAME;
     }
 
-    protected _buildTemplateName(): string {
-        return this._buildQualifiedName(TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
-    }
-
-    protected _buildMaterialName(): string {
-        return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
-    }
-
     protected _elevationAdded(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (data && data.length > 0) {
-            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+            this._map.grid.getScene().onBeforeRenderObservable.addOnce(() => {
                 const newState = new EventState(-1, false, state.currentTarget, this);
                 for (const t of this._activTiles) {
                     if (IsTargetBlock<ITile<IDemInfos>>(t) && t.added) {
@@ -363,7 +268,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     protected _elevationRemoved(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (data && data.length > 0) {
-            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+            this._map.grid.getScene().onBeforeRenderObservable.addOnce(() => {
                 const newState = new EventState(-1, false, state.currentTarget, this);
                 for (const t of this._activTiles) {
                     if (IsTargetBlock<ITile<IDemInfos>>(t) && t.removed) {
@@ -376,7 +281,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
 
     protected _elevationUpdated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (data && data.length > 0) {
-            this._grid.getScene().onBeforeRenderObservable.addOnce(() => {
+            this._map.grid.getScene().onBeforeRenderObservable.addOnce(() => {
                 const newState = new EventState(-1, false, state.currentTarget, this);
                 for (const t of this._activTiles) {
                     if (IsTargetBlock<ITile<IDemInfos>>(t) && t.updated) {
@@ -385,20 +290,5 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
                 }
             });
         }
-    }
-
-    private _bindDisplayInternal(display: Nullable<IDisplay>): void {
-        if (display && this._material) {
-            if (IsHolographicBounds(this.display)) {
-                this.material.holographicBounds = this.display;
-            }
-            if (this.display?.resolution) {
-                this.material.displayResolution = this.display.resolution;
-            }
-        }
-    }
-
-    private _buildGridFactoryInternal(): IElevationGridFactory {
-        return new ElevationGridFactory();
     }
 }

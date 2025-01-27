@@ -1,9 +1,10 @@
-import { ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
-import { IElevationOptions, IMap3D, Map3DContentType } from "./map.interfaces";
-import { TransformNode } from "@babylonjs/core";
+import { IDisplay, ImageLayerContentType, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
+import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
+import { Mesh, Scene, TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { ICartesian3, ISize2 } from "core/geometry";
+import { TerrainGridOptions } from "core/meshes";
 export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
     static DefaultGridSize: number;
     static DefaultExageration: number;
@@ -12,7 +13,12 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     _gridSize: number | ISize2;
     _offset?: ICartesian3;
     _exageration?: number;
+    _grid: Mesh;
+    _material: IMap3DMaterial<ImageLayerContentType>;
     constructor(root: TransformNode);
+    get elevationOptions(): IElevationOptions;
+    get material(): IMap3DMaterial<ImageLayerContentType>;
+    get grid(): Mesh;
     get name(): string;
     get root(): TransformNode;
     get gridSize(): number | ISize2;
@@ -25,6 +31,17 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _rotateMap(nav: Nullable<ITileNavigationState>): void;
     protected _onNavigationBinded(nav: Nullable<ITileNavigationState>): void;
+    protected _onDisplayBinded(display: Nullable<IDisplay>): void;
+    private _bindDisplayInternal;
     protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void;
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void;
+    protected _buildQualifiedName(n: string): string;
+    protected _buildTemplateName(): string;
+    protected _buildMaterialName(): string;
+    protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial<ImageLayerContentType>;
+    protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh;
+    protected _buildTerrainGridOptions(): TerrainGridOptions;
+    protected _buildMesh(name: string, scene?: Scene): Mesh;
+    protected _buildGridFactory(): IElevationGridFactory;
+    private _buildGridFactoryInternal;
 }

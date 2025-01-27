@@ -3,17 +3,11 @@ import {
     IDisplay,
     ImageLayerContentType,
     IPhysicalDisplay,
-    IPipelineMessageType,
     IsPhysicalDisplay,
-    IsTargetBlock,
-    ITargetBlock,
-    ITile,
     ITileMapLayer,
     ITileMetrics,
     ITileNavigationState,
-    ITilePipelineLink,
     ITileView,
-    TargetProxy,
     TileMapLayerView,
     TileNavigationState,
 } from "core/tiles";
@@ -22,19 +16,6 @@ import { IMap3D, ITileWithMesh } from "./map.interfaces";
 import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { IDemInfos } from "core/dem";
-
-export class ElevationLayerView<T extends IDemInfos> extends TileMapLayerView<T> {
-    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
-        super(layer, display, source);
-    }
-
-    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {
-        super._onLinked(link);
-        // we are forwarding the activ tile to the newly linked target.
-        link.forwardAdded(Array.from(this._activTiles), new EventState(-1, false, this, this));
-    }
-}
 
 export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> {
     public static DefaultExageration: number = 1.0;
@@ -48,9 +29,6 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
     // the root of the tiles instances
     _tilesRoot: TransformNode;
 
-    // the grid model
-    _elevationTarget: ITargetBlock<ITile<IDemInfos>>;
-
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
     _cachedSize: ISize2;
@@ -61,7 +39,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         this.factory.withType(TileWithElevation);
 
         this._map = map;
-        this._elevationTarget = new TargetProxy<ITile<IDemInfos>>(this._elevationAdded.bind(this), this._elevationRemoved.bind(this), this._elevationUpdated.bind(this));
+
         const gridSize = map.elevationOptions?.gridSize;
         if (IsSize(gridSize)) {
             this._cachedSize = gridSize;
@@ -71,14 +49,8 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         }
 
         // build the root for the tiles
-        const scene = map.root.getScene();
+        const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
-        // set the parent
-        this._tilesRoot.parent = map.root;
-    }
-
-    public get elevationsTarget(): ITargetBlock<ITile<IDemInfos>> {
-        return this._elevationTarget;
     }
 
     public get map(): IMap3D {
@@ -251,44 +223,5 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
     protected _buildInstanceName(tile: ITileWithMesh<T>): string {
         const k = tile.quadkey;
         return k != "" ? k : ElevationHost.INSTANCE_ROOT_NAME;
-    }
-
-    protected _elevationAdded(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
-        if (data && data.length > 0) {
-            this._map.grid.getScene().onBeforeRenderObservable.addOnce(() => {
-                const newState = new EventState(-1, false, state.currentTarget, this);
-                for (const t of this._activTiles) {
-                    if (IsTargetBlock<ITile<IDemInfos>>(t) && t.added) {
-                        t.added(data, newState);
-                    }
-                }
-            });
-        }
-    }
-
-    protected _elevationRemoved(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
-        if (data && data.length > 0) {
-            this._map.grid.getScene().onBeforeRenderObservable.addOnce(() => {
-                const newState = new EventState(-1, false, state.currentTarget, this);
-                for (const t of this._activTiles) {
-                    if (IsTargetBlock<ITile<IDemInfos>>(t) && t.removed) {
-                        t.removed(data, newState);
-                    }
-                }
-            });
-        }
-    }
-
-    protected _elevationUpdated(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
-        if (data && data.length > 0) {
-            this._map.grid.getScene().onBeforeRenderObservable.addOnce(() => {
-                const newState = new EventState(-1, false, state.currentTarget, this);
-                for (const t of this._activTiles) {
-                    if (IsTargetBlock<ITile<IDemInfos>>(t) && t.updated) {
-                        t.updated(data, newState);
-                    }
-                }
-            });
-        }
     }
 }

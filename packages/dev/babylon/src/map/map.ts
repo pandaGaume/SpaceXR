@@ -3,7 +3,7 @@ import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3D
 import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { ElevationHost, ElevationLayerView } from "./map.layer.elevation.host";
+import { ElevationHost } from "./map.layer.elevation.host";
 import { ElevationLayer } from "../dem";
 import { Cartesian3, ICartesian3, ISize2, IsSize } from "core/geometry";
 import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
@@ -11,6 +11,7 @@ import { ElevationGridFactory } from "./map.grid.factory";
 import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
+import { DEMLayerView } from "./map.layer.dem";
 
 export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
     public static DefaultGridSize: number = 32;
@@ -94,7 +95,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            return new ElevationLayerView(layer, this._display, new TileView());
+            return new DEMLayerView(layer, this._display, new TileView());
         }
         return new ElevationHost(this, <any>layer, this.display, this.view);
     }
@@ -142,19 +143,8 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         for (const v of eventData) {
             if (v instanceof ElevationHost) {
                 v.tilesRoot.parent = this._root;
-                for (const l of this.layerViews) {
-                    if (l instanceof ElevationHost) {
-                        continue;
-                    }
-                    l.linkTo(<any>v.elevationsTarget);
-                }
+                v.linkTo(<any>this.material.imagesTarget);
                 continue;
-            }
-            for (const l of this.layerViews) {
-                if (l instanceof ElevationHost) {
-                    v.linkTo(<any>l.elevationsTarget);
-                    continue;
-                }
             }
         }
     }
@@ -165,6 +155,8 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         for (const v of eventData) {
             if (v instanceof ElevationHost) {
                 v.tilesRoot.parent = null;
+                v.unlinkFrom(<any>this.material.imagesTarget);
+                continue;
             }
         }
     }

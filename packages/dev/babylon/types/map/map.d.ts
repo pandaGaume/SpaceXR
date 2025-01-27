@@ -8,7 +8,8 @@ import { TerrainGridOptions } from "core/meshes";
 export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
     static DefaultGridSize: number;
     static DefaultExageration: number;
-    static ROOT_SUFFIX: string;
+    static TEMPLATE_SUFFIX: string;
+    static MATERIAL_SUFFIX: string;
     _root: TransformNode;
     _gridSize: number | ISize2;
     _offset?: ICartesian3;

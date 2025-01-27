@@ -17,7 +17,8 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     public static DefaultGridSize: number = 32;
     public static DefaultExageration: number = 1.0;
 
-    public static ROOT_SUFFIX = "root";
+    public static TEMPLATE_SUFFIX = "grid";
+    public static MATERIAL_SUFFIX = "material";
 
     _root: TransformNode;
     _gridSize: number | ISize2;
@@ -144,7 +145,19 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
             if (v instanceof ElevationHost) {
                 v.tilesRoot.parent = this._root;
                 v.linkTo(<any>this.material.imagesTarget);
+                for (var l of this.layerViews) {
+                    if (l instanceof DEMLayerView) {
+                        v.bindElevationLayer(l);
+                    }
+                }
                 continue;
+            }
+            if (v instanceof DEMLayerView) {
+                for (const view of this.layerViews) {
+                    if (view instanceof ElevationHost) {
+                        view.bindElevationLayer(v);
+                    }
+                }
             }
         }
     }
@@ -158,6 +171,13 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
                 v.unlinkFrom(<any>this.material.imagesTarget);
                 continue;
             }
+            if (v instanceof DEMLayerView) {
+                for (const view of this.layerViews) {
+                    if (view instanceof ElevationHost) {
+                        view.unbindElevationLayer(v);
+                    }
+                }
+            }
         }
     }
 
@@ -169,11 +189,11 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     }
 
     protected _buildTemplateName(): string {
-        return this._buildQualifiedName(TextUtils.BuildNameWithSuffix(this.name, ElevationHost.TEMPLATE_SUFFIX));
+        return this._buildQualifiedName(TextUtils.BuildNameWithSuffix(this.name, Map3D.TEMPLATE_SUFFIX));
     }
 
     protected _buildMaterialName(): string {
-        return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), ElevationHost.MATERIAL_SUFFIX);
+        return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), Map3D.MATERIAL_SUFFIX);
     }
     protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial<ImageLayerContentType> {
         return new Map3dMaterial<ImageLayerContentType>(name, scene);

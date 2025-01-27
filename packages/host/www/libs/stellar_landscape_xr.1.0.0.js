@@ -1612,7 +1612,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileWithElevation: () => (/* binding */ TileWithElevation)
 /* harmony export */ });
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.helpers.js");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.infos.js");
 /* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+
 
 
 class TileWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
@@ -1701,17 +1704,24 @@ class TileWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
         }
     }
     _addParentElevation(data, state) {
-        console.log(`add elevation data ${data.quadkey} to ${this.quadkey}`);
+        this._updateParentElevation(data, state);
     }
     _addElevation(data, state) { }
     _addChildElevation(data, state) { }
-    _removeParentElevation(data, state) {
-        console.log(`remove elevation data ${data.quadkey} to ${this.quadkey}`);
-    }
+    _removeParentElevation(data, state) { }
     _removeElevation(data, state) { }
     _removeChildElevation(data, state) { }
     _updateParentElevation(data, state) {
-        console.log(`update elevation data ${data.quadkey} to ${this.quadkey}`);
+        if (data.content?.elevations) {
+            const tileSize = state.currentTarget.metrics.tileSize;
+            const b0 = data.geoBounds;
+            const b1 = this.geoBounds;
+            var tx = (b1.west - b0.west) / (b0.east - b0.west);
+            var ty = 1 - (b1.north - b0.south) / (b0.north - b0.south);
+            const elevationBuffer = core_dem__WEBPACK_IMPORTED_MODULE_2__.ElevationHelpers.GetArea(data.content.elevations, tileSize, tileSize, tx * tileSize, ty * tileSize, this.gridSize.width, this.gridSize.height);
+            this._demInfos = new core_dem__WEBPACK_IMPORTED_MODULE_3__.DemInfos(elevationBuffer);
+            this._elevationUpdateObservable?.notifyObservers(this, -1, this, this);
+        }
     }
     _updateElevation(data, state) { }
     _updateChildElevation(data, state) { }

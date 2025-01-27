@@ -2,7 +2,7 @@ import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, ITile, ITile
 import { IHasGridElevation, ITileWithGridElevation } from "./map.interfaces";
 import { Nullable } from "core/types";
 import { AbstractMesh } from "@babylonjs/core";
-import { IDemInfos } from "core/dem";
+import { DemInfos, ElevationHelpers, IDemInfos } from "core/dem";
 import { EventState, Observable } from "core/events";
 import { ISize2 } from "core/geometry";
 
@@ -117,7 +117,9 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
         }
     }
 
-    protected _addParentElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _addParentElevation(data: ITile<IDemInfos>, state: EventState): void {
+        this._updateParentElevation(data, state);
+    }
     protected _addElevation(data: ITile<IDemInfos>, state: EventState): void {}
     protected _addChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
 
@@ -125,7 +127,27 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
     protected _removeElevation(data: ITile<IDemInfos>, state: EventState): void {}
     protected _removeChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
 
-    protected _updateParentElevation(data: ITile<IDemInfos>, state: EventState): void {}
+    protected _updateParentElevation(data: ITile<IDemInfos>, state: EventState): void {
+        if (data.content?.elevations) {
+            const tileSize = state.currentTarget.metrics.tileSize;
+            const b0 = data.geoBounds!;
+            const b1 = this.geoBounds!;
+            var tx = (b1.west - b0.west) / (b0.east - b0.west);
+            var ty = 1 - (b1.north - b0.south) / (b0.north - b0.south);
+
+            const elevationBuffer = ElevationHelpers.GetArea(
+                data.content.elevations,
+                tileSize,
+                tileSize,
+                tx * tileSize,
+                ty * tileSize,
+                this.gridSize!.width,
+                this.gridSize!.height
+            );
+            this._demInfos = new DemInfos(elevationBuffer);
+            this._elevationUpdateObservable?.notifyObservers(this, -1, this, this);
+        }
+    }
     protected _updateElevation(data: ITile<IDemInfos>, state: EventState): void {}
     protected _updateChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
 

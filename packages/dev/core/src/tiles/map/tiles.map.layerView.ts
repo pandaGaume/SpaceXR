@@ -4,12 +4,13 @@ import { IsDisposable, Nullable } from "../../types";
 import { ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
 import { TileNavigationApi } from "../navigation/tiles.navigation.api";
 import { hasTileSelectionContext, ISourceBlock, ITileSelectionContext, ITileView } from "../pipeline";
-import { AbstractTileProvider } from "../providers";
-import { ITile, ITileAddress } from "../tiles.interfaces";
+import { TileProvider } from "../providers";
+
+import { ITileAddress } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { TileView } from "./tiles.map.view";
 
-export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITileMapLayerView<T> {
+export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLayerView<T> {
     private _weightChangedObservable?: Observable<IWeighted>;
 
     private _layer: ITileMapLayer<T>;
@@ -24,9 +25,7 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
     private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
 
     public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ISourceBlock<ITileAddress>, selectionContext?: ITileSelectionContext) {
-        super();
-        // ensure the factory has the right metrics and namespace to build bounds.
-        this.factory.withMetrics(layer.metrics);
+        super(layer.provider);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
 
@@ -161,10 +160,6 @@ export class TileMapLayerView<T> extends AbstractTileProvider<T> implements ITil
 
     protected _onDisplayPropertyChanged(eventData: PropertyChangedEventArgs<IDisplay, unknown>, eventState: EventState): void {
         this.invalidate();
-    }
-
-    public _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T> {
-        return this._layer.provider.fetchContent(tile, callback);
     }
 
     protected _doValidate(): void {

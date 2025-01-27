@@ -36,7 +36,7 @@ export class ElevationLayerView<T extends IDemInfos> extends TileMapLayerView<T>
 
     protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {
         super._onLinked(link);
-        // we are forwarding the tile to the newly linked
+        // we are forwarding the activ tile to the newly linked target.
         link.forwardAdded(Array.from(this._activTiles), new EventState(-1, false, this, this));
     }
 }

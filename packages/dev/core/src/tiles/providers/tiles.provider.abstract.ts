@@ -1,4 +1,4 @@
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics, ITileProvider } from "../tiles.interfaces";
+import { IsTileConstructor, ITile, ITileAddress, ITileBuilder, ITileMetrics, ITileProvider, TileConstructor } from "../tiles.interfaces";
 import { EventState, Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IBounds2 } from "../../geometry/geometry.interfaces";
@@ -24,9 +24,15 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
     // internal pipeline links
     _links: Array<ITilePipelineLink<ITile<T>>> = [];
 
-    public constructor(factory?: ITileBuilder<T>, enabled = true) {
+    public constructor(factory?: ITileBuilder<T> | TileConstructor<T>, enabled = true) {
         super();
-        this._factory = factory ?? this._buildFactory();
+
+        if (factory && IsTileConstructor(factory)) {
+            this._factory = this._buildFactory(factory) ?? this._buildFactoryInternal(factory);
+        } else {
+            this._factory = factory ?? this._buildFactory() ?? this._buildFactoryInternal();
+        }
+
         this._enabled = enabled;
         this._activTiles = new TileCollection<T>();
         this._callback = this._onContentFetched.bind(this);
@@ -219,9 +225,8 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    protected _buildFactory(type?: new (...args: any[]) => ITile<T>): ITileBuilder<T> {
-        const b = new TileBuilder<T>();
-        return type ? b.withType(type) : b;
+    protected _buildFactory(type?: TileConstructor<T>): ITileBuilder<T> {
+        return this._buildFactoryInternal(type);
     }
 
     protected _onTilesAdded(tiles: Array<ITile<T>>): void {
@@ -244,6 +249,11 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
     protected _onTileUpdated(tiles: ITile<T>): void {}
+
+    private _buildFactoryInternal(type?: new (...args: any[]) => ITile<T>): ITileBuilder<T> {
+        const b = new TileBuilder<T>();
+        return type ? b.withType(type) : b;
+    }
 
     public abstract _fetchContent(tile: ITile<T>, callback: (t: ITile<T>) => void): ITile<T>;
 }

@@ -32,6 +32,8 @@ export interface ITile<T> extends ITileAddressable, IGeoBounded, IBounded {
 }
 export declare function IsTile<T>(b: unknown): b is ITile<T>;
 export declare function IsArrayOfTile<T>(b: unknown): b is Array<ITile<T>>;
+export type TileConstructor<T> = new (...args: any[]) => ITile<T>;
+export declare function IsTileConstructor<T>(obj: any): obj is TileConstructor<T>;
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
     namespace?: string;
     count: number;

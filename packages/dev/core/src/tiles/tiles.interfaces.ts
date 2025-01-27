@@ -66,6 +66,13 @@ export function IsArrayOfTile<T>(b: unknown): b is Array<ITile<T>> {
     return false;
 }
 
+export type TileConstructor<T> = new (...args: any[]) => ITile<T>;
+
+// Type guard function
+export function IsTileConstructor<T>(obj: any): obj is TileConstructor<T> {
+    return typeof obj === "function" && !!obj.prototype && "value" in obj.prototype;
+}
+
 /// <summary>
 /// The TileCollection is a collection of tiles, it is used to store the active tiles of a provider
 /// Tile are stored using a quadkey index, this allow fast access to a tile using its address only.

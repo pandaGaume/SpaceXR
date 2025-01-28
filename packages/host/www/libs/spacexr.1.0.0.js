@@ -10109,7 +10109,9 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
             this._onLinked(link);
         }
     }
-    _onLinked(link) { }
+    _onLinked(link) {
+        link.forwardAdded(Array.from(this._activTiles), new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.EventState(-1, false, this, this));
+    }
     unlinkFrom(target) {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {

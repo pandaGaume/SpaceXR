@@ -11,7 +11,7 @@ import { ElevationGridFactory } from "./map.grid.factory";
 import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
-import { DEMLayerView } from "./map.layer.dem";
+import { ElevationLayerView } from "./map.layer.dem";
 
 export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
     public static DefaultGridSize: number = 32;
@@ -96,7 +96,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            return new DEMLayerView(this, layer, this._display, new TileView());
+            return new ElevationLayerView(this, layer, this._display, new TileView());
         }
         if (layer instanceof ImageLayer) {
             return new TextureLayerView(this, layer, this.display, this.view);
@@ -150,7 +150,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
                 v.linkTo(<any>this.material.imagesTarget);
                 continue;
             }
-            if (v instanceof DEMLayerView) {
+            if (v instanceof ElevationLayerView) {
                 v.linkTo(<any>this.material.elevationsTarget);
                 continue;
             }
@@ -166,7 +166,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
                 v.unlinkFrom(<any>this.material.imagesTarget);
                 continue;
             }
-            if (v instanceof DEMLayerView) {
+            if (v instanceof ElevationLayerView) {
                 v.unlinkFrom(<any>this.material.elevationsTarget);
             }
         }

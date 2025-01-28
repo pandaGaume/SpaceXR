@@ -1,12 +1,10 @@
-import { ImageLayerContentType, IPipelineMessageType, ITargetBlock, ITile, ITileMetrics, Tile, TileContentType } from "core/tiles";
+import { ITileMetrics, Tile, TileContentType } from "core/tiles";
 import { ITileWithGridElevation } from "./map.interfaces";
 import { Nullable } from "core/types";
 import { AbstractMesh } from "@babylonjs/core";
-import { IDemInfos } from "core/dem";
-import { EventState } from "core/events";
 import { ISize2 } from "core/geometry";
 
-export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> implements ITileWithGridElevation<T>, ITargetBlock<ITile<IDemInfos>> {
+export class TileWithElevation<T> extends Tile<T> implements ITileWithGridElevation<T> {
     // 3D related
     _surface: Nullable<AbstractMesh>;
     _gridSize: Nullable<ISize2>;
@@ -33,7 +31,7 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
         this._surface = s;
     }
 
-    public added(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
+    /*public added(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (this._isHasNecessaryElevationInfos()) {
             for (const t of data) {
                 if (this.address.quadkey.startsWith(t.address.quadkey)) {
@@ -54,7 +52,7 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
             }
         }
     }
-
+    
     public removed(data: IPipelineMessageType<ITile<IDemInfos>>, state: EventState): void {
         if (this._isHasNecessaryElevationInfos()) {
             for (const t of data) {
@@ -110,7 +108,7 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
     protected _removeChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
 
     protected _updateParentElevation(data: ITile<IDemInfos>, state: EventState): void {
-        /*       if (data.content?.elevations) {
+              if (data.content?.elevations) {
             const tileSize = state.currentTarget.metrics.tileSize;
             const b0 = data.geoBounds!;
             const b1 = this.geoBounds!;
@@ -126,9 +124,9 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
                 this.gridSize!.width,
                 this.gridSize!.height
             );
-            //this._demInfos = new DemInfos(elevationBuffer);
-            //this._elevationUpdateObservable?.notifyObservers(this, -1, this, this);
-        }*/
+            this._demInfos = new DemInfos(elevationBuffer);
+            this._elevationUpdateObservable?.notifyObservers(this, -1, this, this);
+        }
     }
     protected _updateElevation(data: ITile<IDemInfos>, state: EventState): void {}
     protected _updateChildElevation(data: ITile<IDemInfos>, state: EventState): void {}
@@ -136,4 +134,5 @@ export class TileWithElevation<T extends ImageLayerContentType> extends Tile<T> 
     protected _isHasNecessaryElevationInfos(): boolean {
         return this._gridSize !== null && this._gridSize.width > 0 && this._gridSize.height > 0;
     }
+        */
 }

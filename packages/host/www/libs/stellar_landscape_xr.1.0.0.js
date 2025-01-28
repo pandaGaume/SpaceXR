@@ -977,8 +977,8 @@ class ElevationGridFactory {
         return i + j;
     }
     static InitUV(column, row, w, h) {
-        let u = column == w - 1 ? 1 + 1 / w : column / (w - 1);
-        let v = row == h - 1 ? 1 + 1 / h : row / (h - 1);
+        let u = column / (w - 2);
+        let v = row / (h - 2);
         return [u, v];
     }
     buildTopology(options) {

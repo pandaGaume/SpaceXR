@@ -12,8 +12,8 @@ export class ElevationGridFactory implements IElevationGridFactory {
     }
 
     private static InitUV(column: number, row: number, w: number, h: number): number[] {
-        let u = column == w - 1 ? 1 + 1 / w : column / (w - 1);
-        let v = row == h - 1 ? 1 + 1 / h : row / (h - 1);
+        let u = column / (w - 2);
+        let v = row / (h - 2);
         return [u, v];
     }
 

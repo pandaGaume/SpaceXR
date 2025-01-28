@@ -437,7 +437,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     ///<sumary>
     /// gather elevations from grid.
     ///</sumary>
-    protected _grabElevations(layout: TextureLayout) {
+    private _grabElevations(layout: TextureLayout) {
         const textureTile = layout.tile;
         const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
         const surface = textureTile.surface;
@@ -449,16 +449,16 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
                 if (elevationBounds) {
                     if (elevationBounds.contains(textureBounds)) {
-                        // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
+                        // elevation uv's will be
                         // u = u0 + u * su
                         // v = v0 + v * sv
                         const w0 = elevationBounds.east - elevationBounds.west;
                         const h0 = elevationBounds.north - elevationBounds.south;
                         const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                        elevationUvs.z = w1 / w0; // su
-                        elevationUvs.w = h1 / h0; // sv
                         elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
                         elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+                        elevationUvs.z = w1 / w0; // su
+                        elevationUvs.w = h1 / h0; // sv
 
                         const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                         elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
@@ -471,7 +471,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     ///<sumary>
     // dispatch elevations to grid
     ///</sumary>
-    protected _dispatchElevations(layout: ElevationLayout) {
+    private _dispatchElevations(layout: ElevationLayout) {
         const elevationTile = layout.tile;
         const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
         if (elevationBounds) {
@@ -490,10 +490,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                             const w1 = textureBounds.east - textureBounds.west;
                             const h1 = textureBounds.north - textureBounds.south;
                             const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                            elevationUvs.z = w1 / w0; // su
-                            elevationUvs.w = h1 / h0; // sv
                             elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
                             elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+                            elevationUvs.z = w1 / w0; // su
+                            elevationUvs.w = h1 / h0; // sv
 
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;

@@ -976,11 +976,6 @@ class ElevationGridFactory {
         let j = row == h - 1 ? 2 : 0;
         return i + j;
     }
-    static InitUV(column, row, w, h) {
-        let u = column / (w - 2);
-        let v = row / (h - 2);
-        return [u, v];
-    }
     buildTopology(options) {
         const o = this._buildTerrainOptions(options);
         const data = new core_meshes__WEBPACK_IMPORTED_MODULE_1__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
@@ -997,8 +992,6 @@ class ElevationGridFactory {
             .withScale(-1, 1)
             .withInvertIndices(true)
             .withUvs(true)
-            .withUVInitializer(ElevationGridFactory.InitUV)
-            .withNormals(true)
             .withZInitializer(ElevationGridFactory.InitZ);
         if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_2__.IsSize)(options)) {
             builder
@@ -1985,10 +1978,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                         const w0 = elevationBounds.east - elevationBounds.west;
                         const h0 = elevationBounds.north - elevationBounds.south;
                         const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                        elevationUvs.z = w1 / w0;
-                        elevationUvs.w = h1 / h0;
                         elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0;
                         elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0;
+                        elevationUvs.z = w1 / w0;
+                        elevationUvs.w = h1 / h0;
                         const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                         elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
                     }
@@ -2012,10 +2005,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                             const w1 = textureBounds.east - textureBounds.west;
                             const h1 = textureBounds.north - textureBounds.south;
                             const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                            elevationUvs.z = w1 / w0;
-                            elevationUvs.w = h1 / h0;
                             elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0;
                             elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0;
+                            elevationUvs.z = w1 / w0;
+                            elevationUvs.w = h1 / h0;
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
                         }

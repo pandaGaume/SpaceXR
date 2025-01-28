@@ -11,12 +11,6 @@ export class ElevationGridFactory implements IElevationGridFactory {
         return i + j;
     }
 
-    private static InitUV(column: number, row: number, w: number, h: number): number[] {
-        let u = column / (w - 2);
-        let v = row / (h - 2);
-        return [u, v];
-    }
-
     public buildTopology(options: number | ISize2 | TerrainGridOptions | TerrainGridOptionsBuilder): IVerticesData {
         const o = this._buildTerrainOptions(options);
         const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());
@@ -34,8 +28,6 @@ export class ElevationGridFactory implements IElevationGridFactory {
             .withScale(-1, 1) // we consider a grid oriented with babylonjs coordinate system, left handed
             .withInvertIndices(true)
             .withUvs(true) // generate uvs.
-            .withUVInitializer(ElevationGridFactory.InitUV) // register the uv initializer, which serve as referencing the texture coordinate used in conjunction with depth
-            .withNormals(true) // generate normals
             .withZInitializer(ElevationGridFactory.InitZ); // register the z initializer, which serve as referencing the elevation depth
 
         if (IsSize(options)) {

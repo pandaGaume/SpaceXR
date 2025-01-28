@@ -7357,6 +7357,7 @@ StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_address__WEBPACK_IMPORTED_MODULE_0__.NeighborsIndex),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress)
 /* harmony export */ });
 /* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.address */ "./dist/tiles/address/tiles.address.js");
@@ -7373,12 +7374,25 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   NeighborsIndex: () => (/* binding */ NeighborsIndex),
 /* harmony export */   TileAddress: () => (/* binding */ TileAddress)
 /* harmony export */ });
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math/math */ "./dist/math/math.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.bounds.js");
 
 
+var NeighborsIndex;
+(function (NeighborsIndex) {
+    NeighborsIndex[NeighborsIndex["NW"] = 0] = "NW";
+    NeighborsIndex[NeighborsIndex["N"] = 1] = "N";
+    NeighborsIndex[NeighborsIndex["NE"] = 2] = "NE";
+    NeighborsIndex[NeighborsIndex["W"] = 3] = "W";
+    NeighborsIndex[NeighborsIndex["C"] = 4] = "C";
+    NeighborsIndex[NeighborsIndex["E"] = 5] = "E";
+    NeighborsIndex[NeighborsIndex["SW"] = 6] = "SW";
+    NeighborsIndex[NeighborsIndex["S"] = 7] = "S";
+    NeighborsIndex[NeighborsIndex["SE"] = 8] = "SE";
+})(NeighborsIndex || (NeighborsIndex = {}));
 class TileAddress {
     static Split(a, metrics) {
         if (a.levelOfDetail == metrics.maxLOD) {
@@ -7480,10 +7494,10 @@ class TileAddress {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
     }
-    static ToNeigborsKey(key) {
-        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
+    static ToNeighborsKey(key) {
+        return TileAddress.ToNeighborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
     }
-    static ToNeigborsXY(a) {
+    static ToNeighborsXY(a) {
         const max = Math.pow(2, a.levelOfDetail);
         const n = [
             new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
@@ -8273,6 +8287,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.NeighborsIndex),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
@@ -12352,6 +12367,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.MorganKeenanClass),
 /* harmony export */   MouseInputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.MouseInputController),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.NeighborsIndex),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),

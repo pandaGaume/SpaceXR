@@ -1,6 +1,17 @@
 import { Nullable } from "../../types";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { IBounds2 } from "../../geometry";
+export declare enum NeighborsIndex {
+    NW = 0,
+    N = 1,
+    NE = 2,
+    W = 3,
+    C = 4,
+    E = 5,
+    SW = 6,
+    S = 7,
+    SE = 8
+}
 export declare class TileAddress implements ITileAddress {
     static Split(a: ITileAddress, metrics: ITileMetrics): Nullable<ITileAddress[]>;
     static ShiftMultiple(addresses: ITileAddress[], N: number, metrics: ITileMetrics): ITileAddress[];
@@ -13,8 +24,8 @@ export declare class TileAddress implements ITileAddress {
     static ClampLod(levelOfDetail: number, metrics: ITileMetrics): number;
     static ToParentKey(key: string): string;
     static ToChildsKey(key: string): string[];
-    static ToNeigborsKey(key: string): Nullable<string>[];
-    static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[];
+    static ToNeighborsKey(key: string): Nullable<string>[];
+    static ToNeighborsXY(a: ITileAddress): Nullable<ITileAddress>[];
     static TileXYToQuadKey(x: number, y: number, levelOfDetail: number): string;
     static QuadKeyToTileXY(quadKey: string): ITileAddress;
     private _k?;

@@ -24,10 +24,17 @@ import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile, ITileMapLayerView, ITileMetrics, TargetProxy, Tile } from "core/tiles";
+import { IPipelineMessageType, ITargetBlock, ITile, ITileAddress, ITileMapLayerView, ITileMetrics, NeighborsIndex, TargetProxy, Tile, TileAddress } from "core/tiles";
 import { IDisposable } from "core/types";
 import { ElevationLayerView, TextureLayerView } from "../map";
 import { Range } from "core/math";
+
+enum TileBorder {
+    None = 0, // No border in common
+    East = 1, // East border in common
+    South = 2, // South border in common
+    SouthEast = 3, // Both east and south borders in common
+}
 
 // internal class used to hold the tile pool areas
 class TileLayout<T, V> implements IDisposable {
@@ -47,6 +54,8 @@ class TextureLayout extends TileLayout<ITileWithGridElevation<TextureType>, Text
 
 // specialization for elevation with dem and normals
 class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
+    _neighbors: Array<Nullable<ITileAddress>>;
+
     public constructor(
         tile: ITile<ElevationType>,
         layer: ITileMapLayerView<ElevationType>,
@@ -54,6 +63,11 @@ class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
         public normalArea: Nullable<ITexture3Layer> = null
     ) {
         super(tile, layer, area);
+        this._neighbors = TileAddress.ToNeighborsXY(tile.address);
+    }
+
+    public get neighbors(): Array<Nullable<ITileAddress>> {
+        return this._neighbors;
     }
 
     public dispose() {
@@ -63,6 +77,10 @@ class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
 }
 
 export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
+    public static ElevationDepthsEastProperty: string = "y";
+    public static ElevationDepthsSouthProperty: string = "z";
+    public static ElevationDepthsSouthEastProperty: string = "w";
+
     public static ClassName: string = "Map3dMaterial";
     public static ShaderName: string = "map";
 
@@ -761,28 +779,49 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         const textureTile = b.tile;
         const textureBounds = textureTile.geoBounds!; // the bounds has been tested for undefined before.
 
-        let code = 0;
+        let code = TileBorder.None;
         if (textureBounds.east == elevationBounds.east) {
-            code += 1;
+            code += TileBorder.East;
         }
         if (textureBounds.south == elevationBounds.south) {
-            code += 2;
+            code += TileBorder.South;
         }
+
+        let i: NeighborsIndex = NeighborsIndex.E;
+        let p:string = Map3dMaterial.ElevationDepthsEastProperty;
         switch (code) {
-            case 0: {
+            case TileBorder.None: {
+                // Nothing to do
+                return;
+            }
+            case TileBorder.East: {
+                // Tile has east border in common
+                // Find the east neighbor (5 index in the neighbors)
                 break;
             }
-            case 1: {
-                console.log(`elevation ${elevationTile.quadkey} east border with texture ${textureTile.quadkey}`);
+            case TileBorder.South: {
+                // Tile has south border in common
+                // Find the south neighbor (7 index in the neighbors)
+                i = NeighborsIndex.S;
+                p =Map3dMaterial.ElevationDepthsSouthProperty;
                 break;
             }
-            case 2: {
-                console.log(`elevation ${elevationTile.quadkey} south border with texture ${textureTile.quadkey}`);
+            case TileBorder.SouthEast: {
+                // Tile has both east and south borders in common
+                // Find the south-east neighbor (8 index in the neighbors)
+                i = NeighborsIndex.SE;
+                p = Map3dMaterial.ElevationDepthsSouthEastProperty;
                 break;
             }
-            case 3: {
-                console.log(`elevation ${elevationTile.quadkey} south-east corner with texture ${textureTile.quadkey}`);
-                break;
+        }
+        const key = a.neighbors[i]?.quadkey;
+        if (key) {
+            const n = this._elevationTileLayouts.get(key);
+            if (n) {
+                const elevationDepths = textureTile.surface?.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                if (elevationDepths) {
+                    elevationDepths[p] = n.area?.depth;
+                }
             }
         }
     }

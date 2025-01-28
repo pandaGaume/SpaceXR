@@ -3,6 +3,18 @@ import { Scalar } from "../../math/math";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { IBounds2, Bounds2 } from "../../geometry";
 
+export enum NeighborsIndex {
+    NW = 0,
+    N = 1,
+    NE = 2,
+    W = 3,
+    C = 4,
+    E = 5,
+    SW = 6,
+    S = 7,
+    SE = 8,
+}
+
 export class TileAddress implements ITileAddress {
     public static Split(a: ITileAddress, metrics: ITileMetrics): Nullable<ITileAddress[]> {
         if (a.levelOfDetail == metrics.maxLOD) {
@@ -137,8 +149,8 @@ export class TileAddress implements ITileAddress {
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
     }
 
-    public static ToNeigborsKey(key: string): Nullable<string>[] {
-        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
+    public static ToNeighborsKey(key: string): Nullable<string>[] {
+        return TileAddress.ToNeighborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
     }
 
     /// <summary>
@@ -150,7 +162,7 @@ export class TileAddress implements ITileAddress {
     /// with 4 being the specified tile.
     // you may use NeighborsAddress enum for the purpose of indexing the array.
     /// </summary>
-    public static ToNeigborsXY(a: ITileAddress): Nullable<ITileAddress>[] {
+    public static ToNeighborsXY(a: ITileAddress): Nullable<ITileAddress>[] {
         const max = Math.pow(2, a.levelOfDetail);
         const n = [
             new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),

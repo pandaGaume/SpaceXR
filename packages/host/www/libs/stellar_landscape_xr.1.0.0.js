@@ -1671,14 +1671,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
-/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.texture.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.dem.js");
-/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.texture.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.dem.js");
+/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
 
 
 
@@ -1686,6 +1687,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var TileBorder;
+(function (TileBorder) {
+    TileBorder[TileBorder["None"] = 0] = "None";
+    TileBorder[TileBorder["East"] = 1] = "East";
+    TileBorder[TileBorder["South"] = 2] = "South";
+    TileBorder[TileBorder["SouthEast"] = 3] = "SouthEast";
+})(TileBorder || (TileBorder = {}));
 class TileLayout {
     constructor(tile, layer, area = null) {
         this.tile = tile;
@@ -1705,6 +1713,10 @@ class ElevationLayout extends TileLayout {
     constructor(tile, layer, area = null, normalArea = null) {
         super(tile, layer, area);
         this.normalArea = normalArea;
+        this._neighbors = core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileAddress.ToNeighborsXY(tile.address);
+    }
+    get neighbors() {
+        return this._neighbors;
     }
     dispose() {
         super.dispose();
@@ -1724,10 +1736,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         this._mapScale = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.One();
         this._textureTileLayouts = new Map();
         this._elevationTileLayouts = new Map();
-        this._displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.Zero();
+        this._displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.Zero();
         this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
-        this._imagesTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TargetProxy(this._imagesAdded.bind(this), this._imagesRemoved.bind(this), this._imagesUpdated.bind(this));
-        this._elevationsTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_2__.TargetProxy(this._elevationsAdded.bind(this), this._elevationsRemoved.bind(this), this._elevationsUpdated.bind(this));
+        this._imagesTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_3__.TargetProxy(this._imagesAdded.bind(this), this._imagesRemoved.bind(this), this._imagesUpdated.bind(this));
+        this._elevationsTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_3__.TargetProxy(this._elevationsAdded.bind(this), this._elevationsRemoved.bind(this), this._elevationsUpdated.bind(this));
     }
     get imagesTarget() {
         return this._imagesTarget;
@@ -1901,7 +1913,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             internalFormat: scene.getEngine()._gl.RGB8,
             generateMipMap: false,
         };
-        return new _textures__WEBPACK_IMPORTED_MODULE_3__.Texture3(scene, options);
+        return new _textures__WEBPACK_IMPORTED_MODULE_4__.Texture3(scene, options);
     }
     _buildElevationSampler(width, height, depth) {
         height = height ?? width;
@@ -1919,10 +1931,10 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             wrapU: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_WRAP_ADDRESSMODE,
             wrapV: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_WRAP_ADDRESSMODE,
         };
-        return new _textures__WEBPACK_IMPORTED_MODULE_3__.Texture3(scene, options);
+        return new _textures__WEBPACK_IMPORTED_MODULE_4__.Texture3(scene, options);
     }
     _getOverallSamplerDepth(width, height) {
-        if (core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.IsEmpty(this._displayResolution)) {
+        if (core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.IsEmpty(this._displayResolution)) {
             return Map3dMaterial.DefaultElevationTextureDepth;
         }
         height = height ?? width;
@@ -1941,19 +1953,19 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindClipPlanes(effect) {
         if (this._holoBounds) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicBox)(this._holoBounds)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicBox)(this._holoBounds)) {
                 const clips = this._holoBounds.clipPlanesWorld;
                 if (clips) {
-                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_4__.ClipIndex.North);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_4__.ClipIndex.South);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_4__.ClipIndex.East);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_4__.ClipIndex.West);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.North);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.South);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.East);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_5__.ClipIndex.West);
                 }
             }
-            else if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicSphere)(this._holoBounds)) {
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicSphere)(this._holoBounds)) {
                 effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
             }
-            else if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicCylinder)(this._holoBounds)) {
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicCylinder)(this._holoBounds)) {
                 effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
                 effect.setVector3(Map3dMaterial.HeightUniformName, this._holoBounds.height ?? new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, Number.MAX_SAFE_INTEGER, 0));
             }
@@ -1972,7 +1984,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindHolographicBounds() {
         if (this._holoBounds) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicBox)(this._holoBounds)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicBox)(this._holoBounds)) {
                 this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
                 this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
             }
@@ -1988,17 +2000,17 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     _pushUniformsForBounds(defines, uniforms) {
-        if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicBox)(this._holoBounds)) {
+        if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicBox)(this._holoBounds)) {
             defines.HOLOGRAPHIC_BOUNDS_BOX = true;
             const properties = ["point", "normal"];
             uniforms.push(...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
         }
-        else if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicSphere)(this._holoBounds)) {
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicSphere)(this._holoBounds)) {
             throw new Error("Sphere bounds Not supported");
             defines.HOLOGRAPHIC_BOUNDS_SPHERE = true;
             uniforms.push(Map3dMaterial.RadiusUniformName);
         }
-        else if ((0,_display__WEBPACK_IMPORTED_MODULE_4__.IsHolographicCylinder)(this._holoBounds)) {
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_5__.IsHolographicCylinder)(this._holoBounds)) {
             throw new Error("Cylinder bounds Not supported");
             defines.HOLOGRAPHIC_BOUNDS_CYLINDER = true;
             uniforms.push(Map3dMaterial.RadiusUniformName, Map3dMaterial.HeightUniformName);
@@ -2033,13 +2045,13 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             const infos = b.tile.content;
             if (infos) {
                 if (range === null) {
-                    range = new core_math__WEBPACK_IMPORTED_MODULE_5__.Range(infos.min.z, infos.max.z);
+                    range = new core_math__WEBPACK_IMPORTED_MODULE_6__.Range(infos.min.z, infos.max.z);
                     continue;
                 }
                 range.unionInPlace(infos.min.z, infos.max.z);
             }
         }
-        return range ?? new core_math__WEBPACK_IMPORTED_MODULE_5__.Range(Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
+        return range ?? new core_math__WEBPACK_IMPORTED_MODULE_6__.Range(Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
     }
     _updateElevationRange(infos) {
         if (infos) {
@@ -2049,7 +2061,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _imagesAdded(data, state) {
         const host = state.currentTarget;
-        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_6__.TextureLayerView) {
+        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_7__.TextureLayerView) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 if (this._textureTileLayouts.has(key)) {
@@ -2113,7 +2125,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _elevationsAdded(data, state) {
         const host = state.currentTarget;
-        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_7__.ElevationLayerView) {
+        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_8__.ElevationLayerView) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 if (this._elevationTileLayouts.has(key)) {
@@ -2147,7 +2159,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _elevationsUpdated(data, state) {
         const host = state.currentTarget;
-        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_7__.ElevationLayerView) {
+        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_8__.ElevationLayerView) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 const layout = this._elevationTileLayouts.get(key);
@@ -2227,38 +2239,54 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         const elevationBounds = elevationTile.geoBounds;
         const textureTile = b.tile;
         const textureBounds = textureTile.geoBounds;
-        let code = 0;
+        let code = TileBorder.None;
         if (textureBounds.east == elevationBounds.east) {
-            code += 1;
+            code += TileBorder.East;
         }
         if (textureBounds.south == elevationBounds.south) {
-            code += 2;
+            code += TileBorder.South;
         }
+        let i = core_tiles__WEBPACK_IMPORTED_MODULE_1__.NeighborsIndex.E;
+        let p = Map3dMaterial.ElevationDepthsEastProperty;
         switch (code) {
-            case 0: {
+            case TileBorder.None: {
+                return;
+            }
+            case TileBorder.East: {
                 break;
             }
-            case 1: {
-                console.log(`elevation ${elevationTile.quadkey} east border with texture ${textureTile.quadkey}`);
+            case TileBorder.South: {
+                i = core_tiles__WEBPACK_IMPORTED_MODULE_1__.NeighborsIndex.S;
+                p = Map3dMaterial.ElevationDepthsSouthProperty;
                 break;
             }
-            case 2: {
-                console.log(`elevation ${elevationTile.quadkey} south border with texture ${textureTile.quadkey}`);
+            case TileBorder.SouthEast: {
+                i = core_tiles__WEBPACK_IMPORTED_MODULE_1__.NeighborsIndex.SE;
+                p = Map3dMaterial.ElevationDepthsSouthEastProperty;
                 break;
             }
-            case 3: {
-                console.log(`elevation ${elevationTile.quadkey} south-east corner with texture ${textureTile.quadkey}`);
-                break;
+        }
+        const key = a.neighbors[i]?.quadkey;
+        if (key) {
+            const n = this._elevationTileLayouts.get(key);
+            if (n) {
+                const elevationDepths = textureTile.surface?.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                if (elevationDepths) {
+                    elevationDepths[p] = n.area?.depth;
+                }
             }
         }
     }
     _ensureTileGeoBoundsIsReady(tile, metrics) {
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
-            const env = core_tiles__WEBPACK_IMPORTED_MODULE_8__.Tile.BuildEnvelope(tile.address, metrics);
+            const env = core_tiles__WEBPACK_IMPORTED_MODULE_9__.Tile.BuildEnvelope(tile.address, metrics);
             tile.geoBounds = env;
         }
     }
 }
+Map3dMaterial.ElevationDepthsEastProperty = "y";
+Map3dMaterial.ElevationDepthsSouthProperty = "z";
+Map3dMaterial.ElevationDepthsSouthEastProperty = "w";
 Map3dMaterial.ClassName = "Map3dMaterial";
 Map3dMaterial.ShaderName = "map";
 Map3dMaterial.DefaultElevationTextureDepth = 16;
@@ -7901,6 +7929,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.MorganKeenanClass),
 /* harmony export */   MouseInputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.MouseInputController),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.NeighborsIndex),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),
@@ -10403,6 +10432,7 @@ StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_address__WEBPACK_IMPORTED_MODULE_0__.NeighborsIndex),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress)
 /* harmony export */ });
 /* harmony import */ var _tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.address */ "../core/dist/tiles/address/tiles.address.js");
@@ -10419,12 +10449,25 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   NeighborsIndex: () => (/* binding */ NeighborsIndex),
 /* harmony export */   TileAddress: () => (/* binding */ TileAddress)
 /* harmony export */ });
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math/math */ "../core/dist/math/math.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
 
 
+var NeighborsIndex;
+(function (NeighborsIndex) {
+    NeighborsIndex[NeighborsIndex["NW"] = 0] = "NW";
+    NeighborsIndex[NeighborsIndex["N"] = 1] = "N";
+    NeighborsIndex[NeighborsIndex["NE"] = 2] = "NE";
+    NeighborsIndex[NeighborsIndex["W"] = 3] = "W";
+    NeighborsIndex[NeighborsIndex["C"] = 4] = "C";
+    NeighborsIndex[NeighborsIndex["E"] = 5] = "E";
+    NeighborsIndex[NeighborsIndex["SW"] = 6] = "SW";
+    NeighborsIndex[NeighborsIndex["S"] = 7] = "S";
+    NeighborsIndex[NeighborsIndex["SE"] = 8] = "SE";
+})(NeighborsIndex || (NeighborsIndex = {}));
 class TileAddress {
     static Split(a, metrics) {
         if (a.levelOfDetail == metrics.maxLOD) {
@@ -10526,10 +10569,10 @@ class TileAddress {
         key = key || "";
         return [key.slice() + "0", key.slice() + "1", key.slice() + "2", key.slice() + "3"];
     }
-    static ToNeigborsKey(key) {
-        return TileAddress.ToNeigborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
+    static ToNeighborsKey(key) {
+        return TileAddress.ToNeighborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
     }
-    static ToNeigborsXY(a) {
+    static ToNeighborsXY(a) {
         const max = Math.pow(2, a.levelOfDetail);
         const n = [
             new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
@@ -11319,6 +11362,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.NeighborsIndex),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
@@ -15929,6 +15973,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
 /* harmony export */   MouseInputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MouseInputController),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.NeighborsIndex),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Observable),

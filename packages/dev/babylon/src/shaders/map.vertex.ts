@@ -7,8 +7,8 @@ const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 #include<elevationVertexDeclaration>
 #include<textureVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {int i=int(position.z);float elevationDepth=elevationDepths[i];vec3 v=vec3(elevationUvs.xy+uv.xy*elevationUvs.zw,elevationDepth);#include<instancesVertex>
+in vec3 position;uniform mat4 viewProjection;void main(void) {int i=int(position.z);float elevationDepth=elevationDepths[i];vec2 uv0=(- position.xy+0.5);vec2 tmp=(i != 0 && elevationDepth != elevationDepths[0]) ? vec2(uv0.x==1.0 ? 0.0 : uv0.x,uv0.y==1.0 ? 0.0 : uv0.y) : uv0;vec3 v=vec3(elevationUvs.xy+tmp.xy*elevationUvs.zw,elevationDepth);#include<instancesVertex>
 float rawAltitude=float(texture(uElevations,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
-gl_Position=viewProjection*worldPosition;vUvs=(- position.xy+0.5); depth= textureDepths.x;}`;
+gl_Position=viewProjection*worldPosition;vUvs=uv0; depth=textureDepths.x;}`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const mapVertexShader = { name, shader };

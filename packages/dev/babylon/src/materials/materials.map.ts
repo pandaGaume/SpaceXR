@@ -214,7 +214,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         const attribs = [
             // babylon related
             VertexBuffer.PositionKind,
-            VertexBuffer.UVKind,
 
             // instance related
             Map3dMaterial.TextureDepthsAttName,
@@ -788,7 +787,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         }
 
         let i: NeighborsIndex = NeighborsIndex.E;
-        let p:string = Map3dMaterial.ElevationDepthsEastProperty;
+        let p: string = Map3dMaterial.ElevationDepthsEastProperty;
         switch (code) {
             case TileBorder.None: {
                 // Nothing to do
@@ -803,7 +802,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 // Tile has south border in common
                 // Find the south neighbor (7 index in the neighbors)
                 i = NeighborsIndex.S;
-                p =Map3dMaterial.ElevationDepthsSouthProperty;
+                p = Map3dMaterial.ElevationDepthsSouthProperty;
                 break;
             }
             case TileBorder.SouthEast: {

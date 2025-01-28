@@ -27,7 +27,6 @@ export class ElevationGridFactory implements IElevationGridFactory {
         const builder = new TerrainGridOptionsBuilder()
             .withScale(-1, 1) // we consider a grid oriented with babylonjs coordinate system, left handed
             .withInvertIndices(true)
-            .withUvs(true) // generate uvs.
             .withZInitializer(ElevationGridFactory.InitZ); // register the z initializer, which serve as referencing the elevation depth
 
         if (IsSize(options)) {

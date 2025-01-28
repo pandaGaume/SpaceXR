@@ -14,7 +14,7 @@ precision highp float;
 
 // Attributes
 in vec3 position;
-in vec2 uv;
+
 // Uniforms
 uniform mat4 viewProjection;
 
@@ -22,11 +22,12 @@ void main(void) {
 
     int i = int(position.z);
     float elevationDepth = elevationDepths[i];
-    vec3 v = vec3(elevationUvs.xy + uv.xy * elevationUvs.zw, elevationDepth);
+    vec2 uv0 = (- position.xy + 0.5);
+    vec2 tmp = (i != 0 && elevationDepth != elevationDepths[0]) ? vec2(uv0.x == 1.0 ? 0.0 : uv0.x, uv0.y == 1.0 ? 0.0 : uv0.y) : uv0;
+    vec3 v = vec3(elevationUvs.xy + tmp.xy * elevationUvs.zw, elevationDepth);
 
     // babylon specific which give you the finalWorld matrix
     #include<instancesVertex>
-
 
     // get the position
     float rawAltitude = float(texture(uElevations, v));
@@ -39,6 +40,6 @@ void main(void) {
     
     gl_Position = viewProjection * worldPosition;
     
-    vUvs = (- position.xy + 0.5); 
-    depth =  textureDepths.x;
+    vUvs = uv0; 
+    depth = textureDepths.x;
 }

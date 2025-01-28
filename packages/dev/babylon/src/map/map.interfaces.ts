@@ -5,9 +5,11 @@ import { ImageLayerContentType, IsTile, ITargetBlock, ITile, ITileMap } from "co
 import { IValidable, Nullable } from "core/types";
 import { AbstractMesh, Mesh, TransformNode } from "@babylonjs/core";
 import { IHasHolographicBounds } from "../display";
-import { Observable } from "core/events";
 
-export type Map3DContentType = IDemInfos | ImageLayerContentType;
+export type TextureType = ImageLayerContentType;
+export type ElevationType = IDemInfos;
+
+export type Map3DContentType = ElevationType | TextureType;
 
 export interface IMap3D extends ITileMap<Map3DContentType>, IValidable {
     root: TransformNode;
@@ -36,23 +38,14 @@ export function IsTileWithMesh<T>(b: unknown): b is ITileWithMesh<T> {
     return obj.surface !== undefined && IsTile(b);
 }
 
-export interface IHasGridElevation {
-    elevationInfos: Nullable<IDemInfos>;
+export interface ITileWithGridElevation<T> extends ITileWithMesh<T> {
     gridSize: Nullable<ISize2>;
-    elevationUpdateObservable: Observable<IHasGridElevation>;
 }
 
-export function IsHasGridElevation(b: unknown): b is IHasGridElevation {
-    if (b === null || typeof b !== "object") return false;
-    const obj = b as Partial<IHasGridElevation>;
-    return obj?.elevationInfos !== undefined && obj?.gridSize !== undefined;
-}
-
-export interface ITileWithGridElevation<T> extends ITileWithMesh<T>, IHasGridElevation {}
-
-export interface IMap3DMaterial<T extends ImageLayerContentType> extends IHasHolographicBounds {
+export interface IMap3DMaterial extends IHasHolographicBounds {
     mapScale: ICartesian3;
     displayResolution: ISize3;
 
-    imagesTarget: ITargetBlock<ITileWithGridElevation<T>>;
+    imagesTarget: ITargetBlock<ITileWithGridElevation<TextureType>>;
+    elevationsTarget: ITargetBlock<ITile<ElevationType>>;
 }

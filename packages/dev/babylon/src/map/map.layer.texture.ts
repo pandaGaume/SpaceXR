@@ -4,13 +4,10 @@ import {
     ImageLayerContentType,
     IPhysicalDisplay,
     IsPhysicalDisplay,
-    IsTargetBlock,
-    ITile,
     ITileMapLayer,
     ITileMetrics,
     ITileNavigationState,
     ITileView,
-    TileMapLayerView,
     TileNavigationState,
 } from "core/tiles";
 import { Nullable } from "core/types";
@@ -18,33 +15,24 @@ import { IMap3D, ITileWithMesh } from "./map.interfaces";
 import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { DEMLayerView } from "./map.layer.dem";
-import { IDemInfos } from "core/dem";
+import { Map3dLayerView } from "./map.layer.view";
 
-export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayerView<T> {
+export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     public static DefaultExageration: number = 1.0;
 
     public static ROOT_SUFFIX = "root";
 
-    // the owner
-    _map: IMap3D;
-
     // the root of the tiles instances
     _tilesRoot: TransformNode;
-
-    // the dem layers
-    _demLayerViews: Array<DEMLayerView<IDemInfos>> = [];
 
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
     _cachedSize: ISize2;
 
-    public constructor(map: IMap3D, layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
-        super(layer, display, source);
+    public constructor(map: IMap3D, layer: ITileMapLayer<ImageLayerContentType>, display: Nullable<IDisplay>, source: ITileView) {
+        super(map, layer, display, source);
         // ensure factory is with correct type.
         this.factory.withType(TileWithElevation);
-
-        this._map = map;
 
         const gridSize = map.elevationOptions?.gridSize;
         if (IsSize(gridSize)) {
@@ -57,10 +45,6 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         // build the root for the tiles
         const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
-    }
-
-    public get map(): IMap3D {
-        return this._map;
     }
 
     public get grid(): Mesh {
@@ -83,31 +67,6 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         super.dispose();
     }
 
-    public bindElevationLayer(view: DEMLayerView<IDemInfos>): void {
-        // Check if the view is already in the array
-        if (!this._demLayerViews.includes(view)) {
-            this._demLayerViews.push(view);
-            for (const t of this._activTiles) {
-                if (IsTargetBlock<ITile<IDemInfos>>(t)) {
-                    view.linkTo(t);
-                }
-            }
-        }
-    }
-
-    public unbindElevationLayer(view: DEMLayerView<IDemInfos>): void {
-        // Check if the view is in the array
-        const index = this._demLayerViews.indexOf(view);
-        if (index !== -1) {
-            this._demLayerViews.splice(index, 1);
-            for (const t of this._activTiles) {
-                if (IsTargetBlock<ITile<IDemInfos>>(t)) {
-                    view.unlinkFrom(t);
-                }
-            }
-        }
-    }
-
     protected get isReady(): boolean {
         return this._tilesRoot !== null && this._tilesRoot !== undefined;
     }
@@ -116,7 +75,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         return new TransformNode(this._buildRootName(), scene);
     }
 
-    protected _onTileAdded(tile: TileWithElevation<T>): void {
+    protected _onTileAdded(tile: TileWithElevation<ImageLayerContentType>): void {
         const m = this._buildInstance(tile);
         if (m) {
             m.parent = this._tilesRoot;
@@ -135,34 +94,28 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
             if (center) {
                 this._setTilePosition(tile, center);
             }
-            for (const v of this._demLayerViews) {
-                v.linkTo(tile);
-            }
         }
     }
 
-    protected _onTileRemoved(tile: TileWithElevation<T>): void {
+    protected _onTileRemoved(tile: TileWithElevation<ImageLayerContentType>): void {
         if (tile.surface) {
             tile.surface.dispose();
             tile.surface = null;
-            for (const v of this._demLayerViews) {
-                v.unlinkFrom(tile);
-            }
         }
     }
 
-    protected _onTileUpdated(tile: TileWithElevation<T>): void {
+    protected _onTileUpdated(tile: TileWithElevation<ImageLayerContentType>): void {
         if (tile.surface) {
             tile.surface.setEnabled(tile.content !== null && tile.content !== undefined);
         }
     }
 
-    protected _buildInstance(tile: ITileWithMesh<T>): AbstractMesh {
+    protected _buildInstance(tile: ITileWithMesh<ImageLayerContentType>): AbstractMesh {
         const instance = this._map.grid.createInstance(this._buildInstanceName(tile));
         return instance;
     }
 
-    protected _setTilePosition(tile: ITileWithMesh<T>, center: ICartesian2): void {
+    protected _setTilePosition(tile: ITileWithMesh<ImageLayerContentType>, center: ICartesian2): void {
         if (tile?.bounds && tile?.surface) {
             const c = tile.bounds.center;
             const p = tile.surface.position;
@@ -180,7 +133,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         }
     }
 
-    protected _setScale(nav: ITileNavigationState, display: IPhysicalDisplay, layer: ITileMapLayer<T>, metrics: ITileMetrics) {
+    protected _setScale(nav: ITileNavigationState, display: IPhysicalDisplay, layer: ITileMapLayer<ImageLayerContentType>, metrics: ITileMetrics) {
         const groundResolution = metrics.groundResolution(nav.center.lat, nav.lod);
         const x = display.dimension.width / (display.resolution.width * groundResolution);
         const y = display.dimension.height / (display.resolution.height * groundResolution);
@@ -194,7 +147,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
         this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
 
         // z data are already in meter so they just need to be scaled, and exagerated.
-        this._tilesRoot.scaling.z = z * (this._map.elevationOptions?.exageration ?? ElevationHost.DefaultExageration) * nav.scale;
+        this._tilesRoot.scaling.z = z * (this._map.elevationOptions?.exageration ?? TextureLayerView.DefaultExageration) * nav.scale;
     }
 
     protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {
@@ -235,7 +188,7 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
             const center = this._getCenter(true);
             if (center) {
                 for (const tile of tiles) {
-                    this._setTilePosition(tile as ITileWithMesh<T>, center);
+                    this._setTilePosition(tile as ITileWithMesh<ImageLayerContentType>, center);
                 }
             }
         }
@@ -254,10 +207,10 @@ export class ElevationHost<T extends ImageLayerContentType> extends TileMapLayer
     }
 
     protected _buildRootName(): string {
-        return `${this.layer.name}-${ElevationHost.ROOT_SUFFIX}`;
+        return `${this.layer.name}-${TextureLayerView.ROOT_SUFFIX}`;
     }
 
-    protected _buildInstanceName(tile: ITileWithMesh<T>): string {
+    protected _buildInstanceName(tile: ITileWithMesh<ImageLayerContentType>): string {
         return tile.quadkey;
     }
 }

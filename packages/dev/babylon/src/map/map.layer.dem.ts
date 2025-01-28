@@ -1,16 +1,12 @@
 import { IDemInfos } from "core/dem";
-import { EventState } from "core/events";
-import { IDisplay, ITile, ITileMapLayer, ITilePipelineLink, ITileView, TileMapLayerView } from "core/tiles";
+import { IDisplay, ITileMapLayer, ITileView } from "core/tiles";
 import { Nullable } from "core/types";
+import { IMap3D } from "./map.interfaces";
+import { Map3dLayerView } from "./map.layer.view";
 
-export class DEMLayerView<T extends IDemInfos> extends TileMapLayerView<T> {
-    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
-        super(layer, display, source);
-    }
-
-    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {
-        super._onLinked(link);
-        // we are forwarding the activ tile to the newly linked target.
-        link.forwardAdded(Array.from(this._activTiles), new EventState(-1, false, this, this));
+export class DEMLayerView<T extends IDemInfos> extends Map3dLayerView<T> {
+    public constructor(map: IMap3D, layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ITileView) {
+        super(map, layer, display, source);
+        this._map = map;
     }
 }

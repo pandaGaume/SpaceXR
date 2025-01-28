@@ -118,7 +118,10 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {}
+    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {
+        // we are forwarding the activ tile to the newly linked target.
+        link.forwardAdded(Array.from(this._activTiles), new EventState(-1, false, this, this));
+    }
 
     public unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined {
         const i = this._links.findIndex((l) => l.target === target);

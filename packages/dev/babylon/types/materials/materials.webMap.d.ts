@@ -1,7 +1,6 @@
 import { Scene } from "@babylonjs/core";
 import { Map3dMaterial } from "./materials.map";
-import { ImageLayerContentType } from "core/tiles";
-export declare class WebMapMaterial<T extends ImageLayerContentType> extends Map3dMaterial<T> {
+export declare class WebMapMaterial extends Map3dMaterial {
     static ClassName: string;
     static ShaderName: string;
     constructor(name: string, scene?: Scene);

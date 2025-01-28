@@ -1,9 +1,9 @@
-import { IDisplay, ImageLayerContentType, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
+import { IDisplay, ImageLayer, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
 import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
 import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { ElevationHost } from "./map.layer.elevation.host";
+import { TextureLayerView } from "./map.layer.texture";
 import { ElevationLayer } from "../dem";
 import { Cartesian3, ICartesian3, ISize2, IsSize } from "core/geometry";
 import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
@@ -26,7 +26,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     _exageration?: number;
 
     _grid: Mesh;
-    _material: IMap3DMaterial<ImageLayerContentType>;
+    _material: IMap3DMaterial;
 
     public constructor(root: TransformNode) {
         super();
@@ -49,7 +49,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         return this;
     }
 
-    public get material(): IMap3DMaterial<ImageLayerContentType> {
+    public get material(): IMap3DMaterial {
         return this._material;
     }
     public get grid(): Mesh {
@@ -96,9 +96,12 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            return new DEMLayerView(layer, this._display, new TileView());
+            return new DEMLayerView(this, layer, this._display, new TileView());
         }
-        return new ElevationHost(this, <any>layer, this.display, this.view);
+        if (layer instanceof ImageLayer) {
+            return new TextureLayerView(this, layer, this.display, this.view);
+        }
+        return null;
     }
 
     // when navigation propertie's changed
@@ -142,22 +145,14 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void {
         super._onLayerViewAdded(eventData, eventState);
         for (const v of eventData) {
-            if (v instanceof ElevationHost) {
+            if (v instanceof TextureLayerView) {
                 v.tilesRoot.parent = this._root;
                 v.linkTo(<any>this.material.imagesTarget);
-                for (var l of this.layerViews) {
-                    if (l instanceof DEMLayerView) {
-                        v.bindElevationLayer(l);
-                    }
-                }
                 continue;
             }
             if (v instanceof DEMLayerView) {
-                for (const view of this.layerViews) {
-                    if (view instanceof ElevationHost) {
-                        view.bindElevationLayer(v);
-                    }
-                }
+                v.linkTo(<any>this.material.elevationsTarget);
+                continue;
             }
         }
     }
@@ -166,17 +161,13 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     protected _onLayerViewRemoved(eventData: Array<ITileMapLayerView<Map3DContentType>>, eventState: EventState): void {
         super._onLayerViewRemoved(eventData, eventState);
         for (const v of eventData) {
-            if (v instanceof ElevationHost) {
+            if (v instanceof TextureLayerView) {
                 v.tilesRoot.parent = null;
                 v.unlinkFrom(<any>this.material.imagesTarget);
                 continue;
             }
             if (v instanceof DEMLayerView) {
-                for (const view of this.layerViews) {
-                    if (view instanceof ElevationHost) {
-                        view.unbindElevationLayer(v);
-                    }
-                }
+                v.unlinkFrom(<any>this.material.elevationsTarget);
             }
         }
     }
@@ -195,8 +186,8 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     protected _buildMaterialName(): string {
         return TextUtils.BuildNameWithSuffix(this._buildTemplateName(), Map3D.MATERIAL_SUFFIX);
     }
-    protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial<ImageLayerContentType> {
-        return new Map3dMaterial<ImageLayerContentType>(name, scene);
+    protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial {
+        return new Map3dMaterial(name, scene);
     }
 
     protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh {

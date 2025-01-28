@@ -1,4 +1,4 @@
-import { IDisplay, ImageLayerContentType, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
+import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
 import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
 import { Mesh, Scene, TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
@@ -15,10 +15,10 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     _offset?: ICartesian3;
     _exageration?: number;
     _grid: Mesh;
-    _material: IMap3DMaterial<ImageLayerContentType>;
+    _material: IMap3DMaterial;
     constructor(root: TransformNode);
     get elevationOptions(): IElevationOptions;
-    get material(): IMap3DMaterial<ImageLayerContentType>;
+    get material(): IMap3DMaterial;
     get grid(): Mesh;
     get name(): string;
     get root(): TransformNode;
@@ -39,7 +39,7 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     protected _buildQualifiedName(n: string): string;
     protected _buildTemplateName(): string;
     protected _buildMaterialName(): string;
-    protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial<ImageLayerContentType>;
+    protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial;
     protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh;
     protected _buildTerrainGridOptions(): TerrainGridOptions;
     protected _buildMesh(name: string, scene?: Scene): Mesh;

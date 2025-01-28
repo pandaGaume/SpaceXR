@@ -2187,6 +2187,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                         elevationUvs.w = h1 / h0;
                         const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                         elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
+                        this._checkAdjacentTile(l, layout);
                     }
                 }
             }
@@ -2214,9 +2215,40 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                             elevationUvs.w = h1 / h0;
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+                            this._checkAdjacentTile(layout, l);
                         }
                     }
                 }
+            }
+        }
+    }
+    _checkAdjacentTile(a, b) {
+        const elevationTile = a.tile;
+        const elevationBounds = elevationTile.geoBounds;
+        const textureTile = b.tile;
+        const textureBounds = textureTile.geoBounds;
+        let code = 0;
+        if (textureBounds.east == elevationBounds.east) {
+            code += 1;
+        }
+        if (textureBounds.south == elevationBounds.south) {
+            code += 2;
+        }
+        switch (code) {
+            case 0: {
+                break;
+            }
+            case 1: {
+                console.log(`elevation ${elevationTile.quadkey} east border with texture ${textureTile.quadkey}`);
+                break;
+            }
+            case 2: {
+                console.log(`elevation ${elevationTile.quadkey} south border with texture ${textureTile.quadkey}`);
+                break;
+            }
+            case 3: {
+                console.log(`elevation ${elevationTile.quadkey} south-east corner with texture ${textureTile.quadkey}`);
+                break;
             }
         }
     }

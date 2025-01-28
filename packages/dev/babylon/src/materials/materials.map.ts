@@ -710,6 +710,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                         const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                         elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
+                        this._checkAdjacentTile(l, layout);
                     }
                 }
             }
@@ -745,9 +746,43 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+
+                            this._checkAdjacentTile(layout, l);
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private _checkAdjacentTile(a: ElevationLayout, b: TextureLayout): void {
+        const elevationTile = a.tile;
+        const elevationBounds = elevationTile.geoBounds!; // the bounds has been tested for undefined before.
+        const textureTile = b.tile;
+        const textureBounds = textureTile.geoBounds!; // the bounds has been tested for undefined before.
+
+        let code = 0;
+        if (textureBounds.east == elevationBounds.east) {
+            code += 1;
+        }
+        if (textureBounds.south == elevationBounds.south) {
+            code += 2;
+        }
+        switch (code) {
+            case 0: {
+                break;
+            }
+            case 1: {
+                console.log(`elevation ${elevationTile.quadkey} east border with texture ${textureTile.quadkey}`);
+                break;
+            }
+            case 2: {
+                console.log(`elevation ${elevationTile.quadkey} south border with texture ${textureTile.quadkey}`);
+                break;
+            }
+            case 3: {
+                console.log(`elevation ${elevationTile.quadkey} south-east corner with texture ${textureTile.quadkey}`);
+                break;
             }
         }
     }

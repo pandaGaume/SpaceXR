@@ -2069,6 +2069,8 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_NEAREST_NEAREST,
             internalFormat: scene.getEngine()._gl.R16F,
             generateMipMap: false,
+            wrapU: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_WRAP_ADDRESSMODE,
+            wrapV: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_WRAP_ADDRESSMODE,
         };
         return new _textures__WEBPACK_IMPORTED_MODULE_6__.Texture3(scene, options);
     }
@@ -2325,7 +2327,7 @@ class Texture3Layer {
     }
 }
 class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture {
-    constructor(sceneOrEngine, width, height, depth, format, textureType, internalFormat, generateMipmaps, samplingMode) {
+    constructor(sceneOrEngine, width, height, depth, format, textureType, internalFormat, generateMipmaps, samplingMode, wrapU, wrapV) {
         super(sceneOrEngine);
         if (typeof width === "object" && width !== null) {
             const options = width;
@@ -2337,6 +2339,8 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
             internalFormat = options.internalFormat;
             generateMipmaps = options.generateMipmap;
             samplingMode = options.samplingMode;
+            wrapU = options.wrapU;
+            wrapV = options.wrapV;
         }
         height = height ?? width;
         depth = depth ?? 1;
@@ -2350,7 +2354,8 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
         this._h = height;
         this._internalFormat = internalFormat;
         this._texture = this._getEngine().__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
-        this.wrapU = this.wrapV = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_CLAMP_ADDRESSMODE;
+        this.wrapU = wrapU ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_CLAMP_ADDRESSMODE;
+        this.wrapV = wrapV ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_CLAMP_ADDRESSMODE;
     }
     get width() {
         return this._w;
@@ -15634,8 +15639,8 @@ const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 #include<elevationVertexDeclaration>
 #include<textureVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,0.0);#include<instancesVertex>
-float alt=0.0;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {int i=int(position.z);float elevationDepth=elevationDepths[i];vec3 v=vec3(uv.xy,elevationDepth);#include<instancesVertex>
+float rawAltitude=float(texture(uElevations,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;alt=0.0;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
 gl_Position=viewProjection*worldPosition;vUvs=(- position.xy+0.5); depth= textureDepths.x;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const mapVertexShader = { name, shader };

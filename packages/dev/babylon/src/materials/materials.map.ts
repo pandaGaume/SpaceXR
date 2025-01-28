@@ -560,6 +560,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
             internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
             generateMipMap: false,
+            wrapU: Constants.TEXTURE_WRAP_ADDRESSMODE,
+            wrapV: Constants.TEXTURE_WRAP_ADDRESSMODE,
         };
         return new Texture3(scene, options);
     }

@@ -14,6 +14,8 @@ export interface ITexture3CreationOptions {
     internalFormat?: number;
     generateMipmap?: boolean;
     samplingMode?: number;
+    wrapU?: number;
+    wrapV?: number;
 }
 export interface ITexture3 extends ISize {
     depth: number;
@@ -29,7 +31,7 @@ export declare class Texture3 extends BaseTexture implements ITexture3 {
     _count: number;
     _layers: Array<Nullable<ITexture3Layer>>;
     _internalFormat?: number;
-    constructor(sceneOrEngine: Nullable<Scene | ThinEngine>, width: number | ITexture3CreationOptions, height?: number, depth?: number, format?: number, textureType?: number, internalFormat?: number, generateMipmaps?: boolean, samplingMode?: number);
+    constructor(sceneOrEngine: Nullable<Scene | ThinEngine>, width: number | ITexture3CreationOptions, height?: number, depth?: number, format?: number, textureType?: number, internalFormat?: number, generateMipmaps?: boolean, samplingMode?: number, wrapU?: number, wrapV?: number);
     get width(): number;
     get height(): number;
     get depth(): number;

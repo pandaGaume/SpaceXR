@@ -16,6 +16,8 @@ export interface ITexture3CreationOptions {
     internalFormat?: number;
     generateMipmap?: boolean;
     samplingMode?: number;
+    wrapU?: number;
+    wrapV?: number;
 }
 
 export interface ITexture3 extends ISize {
@@ -43,7 +45,7 @@ class Texture3Layer implements ITexture3Layer {
 
     public release(): void {
         this._host.release(this._depth);
-     }
+    }
 
     public get depth(): number {
         return this._depth;
@@ -70,7 +72,9 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         textureType?: number,
         internalFormat?: number,
         generateMipmaps?: boolean,
-        samplingMode?: number
+        samplingMode?: number,
+        wrapU?: number,
+        wrapV?: number
     ) {
         super(sceneOrEngine);
         if (typeof width === "object" && width !== null) {
@@ -83,6 +87,8 @@ export class Texture3 extends BaseTexture implements ITexture3 {
             internalFormat = options.internalFormat;
             generateMipmaps = options.generateMipmap;
             samplingMode = options.samplingMode;
+            wrapU = options.wrapU;
+            wrapV = options.wrapV;
         }
 
         height = height ?? width;
@@ -100,7 +106,8 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         this._internalFormat = internalFormat;
 
         this._texture = this._getEngine()!.__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
-        this.wrapU = this.wrapV = Constants.TEXTURE_CLAMP_ADDRESSMODE;
+        this.wrapU = wrapU ?? Constants.TEXTURE_CLAMP_ADDRESSMODE;
+        this.wrapV = wrapV ?? Constants.TEXTURE_CLAMP_ADDRESSMODE;
     }
 
     public get width(): number {

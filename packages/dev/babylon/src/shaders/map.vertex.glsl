@@ -18,16 +18,19 @@ in vec2 uv;
 // Uniforms
 uniform mat4 viewProjection;
 
-
-
 void main(void) {
-    vec3 v = vec3(uv.xy, 0.0);
+
+    int i = int(position.z);
+    float elevationDepth = elevationDepths[i];
+    vec3 v = vec3(uv.xy, elevationDepth);
 
     // babylon specific which give you the finalWorld matrix
     #include<instancesVertex>
 
     // get the position
-    float alt = 0.0;
+    float rawAltitude = float(texture(uElevations, v));
+    float alt = (rawAltitude -uAltRange.x) * uMapScale;
+    alt = 0.0;
     vec4 pos = vec4(position.xy, alt, 1.0);
     vec4 worldPosition = finalWorld * pos;
     

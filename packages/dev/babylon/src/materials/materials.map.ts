@@ -328,6 +328,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                 if (tile.content) {
                     area.update(tile.content);
+                    this._grabElevations(layout);
                     tile.surface?.setEnabled(true);
                 }
                 this.markAsDirty(Material.TextureDirtyFlag);
@@ -357,6 +358,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             if (layout) {
                 if (tile.content) {
                     layout.area?.update(tile.content);
+                    this._grabElevations(layout);
                     tile.surface?.setEnabled(true);
                     this.markAsDirty(Material.TextureDirtyFlag);
                 }
@@ -435,14 +437,43 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     ///<sumary>
     /// gather elevations from grid.
     ///</sumary>
-    protected _grabElevations(layout: TextureLayout) {}
+    protected _grabElevations(layout: TextureLayout) {
+        const textureTile = layout.tile;
+        const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
+        const surface = textureTile.surface;
+        if (textureBounds && surface) {
+            const w1 = textureBounds.east - textureBounds.west;
+            const h1 = textureBounds.north - textureBounds.south;
+            for (const l of this._elevationTileLayouts.values()) {
+                const elevationTile = l.tile;
+                const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
+                if (elevationBounds) {
+                    if (elevationBounds.contains(textureBounds)) {
+                        // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
+                        // u = u0 + u * su
+                        // v = v0 + v * sv
+                        const w0 = elevationBounds.east - elevationBounds.west;
+                        const h0 = elevationBounds.north - elevationBounds.south;
+                        const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                        elevationUvs.z = w1 / w0; // su
+                        elevationUvs.w = h1 / h0; // sv
+                        elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
+                        elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+
+                        const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                        elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
+                    }
+                }
+            }
+        }
+    }
 
     ///<sumary>
     // dispatch elevations to grid
     ///</sumary>
     protected _dispatchElevations(layout: ElevationLayout) {
-        const tile = layout.tile;
-        const elevationBounds = tile.geoBounds; // the bounds has been tested for undefined before.
+        const elevationTile = layout.tile;
+        const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
         if (elevationBounds) {
             const w0 = elevationBounds.east - elevationBounds.west;
             const h0 = elevationBounds.north - elevationBounds.south;
@@ -450,7 +481,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 const textureTile = l.tile;
                 const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
                 if (textureBounds) {
-                    // if b1 is is inside b0, we compute the normalized coordinates and scale
                     if (elevationBounds.contains(textureBounds)) {
                         const surface = textureTile.surface;
                         if (surface) {

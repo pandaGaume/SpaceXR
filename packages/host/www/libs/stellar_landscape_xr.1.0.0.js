@@ -1880,6 +1880,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 this._ensureTileGeoBoundsIsReady(tile, host.metrics);
                 if (tile.content) {
                     area.update(tile.content);
+                    this._grabElevations(layout);
                     tile.surface?.setEnabled(true);
                 }
                 this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
@@ -1907,6 +1908,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             if (layout) {
                 if (tile.content) {
                     layout.area?.update(tile.content);
+                    this._grabElevations(layout);
                     tile.surface?.setEnabled(true);
                     this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
                 }
@@ -1968,10 +1970,35 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
         }
     }
-    _grabElevations(layout) { }
+    _grabElevations(layout) {
+        const textureTile = layout.tile;
+        const textureBounds = textureTile.geoBounds;
+        const surface = textureTile.surface;
+        if (textureBounds && surface) {
+            const w1 = textureBounds.east - textureBounds.west;
+            const h1 = textureBounds.north - textureBounds.south;
+            for (const l of this._elevationTileLayouts.values()) {
+                const elevationTile = l.tile;
+                const elevationBounds = elevationTile.geoBounds;
+                if (elevationBounds) {
+                    if (elevationBounds.contains(textureBounds)) {
+                        const w0 = elevationBounds.east - elevationBounds.west;
+                        const h0 = elevationBounds.north - elevationBounds.south;
+                        const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                        elevationUvs.z = w1 / w0;
+                        elevationUvs.w = h1 / h0;
+                        elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0;
+                        elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0;
+                        const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                        elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
+                    }
+                }
+            }
+        }
+    }
     _dispatchElevations(layout) {
-        const tile = layout.tile;
-        const elevationBounds = tile.geoBounds;
+        const elevationTile = layout.tile;
+        const elevationBounds = elevationTile.geoBounds;
         if (elevationBounds) {
             const w0 = elevationBounds.east - elevationBounds.west;
             const h0 = elevationBounds.north - elevationBounds.south;

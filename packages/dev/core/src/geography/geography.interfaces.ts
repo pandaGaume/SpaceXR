@@ -42,9 +42,10 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     unionInPlace(other?: IEnvelope): IEnvelope;
     scaleInPlace(scale: number): IEnvelope;
     intersects(bounds?: IEnvelope): boolean;
-    contains(loc?: IGeo3): boolean;
+    contains(other?: IEnvelope | IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     clone(): IEnvelope;
+    isEmpty(): boolean;
 }
 
 export function IsEnvelope(b: unknown): b is IEnvelope {

@@ -18,11 +18,11 @@ vec3 elevation_rgbaToNormal(vec4 rgba)
     return normalize(vec3(x,y,z));
 }
 
-uniform highp sampler2DArray uAltitudes;
-uniform highp sampler2DArray uNormals;
+uniform highp sampler2DArray uElevations;
 
 uniform highp vec2 uAltRange;
 uniform highp float uMapScale;
 
 // the depth of uvs and texture 
-in vec4 samplerDepths;
+in vec4 elevationUvs;
+in vec4 elevationDepths;

@@ -2,10 +2,7 @@
 // Therefore, any manual changes made to this file will be overridden by the next build.
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 import { ShaderStore } from "@babylonjs/core";
-const name = "mapPixelShader";
-const shader = `precision highp float;#include<clipFragmentDeclaration>
-#include<textureFragmentDeclaration>
-void main(void) {#include<clipFragment>
-gl_FragColor=texture(uTextures,vec3(vUvs,depth));}`;
-ShaderStore.ShadersStore[name] = shader;
-/** @internal */ export const mapPixelShader = { name, shader };
+const name = "textureFragmentDeclaration";
+const shader = `uniform highp sampler2DArray uTextures;in vec2 vUvs;flat in float depth;`;
+ShaderStore.IncludesShadersStore[name] = shader;
+/** @internal */ export const textureFragmentDeclaration = { name, shader };

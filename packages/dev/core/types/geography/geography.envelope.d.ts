@@ -13,6 +13,7 @@ export declare class Envelope implements IEnvelope {
     _min: IGeo3;
     _max: IGeo3;
     private constructor();
+    isEmpty(): boolean;
     get north(): number;
     get south(): number;
     get east(): number;
@@ -32,7 +33,7 @@ export declare class Envelope implements IEnvelope {
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     unionInPlace(other: IEnvelope): IEnvelope;
     intersects(bounds?: IEnvelope): boolean;
-    contains(loc?: IGeo3): boolean;
+    contains(other?: IEnvelope | IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     scaleInPlace(scale: number): IEnvelope;
     toString(): string;

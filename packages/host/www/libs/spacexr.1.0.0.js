@@ -2034,6 +2034,9 @@ class Envelope {
         this._min = lowerCorner;
         this._max = upperCorner;
     }
+    isEmpty() {
+        return this._min.equals(this._max);
+    }
     get north() {
         return this._max.lat;
     }
@@ -2134,8 +2137,19 @@ class Envelope {
         }
         return true;
     }
-    contains(loc) {
-        return loc !== undefined && this.containsFloat(loc.lat, loc.lon, loc.alt);
+    contains(other) {
+        if (!other)
+            return false;
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsLocation)(other)) {
+            return this.containsFloat(other.lat, other.lon, other.alt);
+        }
+        return (this.containsFloat(other.south, other.west) &&
+            this.containsFloat(other.north, other.east) &&
+            (!this.hasAltitude ||
+                (other.bottom !== undefined &&
+                    other.top !== undefined &&
+                    this.containsFloat(other.bottom, undefined, other.bottom) &&
+                    this.containsFloat(other.top, undefined, other.top))));
     }
     containsFloat(lat, lon, alt) {
         return (lat >= this._min.lat &&

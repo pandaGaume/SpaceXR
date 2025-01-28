@@ -3,7 +3,7 @@ precision highp float;
 // declare the varying for clipping
 #include<clipFragmentDeclaration>
 
-#include<textureDepthFragmentDeclaration>
+#include<textureFragmentDeclaration>
 
 void main(void) {
      

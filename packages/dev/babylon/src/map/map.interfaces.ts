@@ -19,7 +19,7 @@ export interface IMap3D extends ITileMap<Map3DContentType>, IValidable {
 }
 
 export interface IElevationGridFactory {
-    buildTopology(options: number | TerrainGridOptions | TerrainGridOptionsBuilder): IVerticesData;
+    buildTopology(options: number | ISize2 | TerrainGridOptions | TerrainGridOptionsBuilder): IVerticesData;
 }
 
 export interface IElevationOptions {

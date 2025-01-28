@@ -5,9 +5,10 @@ import { ShaderStore } from "@babylonjs/core";
 const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;#include<textureDepthVertexDeclaration>
-void main(void) {#include<instancesVertex>
+#include<elevationVertexDeclaration>
+#include<textureVertexDeclaration>
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {vec3 v=vec3(uv.xy,0.0);#include<instancesVertex>
 float alt=0.0;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
-gl_Position=viewProjection*worldPosition;vUvs=vec2(1.0-uv.x,uv.y);depth= textureDepths.x;}`;
+gl_Position=viewProjection*worldPosition;vUvs=(- position.xy+0.5); depth= textureDepths.x;}`;
 ShaderStore.ShadersStore[name] = shader;
 /** @internal */ export const mapVertexShader = { name, shader };

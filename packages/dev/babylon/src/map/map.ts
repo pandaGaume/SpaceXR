@@ -5,8 +5,7 @@ import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { TextureLayerView } from "./map.layer.texture";
 import { ElevationLayer } from "../dem";
-import { Cartesian3, ICartesian3, ISize2, IsSize } from "core/geometry";
-import { TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
+import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
 import { ElevationGridFactory } from "./map.grid.factory";
 import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
@@ -35,9 +34,8 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         this._offset = Cartesian3.Zero();
         this._exageration = Map3D.DefaultExageration;
 
-        const o = this._buildTerrainGridOptions();
         const scene = this._root.getScene();
-        this._grid = this._buildTemplate(o, scene);
+        this._grid = this._buildTemplate(scene);
         this._grid.setEnabled(false);
         this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
         if (this._material instanceof Material) {
@@ -190,10 +188,11 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         return new Map3dMaterial(name, scene);
     }
 
-    protected _buildTemplate(options: TerrainGridOptions, scene?: Scene): Mesh {
+    protected _buildTemplate(scene?: Scene): Mesh {
         const mesh = this._buildMesh(this._buildTemplateName() ?? this.name, scene);
         const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
-        const grid = gridFactory.buildTopology(options);
+        const gridSize = this.gridSize ?? Map3D.DefaultGridSize;
+        const grid = gridFactory.buildTopology(gridSize);
         if (grid instanceof VertexData) {
             grid.applyToMesh(mesh);
         } else {
@@ -205,27 +204,6 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
             data.applyToMesh(mesh);
         }
         return mesh;
-    }
-
-    protected _buildTerrainGridOptions(): TerrainGridOptions {
-        let w = TerrainGridOptions.DefaultGridSize;
-        let h = TerrainGridOptions.DefaultGridSize;
-        const gridSize = this.gridSize;
-        if (gridSize) {
-            if (IsSize(gridSize)) {
-                w = gridSize.width;
-                h = gridSize.height;
-            } else {
-                w = h = gridSize;
-            }
-        }
-
-        return new TerrainGridOptionsBuilder()
-            .withColumns(w + 1)
-            .withRows(h + 1)
-            .withUvs(true)
-            .withNormals(false)
-            .build();
     }
 
     protected _buildMesh(name: string, scene?: Scene): Mesh {

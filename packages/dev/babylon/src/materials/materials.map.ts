@@ -23,14 +23,14 @@ import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile, TargetProxy } from "core/tiles";
+import { IPipelineMessageType, ITargetBlock, ITile, ITileMapLayerView, ITileMetrics, TargetProxy, Tile } from "core/tiles";
 import { IDisposable } from "core/types";
 import { ElevationLayerView, TextureLayerView } from "../map";
 import { Range } from "core/math";
 
 // internal class used to hold the tile pool areas
-class TileLayout<T> implements IDisposable {
-    public constructor(public tile: T, public area: Nullable<ITexture3Layer> = null) {}
+class TileLayout<T, V> implements IDisposable {
+    public constructor(public tile: T, public layer: ITileMapLayerView<V>, public area: Nullable<ITexture3Layer> = null) {}
 
     public dispose() {
         this.area?.release();
@@ -38,16 +38,21 @@ class TileLayout<T> implements IDisposable {
 }
 
 // specialization for texture
-class TextureLayout extends TileLayout<ITileWithGridElevation<TextureType>> {
-    public constructor(tile: ITileWithGridElevation<TextureType>, area: Nullable<ITexture3Layer> = null) {
-        super(tile, area);
+class TextureLayout extends TileLayout<ITileWithGridElevation<TextureType>, TextureType> {
+    public constructor(tile: ITileWithGridElevation<TextureType>, layer: ITileMapLayerView<TextureType>, area: Nullable<ITexture3Layer> = null) {
+        super(tile, layer, area);
     }
 }
 
 // specialization for elevation with dem and normals
-class ElevationLayout extends TileLayout<ITile<ElevationType>> {
-    public constructor(tile: ITile<ElevationType>, area: Nullable<ITexture3Layer> = null, public normalArea: Nullable<ITexture3Layer> = null) {
-        super(tile, area);
+class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
+    public constructor(
+        tile: ITile<ElevationType>,
+        layer: ITileMapLayerView<ElevationType>,
+        area: Nullable<ITexture3Layer> = null,
+        public normalArea: Nullable<ITexture3Layer> = null
+    ) {
+        super(tile, layer, area);
     }
 
     public dispose() {
@@ -62,10 +67,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     public static DefaultElevationTextureDepth: number = 16;
 
+    public static ElevationUvsAttName: string = "elevationUvs";
+    public static ElevationUvsSize = 4;
     public static ElevationDepthsAttName: string = "elevationDepths";
     public static ElevationDepthsSize = 4;
-    public static NormalDepthsAttName: string = "normalDepths";
-    public static NormalDepthsSize = 4;
     public static TextureDepthsAttName: string = "textureDepths";
     public static TextureDepthsSize = 4;
 
@@ -194,6 +199,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
             // instance related
             Map3dMaterial.TextureDepthsAttName,
+            Map3dMaterial.ElevationUvsAttName,
+            Map3dMaterial.ElevationDepthsAttName,
         ];
 
         const uniforms = [
@@ -273,6 +280,14 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         }
     }
 
+    public dispose(forceDisposeEffect?: boolean): void {
+        super.dispose(forceDisposeEffect);
+        this._textureSampler?.dispose();
+        this._textureSampler = null;
+        this._elevationSampler?.dispose();
+        this._elevationSampler = null;
+    }
+
     protected imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
         const host = state.currentTarget;
         if (host instanceof TextureLayerView) {
@@ -289,7 +304,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                 this._ensureTextureSamplersReady(host);
 
-                let layout = new TextureLayout(tile);
+                let layout = new TextureLayout(tile, host);
                 this._textureTileLayouts.set(key, layout);
 
                 let area = this._reserveArea(this._textureSampler);
@@ -297,11 +312,17 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                     return;
                 }
 
-                // the depth of the texture x=uvs, y=ids
+                // the depth of the texture and elevations
                 const textureDepths = new Vector4(area.depth, -1, -1, -1);
                 surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
+                const elevationUvs = new Vector4(-1, -1, -1, -1);
+                surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName] = elevationUvs;
+                const elevationDepths = new Vector4(-1, -1, -1, -1);
+                surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName] = elevationDepths;
 
                 layout.area = area;
+                this._ensureTileGeoBoundsIsReady(tile, host.metrics);
+
                 if (tile.content) {
                     area.update(tile.content);
                     tile.surface?.setEnabled(true);
@@ -350,7 +371,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 }
                 this._ensureElevationSamplersReady(host);
 
-                let layout = new ElevationLayout(tile);
+                let layout = new ElevationLayout(tile, host);
                 this._elevationTileLayouts.set(key, layout);
 
                 let area = this._reserveArea(this._elevationSampler);
@@ -358,10 +379,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                     return;
                 }
                 layout.area = area;
-                if (tile.content?.elevations) {
-                    this._updateElevationRange(tile.content);
-                    area.update(tile.content.elevations);
-                }
+                this._ensureTileGeoBoundsIsReady(tile, host.metrics);
+                this._processElevations(layout);
                 this.markAsDirty(Material.TextureDirtyFlag);
             }
         }
@@ -381,25 +400,80 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     }
 
     protected elevationsUpdated(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
-        for (const tile of data) {
-            const key = tile.address.quadkey;
-            const layout = this._elevationTileLayouts.get(key);
-            if (layout) {
-                if (tile.content?.elevations) {
-                    this._updateElevationRange(tile.content);
-                    layout.area?.update(tile.content.elevations);
-                    this.markAsDirty(Material.TextureDirtyFlag);
+        const host = state.currentTarget;
+        if (host instanceof ElevationLayerView) {
+            for (const tile of data) {
+                const key = tile.address.quadkey;
+                const layout = this._elevationTileLayouts.get(key);
+                if (layout) {
+                    this._processElevations(layout);
                 }
             }
         }
     }
 
-    public dispose(forceDisposeEffect?: boolean): void {
-        super.dispose(forceDisposeEffect);
-        this._textureSampler?.dispose();
-        this._textureSampler = null;
-        this._elevationSampler?.dispose();
-        this._elevationSampler = null;
+    protected _processElevations(layout: ElevationLayout) {
+        const tile = layout.tile;
+        if (tile.content?.elevations) {
+            // update the elevation range
+            this._updateElevationRange(tile.content);
+
+            // update the sampler
+            layout.area?.update(tile.content.elevations);
+
+            // dispatch the elevation value to the mesh attributes
+            this._dispatchElevations(layout);
+
+            // mark as dirty, so we gona rebind
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    ///<sumary>
+    /// gather elevations from grid.
+    ///</sumary>
+    protected _grabElevations(layout: TextureLayout) {}
+
+    ///<sumary>
+    // dispatch elevations to grid
+    ///</sumary>
+    protected _dispatchElevations(layout: ElevationLayout) {
+        const tile = layout.tile;
+        const b0 = tile.geoBounds!; // the bounds has been tested for undefined before.
+        const w0 = b0.east - b0.west;
+        const h0 = b0.north - b0.south;
+        for (const l of this._textureTileLayouts.values()) {
+            const b1 = tile.geoBounds!; // the bounds has been tested for undefined before.
+            // if b1 is is inside b0, we compute the normalized coordinates and scale
+            if (b0.contains(b1)) {
+                const surface = l.tile.surface;
+                if (surface) {
+                    // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
+                    // u = u0 + u * su
+                    // v = v0 + v * sv
+                    const w1 = b1.east - b1.west;
+                    const h1 = b1.north - b0.south;
+                    const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                    elevationUvs.z = w1 / w0; // su
+                    elevationUvs.w = h1 / h0; // sv
+                    elevationUvs.x = (b1.west - b0.west) / w0; // u0
+                    elevationUvs.y = (b1.north - b0.north) / h0; // v0
+
+                    const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                    elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+                }
+            }
+        }
+    }
+
+    ///<sumary>
+    /// We use this to ensure the tile geo bounds has been computed.
+    ///</sumary>
+    private _ensureTileGeoBoundsIsReady<T>(tile: ITile<T>, metrics: ITileMetrics): void {
+        if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
+            const env = Tile.BuildEnvelope(tile.address, metrics)!;
+            tile.geoBounds = env;
+        }
     }
 
     protected _reserveArea(sampler: Nullable<Texture3>, mess?: string): ITexture3Layer | undefined {
@@ -448,8 +522,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     }
 
     protected _registerInstanceBuffers(target: Mesh): void {
-        //target.registerInstancedBuffer(Map3dMaterial.ElevationDepthsAttName, Map3dMaterial.ElevationDepthsSize);
+        target.registerInstancedBuffer(Map3dMaterial.ElevationUvsAttName, Map3dMaterial.ElevationUvsSize);
         //target.registerInstancedBuffer(Map3dMaterial.NormalDepthsAttName, Map3dMaterial.NormalDepthsSize);
+        target.registerInstancedBuffer(Map3dMaterial.ElevationDepthsAttName, Map3dMaterial.ElevationDepthsSize);
         target.registerInstancedBuffer(Map3dMaterial.TextureDepthsAttName, Map3dMaterial.TextureDepthsSize);
     }
 

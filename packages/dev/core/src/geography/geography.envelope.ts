@@ -117,6 +117,10 @@ export class Envelope implements IEnvelope {
         this._max = upperCorner;
     }
 
+    public isEmpty(): boolean {
+        return this._min.equals(this._max);
+    }
+
     public get north(): number {
         return this._max.lat;
     }
@@ -241,8 +245,22 @@ export class Envelope implements IEnvelope {
         return true;
     }
 
-    public contains(loc?: IGeo3): boolean {
-        return loc !== undefined && this.containsFloat(loc.lat, loc.lon, loc.alt);
+    public contains(other?: IEnvelope | IGeo3): boolean {
+        if (!other) return false;
+
+        if (IsLocation(other)) {
+            return this.containsFloat(other.lat, other.lon, other.alt);
+        }
+        // Check if all corners of the `other` envelope are within the current envelope
+        return (
+            this.containsFloat(other.south, other.west) && // South-West corner
+            this.containsFloat(other.north, other.east) && // North-East corner
+            (!this.hasAltitude || // Skip altitude check if not applicable
+                (other.bottom !== undefined &&
+                    other.top !== undefined &&
+                    this.containsFloat(other.bottom, undefined, other.bottom) &&
+                    this.containsFloat(other.top, undefined, other.top)))
+        );
     }
 
     public containsFloat(lat: number, lon?: number, alt?: number): boolean {

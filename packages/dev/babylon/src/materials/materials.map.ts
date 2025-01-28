@@ -126,8 +126,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     public constructor(name: string, scene?: Scene, shaderName?: string) {
         super(name, scene);
         this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
-        this._imagesTarget = new TargetProxy<ITileWithGridElevation<TextureType>>(this.imagesAdded.bind(this), this.imagesRemoved.bind(this), this.imagesUpdated.bind(this));
-        this._elevationsTarget = new TargetProxy<ITile<ElevationType>>(this.elevationsAdded.bind(this), this.elevationsRemoved.bind(this), this.elevationsUpdated.bind(this));
+        this._imagesTarget = new TargetProxy<ITileWithGridElevation<TextureType>>(this._imagesAdded.bind(this), this._imagesRemoved.bind(this), this._imagesUpdated.bind(this));
+        this._elevationsTarget = new TargetProxy<ITile<ElevationType>>(this._elevationsAdded.bind(this), this._elevationsRemoved.bind(this), this._elevationsUpdated.bind(this));
     }
 
     public get imagesTarget(): ITargetBlock<ITileWithGridElevation<TextureType>> {
@@ -289,226 +289,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         this._textureSampler = null;
         this._elevationSampler?.dispose();
         this._elevationSampler = null;
-    }
-
-    protected imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
-        const host = state.currentTarget;
-        if (host instanceof TextureLayerView) {
-            for (const tile of data) {
-                const key = tile.address.quadkey;
-                if (this._textureTileLayouts.has(key)) {
-                    continue;
-                }
-
-                const surface = tile.surface;
-                if (!surface) {
-                    throw new Error("Tile surface is not defined");
-                }
-
-                this._ensureTextureSamplersReady(host);
-
-                let layout = new TextureLayout(tile, host);
-                this._textureTileLayouts.set(key, layout);
-
-                let area = this._reserveArea(this._textureSampler);
-                if (area === undefined) {
-                    return;
-                }
-
-                // the depth of the texture and elevations
-                const textureDepths = new Vector4(area.depth, -1, -1, -1);
-                surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
-                const elevationUvs = new Vector4(-1, -1, -1, -1);
-                surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName] = elevationUvs;
-                const elevationDepths = new Vector4(-1, -1, -1, -1);
-                surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName] = elevationDepths;
-
-                layout.area = area;
-                this._ensureTileGeoBoundsIsReady(tile, host.metrics);
-
-                if (tile.content) {
-                    area.update(tile.content);
-                    this._grabElevations(layout);
-                    tile.surface?.setEnabled(true);
-                }
-                this.markAsDirty(Material.TextureDirtyFlag);
-            }
-        }
-    }
-
-    protected imagesRemoved(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
-        for (const tile of data) {
-            const key = tile.address.quadkey;
-            const layout = this._textureTileLayouts.get(key);
-            if (layout) {
-                if (tile.surface) {
-                    tile.surface.instancedBuffers.textureDepths.x = -1;
-                }
-                layout.dispose();
-                this._textureTileLayouts.delete(key);
-                this.markAsDirty(Material.TextureDirtyFlag);
-            }
-        }
-    }
-
-    protected imagesUpdated(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
-        for (const tile of data) {
-            const key = tile.address.quadkey;
-            const layout = this._textureTileLayouts.get(key);
-            if (layout) {
-                if (tile.content) {
-                    layout.area?.update(tile.content);
-                    this._grabElevations(layout);
-                    tile.surface?.setEnabled(true);
-                    this.markAsDirty(Material.TextureDirtyFlag);
-                }
-            }
-        }
-    }
-
-    protected elevationsAdded(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
-        const host = state.currentTarget;
-        if (host instanceof ElevationLayerView) {
-            for (const tile of data) {
-                const key = tile.address.quadkey;
-                if (this._elevationTileLayouts.has(key)) {
-                    continue;
-                }
-                this._ensureElevationSamplersReady(host);
-
-                let layout = new ElevationLayout(tile, host);
-                this._elevationTileLayouts.set(key, layout);
-
-                let area = this._reserveArea(this._elevationSampler);
-                if (area === undefined) {
-                    return;
-                }
-                layout.area = area;
-                this._ensureTileGeoBoundsIsReady(tile, host.metrics);
-                this._processElevations(layout);
-                this.markAsDirty(Material.TextureDirtyFlag);
-            }
-        }
-    }
-
-    protected elevationsRemoved(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
-        for (const tile of data) {
-            const key = tile.address.quadkey;
-            const layout = this._elevationTileLayouts.get(key);
-            if (layout) {
-                layout.dispose();
-                this._elevationTileLayouts.delete(key);
-                this._invalidateElevationRange();
-                this.markAsDirty(Material.TextureDirtyFlag);
-            }
-        }
-    }
-
-    protected elevationsUpdated(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
-        const host = state.currentTarget;
-        if (host instanceof ElevationLayerView) {
-            for (const tile of data) {
-                const key = tile.address.quadkey;
-                const layout = this._elevationTileLayouts.get(key);
-                if (layout) {
-                    this._processElevations(layout);
-                }
-            }
-        }
-    }
-
-    protected _processElevations(layout: ElevationLayout) {
-        const tile = layout.tile;
-        if (tile.content?.elevations) {
-            // update the elevation range
-            this._updateElevationRange(tile.content);
-
-            // update the sampler
-            layout.area?.update(tile.content.elevations);
-
-            // dispatch the elevation value to the mesh attributes
-            this._dispatchElevations(layout);
-
-            // mark as dirty, so we gona rebind
-            this.markAsDirty(Material.TextureDirtyFlag);
-        }
-    }
-
-    ///<sumary>
-    /// gather elevations from grid.
-    ///</sumary>
-    private _grabElevations(layout: TextureLayout) {
-        const textureTile = layout.tile;
-        const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
-        const surface = textureTile.surface;
-        if (textureBounds && surface) {
-            const w1 = textureBounds.east - textureBounds.west;
-            const h1 = textureBounds.north - textureBounds.south;
-            for (const l of this._elevationTileLayouts.values()) {
-                const elevationTile = l.tile;
-                const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
-                if (elevationBounds) {
-                    if (elevationBounds.contains(textureBounds)) {
-                        // elevation uv's will be
-                        // u = u0 + u * su
-                        // v = v0 + v * sv
-                        const w0 = elevationBounds.east - elevationBounds.west;
-                        const h0 = elevationBounds.north - elevationBounds.south;
-                        const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                        elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
-                        elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
-                        elevationUvs.z = w1 / w0; // su
-                        elevationUvs.w = h1 / h0; // sv
-
-                        const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
-                        elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
-                    }
-                }
-            }
-        }
-    }
-
-    ///<sumary>
-    // dispatch elevations to grid
-    ///</sumary>
-    private _dispatchElevations(layout: ElevationLayout) {
-        const elevationTile = layout.tile;
-        const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
-        if (elevationBounds) {
-            const w0 = elevationBounds.east - elevationBounds.west;
-            const h0 = elevationBounds.north - elevationBounds.south;
-            for (const l of this._textureTileLayouts.values()) {
-                const textureTile = l.tile;
-                const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
-                if (textureBounds) {
-                    if (elevationBounds.contains(textureBounds)) {
-                        const surface = textureTile.surface;
-                        if (surface) {
-                            // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
-                            // u = u0 + u * su
-                            // v = v0 + v * sv
-                            const w1 = textureBounds.east - textureBounds.west;
-                            const h1 = textureBounds.north - textureBounds.south;
-                            const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                            elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
-                            elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
-                            elevationUvs.z = w1 / w0; // su
-                            elevationUvs.w = h1 / h0; // sv
-
-                            const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
-                            elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private _ensureTileGeoBoundsIsReady<T>(tile: ITile<T>, metrics: ITileMetrics): void {
-        if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
-            const env = Tile.BuildEnvelope(tile.address, metrics)!;
-            tile.geoBounds = env;
-        }
     }
 
     protected _reserveArea(sampler: Nullable<Texture3>, mess?: string): ITexture3Layer | undefined {
@@ -756,6 +536,226 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         if (infos) {
             this._getElevationRange().unionInPlace(infos.min.z, infos.max.z);
             this.markAsDirty(Material.AttributesDirtyFlag);
+        }
+    }
+
+    private _imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
+        const host = state.currentTarget;
+        if (host instanceof TextureLayerView) {
+            for (const tile of data) {
+                const key = tile.address.quadkey;
+                if (this._textureTileLayouts.has(key)) {
+                    continue;
+                }
+
+                const surface = tile.surface;
+                if (!surface) {
+                    throw new Error("Tile surface is not defined");
+                }
+
+                this._ensureTextureSamplersReady(host);
+
+                let layout = new TextureLayout(tile, host);
+                this._textureTileLayouts.set(key, layout);
+
+                let area = this._reserveArea(this._textureSampler);
+                if (area === undefined) {
+                    return;
+                }
+
+                // the depth of the texture and elevations
+                const textureDepths = new Vector4(area.depth, -1, -1, -1);
+                surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
+                const elevationUvs = new Vector4(-1, -1, -1, -1);
+                surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName] = elevationUvs;
+                const elevationDepths = new Vector4(-1, -1, -1, -1);
+                surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName] = elevationDepths;
+
+                layout.area = area;
+                this._ensureTileGeoBoundsIsReady(tile, host.metrics);
+
+                if (tile.content) {
+                    area.update(tile.content);
+                    this._grabElevations(layout);
+                    tile.surface?.setEnabled(true);
+                }
+                this.markAsDirty(Material.TextureDirtyFlag);
+            }
+        }
+    }
+
+    private _imagesRemoved(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
+        for (const tile of data) {
+            const key = tile.address.quadkey;
+            const layout = this._textureTileLayouts.get(key);
+            if (layout) {
+                if (tile.surface) {
+                    tile.surface.instancedBuffers.textureDepths.x = -1;
+                }
+                layout.dispose();
+                this._textureTileLayouts.delete(key);
+                this.markAsDirty(Material.TextureDirtyFlag);
+            }
+        }
+    }
+
+    private _imagesUpdated(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
+        for (const tile of data) {
+            const key = tile.address.quadkey;
+            const layout = this._textureTileLayouts.get(key);
+            if (layout) {
+                if (tile.content) {
+                    layout.area?.update(tile.content);
+                    this._grabElevations(layout);
+                    tile.surface?.setEnabled(true);
+                    this.markAsDirty(Material.TextureDirtyFlag);
+                }
+            }
+        }
+    }
+
+    private _elevationsAdded(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
+        const host = state.currentTarget;
+        if (host instanceof ElevationLayerView) {
+            for (const tile of data) {
+                const key = tile.address.quadkey;
+                if (this._elevationTileLayouts.has(key)) {
+                    continue;
+                }
+                this._ensureElevationSamplersReady(host);
+
+                let layout = new ElevationLayout(tile, host);
+                this._elevationTileLayouts.set(key, layout);
+
+                let area = this._reserveArea(this._elevationSampler);
+                if (area === undefined) {
+                    return;
+                }
+                layout.area = area;
+                this._ensureTileGeoBoundsIsReady(tile, host.metrics);
+                this._processElevations(layout);
+                this.markAsDirty(Material.TextureDirtyFlag);
+            }
+        }
+    }
+
+    private _elevationsRemoved(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
+        for (const tile of data) {
+            const key = tile.address.quadkey;
+            const layout = this._elevationTileLayouts.get(key);
+            if (layout) {
+                layout.dispose();
+                this._elevationTileLayouts.delete(key);
+                this._invalidateElevationRange();
+                this.markAsDirty(Material.TextureDirtyFlag);
+            }
+        }
+    }
+
+    private _elevationsUpdated(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
+        const host = state.currentTarget;
+        if (host instanceof ElevationLayerView) {
+            for (const tile of data) {
+                const key = tile.address.quadkey;
+                const layout = this._elevationTileLayouts.get(key);
+                if (layout) {
+                    this._processElevations(layout);
+                }
+            }
+        }
+    }
+
+    private _processElevations(layout: ElevationLayout) {
+        const tile = layout.tile;
+        if (tile.content?.elevations) {
+            // update the elevation range
+            this._updateElevationRange(tile.content);
+
+            // update the sampler
+            layout.area?.update(tile.content.elevations);
+
+            // dispatch the elevation value to the mesh attributes
+            this._dispatchElevations(layout);
+
+            // mark as dirty, so we gona rebind
+            this.markAsDirty(Material.TextureDirtyFlag);
+        }
+    }
+
+    ///<sumary>
+    /// gather elevations from grid.
+    ///</sumary>
+    private _grabElevations(layout: TextureLayout) {
+        const textureTile = layout.tile;
+        const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
+        const surface = textureTile.surface;
+        if (textureBounds && surface) {
+            const w1 = textureBounds.east - textureBounds.west;
+            const h1 = textureBounds.north - textureBounds.south;
+            for (const l of this._elevationTileLayouts.values()) {
+                const elevationTile = l.tile;
+                const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
+                if (elevationBounds) {
+                    if (elevationBounds.contains(textureBounds)) {
+                        // elevation uv's will be
+                        // u = u0 + u * su
+                        // v = v0 + v * sv
+                        const w0 = elevationBounds.east - elevationBounds.west;
+                        const h0 = elevationBounds.north - elevationBounds.south;
+                        const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                        elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
+                        elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+                        elevationUvs.z = w1 / w0; // su
+                        elevationUvs.w = h1 / h0; // sv
+
+                        const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                        elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
+                    }
+                }
+            }
+        }
+    }
+
+    ///<sumary>
+    // dispatch elevations to grid
+    ///</sumary>
+    private _dispatchElevations(layout: ElevationLayout) {
+        const elevationTile = layout.tile;
+        const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
+        if (elevationBounds) {
+            const w0 = elevationBounds.east - elevationBounds.west;
+            const h0 = elevationBounds.north - elevationBounds.south;
+            for (const l of this._textureTileLayouts.values()) {
+                const textureTile = l.tile;
+                const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
+                if (textureBounds) {
+                    if (elevationBounds.contains(textureBounds)) {
+                        const surface = textureTile.surface;
+                        if (surface) {
+                            // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
+                            // u = u0 + u * su
+                            // v = v0 + v * sv
+                            const w1 = textureBounds.east - textureBounds.west;
+                            const h1 = textureBounds.north - textureBounds.south;
+                            const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                            elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
+                            elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+                            elevationUvs.z = w1 / w0; // su
+                            elevationUvs.w = h1 / h0; // sv
+
+                            const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                            elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private _ensureTileGeoBoundsIsReady<T>(tile: ITile<T>, metrics: ITileMetrics): void {
+        if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
+            const env = Tile.BuildEnvelope(tile.address, metrics)!;
+            tile.geoBounds = env;
         }
     }
 }

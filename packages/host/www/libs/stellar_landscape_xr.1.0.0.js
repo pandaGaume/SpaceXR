@@ -1841,6 +1841,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         if (this._mustRebind(scene, effect, subMesh)) {
             this._bindClipPlanes(effect);
             this._bindSamplers(effect);
+            this._bindElevations(effect);
         }
     }
     dispose(forceDisposeEffect) {
@@ -1970,23 +1971,28 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     _grabElevations(layout) { }
     _dispatchElevations(layout) {
         const tile = layout.tile;
-        const b0 = tile.geoBounds;
-        const w0 = b0.east - b0.west;
-        const h0 = b0.north - b0.south;
-        for (const l of this._textureTileLayouts.values()) {
-            const b1 = tile.geoBounds;
-            if (b0.contains(b1)) {
-                const surface = l.tile.surface;
-                if (surface) {
-                    const w1 = b1.east - b1.west;
-                    const h1 = b1.north - b0.south;
-                    const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                    elevationUvs.z = w1 / w0;
-                    elevationUvs.w = h1 / h0;
-                    elevationUvs.x = (b1.west - b0.west) / w0;
-                    elevationUvs.y = (b1.north - b0.north) / h0;
-                    const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
-                    elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+        const elevationBounds = tile.geoBounds;
+        if (elevationBounds) {
+            const w0 = elevationBounds.east - elevationBounds.west;
+            const h0 = elevationBounds.north - elevationBounds.south;
+            for (const l of this._textureTileLayouts.values()) {
+                const textureTile = l.tile;
+                const textureBounds = textureTile.geoBounds;
+                if (textureBounds) {
+                    if (elevationBounds.contains(textureBounds)) {
+                        const surface = textureTile.surface;
+                        if (surface) {
+                            const w1 = textureBounds.east - textureBounds.west;
+                            const h1 = textureBounds.north - textureBounds.south;
+                            const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                            elevationUvs.z = w1 / w0;
+                            elevationUvs.w = h1 / h0;
+                            elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0;
+                            elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0;
+                            const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                            elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+                        }
+                    }
                 }
             }
         }
@@ -2086,6 +2092,11 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindMatrix(effect, world, scene) {
         effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
+    }
+    _bindElevations(effect) {
+        const r = this._getElevationRange();
+        effect.setVector2(Map3dMaterial.AltRangeUniformName, new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2(r.min, r.max));
+        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.z);
     }
     _bindClipPlanes(effect) {
         if (this._holoBounds) {
@@ -15639,8 +15650,8 @@ const shader = `precision highp float;#include<instancesDeclaration>
 #include<clipVertexDeclaration>
 #include<elevationVertexDeclaration>
 #include<textureVertexDeclaration>
-in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {int i=int(position.z);float elevationDepth=elevationDepths[i];vec3 v=vec3(uv.xy,elevationDepth);#include<instancesVertex>
-float rawAltitude=float(texture(uElevations,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;alt=0.0;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
+in vec3 position;in vec2 uv;uniform mat4 viewProjection;void main(void) {int i=int(position.z);float elevationDepth=elevationDepths[i];vec3 v=vec3(elevationUvs.xy+uv.xy*elevationUvs.zw,elevationDepth);#include<instancesVertex>
+float rawAltitude=float(texture(uElevations,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
 gl_Position=viewProjection*worldPosition;vUvs=(- position.xy+0.5); depth= textureDepths.x;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 const mapVertexShader = { name, shader };

@@ -17,6 +17,7 @@ import {
     InstancedMesh,
     Constants,
     Vector4,
+    Vector2,
 } from "@babylonjs/core";
 import { ElevationType, IMap3DMaterial, ITileWithGridElevation, TextureType } from "../map/map.interfaces";
 import { ICartesian3, ISize3, Size3 } from "core/geometry";
@@ -277,6 +278,8 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             this._bindClipPlanes(effect);
             // samplers
             this._bindSamplers(effect);
+            // Elevations.
+            this._bindElevations(effect);
         }
     }
 
@@ -439,36 +442,38 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     ///</sumary>
     protected _dispatchElevations(layout: ElevationLayout) {
         const tile = layout.tile;
-        const b0 = tile.geoBounds!; // the bounds has been tested for undefined before.
-        const w0 = b0.east - b0.west;
-        const h0 = b0.north - b0.south;
-        for (const l of this._textureTileLayouts.values()) {
-            const b1 = tile.geoBounds!; // the bounds has been tested for undefined before.
-            // if b1 is is inside b0, we compute the normalized coordinates and scale
-            if (b0.contains(b1)) {
-                const surface = l.tile.surface;
-                if (surface) {
-                    // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
-                    // u = u0 + u * su
-                    // v = v0 + v * sv
-                    const w1 = b1.east - b1.west;
-                    const h1 = b1.north - b0.south;
-                    const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                    elevationUvs.z = w1 / w0; // su
-                    elevationUvs.w = h1 / h0; // sv
-                    elevationUvs.x = (b1.west - b0.west) / w0; // u0
-                    elevationUvs.y = (b1.north - b0.north) / h0; // v0
+        const elevationBounds = tile.geoBounds; // the bounds has been tested for undefined before.
+        if (elevationBounds) {
+            const w0 = elevationBounds.east - elevationBounds.west;
+            const h0 = elevationBounds.north - elevationBounds.south;
+            for (const l of this._textureTileLayouts.values()) {
+                const textureTile = l.tile;
+                const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
+                if (textureBounds) {
+                    // if b1 is is inside b0, we compute the normalized coordinates and scale
+                    if (elevationBounds.contains(textureBounds)) {
+                        const surface = textureTile.surface;
+                        if (surface) {
+                            // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
+                            // u = u0 + u * su
+                            // v = v0 + v * sv
+                            const w1 = textureBounds.east - textureBounds.west;
+                            const h1 = textureBounds.north - textureBounds.south;
+                            const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
+                            elevationUvs.z = w1 / w0; // su
+                            elevationUvs.w = h1 / h0; // sv
+                            elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
+                            elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
 
-                    const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
-                    elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+                            const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
+                            elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
+                        }
+                    }
                 }
             }
         }
     }
 
-    ///<sumary>
-    /// We use this to ensure the tile geo bounds has been computed.
-    ///</sumary>
     private _ensureTileGeoBoundsIsReady<T>(tile: ITile<T>, metrics: ITileMetrics): void {
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
             const env = Tile.BuildEnvelope(tile.address, metrics)!;
@@ -582,6 +587,12 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     protected _bindMatrix(effect: Effect, world: Matrix, scene: Scene): void {
         effect.setMatrix(Map3dMaterial.ViewProjectionMatrixUniformName, scene.getTransformMatrix());
+    }
+
+    protected _bindElevations(effect: Effect): void {
+        const r = this._getElevationRange();
+        effect.setVector2(Map3dMaterial.AltRangeUniformName, new Vector2(r.min, r.max));
+        effect.setFloat(Map3dMaterial.MapScaleUniformName, this._mapScale.z);
     }
 
     protected _bindClipPlanes(effect: Effect): void {

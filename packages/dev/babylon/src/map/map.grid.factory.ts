@@ -5,11 +5,11 @@ import { IElevationGridFactory } from "./map.interfaces";
 import { ISize2, IsSize } from "core/geometry";
 
 export class ElevationGridFactory implements IElevationGridFactory {
-    private static InitZ(column: number, row: number, w: number, h: number): number {
+    /*private static InitZ(column: number, row: number, w: number, h: number): number {
         let i = column == w - 1 ? 1 : 0;
         let j = row == h - 1 ? 2 : 0;
         return i + j;
-    }
+    }*/
 
     public buildTopology(options: number | ISize2 | TerrainGridOptions | TerrainGridOptionsBuilder): IVerticesData {
         const o = this._buildTerrainOptions(options);
@@ -26,8 +26,8 @@ export class ElevationGridFactory implements IElevationGridFactory {
         }
         const builder = new TerrainGridOptionsBuilder()
             .withScale(-1, 1) // we consider a grid oriented with babylonjs coordinate system, left handed
-            .withInvertIndices(true)
-            .withZInitializer(ElevationGridFactory.InitZ); // register the z initializer, which serve as referencing the elevation depth
+            .withInvertIndices(true);
+        //.withZInitializer(ElevationGridFactory.InitZ); // register the z initializer, which serve as referencing the elevation depth
 
         if (IsSize(options)) {
             builder

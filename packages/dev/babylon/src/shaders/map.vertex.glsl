@@ -20,11 +20,11 @@ uniform mat4 viewProjection;
 
 void main(void) {
 
-    int i = int(position.z);
+    int i = 0; // int(position.z);
     float elevationDepth = elevationDepths[i];
     vec2 uv0 = (- position.xy + 0.5);
-    vec2 tmp = (i != 0 && elevationDepth != elevationDepths[0]) ? vec2(uv0.x == 1.0 ? 0.0 : uv0.x, uv0.y == 1.0 ? 0.0 : uv0.y) : uv0;
-    vec3 v = vec3(elevationUvs.xy + tmp.xy * elevationUvs.zw, elevationDepth);
+    //vec2 tmp = (i != 0 && elevationDepth != elevationDepths[0]) ? vec2(uv0.x == 1.0 ? 0.0 : uv0.x, uv0.y == 1.0 ? 0.0 : uv0.y) : uv0;
+    vec3 v = vec3(elevationUvs.xy + uv0.xy * elevationUvs.zw, elevationDepth);
 
     // babylon specific which give you the finalWorld matrix
     #include<instancesVertex>

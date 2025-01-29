@@ -1672,6 +1672,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.texture.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.dem.js");
 /* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
@@ -2181,6 +2182,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 buffer = new Float32Array([z]);
                 area.update(buffer, size, size, 1, 1);
             }
+            this._updateNeighbourgs(layout);
             this._dispatchElevations(layout);
             this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
         }
@@ -2243,6 +2245,69 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
             const env = core_tiles__WEBPACK_IMPORTED_MODULE_10__.Tile.BuildEnvelope(tile.address, metrics);
             tile.geoBounds = env;
+        }
+    }
+    _updateNeighbourgs(layout) {
+        const addresses = layout._neighbors;
+        if (layout.tile.content?.elevations) {
+            const elevations = layout.tile.content.elevations;
+            const elevationTileSize = layout.layer.metrics.tileSize;
+            let a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress.NW];
+            if (a) {
+                const nwLayout = this._elevationTileLayouts.get(a.quadkey);
+                if (nwLayout && nwLayout.area) {
+                    const buffer = new Float32Array([elevations[0]]);
+                    const size = nwLayout.layer.metrics.tileSize;
+                    nwLayout.area.update(buffer, size, size, 1, 1);
+                }
+            }
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress.N];
+            if (a) {
+                const nLayout = this._elevationTileLayouts.get(a.quadkey);
+                if (nLayout && nLayout.area) {
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_9__.ElevationHelpers.GetFirstRow(elevations, elevationTileSize);
+                    const size = nLayout.layer.metrics.tileSize;
+                    nLayout.area.update(buffer, 0, size, size, 1);
+                }
+            }
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress.E];
+            if (a) {
+                const eLayout = this._elevationTileLayouts.get(a.quadkey);
+                const eElevations = eLayout?.tile.content?.elevations;
+                if (eElevations && layout.area) {
+                    const size = layout.layer.metrics.tileSize;
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_9__.ElevationHelpers.GetFirstColumn(eElevations, size, size);
+                    layout.area.update(buffer, elevationTileSize, 0, 1, elevationTileSize);
+                }
+            }
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress.SE];
+            if (a) {
+                const seLayout = this._elevationTileLayouts.get(a.quadkey);
+                const seElevations = seLayout?.tile.content?.elevations;
+                if (seElevations && layout.area) {
+                    const buffer = new Float32Array([seElevations[0]]);
+                    layout.area.update(buffer, elevationTileSize, elevationTileSize, 1, 1);
+                }
+            }
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress.S];
+            if (a) {
+                const sLayout = this._elevationTileLayouts.get(a.quadkey);
+                const sElevations = sLayout?.tile.content?.elevations;
+                if (sElevations && layout.area) {
+                    const size = layout.layer.metrics.tileSize;
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_9__.ElevationHelpers.GetFirstRow(sElevations, size);
+                    layout.area.update(buffer, 0, elevationTileSize, elevationTileSize, 1);
+                }
+            }
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress.W];
+            if (a) {
+                const wLayout = this._elevationTileLayouts.get(a.quadkey);
+                if (wLayout?.area) {
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_9__.ElevationHelpers.GetFirstColumn(elevations, elevationTileSize, elevationTileSize);
+                    const size = layout.layer.metrics.tileSize;
+                    wLayout.area.update(buffer, size, 0, 1, size);
+                }
+            }
         }
     }
 }

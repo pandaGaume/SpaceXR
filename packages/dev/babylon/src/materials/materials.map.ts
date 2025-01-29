@@ -24,7 +24,7 @@ import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile, ITileAddress, ITileMapLayerView, ITileMetrics, TargetProxy, Tile, TileAddress } from "core/tiles";
+import { IPipelineMessageType, ITargetBlock, ITile, ITileAddress, ITileMapLayerView, ITileMetrics, NeighborsAddress, TargetProxy, Tile, TileAddress } from "core/tiles";
 import { IDisposable } from "core/types";
 import { ElevationLayerView, TextureLayerView } from "../map";
 import { Range } from "core/math";
@@ -690,7 +690,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
             const area = layout.area;
             if (area) {
-                // update the sampler
+                // initialize the sampler
                 const size = view.metrics.tileSize;
                 area.update(tile.content.elevations, 0, 0, size, size);
                 // TODO: add temp buffer to avoid allocations
@@ -703,6 +703,9 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 buffer = new Float32Array([z]);
                 area.update(buffer, size, size, 1, 1);
             }
+
+            this._updateNeighbourgs(layout);
+
             // dispatch the elevation value to the mesh attributes
             this._dispatchElevations(layout);
 
@@ -739,7 +742,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                         const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                         elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
-                        //this._checkAdjacentTile(l, layout);
                     }
                 }
             }
@@ -779,8 +781,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
-
-                            //this._checkAdjacentTile(layout, l);
                         }
                     }
                 }
@@ -788,63 +788,93 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         }
     }
 
-    /*    private _checkAdjacentTile(a: ElevationLayout, b: TextureLayout): void {
-        const elevationTile = a.tile;
-        const elevationBounds = elevationTile.geoBounds!; // the bounds has been tested for undefined before.
-        const textureTile = b.tile;
-        const textureBounds = textureTile.geoBounds!; // the bounds has been tested for undefined before.
-
-        let code = TileBorder.None;
-        if (textureBounds.east == elevationBounds.east) {
-            code += TileBorder.East;
-        }
-        if (textureBounds.south == elevationBounds.south) {
-            code += TileBorder.South;
-        }
-
-        let i: NeighborsIndex = NeighborsIndex.E;
-        let p: string = Map3dMaterial.ElevationDepthsEastProperty;
-        switch (code) {
-            case TileBorder.None: {
-                // Nothing to do
-                return;
-            }
-            case TileBorder.East: {
-                // Tile has east border in common
-                // Find the east neighbor (5 index in the neighbors)
-                break;
-            }
-            case TileBorder.South: {
-                // Tile has south border in common
-                // Find the south neighbor (7 index in the neighbors)
-                i = NeighborsIndex.S;
-                p = Map3dMaterial.ElevationDepthsSouthProperty;
-                break;
-            }
-            case TileBorder.SouthEast: {
-                // Tile has both east and south borders in common
-                // Find the south-east neighbor (8 index in the neighbors)
-                i = NeighborsIndex.SE;
-                p = Map3dMaterial.ElevationDepthsSouthEastProperty;
-                break;
-            }
-        }
-        const key = a.neighbors[i]?.quadkey;
-        if (key) {
-            const n = this._elevationTileLayouts.get(key);
-            if (n) {
-                const elevationDepths = textureTile.surface?.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
-                if (elevationDepths) {
-                    elevationDepths[p] = n.area?.depth;
-                }
-            }
-        }
-    }*/
-
     private _ensureTileGeoBoundsIsReady<T>(tile: ITile<T>, metrics: ITileMetrics): void {
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
             const env = Tile.BuildEnvelope(tile.address, metrics)!;
             tile.geoBounds = env;
+        }
+    }
+
+    private _updateNeighbourgs(layout: ElevationLayout) {
+        const addresses = layout._neighbors;
+        if (layout.tile.content?.elevations) {
+            const elevations = layout.tile.content.elevations;
+            const elevationTileSize = layout.layer.metrics.tileSize;
+
+            // checking the north-west neighbour
+            // we push the current upper left corner to neighbour lower right corner.
+            let a = addresses[NeighborsAddress.NW];
+            if (a) {
+                const nwLayout = this._elevationTileLayouts.get(a.quadkey);
+                if (nwLayout && nwLayout.area) {
+                    // we may update the elevation texture with the upper left corner
+                    const buffer = new Float32Array([elevations[0]]);
+                    const size = nwLayout.layer.metrics.tileSize;
+                    nwLayout.area.update(buffer, size, size, 1, 1);
+                }
+            }
+
+            // checking the north neighbour
+            // we push the current first row to the neighbour last row
+            a = addresses[NeighborsAddress.N];
+            if (a) {
+                const nLayout = this._elevationTileLayouts.get(a.quadkey);
+                if (nLayout && nLayout.area) {
+                    const buffer = ElevationHelpers.GetFirstRow(elevations, elevationTileSize);
+                    const size = nLayout.layer.metrics.tileSize;
+                    nLayout.area.update(buffer, 0, size, size, 1);
+                }
+            }
+
+            // checking the east neighbour
+            // we push the neighbour first column to current last column
+            a = addresses[NeighborsAddress.E];
+            if (a) {
+                const eLayout = this._elevationTileLayouts.get(a.quadkey);
+                const eElevations = eLayout?.tile.content?.elevations;
+                if (eElevations && layout.area) {
+                    const size = layout.layer.metrics.tileSize;
+                    const buffer = ElevationHelpers.GetFirstColumn(eElevations, size, size);
+                    layout.area.update(buffer, elevationTileSize, 0, 1, elevationTileSize);
+                }
+            }
+
+            // checking the south-east neigbour
+            // we push the neighbour upper left corner to current lower right corner.
+            a = addresses[NeighborsAddress.SE];
+            if (a) {
+                const seLayout = this._elevationTileLayouts.get(a.quadkey);
+                const seElevations = seLayout?.tile.content?.elevations;
+                if (seElevations && layout.area) {
+                    const buffer = new Float32Array([seElevations[0]]);
+                    layout.area.update(buffer, elevationTileSize, elevationTileSize, 1, 1);
+                }
+            }
+
+            // checking the south neigbour
+            // we push the neighbour first row to the current last row
+            a = addresses[NeighborsAddress.S];
+            if (a) {
+                const sLayout = this._elevationTileLayouts.get(a.quadkey);
+                const sElevations = sLayout?.tile.content?.elevations;
+                if (sElevations && layout.area) {
+                    const size = layout.layer.metrics.tileSize;
+                    const buffer = ElevationHelpers.GetFirstRow(sElevations, size);
+                    layout.area.update(buffer, 0, elevationTileSize, elevationTileSize, 1);
+                }
+            }
+
+            // checking the west neighbour
+            // we push the current first column to the neighbour last column
+            a = addresses[NeighborsAddress.W];
+            if (a) {
+                const wLayout = this._elevationTileLayouts.get(a.quadkey);
+                if (wLayout?.area) {
+                    const buffer = ElevationHelpers.GetFirstColumn(elevations, elevationTileSize, elevationTileSize);
+                    const size = layout.layer.metrics.tileSize;
+                    wLayout.area.update(buffer, size, 0, 1, size);
+                }
+            }
         }
     }
 }

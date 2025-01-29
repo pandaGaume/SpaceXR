@@ -394,8 +394,6 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
             internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
             generateMipMap: false,
-            wrapU: Constants.TEXTURE_WRAP_ADDRESSMODE,
-            wrapV: Constants.TEXTURE_WRAP_ADDRESSMODE,
         };
         return new Texture3(scene, options);
     }
@@ -690,18 +688,21 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             // update the elevation range
             this._updateElevationRange(tile.content);
 
-            // update the sampler
-            const size = view.metrics.tileSize;
-            layout.area?.update(tile.content.elevations, 0, 0, size, size);
-            // TODO: add temp buffer to avoid allocations
-            let buffer = ElevationHelpers.GetLastColumn(tile.content.elevations, size, size);
-            let z = buffer.slice(size - 1, size - 1);
-            layout.area?.update(buffer, 0, size, size, 1);
-            buffer = ElevationHelpers.GetLastRow(tile.content.elevations, size, size);
-            z[0] = (z[0] + buffer[size - 1]) / 2;
-            layout.area?.update(buffer, size, 0, 1, size);
-            layout.area?.update(z, size, size, 1, 1);
-
+            const area = layout.area;
+            if (area) {
+                // update the sampler
+                const size = view.metrics.tileSize;
+                area.update(tile.content.elevations, 0, 0, size, size);
+                // TODO: add temp buffer to avoid allocations
+                let buffer = ElevationHelpers.GetLastColumn(tile.content.elevations, size, size);
+                let z = buffer[size - 1];
+                area.update(buffer, size, 0, 1, size);
+                buffer = ElevationHelpers.GetLastRow(tile.content.elevations, size, size);
+                z = (z + buffer[size - 1]) / 2;
+                area.update(buffer, 0, size, size, 1);
+                buffer = new Float32Array([z]);
+                area.update(buffer, size, size, 1, 1);
+            }
             // dispatch the elevation value to the mesh attributes
             this._dispatchElevations(layout);
 
@@ -771,6 +772,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                             elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
                             elevationUvs.z = w1 / w0; // su
                             elevationUvs.w = h1 / h0; // sv
+
+                            //console.log(
+                            //    `found texture ${textureTile.quadkey} into ${elevationTile.quadkey}, b0:${elevationBounds}, b1:${textureBounds} -> x=${elevationUvs.x},y=${elevationUvs.y},sx=${elevationUvs.z},sy=${elevationUvs.w}`
+                            //);
 
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;

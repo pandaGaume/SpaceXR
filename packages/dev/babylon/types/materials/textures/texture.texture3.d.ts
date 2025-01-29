@@ -20,7 +20,7 @@ export interface ITexture3CreationOptions {
 export interface ITexture3 extends ISize {
     depth: number;
     count: number;
-    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
+    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, xoffset?: number, yoffset?: number, width?: number, height?: number): void;
     release(depth: number): void;
     reserve(): ITexture3Layer | undefined;
     ensureRoomFor(count: number): boolean;
@@ -37,7 +37,7 @@ export declare class Texture3 extends BaseTexture implements ITexture3 {
     get depth(): number;
     get count(): number;
     reserve(): ITexture3Layer | undefined;
-    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
+    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, xoffset?: number, yoffset?: number, width?: number, height?: number): void;
     release(depth: number): void;
     ensureRoomFor(count: number): boolean;
     protected _buildLayer(z: number): ITexture3Layer;

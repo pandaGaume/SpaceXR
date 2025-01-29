@@ -24,7 +24,7 @@ export interface ITexture3 extends ISize {
     depth: number; // the number of possible layers.
     count: number; // the number of layers in use.
 
-    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void;
+    update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, xoffset?: number, yoffset?: number, width?: number, height?: number): void;
     release(depth: number): void;
     reserve(): ITexture3Layer | undefined;
     ensureRoomFor(count: number): boolean;
@@ -139,14 +139,14 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         return a;
     }
 
-    public update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, row?: number, column?: number, width?: number, height?: number): void {
+    public update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, xoffset?: number, yoffset?: number, width?: number, height?: number): void {
         const engine = this._getEngine();
         if (engine && this._texture) {
             engine.__SpaceXR__updateSubRawTexture2DArray(
                 this._texture,
                 0, // specifying the level of detail - 0 is the base image
-                row ?? 0, // row where pixel data should go
-                column ?? 0, // column where pixel data should go
+                xoffset ?? 0, // column where pixel data should go
+                yoffset ?? 0, // row where pixel data should go
                 depth, // array "index" for pixels
                 width ?? this._w, // width of pixel data
                 height ?? this._h, // height of pixel data

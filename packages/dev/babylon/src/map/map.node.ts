@@ -81,6 +81,10 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         return this;
     }
 
+    public withElevationExageration(e: number) {
+        this.map.elevationOptions.exageration = e;
+    }
+
     protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): MapNode {
         if (this._controller === controller) return this;
 

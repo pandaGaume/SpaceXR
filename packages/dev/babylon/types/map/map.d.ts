@@ -22,12 +22,14 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     get name(): string;
     get root(): TransformNode;
     get gridSize(): number | ISize2;
+    get gridDimension(): number;
     set gridSize(value: number | ISize2);
     get offset(): ICartesian3 | undefined;
     set offset(value: ICartesian3 | undefined);
     get exageration(): number | undefined;
     set exageration(value: number | undefined);
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>>;
+    protected _computeTheoricalZoomOffset(gridDimension: number, tileSize: number): number;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;
     protected _rotateMap(nav: Nullable<ITileNavigationState>): void;
     protected _onNavigationBinded(nav: Nullable<ITileNavigationState>): void;

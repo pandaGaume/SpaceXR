@@ -5,7 +5,7 @@ import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { TextureLayerView } from "./map.layer.texture";
 import { ElevationLayer } from "../dem";
-import { Cartesian3, ICartesian3, ISize2 } from "core/geometry";
+import { Cartesian3, ICartesian3, ISize2, IsSize } from "core/geometry";
 import { ElevationGridFactory } from "./map.grid.factory";
 import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
@@ -66,6 +66,10 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         return this._gridSize;
     }
 
+    public get gridDimension(): number {
+        return IsSize(this._gridSize) ? Math.max(this._gridSize.width, this._gridSize.height) : this._gridSize;
+    }
+
     public set gridSize(value: number | ISize2) {
         this._gridSize = value;
     }
@@ -94,12 +98,18 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            return new ElevationLayerView(this, layer, this._display, new TileView());
+            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics.tileSize);
+            return new ElevationLayerView(this, layer, this._display, new TileView(zoomOffset));
         }
         if (layer instanceof ImageLayer) {
             return new TextureLayerView(this, layer, this.display, this.view);
         }
         return null;
+    }
+
+    protected _computeTheoricalZoomOffset(gridDimension: number, tileSize: number): number {
+        const n = tileSize / gridDimension;
+        return -Math.ceil(Math.log(n));
     }
 
     // when navigation propertie's changed

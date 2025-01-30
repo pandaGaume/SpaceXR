@@ -109,8 +109,6 @@
                 // build layer options
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
-                    exageration: 1.2,
-                    zoomOffset: -3,
                 };
 
                 // build layer and add it to the map
@@ -120,6 +118,7 @@
                 };
                 let client = SPACEXR.MapZen.DemClient(demCodecOptions);
                 const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(mapNode);
+                mapNode.withElevationExageration(1.2);
 
                 //const imageLayerOptions = {
                 //    alpha: 0.5,

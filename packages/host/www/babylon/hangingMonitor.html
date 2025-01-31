@@ -91,25 +91,27 @@
 
                         camera.setTarget(display.node);
 
-                        display.pointerSource.onPointerUpObservable.add((eventData, eventState) => {
-                            console.log("Pointer up on display");
-                        });
+                        if (debug) {
+                            display.pointerSource.onPointerUpObservable.add((eventData, eventState) => {
+                                console.log("Pointer up on display");
+                            });
 
-                        display.pointerSource.onPointerDownObservable.add((eventData, eventState) => {
-                            console.log("Pointer down on display");
-                        });
+                            display.pointerSource.onPointerDownObservable.add((eventData, eventState) => {
+                                console.log("Pointer down on display");
+                            });
 
-                        display.pointerSource.onPointerMoveObservable.add((eventData, eventState) => {
-                            console.log(`x=${eventData.x}, y=${eventData.y}, u=${eventData.textureCoordinates?.x}, v=${eventData.textureCoordinates?.y}`);
-                        });
+                            display.pointerSource.onPointerMoveObservable.add((eventData, eventState) => {
+                                console.log(`x=${eventData.x}, y=${eventData.y}, u=${eventData.textureCoordinates?.x}, v=${eventData.textureCoordinates?.y}`);
+                            });
 
-                        display.pointerSource.onPointerEnterObservable.add((eventData, eventState) => {
-                            console.log("Pointer enter in display");
-                        });
+                            display.pointerSource.onPointerEnterObservable.add((eventData, eventState) => {
+                                console.log("Pointer enter in display");
+                            });
 
-                        display.pointerSource.onPointerOutObservable.add((eventData, eventState) => {
-                            console.log("Pointer out of display");
-                        });
+                            display.pointerSource.onPointerOutObservable.add((eventData, eventState) => {
+                                console.log("Pointer out of display");
+                            });
+                        }
                     }
                 });
 

@@ -124,6 +124,14 @@
             "url": "http://localhost:1338/packages/host/www/babylon/holographicTable.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test Mesh Feature Id",
+            "url": "http://localhost:1338/packages/host/www/babylon/tests/testExtMeshFeatureId.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
         }
     ]
 }

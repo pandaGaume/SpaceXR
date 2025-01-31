@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Test EXT_mesh_features with attributes</title>
+        <script src="../../libs/babylon.js"></script>
+        <script src="../../libs/babylon.inspector.bundle.js"></script>
+        <script src="../../libs/babylon.glTF2FileLoader.min.js"></script>
+        <script src="../../libs/stellar_landscape_xr.1.0.0.js"></script>
+
+        <style>
+            html,
+            body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #mapcanvas3d {
+                width: 100%;
+                height: 100%;
+            }
+            .babylon-purple-bg {
+                background-color: #34344a;
+                color: white;
+            }
+            header {
+                border-bottom: 10px solid #34344a;
+            }
+            h1 {
+                font-size: 32px;
+            }
+            p {
+                font-size: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapcontainer">
+            <canvas id="mapcanvas3d"></canvas>
+        </div>
+        <script>
+            const unit = 1;
+            async function createScene(canvas, engine) {
+                const scene = new BABYLON.Scene(engine);
+                // Parameters: name, alpha, beta, radius, target position, scene
+                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 4 * unit, new BABYLON.Vector3(0, 0, 0), scene);
+
+                // This attaches the camera to the canvas
+                camera.attachControl(canvas, true);
+
+                // This creates a light, aiming 0,-1,0 - from the sky (non-mesh)
+                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 1), scene);
+                // Default intensity is 1. Let's dim the light a small amount
+                light.intensity = 1.0;
+                light.diffuse = new BABYLON.Color3(1, 1, 1);
+
+                BABYLON.SceneLoader.ImportMesh(null, "../../models/tests/gltf/", "FeatureIdAttribute.gltf", scene, function (meshes) {
+                    console.log("mesh loaded..");
+                });
+
+                return scene;
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
+                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+                const scene = await createScene(canvas, engine); //Call the createScene function
+                scene.debugLayer.show();
+
+                // Register a render loop to repeatedly render the scene
+                engine.runRenderLoop(function () {
+                    scene.render();
+                });
+
+                // Watch for browser/canvas resize events
+                window.addEventListener("resize", function () {
+                    engine.resize();
+                });
+            };
+        </script>
+    </body>
+</html>

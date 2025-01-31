@@ -1,3 +1,4 @@
+import type * as GLTF2 from "babylonjs-gltf2interface";
 import { ICartesian3, ICartesian2, ICartesian4 } from "core/geometry";
 import { IVerticesData } from "core/meshes";
 declare module "@babylonjs/core" {
@@ -8,5 +9,9 @@ declare module "@babylonjs/core" {
     interface Vector2 extends ICartesian2 {
     }
     interface Vector4 extends ICartesian4 {
+    }
+}
+declare module "@babylonjs/loaders/glTF/2.0" {
+    interface IProperty extends GLTF2.IProperty {
     }
 }

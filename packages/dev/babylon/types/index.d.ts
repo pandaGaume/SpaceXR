@@ -6,4 +6,5 @@ export * from "./map";
 export * from "./dem";
 export * from "./engines";
 export * from "./meshes";
+export * from "./gltf";
 export * from "core/index";

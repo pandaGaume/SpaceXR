@@ -872,8 +872,9 @@ class EXT_mesh_features {
     }
     _loadVertexDataAsync(context, primitive, babylonMesh) {
         const gltfProp = primitive.extensions?.EXT_mesh_features;
-        const babylonObject = babylonMesh;
         if (HasFeatureIds(gltfProp)) {
+            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Geometry(babylonMesh.name, this._loader._babylonScene);
+            const babylonObject = babylonMesh;
             const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
             for (const i of gltfProp.featureIds) {
                 featureIds.push(i);
@@ -883,7 +884,6 @@ class EXT_mesh_features {
                 throw new Error(`${context}: Attributes are missing`);
             }
             const promises = new Array();
-            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Geometry(babylonMesh.name, this._loader._babylonScene);
             if (primitive.indices == undefined) {
                 babylonMesh.isUnIndexed = true;
             }
@@ -940,6 +940,7 @@ class EXT_mesh_features {
                     callback(accessor);
                 }
             };
+            const lastTexCoordIndex = 5;
             const attributeMappings = [
                 ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind, null],
                 ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV2Kind, null],
@@ -964,22 +965,33 @@ class EXT_mesh_features {
                     },
                 ],
             ];
+            let vfidCount = 0;
+            const implicit = [];
             for (const fid of featureIds) {
-                if (fid.attribute) {
-                    const n = `_FEATURE_ID_${fid.attribute}`;
-                    attributeMappings.push([n, n, null]);
+                if (fid.attribute != undefined) {
+                    const n = this._getKind("_FEATURE_ID_", fid.attribute);
+                    fid.kind = this._getKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
+                    attributeMappings.push([n, fid.kind, null]);
+                    vfidCount++;
                     continue;
                 }
-                if (fid.texture?.texCoord) {
-                    const n = `TEXCOORD_${fid.attribute}`;
-                    if (fid.texture?.texCoord <= 5) {
-                        attributeMappings[fid.texture?.texCoord] = [n, n, null];
+                if (fid.texture?.texCoord != undefined) {
+                    const n = this._getKind("TEXCOORD_", fid.texture.texCoord);
+                    fid.kind = this._getKind(EXT_mesh_features.TextureKindPrefix, fid.texture.texCoord);
+                    if (fid.texture?.texCoord <= lastTexCoordIndex) {
+                        attributeMappings[fid.texture?.texCoord] = [n, fid.kind, null];
                     }
                     else {
-                        attributeMappings.push([n, n, null]);
+                        attributeMappings.push([n, fid.kind, null]);
                     }
                     continue;
                 }
+                implicit.push(fid);
+            }
+            for (const fid of implicit) {
+                fid.kind = this._getKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
+                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.kind);
+                babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
             }
             attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
                 loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
@@ -990,7 +1002,17 @@ class EXT_mesh_features {
         }
         return null;
     }
+    _buildVertexBufferForImplicitId(count, kind) {
+        const generatedIndices = Array.from({ length: count }, (_, i) => i);
+        const engine = this._loader._babylonScene.getEngine();
+        return new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer(engine, generatedIndices, kind);
+    }
+    _getKind(prefix, n) {
+        return `${prefix}${n}`;
+    }
 }
+EXT_mesh_features.VerticeKindPrefix = "vfid";
+EXT_mesh_features.TextureKindPrefix = "tfid";
 _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_mesh_features(loader));
 //# sourceMappingURL=EXT_mesh_features.js.map
 

@@ -129,7 +129,15 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Test Mesh Feature Id",
-            "url": "http://localhost:1338/packages/host/www/babylon/tests/testExtMeshFeatureId.html",
+            "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?file=FeatureIdTexture.gltf",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test instance Feature Id",
+            "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?file=GpuInstancesMetadata.gltf",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         }

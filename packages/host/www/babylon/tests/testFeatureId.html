@@ -43,6 +43,13 @@
             <canvas id="mapcanvas3d"></canvas>
         </div>
         <script>
+            window.getUrlParameter = (name) => {
+                name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+                var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+                var results = regex.exec(window.location.search);
+                return results !== null ? decodeURIComponent(results[1].replace(/\+/g, " ")) : null;
+            };
+
             const unit = 1;
             async function createScene(canvas, engine) {
                 const scene = new BABYLON.Scene(engine);
@@ -58,10 +65,12 @@
                 light.intensity = 1.0;
                 light.diffuse = new BABYLON.Color3(1, 1, 1);
 
-                BABYLON.SceneLoader.ImportMesh(null, "../../models/tests/gltf/", "FeatureIdAttribute.gltf", scene, function (meshes) {
-                    console.log("mesh loaded..");
-                });
-
+                const file = window.getUrlParameter("file");
+                if (file) {
+                    BABYLON.SceneLoader.ImportMesh(null, "../../models/tests/gltf/", file, scene, function (meshes) {
+                        console.log("Texture Id mesh loaded..");
+                    });
+                }
                 return scene;
             }
 

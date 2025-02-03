@@ -1,7 +1,7 @@
 import * as GLTF2 from "babylonjs-gltf2interface";
-import { BoundingInfo, Geometry, Mesh, Nullable, TmpVectors, VertexBuffer } from "@babylonjs/core";
+import { BaseTexture, BoundingInfo, Geometry, Mesh, Nullable, TmpVectors, VertexBuffer } from "@babylonjs/core";
 import { IGLTFLoaderExtension } from "@babylonjs/loaders";
-import { GLTFLoader, IProperty, ITextureInfo, IMeshPrimitive, IAccessor, ArrayItem } from "@babylonjs/loaders/glTF/2.0";
+import { GLTFLoader, IProperty, ITextureInfo, IMeshPrimitive, ArrayItem, IAccessor } from "@babylonjs/loaders/glTF/2.0";
 
 const NAME = "EXT_mesh_features";
 
@@ -15,12 +15,14 @@ export interface IFeatureIdTexture extends ITextureInfo {
 export interface IFeatureId extends IProperty {
     featureCount: number; // The number of unique features in the attribute or texture.
     nullFeatureId?: number; // A value that indicates that no feature is associated with this vertex or texel.
-    label?: string; // A label assigned to this feature ID set. Labels must be alphanumeric identifiers matching the regular expression `^[a-zA-Z_][a-zA-Z0-9_]*$`.
     attribute?: FeatureIdAttribute; // An attribute containing feature IDs. When `attribute` and `texture` are omitted the feature IDs are assigned to vertices by their index.
     texture?: IFeatureIdTexture; // A texture containing feature IDs.
     propertyTable?: number; // the index of the property table containing per-feature property values. Only applicable when using the `EXT_structural_metadata` extension.
+    label?: string; // A label assigned to this feature ID set. Labels must be alphanumeric identifiers matching the regular expression `^[a-zA-Z_][a-zA-Z0-9_]*$`.
+
     // specific to babylon
-    kind: string;
+    vertexAttributeKind?: string; // the kind of vertice attribute binded with this feature
+    textureData?: BaseTexture; // the optional texture.
 }
 
 export interface IHasFeatureIds {
@@ -39,8 +41,12 @@ export function HasFeatureIds(b: unknown): b is IHasFeatureIds {
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export class EXT_mesh_features implements IGLTFLoaderExtension {
-    private static VerticeKindPrefix = "vfid";
-    private static TextureKindPrefix = "tfid";
+    public static BuildKind(prefix: string, n: number): string {
+        return `${prefix}${n}`;
+    }
+
+    public static VerticeKindPrefix = "fid";
+    private static uvKindPrefix = "uv";
     /**
      * The name of this extension.
      */
@@ -152,7 +158,6 @@ export class EXT_mesh_features implements IGLTFLoaderExtension {
                 }
             };
 
-            const lastTexCoordIndex = 5;
             const attributeMappings: [string, string, Nullable<(accessor: IAccessor) => void>][] = [
                 ["TEXCOORD_0", VertexBuffer.UVKind, null],
                 ["TEXCOORD_1", VertexBuffer.UV2Kind, null],
@@ -187,22 +192,17 @@ export class EXT_mesh_features implements IGLTFLoaderExtension {
             for (const fid of featureIds) {
                 if (fid.attribute != undefined) {
                     // Feature ID by Vertex
-                    const n = this._getKind("_FEATURE_ID_", fid.attribute);
-                    fid.kind = this._getKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
-                    attributeMappings.push([n, fid.kind, null]);
+                    const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
+                    attributeMappings.push([n, fid.vertexAttributeKind, null]);
                     vfidCount++;
                     continue;
                 }
                 if (fid.texture?.texCoord != undefined) {
-                    // Feature ID by Texture Coordinates
-                    const n = this._getKind("TEXCOORD_", fid.texture.texCoord);
-                    fid.kind = this._getKind(EXT_mesh_features.TextureKindPrefix, fid.texture.texCoord);
-                    if (fid.texture?.texCoord <= lastTexCoordIndex) {
-                        // we override the kind.
-                        attributeMappings[fid.texture?.texCoord] = [n, fid.kind, null];
-                    } else {
-                        attributeMappings.push([n, fid.kind, null]);
-                    }
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
+                    this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
+                        fid.textureData = babylonTexture;
+                    });
                     continue;
                 }
                 // When both featureId.attribute and featureId.texture are undefined,
@@ -215,8 +215,8 @@ export class EXT_mesh_features implements IGLTFLoaderExtension {
 
             // loop over the implicit feature id, creating and set buffer.
             for (const fid of implicit) {
-                fid.kind = this._getKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
-                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.kind);
+                fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
+                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
                 babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
             }
             //#end region extension specific
@@ -235,12 +235,8 @@ export class EXT_mesh_features implements IGLTFLoaderExtension {
     private _buildVertexBufferForImplicitId(count: number, kind: string): VertexBuffer {
         const generatedIndices = Array.from({ length: count }, (_, i) => i);
         const engine = (<any>this._loader)._babylonScene.getEngine();
-        // TODO - add more parameter such size, to avoid check for the kind and throw exception.
-        return new VertexBuffer(engine, generatedIndices, kind);
-    }
-
-    private _getKind(prefix: string, n: number): string {
-        return `${prefix}${n}`;
+        // TODO : optimise the size/type depending the count..
+        return new VertexBuffer(engine, generatedIndices, kind, false, undefined, 4, false, 0, 1, GLTF2.AccessorComponentType.FLOAT);
     }
 }
 

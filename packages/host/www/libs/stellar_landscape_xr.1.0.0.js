@@ -838,6 +838,67 @@ _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR__cop
 
 /***/ }),
 
+/***/ "./dist/gltf/2.0/extensions/EXT_instance_features.js":
+/*!***********************************************************!*\
+  !*** ./dist/gltf/2.0/extensions/EXT_instance_features.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* binding */ EXT_instance_features)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
+/* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/gltf/2.0/extensions/EXT_mesh_features.js");
+
+
+const NAME = "EXT_instance_features";
+class EXT_instance_features {
+    constructor(loader) {
+        this.name = NAME;
+        this._loader = loader;
+        this.enabled = this._loader.isExtensionUsed(NAME) && this._loader.isExtensionUsed(_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name);
+    }
+    dispose() {
+        this._loader = null;
+    }
+    loadNodeAsync(context, node, assign) {
+        if (node.extensions) {
+            const ext_gpu_instancing = node.extensions[_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name];
+            if (ext_gpu_instancing) {
+                return _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.LoadExtensionAsync(context, node, this.name, (extensionContext, extension) => {
+                    const promise = this._loader.loadNodeAsync(`/nodes/${node.index}`, node, assign);
+                    if (!node._primitiveBabylonMeshes) {
+                        return promise;
+                    }
+                    for (const babylonMesh of node._primitiveBabylonMeshes) {
+                        const babylonObject = babylonMesh;
+                        const gpu_instancing_context = `${context}.${_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name}`;
+                        const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
+                        for (const fid of extension.featureIds) {
+                            featureIds.push(fid);
+                            if (fid.attribute != undefined) {
+                                const n = _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_1__.EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.ArrayItem.Get(`${gpu_instancing_context}/attributes/${n}`, this._loader.gltf.accessors, ext_gpu_instancing.attributes[n]);
+                                this._loader._loadIndicesAccessorAsync(`/accessors/${accessor.bufferView}`, accessor).then((data) => {
+                                    babylonObject.thinInstanceIds = babylonObject.thinInstanceIds ?? [];
+                                    babylonObject.thinInstanceIds.push(data);
+                                });
+                            }
+                        }
+                    }
+                    return promise;
+                });
+            }
+        }
+        return null;
+    }
+}
+_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_instance_features(loader));
+//# sourceMappingURL=EXT_instance_features.js.map
+
+/***/ }),
+
 /***/ "./dist/gltf/2.0/extensions/EXT_mesh_features.js":
 /*!*******************************************************!*\
   !*** ./dist/gltf/2.0/extensions/EXT_mesh_features.js ***!
@@ -862,6 +923,9 @@ function HasFeatureIds(b) {
     return obj.featureIds !== undefined && Array.isArray(obj.featureIds) && obj.featureIds.length != 0;
 }
 class EXT_mesh_features {
+    static BuildKind(prefix, n) {
+        return `${prefix}${n}`;
+    }
     constructor(loader) {
         this.name = NAME;
         this._loader = loader;
@@ -940,7 +1004,6 @@ class EXT_mesh_features {
                     callback(accessor);
                 }
             };
-            const lastTexCoordIndex = 5;
             const attributeMappings = [
                 ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind, null],
                 ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV2Kind, null],
@@ -969,28 +1032,24 @@ class EXT_mesh_features {
             const implicit = [];
             for (const fid of featureIds) {
                 if (fid.attribute != undefined) {
-                    const n = this._getKind("_FEATURE_ID_", fid.attribute);
-                    fid.kind = this._getKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
-                    attributeMappings.push([n, fid.kind, null]);
+                    const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
+                    attributeMappings.push([n, fid.vertexAttributeKind, null]);
                     vfidCount++;
                     continue;
                 }
                 if (fid.texture?.texCoord != undefined) {
-                    const n = this._getKind("TEXCOORD_", fid.texture.texCoord);
-                    fid.kind = this._getKind(EXT_mesh_features.TextureKindPrefix, fid.texture.texCoord);
-                    if (fid.texture?.texCoord <= lastTexCoordIndex) {
-                        attributeMappings[fid.texture?.texCoord] = [n, fid.kind, null];
-                    }
-                    else {
-                        attributeMappings.push([n, fid.kind, null]);
-                    }
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
+                    this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
+                        fid.textureData = babylonTexture;
+                    });
                     continue;
                 }
                 implicit.push(fid);
             }
             for (const fid of implicit) {
-                fid.kind = this._getKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
-                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.kind);
+                fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
+                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
                 babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
             }
             attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
@@ -1005,16 +1064,41 @@ class EXT_mesh_features {
     _buildVertexBufferForImplicitId(count, kind) {
         const generatedIndices = Array.from({ length: count }, (_, i) => i);
         const engine = this._loader._babylonScene.getEngine();
-        return new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer(engine, generatedIndices, kind);
-    }
-    _getKind(prefix, n) {
-        return `${prefix}${n}`;
+        return new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer(engine, generatedIndices, kind, false, undefined, 4, false, 0, 1, 5126);
     }
 }
-EXT_mesh_features.VerticeKindPrefix = "vfid";
-EXT_mesh_features.TextureKindPrefix = "tfid";
+EXT_mesh_features.VerticeKindPrefix = "fid";
+EXT_mesh_features.uvKindPrefix = "uv";
 _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_mesh_features(loader));
 //# sourceMappingURL=EXT_mesh_features.js.map
+
+/***/ }),
+
+/***/ "./dist/gltf/2.0/extensions/EXT_structural_metadata.js":
+/*!*************************************************************!*\
+  !*** ./dist/gltf/2.0/extensions/EXT_structural_metadata.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_structural_metadata: () => (/* binding */ EXT_structural_metadata)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
+
+const NAME = "EXT_structural_metadata";
+class EXT_structural_metadata {
+    constructor(loader) {
+        this.name = NAME;
+        this._loader = loader;
+        this.enabled = this._loader.isExtensionUsed(NAME);
+    }
+    dispose() {
+        this._loader = null;
+    }
+}
+_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_structural_metadata(loader));
+//# sourceMappingURL=EXT_structural_metadata.js.map
 
 /***/ }),
 
@@ -1026,10 +1110,16 @@ _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.GLTFLoader.RegisterExte
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.EXT_structural_metadata),
 /* harmony export */   HasFeatureIds: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds)
 /* harmony export */ });
 /* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/gltf/2.0/extensions/EXT_mesh_features.js");
+/* harmony import */ var _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_instance_features */ "./dist/gltf/2.0/extensions/EXT_instance_features.js");
+/* harmony import */ var _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EXT_structural_metadata */ "./dist/gltf/2.0/extensions/EXT_structural_metadata.js");
+
+
 
 //# sourceMappingURL=index.js.map
 
@@ -1043,7 +1133,9 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
 /* harmony export */   HasFeatureIds: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds)
 /* harmony export */ });
 /* harmony import */ var _extensions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./extensions */ "./dist/gltf/2.0/extensions/index.js");
@@ -1060,7 +1152,9 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
 /* harmony export */   HasFeatureIds: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds)
 /* harmony export */ });
 /* harmony import */ var _2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./2.0 */ "./dist/gltf/2.0/index.js");
@@ -23892,7 +23986,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient),
 /* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EPSG3857),
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_7__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_7__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_7__.EXT_structural_metadata),
 /* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.ElevationGridFactory),
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ElevationHelpers),
 /* harmony export */   ElevationLayer: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_4__.ElevationLayer),

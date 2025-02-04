@@ -1087,6 +1087,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsStructuralMetadata: () => (/* binding */ IsStructuralMetadata)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_1__);
+
 
 const NAME = "EXT_structural_metadata";
 function IsStructuralMetadata(b) {
@@ -1123,8 +1126,118 @@ class EXT_structural_metadata {
         }
     }
     _loadVertexDataAsync(context, primitive, babylonMesh) {
-        const gltfProp = primitive.extensions?.EXT_mesh_features;
-        if (IsStructuralMetadata(gltfProp) && this._metadata) {
+        if (primitive.extensions) {
+            const attributes = primitive.attributes;
+            if (!attributes) {
+                throw new Error(`${context}: Attributes are missing`);
+            }
+            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.Geometry(babylonMesh.name, this._loader._babylonScene);
+            const promises = new Array();
+            const loadAttribute = (name, kind, callback) => {
+                if (attributes[name] == undefined) {
+                    return;
+                }
+                babylonMesh._delayInfo = babylonMesh._delayInfo || [];
+                if (babylonMesh._delayInfo.indexOf(kind) === -1) {
+                    babylonMesh._delayInfo.push(kind);
+                }
+                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.ArrayItem.Get(`${context}/attributes/${name}`, this._loader._gltf.accessors, attributes[name]);
+                promises.push(this._loader._loadVertexAccessorAsync(`/accessors/${accessor.index}`, accessor, kind).then((babylonVertexBuffer) => {
+                    if (babylonVertexBuffer.getKind() === _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.PositionKind && !this._loader.parent.alwaysComputeBoundingBox && !babylonMesh.skeleton) {
+                        if (accessor.min && accessor.max) {
+                            const min = _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.TmpVectors.Vector3[0].copyFromFloats(...accessor.min);
+                            const max = _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.TmpVectors.Vector3[1].copyFromFloats(...accessor.max);
+                            if (accessor.normalized && accessor.componentType !== 5126) {
+                                let divider = 1;
+                                switch (accessor.componentType) {
+                                    case 5120:
+                                        divider = 127.0;
+                                        break;
+                                    case 5121:
+                                        divider = 255.0;
+                                        break;
+                                    case 5122:
+                                        divider = 32767.0;
+                                        break;
+                                    case 5123:
+                                        divider = 65535.0;
+                                        break;
+                                }
+                                const oneOverDivider = 1 / divider;
+                                min.scaleInPlace(oneOverDivider);
+                                max.scaleInPlace(oneOverDivider);
+                            }
+                            babylonGeometry._boundingInfo = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.BoundingInfo(min, max);
+                            babylonGeometry.useBoundingInfoFromGeometry = true;
+                        }
+                    }
+                    babylonGeometry.setVerticesBuffer(babylonVertexBuffer, accessor.count);
+                }));
+                if (kind == _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesExtraKind) {
+                    babylonMesh.numBoneInfluencers = 8;
+                }
+                if (callback) {
+                    callback(accessor);
+                }
+            };
+            const attributeMappings = [
+                ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UVKind, null],
+                ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV2Kind, null],
+                ["TEXCOORD_2", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV3Kind, null],
+                ["TEXCOORD_3", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV4Kind, null],
+                ["TEXCOORD_4", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV5Kind, null],
+                ["TEXCOORD_5", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV6Kind, null],
+                ["POSITION", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.PositionKind, null],
+                ["NORMAL", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.NormalKind, null],
+                ["TANGENT", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.TangentKind, null],
+                ["JOINTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesKind, null],
+                ["WEIGHTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesWeightsKind, null],
+                ["JOINTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesExtraKind, null],
+                ["WEIGHTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesWeightsExtraKind, null],
+                [
+                    "COLOR_0",
+                    _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.ColorKind,
+                    (accessor) => {
+                        if (accessor.type === "VEC4") {
+                            babylonMesh.hasVertexAlpha = true;
+                        }
+                    },
+                ],
+            ];
+            const extension = primitive.extensions[EXT_structural_metadata.name];
+            if (extension && this._metadata) {
+                if (extension.propertyAttributes && this._metadata.propertyAttributes) {
+                    for (const i of extension.propertyAttributes) {
+                        if (i >= 0 && i < this._metadata.propertyAttributes.length) {
+                            const ref = this._metadata.propertyAttributes[i];
+                            for (const propertyName in ref.properties) {
+                                const v = ref.properties[propertyName];
+                                attributeMappings.push([v.attribute, v.attribute, null]);
+                            }
+                        }
+                    }
+                }
+                if (extension.propertyTextures && this._metadata.propertyTextures) {
+                    for (const i of extension.propertyTextures) {
+                        if (i >= 0 && i < this._metadata.propertyTextures.length) {
+                            const ref = this._metadata.propertyTextures[i];
+                            for (const propertyName in ref.properties) {
+                                const textInfos = ref.properties[propertyName];
+                                this._loader.loadTextureInfoAsync(context, textInfos).then((babylonTexture) => {
+                                    ref.textures = ref.textures || [];
+                                    ref.textures[propertyName] = babylonTexture;
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
+                loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
+            });
+            return Promise.all(promises).then(() => {
+                return babylonGeometry;
+            });
         }
         return null;
     }

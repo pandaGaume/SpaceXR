@@ -74,23 +74,13 @@ export class EXT_mesh_features implements IGLTFLoaderExtension {
      * @internal
      */
     public _loadVertexDataAsync(context: string, primitive: IMeshPrimitive, babylonMesh: Mesh): Nullable<Promise<Geometry>> {
-        const gltfProp = primitive.extensions?.EXT_mesh_features;
-        if (HasFeatureIds(gltfProp)) {
-            const babylonGeometry = new Geometry(babylonMesh.name, (<any>this._loader)._babylonScene);
-
-            //#region extension specific
-            const babylonObject: any = babylonMesh; // this is the object where we decide to put the feature ids accessor.
-            const featureIds: Array<IFeatureId> = (babylonObject.featureIds = babylonObject.featureIds ?? []);
-            for (const i of gltfProp.featureIds) {
-                featureIds.push(i);
-            }
-            //#endregion extension specific
-
+        if (primitive.extensions) {
             const attributes = primitive.attributes;
             if (!attributes) {
                 throw new Error(`${context}: Attributes are missing`);
             }
 
+            const babylonGeometry = new Geometry(babylonMesh.name, (<any>this._loader)._babylonScene);
             const promises = new Array<Promise<any>>();
 
             if (primitive.indices == undefined) {
@@ -186,38 +176,47 @@ export class EXT_mesh_features implements IGLTFLoaderExtension {
             ];
 
             //#region extension specific
-            // this is where we load the features id..
-            let vfidCount = 0;
-            const implicit: Array<IFeatureId> = [];
-            for (const fid of featureIds) {
-                if (fid.attribute != undefined) {
-                    // Feature ID by Vertex
-                    const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
-                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
-                    attributeMappings.push([n, fid.vertexAttributeKind, null]);
-                    vfidCount++;
-                    continue;
+            const extension = primitive.extensions[EXT_mesh_features.name];
+            if (extension && extension.featureIds) {
+                const babylonObject: any = babylonMesh; // this is the object where we decide to put the feature ids accessor.
+                const featureIds: Array<IFeatureId> = (babylonObject.featureIds = babylonObject.featureIds ?? []);
+                for (const i of extension.featureIds) {
+                    featureIds.push(i);
                 }
-                if (fid.texture?.texCoord != undefined) {
-                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
-                    this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
-                        fid.textureData = babylonTexture;
-                    });
-                    continue;
-                }
-                // When both featureId.attribute and featureId.texture are undefined,
-                // then the feature ID value for each vertex is given implicitly, via
-                // the index of the vertex. In this case, the featureCount must match
-                // the number of vertices of the mesh primitive.
-                // push these into stack for later process (we need this to know the number of feature by vertex already declared)
-                implicit.push(fid);
-            }
 
-            // loop over the implicit feature id, creating and set buffer.
-            for (const fid of implicit) {
-                fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
-                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
-                babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
+                // this is where we load the features id..
+                let vfidCount = 0;
+                const implicit: Array<IFeatureId> = [];
+                for (const fid of featureIds) {
+                    if (fid.attribute != undefined) {
+                        // Feature ID by Vertex
+                        const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
+                        attributeMappings.push([n, fid.vertexAttributeKind, null]);
+                        vfidCount++;
+                        continue;
+                    }
+                    if (fid.texture?.texCoord != undefined) {
+                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
+                        this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
+                            fid.textureData = babylonTexture;
+                        });
+                        continue;
+                    }
+                    // When both featureId.attribute and featureId.texture are undefined,
+                    // then the feature ID value for each vertex is given implicitly, via
+                    // the index of the vertex. In this case, the featureCount must match
+                    // the number of vertices of the mesh primitive.
+                    // push these into stack for later process (we need this to know the number of feature by vertex already declared)
+                    implicit.push(fid);
+                }
+
+                // loop over the implicit feature id, creating and set buffer.
+                for (const fid of implicit) {
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
+                    const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
+                    babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
+                }
             }
             //#end region extension specific
 

@@ -1,3 +1,4 @@
+import { BaseTexture } from "@babylonjs/core";
 import { IProperty, ITextureInfo } from "@babylonjs/loaders/glTF/2.0";
 
 export interface IMetadataItem extends IProperty {
@@ -269,6 +270,11 @@ export interface IMetadataPropertyTexture extends IProperty {
     /// </summary>
     properties: {
         [key: string]: IMetadataPropertyTextureProperty;
+    };
+
+    // babylon specific
+    textures: {
+        [key: string]: BaseTexture;
     };
 }
 

@@ -128,17 +128,17 @@ export interface IMetadataPropertyTable extends IProperty {
     /// Required properties must be included in this dictionary.
     /// </summary>
     properties: {
-        [key: string]: IPropertyMetadataTableProperty;
+        [key: string]: IMetadataPropertyTableProperty;
     };
 }
 
-export type IPropertyMetadataType = "UINT8" | "UINT16" | "UINT32" | "UINT64" | string;
+export type IMetadataPropertyType = "UINT8" | "UINT16" | "UINT32" | "UINT64" | string;
 
 /// <summary>
 /// Represents a property table property in the EXT_structural_metadata extension.
 /// An array of binary property values.
 /// </summary>
-export interface IPropertyMetadataTableProperty extends IProperty {
+export interface IMetadataPropertyTableProperty extends IProperty {
     /// <summary>
     /// The index of the buffer view containing property values.
     /// </summary>
@@ -158,13 +158,13 @@ export interface IPropertyMetadataTableProperty extends IProperty {
     /// The type of values in `arrayOffsets`.
     /// Defaults to UINT32.
     /// </summary>
-    arrayOffsetType?: IPropertyMetadataType;
+    arrayOffsetType?: IMetadataPropertyType;
 
     /// <summary>
     /// The type of values in `stringOffsets`.
     /// Defaults to UINT32.
     /// </summary>
-    stringOffsetType?: IPropertyMetadataType;
+    stringOffsetType?: IMetadataPropertyType;
 
     /// <summary>
     /// An offset to apply to property values.
@@ -304,4 +304,16 @@ export interface IMetadataPropertyTextureProperty extends ITextureInfo {
     /// Minimum value present in the property values.
     /// </summary>
     min?: number;
+}
+
+export interface IMetadataNode {
+    class: string;
+    properties: {
+        [key: string]: any;
+    };
+}
+
+export interface IMetadataPrimitiveIndex {
+    propertyAttributes: Array<number>;
+    propertyTextures: Array<number>;
 }

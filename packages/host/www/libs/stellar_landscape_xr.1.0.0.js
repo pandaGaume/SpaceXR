@@ -1082,16 +1082,51 @@ _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.GLTFLoader.RegisterExte
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_structural_metadata: () => (/* binding */ EXT_structural_metadata)
+/* harmony export */   EXT_structural_metadata: () => (/* binding */ EXT_structural_metadata),
+/* harmony export */   IsHasStructuralMetadata: () => (/* binding */ IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* binding */ IsStructuralMetadata)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
 
 const NAME = "EXT_structural_metadata";
+function IsStructuralMetadata(b) {
+    if (b === null || b === undefined || typeof b !== "object")
+        return false;
+    const obj = b;
+    return obj.schema !== undefined;
+}
+function IsHasStructuralMetadata(b) {
+    if (b === null || b === undefined || typeof b !== "object")
+        return false;
+    const obj = b;
+    return obj.structuralMetadata !== undefined;
+}
 class EXT_structural_metadata {
     constructor(loader) {
         this.name = NAME;
+        this._metadata = null;
         this._loader = loader;
         this.enabled = this._loader.isExtensionUsed(NAME);
+    }
+    onLoading() {
+        const extensions = this._loader.gltf.extensions;
+        if (extensions && extensions[this.name]) {
+            const extension = extensions[this.name];
+            const babylonObject = this._loader.rootBabylonMesh;
+            babylonObject.structuralMetadata = {
+                schema: extension.schema,
+                propertyTables: extension.propertyTables,
+                propertyAttributes: extension.propertyAttributes,
+                propertyTextures: extension.propertyTextures,
+            };
+            this._metadata = babylonObject.structuralMetadata;
+        }
+    }
+    _loadVertexDataAsync(context, primitive, babylonMesh) {
+        const gltfProp = primitive.extensions?.EXT_mesh_features;
+        if (IsStructuralMetadata(gltfProp) && this._metadata) {
+        }
+        return null;
     }
     dispose() {
         this._loader = null;
@@ -1113,11 +1148,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EXT_instance_features: () => (/* reexport safe */ _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
 /* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.EXT_structural_metadata),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds)
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.IsStructuralMetadata)
 /* harmony export */ });
 /* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/gltf/2.0/extensions/EXT_mesh_features.js");
 /* harmony import */ var _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_instance_features */ "./dist/gltf/2.0/extensions/EXT_instance_features.js");
 /* harmony import */ var _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EXT_structural_metadata */ "./dist/gltf/2.0/extensions/EXT_structural_metadata.js");
+
 
 
 
@@ -1136,7 +1174,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EXT_instance_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
 /* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds)
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata)
 /* harmony export */ });
 /* harmony import */ var _extensions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./extensions */ "./dist/gltf/2.0/extensions/index.js");
 
@@ -1155,7 +1195,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EXT_instance_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
 /* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
 /* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds)
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata)
 /* harmony export */ });
 /* harmony import */ var _2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./2.0 */ "./dist/gltf/2.0/index.js");
 
@@ -24046,6 +24088,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_4__.IsElevationLayerOptions),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsGeoBounded),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_7__.IsHasStructuralMetadata),
 /* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicCylinder),
@@ -24055,6 +24098,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsPhysicalDisplay),
 /* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsSize3),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_7__.IsStructuralMetadata),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTile),
 /* harmony export */   IsTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileAddress),

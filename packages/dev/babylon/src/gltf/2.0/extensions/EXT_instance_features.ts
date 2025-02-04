@@ -6,6 +6,7 @@ import { EXT_mesh_features, IFeatureId, IHasFeatureIds } from "./EXT_mesh_featur
 const NAME = "EXT_instance_features";
 
 export interface IHasInstanceIds extends IHasFeatureIds {
+    // babylon specific.
     thinInstanceIds: Array<IndicesArray>;
 }
 

@@ -3,6 +3,7 @@ import { ICartesian3, ICartesian2, ICartesian4 } from "core/geometry";
 import { IVerticesData } from "core/meshes";
 import { IHasFeatureIds } from "./gltf/2.0/extensions/EXT_mesh_features";
 import { IHasInstanceIds } from "./gltf/2.0/extensions/EXT_instance_features";
+import { IStructuralMetadata } from "./gltf/2.0/extensions/EXT_structural_metadata";
 
 /// classic augmentation
 declare module "@babylonjs/core" {
@@ -12,7 +13,7 @@ declare module "@babylonjs/core" {
     export interface Vector4 extends ICartesian4 {}
 
     // gltf extensions
-    export interface Mesh extends IHasFeatureIds, IHasInstanceIds {}
+    export interface Mesh extends IHasFeatureIds, IHasInstanceIds, IStructuralMetadata {}
 }
 
 declare module "@babylonjs/loaders/glTF/2.0" {
@@ -20,4 +21,5 @@ declare module "@babylonjs/loaders/glTF/2.0" {
 
     interface IEXTMeshFeatures extends IHasFeatureIds {}
     interface IEXTInstanceFeatures extends IHasFeatureIds {}
+    interface IEXTStructuralMetadata extends IStructuralMetadata {}
 }

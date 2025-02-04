@@ -68,7 +68,17 @@
                 const file = window.getUrlParameter("file");
                 if (file) {
                     BABYLON.SceneLoader.ImportMesh(null, "../../models/tests/gltf/", file, scene, function (meshes) {
-                        console.log("Texture Id mesh loaded..");
+                        for (const m of meshes) {
+                            if (m.structuralMetadata) {
+                                console.log("metadata found");
+                            }
+                            if (m.featureIds) {
+                                console.log("feature ids found");
+                            }
+                            if (m.thinInstanceIds) {
+                                console.log("instance ids found");
+                            }
+                        }
                     });
                 }
                 return scene;

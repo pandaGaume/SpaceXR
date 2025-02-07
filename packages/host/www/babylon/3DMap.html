@@ -90,7 +90,16 @@
                     height: 2.4 * unit,
                 };
 
-                const resolution = SPACEXR.VirtualDisplay.HD;
+                // QVGA: ISize2 = new Size2(320, 240);
+                // VGA: ISize2 = new Size2(640, 480);
+                // QHD: ISize2 = new Size2(960, 540);
+                // HD: ISize2 = new Size2(1280, 720);
+                // WXGA: ISize2 = new Size2(1280, 800);
+                // FullHD: ISize2 = new Size2(1980, 1080);
+                // UltraHD: ISize2 = new Size2(3840, 2160);
+                // UltraHD2: ISize2 = new Size2(7680, 4320);
+
+                const resolution = SPACEXR.VirtualDisplay.FullHD;
 
                 // set the virtual display
                 const buildClipPlane = true;

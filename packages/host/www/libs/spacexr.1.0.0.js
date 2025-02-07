@@ -9179,8 +9179,8 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         }
     }
     _getRectangle(center, w, h, scale, azimuth) {
-        w = w / scale;
-        h = h / scale;
+        w = (w / scale) * 1.5;
+        h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
         const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2(x0, y0, w, h);
@@ -10424,8 +10424,8 @@ class TileBuilder {
         const type = this._t ?? (_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile);
         const t = new type(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
-            t.geoBounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildEnvelope(t.address, this._m);
-            t.bounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t.address, this._m);
+            t.geoBounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildEnvelope(t, this._m);
+            t.bounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t, this._m);
         }
         return t;
     }
@@ -10896,16 +10896,30 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
-    static BuildEnvelope(a, metrics) {
+    static BuildEnvelope(t, metrics) {
         if (metrics) {
+            if (metrics.geoBoundsFactory) {
+                const b = metrics.geoBoundsFactory(t, metrics);
+                if (b) {
+                    return b;
+                }
+            }
+            const a = t.address;
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
             return _geography__WEBPACK_IMPORTED_MODULE_1__.Envelope.FromPoints(nw, se);
         }
         return undefined;
     }
-    static BuildBounds(a, metrics) {
+    static BuildBounds(t, metrics) {
         if (metrics) {
+            if (metrics.boundsFactory) {
+                const b = metrics.boundsFactory(t, metrics);
+                if (b) {
+                    return b;
+                }
+            }
+            const a = t.address;
             const p = metrics.getTileXYToPointXY(a.x, a.y);
             return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }
@@ -12236,8 +12250,6 @@ ValidableBase.VALID_PROPERTY_NAME = "valid";
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
 /*!***********************!*\
   !*** ./dist/index.js ***!
   \***********************/
@@ -12488,8 +12500,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 //# sourceMappingURL=index.js.map
-})();
-
 SPACEXR = __webpack_exports__;
 /******/ })()
 ;

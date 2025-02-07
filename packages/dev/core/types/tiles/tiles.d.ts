@@ -3,8 +3,8 @@ import { ITile, ITileAddress, ITileMetrics, TileContentType } from "./tiles.inte
 import { IBounds2 } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./address/tiles.address";
 export declare class Tile<T> extends TileAddress implements ITile<T> {
-    static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined;
-    static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IBounds2 | undefined;
+    static BuildEnvelope(t: ITile<unknown>, metrics?: ITileMetrics): IEnvelope | undefined;
+    static BuildBounds(t: ITile<unknown>, metrics?: ITileMetrics): IBounds2 | undefined;
     private _value;
     private _env?;
     private _rect?;

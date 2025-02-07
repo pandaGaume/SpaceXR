@@ -108,8 +108,8 @@ export class TileView extends TileViewBase {
     }
 
     protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IBounds2 {
-        w = w / scale;
-        h = h / scale;
+        w = (w / scale) * 1.5; // add border for caching
+        h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
         const bounds = new Bounds2(x0, y0, w, h);

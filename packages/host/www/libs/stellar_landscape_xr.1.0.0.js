@@ -935,18 +935,12 @@ class EXT_mesh_features {
         this._loader = null;
     }
     _loadVertexDataAsync(context, primitive, babylonMesh) {
-        const gltfProp = primitive.extensions?.EXT_mesh_features;
-        if (HasFeatureIds(gltfProp)) {
-            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Geometry(babylonMesh.name, this._loader._babylonScene);
-            const babylonObject = babylonMesh;
-            const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
-            for (const i of gltfProp.featureIds) {
-                featureIds.push(i);
-            }
+        if (primitive.extensions) {
             const attributes = primitive.attributes;
             if (!attributes) {
                 throw new Error(`${context}: Attributes are missing`);
             }
+            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Geometry(babylonMesh.name, this._loader._babylonScene);
             const promises = new Array();
             if (primitive.indices == undefined) {
                 babylonMesh.isUnIndexed = true;
@@ -1028,29 +1022,37 @@ class EXT_mesh_features {
                     },
                 ],
             ];
-            let vfidCount = 0;
-            const implicit = [];
-            for (const fid of featureIds) {
-                if (fid.attribute != undefined) {
-                    const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
-                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
-                    attributeMappings.push([n, fid.vertexAttributeKind, null]);
-                    vfidCount++;
-                    continue;
+            const extension = primitive.extensions[EXT_mesh_features.name];
+            if (extension && extension.featureIds) {
+                const babylonObject = babylonMesh;
+                const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
+                for (const i of extension.featureIds) {
+                    featureIds.push(i);
                 }
-                if (fid.texture?.texCoord != undefined) {
-                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
-                    this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
-                        fid.textureData = babylonTexture;
-                    });
-                    continue;
+                let vfidCount = 0;
+                const implicit = [];
+                for (const fid of featureIds) {
+                    if (fid.attribute != undefined) {
+                        const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
+                        attributeMappings.push([n, fid.vertexAttributeKind, null]);
+                        vfidCount++;
+                        continue;
+                    }
+                    if (fid.texture?.texCoord != undefined) {
+                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
+                        this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
+                            fid.textureData = babylonTexture;
+                        });
+                        continue;
+                    }
+                    implicit.push(fid);
                 }
-                implicit.push(fid);
-            }
-            for (const fid of implicit) {
-                fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
-                const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
-                babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
+                for (const fid of implicit) {
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
+                    const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
+                    babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
+                }
             }
             attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
                 loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
@@ -2735,7 +2737,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _ensureTileGeoBoundsIsReady(tile, metrics) {
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
-            const env = core_tiles__WEBPACK_IMPORTED_MODULE_10__.Tile.BuildEnvelope(tile.address, metrics);
+            const env = core_tiles__WEBPACK_IMPORTED_MODULE_10__.Tile.BuildEnvelope(tile, metrics);
             tile.geoBounds = env;
         }
     }
@@ -12941,8 +12943,8 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         }
     }
     _getRectangle(center, w, h, scale, azimuth) {
-        w = w / scale;
-        h = h / scale;
+        w = (w / scale) * 1.5;
+        h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
         const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2(x0, y0, w, h);
@@ -14186,8 +14188,8 @@ class TileBuilder {
         const type = this._t ?? (_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile);
         const t = new type(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
-            t.geoBounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildEnvelope(t.address, this._m);
-            t.bounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t.address, this._m);
+            t.geoBounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildEnvelope(t, this._m);
+            t.bounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t, this._m);
         }
         return t;
     }
@@ -14658,16 +14660,30 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
-    static BuildEnvelope(a, metrics) {
+    static BuildEnvelope(t, metrics) {
         if (metrics) {
+            if (metrics.geoBoundsFactory) {
+                const b = metrics.geoBoundsFactory(t, metrics);
+                if (b) {
+                    return b;
+                }
+            }
+            const a = t.address;
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
             return _geography__WEBPACK_IMPORTED_MODULE_1__.Envelope.FromPoints(nw, se);
         }
         return undefined;
     }
-    static BuildBounds(a, metrics) {
+    static BuildBounds(t, metrics) {
         if (metrics) {
+            if (metrics.boundsFactory) {
+                const b = metrics.boundsFactory(t, metrics);
+                if (b) {
+                    return b;
+                }
+            }
+            const a = t.address;
             const p = metrics.getTileXYToPointXY(a.x, a.y);
             return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }

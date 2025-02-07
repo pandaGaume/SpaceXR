@@ -5,8 +5,15 @@ import { Bounds2 } from "../geometry/geometry.bounds";
 import { TileAddress } from "./address/tiles.address";
 
 export class Tile<T> extends TileAddress implements ITile<T> {
-    public static BuildEnvelope(a: ITileAddress, metrics?: ITileMetrics): IEnvelope | undefined {
+    public static BuildEnvelope(t: ITile<unknown>, metrics?: ITileMetrics): IEnvelope | undefined {
         if (metrics) {
+            if (metrics.geoBoundsFactory) {
+                const b = metrics.geoBoundsFactory(t, metrics);
+                if (b) {
+                    return b;
+                }
+            }
+            const a = t.address;
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
             return Envelope.FromPoints(nw, se);
@@ -14,8 +21,15 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    public static BuildBounds(a: ITileAddress, metrics?: ITileMetrics): IBounds2 | undefined {
+    public static BuildBounds(t: ITile<unknown>, metrics?: ITileMetrics): IBounds2 | undefined {
         if (metrics) {
+            if (metrics.boundsFactory) {
+                const b = metrics.boundsFactory(t, metrics);
+                if (b) {
+                    return b;
+                }
+            }
+            const a = t.address;
             const p = metrics.getTileXYToPointXY(a.x, a.y);
             return new Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }

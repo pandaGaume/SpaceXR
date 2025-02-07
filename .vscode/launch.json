@@ -140,6 +140,14 @@
             "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?file=GpuInstancesMetadata.gltf",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test google 3D Tile",
+            "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?root=glb&file=Google3DTile.glb",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
         }
     ]
 }

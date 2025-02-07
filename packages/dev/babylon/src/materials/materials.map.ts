@@ -790,7 +790,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     private _ensureTileGeoBoundsIsReady<T>(tile: ITile<T>, metrics: ITileMetrics): void {
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
-            const env = Tile.BuildEnvelope(tile.address, metrics)!;
+            const env = Tile.BuildEnvelope(tile, metrics)!;
             tile.geoBounds = env;
         }
     }

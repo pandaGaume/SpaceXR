@@ -162,6 +162,8 @@ export interface ITileSystem extends ITileSystemBounds {
     cellSize: number;
     cellCoordinateReference: CellCoordinateReference;
     overlap: number;
+    boundsFactory?: (a: ITile<unknown>, metrics: ITileMetrics) => IBounds2;
+    geoBoundsFactory?: (a: ITile<unknown>, metrics: ITileMetrics) => IEnvelope;
 }
 
 export interface ITileMetrics extends ITileSystem {

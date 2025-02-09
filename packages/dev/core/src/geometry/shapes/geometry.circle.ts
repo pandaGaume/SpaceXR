@@ -1,6 +1,6 @@
-import { Bounds2 } from "../geometry.bounds";
+import { Bounds } from "../geometry.bounds";
 import { Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3 } from "../geometry.interfaces";
+import { IBounds, ICartesian3 } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { ICircle, ShapeType } from "./geometry.shapes.interfaces";
 
@@ -36,12 +36,12 @@ export class Circle extends AbstractShape implements ICircle {
         }
     }
 
-    protected _buildBounds(): IBounds2 | undefined {
+    protected _buildBounds(): IBounds | undefined {
         const r = this._radius;
         const x = this._center.x;
         const y = this._center.y;
 
-        return new Bounds2(x - r, y - r, r * 2, r * 2);
+        return new Bounds(x - r, y - r, r * 2, r * 2);
     }
 
     protected _getPoints(): Array<ICartesian3> {

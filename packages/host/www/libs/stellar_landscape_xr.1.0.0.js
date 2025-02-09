@@ -196,7 +196,7 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
     }
     static buildHorizontalClipPlanes(display) {
         const clipPlanes = new Array();
-        const halfThickness = display.halfDimension.thickness;
+        const halfThickness = display.halfDimension.depth;
         const nTop = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, 1);
         const nBottom = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, -1);
         const position = display.node.position;
@@ -530,9 +530,9 @@ var UVKind;
 class VirtualDisplay {
     constructor(name, dimension, resolution, scene, unit = core_math__WEBPACK_IMPORTED_MODULE_1__.Length.Units.meter) {
         this._dimension = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(dimension);
-        this._halfDimension = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.thickness / 2);
+        this._halfDimension = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.depth / 2);
         this._resolution = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(resolution);
-        this._ppu = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._resolution.width / this._dimension.width, this._resolution.height / this._dimension.height, this._dimension.thickness ? this._resolution.thickness / this._dimension.thickness : 0);
+        this._ppu = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._resolution.width / this._dimension.width, this._resolution.height / this._dimension.height, this._dimension.depth ? this._resolution.depth / this._dimension.depth : 0);
         this._ratio = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._ppu.x / this._ppu.y, this._ppu.z / this._ppu.y, this._ppu.z / this._ppu.x);
         if (scene == undefined || scene instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Scene) {
             this._node = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
@@ -1851,8 +1851,8 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         const x = display.dimension.width / (display.resolution.width * groundResolution);
         const y = display.dimension.height / (display.resolution.height * groundResolution);
         let z = Math.max(x, y);
-        if (display.dimension.thickness && display.resolution.thickness) {
-            z = display.dimension.thickness / (display.resolution.thickness * groundResolution);
+        if (display.dimension.depth && display.resolution.depth) {
+            z = display.dimension.depth / (display.resolution.depth * groundResolution);
         }
         this._tilesRoot.scaling.x = x * groundResolution * nav.scale;
         this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
@@ -3228,20 +3228,22 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   B3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.B3DMLoader),
-/* harmony export */   CMPTLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.CMPTLoader),
-/* harmony export */   I3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.I3DMLoader),
-/* harmony export */   PNTSLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.PNTSLoader),
-/* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__.RefinementStrategy),
+/* harmony export */   B3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.B3DMLoader),
+/* harmony export */   CMPTLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.CMPTLoader),
+/* harmony export */   I3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.I3DMLoader),
+/* harmony export */   PNTSLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.PNTSLoader),
+/* harmony export */   RBush3D: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.RBush3D),
+/* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy),
 /* harmony export */   Tile3D: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
-/* harmony export */   Tile3DContent: () => (/* reexport safe */ _tile3d_content__WEBPACK_IMPORTED_MODULE_1__.Tile3DContent),
-/* harmony export */   Tile3DContentGroup: () => (/* reexport safe */ _tile3d_content__WEBPACK_IMPORTED_MODULE_1__.Tile3DContentGroup),
-/* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.Tile3dLoader)
+/* harmony export */   Tile3DGroup: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DGroup),
+/* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.Tile3dLoader),
+/* harmony export */   boxRayIntersects: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.boxRayIntersects),
+/* harmony export */   intersects: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.intersects)
 /* harmony export */ });
 /* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/3d/tile3d.js");
-/* harmony import */ var _tile3d_content__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.content */ "./dist/tiles/3d/tile3d.content.js");
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
-/* harmony import */ var _legacy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./legacy */ "./dist/tiles/3d/legacy/index.js");
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
+/* harmony import */ var _legacy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legacy */ "./dist/tiles/3d/legacy/index.js");
+/* harmony import */ var _tree__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree */ "./dist/tiles/3d/tree/index.js");
 
 
 
@@ -3411,66 +3413,6 @@ class CMPTLoader extends Tile3dLoader {
 
 /***/ }),
 
-/***/ "./dist/tiles/3d/tile3d.content.js":
-/*!*****************************************!*\
-  !*** ./dist/tiles/3d/tile3d.content.js ***!
-  \*****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3DContent: () => (/* binding */ Tile3DContent),
-/* harmony export */   Tile3DContentGroup: () => (/* binding */ Tile3DContentGroup)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
-
-
-class Tile3DContentGroup extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
-    constructor(name) {
-        super(name);
-    }
-    get bounds() {
-        return this._envelope;
-    }
-    set bounds(v) {
-        this._envelope = v;
-    }
-    *[Symbol.iterator](predicate) {
-        yield null;
-    }
-}
-class Tile3DContent extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
-    constructor(name) {
-        super(name);
-        this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy.REPLACEMENT;
-        this._geometricError = 0;
-    }
-    get refinementStrategy() {
-        return _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy.ADDITIVE;
-    }
-    set refinementStrategy(v) {
-        if (v !== this._refinementStrategy) {
-            this._refinementStrategy = v;
-        }
-    }
-    get geometricError() {
-        return this._geometricError;
-    }
-    set geometricError(v) {
-        if (v !== this._geometricError) {
-            this._geometricError = v;
-        }
-    }
-    *[Symbol.iterator](predicate) {
-        yield null;
-    }
-}
-//# sourceMappingURL=tile3d.content.js.map
-
-/***/ }),
-
 /***/ "./dist/tiles/3d/tile3d.interfaces.js":
 /*!********************************************!*\
   !*** ./dist/tiles/3d/tile3d.interfaces.js ***!
@@ -3498,16 +3440,704 @@ var RefinementStrategy;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3D: () => (/* binding */ Tile3D)
+/* harmony export */   Tile3D: () => (/* binding */ Tile3D),
+/* harmony export */   Tile3DGroup: () => (/* binding */ Tile3DGroup)
 /* harmony export */ });
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 
-class Tile3D extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
-    constructor(x, y, levelOfDetail, data) {
-        super(x, y, levelOfDetail, data);
+
+class Tile3DGroup extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
+    constructor(name) {
+        super(name);
+    }
+    get geoBounds() {
+        return this._envelope;
+    }
+    set geoBounds(v) {
+        this._envelope = v;
+    }
+    *[Symbol.iterator](predicate) {
+        yield null;
+    }
+}
+class Tile3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
+    constructor(name) {
+        super(name);
+        this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy.REPLACEMENT;
+        this._geometricError = 0;
+    }
+    get refinementStrategy() {
+        return _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy.ADDITIVE;
+    }
+    set refinementStrategy(v) {
+        if (v !== this._refinementStrategy) {
+            this._refinementStrategy = v;
+        }
+    }
+    get geometricError() {
+        return this._geometricError;
+    }
+    set geometricError(v) {
+        if (v !== this._geometricError) {
+            this._geometricError = v;
+        }
+    }
+    *[Symbol.iterator](predicate) {
+        return yield null;
     }
 }
 //# sourceMappingURL=tile3d.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/tree/index.js":
+/*!*************************************!*\
+  !*** ./dist/tiles/3d/tree/index.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RBush3D: () => (/* reexport safe */ _rtree__WEBPACK_IMPORTED_MODULE_0__.RBush3D),
+/* harmony export */   boxRayIntersects: () => (/* reexport safe */ _rtree__WEBPACK_IMPORTED_MODULE_0__.boxRayIntersects),
+/* harmony export */   intersects: () => (/* reexport safe */ _rtree__WEBPACK_IMPORTED_MODULE_0__.intersects)
+/* harmony export */ });
+/* harmony import */ var _rtree__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./rtree */ "./dist/tiles/3d/tree/rtree.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/tree/quickselect.js":
+/*!*******************************************!*\
+  !*** ./dist/tiles/3d/tree/quickselect.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ quickselect)
+/* harmony export */ });
+function quickselect(arr, k, left = 0, right = arr.length - 1, compare) {
+    while (right > left) {
+        if (right - left > 600) {
+            const n = right - left + 1;
+            const m = k - left + 1;
+            const z = Math.log(n);
+            const s = 0.5 * Math.exp((2 * z) / 3);
+            const sd = 0.5 * Math.sqrt((z * s * (n - s)) / n) * (m - n / 2 < 0 ? -1 : 1);
+            const newLeft = Math.max(left, Math.floor(k - (m * s) / n + sd));
+            const newRight = Math.min(right, Math.floor(k + ((n - m) * s) / n + sd));
+            quickselect(arr, k, newLeft, newRight, compare);
+        }
+        const t = arr[k];
+        let i = left;
+        let j = right;
+        let tmp = arr[left];
+        arr[left] = arr[k];
+        arr[k] = tmp;
+        if (compare(arr[right], t) > 0) {
+            let tmp = arr[left];
+            arr[left] = arr[right];
+            arr[right] = tmp;
+        }
+        while (i < j) {
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+            i++;
+            j--;
+            while (compare(arr[i], t) < 0)
+                i++;
+            while (compare(arr[j], t) > 0)
+                j--;
+        }
+        if (compare(arr[left], t) === 0) {
+            tmp = arr[left];
+            arr[left] = arr[j];
+            arr[j] = tmp;
+        }
+        else {
+            j++;
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+        if (j <= k)
+            left = j + 1;
+        if (k <= j)
+            right = j - 1;
+    }
+}
+//# sourceMappingURL=quickselect.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/tree/rtree.js":
+/*!*************************************!*\
+  !*** ./dist/tiles/3d/tree/rtree.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RBush3D: () => (/* binding */ RBush3D),
+/* harmony export */   boxRayIntersects: () => (/* binding */ boxRayIntersects),
+/* harmony export */   intersects: () => (/* binding */ intersects)
+/* harmony export */ });
+/* harmony import */ var _quickselect__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./quickselect */ "./dist/tiles/3d/tree/quickselect.js");
+
+const nodePool = [];
+const freeNode = (node) => nodePool.push(node);
+const freeAllNode = (node) => {
+    if (node) {
+        freeNode(node);
+        if (!isLeaf(node)) {
+            node.children.forEach(freeAllNode);
+        }
+    }
+};
+const allowNode = (children) => {
+    let node = nodePool.pop();
+    if (node) {
+        node.children = children;
+        node.height = 1;
+        node.leaf = true;
+        node.minX = Infinity;
+        node.minY = Infinity;
+        node.minZ = Infinity;
+        node.maxX = -Infinity;
+        node.maxY = -Infinity;
+        node.maxZ = -Infinity;
+    }
+    else {
+        node = {
+            children: children,
+            height: 1,
+            leaf: true,
+            minX: Infinity,
+            minY: Infinity,
+            minZ: Infinity,
+            maxX: -Infinity,
+            maxY: -Infinity,
+            maxZ: -Infinity,
+        };
+    }
+    return node;
+};
+const distNodePool = [];
+const freeDistNode = (node) => distNodePool.push(node);
+const allowDistNode = (dist, node) => {
+    let heapNode = distNodePool.pop();
+    if (heapNode) {
+        heapNode.dist = dist;
+        heapNode.node = node;
+    }
+    else {
+        heapNode = { dist, node };
+    }
+    return heapNode;
+};
+const isLeaf = (node) => {
+    return node.leaf;
+};
+const isLeafChild = (node, child) => {
+    return node.leaf;
+};
+const findItem = (item, items, equalsFn) => {
+    if (!equalsFn)
+        return items.indexOf(item);
+    for (let i = 0; i < items.length; i++) {
+        if (equalsFn(item, items[i]))
+            return i;
+    }
+    return -1;
+};
+const calcBBox = (node) => {
+    distBBox(node, 0, node.children.length, node);
+};
+const distBBox = (node, k, p, destNode) => {
+    let dNode = destNode;
+    if (dNode) {
+        dNode.minX = Infinity;
+        dNode.minY = Infinity;
+        dNode.minZ = Infinity;
+        dNode.maxX = -Infinity;
+        dNode.maxY = -Infinity;
+        dNode.maxZ = -Infinity;
+    }
+    else {
+        dNode = allowNode([]);
+    }
+    for (let i = k, child; i < p; i++) {
+        child = node.children[i];
+        extend(dNode, child);
+    }
+    return dNode;
+};
+const extend = (a, b) => {
+    a.minX = Math.min(a.minX, b.minX);
+    a.minY = Math.min(a.minY, b.minY);
+    a.minZ = Math.min(a.minZ, b.minZ);
+    a.maxX = Math.max(a.maxX, b.maxX);
+    a.maxY = Math.max(a.maxY, b.maxY);
+    a.maxZ = Math.max(a.maxZ, b.maxZ);
+    return a;
+};
+const bboxVolume = (a) => (a.maxX - a.minX) * (a.maxY - a.minY) * (a.maxZ - a.minZ);
+const bboxMargin = (a) => a.maxX - a.minX + (a.maxY - a.minY) + (a.maxZ - a.minZ);
+const enlargedVolume = (a, b) => {
+    const minX = Math.min(a.minX, b.minX), minY = Math.min(a.minY, b.minY), minZ = Math.min(a.minZ, b.minZ), maxX = Math.max(a.maxX, b.maxX), maxY = Math.max(a.maxY, b.maxY), maxZ = Math.max(a.maxZ, b.maxZ);
+    return (maxX - minX) * (maxY - minY) * (maxZ - minZ);
+};
+const intersectionVolume = (a, b) => {
+    const minX = Math.max(a.minX, b.minX), minY = Math.max(a.minY, b.minY), minZ = Math.max(a.minZ, b.minZ), maxX = Math.min(a.maxX, b.maxX), maxY = Math.min(a.maxY, b.maxY), maxZ = Math.min(a.maxZ, b.maxZ);
+    return Math.max(0, maxX - minX) * Math.max(0, maxY - minY) * Math.max(0, maxZ - minZ);
+};
+const contains = (a, b) => a.minX <= b.minX && a.minY <= b.minY && a.minZ <= b.minZ && b.maxX <= a.maxX && b.maxY <= a.maxY && b.maxZ <= a.maxZ;
+const intersects = (a, b) => b.minX <= a.maxX && b.minY <= a.maxY && b.minZ <= a.maxZ && b.maxX >= a.minX && b.maxY >= a.minY && b.maxZ >= a.minZ;
+const boxRayIntersects = (box, ox, oy, oz, idx, idy, idz) => {
+    const tx0 = (box.minX - ox) * idx;
+    const tx1 = (box.maxX - ox) * idx;
+    const ty0 = (box.minY - oy) * idy;
+    const ty1 = (box.maxY - oy) * idy;
+    const tz0 = (box.minZ - oz) * idz;
+    const tz1 = (box.maxZ - oz) * idz;
+    const z0 = Math.min(tz0, tz1);
+    const z1 = Math.max(tz0, tz1);
+    const y0 = Math.min(ty0, ty1);
+    const y1 = Math.max(ty0, ty1);
+    const x0 = Math.min(tx0, tx1);
+    const x1 = Math.max(tx0, tx1);
+    const tmin = Math.max(0, x0, y0, z0);
+    const tmax = Math.min(x1, y1, z1);
+    return tmax >= tmin ? tmin : Infinity;
+};
+const multiSelect = (arr, left, right, n, compare) => {
+    const stack = [left, right];
+    var mid;
+    while (stack.length) {
+        right = stack.pop();
+        left = stack.pop();
+        if (right - left <= n)
+            continue;
+        mid = left + Math.ceil((right - left) / n / 2) * n;
+        (0,_quickselect__WEBPACK_IMPORTED_MODULE_0__["default"])(arr, mid, left, right, compare);
+        stack.push(left, mid, mid, right);
+    }
+};
+const compareMinX = (a, b) => a.minX - b.minX;
+const compareMinY = (a, b) => a.minY - b.minY;
+const compareMinZ = (a, b) => a.minZ - b.minZ;
+class RBush3D {
+    static alloc() {
+        return this.pool.pop() || new this();
+    }
+    static free(rbush) {
+        rbush.clear();
+        this.pool.push(rbush);
+    }
+    constructor(maxEntries = 16) {
+        this.maxEntries = Math.max(maxEntries, 8);
+        this.minEntries = Math.max(4, Math.ceil(this.maxEntries * 0.4));
+        this.clear();
+    }
+    search(bbox) {
+        let node = this.data;
+        const result = [];
+        if (!node || !intersects(bbox, node))
+            return result;
+        const nodesToSearch = [];
+        while (node) {
+            for (let i = 0, len = node.children.length; i < len; i++) {
+                const child = node.children[i];
+                if (intersects(bbox, child)) {
+                    if (isLeafChild(node, child))
+                        result.push(child);
+                    else if (contains(bbox, child))
+                        this._all(child, result);
+                    else
+                        nodesToSearch.push(child);
+                }
+            }
+            node = nodesToSearch.pop();
+        }
+        return result;
+    }
+    collides(bbox) {
+        let node = this.data;
+        if (!node || !intersects(bbox, node))
+            return false;
+        const nodesToSearch = [];
+        while (node) {
+            for (let i = 0, len = node.children.length; i < len; i++) {
+                const child = node.children[i];
+                if (intersects(bbox, child)) {
+                    if (isLeafChild(node, child) || contains(bbox, child))
+                        return true;
+                    nodesToSearch.push(child);
+                }
+            }
+            node = nodesToSearch.pop();
+        }
+        return false;
+    }
+    raycastInv(ox, oy, oz, idx, idy, idz, maxLen = Infinity) {
+        let node = this.data;
+        if (idx === Infinity && idy === Infinity && idz === Infinity)
+            return allowDistNode(Infinity, undefined);
+        if (!node || boxRayIntersects(node, ox, oy, oz, idx, idy, idz) === Infinity)
+            return allowDistNode(Infinity, undefined);
+        const heap = [allowDistNode(0, node)];
+        const swap = (a, b) => {
+            const t = heap[a];
+            heap[a] = heap[b];
+            heap[b] = t;
+        };
+        const pop = () => {
+            const top = heap[0];
+            const newLen = heap.length - 1;
+            heap[0] = heap[newLen];
+            heap.length = newLen;
+            let idx = 0;
+            while (true) {
+                let left = (idx << 1) | 1;
+                if (left >= newLen)
+                    break;
+                const right = left + 1;
+                if (right < newLen && heap[right].dist < heap[left].dist) {
+                    left = right;
+                }
+                if (heap[idx].dist < heap[left].dist)
+                    break;
+                swap(idx, left);
+                idx = left;
+            }
+            freeDistNode(top);
+            return top.node;
+        };
+        const push = (dist, node) => {
+            let idx = heap.length;
+            heap.push(allowDistNode(dist, node));
+            while (idx > 0) {
+                const p = (idx - 1) >> 1;
+                if (heap[p].dist <= heap[idx].dist)
+                    break;
+                swap(idx, p);
+                idx = p;
+            }
+        };
+        let dist = maxLen;
+        let result;
+        while (heap.length && heap[0].dist < dist) {
+            node = pop();
+            for (let i = 0, len = node.children.length; i < len; i++) {
+                const child = node.children[i];
+                const d = boxRayIntersects(child, ox, oy, oz, idx, idy, idz);
+                if (!isLeafChild(node, child)) {
+                    push(d, child);
+                }
+                else if (d < dist) {
+                    if (d === 0) {
+                        return allowDistNode(d, child);
+                    }
+                    dist = d;
+                    result = child;
+                }
+            }
+        }
+        return allowDistNode(dist < maxLen ? dist : Infinity, result);
+    }
+    raycast(ox, oy, oz, dx, dy, dz, maxLen = Infinity) {
+        return this.raycastInv(ox, oy, oz, 1 / dx, 1 / dy, 1 / dz, maxLen);
+    }
+    all() {
+        return this._all(this.data, []);
+    }
+    load(data) {
+        if (!(data && data.length))
+            return this;
+        if (data.length < this.minEntries) {
+            for (var i = 0, len = data.length; i < len; i++) {
+                this.insert(data[i]);
+            }
+            return this;
+        }
+        var node = this.build(data.slice(), 0, data.length - 1, 0);
+        if (!this.data?.children.length) {
+            this.data = node;
+        }
+        else if (this.data.height === node.height) {
+            this.splitRoot(this.data, node);
+        }
+        else {
+            if (this.data.height < node.height) {
+                const tmpNode = this.data;
+                this.data = node;
+                node = tmpNode;
+            }
+            this._insert(node, this.data.height - node.height - 1, true);
+        }
+        return this;
+    }
+    insert(item) {
+        if (item && this.data)
+            this._insert(item, this.data.height - 1);
+        return this;
+    }
+    clear() {
+        if (this.data) {
+            freeAllNode(this.data);
+        }
+        this.data = allowNode([]);
+        return this;
+    }
+    remove(item, equalsFn) {
+        if (!item)
+            return this;
+        let node = this.data;
+        let i = 0;
+        let goingUp = false;
+        let index;
+        let parent;
+        const path = [];
+        const indexes = [];
+        while (node || path.length) {
+            if (!node) {
+                node = path.pop();
+                i = indexes.pop();
+                parent = path[path.length - 1];
+                goingUp = true;
+            }
+            if (isLeaf(node)) {
+                index = findItem(item, node.children, equalsFn);
+                if (index !== -1) {
+                    node.children.splice(index, 1);
+                    path.push(node);
+                    this.condense(path);
+                    return this;
+                }
+            }
+            if (!goingUp && !isLeaf(node) && contains(node, item)) {
+                path.push(node);
+                indexes.push(i);
+                i = 0;
+                parent = node;
+                node = node.children[0];
+            }
+            else if (parent) {
+                i++;
+                node = parent.children[i];
+                goingUp = false;
+            }
+            else {
+                node = undefined;
+            }
+        }
+        return this;
+    }
+    toJSON() {
+        return this.data;
+    }
+    fromJSON(data) {
+        if (this.data) {
+            freeAllNode(this.data);
+        }
+        this.data = data;
+        return this;
+    }
+    build(items, left, right, height) {
+        const N = right - left + 1;
+        let M = this.maxEntries;
+        let node;
+        if (N <= M) {
+            node = allowNode(items.slice(left, right + 1));
+            calcBBox(node);
+            return node;
+        }
+        if (!height) {
+            height = Math.ceil(Math.log(N) / Math.log(M));
+            M = Math.ceil(N / Math.pow(M, height - 1));
+        }
+        node = allowNode([]);
+        node.leaf = false;
+        node.height = height;
+        const N3 = Math.ceil(N / M), N2 = N3 * Math.ceil(Math.pow(M, 2 / 3)), N1 = N3 * Math.ceil(Math.pow(M, 1 / 3));
+        multiSelect(items, left, right, N1, compareMinX);
+        for (let i = left; i <= right; i += N1) {
+            const right2 = Math.min(i + N1 - 1, right);
+            multiSelect(items, i, right2, N2, compareMinY);
+            for (let j = i; j <= right2; j += N2) {
+                const right3 = Math.min(j + N2 - 1, right2);
+                multiSelect(items, j, right3, N3, compareMinZ);
+                for (let k = j; k <= right3; k += N3) {
+                    const right4 = Math.min(k + N3 - 1, right3);
+                    node.children.push(this.build(items, k, right4, height - 1));
+                }
+            }
+        }
+        calcBBox(node);
+        return node;
+    }
+    _all(node, result) {
+        const nodesToSearch = [];
+        while (node) {
+            if (isLeaf(node))
+                result.push(...node.children);
+            else
+                nodesToSearch.push(...node.children);
+            node = nodesToSearch.pop();
+        }
+        return result;
+    }
+    chooseSubtree(bbox, node, level, path) {
+        let minVolume;
+        let minEnlargement;
+        let targetNode;
+        while (true) {
+            path.push(node);
+            if (isLeaf(node) || path.length - 1 === level)
+                break;
+            minVolume = minEnlargement = Infinity;
+            for (let i = 0, len = node.children.length; i < len; i++) {
+                const child = node.children[i];
+                const volume = bboxVolume(child);
+                const enlargement = enlargedVolume(bbox, child) - volume;
+                if (enlargement < minEnlargement) {
+                    minEnlargement = enlargement;
+                    minVolume = volume < minVolume ? volume : minVolume;
+                    targetNode = child;
+                }
+                else if (enlargement === minEnlargement) {
+                    if (volume < minVolume) {
+                        minVolume = volume;
+                        targetNode = child;
+                    }
+                }
+            }
+            node = targetNode || node.children[0];
+        }
+        return node;
+    }
+    split(insertPath, level) {
+        const node = insertPath[level];
+        const M = node.children.length;
+        const m = this.minEntries;
+        this.chooseSplitAxis(node, m, M);
+        const splitIndex = this.chooseSplitIndex(node, m, M);
+        const newNode = allowNode(node.children.splice(splitIndex, node.children.length - splitIndex));
+        newNode.height = node.height;
+        newNode.leaf = node.leaf;
+        calcBBox(node);
+        calcBBox(newNode);
+        if (level)
+            insertPath[level - 1].children.push(newNode);
+        else
+            this.splitRoot(node, newNode);
+    }
+    splitRoot(node, newNode) {
+        this.data = allowNode([node, newNode]);
+        this.data.height = node.height + 1;
+        this.data.leaf = false;
+        calcBBox(this.data);
+    }
+    chooseSplitIndex(node, m, M) {
+        let minOverlap = Infinity;
+        let minVolume = Infinity;
+        let index;
+        for (let i = m; i <= M - m; i++) {
+            const bbox1 = distBBox(node, 0, i);
+            const bbox2 = distBBox(node, i, M);
+            const overlap = intersectionVolume(bbox1, bbox2);
+            const volume = bboxVolume(bbox1) + bboxVolume(bbox2);
+            if (overlap < minOverlap) {
+                minOverlap = overlap;
+                index = i;
+                minVolume = volume < minVolume ? volume : minVolume;
+            }
+            else if (overlap === minOverlap) {
+                if (volume < minVolume) {
+                    minVolume = volume;
+                    index = i;
+                }
+            }
+        }
+        return index;
+    }
+    chooseSplitAxis(node, m, M) {
+        const xMargin = this.allDistMargin(node, m, M, compareMinX);
+        const yMargin = this.allDistMargin(node, m, M, compareMinY);
+        const zMargin = this.allDistMargin(node, m, M, compareMinZ);
+        if (xMargin < yMargin && xMargin < zMargin) {
+            node.children.sort(compareMinX);
+        }
+        else if (yMargin < xMargin && yMargin < zMargin) {
+            node.children.sort(compareMinY);
+        }
+    }
+    allDistMargin(node, m, M, compare) {
+        node.children.sort(compare);
+        const leftBBox = distBBox(node, 0, m);
+        const rightBBox = distBBox(node, M - m, M);
+        let margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
+        for (let i = m; i < M - m; i++) {
+            const child = node.children[i];
+            extend(leftBBox, child);
+            margin += bboxMargin(leftBBox);
+        }
+        for (let i = M - m - 1; i >= m; i--) {
+            const child = node.children[i];
+            extend(rightBBox, child);
+            margin += bboxMargin(rightBBox);
+        }
+        return margin;
+    }
+    adjustParentBBoxes(bbox, path, level) {
+        for (let i = level; i >= 0; i--) {
+            extend(path[i], bbox);
+        }
+    }
+    condense(path) {
+        for (let i = path.length - 1, siblings; i >= 0; i--) {
+            if (path[i].children.length === 0) {
+                if (i > 0) {
+                    siblings = path[i - 1].children;
+                    siblings.splice(siblings.indexOf(path[i]), 1);
+                    freeNode(path[i]);
+                }
+                else {
+                    this.clear();
+                }
+            }
+            else {
+                calcBBox(path[i]);
+            }
+        }
+    }
+    _insert(item, level, isNode) {
+        if (!this.data) {
+            return;
+        }
+        const insertPath = [];
+        const node = this.chooseSubtree(item, this.data, level, insertPath);
+        node.children.push(item);
+        extend(node, item);
+        while (level >= 0) {
+            if (insertPath[level].children.length > this.maxEntries) {
+                this.split(insertPath, level);
+                level--;
+            }
+            else
+                break;
+        }
+        this.adjustParentBBoxes(item, insertPath, level);
+    }
+}
+RBush3D.pool = [];
+//# sourceMappingURL=rtree.js.map
 
 /***/ }),
 
@@ -5162,8 +5792,8 @@ class MapScale {
         const x = displaySize.width / (resolution.width * groundRes);
         const y = displaySize.height / (resolution.height * groundRes);
         let z = groundRes;
-        if (displaySize.thickness) {
-            z = (displaySize.thickness / resolution.thickness) * groundRes;
+        if (displaySize.depth) {
+            z = (displaySize.depth / resolution.depth) * groundRes;
         }
         return new _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x, y, z);
     }
@@ -5669,16 +6299,16 @@ class Envelope {
         const size = this.size;
         size.width = (size.width * scale - size.width) / 2;
         size.height = (size.height * scale - size.height) / 2;
-        size.thickness = (size.thickness * scale - size.thickness) / 2;
+        size.depth = (size.depth * scale - size.depth) / 2;
         this._min.lat -= size.height;
         this._min.lon -= size.width;
         if (this._min.alt) {
-            this._min.alt -= size.thickness;
+            this._min.alt -= size.depth;
         }
         this._max.lat += size.height;
         this._max.lon += size.width;
         if (this._max.alt) {
-            this._max.alt += size.thickness;
+            this._max.alt += size.depth;
         }
         return this;
     }
@@ -6312,7 +6942,7 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
         return iterator;
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds2.FromBounds(...this._items.map((v) => v.bounds));
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => v.bounds));
     }
 }
 //# sourceMappingURL=geometry.bounds.collection.js.map
@@ -6328,35 +6958,18 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Bounded: () => (/* binding */ Bounded),
-/* harmony export */   Bounds2: () => (/* binding */ Bounds2)
+/* harmony export */   Bounds: () => (/* binding */ Bounds)
 /* harmony export */ });
 /* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
 
 
-class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2 {
+class Bounds extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3 {
     static Zero() {
-        return new Bounds2(0, 0, 0, 0);
+        return new Bounds(0, 0, 0, 0, 0, 0);
     }
     static FromSize(size) {
-        return new Bounds2(0, 0, size?.width || 0, size.height || 0);
-    }
-    static FromPoints(...params) {
-        let i = 0;
-        let xmin = params[i].x;
-        let xmax = params[i].x;
-        let ymin = params[i].y;
-        let ymax = params[i++].y;
-        for (; i < params.length; i++) {
-            const p = params[i];
-            if (p) {
-                xmin = Math.min(xmin, p.x);
-                xmax = Math.max(xmax, p.x);
-                ymin = Math.min(ymin, p.y);
-                ymax = Math.max(ymax, p.y);
-            }
-        }
-        return new Bounds2(xmin, ymin, xmax - xmin, ymax - ymin);
+        return new Bounds(0, 0, size?.width || 0, size?.height || 0, 0, size?.depth || 0);
     }
     static FromBounds(...array) {
         let rect = undefined;
@@ -6376,24 +6989,65 @@ class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian
         }
         return rect;
     }
-    constructor(x, y, width, height) {
-        super(x, y);
+    static FromPoints2(...params) {
+        let i = 0;
+        let xmin = params[i].x;
+        let xmax = params[i].x;
+        let ymin = params[i].y;
+        let ymax = params[i].y;
+        for (; i < params.length; i++) {
+            const p = params[i];
+            if (p) {
+                xmin = Math.min(xmin, p.x);
+                xmax = Math.max(xmax, p.x);
+                ymin = Math.min(ymin, p.y);
+                ymax = Math.max(ymax, p.y);
+            }
+        }
+        return new Bounds(xmin, ymin, xmax - xmin, ymax - ymin);
+    }
+    static FromPoints3(...params) {
+        let i = 0;
+        let xmin = params[i].x;
+        let xmax = params[i].x;
+        let ymin = params[i].y;
+        let ymax = params[i].y;
+        let zmin = params[i].z;
+        let zmax = params[i++].z;
+        for (; i < params.length; i++) {
+            const p = params[i];
+            if (p) {
+                xmin = Math.min(xmin, p.x);
+                xmax = Math.max(xmax, p.x);
+                ymin = Math.min(ymin, p.y);
+                ymax = Math.max(ymax, p.y);
+                zmin = Math.min(zmin, p.z);
+                zmax = Math.max(zmax, p.z);
+            }
+        }
+        return new Bounds(xmin, ymin, xmax - xmin, ymax - ymin, zmin, zmax - zmin);
+    }
+    constructor(x, y, width, height, z = 0, depth = 0) {
+        super(x, y, z);
         this.width = width;
         this.height = height;
+        this.depth = depth;
     }
     *points() {
         const r = this.xmax;
         const t = this.ymax;
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.xmin, this.ymin);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.xmin, t);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, t);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.ymin);
+        const f = this.zmax;
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, this.ymin, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, this.ymin, f);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, t, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, t, f);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, this.ymin, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, this.ymin, f);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, t, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, t, f);
     }
     clone() {
-        return new Bounds2(this.x, this.y, this.width, this.height);
-    }
-    get ymax() {
-        return this.y + this.height;
+        return new Bounds(this.x, this.y, this.width, this.height, this.z, this.depth);
     }
     get xmin() {
         return this.x;
@@ -6404,11 +7058,20 @@ class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian
     get ymin() {
         return this.y;
     }
+    get ymax() {
+        return this.y + this.height;
+    }
+    get zmin() {
+        return this.z;
+    }
+    get zmax() {
+        return this.z + this.depth;
+    }
     get center() {
-        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.x + this.width / 2, this.y + this.height / 2, this.z + this.depth / 2);
     }
     intersects(other) {
-        if (!other || this.ymin > other.ymax || this.ymax < other.ymin || this.xmin > other.xmax || this.xmax < other.xmin) {
+        if (!other || this.xmin > other.xmax || this.xmax < other.xmin || this.ymin > other.ymax || this.ymax < other.ymin || this.zmin > other.zmax || this.zmax < other.zmin) {
             return false;
         }
         return true;
@@ -6417,50 +7080,51 @@ class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian
         if (!other || !this.intersects(other)) {
             return undefined;
         }
-        const target = ref || Bounds2.Zero();
-        target.y = Math.max(this.ymin, other.ymin);
-        target.height = Math.min(this.ymax, other.ymax) - target.y;
+        const target = ref || Bounds.Zero();
         target.x = Math.max(this.xmin, other.xmin);
         target.width = Math.min(this.xmax, other.xmax) - target.x;
+        target.y = Math.max(this.ymin, other.ymin);
+        target.height = Math.min(this.ymax, other.ymax) - target.y;
+        target.z = Math.max(this.zmin, other.zmin);
+        target.depth = Math.min(this.zmax, other.zmax) - target.z;
         return target;
+    }
+    containsFloat(x, y, z = 0) {
+        return x >= this.xmin && x <= this.xmax && y >= this.ymin && y <= this.ymax && z >= this.zmin && z <= this.zmax;
+    }
+    containsBounds(other) {
+        if (!other)
+            return false;
+        return other.xmin >= this.xmin && other.xmax <= this.xmax && other.ymin >= this.ymin && other.ymax <= this.ymax && other.zmin >= this.zmin && other.zmax <= this.zmax;
     }
     unionInPlace(other) {
         if (!other)
             return this;
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
+        const z1 = Math.min(this.z, other.z);
         const x2 = Math.max(this.xmax, other.xmax);
         const y2 = Math.max(this.ymax, other.ymax);
+        const z2 = Math.max(this.zmax, other.zmax);
         this.x = x1;
         this.y = y1;
+        this.z = z1;
         this.width = x2 - x1;
         this.height = y2 - y1;
+        this.depth = z2 - z1;
         return this;
     }
-    contains(x, y) {
-        return x >= this.xmin && x <= this.xmax && y >= this.ymax && y <= this.ymin;
-    }
-    containsBounds(other) {
-        if (!other)
-            return false;
-        return (other.xmin >= this.xmin &&
-            other.xmin <= this.xmax &&
-            other.ymin >= this.ymin &&
-            other.ymin <= this.ymax &&
-            other.xmax >= this.xmin &&
-            other.xmax <= this.xmax &&
-            other.ymax >= this.ymin &&
-            other.ymax <= this.ymax);
-    }
-    inflateInPlace(dx, dy) {
+    inflateInPlace(dx, dy, dz = 0) {
         this.x -= dx;
         this.y -= dy;
+        this.z -= dz;
         this.width += 2 * dx;
         this.height += 2 * dy;
+        this.depth += 2 * dz;
         return this;
     }
     toString() {
-        return `left:${this.xmin}, bottom:${this.ymin}, right:${this.xmax}, top:${this.ymax}, width:${this.width}, height:${this.height}`;
+        return `left:${this.xmin}, bottom:${this.ymin}, front:${this.zmin}, right:${this.xmax}, top:${this.ymax}, back:${this.zmax}, width:${this.width}, height:${this.height}, depth:${this.depth}`;
     }
 }
 class Bounded {
@@ -7280,12 +7944,17 @@ function IsSize(b) {
     return b.height !== undefined && b.width !== undefined;
 }
 function IsSize3(size) {
-    return IsSize(size) && size.thickness !== undefined;
+    return IsSize(size) && size.depth !== undefined;
 }
 function IsBounds(b) {
     if (typeof b !== "object" || b === null)
         return false;
-    return b.ymax !== undefined && b.xmin !== undefined && b.xmax !== undefined && b.ymin !== undefined;
+    return (b.xmin !== undefined &&
+        b.ymin !== undefined &&
+        b.zmin !== undefined &&
+        b.xmax !== undefined &&
+        b.ymax !== undefined &&
+        b.zmax !== undefined);
 }
 //# sourceMappingURL=geometry.interfaces.js.map
 
@@ -7674,33 +8343,33 @@ class Size3 extends Size2 {
         ref = ref ?? Size3.Zero();
         ref.width = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.width, from, to);
         ref.height = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.height, from, to);
-        ref.thickness = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.thickness, from, to);
+        ref.depth = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.depth, from, to);
         return ref;
     }
     static Zero() {
         return new Size3(0, 0, 0);
     }
     static IsEmpty(size) {
-        return size.width === 0 && size.height === 0 && (size.thickness ?? 0) === 0;
+        return size.width === 0 && size.height === 0 && (size.depth ?? 0) === 0;
     }
     static FromSize(size) {
         if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsSize3)(size)) {
-            return new Size3(size.width, size.height, size.thickness);
+            return new Size3(size.width, size.height, size.depth);
         }
         return new Size3(size.width, size.height);
     }
-    constructor(width, height, thickness = 0) {
+    constructor(width, height, depth = 0) {
         super(width, height);
-        this.thickness = thickness;
+        this.depth = depth;
     }
     get hasThickness() {
-        return this.thickness !== undefined;
+        return this.depth !== undefined;
     }
     clone() {
-        return new Size3(this.width, this.height, this.thickness);
+        return new Size3(this.width, this.height, this.depth);
     }
     equals(other) {
-        return this.height === other.height && this.width === other.width && this.thickness === other.thickness;
+        return this.height === other.height && this.width === other.width && this.depth === other.depth;
     }
 }
 //# sourceMappingURL=geometry.size.js.map
@@ -7718,7 +8387,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _shapes__WEBPACK_IMPORTED_MODULE_7__.AbstractShape),
 /* harmony export */   Bounded: () => (/* reexport safe */ _geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ _geometry_bounds_collection__WEBPACK_IMPORTED_MODULE_3__.BoundedCollection),
-/* harmony export */   Bounds2: () => (/* reexport safe */ _geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds2),
+/* harmony export */   Bounds: () => (/* reexport safe */ _geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds),
 /* harmony export */   Cartesian2: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2),
 /* harmony export */   Cartesian3: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3),
 /* harmony export */   Cartesian4: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian4),
@@ -7819,7 +8488,7 @@ class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape 
         const r = this._radius;
         const x = this._center.x;
         const y = this._center.y;
-        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds2(x - r, y - r, r * 2, r * 2);
+        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds(x - r, y - r, r * 2, r * 2);
     }
     _getPoints() {
         return [this._center];
@@ -7925,7 +8594,7 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         return new Line(a, b);
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(this._alice, this._bob);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds.FromPoints2(this._alice, this._bob);
     }
     _getPoints() {
         return [this._alice, this._bob];
@@ -7982,7 +8651,7 @@ class Point extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         return undefined;
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(this._position);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds.FromPoints2(this._position);
     }
     _getPoints() {
         return [this._position];
@@ -8342,7 +9011,7 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(x ?? 0, y ?? 0, z ?? 0);
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__.Bounds2.FromPoints(...this._points);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__.Bounds.FromPoints2(...this._points);
     }
     _getPoints() {
         return this._points;
@@ -8505,7 +9174,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.BlobTileCodec),
 /* harmony export */   Bounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.BoundedCollection),
-/* harmony export */   Bounds2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounds2),
+/* harmony export */   Bounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounds),
 /* harmony export */   CacheEntry: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntry),
 /* harmony export */   CacheEntryOptions: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntryOptions),
 /* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntryOptionsBuilder),
@@ -11215,7 +11884,7 @@ class TileAddress {
     }
     static ToBounds(a, metrics) {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds2.FromPoints(...points);
+        return _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromPoints2(...points);
     }
     static IsEquals(a, b) {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
@@ -11860,17 +12529,17 @@ class Display {
         return this._resolution;
     }
     resize(width, height, thickness) {
-        if (this._resolution.width != width || this._resolution.height != height || this._resolution.thickness != thickness) {
+        if (this._resolution.width != width || this._resolution.height != height || this._resolution.depth != thickness) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const old = this._resolution;
-                this._resolution = new _geometry__WEBPACK_IMPORTED_MODULE_1__.Size3(width, height, thickness ?? this._resolution.thickness);
+                this._resolution = new _geometry__WEBPACK_IMPORTED_MODULE_1__.Size3(width, height, thickness ?? this._resolution.depth);
                 this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._resolution, "resolution"));
                 return;
             }
             this._resolution.width = width;
             this._resolution.height = height;
             if (thickness) {
-                this._resolution.thickness = thickness;
+                this._resolution.depth = thickness;
             }
         }
     }
@@ -13083,8 +13752,8 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2(x0, y0, w, h);
-        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds(x0, y0, w, h);
+        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
     _getTileRectangle(a, metrics, center, azimuth) {
         const points = [
@@ -13093,7 +13762,7 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
             metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
             metrics.getTileXYToPointXY(a.x, a.y + 1),
         ];
-        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
+        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...points));
     }
     *_rotatePointsArround(center, azimuth, ...points) {
         for (const p of points) {
@@ -14462,7 +15131,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography/geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
 /* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.envelope */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
 
 
 
@@ -14649,7 +15318,7 @@ class TileCollection {
         return _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope.FromEnvelopes(...this._items);
     }
     _buildRect() {
-        return _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds2.FromBounds(...this._items);
+        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromBounds(...this._items);
     }
 }
 //# sourceMappingURL=tiles.collection.js.map
@@ -14790,8 +15459,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Tile: () => (/* binding */ Tile)
 /* harmony export */ });
 /* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
 /* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
 
 
 
@@ -14821,7 +15490,7 @@ class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddre
             }
             const a = t.address;
             const p = metrics.getTileXYToPointXY(a.x, a.y);
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
+            return new _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }
         return undefined;
     }
@@ -24124,7 +24793,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BlobTileCodec),
 /* harmony export */   Bounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BoundedCollection),
-/* harmony export */   Bounds2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bounds2),
+/* harmony export */   Bounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bounds),
 /* harmony export */   CMPTLoader: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.CMPTLoader),
 /* harmony export */   CacheEntry: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CacheEntry),
 /* harmony export */   CacheEntryOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CacheEntryOptions),
@@ -24288,6 +24957,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuantityRange),
 /* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuickHull),
+/* harmony export */   RBush3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.RBush3D),
 /* harmony export */   RGBAColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBAColor),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBTileCodec),
@@ -24318,8 +24988,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.TextureLayerView),
 /* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Tile),
 /* harmony export */   Tile3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
-/* harmony export */   Tile3DContent: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DContent),
-/* harmony export */   Tile3DContentGroup: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DContentGroup),
+/* harmony export */   Tile3DGroup: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DGroup),
 /* harmony export */   Tile3dLoader: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dLoader),
 /* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.TileBorder),
@@ -24359,7 +25028,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   _makeCopyRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeCopyRawTextureFunction),
 /* harmony export */   _makeCreateRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeCreateRawTextureFunction),
 /* harmony export */   _makeUpdateSubRawTexture2DArrayFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeUpdateSubRawTexture2DArrayFunction),
+/* harmony export */   boxRayIntersects: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.boxRayIntersects),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.hasTileSelectionContext),
+/* harmony export */   intersects: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.intersects),
 /* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isArrayOfCartesianArray),
 /* harmony export */   isArrayOfFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isArrayOfFloatArray),
 /* harmony export */   isCartesian: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCartesian),

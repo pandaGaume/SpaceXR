@@ -1,4 +1,4 @@
-import { Nullable } from "@babylonjs/core";
+import { Nullable, Node } from "@babylonjs/core";
 import { IGeoBounded } from "core/geography";
 
 export enum RefinementStrategy {
@@ -10,10 +10,10 @@ export interface INodeCollection {
     [Symbol.iterator](predicate?: (n: Nullable<Node>) => boolean): IterableIterator<Nullable<Node>>;
 }
 
-export interface ITile3DContentGroup extends INodeCollection, IGeoBounded {}
+export interface ITile3DGroup extends INodeCollection, IGeoBounded {}
 
-export interface ITile3DContent extends IGeoBounded {
+export interface ITile3D extends IGeoBounded {
     refinementStrategy: RefinementStrategy;
     geometricError: number;
-    [Symbol.iterator](predicate?: (n: Nullable<Node>) => boolean): IterableIterator<Nullable<ITile3DContentGroup>>;
+    [Symbol.iterator](predicate?: (n: Nullable<Node>) => boolean): IterableIterator<Nullable<ITile3DGroup>>;
 }

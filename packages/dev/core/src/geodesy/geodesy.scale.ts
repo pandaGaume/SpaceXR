@@ -30,8 +30,8 @@ export class MapScale {
         const x = displaySize.width / (resolution.width * groundRes);
         const y = displaySize.height / (resolution.height * groundRes);
         let z = groundRes;
-        if (displaySize.thickness) {
-            z = (displaySize.thickness / resolution.thickness) * groundRes;
+        if (displaySize.depth) {
+            z = (displaySize.depth / resolution.depth) * groundRes;
         }
         return new Cartesian3(x, y, z);
     }

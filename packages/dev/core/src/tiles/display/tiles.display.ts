@@ -24,17 +24,17 @@ export class Display implements IDisplay {
     }
 
     public resize(width: number, height: number, thickness?: number) {
-        if (this._resolution.width != width || this._resolution.height != height || this._resolution.thickness != thickness) {
+        if (this._resolution.width != width || this._resolution.height != height || this._resolution.depth != thickness) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const old = this._resolution;
-                this._resolution = new Size3(width, height, thickness ?? this._resolution.thickness);
+                this._resolution = new Size3(width, height, thickness ?? this._resolution.depth);
                 this._propertyChangedObservable.notifyObservers(new PropertyChangedEventArgs(this, old, this._resolution, "resolution"));
                 return;
             }
             this._resolution.width = width;
             this._resolution.height = height;
             if (thickness) {
-                this._resolution.thickness = thickness;
+                this._resolution.depth = thickness;
             }
         }
     }

@@ -1,6 +1,6 @@
-import { Bounds2 } from "../geometry.bounds";
+import { Bounds } from "../geometry.bounds";
 import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3, RegionCode } from "../geometry.interfaces";
+import { IBounds, ICartesian3, RegionCode } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { ILine, ShapeType } from "./geometry.shapes.interfaces";
 
@@ -36,7 +36,7 @@ export class Line extends AbstractShape implements ILine {
         }
     }
 
-    public clip(clipArea: IBounds2): ILine | Array<ILine> | undefined {
+    public clip(clipArea: IBounds): ILine | Array<ILine> | undefined {
         // Compute region codes for P1, P2
         let code1 = Cartesian2.ComputeCode(this._alice, clipArea);
         let code2 = Cartesian2.ComputeCode(this._bob, clipArea);
@@ -108,8 +108,8 @@ export class Line extends AbstractShape implements ILine {
         return new Line(a, b);
     }
 
-    protected _buildBounds(): IBounds2 | undefined {
-        return Bounds2.FromPoints(this._alice, this._bob);
+    protected _buildBounds(): IBounds | undefined {
+        return Bounds.FromPoints2(this._alice, this._bob);
     }
     protected _getPoints(): Array<ICartesian3> {
         return [this._alice, this._bob];

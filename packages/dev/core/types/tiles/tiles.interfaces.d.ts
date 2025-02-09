@@ -1,6 +1,6 @@
 import { ICloneable, IDisposable, IValidable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IBounds2 } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IBounds } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
@@ -45,7 +45,7 @@ export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBo
     remove(address: ITileAddress): void;
     removeAll(...address: Array<ITileAddress>): void;
     clear(): void;
-    intersect(bounds?: IBounds2 | IEnvelope): IterableIterator<ITile<T>>;
+    intersect(bounds?: IBounds | IEnvelope): IterableIterator<ITile<T>>;
 }
 export declare function IsTileCollection<T>(b: unknown): b is ITileCollection<T>;
 export interface ITileProxy<T> {
@@ -84,7 +84,7 @@ export interface ITileSystem extends ITileSystemBounds {
     cellSize: number;
     cellCoordinateReference: CellCoordinateReference;
     overlap: number;
-    boundsFactory?: (a: ITile<unknown>, metrics: ITileMetrics) => IBounds2;
+    boundsFactory?: (a: ITile<unknown>, metrics: ITileMetrics) => IBounds;
     geoBoundsFactory?: (a: ITile<unknown>, metrics: ITileMetrics) => IEnvelope;
 }
 export interface ITileMetrics extends ITileSystem {

@@ -1,5 +1,5 @@
-import { Bounded, Bounds2 } from "./geometry.bounds";
-import { IBounded, IBounds2 } from "./geometry.interfaces";
+import { Bounded, Bounds } from "./geometry.bounds";
+import { IBounded, IBounds } from "./geometry.interfaces";
 
 export class BoundedCollection<T extends IBounded> extends Bounded {
     private _items: Array<T>;
@@ -48,7 +48,7 @@ export class BoundedCollection<T extends IBounded> extends Bounded {
         return iterator;
     }
 
-    protected _buildBounds(): IBounds2 | undefined {
-        return Bounds2.FromBounds(...this._items.map((v) => v.bounds));
+    protected _buildBounds(): IBounds | undefined {
+        return Bounds.FromBounds(...this._items.map((v) => v.bounds));
     }
 }

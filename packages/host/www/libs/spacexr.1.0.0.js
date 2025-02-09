@@ -1654,8 +1654,8 @@ class MapScale {
         const x = displaySize.width / (resolution.width * groundRes);
         const y = displaySize.height / (resolution.height * groundRes);
         let z = groundRes;
-        if (displaySize.thickness) {
-            z = (displaySize.thickness / resolution.thickness) * groundRes;
+        if (displaySize.depth) {
+            z = (displaySize.depth / resolution.depth) * groundRes;
         }
         return new _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x, y, z);
     }
@@ -2161,16 +2161,16 @@ class Envelope {
         const size = this.size;
         size.width = (size.width * scale - size.width) / 2;
         size.height = (size.height * scale - size.height) / 2;
-        size.thickness = (size.thickness * scale - size.thickness) / 2;
+        size.depth = (size.depth * scale - size.depth) / 2;
         this._min.lat -= size.height;
         this._min.lon -= size.width;
         if (this._min.alt) {
-            this._min.alt -= size.thickness;
+            this._min.alt -= size.depth;
         }
         this._max.lat += size.height;
         this._max.lon += size.width;
         if (this._max.alt) {
-            this._max.alt += size.thickness;
+            this._max.alt += size.depth;
         }
         return this;
     }
@@ -2804,7 +2804,7 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
         return iterator;
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds2.FromBounds(...this._items.map((v) => v.bounds));
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => v.bounds));
     }
 }
 //# sourceMappingURL=geometry.bounds.collection.js.map
@@ -2820,35 +2820,18 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Bounded: () => (/* binding */ Bounded),
-/* harmony export */   Bounds2: () => (/* binding */ Bounds2)
+/* harmony export */   Bounds: () => (/* binding */ Bounds)
 /* harmony export */ });
 /* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "./dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
 
 
-class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2 {
+class Bounds extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3 {
     static Zero() {
-        return new Bounds2(0, 0, 0, 0);
+        return new Bounds(0, 0, 0, 0, 0, 0);
     }
     static FromSize(size) {
-        return new Bounds2(0, 0, size?.width || 0, size.height || 0);
-    }
-    static FromPoints(...params) {
-        let i = 0;
-        let xmin = params[i].x;
-        let xmax = params[i].x;
-        let ymin = params[i].y;
-        let ymax = params[i++].y;
-        for (; i < params.length; i++) {
-            const p = params[i];
-            if (p) {
-                xmin = Math.min(xmin, p.x);
-                xmax = Math.max(xmax, p.x);
-                ymin = Math.min(ymin, p.y);
-                ymax = Math.max(ymax, p.y);
-            }
-        }
-        return new Bounds2(xmin, ymin, xmax - xmin, ymax - ymin);
+        return new Bounds(0, 0, size?.width || 0, size?.height || 0, 0, size?.depth || 0);
     }
     static FromBounds(...array) {
         let rect = undefined;
@@ -2868,24 +2851,65 @@ class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian
         }
         return rect;
     }
-    constructor(x, y, width, height) {
-        super(x, y);
+    static FromPoints2(...params) {
+        let i = 0;
+        let xmin = params[i].x;
+        let xmax = params[i].x;
+        let ymin = params[i].y;
+        let ymax = params[i].y;
+        for (; i < params.length; i++) {
+            const p = params[i];
+            if (p) {
+                xmin = Math.min(xmin, p.x);
+                xmax = Math.max(xmax, p.x);
+                ymin = Math.min(ymin, p.y);
+                ymax = Math.max(ymax, p.y);
+            }
+        }
+        return new Bounds(xmin, ymin, xmax - xmin, ymax - ymin);
+    }
+    static FromPoints3(...params) {
+        let i = 0;
+        let xmin = params[i].x;
+        let xmax = params[i].x;
+        let ymin = params[i].y;
+        let ymax = params[i].y;
+        let zmin = params[i].z;
+        let zmax = params[i++].z;
+        for (; i < params.length; i++) {
+            const p = params[i];
+            if (p) {
+                xmin = Math.min(xmin, p.x);
+                xmax = Math.max(xmax, p.x);
+                ymin = Math.min(ymin, p.y);
+                ymax = Math.max(ymax, p.y);
+                zmin = Math.min(zmin, p.z);
+                zmax = Math.max(zmax, p.z);
+            }
+        }
+        return new Bounds(xmin, ymin, xmax - xmin, ymax - ymin, zmin, zmax - zmin);
+    }
+    constructor(x, y, width, height, z = 0, depth = 0) {
+        super(x, y, z);
         this.width = width;
         this.height = height;
+        this.depth = depth;
     }
     *points() {
         const r = this.xmax;
         const t = this.ymax;
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.xmin, this.ymin);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.xmin, t);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, t);
-        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(r, this.ymin);
+        const f = this.zmax;
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, this.ymin, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, this.ymin, f);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, t, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.xmin, t, f);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, this.ymin, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, this.ymin, f);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, t, this.zmin);
+        yield new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(r, t, f);
     }
     clone() {
-        return new Bounds2(this.x, this.y, this.width, this.height);
-    }
-    get ymax() {
-        return this.y + this.height;
+        return new Bounds(this.x, this.y, this.width, this.height, this.z, this.depth);
     }
     get xmin() {
         return this.x;
@@ -2896,11 +2920,20 @@ class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian
     get ymin() {
         return this.y;
     }
+    get ymax() {
+        return this.y + this.height;
+    }
+    get zmin() {
+        return this.z;
+    }
+    get zmax() {
+        return this.z + this.depth;
+    }
     get center() {
-        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2(this.x + this.width / 2, this.y + this.height / 2);
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.x + this.width / 2, this.y + this.height / 2, this.z + this.depth / 2);
     }
     intersects(other) {
-        if (!other || this.ymin > other.ymax || this.ymax < other.ymin || this.xmin > other.xmax || this.xmax < other.xmin) {
+        if (!other || this.xmin > other.xmax || this.xmax < other.xmin || this.ymin > other.ymax || this.ymax < other.ymin || this.zmin > other.zmax || this.zmax < other.zmin) {
             return false;
         }
         return true;
@@ -2909,50 +2942,51 @@ class Bounds2 extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian
         if (!other || !this.intersects(other)) {
             return undefined;
         }
-        const target = ref || Bounds2.Zero();
-        target.y = Math.max(this.ymin, other.ymin);
-        target.height = Math.min(this.ymax, other.ymax) - target.y;
+        const target = ref || Bounds.Zero();
         target.x = Math.max(this.xmin, other.xmin);
         target.width = Math.min(this.xmax, other.xmax) - target.x;
+        target.y = Math.max(this.ymin, other.ymin);
+        target.height = Math.min(this.ymax, other.ymax) - target.y;
+        target.z = Math.max(this.zmin, other.zmin);
+        target.depth = Math.min(this.zmax, other.zmax) - target.z;
         return target;
+    }
+    containsFloat(x, y, z = 0) {
+        return x >= this.xmin && x <= this.xmax && y >= this.ymin && y <= this.ymax && z >= this.zmin && z <= this.zmax;
+    }
+    containsBounds(other) {
+        if (!other)
+            return false;
+        return other.xmin >= this.xmin && other.xmax <= this.xmax && other.ymin >= this.ymin && other.ymax <= this.ymax && other.zmin >= this.zmin && other.zmax <= this.zmax;
     }
     unionInPlace(other) {
         if (!other)
             return this;
         const x1 = Math.min(this.x, other.x);
         const y1 = Math.min(this.y, other.y);
+        const z1 = Math.min(this.z, other.z);
         const x2 = Math.max(this.xmax, other.xmax);
         const y2 = Math.max(this.ymax, other.ymax);
+        const z2 = Math.max(this.zmax, other.zmax);
         this.x = x1;
         this.y = y1;
+        this.z = z1;
         this.width = x2 - x1;
         this.height = y2 - y1;
+        this.depth = z2 - z1;
         return this;
     }
-    contains(x, y) {
-        return x >= this.xmin && x <= this.xmax && y >= this.ymax && y <= this.ymin;
-    }
-    containsBounds(other) {
-        if (!other)
-            return false;
-        return (other.xmin >= this.xmin &&
-            other.xmin <= this.xmax &&
-            other.ymin >= this.ymin &&
-            other.ymin <= this.ymax &&
-            other.xmax >= this.xmin &&
-            other.xmax <= this.xmax &&
-            other.ymax >= this.ymin &&
-            other.ymax <= this.ymax);
-    }
-    inflateInPlace(dx, dy) {
+    inflateInPlace(dx, dy, dz = 0) {
         this.x -= dx;
         this.y -= dy;
+        this.z -= dz;
         this.width += 2 * dx;
         this.height += 2 * dy;
+        this.depth += 2 * dz;
         return this;
     }
     toString() {
-        return `left:${this.xmin}, bottom:${this.ymin}, right:${this.xmax}, top:${this.ymax}, width:${this.width}, height:${this.height}`;
+        return `left:${this.xmin}, bottom:${this.ymin}, front:${this.zmin}, right:${this.xmax}, top:${this.ymax}, back:${this.zmax}, width:${this.width}, height:${this.height}, depth:${this.depth}`;
     }
 }
 class Bounded {
@@ -3772,12 +3806,17 @@ function IsSize(b) {
     return b.height !== undefined && b.width !== undefined;
 }
 function IsSize3(size) {
-    return IsSize(size) && size.thickness !== undefined;
+    return IsSize(size) && size.depth !== undefined;
 }
 function IsBounds(b) {
     if (typeof b !== "object" || b === null)
         return false;
-    return b.ymax !== undefined && b.xmin !== undefined && b.xmax !== undefined && b.ymin !== undefined;
+    return (b.xmin !== undefined &&
+        b.ymin !== undefined &&
+        b.zmin !== undefined &&
+        b.xmax !== undefined &&
+        b.ymax !== undefined &&
+        b.zmax !== undefined);
 }
 //# sourceMappingURL=geometry.interfaces.js.map
 
@@ -4166,33 +4205,33 @@ class Size3 extends Size2 {
         ref = ref ?? Size3.Zero();
         ref.width = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.width, from, to);
         ref.height = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.height, from, to);
-        ref.thickness = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.thickness, from, to);
+        ref.depth = _math__WEBPACK_IMPORTED_MODULE_0__.Quantity.Convert(size.depth, from, to);
         return ref;
     }
     static Zero() {
         return new Size3(0, 0, 0);
     }
     static IsEmpty(size) {
-        return size.width === 0 && size.height === 0 && (size.thickness ?? 0) === 0;
+        return size.width === 0 && size.height === 0 && (size.depth ?? 0) === 0;
     }
     static FromSize(size) {
         if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsSize3)(size)) {
-            return new Size3(size.width, size.height, size.thickness);
+            return new Size3(size.width, size.height, size.depth);
         }
         return new Size3(size.width, size.height);
     }
-    constructor(width, height, thickness = 0) {
+    constructor(width, height, depth = 0) {
         super(width, height);
-        this.thickness = thickness;
+        this.depth = depth;
     }
     get hasThickness() {
-        return this.thickness !== undefined;
+        return this.depth !== undefined;
     }
     clone() {
-        return new Size3(this.width, this.height, this.thickness);
+        return new Size3(this.width, this.height, this.depth);
     }
     equals(other) {
-        return this.height === other.height && this.width === other.width && this.thickness === other.thickness;
+        return this.height === other.height && this.width === other.width && this.depth === other.depth;
     }
 }
 //# sourceMappingURL=geometry.size.js.map
@@ -4210,7 +4249,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _shapes__WEBPACK_IMPORTED_MODULE_7__.AbstractShape),
 /* harmony export */   Bounded: () => (/* reexport safe */ _geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ _geometry_bounds_collection__WEBPACK_IMPORTED_MODULE_3__.BoundedCollection),
-/* harmony export */   Bounds2: () => (/* reexport safe */ _geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds2),
+/* harmony export */   Bounds: () => (/* reexport safe */ _geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds),
 /* harmony export */   Cartesian2: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2),
 /* harmony export */   Cartesian3: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3),
 /* harmony export */   Cartesian4: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian4),
@@ -4311,7 +4350,7 @@ class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape 
         const r = this._radius;
         const x = this._center.x;
         const y = this._center.y;
-        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds2(x - r, y - r, r * 2, r * 2);
+        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds(x - r, y - r, r * 2, r * 2);
     }
     _getPoints() {
         return [this._center];
@@ -4417,7 +4456,7 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         return new Line(a, b);
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(this._alice, this._bob);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds.FromPoints2(this._alice, this._bob);
     }
     _getPoints() {
         return [this._alice, this._bob];
@@ -4474,7 +4513,7 @@ class Point extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         return undefined;
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds2.FromPoints(this._position);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds.FromPoints2(this._position);
     }
     _getPoints() {
         return [this._position];
@@ -4834,7 +4873,7 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(x ?? 0, y ?? 0, z ?? 0);
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__.Bounds2.FromPoints(...this._points);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__.Bounds.FromPoints2(...this._points);
     }
     _getPoints() {
         return this._points;
@@ -7451,7 +7490,7 @@ class TileAddress {
     }
     static ToBounds(a, metrics) {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds2.FromPoints(...points);
+        return _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromPoints2(...points);
     }
     static IsEquals(a, b) {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
@@ -8096,17 +8135,17 @@ class Display {
         return this._resolution;
     }
     resize(width, height, thickness) {
-        if (this._resolution.width != width || this._resolution.height != height || this._resolution.thickness != thickness) {
+        if (this._resolution.width != width || this._resolution.height != height || this._resolution.depth != thickness) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const old = this._resolution;
-                this._resolution = new _geometry__WEBPACK_IMPORTED_MODULE_1__.Size3(width, height, thickness ?? this._resolution.thickness);
+                this._resolution = new _geometry__WEBPACK_IMPORTED_MODULE_1__.Size3(width, height, thickness ?? this._resolution.depth);
                 this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._resolution, "resolution"));
                 return;
             }
             this._resolution.width = width;
             this._resolution.height = height;
             if (thickness) {
-                this._resolution.thickness = thickness;
+                this._resolution.depth = thickness;
             }
         }
     }
@@ -9319,8 +9358,8 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2(x0, y0, w, h);
-        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds(x0, y0, w, h);
+        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
     _getTileRectangle(a, metrics, center, azimuth) {
         const points = [
@@ -9329,7 +9368,7 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
             metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
             metrics.getTileXYToPointXY(a.x, a.y + 1),
         ];
-        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
+        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...points));
     }
     *_rotatePointsArround(center, azimuth, ...points) {
         for (const p of points) {
@@ -10698,7 +10737,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography/geography.interfaces */ "./dist/geography/geography.interfaces.js");
 /* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "./dist/tiles/address/tiles.address.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.envelope */ "./dist/geography/geography.envelope.js");
-/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.js");
 
 
 
@@ -10885,7 +10924,7 @@ class TileCollection {
         return _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope.FromEnvelopes(...this._items);
     }
     _buildRect() {
-        return _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds2.FromBounds(...this._items);
+        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromBounds(...this._items);
     }
 }
 //# sourceMappingURL=tiles.collection.js.map
@@ -11026,8 +11065,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Tile: () => (/* binding */ Tile)
 /* harmony export */ });
 /* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography */ "./dist/geography/geography.envelope.js");
-/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
 /* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "./dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.js");
 
 
 
@@ -11057,7 +11096,7 @@ class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddre
             }
             const a = t.address;
             const p = metrics.getTileXYToPointXY(a.x, a.y);
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
+            return new _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }
         return undefined;
     }
@@ -12266,7 +12305,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.BlobTileCodec),
 /* harmony export */   Bounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.BoundedCollection),
-/* harmony export */   Bounds2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounds2),
+/* harmony export */   Bounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounds),
 /* harmony export */   CacheEntry: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntry),
 /* harmony export */   CacheEntryOptions: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntryOptions),
 /* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntryOptionsBuilder),

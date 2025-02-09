@@ -276,17 +276,17 @@ export class Envelope implements IEnvelope {
         const size = this.size;
         size.width = (size.width * scale - size.width) / 2;
         size.height = (size.height * scale - size.height) / 2;
-        size.thickness = (size.thickness * scale - size.thickness) / 2;
+        size.depth = (size.depth * scale - size.depth) / 2;
 
         this._min.lat -= size.height;
         this._min.lon -= size.width;
         if (this._min.alt) {
-            this._min.alt -= size.thickness;
+            this._min.alt -= size.depth;
         }
         this._max.lat += size.height;
         this._max.lon += size.width;
         if (this._max.alt) {
-            this._max.alt += size.thickness;
+            this._max.alt += size.depth;
         }
         return this;
     }

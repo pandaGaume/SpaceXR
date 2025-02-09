@@ -1,6 +1,6 @@
 import { FloatArray, isArrayOfFloatArray } from "../../types";
 import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3, isArrayOfCartesianArray } from "../geometry.interfaces";
+import { IBounds, ICartesian3, isArrayOfCartesianArray } from "../geometry.interfaces";
 import { Polyline } from "./geometry.polyline";
 import { IPolygon, ShapeType } from "./geometry.shapes.interfaces";
 
@@ -104,7 +104,7 @@ export class Polygon extends Polyline implements IPolygon {
     /// Clip the polygon with the given area. This is a bit more complex than the polyline clip
     /// because we eventually close polygons bounds with the bounds itselfs, then may obtains several polygons.
     /// </summary>
-    public clip(clipArea: IBounds2): IPolygon | Array<IPolygon> | undefined {
+    public clip(clipArea: IBounds): IPolygon | Array<IPolygon> | undefined {
         if (clipArea.containsBounds(this.bounds)) {
             return this;
         }
@@ -112,7 +112,7 @@ export class Polygon extends Polyline implements IPolygon {
         return this._clipPolygon(clipArea);
     }
 
-    protected _clipPolygon(clipArea: IBounds2): IPolygon | Array<IPolygon> | undefined {
+    protected _clipPolygon(clipArea: IBounds): IPolygon | Array<IPolygon> | undefined {
         if (clipArea.intersects(this.bounds)) {
             // 1 - Identify Intersection Points: Find all points where the subject polygon intersects with the clipping polygon.
             // These points should be inserted into both the subject and clipping polygons at their respective positions.

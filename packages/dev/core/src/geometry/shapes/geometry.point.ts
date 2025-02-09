@@ -1,6 +1,6 @@
-import { Bounds2 } from "../geometry.bounds";
+import { Bounds } from "../geometry.bounds";
 import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3, isCartesian } from "../geometry.interfaces";
+import { IBounds, ICartesian3, isCartesian } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { IPoint, ShapeType } from "./geometry.shapes.interfaces";
 
@@ -27,7 +27,7 @@ export class Point extends AbstractShape implements IPoint {
         }
     }
 
-    public clip(clipArea: IBounds2): IPoint | Array<IPoint> | undefined {
+    public clip(clipArea: IBounds): IPoint | Array<IPoint> | undefined {
         let code = Cartesian2.ComputeCode(this._position, clipArea);
         if (code == 0) {
             return this;
@@ -35,8 +35,8 @@ export class Point extends AbstractShape implements IPoint {
         return undefined;
     }
 
-    protected _buildBounds(): IBounds2 | undefined {
-        return Bounds2.FromPoints(this._position);
+    protected _buildBounds(): IBounds | undefined {
+        return Bounds.FromPoints2(this._position);
     }
 
     protected _getPoints(): Array<ICartesian3> {

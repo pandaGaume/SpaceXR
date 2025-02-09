@@ -1,6 +1,6 @@
 import { Nullable } from "../../types";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
-import { IBounds2 } from "../../geometry";
+import { IBounds } from "../../geometry";
 export declare enum NeighborsIndex {
     NW = 0,
     N = 1,
@@ -16,7 +16,7 @@ export declare class TileAddress implements ITileAddress {
     static Split(a: ITileAddress, metrics: ITileMetrics): Nullable<ITileAddress[]>;
     static ShiftMultiple(addresses: ITileAddress[], N: number, metrics: ITileMetrics): ITileAddress[];
     static Shift(a: ITileAddress | ITileAddress[], N: number, metrics: ITileMetrics): Nullable<ITileAddress | ITileAddress[]>;
-    static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds2;
+    static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds;
     static IsEquals(a: ITileAddress, b: ITileAddress): boolean;
     static IsValidAddress(a: ITileAddress, metrics: ITileMetrics): boolean;
     static AssertValidAddress(a: ITileAddress, metrics: ITileMetrics): void;

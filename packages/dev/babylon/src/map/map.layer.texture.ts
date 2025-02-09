@@ -138,8 +138,8 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         const x = display.dimension.width / (display.resolution.width * groundResolution);
         const y = display.dimension.height / (display.resolution.height * groundResolution);
         let z = Math.max(x, y);
-        if (display.dimension.thickness && display.resolution.thickness) {
-            z = display.dimension.thickness / (display.resolution.thickness * groundResolution);
+        if (display.dimension.depth && display.resolution.depth) {
+            z = display.dimension.depth / (display.resolution.depth * groundResolution);
         }
 
         // x & y are unitless, so we define the size in meter using scale and groundResolution

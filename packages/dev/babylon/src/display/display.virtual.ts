@@ -61,12 +61,12 @@ export class VirtualDisplay implements IPhysicalDisplay {
     public constructor(name: string, dimension: ISize2, resolution: ISize2, scene?: Mesh | Scene, unit: Unit = Length.Units.meter) {
         this._dimension = Size3.FromSize(dimension);
 
-        this._halfDimension = new Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.thickness / 2);
+        this._halfDimension = new Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.depth / 2);
         this._resolution = Size3.FromSize(resolution);
         this._ppu = new Vector3(
             this._resolution.width / this._dimension.width,
             this._resolution.height / this._dimension.height,
-            this._dimension.thickness ? this._resolution.thickness / this._dimension.thickness : 0
+            this._dimension.depth ? this._resolution.depth / this._dimension.depth : 0
         );
         this._ratio = new Vector3(this._ppu.x / this._ppu.y, this._ppu.z / this._ppu.y, this._ppu.z / this._ppu.x);
         if (scene == undefined || scene instanceof Scene) {

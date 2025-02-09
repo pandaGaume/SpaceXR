@@ -42,7 +42,7 @@ export class Size3 extends Size2 implements ISize3 {
         ref = ref ?? Size3.Zero();
         ref.width = Quantity.Convert(size.width, from, to);
         ref.height = Quantity.Convert(size.height, from, to);
-        ref.thickness = Quantity.Convert(size.thickness, from, to);
+        ref.depth = Quantity.Convert(size.depth, from, to);
         return ref;
     }
 
@@ -51,29 +51,29 @@ export class Size3 extends Size2 implements ISize3 {
     }
 
     public static IsEmpty(size: ISize3): boolean {
-        return size.width === 0 && size.height === 0 && (size.thickness ?? 0) === 0;
+        return size.width === 0 && size.height === 0 && (size.depth ?? 0) === 0;
     }
 
     public static FromSize(size: ISize2 | ISize3): Size3 {
         if (IsSize3(size)) {
-            return new Size3(size.width, size.height, size.thickness);
+            return new Size3(size.width, size.height, size.depth);
         }
         return new Size3(size.width, size.height);
     }
 
-    public constructor(width: number, height: number, public thickness: number = 0) {
+    public constructor(width: number, height: number, public depth: number = 0) {
         super(width, height);
     }
 
     public get hasThickness(): boolean {
-        return this.thickness !== undefined;
+        return this.depth !== undefined;
     }
 
     public clone(): ISize3 {
-        return new Size3(this.width, this.height, this.thickness);
+        return new Size3(this.width, this.height, this.depth);
     }
 
     public equals(other: ISize3): boolean {
-        return this.height === other.height && this.width === other.width && this.thickness === other.thickness;
+        return this.height === other.height && this.width === other.width && this.depth === other.depth;
     }
 }

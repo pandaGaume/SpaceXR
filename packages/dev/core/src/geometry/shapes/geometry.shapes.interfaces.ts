@@ -1,4 +1,4 @@
-import { IBounded, IBounds2, ICartesian3 } from "../geometry.interfaces";
+import { IBounded, IBounds, ICartesian3 } from "../geometry.interfaces";
 
 export enum ShapeType {
     Unknown,
@@ -14,7 +14,7 @@ export interface IClipable<T extends IShape> {
     /// clip to a bounding box. return the clipped shape or undefined if the whole shape is outside the clip area.
     /// the result may be a single shape or an array of shapes. In all cases the original shape is NOT modified.
     /// </Resume>
-    clip(clipArea: IBounds2): T | Array<T> | undefined;
+    clip(clipArea: IBounds): T | Array<T> | undefined;
 }
 
 export function isClipable<T extends IShape>(value: any): value is IClipable<T> {

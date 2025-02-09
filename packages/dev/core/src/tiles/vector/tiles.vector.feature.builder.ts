@@ -1,4 +1,4 @@
-import { IBounds2, ICartesian2, isClipable, IShape, ISize2 } from "../../geometry";
+import { IBounds, ICartesian2, isClipable, IShape, ISize2 } from "../../geometry";
 import { VectorTileFeature } from "./tiles.vector.feature";
 import { IVectorTileFeature, VectorTileGeomType } from "./tiles.vector.interfaces";
 
@@ -11,7 +11,7 @@ export class VectorTileFeatureBuilder {
     ]; // POLYGON
 
     _type: VectorTileGeomType;
-    _bounds?: IBounds2;
+    _bounds?: IBounds;
     _shapes: Array<IShape> = [];
     _clip: boolean = false;
     _insets?: ISize2;
@@ -27,7 +27,7 @@ export class VectorTileFeatureBuilder {
         return this;
     }
 
-    public withBounds(value: IBounds2): VectorTileFeatureBuilder {
+    public withBounds(value: IBounds): VectorTileFeatureBuilder {
         this._bounds = value;
         return this;
     }

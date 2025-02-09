@@ -1,11 +1,11 @@
 import { Unit } from "../math";
-import { Bounds2 } from "./geometry.bounds";
+import { Bounds } from "./geometry.bounds";
 import { ICartesian2, ICartesian3, ICartesian4, RegionCode } from "./geometry.interfaces";
 export declare class Cartesian2 implements ICartesian2 {
     x: number;
     y: number;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
-    static ComputeCode(point: ICartesian2, clipArea: Bounds2): RegionCode;
+    static ComputeCode(point: ICartesian2, clipArea: Bounds): RegionCode;
     static Dot(a: ICartesian2, b: ICartesian2): number;
     static Cross(a: ICartesian2, b: ICartesian2): ICartesian2;
     static Subtract(a: ICartesian2, b: ICartesian2): ICartesian2;

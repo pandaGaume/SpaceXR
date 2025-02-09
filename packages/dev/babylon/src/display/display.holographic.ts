@@ -27,7 +27,7 @@ export class HolographicDisplay extends VirtualDisplay implements IHolographicBo
 
     public static buildHorizontalClipPlanes(display: VirtualDisplay): Array<ClipPlaneDefinition> {
         const clipPlanes = new Array<ClipPlaneDefinition>();
-        const halfThickness: number = display.halfDimension.thickness;
+        const halfThickness: number = display.halfDimension.depth;
 
         const nTop = new Vector3(0, 0, 1);
         const nBottom = new Vector3(0, 0, -1);

@@ -1,5 +1,5 @@
 import { Quantity, Scalar, Unit } from "../math";
-import { Bounds2 } from "./geometry.bounds";
+import { Bounds } from "./geometry.bounds";
 import { ICartesian2, ICartesian3, ICartesian4, isCartesianArray, RegionCode } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
@@ -12,7 +12,7 @@ export class Cartesian2 implements ICartesian2 {
         }
         return ref;
     }
-    public static ComputeCode(point: ICartesian2, clipArea: Bounds2): RegionCode {
+    public static ComputeCode(point: ICartesian2, clipArea: Bounds): RegionCode {
         // initialized as being inside
         let code = RegionCode.INSIDE;
 

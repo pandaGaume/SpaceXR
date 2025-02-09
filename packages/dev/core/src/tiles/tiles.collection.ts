@@ -1,9 +1,9 @@
-import { IBounds2 } from "../geometry/geometry.interfaces";
+import { IBounds } from "../geometry/geometry.interfaces";
 import { IEnvelope, IsEnvelope } from "../geography/geography.interfaces";
 import { ITile, ITileAddress, ITileCollection } from "./tiles.interfaces";
 import { TileAddress } from "./address/tiles.address";
 import { Envelope } from "../geography/geography.envelope";
-import { Bounds2 } from "../geometry/geometry.bounds";
+import { Bounds } from "../geometry";
 
 export class TileCollection<T> implements ITileCollection<T> {
     public static Empty<T>(): ITileCollection<T> {
@@ -13,7 +13,7 @@ export class TileCollection<T> implements ITileCollection<T> {
     private _index?: Map<string, ITile<T>>;
     private _items: Array<ITile<T>>;
     private _bounds?: IEnvelope;
-    private _rect?: IBounds2;
+    private _rect?: IBounds;
     private _ns?: string;
 
     public constructor(...items: Array<ITile<T>>) {
@@ -46,7 +46,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         return this._bounds;
     }
 
-    public get bounds(): IBounds2 | undefined {
+    public get bounds(): IBounds | undefined {
         if (!this._rect) {
             this._rect = this._buildRect();
         }
@@ -108,7 +108,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         this._rect = undefined;
     }
 
-    public intersect(bounds?: IBounds2 | IEnvelope): IterableIterator<ITile<T>> {
+    public intersect(bounds?: IBounds | IEnvelope): IterableIterator<ITile<T>> {
         if (!bounds) return this[Symbol.iterator]();
 
         let pointer = 0;
@@ -220,7 +220,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         return Envelope.FromEnvelopes(...this._items);
     }
 
-    protected _buildRect(): IBounds2 | undefined {
-        return Bounds2.FromBounds(...this._items);
+    protected _buildRect(): IBounds | undefined {
+        return Bounds.FromBounds(...this._items);
     }
 }

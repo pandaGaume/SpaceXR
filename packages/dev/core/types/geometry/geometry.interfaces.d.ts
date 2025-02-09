@@ -36,28 +36,30 @@ export declare enum Side {
 export interface ISize3 {
     height: number;
     width: number;
-    thickness: number;
+    depth: number;
 }
 export declare function IsSize(b: unknown): b is ISize3 | ISize2;
 export declare function IsSize3(size: ISize2 | ISize3): size is ISize3;
-export interface IBounds2 extends ISize2, ICartesian2, ICloneable<IBounds2> {
+export interface IBounds extends ISize3, ICartesian3, ICloneable<IBounds> {
     ymax: number;
-    xmin: number;
     xmax: number;
+    zmax: number;
+    xmin: number;
     ymin: number;
-    center: ICartesian2;
-    intersects(other?: IBounds2): boolean;
-    intersection(other?: IBounds2, ref?: IBounds2): IBounds2 | undefined;
-    unionInPlace(other?: IBounds2): IBounds2;
-    contains(x: number, y: number): boolean;
-    containsBounds(other?: IBounds2): boolean;
-    inflateInPlace(dx: number, dy: number): IBounds2;
+    zmin: number;
+    center: ICartesian3;
+    intersects(other?: IBounds): boolean;
+    intersection(other?: IBounds, ref?: IBounds): IBounds | undefined;
+    unionInPlace(other?: IBounds): IBounds;
+    containsBounds(other?: IBounds): boolean;
+    containsFloat(x: number, y: number, z?: number): boolean;
+    inflateInPlace(dx: number, dy: number, dz?: number): IBounds;
     toString(): string;
-    points(): IterableIterator<ICartesian2>;
+    points(): IterableIterator<ICartesian3>;
 }
-export declare function IsBounds(b: unknown): b is IBounds2;
+export declare function IsBounds(b: unknown): b is IBounds;
 export interface IBounded {
-    bounds?: IBounds2;
+    bounds?: IBounds;
 }
 export interface IPlane {
     point: ICartesian3;

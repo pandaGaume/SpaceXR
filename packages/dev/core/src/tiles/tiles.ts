@@ -1,8 +1,8 @@
 import { IEnvelope, Envelope } from "../geography";
 import { ITile, ITileAddress, ITileMetrics, TileContentType } from "./tiles.interfaces";
-import { IBounds2 } from "../geometry/geometry.interfaces";
-import { Bounds2 } from "../geometry/geometry.bounds";
+import { IBounds } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./address/tiles.address";
+import { Bounds } from "../geometry";
 
 export class Tile<T> extends TileAddress implements ITile<T> {
     public static BuildEnvelope(t: ITile<unknown>, metrics?: ITileMetrics): IEnvelope | undefined {
@@ -21,7 +21,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         return undefined;
     }
 
-    public static BuildBounds(t: ITile<unknown>, metrics?: ITileMetrics): IBounds2 | undefined {
+    public static BuildBounds(t: ITile<unknown>, metrics?: ITileMetrics): IBounds | undefined {
         if (metrics) {
             if (metrics.boundsFactory) {
                 const b = metrics.boundsFactory(t, metrics);
@@ -31,14 +31,14 @@ export class Tile<T> extends TileAddress implements ITile<T> {
             }
             const a = t.address;
             const p = metrics.getTileXYToPointXY(a.x, a.y);
-            return new Bounds2(p.x, p.y, metrics.tileSize, metrics.tileSize);
+            return new Bounds(p.x, p.y, metrics.tileSize, metrics.tileSize);
         }
         return undefined;
     }
 
     private _value: TileContentType<T>;
     private _env?: IEnvelope;
-    private _rect?: IBounds2;
+    private _rect?: IBounds;
     private _ns?: string;
 
     public constructor(x: number, y: number, levelOfDetail: number, data: TileContentType<T> = null, metrics?: ITileMetrics) {
@@ -78,11 +78,11 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         this._env = e;
     }
 
-    public get bounds(): IBounds2 | undefined {
+    public get bounds(): IBounds | undefined {
         return this._rect;
     }
 
-    public set bounds(r: IBounds2 | undefined) {
+    public set bounds(r: IBounds | undefined) {
         this._rect = r;
     }
 }

@@ -1,7 +1,7 @@
 import { Nullable } from "../../types";
 import { Scalar } from "../../math/math";
 import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
-import { IBounds2, Bounds2 } from "../../geometry";
+import { Bounds, IBounds } from "../../geometry";
 
 export enum NeighborsIndex {
     NW = 0,
@@ -96,9 +96,9 @@ export class TileAddress implements ITileAddress {
         return TileAddress.QuadKeyToTileXY(currentKey);
     }
 
-    public static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds2 {
+    public static ToBounds(a: ITileAddress, metrics: ITileMetrics): IBounds {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return Bounds2.FromPoints(...points);
+        return Bounds.FromPoints2(...points);
     }
 
     public static IsEquals(a: ITileAddress, b: ITileAddress): boolean {

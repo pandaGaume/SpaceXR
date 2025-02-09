@@ -1,5 +1,5 @@
 import { Bounded } from "../geometry.bounds";
-import { IBounds2, ICartesian3 } from "../geometry.interfaces";
+import { IBounds, ICartesian3 } from "../geometry.interfaces";
 import { IShape, ShapeType } from "./geometry.shapes.interfaces";
 
 export abstract class AbstractShape extends Bounded implements IShape {
@@ -29,6 +29,6 @@ export abstract class AbstractShape extends Bounded implements IShape {
         };
     }
 
-    protected abstract _buildBounds(): IBounds2 | undefined;
+    protected abstract _buildBounds(): IBounds | undefined;
     protected abstract _getPoints(): Array<ICartesian3>;
 }

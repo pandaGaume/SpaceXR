@@ -2,7 +2,7 @@ import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
 import { ITileSelectionContextOptions } from "../pipeline/tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
-import { ICartesian2, IBounds2, Bounds2, Cartesian2 } from "../../geometry";
+import { ICartesian2, IBounds, Cartesian2, Bounds } from "../../geometry";
 import { ITileNavigationState } from "../navigation";
 
 import { Bearing } from "../../geography";
@@ -107,24 +107,24 @@ export class TileView extends TileViewBase {
         }
     }
 
-    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IBounds2 {
+    protected _getRectangle(center: ICartesian2, w: number, h: number, scale: number, azimuth?: Bearing): IBounds {
         w = (w / scale) * 1.5; // add border for caching
         h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        const bounds = new Bounds2(x0, y0, w, h);
+        const bounds = new Bounds(x0, y0, w, h);
         // bounds.points is returning a new set of points, so we need to rotate them if azimuth is non zero.
-        return azimuth?.value ? Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        return azimuth?.value ? Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
 
-    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IBounds2 {
+    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IBounds {
         const points = [
             metrics.getTileXYToPointXY(a.x, a.y),
             metrics.getTileXYToPointXY(a.x + 1, a.y),
             metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
             metrics.getTileXYToPointXY(a.x, a.y + 1),
         ];
-        return Bounds2.FromPoints(...this._rotatePointsArround(center, azimuth, ...points));
+        return Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...points));
     }
 
     protected *_rotatePointsArround(center: ICartesian2, azimuth: Bearing, ...points: ICartesian2[]): IterableIterator<ICartesian2> {

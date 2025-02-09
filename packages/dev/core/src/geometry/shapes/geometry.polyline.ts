@@ -1,7 +1,7 @@
 import { FloatArray, isArrayOfFloatArray } from "../../types";
-import { Bounds2 } from "../geometry.bounds";
+import { Bounds } from "../geometry.bounds";
 import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
-import { IBounds2, ICartesian3, isArrayOfCartesianArray, RegionCode } from "../geometry.interfaces";
+import { IBounds, ICartesian3, isArrayOfCartesianArray, RegionCode } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
@@ -58,14 +58,14 @@ export class Polyline extends AbstractShape implements IPolyline {
         return this._points;
     }
 
-    public clip(clipArea: IBounds2): IPolyline | Array<IPolyline> | undefined {
+    public clip(clipArea: IBounds): IPolyline | Array<IPolyline> | undefined {
         if (clipArea.containsBounds(this.bounds)) {
             return this;
         }
         return this._clipPolyline(clipArea);
     }
 
-    protected _clipPolyline(clipArea: IBounds2): IPolyline | Array<IPolyline> | undefined {
+    protected _clipPolyline(clipArea: IBounds): IPolyline | Array<IPolyline> | undefined {
         if (clipArea.intersects(this.bounds)) {
             const polylines = [];
             let points = [];
@@ -110,7 +110,7 @@ export class Polyline extends AbstractShape implements IPolyline {
         return undefined;
     }
 
-    protected _computeIntersectionToRef<T extends ICartesian3>(clipArea: IBounds2, a: ICartesian3, b: ICartesian3, code_out: RegionCode, ref: T): T {
+    protected _computeIntersectionToRef<T extends ICartesian3>(clipArea: IBounds, a: ICartesian3, b: ICartesian3, code_out: RegionCode, ref: T): T {
         // compute intersection point
         const x1 = a.x;
         const y1 = a.y;
@@ -145,8 +145,8 @@ export class Polyline extends AbstractShape implements IPolyline {
         return new Cartesian3(x ?? 0, y ?? 0, z ?? 0);
     }
 
-    protected _buildBounds(): IBounds2 | undefined {
-        return Bounds2.FromPoints(...this._points);
+    protected _buildBounds(): IBounds | undefined {
+        return Bounds.FromPoints2(...this._points);
     }
     protected _getPoints(): Array<ICartesian3> {
         return this._points;

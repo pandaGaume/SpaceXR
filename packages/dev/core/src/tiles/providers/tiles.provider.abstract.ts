@@ -1,7 +1,7 @@
 import { IsTileConstructor, ITile, ITileAddress, ITileBuilder, ITileMetrics, ITileProvider, TileConstructor } from "../tiles.interfaces";
 import { EventState, Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
-import { IBounds2 } from "../../geometry/geometry.interfaces";
+import { IBounds } from "../../geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collection";
 import { TileBuilder } from "../tiles.builder";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, TilePipelineLink } from "../pipeline";
@@ -42,7 +42,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return this._activTiles?.geoBounds;
     }
 
-    public get bounds(): IBounds2 | undefined {
+    public get bounds(): IBounds | undefined {
         return this._activTiles?.bounds;
     }
 

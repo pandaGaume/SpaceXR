@@ -97,7 +97,6 @@ export class ShapeCollection implements ITileMetricsProvider {
         }
     }
 
-
     protected _buildPolygon(shape: IGeoPolygon, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);
         return Polygon.FromPoints(points);

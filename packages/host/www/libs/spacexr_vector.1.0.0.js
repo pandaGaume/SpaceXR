@@ -1874,8 +1874,6 @@ function writeUtf8(buf, str, pos) {
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
 /*!***********************!*\
   !*** ./dist/index.js ***!
   \***********************/
@@ -1897,8 +1895,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
 
 //# sourceMappingURL=index.js.map
-})();
-
 SPACEXR_MAPBOX = __webpack_exports__;
 /******/ })()
 ;

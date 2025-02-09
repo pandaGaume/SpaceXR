@@ -17,7 +17,7 @@ export class InputsNavigationTarget<T> implements IPointerTarget<T>, IWheelTarge
     _isDragging: boolean;
     _button: number;
 
-    public constructor(target: ITileNavigationApi, zoomIncrement?: number, invertY?: boolean) {
+    public constructor(target: ITileNavigationApi, zoomIncrement?: number, invertY: boolean = true) {
         this._target = target;
         this._offsetX = 0;
         this._offsetY = 0;

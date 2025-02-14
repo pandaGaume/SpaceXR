@@ -1,4 +1,3 @@
-import { IStack } from "../collections";
 import { BoundedCollection, IBounded, IBounds } from "../geometry";
 
 export enum SubdivisionScheme {
@@ -11,11 +10,12 @@ export interface ISpatialTreeOptions<T extends IBounds | IBounded> {
     maxItemPerNode: number;
     subdivision: SubdivisionScheme;
     factory: (a?: IBounds, b?: number) => ISpatialTreeNode<T>;
+    lookupThreshold?: number;
 }
 
 export interface ISpatialTreeContext<T extends IBounds | IBounded> {
     tree: ISpatialTree<T>;
-    stack: IStack<ISpatialTreeNode<T>>;
+    lookupThreshold?: number;
 }
 
 export interface ISpatialTreeNode<T extends IBounds | IBounded> extends IBounded {
@@ -25,7 +25,7 @@ export interface ISpatialTreeNode<T extends IBounds | IBounded> extends IBounded
 
     add(context: ISpatialTreeContext<T>, data: T[]): void;
     remove(context: ISpatialTreeContext<T>, data: T[]): void;
-    lookupToRef(bounds: IBounds | IBounded, ref: T[]): void;
+    lookupToRef(context: ISpatialTreeContext<T>, bounds: IBounds | IBounded, ref: T[]): void;
 }
 
 export interface ISpatialTree<T extends IBounds | IBounded> extends ISpatialTreeOptions<T>, IBounded {

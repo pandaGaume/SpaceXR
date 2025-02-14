@@ -1,4 +1,5 @@
 import { BoundedCollection, Bounds, IBounded, IBounds, IsBounds } from "../geometry";
+import { SpatialTree } from "./tree.spatial";
 import { ISpatialTreeOptions, ISpatialTreeNode, SubdivisionScheme, ISpatialTreeContext } from "./tree.spatial.interfaces";
 
 export class SpatialTreeNode<T extends IBounds | IBounded> implements ISpatialTreeNode<T> {
@@ -111,7 +112,7 @@ export class SpatialTreeNode<T extends IBounds | IBounded> implements ISpatialTr
         }
     }
 
-    public lookupToRef(bounds: IBounds | IBounded, ref: T[]): void {
+    public lookupToRef(context: ISpatialTreeContext<T>, bounds: IBounds | IBounded, ref: T[]): void {
         const nodeBox = this.boundingBox;
         const lookupBox = IsBounds(bounds) ? bounds : bounds.boundingBox;
         if (lookupBox == undefined || lookupBox.intersects(nodeBox) == false) {
@@ -119,21 +120,28 @@ export class SpatialTreeNode<T extends IBounds | IBounded> implements ISpatialTr
         }
         if (this.items) {
             // extract the data to ref
-            const contentBounds = this.items.boundingBox;
-            if (lookupBox.intersects(contentBounds)) {
-                for (const v of this.items.data) {
-                    const dataBox = IsBounds(v) ? v : v.boundingBox;
-                    if (dataBox?.intersects(lookupBox)) {
-                        ref.push(v);
-                    }
+            // the bounds may be inside the node, but the items may be located into a small portion of it
+            // so we may check for the items box.
+            // this is not optimal when there is a small number of items so we may find a threshold
+            // to do this check.
+            const threshold = context.tree.lookupThreshold ?? SpatialTree.DefaultLookupThreshold;
+            if (this.items.length < threshold) {
+                const contentBounds = this.items.boundingBox;
+                if (lookupBox.intersects(contentBounds) == false) {
+                    return;
                 }
             }
-
+            for (const v of this.items.data) {
+                const dataBox = IsBounds(v) ? v : v.boundingBox;
+                if (dataBox && dataBox.intersects(lookupBox)) {
+                    ref.push(v);
+                }
+            }
             return;
         }
         if (this.children) {
             for (const c of this.children) {
-                c.lookupToRef(bounds, ref);
+                c.lookupToRef(context, bounds, ref);
             }
         }
     }

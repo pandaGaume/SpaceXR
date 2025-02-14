@@ -71,7 +71,7 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
 
                 const tiles = view.activTiles;
                 for (const tile of tiles) {
-                    const b = tile?.bounds;
+                    const b = tile?.boundingBox;
                     if (!b || !tile.content) {
                         continue;
                     }

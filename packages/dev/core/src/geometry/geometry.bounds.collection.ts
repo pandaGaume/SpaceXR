@@ -1,7 +1,7 @@
 import { Bounded, Bounds } from "./geometry.bounds";
-import { IBounded, IBounds } from "./geometry.interfaces";
+import { IBounded, IBounds, IsBounds } from "./geometry.interfaces";
 
-export class BoundedCollection<T extends IBounded> extends Bounded {
+export class BoundedCollection<T extends IBounds | IBounded> extends Bounded {
     private _items: Array<T>;
 
     public constructor() {
@@ -9,9 +9,28 @@ export class BoundedCollection<T extends IBounded> extends Bounded {
         this._items = new Array<T>();
     }
 
+    public get data(): Array<T> {
+        return this._items;
+    }
+    public set data(d: Array<T>) {
+        this._items = d;
+        this.invalidateBounds();
+    }
+    public get length(): number {
+        return this._items.length;
+    }
+
     public push(...views: Array<T>): void {
         this._items.push(...views);
         this.invalidateBounds();
+    }
+
+    public pop(): T | undefined {
+        const d = this._items.pop();
+        if (d) {
+            this.invalidateBounds();
+        }
+        return d;
     }
 
     public findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number {
@@ -23,32 +42,7 @@ export class BoundedCollection<T extends IBounded> extends Bounded {
         this.invalidateBounds();
     }
 
-    public [Symbol.iterator](): IterableIterator<T> {
-        let pointer = 0;
-        let items = this._items;
-
-        const iterator: IterableIterator<T> = {
-            next(): IteratorResult<T> {
-                if (pointer < items.length) {
-                    return {
-                        done: false,
-                        value: items[pointer++],
-                    };
-                }
-
-                return {
-                    done: true,
-                    value: null as any,
-                };
-            },
-            [Symbol.iterator]() {
-                return this;
-            },
-        };
-        return iterator;
-    }
-
     protected _buildBounds(): IBounds | undefined {
-        return Bounds.FromBounds(...this._items.map((v) => v.bounds));
+        return Bounds.FromBounds(...this._items.map((v) => (IsBounds(v) ? v : v.boundingBox)));
     }
 }

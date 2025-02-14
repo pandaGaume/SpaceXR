@@ -78,11 +78,11 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         this._env = e;
     }
 
-    public get bounds(): IBounds | undefined {
+    public get boundingBox(): IBounds | undefined {
         return this._rect;
     }
 
-    public set bounds(r: IBounds | undefined) {
+    public set boundingBox(r: IBounds | undefined) {
         this._rect = r;
     }
 }

@@ -17,6 +17,6 @@ export declare class Tile<T> extends TileAddress implements ITile<T> {
     set content(v: TileContentType<T>);
     get geoBounds(): IEnvelope | undefined;
     set geoBounds(e: IEnvelope | undefined);
-    get bounds(): IBounds | undefined;
-    set bounds(r: IBounds | undefined);
+    get boundingBox(): IBounds | undefined;
+    set boundingBox(r: IBounds | undefined);
 }

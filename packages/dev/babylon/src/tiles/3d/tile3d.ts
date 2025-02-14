@@ -1,35 +1,28 @@
-import { Nullable, TransformNode, Node } from "@babylonjs/core";
-import { IEnvelope } from "core/geography";
-import { ITile3D, ITile3DGroup, RefinementStrategy } from "./tile3d.interfaces";
+import { Nullable } from "core/types";
+import { ITile3D, RefinementStrategy } from "./tile3d.interfaces";
+import { IBounds } from "core/geometry";
 
-export class Tile3DGroup extends TransformNode implements ITile3DGroup {
-    _envelope?: IEnvelope;
-
-    public constructor(name: string) {
-        super(name);
-    }
-
-    public get geoBounds(): IEnvelope | undefined {
-        return this._envelope;
-    }
-
-    public set geoBounds(v: IEnvelope | undefined) {
-        this._envelope = v;
-    }
-
-    public *[Symbol.iterator](predicate?: (n: Nullable<Node>) => boolean): IterableIterator<Nullable<Node>> {
-        yield null;
-    }
-}
-
-export class Tile3D extends TransformNode implements ITile3D {
+export class Tile3D implements ITile3D {
     private _refinementStrategy: RefinementStrategy;
     private _geometricError: number;
+    private _children?: Array<ITile3D>;
+    private _bounds?: IBounds;
 
-    public constructor(name: string) {
-        super(name);
+    public constructor() {
         this._refinementStrategy = RefinementStrategy.REPLACEMENT;
         this._geometricError = 0;
+    }
+
+    public get isLeaf(): boolean {
+        return (this.children?.length ?? 0) != 0;
+    }
+
+    public get children(): Array<ITile3D> | undefined {
+        return this._children;
+    }
+
+    public get boundingBox(): IBounds | undefined {
+        return this._bounds;
     }
 
     public get refinementStrategy(): RefinementStrategy {
@@ -52,7 +45,17 @@ export class Tile3D extends TransformNode implements ITile3D {
         }
     }
 
-    public *[Symbol.iterator](predicate?: (n: Nullable<Node>) => boolean): IterableIterator<Nullable<ITile3DGroup>> {
-        return yield null;
+    public *[Symbol.iterator](predicate?: (n: Nullable<ITile3D>) => boolean): IterableIterator<Nullable<ITile3D>> {
+        if (this._children) {
+            if (predicate) {
+                for (const t of this._children) {
+                    if (predicate(t)) {
+                        yield t;
+                    }
+                }
+            }
+            return this._children;
+        }
+        return null;
     }
 }

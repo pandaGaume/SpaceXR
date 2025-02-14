@@ -39,3 +39,17 @@ export interface ICollection<T> extends Iterable<T>, IValidable, IDisposable {
 }
 
 export interface IOrderedCollection<T extends IWeighted> extends ICollection<T> {}
+
+export interface IStack<T> {
+    push(item: T): void;
+    /** Pop an element from the stack (removes and returns it) */
+    pop(): T | undefined;
+    /** Peek at the top element without removing it */
+    peek(): T | undefined;
+    /** Check if the stack is empty */
+    isEmpty(): boolean;
+    /** Get the number of elements in the stack */
+    size(): number;
+    /** Clear the stack */
+    clear(): void;
+}

@@ -9,6 +9,7 @@ export class Bounds extends Cartesian3 implements IBounds {
     public static FromSize(size: ISize3): IBounds {
         return new Bounds(0, 0, size?.width || 0, size?.height || 0, 0, size?.depth || 0);
     }
+
     public static FromBounds(...array: Array<IBounds | IBounded | undefined>): IBounds | undefined {
         let rect: IBounds | undefined = undefined;
         for (let i = 0; i < array.length; i++) {
@@ -17,7 +18,7 @@ export class Bounds extends Cartesian3 implements IBounds {
                 if (IsBounds(a)) {
                     rect = rect ? rect.unionInPlace(a) : a.clone();
                 } else {
-                    a = a.bounds;
+                    a = a.boundingBox;
                     if (a) {
                         rect = rect ? rect.unionInPlace(a) : a.clone();
                     }
@@ -188,7 +189,7 @@ export abstract class Bounded implements IBounded {
         return this._parent;
     }
 
-    public get bounds(): IBounds | undefined {
+    public get boundingBox(): IBounds | undefined {
         this.validateBounds();
         return this._rect;
     }

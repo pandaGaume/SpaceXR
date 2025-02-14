@@ -105,7 +105,7 @@ export class Polygon extends Polyline implements IPolygon {
     /// because we eventually close polygons bounds with the bounds itselfs, then may obtains several polygons.
     /// </summary>
     public clip(clipArea: IBounds): IPolygon | Array<IPolygon> | undefined {
-        if (clipArea.containsBounds(this.bounds)) {
+        if (clipArea.containsBounds(this.boundingBox)) {
             return this;
         }
 
@@ -113,7 +113,7 @@ export class Polygon extends Polyline implements IPolygon {
     }
 
     protected _clipPolygon(clipArea: IBounds): IPolygon | Array<IPolygon> | undefined {
-        if (clipArea.intersects(this.bounds)) {
+        if (clipArea.intersects(this.boundingBox)) {
             // 1 - Identify Intersection Points: Find all points where the subject polygon intersects with the clipping polygon.
             // These points should be inserted into both the subject and clipping polygons at their respective positions.
             // Each point in both polygons should be classified as either entering, exiting, or neither with respect to the other polygon.

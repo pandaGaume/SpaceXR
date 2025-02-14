@@ -78,6 +78,11 @@ export function IsSize3(size: ISize2 | ISize3): size is ISize3 {
     return IsSize(size) && (size as ISize3).depth !== undefined;
 }
 
+export interface IBoundingSphere {
+    center: ICartesian3;
+    radius: number;
+}
+
 export interface IBounds extends ISize3, ICartesian3, ICloneable<IBounds> {
     ymax: number;
     xmax: number;
@@ -113,7 +118,8 @@ export function IsBounds(b: unknown): b is IBounds {
 }
 
 export interface IBounded {
-    bounds?: IBounds;
+    boundingBox?: IBounds;
+    boundingSphere?: IBoundingSphere;
 }
 
 export interface IPlane {

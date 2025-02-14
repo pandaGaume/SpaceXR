@@ -2764,15 +2764,34 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BoundedCollection: () => (/* binding */ BoundedCollection)
 /* harmony export */ });
 /* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.bounds */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
+
 
 class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounded {
     constructor() {
         super();
         this._items = new Array();
     }
+    get data() {
+        return this._items;
+    }
+    set data(d) {
+        this._items = d;
+        this.invalidateBounds();
+    }
+    get length() {
+        return this._items.length;
+    }
     push(...views) {
         this._items.push(...views);
         this.invalidateBounds();
+    }
+    pop() {
+        const d = this._items.pop();
+        if (d) {
+            this.invalidateBounds();
+        }
+        return d;
     }
     findIndex(predicate, thisArg) {
         return this._items.findIndex(predicate, thisArg);
@@ -2781,30 +2800,8 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
         this._items.splice(start, deleteCount);
         this.invalidateBounds();
     }
-    [Symbol.iterator]() {
-        let pointer = 0;
-        let items = this._items;
-        const iterator = {
-            next() {
-                if (pointer < items.length) {
-                    return {
-                        done: false,
-                        value: items[pointer++],
-                    };
-                }
-                return {
-                    done: true,
-                    value: null,
-                };
-            },
-            [Symbol.iterator]() {
-                return this;
-            },
-        };
-        return iterator;
-    }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => v.bounds));
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(v) ? v : v.boundingBox)));
     }
 }
 //# sourceMappingURL=geometry.bounds.collection.js.map
@@ -2842,7 +2839,7 @@ class Bounds extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3
                     rect = rect ? rect.unionInPlace(a) : a.clone();
                 }
                 else {
-                    a = a.bounds;
+                    a = a.boundingBox;
                     if (a) {
                         rect = rect ? rect.unionInPlace(a) : a.clone();
                     }
@@ -2999,7 +2996,7 @@ class Bounded {
     get parent() {
         return this._parent;
     }
-    get bounds() {
+    get boundingBox() {
         this.validateBounds();
         return this._rect;
     }
@@ -4620,13 +4617,13 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
         }
     }
     clip(clipArea) {
-        if (clipArea.containsBounds(this.bounds)) {
+        if (clipArea.containsBounds(this.boundingBox)) {
             return this;
         }
         return this._clipPolygon(clipArea);
     }
     _clipPolygon(clipArea) {
-        if (clipArea.intersects(this.bounds)) {
+        if (clipArea.intersects(this.boundingBox)) {
             const polygonArea = Array.from(clipArea.points()).map((p) => this._buildPoint(p.x, p.y, 0));
             polygonArea.push(polygonArea[0]);
             const toClips = [this._points];
@@ -4796,13 +4793,13 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return this._points;
     }
     clip(clipArea) {
-        if (clipArea.containsBounds(this.bounds)) {
+        if (clipArea.containsBounds(this.boundingBox)) {
             return this;
         }
         return this._clipPolyline(clipArea);
     }
     _clipPolyline(clipArea) {
-        if (clipArea.intersects(this.bounds)) {
+        if (clipArea.intersects(this.boundingBox)) {
             const polylines = [];
             let points = [];
             const codes = this._points.map((p) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.ComputeCode(p, clipArea));
@@ -5212,7 +5209,7 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 const size = metrics.tileSize;
                 const tiles = view.activTiles;
                 for (const tile of tiles) {
-                    const b = tile?.bounds;
+                    const b = tile?.boundingBox;
                     if (!b || !tile.content) {
                         continue;
                     }
@@ -10255,8 +10252,8 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
     get geoBounds() {
         return this._activTiles?.geoBounds;
     }
-    get bounds() {
-        return this._activTiles?.bounds;
+    get boundingBox() {
+        return this._activTiles?.boundingBox;
     }
     get enabledObservable() {
         this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
@@ -10600,7 +10597,7 @@ class TileBuilder {
         const t = new type(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
             t.geoBounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildEnvelope(t, this._m);
-            t.bounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t, this._m);
+            t.boundingBox = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t, this._m);
         }
         return t;
     }
@@ -10770,7 +10767,7 @@ class TileCollection {
         }
         return this._bounds;
     }
-    get bounds() {
+    get boundingBox() {
         if (!this._rect) {
             this._rect = this._buildRect();
         }
@@ -10793,7 +10790,7 @@ class TileCollection {
             if (b && this._bounds) {
                 this._bounds.unionInPlace(b);
             }
-            const r = tile.bounds;
+            const r = tile.boundingBox;
             if (r && this._rect) {
                 this._rect.unionInPlace(r);
             }
@@ -10854,12 +10851,12 @@ class TileCollection {
             }
         }
         else {
-            if (this.bounds?.intersects(bounds)) {
+            if (this.boundingBox?.intersects(bounds)) {
                 return {
                     next() {
                         while (pointer < items.length) {
                             let item = items[pointer++];
-                            let r = item.bounds;
+                            let r = item.boundingBox;
                             if (!r || bounds.intersects(r)) {
                                 return {
                                     done: false,
@@ -11129,10 +11126,10 @@ class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddre
     set geoBounds(e) {
         this._env = e;
     }
-    get bounds() {
+    get boundingBox() {
         return this._rect;
     }
-    set bounds(r) {
+    set boundingBox(r) {
         this._rect = r;
     }
 }

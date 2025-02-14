@@ -59,14 +59,14 @@ export class Polyline extends AbstractShape implements IPolyline {
     }
 
     public clip(clipArea: IBounds): IPolyline | Array<IPolyline> | undefined {
-        if (clipArea.containsBounds(this.bounds)) {
+        if (clipArea.containsBounds(this.boundingBox)) {
             return this;
         }
         return this._clipPolyline(clipArea);
     }
 
     protected _clipPolyline(clipArea: IBounds): IPolyline | Array<IPolyline> | undefined {
-        if (clipArea.intersects(this.bounds)) {
+        if (clipArea.intersects(this.boundingBox)) {
             const polylines = [];
             let points = [];
             const codes = this._points.map((p) => Cartesian2.ComputeCode(p, clipArea));

@@ -40,6 +40,10 @@ export interface ISize3 {
 }
 export declare function IsSize(b: unknown): b is ISize3 | ISize2;
 export declare function IsSize3(size: ISize2 | ISize3): size is ISize3;
+export interface IBoundingSphere {
+    center: ICartesian3;
+    radius: number;
+}
 export interface IBounds extends ISize3, ICartesian3, ICloneable<IBounds> {
     ymax: number;
     xmax: number;
@@ -59,7 +63,8 @@ export interface IBounds extends ISize3, ICartesian3, ICloneable<IBounds> {
 }
 export declare function IsBounds(b: unknown): b is IBounds;
 export interface IBounded {
-    bounds?: IBounds;
+    boundingBox?: IBounds;
+    boundingSphere?: IBoundingSphere;
 }
 export interface IPlane {
     point: ICartesian3;

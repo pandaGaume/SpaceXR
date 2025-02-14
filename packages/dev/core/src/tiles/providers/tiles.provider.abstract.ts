@@ -42,8 +42,8 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return this._activTiles?.geoBounds;
     }
 
-    public get bounds(): IBounds | undefined {
-        return this._activTiles?.bounds;
+    public get boundingBox(): IBounds | undefined {
+        return this._activTiles?.boundingBox;
     }
 
     public get enabledObservable(): Observable<ITileProvider<T>> {

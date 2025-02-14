@@ -46,7 +46,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         return this._bounds;
     }
 
-    public get bounds(): IBounds | undefined {
+    public get boundingBox(): IBounds | undefined {
         if (!this._rect) {
             this._rect = this._buildRect();
         }
@@ -73,7 +73,7 @@ export class TileCollection<T> implements ITileCollection<T> {
             if (b && this._bounds) {
                 this._bounds.unionInPlace(b);
             }
-            const r = tile.bounds;
+            const r = tile.boundingBox;
             if (r && this._rect) {
                 this._rect.unionInPlace(r);
             }
@@ -142,13 +142,13 @@ export class TileCollection<T> implements ITileCollection<T> {
             }
         } else {
             // this is a rectangle
-            if (this.bounds?.intersects(bounds)) {
+            if (this.boundingBox?.intersects(bounds)) {
                 // with a valid intersection with the collection
                 return {
                     next(): IteratorResult<ITile<T>> {
                         while (pointer < items.length) {
                             let item = items[pointer++];
-                            let r = item.bounds;
+                            let r = item.boundingBox;
                             if (!r || bounds.intersects(r)) {
                                 return {
                                     done: false,

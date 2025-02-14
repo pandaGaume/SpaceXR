@@ -1832,8 +1832,8 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         return instance;
     }
     _setTilePosition(tile, center) {
-        if (tile?.bounds && tile?.surface) {
-            const c = tile.bounds.center;
+        if (tile?.boundingBox && tile?.surface) {
+            const c = tile.boundingBox.center;
             const p = tile.surface.position;
             p.x = center.x - c.x;
             p.y = center.y - c.y;
@@ -3235,7 +3235,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RBush3D: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.RBush3D),
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy),
 /* harmony export */   Tile3D: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
-/* harmony export */   Tile3DGroup: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DGroup),
 /* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.Tile3dLoader),
 /* harmony export */   boxRayIntersects: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.boxRayIntersects),
 /* harmony export */   intersects: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.intersects)
@@ -3440,36 +3439,26 @@ var RefinementStrategy;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3D: () => (/* binding */ Tile3D),
-/* harmony export */   Tile3DGroup: () => (/* binding */ Tile3DGroup)
+/* harmony export */   Tile3D: () => (/* binding */ Tile3D)
 /* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 
-
-class Tile3DGroup extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
-    constructor(name) {
-        super(name);
-    }
-    get geoBounds() {
-        return this._envelope;
-    }
-    set geoBounds(v) {
-        this._envelope = v;
-    }
-    *[Symbol.iterator](predicate) {
-        yield null;
-    }
-}
-class Tile3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
-    constructor(name) {
-        super(name);
-        this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy.REPLACEMENT;
+class Tile3D {
+    constructor() {
+        this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy.REPLACEMENT;
         this._geometricError = 0;
     }
+    get isLeaf() {
+        return (this.children?.length ?? 0) != 0;
+    }
+    get children() {
+        return this._children;
+    }
+    get boundingBox() {
+        return this._bounds;
+    }
     get refinementStrategy() {
-        return _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy.ADDITIVE;
+        return _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy.ADDITIVE;
     }
     set refinementStrategy(v) {
         if (v !== this._refinementStrategy) {
@@ -3485,7 +3474,17 @@ class Tile3D extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode 
         }
     }
     *[Symbol.iterator](predicate) {
-        return yield null;
+        if (this._children) {
+            if (predicate) {
+                for (const t of this._children) {
+                    if (predicate(t)) {
+                        yield t;
+                    }
+                }
+            }
+            return this._children;
+        }
+        return null;
     }
 }
 //# sourceMappingURL=tile3d.js.map
@@ -6942,7 +6941,7 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
         return iterator;
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => v.bounds));
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => v.boundingBox));
     }
 }
 //# sourceMappingURL=geometry.bounds.collection.js.map
@@ -6980,7 +6979,7 @@ class Bounds extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3
                     rect = rect ? rect.unionInPlace(a) : a.clone();
                 }
                 else {
-                    a = a.bounds;
+                    a = a.boundingBox;
                     if (a) {
                         rect = rect ? rect.unionInPlace(a) : a.clone();
                     }
@@ -7137,7 +7136,7 @@ class Bounded {
     get parent() {
         return this._parent;
     }
-    get bounds() {
+    get boundingBox() {
         this.validateBounds();
         return this._rect;
     }
@@ -8758,13 +8757,13 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
         }
     }
     clip(clipArea) {
-        if (clipArea.containsBounds(this.bounds)) {
+        if (clipArea.containsBounds(this.boundingBox)) {
             return this;
         }
         return this._clipPolygon(clipArea);
     }
     _clipPolygon(clipArea) {
-        if (clipArea.intersects(this.bounds)) {
+        if (clipArea.intersects(this.boundingBox)) {
             const polygonArea = Array.from(clipArea.points()).map((p) => this._buildPoint(p.x, p.y, 0));
             polygonArea.push(polygonArea[0]);
             const toClips = [this._points];
@@ -8934,13 +8933,13 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return this._points;
     }
     clip(clipArea) {
-        if (clipArea.containsBounds(this.bounds)) {
+        if (clipArea.containsBounds(this.boundingBox)) {
             return this;
         }
         return this._clipPolyline(clipArea);
     }
     _clipPolyline(clipArea) {
-        if (clipArea.intersects(this.bounds)) {
+        if (clipArea.intersects(this.boundingBox)) {
             const polylines = [];
             let points = [];
             const codes = this._points.map((p) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.ComputeCode(p, clipArea));
@@ -9606,7 +9605,7 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 const size = metrics.tileSize;
                 const tiles = view.activTiles;
                 for (const tile of tiles) {
-                    const b = tile?.bounds;
+                    const b = tile?.boundingBox;
                     if (!b || !tile.content) {
                         continue;
                     }
@@ -14649,8 +14648,8 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
     get geoBounds() {
         return this._activTiles?.geoBounds;
     }
-    get bounds() {
-        return this._activTiles?.bounds;
+    get boundingBox() {
+        return this._activTiles?.boundingBox;
     }
     get enabledObservable() {
         this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
@@ -14994,7 +14993,7 @@ class TileBuilder {
         const t = new type(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
             t.geoBounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildEnvelope(t, this._m);
-            t.bounds = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t, this._m);
+            t.boundingBox = _tiles__WEBPACK_IMPORTED_MODULE_0__.Tile.BuildBounds(t, this._m);
         }
         return t;
     }
@@ -15164,7 +15163,7 @@ class TileCollection {
         }
         return this._bounds;
     }
-    get bounds() {
+    get boundingBox() {
         if (!this._rect) {
             this._rect = this._buildRect();
         }
@@ -15187,7 +15186,7 @@ class TileCollection {
             if (b && this._bounds) {
                 this._bounds.unionInPlace(b);
             }
-            const r = tile.bounds;
+            const r = tile.boundingBox;
             if (r && this._rect) {
                 this._rect.unionInPlace(r);
             }
@@ -15248,12 +15247,12 @@ class TileCollection {
             }
         }
         else {
-            if (this.bounds?.intersects(bounds)) {
+            if (this.boundingBox?.intersects(bounds)) {
                 return {
                     next() {
                         while (pointer < items.length) {
                             let item = items[pointer++];
-                            let r = item.bounds;
+                            let r = item.boundingBox;
                             if (!r || bounds.intersects(r)) {
                                 return {
                                     done: false,
@@ -15523,10 +15522,10 @@ class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddre
     set geoBounds(e) {
         this._env = e;
     }
-    get bounds() {
+    get boundingBox() {
         return this._rect;
     }
-    set bounds(r) {
+    set boundingBox(r) {
         this._rect = r;
     }
 }
@@ -24988,7 +24987,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.TextureLayerView),
 /* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Tile),
 /* harmony export */   Tile3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
-/* harmony export */   Tile3DGroup: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DGroup),
 /* harmony export */   Tile3dLoader: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dLoader),
 /* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.TileBorder),

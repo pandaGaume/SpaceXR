@@ -51,7 +51,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         const t = new type(this._a?.x || 0, this._a?.y || 0, this._a?.levelOfDetail || this._m?.minLOD || 0, this._d || null);
         if (this._m) {
             t.geoBounds = Tile.BuildEnvelope(t, this._m);
-            t.bounds = Tile.BuildBounds(t, this._m);
+            t.boundingBox = Tile.BuildBounds(t, this._m);
         }
 
         return t;

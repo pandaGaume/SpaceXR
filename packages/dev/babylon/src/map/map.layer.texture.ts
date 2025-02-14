@@ -116,8 +116,8 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     }
 
     protected _setTilePosition(tile: ITileWithMesh<ImageLayerContentType>, center: ICartesian2): void {
-        if (tile?.bounds && tile?.surface) {
-            const c = tile.bounds.center;
+        if (tile?.boundingBox && tile?.surface) {
+            const c = tile.boundingBox.center;
             const p = tile.surface.position;
             // the tile system is origin north-west corner, y pointing to the south, x to the east.
             p.x = center.x - c.x;

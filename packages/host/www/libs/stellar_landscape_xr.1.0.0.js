@@ -3235,10 +3235,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy),
 /* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError),
 /* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError0),
-/* harmony export */   Tile3DNode: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode),
+/* harmony export */   Tile3DNode: () => (/* reexport safe */ _tile3d_node__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode),
 /* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.Tile3dLoader)
 /* harmony export */ });
-/* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/3d/tile3d.js");
+/* harmony import */ var _tile3d_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.node */ "./dist/tiles/3d/tile3d.node.js");
 /* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 /* harmony import */ var _legacy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legacy */ "./dist/tiles/3d/legacy/index.js");
 
@@ -3440,22 +3440,69 @@ function ScreenSpaceError0(geometricError, distance, viewportHeight, tanfov2) {
 
 /***/ }),
 
-/***/ "./dist/tiles/3d/tile3d.js":
-/*!*********************************!*\
-  !*** ./dist/tiles/3d/tile3d.js ***!
-  \*********************************/
+/***/ "./dist/tiles/3d/tile3d.node.js":
+/*!**************************************!*\
+  !*** ./dist/tiles/3d/tile3d.node.js ***!
+  \**************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Tile3DNode: () => (/* binding */ Tile3DNode)
 /* harmony export */ });
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var core_tree_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tree/tree.spatial.interfaces */ "../core/dist/tree/tree.spatial.interfaces.js");
+
+
 
 class Tile3DNode {
-    constructor() {
-        this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy.REPLACEMENT;
-        this._geometricError = 0;
+    static Split(node, sub, refinement, constructor, error) {
+        if (node.boundingBox) {
+            const buildChild = (bounds, error) => {
+                const n = constructor ? new constructor(bounds, error) : new Tile3DNode(bounds);
+                if (n) {
+                    n.refinementStrategy = refinement ?? node.refinementStrategy;
+                }
+                return n;
+            };
+            const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const halfDepth = depth / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+            const midZ = zmin + halfDepth;
+            const d = error ? error(node.geometricError) : node.geometricError / 2;
+            switch (sub) {
+                case core_tree_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.SubdivisionScheme.QUADTREE: {
+                    return [
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, zmin, 0), d),
+                    ];
+                }
+                case core_tree_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.SubdivisionScheme.OCTREE: {
+                    return [
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth), d),
+                        buildChild(new core_geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth), d),
+                    ];
+                }
+            }
+        }
+        return [];
+    }
+    constructor(bounds, error = 0) {
+        this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__.RefinementStrategy.REPLACEMENT;
+        this._geometricError = error;
+        this._bounds = bounds;
     }
     get isLeaf() {
         return (this.children?.length ?? 0) != 0;
@@ -3467,7 +3514,7 @@ class Tile3DNode {
         return this._bounds;
     }
     get refinementStrategy() {
-        return _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy.ADDITIVE;
+        return _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__.RefinementStrategy.ADDITIVE;
     }
     set refinementStrategy(v) {
         if (v !== this._refinementStrategy) {
@@ -3496,7 +3543,7 @@ class Tile3DNode {
         return null;
     }
 }
-//# sourceMappingURL=tile3d.js.map
+//# sourceMappingURL=tile3d.node.js.map
 
 /***/ }),
 
@@ -15753,6 +15800,25 @@ MapZen.MaxLevelOfDetail = 15;
 MapZen.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_7__.EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
 MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 //# sourceMappingURL=tiles.vendors.mapzen.js.map
+
+/***/ }),
+
+/***/ "../core/dist/tree/tree.spatial.interfaces.js":
+/*!****************************************************!*\
+  !*** ../core/dist/tree/tree.spatial.interfaces.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SubdivisionScheme: () => (/* binding */ SubdivisionScheme)
+/* harmony export */ });
+var SubdivisionScheme;
+(function (SubdivisionScheme) {
+    SubdivisionScheme[SubdivisionScheme["QUADTREE"] = 0] = "QUADTREE";
+    SubdivisionScheme[SubdivisionScheme["OCTREE"] = 1] = "OCTREE";
+})(SubdivisionScheme || (SubdivisionScheme = {}));
+//# sourceMappingURL=tree.spatial.interfaces.js.map
 
 /***/ }),
 

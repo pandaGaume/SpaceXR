@@ -45,10 +45,3 @@ It is important to note that **3D Tiles do not follow the same logic** as 2D til
 4. **Google 3D Tiles and Cesium Moon 3D Tiles use ECEF coordinates**, which means transformations to geodetic coordinates (lat/lon/alt) may be required for some applications.
 5. **Cesium's Moon 3D Tiles are referenced to the Moon's center**, making them incompatible with standard Earth-based rendering pipelines without proper reference frame adjustments.
 
----
-
-### 📌 Notes for CesiumJS Implementation:
-
--   If you're using **CesiumJS** to visualize Moon 3D Tiles, ensure that the **reference frame is adjusted for the Moon**.
--   Since Cesium uses **WGS84 as the default ellipsoid**, loading **Moon 3D Tiles** may require an explicit switch to **lunar ECEF**.
--   The transformation from **lunar ECEF → Moon lat/lon/alt** is needed if geodetic coordinates are required for calculations.

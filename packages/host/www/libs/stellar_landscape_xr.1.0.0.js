@@ -3232,18 +3232,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CMPTLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.CMPTLoader),
 /* harmony export */   I3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.I3DMLoader),
 /* harmony export */   PNTSLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.PNTSLoader),
-/* harmony export */   RBush3D: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.RBush3D),
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy),
-/* harmony export */   Tile3D: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
-/* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.Tile3dLoader),
-/* harmony export */   boxRayIntersects: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.boxRayIntersects),
-/* harmony export */   intersects: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_3__.intersects)
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError),
+/* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError0),
+/* harmony export */   Tile3DNode: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode),
+/* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.Tile3dLoader)
 /* harmony export */ });
 /* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/3d/tile3d.js");
 /* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 /* harmony import */ var _legacy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legacy */ "./dist/tiles/3d/legacy/index.js");
-/* harmony import */ var _tree__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree */ "./dist/tiles/3d/tree/index.js");
-
 
 
 
@@ -3420,13 +3417,25 @@ class CMPTLoader extends Tile3dLoader {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   RefinementStrategy: () => (/* binding */ RefinementStrategy)
+/* harmony export */   RefinementStrategy: () => (/* binding */ RefinementStrategy),
+/* harmony export */   ScreenSpaceError: () => (/* binding */ ScreenSpaceError),
+/* harmony export */   ScreenSpaceError0: () => (/* binding */ ScreenSpaceError0)
 /* harmony export */ });
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
+
 var RefinementStrategy;
 (function (RefinementStrategy) {
     RefinementStrategy[RefinementStrategy["ADDITIVE"] = 0] = "ADDITIVE";
     RefinementStrategy[RefinementStrategy["REPLACEMENT"] = 1] = "REPLACEMENT";
 })(RefinementStrategy || (RefinementStrategy = {}));
+function ScreenSpaceError(node, position, viewportHeight, fov) {
+    const center = node.boundingBox?.center ?? core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Zero();
+    const d = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Distance(center, position);
+    return (node.geometricError * viewportHeight) / (d * Math.tan(fov / 2));
+}
+function ScreenSpaceError0(geometricError, distance, viewportHeight, tanfov2) {
+    return (geometricError * viewportHeight) / (distance * tanfov2);
+}
 //# sourceMappingURL=tile3d.interfaces.js.map
 
 /***/ }),
@@ -3439,11 +3448,11 @@ var RefinementStrategy;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3D: () => (/* binding */ Tile3D)
+/* harmony export */   Tile3DNode: () => (/* binding */ Tile3DNode)
 /* harmony export */ });
 /* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
 
-class Tile3D {
+class Tile3DNode {
     constructor() {
         this._refinementStrategy = _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy.REPLACEMENT;
         this._geometricError = 0;
@@ -3488,655 +3497,6 @@ class Tile3D {
     }
 }
 //# sourceMappingURL=tile3d.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/3d/tree/index.js":
-/*!*************************************!*\
-  !*** ./dist/tiles/3d/tree/index.js ***!
-  \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   RBush3D: () => (/* reexport safe */ _rtree__WEBPACK_IMPORTED_MODULE_0__.RBush3D),
-/* harmony export */   boxRayIntersects: () => (/* reexport safe */ _rtree__WEBPACK_IMPORTED_MODULE_0__.boxRayIntersects),
-/* harmony export */   intersects: () => (/* reexport safe */ _rtree__WEBPACK_IMPORTED_MODULE_0__.intersects)
-/* harmony export */ });
-/* harmony import */ var _rtree__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./rtree */ "./dist/tiles/3d/tree/rtree.js");
-
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/3d/tree/quickselect.js":
-/*!*******************************************!*\
-  !*** ./dist/tiles/3d/tree/quickselect.js ***!
-  \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ quickselect)
-/* harmony export */ });
-function quickselect(arr, k, left = 0, right = arr.length - 1, compare) {
-    while (right > left) {
-        if (right - left > 600) {
-            const n = right - left + 1;
-            const m = k - left + 1;
-            const z = Math.log(n);
-            const s = 0.5 * Math.exp((2 * z) / 3);
-            const sd = 0.5 * Math.sqrt((z * s * (n - s)) / n) * (m - n / 2 < 0 ? -1 : 1);
-            const newLeft = Math.max(left, Math.floor(k - (m * s) / n + sd));
-            const newRight = Math.min(right, Math.floor(k + ((n - m) * s) / n + sd));
-            quickselect(arr, k, newLeft, newRight, compare);
-        }
-        const t = arr[k];
-        let i = left;
-        let j = right;
-        let tmp = arr[left];
-        arr[left] = arr[k];
-        arr[k] = tmp;
-        if (compare(arr[right], t) > 0) {
-            let tmp = arr[left];
-            arr[left] = arr[right];
-            arr[right] = tmp;
-        }
-        while (i < j) {
-            tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
-            i++;
-            j--;
-            while (compare(arr[i], t) < 0)
-                i++;
-            while (compare(arr[j], t) > 0)
-                j--;
-        }
-        if (compare(arr[left], t) === 0) {
-            tmp = arr[left];
-            arr[left] = arr[j];
-            arr[j] = tmp;
-        }
-        else {
-            j++;
-            tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
-        }
-        if (j <= k)
-            left = j + 1;
-        if (k <= j)
-            right = j - 1;
-    }
-}
-//# sourceMappingURL=quickselect.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/3d/tree/rtree.js":
-/*!*************************************!*\
-  !*** ./dist/tiles/3d/tree/rtree.js ***!
-  \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   RBush3D: () => (/* binding */ RBush3D),
-/* harmony export */   boxRayIntersects: () => (/* binding */ boxRayIntersects),
-/* harmony export */   intersects: () => (/* binding */ intersects)
-/* harmony export */ });
-/* harmony import */ var _quickselect__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./quickselect */ "./dist/tiles/3d/tree/quickselect.js");
-
-const nodePool = [];
-const freeNode = (node) => nodePool.push(node);
-const freeAllNode = (node) => {
-    if (node) {
-        freeNode(node);
-        if (!isLeaf(node)) {
-            node.children.forEach(freeAllNode);
-        }
-    }
-};
-const allowNode = (children) => {
-    let node = nodePool.pop();
-    if (node) {
-        node.children = children;
-        node.height = 1;
-        node.leaf = true;
-        node.minX = Infinity;
-        node.minY = Infinity;
-        node.minZ = Infinity;
-        node.maxX = -Infinity;
-        node.maxY = -Infinity;
-        node.maxZ = -Infinity;
-    }
-    else {
-        node = {
-            children: children,
-            height: 1,
-            leaf: true,
-            minX: Infinity,
-            minY: Infinity,
-            minZ: Infinity,
-            maxX: -Infinity,
-            maxY: -Infinity,
-            maxZ: -Infinity,
-        };
-    }
-    return node;
-};
-const distNodePool = [];
-const freeDistNode = (node) => distNodePool.push(node);
-const allowDistNode = (dist, node) => {
-    let heapNode = distNodePool.pop();
-    if (heapNode) {
-        heapNode.dist = dist;
-        heapNode.node = node;
-    }
-    else {
-        heapNode = { dist, node };
-    }
-    return heapNode;
-};
-const isLeaf = (node) => {
-    return node.leaf;
-};
-const isLeafChild = (node, child) => {
-    return node.leaf;
-};
-const findItem = (item, items, equalsFn) => {
-    if (!equalsFn)
-        return items.indexOf(item);
-    for (let i = 0; i < items.length; i++) {
-        if (equalsFn(item, items[i]))
-            return i;
-    }
-    return -1;
-};
-const calcBBox = (node) => {
-    distBBox(node, 0, node.children.length, node);
-};
-const distBBox = (node, k, p, destNode) => {
-    let dNode = destNode;
-    if (dNode) {
-        dNode.minX = Infinity;
-        dNode.minY = Infinity;
-        dNode.minZ = Infinity;
-        dNode.maxX = -Infinity;
-        dNode.maxY = -Infinity;
-        dNode.maxZ = -Infinity;
-    }
-    else {
-        dNode = allowNode([]);
-    }
-    for (let i = k, child; i < p; i++) {
-        child = node.children[i];
-        extend(dNode, child);
-    }
-    return dNode;
-};
-const extend = (a, b) => {
-    a.minX = Math.min(a.minX, b.minX);
-    a.minY = Math.min(a.minY, b.minY);
-    a.minZ = Math.min(a.minZ, b.minZ);
-    a.maxX = Math.max(a.maxX, b.maxX);
-    a.maxY = Math.max(a.maxY, b.maxY);
-    a.maxZ = Math.max(a.maxZ, b.maxZ);
-    return a;
-};
-const bboxVolume = (a) => (a.maxX - a.minX) * (a.maxY - a.minY) * (a.maxZ - a.minZ);
-const bboxMargin = (a) => a.maxX - a.minX + (a.maxY - a.minY) + (a.maxZ - a.minZ);
-const enlargedVolume = (a, b) => {
-    const minX = Math.min(a.minX, b.minX), minY = Math.min(a.minY, b.minY), minZ = Math.min(a.minZ, b.minZ), maxX = Math.max(a.maxX, b.maxX), maxY = Math.max(a.maxY, b.maxY), maxZ = Math.max(a.maxZ, b.maxZ);
-    return (maxX - minX) * (maxY - minY) * (maxZ - minZ);
-};
-const intersectionVolume = (a, b) => {
-    const minX = Math.max(a.minX, b.minX), minY = Math.max(a.minY, b.minY), minZ = Math.max(a.minZ, b.minZ), maxX = Math.min(a.maxX, b.maxX), maxY = Math.min(a.maxY, b.maxY), maxZ = Math.min(a.maxZ, b.maxZ);
-    return Math.max(0, maxX - minX) * Math.max(0, maxY - minY) * Math.max(0, maxZ - minZ);
-};
-const contains = (a, b) => a.minX <= b.minX && a.minY <= b.minY && a.minZ <= b.minZ && b.maxX <= a.maxX && b.maxY <= a.maxY && b.maxZ <= a.maxZ;
-const intersects = (a, b) => b.minX <= a.maxX && b.minY <= a.maxY && b.minZ <= a.maxZ && b.maxX >= a.minX && b.maxY >= a.minY && b.maxZ >= a.minZ;
-const boxRayIntersects = (box, ox, oy, oz, idx, idy, idz) => {
-    const tx0 = (box.minX - ox) * idx;
-    const tx1 = (box.maxX - ox) * idx;
-    const ty0 = (box.minY - oy) * idy;
-    const ty1 = (box.maxY - oy) * idy;
-    const tz0 = (box.minZ - oz) * idz;
-    const tz1 = (box.maxZ - oz) * idz;
-    const z0 = Math.min(tz0, tz1);
-    const z1 = Math.max(tz0, tz1);
-    const y0 = Math.min(ty0, ty1);
-    const y1 = Math.max(ty0, ty1);
-    const x0 = Math.min(tx0, tx1);
-    const x1 = Math.max(tx0, tx1);
-    const tmin = Math.max(0, x0, y0, z0);
-    const tmax = Math.min(x1, y1, z1);
-    return tmax >= tmin ? tmin : Infinity;
-};
-const multiSelect = (arr, left, right, n, compare) => {
-    const stack = [left, right];
-    var mid;
-    while (stack.length) {
-        right = stack.pop();
-        left = stack.pop();
-        if (right - left <= n)
-            continue;
-        mid = left + Math.ceil((right - left) / n / 2) * n;
-        (0,_quickselect__WEBPACK_IMPORTED_MODULE_0__["default"])(arr, mid, left, right, compare);
-        stack.push(left, mid, mid, right);
-    }
-};
-const compareMinX = (a, b) => a.minX - b.minX;
-const compareMinY = (a, b) => a.minY - b.minY;
-const compareMinZ = (a, b) => a.minZ - b.minZ;
-class RBush3D {
-    static alloc() {
-        return this.pool.pop() || new this();
-    }
-    static free(rbush) {
-        rbush.clear();
-        this.pool.push(rbush);
-    }
-    constructor(maxEntries = 16) {
-        this.maxEntries = Math.max(maxEntries, 8);
-        this.minEntries = Math.max(4, Math.ceil(this.maxEntries * 0.4));
-        this.clear();
-    }
-    search(bbox) {
-        let node = this.data;
-        const result = [];
-        if (!node || !intersects(bbox, node))
-            return result;
-        const nodesToSearch = [];
-        while (node) {
-            for (let i = 0, len = node.children.length; i < len; i++) {
-                const child = node.children[i];
-                if (intersects(bbox, child)) {
-                    if (isLeafChild(node, child))
-                        result.push(child);
-                    else if (contains(bbox, child))
-                        this._all(child, result);
-                    else
-                        nodesToSearch.push(child);
-                }
-            }
-            node = nodesToSearch.pop();
-        }
-        return result;
-    }
-    collides(bbox) {
-        let node = this.data;
-        if (!node || !intersects(bbox, node))
-            return false;
-        const nodesToSearch = [];
-        while (node) {
-            for (let i = 0, len = node.children.length; i < len; i++) {
-                const child = node.children[i];
-                if (intersects(bbox, child)) {
-                    if (isLeafChild(node, child) || contains(bbox, child))
-                        return true;
-                    nodesToSearch.push(child);
-                }
-            }
-            node = nodesToSearch.pop();
-        }
-        return false;
-    }
-    raycastInv(ox, oy, oz, idx, idy, idz, maxLen = Infinity) {
-        let node = this.data;
-        if (idx === Infinity && idy === Infinity && idz === Infinity)
-            return allowDistNode(Infinity, undefined);
-        if (!node || boxRayIntersects(node, ox, oy, oz, idx, idy, idz) === Infinity)
-            return allowDistNode(Infinity, undefined);
-        const heap = [allowDistNode(0, node)];
-        const swap = (a, b) => {
-            const t = heap[a];
-            heap[a] = heap[b];
-            heap[b] = t;
-        };
-        const pop = () => {
-            const top = heap[0];
-            const newLen = heap.length - 1;
-            heap[0] = heap[newLen];
-            heap.length = newLen;
-            let idx = 0;
-            while (true) {
-                let left = (idx << 1) | 1;
-                if (left >= newLen)
-                    break;
-                const right = left + 1;
-                if (right < newLen && heap[right].dist < heap[left].dist) {
-                    left = right;
-                }
-                if (heap[idx].dist < heap[left].dist)
-                    break;
-                swap(idx, left);
-                idx = left;
-            }
-            freeDistNode(top);
-            return top.node;
-        };
-        const push = (dist, node) => {
-            let idx = heap.length;
-            heap.push(allowDistNode(dist, node));
-            while (idx > 0) {
-                const p = (idx - 1) >> 1;
-                if (heap[p].dist <= heap[idx].dist)
-                    break;
-                swap(idx, p);
-                idx = p;
-            }
-        };
-        let dist = maxLen;
-        let result;
-        while (heap.length && heap[0].dist < dist) {
-            node = pop();
-            for (let i = 0, len = node.children.length; i < len; i++) {
-                const child = node.children[i];
-                const d = boxRayIntersects(child, ox, oy, oz, idx, idy, idz);
-                if (!isLeafChild(node, child)) {
-                    push(d, child);
-                }
-                else if (d < dist) {
-                    if (d === 0) {
-                        return allowDistNode(d, child);
-                    }
-                    dist = d;
-                    result = child;
-                }
-            }
-        }
-        return allowDistNode(dist < maxLen ? dist : Infinity, result);
-    }
-    raycast(ox, oy, oz, dx, dy, dz, maxLen = Infinity) {
-        return this.raycastInv(ox, oy, oz, 1 / dx, 1 / dy, 1 / dz, maxLen);
-    }
-    all() {
-        return this._all(this.data, []);
-    }
-    load(data) {
-        if (!(data && data.length))
-            return this;
-        if (data.length < this.minEntries) {
-            for (var i = 0, len = data.length; i < len; i++) {
-                this.insert(data[i]);
-            }
-            return this;
-        }
-        var node = this.build(data.slice(), 0, data.length - 1, 0);
-        if (!this.data?.children.length) {
-            this.data = node;
-        }
-        else if (this.data.height === node.height) {
-            this.splitRoot(this.data, node);
-        }
-        else {
-            if (this.data.height < node.height) {
-                const tmpNode = this.data;
-                this.data = node;
-                node = tmpNode;
-            }
-            this._insert(node, this.data.height - node.height - 1, true);
-        }
-        return this;
-    }
-    insert(item) {
-        if (item && this.data)
-            this._insert(item, this.data.height - 1);
-        return this;
-    }
-    clear() {
-        if (this.data) {
-            freeAllNode(this.data);
-        }
-        this.data = allowNode([]);
-        return this;
-    }
-    remove(item, equalsFn) {
-        if (!item)
-            return this;
-        let node = this.data;
-        let i = 0;
-        let goingUp = false;
-        let index;
-        let parent;
-        const path = [];
-        const indexes = [];
-        while (node || path.length) {
-            if (!node) {
-                node = path.pop();
-                i = indexes.pop();
-                parent = path[path.length - 1];
-                goingUp = true;
-            }
-            if (isLeaf(node)) {
-                index = findItem(item, node.children, equalsFn);
-                if (index !== -1) {
-                    node.children.splice(index, 1);
-                    path.push(node);
-                    this.condense(path);
-                    return this;
-                }
-            }
-            if (!goingUp && !isLeaf(node) && contains(node, item)) {
-                path.push(node);
-                indexes.push(i);
-                i = 0;
-                parent = node;
-                node = node.children[0];
-            }
-            else if (parent) {
-                i++;
-                node = parent.children[i];
-                goingUp = false;
-            }
-            else {
-                node = undefined;
-            }
-        }
-        return this;
-    }
-    toJSON() {
-        return this.data;
-    }
-    fromJSON(data) {
-        if (this.data) {
-            freeAllNode(this.data);
-        }
-        this.data = data;
-        return this;
-    }
-    build(items, left, right, height) {
-        const N = right - left + 1;
-        let M = this.maxEntries;
-        let node;
-        if (N <= M) {
-            node = allowNode(items.slice(left, right + 1));
-            calcBBox(node);
-            return node;
-        }
-        if (!height) {
-            height = Math.ceil(Math.log(N) / Math.log(M));
-            M = Math.ceil(N / Math.pow(M, height - 1));
-        }
-        node = allowNode([]);
-        node.leaf = false;
-        node.height = height;
-        const N3 = Math.ceil(N / M), N2 = N3 * Math.ceil(Math.pow(M, 2 / 3)), N1 = N3 * Math.ceil(Math.pow(M, 1 / 3));
-        multiSelect(items, left, right, N1, compareMinX);
-        for (let i = left; i <= right; i += N1) {
-            const right2 = Math.min(i + N1 - 1, right);
-            multiSelect(items, i, right2, N2, compareMinY);
-            for (let j = i; j <= right2; j += N2) {
-                const right3 = Math.min(j + N2 - 1, right2);
-                multiSelect(items, j, right3, N3, compareMinZ);
-                for (let k = j; k <= right3; k += N3) {
-                    const right4 = Math.min(k + N3 - 1, right3);
-                    node.children.push(this.build(items, k, right4, height - 1));
-                }
-            }
-        }
-        calcBBox(node);
-        return node;
-    }
-    _all(node, result) {
-        const nodesToSearch = [];
-        while (node) {
-            if (isLeaf(node))
-                result.push(...node.children);
-            else
-                nodesToSearch.push(...node.children);
-            node = nodesToSearch.pop();
-        }
-        return result;
-    }
-    chooseSubtree(bbox, node, level, path) {
-        let minVolume;
-        let minEnlargement;
-        let targetNode;
-        while (true) {
-            path.push(node);
-            if (isLeaf(node) || path.length - 1 === level)
-                break;
-            minVolume = minEnlargement = Infinity;
-            for (let i = 0, len = node.children.length; i < len; i++) {
-                const child = node.children[i];
-                const volume = bboxVolume(child);
-                const enlargement = enlargedVolume(bbox, child) - volume;
-                if (enlargement < minEnlargement) {
-                    minEnlargement = enlargement;
-                    minVolume = volume < minVolume ? volume : minVolume;
-                    targetNode = child;
-                }
-                else if (enlargement === minEnlargement) {
-                    if (volume < minVolume) {
-                        minVolume = volume;
-                        targetNode = child;
-                    }
-                }
-            }
-            node = targetNode || node.children[0];
-        }
-        return node;
-    }
-    split(insertPath, level) {
-        const node = insertPath[level];
-        const M = node.children.length;
-        const m = this.minEntries;
-        this.chooseSplitAxis(node, m, M);
-        const splitIndex = this.chooseSplitIndex(node, m, M);
-        const newNode = allowNode(node.children.splice(splitIndex, node.children.length - splitIndex));
-        newNode.height = node.height;
-        newNode.leaf = node.leaf;
-        calcBBox(node);
-        calcBBox(newNode);
-        if (level)
-            insertPath[level - 1].children.push(newNode);
-        else
-            this.splitRoot(node, newNode);
-    }
-    splitRoot(node, newNode) {
-        this.data = allowNode([node, newNode]);
-        this.data.height = node.height + 1;
-        this.data.leaf = false;
-        calcBBox(this.data);
-    }
-    chooseSplitIndex(node, m, M) {
-        let minOverlap = Infinity;
-        let minVolume = Infinity;
-        let index;
-        for (let i = m; i <= M - m; i++) {
-            const bbox1 = distBBox(node, 0, i);
-            const bbox2 = distBBox(node, i, M);
-            const overlap = intersectionVolume(bbox1, bbox2);
-            const volume = bboxVolume(bbox1) + bboxVolume(bbox2);
-            if (overlap < minOverlap) {
-                minOverlap = overlap;
-                index = i;
-                minVolume = volume < minVolume ? volume : minVolume;
-            }
-            else if (overlap === minOverlap) {
-                if (volume < minVolume) {
-                    minVolume = volume;
-                    index = i;
-                }
-            }
-        }
-        return index;
-    }
-    chooseSplitAxis(node, m, M) {
-        const xMargin = this.allDistMargin(node, m, M, compareMinX);
-        const yMargin = this.allDistMargin(node, m, M, compareMinY);
-        const zMargin = this.allDistMargin(node, m, M, compareMinZ);
-        if (xMargin < yMargin && xMargin < zMargin) {
-            node.children.sort(compareMinX);
-        }
-        else if (yMargin < xMargin && yMargin < zMargin) {
-            node.children.sort(compareMinY);
-        }
-    }
-    allDistMargin(node, m, M, compare) {
-        node.children.sort(compare);
-        const leftBBox = distBBox(node, 0, m);
-        const rightBBox = distBBox(node, M - m, M);
-        let margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
-        for (let i = m; i < M - m; i++) {
-            const child = node.children[i];
-            extend(leftBBox, child);
-            margin += bboxMargin(leftBBox);
-        }
-        for (let i = M - m - 1; i >= m; i--) {
-            const child = node.children[i];
-            extend(rightBBox, child);
-            margin += bboxMargin(rightBBox);
-        }
-        return margin;
-    }
-    adjustParentBBoxes(bbox, path, level) {
-        for (let i = level; i >= 0; i--) {
-            extend(path[i], bbox);
-        }
-    }
-    condense(path) {
-        for (let i = path.length - 1, siblings; i >= 0; i--) {
-            if (path[i].children.length === 0) {
-                if (i > 0) {
-                    siblings = path[i - 1].children;
-                    siblings.splice(siblings.indexOf(path[i]), 1);
-                    freeNode(path[i]);
-                }
-                else {
-                    this.clear();
-                }
-            }
-            else {
-                calcBBox(path[i]);
-            }
-        }
-    }
-    _insert(item, level, isNode) {
-        if (!this.data) {
-            return;
-        }
-        const insertPath = [];
-        const node = this.chooseSubtree(item, this.data, level, insertPath);
-        node.children.push(item);
-        extend(node, item);
-        while (level >= 0) {
-            if (insertPath[level].children.length > this.maxEntries) {
-                this.split(insertPath, level);
-                level--;
-            }
-            else
-                break;
-        }
-        this.adjustParentBBoxes(item, insertPath, level);
-    }
-}
-RBush3D.pool = [];
-//# sourceMappingURL=rtree.js.map
 
 /***/ }),
 
@@ -6901,15 +6261,34 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BoundedCollection: () => (/* binding */ BoundedCollection)
 /* harmony export */ });
 /* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
+
 
 class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounded {
     constructor() {
         super();
         this._items = new Array();
     }
+    get data() {
+        return this._items;
+    }
+    set data(d) {
+        this._items = d;
+        this.invalidateBounds();
+    }
+    get length() {
+        return this._items.length;
+    }
     push(...views) {
         this._items.push(...views);
         this.invalidateBounds();
+    }
+    pop() {
+        const d = this._items.pop();
+        if (d) {
+            this.invalidateBounds();
+        }
+        return d;
     }
     findIndex(predicate, thisArg) {
         return this._items.findIndex(predicate, thisArg);
@@ -6918,30 +6297,8 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
         this._items.splice(start, deleteCount);
         this.invalidateBounds();
     }
-    [Symbol.iterator]() {
-        let pointer = 0;
-        let items = this._items;
-        const iterator = {
-            next() {
-                if (pointer < items.length) {
-                    return {
-                        done: false,
-                        value: items[pointer++],
-                    };
-                }
-                return {
-                    done: true,
-                    value: null,
-                };
-            },
-            [Symbol.iterator]() {
-                return this;
-            },
-        };
-        return iterator;
-    }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => v.boundingBox));
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromBounds(...this._items.map((v) => ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(v) ? v : v.boundingBox)));
     }
 }
 //# sourceMappingURL=geometry.bounds.collection.js.map
@@ -24956,7 +24313,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuantityRange),
 /* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuickHull),
-/* harmony export */   RBush3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.RBush3D),
 /* harmony export */   RGBAColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBAColor),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBTileCodec),
@@ -24964,6 +24320,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.RefinementStrategy),
 /* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RegionCode),
 /* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Scalar),
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.ScreenSpaceError),
+/* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.ScreenSpaceError0),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollectionEventArgs),
 /* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeType),
@@ -24986,7 +24344,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Texture3: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Texture3),
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.TextureLayerView),
 /* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Tile),
-/* harmony export */   Tile3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
+/* harmony export */   Tile3DNode: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode),
 /* harmony export */   Tile3dLoader: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dLoader),
 /* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.TileBorder),
@@ -25026,9 +24384,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   _makeCopyRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeCopyRawTextureFunction),
 /* harmony export */   _makeCreateRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeCreateRawTextureFunction),
 /* harmony export */   _makeUpdateSubRawTexture2DArrayFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeUpdateSubRawTexture2DArrayFunction),
-/* harmony export */   boxRayIntersects: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.boxRayIntersects),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.hasTileSelectionContext),
-/* harmony export */   intersects: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.intersects),
 /* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isArrayOfCartesianArray),
 /* harmony export */   isArrayOfFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isArrayOfFloatArray),
 /* harmony export */   isCartesian: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCartesian),

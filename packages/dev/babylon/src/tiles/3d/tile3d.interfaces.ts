@@ -1,5 +1,5 @@
 import { IGeoBounded } from "core/geography";
-import { IBounded } from "core/geometry";
+import { Cartesian3, IBounded } from "core/geometry";
 import { Nullable } from "core/types";
 
 export enum RefinementStrategy {
@@ -11,7 +11,7 @@ export enum RefinementStrategy {
 // 3D Tiles defines the z axis as up for local Cartesian coordinate systems. A tileset’s global coordinate
 // system will often be in a WGS 84 Earth-centered, Earth-fixed (ECEF) reference frame (EPSG 4978), but it doesn’t have to be, e.g.,
 // a power plant may be defined fully in its local coordinate system for use with a modeling tool without a geospatial context.
-export interface ITile3D extends IBounded, IGeoBounded {
+export interface ITile3DNode extends IBounded, IGeoBounded {
     // Refinement determines the process by which a lower resolution parent tile renders when its higher resolution children are selected
     // to be rendered.
     // Permitted refinement types are replacement ("REPLACE") and additive ("ADD").
@@ -40,7 +40,23 @@ export interface ITile3D extends IBounded, IGeoBounded {
     geometricError: number;
 
     isLeaf: boolean;
-    children?: Array<ITile3D>;
+    children?: Array<ITile3DNode>;
 
-    [Symbol.iterator](predicate?: (n: Nullable<ITile3D>) => boolean): IterableIterator<Nullable<ITile3D>>;
+    [Symbol.iterator](predicate?: (n: Nullable<ITile3DNode>) => boolean): IterableIterator<Nullable<ITile3DNode>>;
+}
+
+export type Tile3dContent<T> = Nullable<T> | Nullable<Array<T>>;
+
+export interface ITile3D<T> extends ITile3DNode {
+    content: Tile3dContent<T>;
+}
+
+export function ScreenSpaceError(node: ITile3DNode, position: Cartesian3, viewportHeight: number, fov: number): number {
+    const center = node.boundingBox?.center ?? Cartesian3.Zero();
+    const d = Cartesian3.Distance(center, position);
+    return (node.geometricError * viewportHeight) / (d * Math.tan(fov / 2));
+}
+
+export function ScreenSpaceError0(geometricError: number, distance: number, viewportHeight: number, tanfov2: number): number {
+    return (geometricError * viewportHeight) / (distance * tanfov2);
 }

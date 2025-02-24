@@ -1,5 +1,5 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
-import { WebTileUrlBuilder } from "../tiles.urlBuilder";
+import { WebTileUrlBuilder } from "../tiles.url.web";
 import { Float32TileCodec, Float32TileCodecOptions, ImageTileCodec, RGBTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { DemTileWebClient } from "../../dem/dem.tileclient";

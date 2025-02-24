@@ -24,7 +24,7 @@ import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile, ITileAddress, ITileMapLayerView, ITileMetrics, NeighborsAddress, TargetProxy, Tile, TileAddress } from "core/tiles";
+import { IPipelineMessageType, ITargetBlock, ITile, ITileAddress2, ITileMapLayerView, ITileMetrics, NeighborsAddress, TargetProxy, Tile, TileAddress } from "core/tiles";
 import { IDisposable } from "core/types";
 import { ElevationLayerView, TextureLayerView } from "../map";
 import { Range } from "core/math";
@@ -55,7 +55,7 @@ class TextureLayout extends TileLayout<ITileWithGridElevation<TextureType>, Text
 
 // specialization for elevation with dem and normals
 class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
-    _neighbors: Array<Nullable<ITileAddress>>;
+    _neighbors: Array<Nullable<ITileAddress2>>;
 
     public constructor(
         tile: ITile<ElevationType>,
@@ -67,7 +67,7 @@ class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
         this._neighbors = TileAddress.ToNeighborsXY(tile.address);
     }
 
-    public get neighbors(): Array<Nullable<ITileAddress>> {
+    public get neighbors(): Array<Nullable<ITileAddress2>> {
         return this._neighbors;
     }
 

@@ -1,4 +1,4 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
+import { ITileAddress2, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { IGeoBounded } from "../geography";
 import { IFilter } from "./codecs";
@@ -32,5 +32,5 @@ export declare class TileWebClient<T> implements ITileClient<T> {
     get zindex(): number;
     set zindex(v: number);
     get metrics(): ITileMetrics;
-    fetchAsync(request: ITileAddress, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
 }

@@ -3220,6 +3220,46 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./dist/tiles/3d/babylon/index.js":
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/babylon/index.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Tile3DAbstractMesh: () => (/* reexport safe */ _tile3d_mesh__WEBPACK_IMPORTED_MODULE_0__.Tile3DAbstractMesh)
+/* harmony export */ });
+/* harmony import */ var _tile3d_mesh__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.mesh */ "./dist/tiles/3d/babylon/tile3d.mesh.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/tile3d.mesh.js":
+/*!**********************************************!*\
+  !*** ./dist/tiles/3d/babylon/tile3d.mesh.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Tile3DAbstractMesh: () => (/* binding */ Tile3DAbstractMesh)
+/* harmony export */ });
+/* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tile3d */ "./dist/tiles/3d/tile3d.js");
+
+class Tile3DAbstractMesh extends _tile3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D {
+    constructor(bounds, error = 0) {
+        super(bounds, error);
+    }
+    _constructor() {
+        return Tile3DAbstractMesh;
+    }
+}
+//# sourceMappingURL=tile3d.mesh.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/index.js":
 /*!********************************!*\
   !*** ./dist/tiles/3d/index.js ***!
@@ -3228,19 +3268,25 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   B3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.B3DMLoader),
-/* harmony export */   CMPTLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.CMPTLoader),
-/* harmony export */   I3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.I3DMLoader),
-/* harmony export */   PNTSLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.PNTSLoader),
-/* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.RefinementStrategy),
-/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError),
-/* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError0),
+/* harmony export */   B3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.B3DMLoader),
+/* harmony export */   CMPTLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.CMPTLoader),
+/* harmony export */   I3DMLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.I3DMLoader),
+/* harmony export */   PNTSLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.PNTSLoader),
+/* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__.RefinementStrategy),
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__.ScreenSpaceError),
+/* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__.ScreenSpaceError0),
+/* harmony export */   Tile3D: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_1__.Tile3D),
+/* harmony export */   Tile3DAbstractMesh: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_4__.Tile3DAbstractMesh),
 /* harmony export */   Tile3DNode: () => (/* reexport safe */ _tile3d_node__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode),
-/* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_2__.Tile3dLoader)
+/* harmony export */   Tile3dLoader: () => (/* reexport safe */ _legacy__WEBPACK_IMPORTED_MODULE_3__.Tile3dLoader)
 /* harmony export */ });
 /* harmony import */ var _tile3d_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.node */ "./dist/tiles/3d/tile3d.node.js");
-/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
-/* harmony import */ var _legacy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legacy */ "./dist/tiles/3d/legacy/index.js");
+/* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/3d/tile3d.js");
+/* harmony import */ var _tile3d_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.interfaces */ "./dist/tiles/3d/tile3d.interfaces.js");
+/* harmony import */ var _legacy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./legacy */ "./dist/tiles/3d/legacy/index.js");
+/* harmony import */ var _babylon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./babylon */ "./dist/tiles/3d/babylon/index.js");
+
+
 
 
 
@@ -3440,6 +3486,37 @@ function ScreenSpaceError0(geometricError, distance, viewportHeight, tanfov2) {
 
 /***/ }),
 
+/***/ "./dist/tiles/3d/tile3d.js":
+/*!*********************************!*\
+  !*** ./dist/tiles/3d/tile3d.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Tile3D: () => (/* binding */ Tile3D)
+/* harmony export */ });
+/* harmony import */ var _tile3d_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.node */ "./dist/tiles/3d/tile3d.node.js");
+
+class Tile3D extends _tile3d_node__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode {
+    constructor(bounds, error = 0) {
+        super(bounds, error);
+        this._content = null;
+    }
+    get content() {
+        return this._content;
+    }
+    set content(content) {
+        this._content = content;
+    }
+    _constructor() {
+        return Tile3D;
+    }
+}
+//# sourceMappingURL=tile3d.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/tile3d.node.js":
 /*!**************************************!*\
   !*** ./dist/tiles/3d/tile3d.node.js ***!
@@ -3541,6 +3618,12 @@ class Tile3DNode {
             return this._children;
         }
         return null;
+    }
+    split(sub = core_tree_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.SubdivisionScheme.QUADTREE, refinementStrategy) {
+        this._children = Tile3DNode.Split(this, sub, refinementStrategy ?? this.refinementStrategy, this._constructor() ?? Tile3DNode);
+    }
+    _constructor() {
+        return Tile3DNode;
     }
 }
 //# sourceMappingURL=tile3d.node.js.map
@@ -8667,7 +8750,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMapLayerProxy),
 /* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMetricsProvider),
-/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileSystemBounds),
@@ -12248,7 +12330,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerProxy),
 /* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileMetricsProvider),
-/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileSystemBounds),
@@ -12287,7 +12368,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileWebClientOptions: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClientOptions),
 /* harmony export */   TileWebClientOptionsBuilder: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClientOptionsBuilder),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
-/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_14__.WebTileUrlBuilder),
+/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_url_web__WEBPACK_IMPORTED_MODULE_14__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.hasTileSelectionContext),
 /* harmony export */   isFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.isFilter),
@@ -12307,7 +12388,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tiles.client */ "../core/dist/tiles/tiles.client.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
-/* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles.urlBuilder */ "../core/dist/tiles/tiles.urlBuilder.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
 /* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles.collection */ "../core/dist/tiles/tiles.collection.js");
 /* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.system */ "../core/dist/tiles/tiles.system.js");
 
@@ -13836,7 +13917,6 @@ class TileNavigationStateSynchronizer {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock),
-/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMipMapping),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_pipeline_target_proxy__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasTileSelectionContext),
@@ -13861,7 +13941,6 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* binding */ IsTargetBlock),
-/* harmony export */   IsTileMipMapping: () => (/* binding */ IsTileMipMapping),
 /* harmony export */   hasTileSelectionContext: () => (/* binding */ hasTileSelectionContext),
 /* harmony export */   isViewProxy: () => (/* binding */ isViewProxy)
 /* harmony export */ });
@@ -13869,11 +13948,6 @@ function IsTargetBlock(b) {
     if (b === null || typeof b !== "object")
         return false;
     return b.added !== undefined || b.removed !== undefined || b.updated !== undefined;
-}
-function IsTileMipMapping(b) {
-    if (b === null || typeof b !== "object")
-        return false;
-    return b.split !== undefined && b.stitch !== undefined;
 }
 function hasTileSelectionContext(b) {
     if (b === null || typeof b !== "object")
@@ -15215,10 +15289,10 @@ TileSystemBounds.Shared = new TileSystemBounds();
 
 /***/ }),
 
-/***/ "../core/dist/tiles/tiles.urlBuilder.js":
-/*!**********************************************!*\
-  !*** ../core/dist/tiles/tiles.urlBuilder.js ***!
-  \**********************************************/
+/***/ "../core/dist/tiles/tiles.url.web.js":
+/*!*******************************************!*\
+  !*** ../core/dist/tiles/tiles.url.web.js ***!
+  \*******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -15278,7 +15352,7 @@ class WebTileUrlBuilder {
         return str;
     }
 }
-//# sourceMappingURL=tiles.urlBuilder.js.map
+//# sourceMappingURL=tiles.url.web.js.map
 
 /***/ }),
 
@@ -15663,7 +15737,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
 /* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
 /* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "../core/dist/tiles/tiles.urlBuilder.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
 
 
 
@@ -15675,7 +15749,7 @@ var GoogleMap2DLayerCode;
     GoogleMap2DLayerCode["hybrid"] = "h";
     GoogleMap2DLayerCode["terrain"] = "p";
 })(GoogleMap2DLayerCode || (GoogleMap2DLayerCode = {}));
-class GoogleMap2DUrlBuilder extends _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+class GoogleMap2DUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
     constructor(...types) {
         super();
         this.withSubDomains(["mt0", "mt1", "mt2", "mt3"])
@@ -15727,7 +15801,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapzenAltitudeDecoder: () => (/* binding */ MapzenAltitudeDecoder)
 /* harmony export */ });
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.urlBuilder */ "../core/dist/tiles/tiles.urlBuilder.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
 /* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
 /* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
 /* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
@@ -15742,7 +15816,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class MapZenDemUrlBuilder extends _tiles_urlBuilder__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+class MapZenDemUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
     constructor(format, extension = "png") {
         super();
         this.withHost("s3.amazonaws.com").withPath(`elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}`).withSecure(true).withExtension(extension);
@@ -24329,7 +24403,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayerProxy),
 /* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMetricsProvider),
-/* harmony export */   IsTileMipMapping: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMipMapping),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileSystemBounds),
@@ -24410,6 +24483,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Texture3: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.Texture3),
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.TextureLayerView),
 /* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Tile),
+/* harmony export */   Tile3D: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3D),
+/* harmony export */   Tile3DAbstractMesh: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DAbstractMesh),
 /* harmony export */   Tile3DNode: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3DNode),
 /* harmony export */   Tile3dLoader: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dLoader),
 /* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),

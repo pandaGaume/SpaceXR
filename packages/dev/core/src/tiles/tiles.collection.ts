@@ -1,6 +1,6 @@
 import { IBounds } from "../geometry/geometry.interfaces";
 import { IEnvelope, IsEnvelope } from "../geography/geography.interfaces";
-import { ITile, ITileAddress, ITileCollection } from "./tiles.interfaces";
+import { ITile, ITileAddress2, ITileCollection } from "./tiles.interfaces";
 import { TileAddress } from "./address/tiles.address";
 import { Envelope } from "../geography/geography.envelope";
 import { Bounds } from "../geometry";
@@ -53,15 +53,15 @@ export class TileCollection<T> implements ITileCollection<T> {
         return this._rect;
     }
 
-    public has(address: ITileAddress): boolean {
+    public has(address: ITileAddress2): boolean {
         return this.index.has(address.quadkey);
     }
 
-    public get(address: ITileAddress): ITile<T> | undefined {
+    public get(address: ITileAddress2): ITile<T> | undefined {
         return this.index.get(address.quadkey);
     }
 
-    public getAll(...address: Array<ITileAddress>): Array<ITile<T> | undefined> {
+    public getAll(...address: Array<ITileAddress2>): Array<ITile<T> | undefined> {
         return address.map((a) => this.get(a));
     }
 
@@ -86,7 +86,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         }
     }
 
-    public remove(address: ITileAddress): void {
+    public remove(address: ITileAddress2): void {
         if (this.has(address)) {
             const index = this._items.findIndex((t) => TileAddress.IsEquals(t.address, address));
             this._items.splice(index, 1);
@@ -96,7 +96,7 @@ export class TileCollection<T> implements ITileCollection<T> {
         }
     }
 
-    public removeAll(...address: Array<ITileAddress>): void {
+    public removeAll(...address: Array<ITileAddress2>): void {
         for (const a of address) {
             this.remove(a);
         }

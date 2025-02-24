@@ -1,5 +1,5 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { ITileAddress2, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, LayerRenderFn } from "./tiles.map.interfaces";
 import { IMemoryCache } from "../../cache";
 import { IWeighted } from "../../collections/collections.interfaces";
@@ -14,7 +14,7 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     _provider: ITileContentProvider<T>;
-    constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
+    constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress2>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
     get metrics(): ITileMetrics;
     get provider(): ITileContentProvider<T>;
     get drawFn(): LayerRenderFn<T> | undefined;
@@ -32,5 +32,5 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     set enabled(enabled: boolean);
     addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
     dispose(): void;
-    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T>;
+    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress2>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T>;
 }

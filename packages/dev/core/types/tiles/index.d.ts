@@ -12,6 +12,6 @@ export * from "./tiles.interfaces";
 export * from "./tiles.metrics";
 export * from "./tiles.client";
 export * from "./tiles";
-export * from "./tiles.urlBuilder";
+export * from "./tiles.url.web";
 export * from "./tiles.collection";
 export * from "./tiles.system";

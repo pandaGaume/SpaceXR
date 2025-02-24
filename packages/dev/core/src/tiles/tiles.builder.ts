@@ -1,4 +1,4 @@
-import { ITile, ITileAddress, ITileBuilder, ITileMetrics, TileContentType } from "./tiles.interfaces";
+import { ITile, ITileAddress2, ITileBuilder, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { Tile } from "./tiles";
 
 export class TileBuilder<T> implements ITileBuilder<T> {
@@ -7,7 +7,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
     }
 
     _ns?: string;
-    _a?: ITileAddress;
+    _a?: ITileAddress2;
     _d?: TileContentType<T>;
     _m?: ITileMetrics;
     _t?: new (...args: any[]) => ITile<T>;
@@ -26,7 +26,7 @@ export class TileBuilder<T> implements ITileBuilder<T> {
         return this;
     }
 
-    public withAddress(a: ITileAddress): ITileBuilder<T> {
+    public withAddress(a: ITileAddress2): ITileBuilder<T> {
         this._a = a;
         return this;
     }

@@ -1,6 +1,6 @@
 import { EventState, Observable } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
+import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { IDisplay } from "../map";
 
@@ -57,18 +57,6 @@ export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
 
-export interface ITileMipMapping {
-    // split the tile into 4 tiles
-    split?(tile: ITileAddress): void;
-    // replace tile with it's parent
-    stitch?(...tile: Array<ITileAddress>): void;
-}
-
-export function IsTileMipMapping(b: unknown): b is ITileMipMapping {
-    if (b === null || typeof b !== "object") return false;
-    return (<ITileMipMapping>b).split !== undefined && (<ITileMipMapping>b).stitch !== undefined;
-}
-
 export interface ITileSelectionContextOptions {
     dispatchEvent?: boolean;
     zoomOffset?: number;
@@ -91,7 +79,7 @@ export function hasTileSelectionContext(b: unknown): b is ITileSelectionContext 
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext, ITileMipMapping {}
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress2>, ITileSelectionContext {}
 
 export interface IHasView {
     view: ITileView;

@@ -1,14 +1,14 @@
 import { IMemoryCache, MemoryCache } from "../../cache/cache";
-import { ITile, ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { ITile, ITileAddress2, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { TileAddress } from "../address/tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
     private _cache: IMemoryCache<string, TileContentType<T>>;
     private _ownCache: boolean;
-    private _datasource: ITileDatasource<T, ITileAddress>;
+    private _datasource: ITileDatasource<T, ITileAddress2>;
     private _prefix?: string;
 
-    public constructor(datasource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>) {
+    public constructor(datasource: ITileDatasource<T, ITileAddress2>, cache?: IMemoryCache<string, TileContentType<T>>) {
         this._datasource = datasource;
         this._cache = cache || new MemoryCache<string, TileContentType<T>>();
         if (cache) {
@@ -19,7 +19,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         }
     }
 
-    public accept(address: ITileAddress): boolean {
+    public accept(address: ITileAddress2): boolean {
         return TileAddress.IsValidAddress(address, this.metrics);
     }
 
@@ -27,7 +27,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return this._datasource.name;
     }
 
-    public get datasource(): ITileDatasource<T, ITileAddress> {
+    public get datasource(): ITileDatasource<T, ITileAddress2> {
         return this._datasource;
     }
 
@@ -81,12 +81,12 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return tile;
     }
 
-    protected _buildTemporaryContent(address: ITileAddress): TileContentType<T> {
+    protected _buildTemporaryContent(address: ITileAddress2): TileContentType<T> {
         // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
         // in oder to avoid empty tile to be displayed during pan and zoom operation.
         return null;
     }
-    protected _buildAlternativContent(address: ITileAddress): TileContentType<T> {
+    protected _buildAlternativContent(address: ITileAddress2): TileContentType<T> {
         // TODO : implement a strategy to build an alternativ content
         // this could be used when the datasource is not available or when the lookup operation has failed
         // or when the content is unavailable on purpose such as a 404 error for sea based tile

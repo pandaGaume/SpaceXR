@@ -1,5 +1,5 @@
 import { Observable } from "../../events";
-import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
+import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
 import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileSelectionContextOptions, ITileView } from "../pipeline/tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
@@ -7,14 +7,14 @@ import { TilePipelineLink } from "../pipeline/tiles.pipeline.link";
 import { IDisplay } from ".";
 
 export class TileViewBase implements ITileView {
-    _addedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
-    _removedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
-    _updatedObservable?: Observable<IPipelineMessageType<ITileAddress>>;
+    _addedObservable?: Observable<IPipelineMessageType<ITileAddress2>>;
+    _removedObservable?: Observable<IPipelineMessageType<ITileAddress2>>;
+    _updatedObservable?: Observable<IPipelineMessageType<ITileAddress2>>;
 
-    _activ: Map<string, ITileAddress> = new Map<string, ITileAddress>();
+    _activ: Map<string, ITileAddress2> = new Map<string, ITileAddress2>();
 
     // internal pipeline links
-    _links: Array<ITilePipelineLink<ITileAddress>> = [];
+    _links: Array<ITilePipelineLink<ITileAddress2>> = [];
 
     public dispose(): void {
         // dispose the links
@@ -24,22 +24,22 @@ export class TileViewBase implements ITileView {
         this._links = [];
     }
 
-    public get addedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+    public get addedObservable(): Observable<IPipelineMessageType<ITileAddress2>> {
+        this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<ITileAddress2>>();
         return this._addedObservable!;
     }
 
-    public get removedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._removedObservable = this._removedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+    public get removedObservable(): Observable<IPipelineMessageType<ITileAddress2>> {
+        this._removedObservable = this._removedObservable || new Observable<IPipelineMessageType<ITileAddress2>>();
         return this._removedObservable!;
     }
 
-    public get updatedObservable(): Observable<IPipelineMessageType<ITileAddress>> {
-        this._updatedObservable = this._updatedObservable || new Observable<IPipelineMessageType<ITileAddress>>();
+    public get updatedObservable(): Observable<IPipelineMessageType<ITileAddress2>> {
+        this._updatedObservable = this._updatedObservable || new Observable<IPipelineMessageType<ITileAddress2>>();
         return this._updatedObservable!;
     }
 
-    public linkTo(target: ITargetBlock<ITileAddress>, options?: ILinkOptions<ITileAddress>): void {
+    public linkTo(target: ITargetBlock<ITileAddress2>, options?: ILinkOptions<ITileAddress2>): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             const link = new TilePipelineLink(this, target, options);
@@ -47,7 +47,7 @@ export class TileViewBase implements ITileView {
         }
     }
 
-    public unlinkFrom(target: ITargetBlock<ITileAddress>): ITilePipelineLink<ITileAddress> | undefined {
+    public unlinkFrom(target: ITargetBlock<ITileAddress2>): ITilePipelineLink<ITileAddress2> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];
@@ -65,7 +65,7 @@ export class TileViewBase implements ITileView {
         this._doValidateContext(state, display, metrics, this._activ, options);
     }
 
-    protected _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress>, options?: ITileSelectionContextOptions): void {
+    protected _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress2>, options?: ITileSelectionContextOptions): void {
         if (state) {
             let deleted = Array.from(activAddresses.values());
             activAddresses.clear();
@@ -82,7 +82,7 @@ export class TileViewBase implements ITileView {
         state: Nullable<ITileNavigationState>,
         display: Nullable<IDisplay>,
         metrics: ITileMetrics,
-        activAddresses: Map<string, ITileAddress>,
+        activAddresses: Map<string, ITileAddress2>,
         options?: ITileSelectionContextOptions
     ): void {}
 }

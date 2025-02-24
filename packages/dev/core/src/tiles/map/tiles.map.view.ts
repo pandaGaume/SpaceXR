@@ -1,4 +1,4 @@
-import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
+import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
 import { ITileSelectionContextOptions } from "../pipeline/tiles.pipeline.interfaces";
 import { TileAddress } from "../address";
 import { Nullable } from "../../types";
@@ -25,7 +25,7 @@ export class TileView extends TileViewBase {
         state: Nullable<ITileNavigationState>,
         display: Nullable<IDisplay>,
         metrics: ITileMetrics,
-        activAddresses: Map<string, ITileAddress>,
+        activAddresses: Map<string, ITileAddress2>,
         options?: ITileSelectionContextOptions
     ) {
         if (state && display) {
@@ -60,8 +60,8 @@ export class TileView extends TileViewBase {
             const x1 = Math.min(maxIndex, seTileXY.x);
             const y1 = Math.min(maxIndex, seTileXY.y);
 
-            const remains = new Array<ITileAddress>();
-            const added = new Array<ITileAddress>();
+            const remains = new Array<ITileAddress2>();
+            const added = new Array<ITileAddress2>();
 
             const tmp = new TileAddress(0, 0, lod);
             for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
@@ -117,7 +117,7 @@ export class TileView extends TileViewBase {
         return azimuth?.value ? Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
 
-    protected _getTileRectangle(a: ITileAddress, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IBounds {
+    protected _getTileRectangle(a: ITileAddress2, metrics: ITileMetrics, center: ICartesian2, azimuth: Bearing): IBounds {
         const points = [
             metrics.getTileXYToPointXY(a.x, a.y),
             metrics.getTileXYToPointXY(a.x + 1, a.y),

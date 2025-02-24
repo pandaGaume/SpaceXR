@@ -1,4 +1,4 @@
-import { ITileAddress, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
+import { ITileAddress2, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { Scalar } from "../math/math";
 import { TileAddress } from "./address/tiles.address";
@@ -82,7 +82,7 @@ export class TileWebClient<T> implements ITileClient<T> {
         return this._metrics;
     }
 
-    public async fetchAsync(request: ITileAddress, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
+    public async fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>> {
         if (!request) {
             throw new FetchError(`invalid request parameter.`);
         }

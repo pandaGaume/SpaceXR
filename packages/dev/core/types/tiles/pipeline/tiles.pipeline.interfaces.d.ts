@@ -1,6 +1,6 @@
 import { EventState, Observable } from "../../events";
 import { IDisposable, Nullable } from "../../types";
-import { ITileAddress, ITileMetrics } from "../tiles.interfaces";
+import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { IDisplay } from "../map";
 export type IPipelineMessageType<T> = Array<T>;
@@ -40,11 +40,6 @@ export interface ITilePipelineLink<T> extends IDisposable {
 export interface ITilePipelineComponent extends IDisposable {
     name?: string;
 }
-export interface ITileMipMapping {
-    split?(tile: ITileAddress): void;
-    stitch?(...tile: Array<ITileAddress>): void;
-}
-export declare function IsTileMipMapping(b: unknown): b is ITileMipMapping;
 export interface ITileSelectionContextOptions {
     dispatchEvent?: boolean;
     zoomOffset?: number;
@@ -53,7 +48,7 @@ export interface ITileSelectionContext {
     setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void;
 }
 export declare function hasTileSelectionContext(b: unknown): b is ITileSelectionContext;
-export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress>, ITileSelectionContext, ITileMipMapping {
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress2>, ITileSelectionContext {
 }
 export interface IHasView {
     view: ITileView;

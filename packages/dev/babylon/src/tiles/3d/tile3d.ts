@@ -1,7 +1,6 @@
 import { IBounds } from "core/geometry";
-import { ITile3D, RefinementStrategy, Tile3dContent } from "./tile3d.interfaces";
+import { ITile3D, ITile3DNode, Tile3dContent } from "./tile3d.interfaces";
 import { Tile3DNode } from "./tile3d.node";
-import { SubdivisionScheme } from "core/tree/tree.spatial.interfaces";
 
 export class Tile3D<T> extends Tile3DNode implements ITile3D<T> {
     private _content: Tile3dContent<T>;
@@ -15,7 +14,11 @@ export class Tile3D<T> extends Tile3DNode implements ITile3D<T> {
         return this._content;
     }
 
-    public split(sub: SubdivisionScheme.QUADTREE, refinementStrategy?: RefinementStrategy): void {
-        this._children = Tile3DNode.Split(this, sub, refinementStrategy ?? this.refinementStrategy, Tile3D);
+    public set content(content: Tile3dContent<T>) {
+        this._content = content;
+    }
+
+    protected _constructor(): new (bounds?: IBounds, error?: number) => ITile3DNode {
+        return Tile3D;
     }
 }

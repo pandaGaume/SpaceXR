@@ -110,4 +110,12 @@ export class Tile3DNode implements ITile3DNode {
         }
         return null;
     }
+
+    public split(sub: SubdivisionScheme = SubdivisionScheme.QUADTREE, refinementStrategy?: RefinementStrategy): void {
+        this._children = Tile3DNode.Split(this, sub, refinementStrategy ?? this.refinementStrategy, this._constructor() ?? Tile3DNode);
+    }
+
+    protected _constructor(): new (bounds?: IBounds, error?: number) => ITile3DNode {
+        return Tile3DNode;
+    }
 }

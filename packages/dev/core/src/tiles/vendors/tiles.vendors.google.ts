@@ -1,7 +1,7 @@
 import { TileWebClient, TileWebClientOptions } from "../tiles.client";
 import { ImageTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
-import { WebTileUrlBuilder } from "../tiles.urlBuilder";
+import { WebTileUrlBuilder } from "../tiles.url.web";
 
 export enum GoogleMap2DLayerCode {
     street = "m",

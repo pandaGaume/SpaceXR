@@ -1,5 +1,6 @@
 import { IGeoBounded } from "core/geography";
 import { Cartesian3, IBounded } from "core/geometry";
+import { SubdivisionScheme } from "core/tree/tree.spatial.interfaces";
 import { Nullable } from "core/types";
 
 export enum RefinementStrategy {
@@ -43,6 +44,7 @@ export interface ITile3DNode extends IBounded, IGeoBounded {
     children?: Array<ITile3DNode>;
 
     [Symbol.iterator](predicate?: (n: Nullable<ITile3DNode>) => boolean): IterableIterator<Nullable<ITile3DNode>>;
+    split(sub: SubdivisionScheme, refinementStrategy?: RefinementStrategy): void;
 }
 
 export type Tile3dContent<T> = Nullable<T> | Nullable<Array<T>>;

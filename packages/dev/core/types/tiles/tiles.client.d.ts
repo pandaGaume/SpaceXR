@@ -1,36 +1,14 @@
-import { ITileAddress2, ITileCodec, ITileClient, ITileUrlBuilder, FetchResult, ITileMetrics } from "./tiles.interfaces";
+import { ITileAddress2, ITileClient, ITileMetrics } from "./tiles.interfaces";
 import { Nullable } from "../types";
 import { IGeoBounded } from "../geography";
-import { IFilter } from "./codecs";
-export declare class TileWebClientOptions {
-    static Default: TileWebClientOptions;
-    maxRetry?: number;
-    initialDelay?: number;
-    filter?: IFilter<any>;
-    constructor(p: Partial<TileWebClientOptions>);
-}
-export declare class TileWebClientOptionsBuilder {
-    _maxRetry?: number;
-    _initialDelay?: number;
-    withMaxRetry(v: number): TileWebClientOptionsBuilder;
-    withInitialDelay(v: number): TileWebClientOptionsBuilder;
-    build(): TileWebClientOptions;
-}
-export declare class FetchError extends Error {
-    userArgs?: Array<unknown>;
-    constructor(message?: string, ...userArgs: Array<unknown>);
-}
-export declare class TileWebClient<T> implements ITileClient<T> {
-    _name: string;
-    _o: TileWebClientOptions;
-    _urlFactory: ITileUrlBuilder;
-    _codec: ITileCodec<T>;
+import { FetchResult, IUrlBuilder, WebClient, WebClientOptions } from "../io";
+import { ICodec } from "./codecs";
+export declare class TileWebClient<T> extends WebClient<ITileAddress2, T> implements ITileClient<T> {
     _metrics: ITileMetrics;
     _zindex: number;
-    constructor(name: string, urlFactory: ITileUrlBuilder, codec: ITileCodec<T>, metrics: ITileMetrics, options?: TileWebClientOptions);
-    get name(): string;
+    constructor(name: string, urlFactory: IUrlBuilder<ITileAddress2>, codec: ICodec<T>, metrics: ITileMetrics, options?: WebClientOptions);
     get zindex(): number;
     set zindex(v: number);
     get metrics(): ITileMetrics;
-    fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<ITileAddress2, Nullable<T>>>;
 }

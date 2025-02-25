@@ -1,9 +1,8 @@
-import { IFilter, IPixelDecoder } from "./tiles.codecs.interfaces";
+import { IFilter, IPixelDecoder, ICodec } from "./tiles.codecs.interfaces";
 import { Nullable } from "../../types";
-import { ITileCodec } from "../tiles.interfaces";
 import { Side } from "../../geometry/geometry.interfaces";
 
-export class ImageTileCodec implements ITileCodec<HTMLImageElement> {
+export class ImageTileCodec implements ICodec<HTMLImageElement> {
     public static Shared = new ImageTileCodec();
 
     async decodeAsync(r: void | Response): Promise<Nullable<HTMLImageElement>> {
@@ -59,7 +58,7 @@ export class ImageDataTileCodecOptionsBuilder {
     }
 }
 
-export class ImageDataTileCodec implements ITileCodec<ImageData> {
+export class ImageDataTileCodec implements ICodec<ImageData> {
     public static Shared = new ImageDataTileCodec();
 
     private static CreateCanvas(width: number, height: number): HTMLCanvasElement {
@@ -103,7 +102,7 @@ export class ImageDataTileCodec implements ITileCodec<ImageData> {
     }
 }
 
-export class RGBTileCodec implements ITileCodec<Uint8ClampedArray> {
+export class RGBTileCodec implements ICodec<Uint8ClampedArray> {
     private _canvas?: HTMLCanvasElement;
 
     public constructor(canvas?: HTMLCanvasElement) {
@@ -132,7 +131,7 @@ export class RGBTileCodec implements ITileCodec<Uint8ClampedArray> {
     }
 }
 
-export class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
+export class RGBATileCodec implements ICodec<Uint8ClampedArray> {
     private _canvas?: HTMLCanvasElement;
 
     public constructor(canvas?: HTMLCanvasElement) {
@@ -158,7 +157,7 @@ export class Float32TileCodecOptions extends ImageDataTileCodecOptions {
 
 export class Float32TileCodecOptionsBuilder extends ImageDataTileCodecOptionsBuilder {}
 
-export class Float32TileCodec implements ITileCodec<Float32Array> {
+export class Float32TileCodec implements ICodec<Float32Array> {
     private _canvas?: HTMLCanvasElement;
     private _options?: Float32TileCodecOptions;
 

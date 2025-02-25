@@ -1,4 +1,4 @@
-import { TileWebClient, TileWebClientOptions } from "../tiles.client";
+import { TileWebClient } from "../tiles.client";
 import { WebTileUrlBuilder } from "../tiles.url.web";
 import { Float32TileCodec, Float32TileCodecOptions, ImageTileCodec, RGBTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
@@ -6,6 +6,7 @@ import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { IPixelDecoder, isFilter } from "../codecs/tiles.codecs.interfaces";
 import { Cartesian4, ICartesian4 } from "../../geometry";
 import { Cartesian4TileCodec } from "../codecs/tiles.codecs.cartesian";
+import { WebClientOptions } from "../../io";
 
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     public static Terrarium = new MapZenDemUrlBuilder("terrarium");
@@ -54,23 +55,23 @@ export class MapZen {
     public static Metrics = new EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
     public static Attribution = "Freely provided by MapZen - with thanks.";
 
-    public static ElevationsImagesClient(options?: TileWebClientOptions) {
+    public static ElevationsImagesClient(options?: WebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new ImageTileCodec(), MapZen.Metrics, options);
     }
-    public static ElevationsClient(options?: TileWebClientOptions) {
+    public static ElevationsClient(options?: WebClientOptions) {
         const o = isFilter<Float32Array>(options?.filter) ? new Float32TileCodecOptions({ filter: options?.filter }) : undefined;
         return new TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new Float32TileCodec(MapzenAltitudeDecoder.Shared, o), MapZen.Metrics, options);
     }
-    public static NormalsImagesClient(options?: TileWebClientOptions) {
+    public static NormalsImagesClient(options?: WebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new ImageTileCodec(), MapZen.Metrics, options);
     }
-    public static NormalsUint8ArrayClient(options?: TileWebClientOptions) {
+    public static NormalsUint8ArrayClient(options?: WebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new RGBTileCodec(), MapZen.Metrics, options);
     }
-    public static NormalsCartesian4Client(options?: TileWebClientOptions) {
+    public static NormalsCartesian4Client(options?: WebClientOptions) {
         return new TileWebClient(`${MapZen.KEY}_normal_Cartesian4`, MapZenDemUrlBuilder.Normal, new Cartesian4TileCodec(MapZenNormalsDecoder.Shared), MapZen.Metrics, options);
     }
-    public static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions) {
+    public static DemClient(optionsElevations?: WebClientOptions, optionsNormals?: WebClientOptions) {
         return new DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsUint8ArrayClient(optionsNormals));
     }
 }

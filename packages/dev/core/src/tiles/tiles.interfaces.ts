@@ -4,6 +4,7 @@ import { IBounded, ICartesian2, IBounds } from "../geometry/geometry.interfaces"
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
+import { FetchResult } from "../io";
 
 export function IsTileAddress(b: unknown): b is ITileAddress2 {
     if (typeof b !== "object" || b === null) return false;
@@ -203,33 +204,14 @@ export function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider {
     return (<ITileMetricsProvider>b).metrics !== undefined;
 }
 
-export class FetchResult<T> {
-    public static Null<T>(address: ITileAddress2, userArgs: Nullable<Array<unknown>>): FetchResult<Nullable<T>> {
-        return new FetchResult<Nullable<T>>(address, null, userArgs);
-    }
-
-    ok?: boolean = true;
-    status?: number;
-    statusText?: string;
-    public constructor(public address: ITileAddress2, public content: T, public userArgs: Nullable<Array<unknown>> = null) {}
-}
-
 export interface ITileDatasource<T, A extends ITileAddress2> extends ITileMetricsProvider {
     name: string;
-    fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
 
 export function IsTileDatasource<T, A extends ITileAddress2>(b: unknown): b is ITileDatasource<T, A> {
     if (b === null || typeof b !== "object") return false;
     return (<ITileDatasource<T, A>>b).fetchAsync !== undefined && (<ITileDatasource<T, A>>b).metrics !== undefined;
-}
-
-export interface ITileUrlBuilder {
-    buildUrl(address: ITileAddress2, ...params: unknown[]): string;
-}
-
-export interface ITileCodec<T> {
-    decodeAsync(r: void | Response): Promise<Nullable<T>>;
 }
 
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2> {}

@@ -1,7 +1,7 @@
 import { Nullable } from "../../types";
-import { ITileCodec } from "../tiles.interfaces";
+import { ICodec } from "./tiles.codecs.interfaces";
 
-export class BlobTileCodec implements ITileCodec<Blob> {
+export class BlobTileCodec implements ICodec<Blob> {
     public static Shared = new BlobTileCodec();
 
     public async decodeAsync(r: void | Response): Promise<Awaited<Nullable<Blob>>> {
@@ -13,7 +13,7 @@ export class BlobTileCodec implements ITileCodec<Blob> {
     }
 }
 
-export class TextTileCodec implements ITileCodec<string> {
+export class TextTileCodec implements ICodec<string> {
     public static Shared = new TextTileCodec();
 
     async decodeAsync(r: void | Response): Promise<Awaited<Nullable<string>>> {
@@ -25,7 +25,7 @@ export class TextTileCodec implements ITileCodec<string> {
     }
 }
 
-export class JsonTileCodec implements ITileCodec<object> {
+export class JsonTileCodec implements ICodec<object> {
     public static Shared = new JsonTileCodec();
 
     async decodeAsync(r: void | Response): Promise<Awaited<Nullable<object>>> {
@@ -37,7 +37,7 @@ export class JsonTileCodec implements ITileCodec<object> {
     }
 }
 
-export class XmlDocumentTileCodec implements ITileCodec<XMLDocument> {
+export class XmlDocumentTileCodec implements ICodec<XMLDocument> {
     public static Shared = new XmlDocumentTileCodec();
 
     async decodeAsync(r: void | Response): Promise<Awaited<Nullable<XMLDocument>>> {

@@ -1,9 +1,10 @@
-import { TileWebClient, TileWebClientOptions } from "../tiles.client";
+import { TileWebClient } from "../tiles.client";
 import { WebTileUrlBuilder } from "../tiles.url.web";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { IPixelDecoder } from "../codecs/tiles.codecs.interfaces";
 import { ICartesian4 } from "../../geometry";
+import { WebClientOptions } from "../../io";
 export declare class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     static Terrarium: MapZenDemUrlBuilder;
     static Normal: MapZenDemUrlBuilder;
@@ -22,10 +23,10 @@ export declare class MapZen {
     static MaxLevelOfDetail: number;
     static Metrics: EPSG3857;
     static Attribution: string;
-    static ElevationsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
-    static ElevationsClient(options?: TileWebClientOptions): TileWebClient<Float32Array>;
-    static NormalsImagesClient(options?: TileWebClientOptions): TileWebClient<HTMLImageElement>;
-    static NormalsUint8ArrayClient(options?: TileWebClientOptions): TileWebClient<Uint8ClampedArray>;
-    static NormalsCartesian4Client(options?: TileWebClientOptions): TileWebClient<ICartesian4[]>;
-    static DemClient(optionsElevations?: TileWebClientOptions, optionsNormals?: TileWebClientOptions): DemTileWebClient;
+    static ElevationsImagesClient(options?: WebClientOptions): TileWebClient<HTMLImageElement>;
+    static ElevationsClient(options?: WebClientOptions): TileWebClient<Float32Array>;
+    static NormalsImagesClient(options?: WebClientOptions): TileWebClient<HTMLImageElement>;
+    static NormalsUint8ArrayClient(options?: WebClientOptions): TileWebClient<Uint8ClampedArray>;
+    static NormalsCartesian4Client(options?: WebClientOptions): TileWebClient<ICartesian4[]>;
+    static DemClient(optionsElevations?: WebClientOptions, optionsNormals?: WebClientOptions): DemTileWebClient;
 }

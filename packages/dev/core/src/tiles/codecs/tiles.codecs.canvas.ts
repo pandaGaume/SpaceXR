@@ -1,8 +1,8 @@
 import { ISize2 } from "../../geometry";
 import { Nullable } from "../../types";
-import { ITileCodec } from "../tiles.interfaces";
+import { ICodec } from "./tiles.codecs.interfaces";
 
-export abstract class CanvasTileCodec<T> implements ITileCodec<ImageBitmap>, ISize2 {
+export abstract class CanvasTileCodec<T> implements ICodec<ImageBitmap>, ISize2 {
     private _canvas: HTMLCanvasElement;
 
     public constructor(canvas: HTMLCanvasElement) {

@@ -1,7 +1,8 @@
-import { TileWebClient, TileWebClientOptions } from "../tiles.client";
+import { TileWebClient } from "../tiles.client";
 import { ImageTileCodec } from "../codecs/tiles.codecs.image";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { WebTileUrlBuilder } from "../tiles.url.web";
+import { WebClientOptions } from "../../io";
 
 export enum GoogleMap2DLayerCode {
     street = "m",
@@ -33,19 +34,19 @@ export class Google {
 
     public static Attribution = "Map data © Google";
 
-    public static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: TileWebClientOptions) {
+    public static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: WebClientOptions) {
         return new TileWebClient(`${Google.KEY}_2d`, urlBuilder, new ImageTileCodec(), Google.Metrics, options);
     }
-    public static StreetClient2d(options?: TileWebClientOptions) {
+    public static StreetClient2d(options?: WebClientOptions) {
         return new TileWebClient(`${Google.KEY}_street2d`, GoogleMap2DUrlBuilder.Street, new ImageTileCodec(), Google.Metrics, options);
     }
-    public static SatelliteClient2d(options?: TileWebClientOptions) {
+    public static SatelliteClient2d(options?: WebClientOptions) {
         return new TileWebClient(`${Google.KEY}_sat2d`, GoogleMap2DUrlBuilder.Satellite, new ImageTileCodec(), Google.Metrics, options);
     }
-    public static HybridClient2d(options?: TileWebClientOptions) {
+    public static HybridClient2d(options?: WebClientOptions) {
         return new TileWebClient(`${Google.KEY}_hybrid2d`, GoogleMap2DUrlBuilder.Hybrid, new ImageTileCodec(), Google.Metrics, options);
     }
-    public static TerrainClient2d(options?: TileWebClientOptions) {
+    public static TerrainClient2d(options?: WebClientOptions) {
         return new TileWebClient(`${Google.KEY}_terrain2d`, GoogleMap2DUrlBuilder.Terrain, new ImageTileCodec(), Google.Metrics, options);
     }
 }

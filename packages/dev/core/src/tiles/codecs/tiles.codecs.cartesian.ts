@@ -1,8 +1,7 @@
 import { ICartesian4 } from "../../geometry";
 import { Nullable } from "../../types";
-import { ITileCodec } from "../tiles.interfaces";
 import { ImageDataTileCodec, ImageDataTileCodecOptions } from "./tiles.codecs.image";
-import { IPixelDecoder } from "./tiles.codecs.interfaces";
+import { IPixelDecoder, ICodec } from "./tiles.codecs.interfaces";
 
 export class Cartesian4TileCodecOptions extends ImageDataTileCodecOptions {
     factory?: () => ICartesian4;
@@ -12,7 +11,7 @@ export class Cartesian4TileCodecOptions extends ImageDataTileCodecOptions {
     }
 }
 
-export class Cartesian4TileCodec implements ITileCodec<Array<ICartesian4>> {
+export class Cartesian4TileCodec implements ICodec<Array<ICartesian4>> {
     private _canvas?: HTMLCanvasElement;
     private _options?: Cartesian4TileCodecOptions;
 

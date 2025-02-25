@@ -1,8 +1,7 @@
-import { IFilter, IPixelDecoder } from "./tiles.codecs.interfaces";
+import { IFilter, IPixelDecoder, ICodec } from "./tiles.codecs.interfaces";
 import { Nullable } from "../../types";
-import { ITileCodec } from "../tiles.interfaces";
 import { Side } from "../../geometry/geometry.interfaces";
-export declare class ImageTileCodec implements ITileCodec<HTMLImageElement> {
+export declare class ImageTileCodec implements ICodec<HTMLImageElement> {
     static Shared: ImageTileCodec;
     decodeAsync(r: void | Response): Promise<Nullable<HTMLImageElement>>;
 }
@@ -15,7 +14,7 @@ export declare class ImageDataTileCodecOptionsBuilder {
     withInsets(v: number, side: Side): ImageDataTileCodecOptionsBuilder;
     build(): ImageDataTileCodecOptions;
 }
-export declare class ImageDataTileCodec implements ITileCodec<ImageData> {
+export declare class ImageDataTileCodec implements ICodec<ImageData> {
     static Shared: ImageDataTileCodec;
     private static CreateCanvas;
     private _canvas?;
@@ -23,12 +22,12 @@ export declare class ImageDataTileCodec implements ITileCodec<ImageData> {
     constructor(canvas?: HTMLCanvasElement, options?: ImageDataTileCodecOptions);
     decodeAsync(r: void | Response): Promise<Awaited<Nullable<ImageData>>>;
 }
-export declare class RGBTileCodec implements ITileCodec<Uint8ClampedArray> {
+export declare class RGBTileCodec implements ICodec<Uint8ClampedArray> {
     private _canvas?;
     constructor(canvas?: HTMLCanvasElement);
     decodeAsync(r: void | Response): Promise<Awaited<Nullable<Uint8ClampedArray>>>;
 }
-export declare class RGBATileCodec implements ITileCodec<Uint8ClampedArray> {
+export declare class RGBATileCodec implements ICodec<Uint8ClampedArray> {
     private _canvas?;
     constructor(canvas?: HTMLCanvasElement);
     decodeAsync(r: void | Response): Promise<Awaited<Nullable<Uint8ClampedArray>>>;
@@ -39,7 +38,7 @@ export declare class Float32TileCodecOptions extends ImageDataTileCodecOptions {
 }
 export declare class Float32TileCodecOptionsBuilder extends ImageDataTileCodecOptionsBuilder {
 }
-export declare class Float32TileCodec implements ITileCodec<Float32Array> {
+export declare class Float32TileCodec implements ICodec<Float32Array> {
     pixelDecoder: IPixelDecoder<Float32Array>;
     private _canvas?;
     private _options?;

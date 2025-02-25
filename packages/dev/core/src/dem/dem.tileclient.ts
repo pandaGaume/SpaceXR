@@ -1,8 +1,9 @@
 import { Nullable } from "../types";
-import { FetchResult, ITileAddress2, ITileClient, ITileMetrics } from "../tiles/tiles.interfaces";
+import { ITileAddress2, ITileClient, ITileMetrics } from "../tiles/tiles.interfaces";
 import { IDemInfos } from "./dem.interfaces";
 import { DemInfos } from "./dem.infos";
 import { IGeoBounded } from "../geography";
+import { FetchResult } from "../io";
 
 export class DemTileWebClient implements ITileClient<IDemInfos> {
     _name: string;
@@ -32,8 +33,8 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         return this._elevationsDataSource.metrics;
     }
 
-    public async fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<Nullable<IDemInfos>>> {
-        const requests: Array<Promise<FetchResult<Nullable<Float32Array> | Nullable<Uint8ClampedArray> | Nullable<HTMLImageElement>>>> = [];
+    public async fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<ITileAddress2, Nullable<IDemInfos>>> {
+        const requests: Array<Promise<FetchResult<ITileAddress2, Nullable<Float32Array> | Nullable<Uint8ClampedArray> | Nullable<HTMLImageElement>>>> = [];
         requests.push(this._elevationsDataSource.fetchAsync(request, env, ...userArgs));
         if (this._normalsDataSource) {
             requests.push(this._normalsDataSource.fetchAsync(request, env, ...userArgs));
@@ -52,7 +53,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         }
 
         if (elevations == null) {
-            return new FetchResult<Nullable<IDemInfos>>(request, null, userArgs);
+            return new FetchResult(request, null, userArgs);
         }
 
         // normals

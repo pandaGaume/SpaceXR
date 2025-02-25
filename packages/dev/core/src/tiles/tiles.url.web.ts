@@ -1,6 +1,7 @@
-import { ITileAddress2, ITileUrlBuilder } from "./tiles.interfaces";
+import { IUrlBuilder } from "../io";
+import { ITileAddress2 } from "./tiles.interfaces";
 
-export class WebTileUrlBuilder implements ITileUrlBuilder {
+export class WebTileUrlBuilder implements IUrlBuilder<ITileAddress2> {
     // options
     _host?: string;
     _port?: number;

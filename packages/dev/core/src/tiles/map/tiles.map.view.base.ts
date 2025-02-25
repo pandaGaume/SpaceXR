@@ -1,60 +1,15 @@
-import { Observable } from "../../events";
 import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
-import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, ITileSelectionContextOptions, ITileView } from "../pipeline/tiles.pipeline.interfaces";
+import { ITileSelectionContextOptions, ITileView } from "../pipeline/tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
-import { TilePipelineLink } from "../pipeline/tiles.pipeline.link";
 import { IDisplay } from ".";
+import { SourceBlock } from "../pipeline/tiles.pipeline.sourceblock";
 
-export class TileViewBase implements ITileView {
-    _addedObservable?: Observable<IPipelineMessageType<ITileAddress2>>;
-    _removedObservable?: Observable<IPipelineMessageType<ITileAddress2>>;
-    _updatedObservable?: Observable<IPipelineMessageType<ITileAddress2>>;
-
+export class TileViewBase extends SourceBlock<ITileAddress2> implements ITileView {
     _activ: Map<string, ITileAddress2> = new Map<string, ITileAddress2>();
 
-    // internal pipeline links
-    _links: Array<ITilePipelineLink<ITileAddress2>> = [];
-
-    public dispose(): void {
-        // dispose the links
-        for (const l of this._links) {
-            l.dispose();
-        }
-        this._links = [];
-    }
-
-    public get addedObservable(): Observable<IPipelineMessageType<ITileAddress2>> {
-        this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<ITileAddress2>>();
-        return this._addedObservable!;
-    }
-
-    public get removedObservable(): Observable<IPipelineMessageType<ITileAddress2>> {
-        this._removedObservable = this._removedObservable || new Observable<IPipelineMessageType<ITileAddress2>>();
-        return this._removedObservable!;
-    }
-
-    public get updatedObservable(): Observable<IPipelineMessageType<ITileAddress2>> {
-        this._updatedObservable = this._updatedObservable || new Observable<IPipelineMessageType<ITileAddress2>>();
-        return this._updatedObservable!;
-    }
-
-    public linkTo(target: ITargetBlock<ITileAddress2>, options?: ILinkOptions<ITileAddress2>): void {
-        // a view may be linked to several targets, so we need to keep track of them.
-        if (this._links.findIndex((l) => l.target === target) === -1) {
-            const link = new TilePipelineLink(this, target, options);
-            this._links.push(link);
-        }
-    }
-
-    public unlinkFrom(target: ITargetBlock<ITileAddress2>): ITilePipelineLink<ITileAddress2> | undefined {
-        const i = this._links.findIndex((l) => l.target === target);
-        if (i !== -1) {
-            const l = this._links.splice(i)[0];
-            l.dispose();
-            return l;
-        }
-        return undefined;
+    public constructor() {
+        super();
     }
 
     public setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void {

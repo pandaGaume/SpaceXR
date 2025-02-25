@@ -4,6 +4,7 @@ import { IBounded, ICartesian2, IBounds } from "../geometry/geometry.interfaces"
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
+import { FetchResult } from "../io";
 export declare function IsTileAddress(b: unknown): b is ITileAddress2;
 export declare function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress2>;
 export declare enum NeighborsAddress {
@@ -24,13 +25,16 @@ export interface ITileAddress2 extends ITileAddress, ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export interface ITileAddressable {
+export interface ITileAddress3 extends ITileAddress, IBounded {
+    tileId: string;
+}
+export interface ITileAddressable2 {
     namespace?: string;
     address: ITileAddress2;
     quadkey: string;
 }
 export type TileContentType<T> = Nullable<T>;
-export interface ITile<T> extends ITileAddressable, IGeoBounded, IBounded {
+export interface ITile<T> extends ITileAddressable2, IGeoBounded, IBounded {
     content: TileContentType<T>;
 }
 export declare function IsTile<T>(b: unknown): b is ITile<T>;
@@ -111,27 +115,11 @@ export interface ITileMetricsProvider {
     metrics: ITileMetrics;
 }
 export declare function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider;
-export declare class FetchResult<T> {
-    address: ITileAddress2;
-    content: T;
-    userArgs: Nullable<Array<unknown>>;
-    static Null<T>(address: ITileAddress2, userArgs: Nullable<Array<unknown>>): FetchResult<Nullable<T>>;
-    ok?: boolean;
-    status?: number;
-    statusText?: string;
-    constructor(address: ITileAddress2, content: T, userArgs?: Nullable<Array<unknown>>);
-}
 export interface ITileDatasource<T, A extends ITileAddress2> extends ITileMetricsProvider {
     name: string;
-    fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<Nullable<T>>>;
+    fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
 export declare function IsTileDatasource<T, A extends ITileAddress2>(b: unknown): b is ITileDatasource<T, A>;
-export interface ITileUrlBuilder {
-    buildUrl(address: ITileAddress2, ...params: unknown[]): string;
-}
-export interface ITileCodec<T> {
-    decodeAsync(r: void | Response): Promise<Nullable<T>>;
-}
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2> {
 }
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {

@@ -26,6 +26,7 @@ export interface ICameraState {
     /// This enables reactive updates when properties like `position`, `traget`, or `fov` are modified.
     /// </summary>
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
+
     /// <summary>
     /// The position of the camera in a 3D Cartesian coordinate system.
     /// This is crucial for determining the camera's proximity to tiles, which

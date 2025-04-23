@@ -56,3 +56,11 @@ export interface IValidable {
 export function IsNumber(value: unknown): value is number {
     return typeof value === "number" && !Number.isNaN(value);
 }
+
+export function IsString(value: unknown): value is string {
+    return typeof value === "string";
+}
+
+export function HasToString(value: unknown): value is { toString(): string } {
+    return value !== null && typeof value === "object" && typeof (value as { toString: unknown }).toString === "function";
+}

@@ -1,6 +1,6 @@
 import { Scalar } from "../math";
 import { IFilter, ICodec } from "../tiles";
-import { Nullable } from "../types";
+import { HasToString, IsString, Nullable } from "../types";
 
 export class FetchError extends Error {
     public readonly userArgs: Array<unknown>;
@@ -33,6 +33,18 @@ export class FetchResult<R, T> {
 
 export interface IUrlBuilder<R> {
     buildUrl(request: R, ...params: unknown[]): string;
+}
+
+export class DefaultUrlBuilder<R> implements IUrlBuilder<R> {
+    public buildUrl(request: R, ...params: unknown[]): string {
+        if (IsString(request)) {
+            return request;
+        }
+        if (HasToString(request)) {
+            return request.toString();
+        }
+        throw new Error("Request must be a string or an object with a toString method.");
+    }
 }
 
 export class WebClientOptions {
@@ -77,15 +89,12 @@ export class WebClient<R, T> {
     private readonly _codec: ICodec<T>;
     private readonly _options: WebClientOptions;
 
-    public constructor(name: string, urlFactory: IUrlBuilder<R>, codec: ICodec<T>, options?: WebClientOptions) {
+    public constructor(name: string, codec: ICodec<T>, urlFactory?: IUrlBuilder<R>, options?: WebClientOptions) {
         this._name = name;
-        if (!urlFactory) {
-            throw new Error(`invalid url factory parameter ${codec}`);
-        }
         if (!codec) {
             throw new Error(`invalid codec parameter ${codec}`);
         }
-        this._urlFactory = urlFactory;
+        this._urlFactory = urlFactory ?? new DefaultUrlBuilder<R>();
         this._codec = codec;
         this._options = { ...WebClientOptions.getDefault(), ...options };
     }

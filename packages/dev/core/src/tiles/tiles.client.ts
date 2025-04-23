@@ -10,7 +10,7 @@ export class TileWebClient<T> extends WebClient<ITileAddress2, T> implements ITi
     _zindex: number;
 
     public constructor(name: string, urlFactory: IUrlBuilder<ITileAddress2>, codec: ICodec<T>, metrics: ITileMetrics, options?: WebClientOptions) {
-        super(name, urlFactory, codec, options);
+        super(name, codec, urlFactory, options);
         this._metrics = metrics;
         this._zindex = 0;
     }

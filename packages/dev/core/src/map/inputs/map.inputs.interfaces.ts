@@ -24,12 +24,6 @@ export interface IDragTarget<T> {
     onEndDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
 }
 
-export interface IGestureSource<T> {}
-
-export function isSupportingTouch(): boolean {
-    return window.matchMedia("(hover: none)").matches || "ontouchstart" in window || navigator.maxTouchPoints > 0;
-}
-
 export interface ICartesian2WithInfos extends ICartesian2 {
     buttonIndex?: number;
     pointerId?: number;

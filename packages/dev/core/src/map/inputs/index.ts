@@ -5,3 +5,4 @@ export * from "./map.inputs.pointer";
 export * from "./map.inputs.controller";
 export * from "./map.inputs.cartesian";
 export * from "./map.inputs.source";
+export * from "./touch";

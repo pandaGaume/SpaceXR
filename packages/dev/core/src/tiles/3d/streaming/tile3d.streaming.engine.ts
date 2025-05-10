@@ -1,11 +1,11 @@
-import { Nullable } from "dev/core/src/types";
 import { ICameraState } from "../../navigation";
 import { IDisplay } from "../../map";
 import { IStreamingTile, IStreamingTileset } from "./tile3d.streaming.interfaces";
 import { SourceBlock } from "../../pipeline/tiles.pipeline.sourceblock";
-import { WebClient } from "dev/core/src/io";
 import { ICodec } from "../../codecs";
-import { TextUtils } from "dev/core/src/utils";
+import { Nullable } from "../../../types";
+import { WebClient } from "../../../io/webClient";
+import { TextUtils } from "../../../utils/text";
 
 export class TilesetCodec implements ICodec<IStreamingTileset> {
     public async decodeAsync(r: void | Response): Promise<Nullable<IStreamingTileset>> {

@@ -20,9 +20,6 @@ export interface IDragTarget<T> {
     onDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
     onEndDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
 }
-export interface IGestureSource<T> {
-}
-export declare function isSupportingTouch(): boolean;
 export interface ICartesian2WithInfos extends ICartesian2 {
     buttonIndex?: number;
     pointerId?: number;

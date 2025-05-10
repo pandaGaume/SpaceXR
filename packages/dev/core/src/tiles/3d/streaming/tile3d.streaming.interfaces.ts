@@ -1,7 +1,7 @@
 /// <summary>
 /// Represents the root structure of a 3D Tileset, as streamed from a server.
 
-import { Nullable } from "dev/core/src/types";
+import { Nullable } from "../../../types";
 import { ICameraState } from "../../navigation";
 import { IDisplay } from "../../map";
 

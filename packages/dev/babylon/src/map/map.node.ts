@@ -4,7 +4,7 @@ import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
-import { InputsNavigationTarget, IPointerSource, IWheelSource, PointerController } from "core/map";
+import { InputsNavigationMouseTarget, InputsNavigationTargetBase, IPointerSource, IWheelSource, PointerController } from "core/map";
 import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
 
@@ -14,8 +14,8 @@ import { Map3D } from "./map";
 export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi, IHasTileMapLayerContainer<Map3DContentType> {
     private _map: IMap3D;
     private _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
-    private _controller: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
-    private _ownController = false;
+    private _pointerController: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
+    private _ownPointerController = false;
 
     public constructor(name: string, scene?: BABYLON.Scene) {
         super(name, scene);
@@ -86,17 +86,17 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
     }
 
     protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): MapNode {
-        if (this._controller === controller) return this;
+        if (this._pointerController === controller) return this;
 
-        if (this._controller && this._ownController) {
-            this._controller.dispose();
+        if (this._pointerController && this._ownPointerController) {
+            this._pointerController.dispose();
         }
         if (controller instanceof PointerController) {
-            this._controller = controller;
+            this._pointerController = controller;
         } else {
-            const input = new InputsNavigationTarget(this._map, InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT, true);
-            this._controller = new PointerController(controller, input);
-            this._ownController = true;
+            const input = new InputsNavigationMouseTarget(this._map, InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT, true);
+            this._pointerController = new PointerController(controller, input);
+            this._ownPointerController = true;
         }
         return this;
     }
@@ -110,7 +110,7 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
     }
 
     public dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void {
-        this._controller?.dispose();
+        this._pointerController?.dispose();
         this._beforeRenderObserver?.remove();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);

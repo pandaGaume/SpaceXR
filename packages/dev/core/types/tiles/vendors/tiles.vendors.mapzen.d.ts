@@ -24,9 +24,9 @@ export declare class MapZen {
     static Metrics: EPSG3857;
     static Attribution: string;
     static ElevationsImagesClient(options?: WebClientOptions): TileWebClient<HTMLImageElement>;
-    static ElevationsClient(options?: WebClientOptions): TileWebClient<Float32Array>;
+    static ElevationsClient(options?: WebClientOptions): TileWebClient<Float32Array<ArrayBufferLike>>;
     static NormalsImagesClient(options?: WebClientOptions): TileWebClient<HTMLImageElement>;
-    static NormalsUint8ArrayClient(options?: WebClientOptions): TileWebClient<Uint8ClampedArray>;
+    static NormalsUint8ArrayClient(options?: WebClientOptions): TileWebClient<Uint8ClampedArray<ArrayBufferLike>>;
     static NormalsCartesian4Client(options?: WebClientOptions): TileWebClient<ICartesian4[]>;
     static DemClient(optionsElevations?: WebClientOptions, optionsNormals?: WebClientOptions): DemTileWebClient;
 }

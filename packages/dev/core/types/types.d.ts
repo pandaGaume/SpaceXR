@@ -23,3 +23,7 @@ export interface IValidable {
     revalidate(): void;
 }
 export declare function IsNumber(value: unknown): value is number;
+export declare function IsString(value: unknown): value is string;
+export declare function HasToString(value: unknown): value is {
+    toString(): string;
+};

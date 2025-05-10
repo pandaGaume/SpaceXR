@@ -5022,13 +5022,16 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DefaultUrlBuilder: () => (/* binding */ DefaultUrlBuilder),
 /* harmony export */   FetchError: () => (/* binding */ FetchError),
 /* harmony export */   FetchResult: () => (/* binding */ FetchResult),
 /* harmony export */   WebClient: () => (/* binding */ WebClient),
 /* harmony export */   WebClientOptions: () => (/* binding */ WebClientOptions),
 /* harmony export */   WebClientOptionsBuilder: () => (/* binding */ WebClientOptionsBuilder)
 /* harmony export */ });
-/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math */ "./dist/math/math.js");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "./dist/math/math.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../types */ "./dist/types.js");
+
 
 class FetchError extends Error {
     constructor(message, ...userArgs) {
@@ -5045,6 +5048,17 @@ class FetchResult {
         this.address = address;
         this.content = content;
         this.userArgs = userArgs ?? [];
+    }
+}
+class DefaultUrlBuilder {
+    buildUrl(request, ...params) {
+        if ((0,_types__WEBPACK_IMPORTED_MODULE_0__.IsString)(request)) {
+            return request;
+        }
+        if ((0,_types__WEBPACK_IMPORTED_MODULE_0__.HasToString)(request)) {
+            return request.toString();
+        }
+        throw new Error("Request must be a string or an object with a toString method.");
     }
 }
 class WebClientOptions {
@@ -5075,15 +5089,12 @@ class WebClientOptionsBuilder {
     }
 }
 class WebClient {
-    constructor(name, urlFactory, codec, options) {
+    constructor(name, codec, urlFactory, options) {
         this._name = name;
-        if (!urlFactory) {
-            throw new Error(`invalid url factory parameter ${codec}`);
-        }
         if (!codec) {
             throw new Error(`invalid codec parameter ${codec}`);
         }
-        this._urlFactory = urlFactory;
+        this._urlFactory = urlFactory ?? new DefaultUrlBuilder();
         this._codec = codec;
         this._options = { ...WebClientOptions.getDefault(), ...options };
     }
@@ -5122,7 +5133,7 @@ class WebClient {
                     throw new FetchError(`Exceeded maximum retries for URL: ${url}`, ...userArgs);
                 }
             }
-            const jitter = _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.GetRandomInt(0, this._options.initialDelay ?? 1000);
+            const jitter = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.GetRandomInt(0, this._options.initialDelay ?? 1000);
             await new Promise((resolve) => setTimeout(resolve, Math.min(delay + jitter, 30000)));
             delay *= 2;
             retryCount++;
@@ -5233,7 +5244,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CanvasMap: () => (/* binding */ CanvasMap)
 /* harmony export */ });
 /* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas.display */ "./dist/map/canvas/map.canvas.display.js");
-/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../inputs */ "./dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../inputs */ "./dist/map/inputs/map.inputs.navigation.mouse.js");
 /* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../inputs */ "./dist/map/inputs/map.inputs.pointer.js");
 /* harmony import */ var _map_context2d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.context2d */ "./dist/map/canvas/map.context2d.js");
 
@@ -5246,7 +5257,7 @@ class CanvasMap extends _map_context2d__WEBPACK_IMPORTED_MODULE_0__.Context2DTil
         }
         super(display, nav);
         this._context = display.getContext();
-        this._navigationManager = options?.navigationManager ?? new _inputs__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationTarget(this);
+        this._navigationManager = options?.navigationManager ?? new _inputs__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationMouseTarget(this);
         this._inputController = options?.inputController ?? new _inputs__WEBPACK_IMPORTED_MODULE_3__.PointerInputController(display.canvas, this._navigationManager);
     }
     _doValidate() {
@@ -5371,12 +5382,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CanvasMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasMap),
 /* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian2WithInfos),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap),
+/* harmony export */   GestureStatus: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.GestureStatus),
 /* harmony export */   InputControllerBase: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputControllerBase),
-/* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTarget),
+/* harmony export */   InputsNavigationMouseTarget: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationMouseTarget),
+/* harmony export */   InputsNavigationTargetBase: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTargetBase),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.IsTouchCapable),
 /* harmony export */   MouseInputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.MouseInputController),
 /* harmony export */   PointerController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerController),
 /* harmony export */   PointerInputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerInputController),
-/* harmony export */   isSupportingTouch: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.isSupportingTouch)
+/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapDragGesture),
+/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapEndEvent),
+/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapEvent),
+/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapGesture),
+/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapRotateGesture),
+/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapStartEvent),
+/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapUpdateEvent),
+/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapZoomGesture),
+/* harmony export */   TouchSpot: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchSpot)
 /* harmony export */ });
 /* harmony import */ var _canvas_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./canvas/index */ "./dist/map/canvas/index.js");
 /* harmony import */ var _inputs_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./inputs/index */ "./dist/map/inputs/index.js");
@@ -5395,20 +5417,34 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_5__.Cartesian2WithInfos),
+/* harmony export */   GestureStatus: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.GestureStatus),
 /* harmony export */   InputControllerBase: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__.InputControllerBase),
-/* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationTarget),
-/* harmony export */   MouseInputController: () => (/* reexport safe */ _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_1__.MouseInputController),
+/* harmony export */   InputsNavigationMouseTarget: () => (/* reexport safe */ _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationMouseTarget),
+/* harmony export */   InputsNavigationTargetBase: () => (/* reexport safe */ _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTargetBase),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.IsTouchCapable),
+/* harmony export */   MouseInputController: () => (/* reexport safe */ _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_0__.MouseInputController),
 /* harmony export */   PointerController: () => (/* reexport safe */ _map_inputs_source__WEBPACK_IMPORTED_MODULE_6__.PointerController),
 /* harmony export */   PointerInputController: () => (/* reexport safe */ _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_3__.PointerInputController),
-/* harmony export */   isSupportingTouch: () => (/* reexport safe */ _map_inputs_interfaces__WEBPACK_IMPORTED_MODULE_0__.isSupportingTouch)
+/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapDragGesture),
+/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapEndEvent),
+/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapEvent),
+/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapGesture),
+/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapRotateGesture),
+/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapStartEvent),
+/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapUpdateEvent),
+/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapZoomGesture),
+/* harmony export */   TouchSpot: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchSpot)
 /* harmony export */ });
-/* harmony import */ var _map_inputs_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces */ "./dist/map/inputs/map.inputs.interfaces.js");
-/* harmony import */ var _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.mouse */ "./dist/map/inputs/map.inputs.mouse.js");
-/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.navigation */ "./dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.mouse */ "./dist/map/inputs/map.inputs.mouse.js");
+/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.navigation */ "./dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.navigation.mouse */ "./dist/map/inputs/map.inputs.navigation.mouse.js");
 /* harmony import */ var _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.inputs.pointer */ "./dist/map/inputs/map.inputs.pointer.js");
 /* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.inputs.controller */ "./dist/map/inputs/map.inputs.controller.js");
 /* harmony import */ var _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.inputs.cartesian */ "./dist/map/inputs/map.inputs.cartesian.js");
 /* harmony import */ var _map_inputs_source__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.inputs.source */ "./dist/map/inputs/map.inputs.source.js");
+/* harmony import */ var _touch__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./touch */ "./dist/map/inputs/touch/index.js");
+
+
 
 
 
@@ -5488,23 +5524,6 @@ class InputControllerBase {
 
 /***/ }),
 
-/***/ "./dist/map/inputs/map.inputs.interfaces.js":
-/*!**************************************************!*\
-  !*** ./dist/map/inputs/map.inputs.interfaces.js ***!
-  \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   isSupportingTouch: () => (/* binding */ isSupportingTouch)
-/* harmony export */ });
-function isSupportingTouch() {
-    return window.matchMedia("(hover: none)").matches || "ontouchstart" in window || navigator.maxTouchPoints > 0;
-}
-//# sourceMappingURL=map.inputs.interfaces.js.map
-
-/***/ }),
-
 /***/ "./dist/map/inputs/map.inputs.mouse.js":
 /*!*********************************************!*\
   !*** ./dist/map/inputs/map.inputs.mouse.js ***!
@@ -5572,19 +5591,41 @@ class MouseInputController extends _map_inputs_controller__WEBPACK_IMPORTED_MODU
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   InputsNavigationTarget: () => (/* binding */ InputsNavigationTarget)
+/* harmony export */   InputsNavigationTargetBase: () => (/* binding */ InputsNavigationTargetBase)
 /* harmony export */ });
-class InputsNavigationTarget {
+class InputsNavigationTargetBase {
     constructor(target, zoomIncrement, invertY = true) {
         this._target = target;
+        this._zoomIncrement = zoomIncrement ?? InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT;
+        this._inverty = invertY;
+    }
+}
+InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT = 0.1;
+//# sourceMappingURL=map.inputs.navigation.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/map.inputs.navigation.mouse.js":
+/*!********************************************************!*\
+  !*** ./dist/map/inputs/map.inputs.navigation.mouse.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   InputsNavigationMouseTarget: () => (/* binding */ InputsNavigationMouseTarget)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.navigation */ "./dist/map/inputs/map.inputs.navigation.js");
+
+class InputsNavigationMouseTarget extends _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationTargetBase {
+    constructor(target, zoomIncrement, invertY = true) {
+        super(target, zoomIncrement, invertY);
         this._offsetX = 0;
         this._offsetY = 0;
         this._startX = 0;
         this._startY = 0;
         this._button = 0;
         this._isDragging = false;
-        this._zoomIncrement = zoomIncrement ?? InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT;
-        this._inverty = invertY;
     }
     onPointerOver(src, x, y, id) { }
     onPointerLeave(src, x, y, id) { }
@@ -5649,8 +5690,7 @@ class InputsNavigationTarget {
     }
     onEndDrag(src, dx, dy, buttonIndex, id) { }
 }
-InputsNavigationTarget.DEFAULT_ZOOM_INCREMENT = 0.1;
-//# sourceMappingURL=map.inputs.navigation.js.map
+//# sourceMappingURL=map.inputs.navigation.mouse.js.map
 
 /***/ }),
 
@@ -5764,12 +5804,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PointerController: () => (/* binding */ PointerController)
 /* harmony export */ });
-/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.navigation */ "./dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.navigation.mouse */ "./dist/map/inputs/map.inputs.navigation.mouse.js");
 
 class PointerController {
     constructor(src, target) {
         this._src = src;
-        this._target = target instanceof _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationTarget ? target : new _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationTarget(target);
+        this._target = target instanceof _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationMouseTarget ? target : new _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_0__.InputsNavigationMouseTarget(target);
         this._attachControl(this._src);
     }
     dispose() {
@@ -5811,6 +5851,345 @@ class PointerController {
     }
 }
 //# sourceMappingURL=map.inputs.source.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/gestures/index.js":
+/*!*************************************************!*\
+  !*** ./dist/map/inputs/touch/gestures/index.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _map_inputs_touch_gestures_drag__WEBPACK_IMPORTED_MODULE_0__.TouchMapDragGesture),
+/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _map_inputs_touch_gestures_rotate__WEBPACK_IMPORTED_MODULE_1__.TouchMapRotateGesture),
+/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _map_inputs_touch_gestures_zoom__WEBPACK_IMPORTED_MODULE_2__.TouchMapZoomGesture)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_touch_gestures_drag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.touch.gestures.drag */ "./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.drag.js");
+/* harmony import */ var _map_inputs_touch_gestures_rotate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.touch.gestures.rotate */ "./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.rotate.js");
+/* harmony import */ var _map_inputs_touch_gestures_zoom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.touch.gestures.zoom */ "./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.zoom.js");
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.drag.js":
+/*!**************************************************************************!*\
+  !*** ./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.drag.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TouchMapDragGesture: () => (/* binding */ TouchMapDragGesture)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map.inputs.touch.gestures */ "./dist/map/inputs/touch/map.inputs.touch.gestures.js");
+
+class TouchMapDragGesture extends _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture {
+    constructor(element, options) {
+        super(element, "drag", options);
+    }
+    _doStart(evt) {
+        super._doStart(evt);
+    }
+    _doMove(evt) {
+        super._doMove(evt);
+    }
+    _doEnd(evt) {
+        super._doEnd(evt);
+    }
+}
+//# sourceMappingURL=map.inputs.touch.gestures.drag.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.rotate.js":
+/*!****************************************************************************!*\
+  !*** ./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.rotate.js ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TouchMapRotateGesture: () => (/* binding */ TouchMapRotateGesture)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map.inputs.touch.gestures */ "./dist/map/inputs/touch/map.inputs.touch.gestures.js");
+
+class TouchMapRotateGesture extends _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture {
+    constructor(element, options) {
+        super(element, "rotate", options);
+    }
+    _doStart(evt) {
+        super._doStart(evt);
+    }
+    _doMove(evt) {
+        super._doMove(evt);
+    }
+    _doEnd(evt) {
+        super._doEnd(evt);
+    }
+}
+//# sourceMappingURL=map.inputs.touch.gestures.rotate.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.zoom.js":
+/*!**************************************************************************!*\
+  !*** ./dist/map/inputs/touch/gestures/map.inputs.touch.gestures.zoom.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TouchMapZoomGesture: () => (/* binding */ TouchMapZoomGesture)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map.inputs.touch.gestures */ "./dist/map/inputs/touch/map.inputs.touch.gestures.js");
+
+class TouchMapZoomGesture extends _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture {
+    constructor(element, options) {
+        super(element, "zoom", options);
+    }
+    _doStart(evt) {
+        super._doStart(evt);
+    }
+    _doMove(evt) {
+        super._doMove(evt);
+    }
+    _doEnd(evt) {
+        super._doEnd(evt);
+    }
+}
+//# sourceMappingURL=map.inputs.touch.gestures.zoom.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/index.js":
+/*!****************************************!*\
+  !*** ./dist/map/inputs/touch/index.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GestureStatus: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.GestureStatus),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTouchCapable),
+/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _gestures__WEBPACK_IMPORTED_MODULE_2__.TouchMapDragGesture),
+/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapEndEvent),
+/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapEvent),
+/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture),
+/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _gestures__WEBPACK_IMPORTED_MODULE_2__.TouchMapRotateGesture),
+/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapStartEvent),
+/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapUpdateEvent),
+/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _gestures__WEBPACK_IMPORTED_MODULE_2__.TouchMapZoomGesture),
+/* harmony export */   TouchSpot: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchSpot)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.touch.gestures */ "./dist/map/inputs/touch/map.inputs.touch.gestures.js");
+/* harmony import */ var _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.touch.interfaces */ "./dist/map/inputs/touch/map.inputs.touch.interfaces.js");
+/* harmony import */ var _gestures__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./gestures */ "./dist/map/inputs/touch/gestures/index.js");
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/map.inputs.touch.gestures.js":
+/*!************************************************************!*\
+  !*** ./dist/map/inputs/touch/map.inputs.touch.gestures.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TouchMapGesture: () => (/* binding */ TouchMapGesture)
+/* harmony export */ });
+/* harmony import */ var _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.touch.interfaces */ "./dist/map/inputs/touch/map.inputs.touch.interfaces.js");
+
+class TouchMapGesture {
+    static GetCenterToRef(spots, center) {
+        let count = spots.length;
+        center[TouchMapGesture.X_coordinate] = spots[0].clientX;
+        center[TouchMapGesture.Y_coordinate] = spots[0].clientY;
+        for (let i = 1; i < count; i++) {
+            center[TouchMapGesture.X_coordinate] += spots[i].clientX;
+            center[TouchMapGesture.Y_coordinate] += spots[i].clientY;
+        }
+        center[TouchMapGesture.X_coordinate] /= count;
+        center[TouchMapGesture.Y_coordinate] /= count;
+    }
+    constructor(element, gestureType, options) {
+        this._element = typeof element == "string" ? document.getElementById(element) : element;
+        if (this._element) {
+            this._element.addEventListener("touchstart", this._start.bind(this), false);
+            this._element.addEventListener("touchmove", this._move.bind(this), false);
+            this._element.addEventListener("touchend", this._end.bind(this), false);
+            this._element.addEventListener("touchcancel", this._cancel.bind(this), false);
+        }
+        this._gestureType = gestureType;
+        this._options = options || { touchCount: 1 };
+        this._touchesA = Array.from({ length: this._options.touchCount }, () => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot());
+        this._touchesB = Array.from({ length: this._options.touchCount }, () => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot());
+        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.IDLE;
+    }
+    get element() {
+        return this._element;
+    }
+    _start(e) {
+        e.preventDefault();
+        var evt = e;
+        if (!evt.touches || evt.touches.length != this._options.touchCount) {
+            return;
+        }
+        this._doStart(evt);
+    }
+    _doStart(evt) {
+        this._update(evt);
+        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.STARTED;
+        this._fireEvent(this._buildStartEvent(evt));
+    }
+    _move(e) {
+        e.preventDefault();
+        var evt = e;
+        if (!evt.touches || evt.touches.length != this._options.touchCount) {
+            return;
+        }
+        this._doMove(evt);
+    }
+    _doMove(evt) {
+        this._swap();
+        this._update(evt);
+        this._fireEvent(this._buildUpdateEvent(evt));
+    }
+    _end(e) {
+        e.preventDefault();
+        var evt = e;
+        let l1 = evt.touches?.length ?? 0;
+        let l2 = evt.changedTouches?.length ?? 0;
+        var totalLength = l1 + l2;
+        if (totalLength >= this._options.touchCount) {
+            this._doEnd(evt);
+        }
+    }
+    _doEnd(evt) {
+        this._clear();
+        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.IDLE;
+        this._fireEvent(this._buildEndEvent(evt));
+    }
+    _cancel(e) {
+        e.preventDefault();
+        this._clear();
+        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.IDLE;
+    }
+    _fireEvent(e) {
+        if (e) {
+            this._element?.dispatchEvent(e);
+        }
+    }
+    _update(evt) {
+        let now = Date.now();
+        let count = evt.touches.length;
+        for (let i = 0; i < count; i++) {
+            let touch = evt.touches[i];
+            let localTouch = this._touchesB[i];
+            localTouch.id = touch.identifier;
+            localTouch.x = touch.clientX;
+            localTouch.y = touch.clientY;
+            localTouch.timestamp = now;
+        }
+    }
+    _clear() { }
+    _swap() {
+        var tmp = this._touchesB;
+        this._touchesB = this._touchesA;
+        this._touchesA = tmp;
+    }
+    _buildStartEvent(evt) {
+        return new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchMapStartEvent(evt, this._gestureType);
+    }
+    _buildUpdateEvent(evt) {
+        return new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchMapUpdateEvent(evt, this._gestureType, this._touchesA.map((v) => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot(v)), this._touchesB.map((v) => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot(v)));
+    }
+    _buildEndEvent(evt) {
+        return new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchMapEndEvent(evt, this._gestureType);
+    }
+}
+TouchMapGesture.X_coordinate = 0;
+TouchMapGesture.Y_coordinate = 1;
+//# sourceMappingURL=map.inputs.touch.gestures.js.map
+
+/***/ }),
+
+/***/ "./dist/map/inputs/touch/map.inputs.touch.interfaces.js":
+/*!**************************************************************!*\
+  !*** ./dist/map/inputs/touch/map.inputs.touch.interfaces.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GestureStatus: () => (/* binding */ GestureStatus),
+/* harmony export */   IsTouchCapable: () => (/* binding */ IsTouchCapable),
+/* harmony export */   TouchMapEndEvent: () => (/* binding */ TouchMapEndEvent),
+/* harmony export */   TouchMapEvent: () => (/* binding */ TouchMapEvent),
+/* harmony export */   TouchMapStartEvent: () => (/* binding */ TouchMapStartEvent),
+/* harmony export */   TouchMapUpdateEvent: () => (/* binding */ TouchMapUpdateEvent),
+/* harmony export */   TouchSpot: () => (/* binding */ TouchSpot)
+/* harmony export */ });
+var GestureStatus;
+(function (GestureStatus) {
+    GestureStatus[GestureStatus["IDLE"] = 0] = "IDLE";
+    GestureStatus[GestureStatus["STARTED"] = 1] = "STARTED";
+})(GestureStatus || (GestureStatus = {}));
+class TouchSpot {
+    constructor(spot) {
+        this.x = 0;
+        this.y = 0;
+        this.timestamp = 0;
+        if (spot) {
+            this.id = spot.id;
+            this.x = spot.x;
+            this.y = spot.y;
+            this.timestamp = spot.timestamp;
+        }
+    }
+}
+class TouchMapEvent extends Event {
+    constructor(eventSource, gestureType, name) {
+        super(name);
+        this.eventSource = eventSource;
+        this.gestureType = gestureType;
+    }
+    preventDefault() {
+        this.eventSource?.preventDefault();
+    }
+}
+class TouchMapStartEvent extends TouchMapEvent {
+    constructor(eventSource, gestureType, name) {
+        super(eventSource, gestureType, name ?? "gesturestart");
+    }
+}
+class TouchMapEndEvent extends TouchMapEvent {
+    constructor(eventSource, gestureType, name) {
+        super(eventSource, gestureType, name ?? "gestureend");
+    }
+}
+class TouchMapUpdateEvent extends TouchMapEvent {
+    constructor(eventSource, gestureType, touchesA, touchesB, name) {
+        super(eventSource, gestureType, name ?? "gestureupdate");
+        this.touchesA = touchesA;
+        this.touchesB = touchesB ?? touchesA;
+    }
+}
+function IsTouchCapable() {
+    const hasTouchEvents = "ontouchstart" in window;
+    const hasTouchConstructor = typeof window !== "undefined" && "DocumentTouch" in window && document instanceof window.DocumentTouch;
+    const hasTouchPoints = navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    return hasTouchEvents || hasTouchConstructor || hasTouchPoints;
+}
+//# sourceMappingURL=map.inputs.touch.interfaces.js.map
 
 /***/ }),
 
@@ -7505,6 +7884,867 @@ StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
 
 /***/ }),
 
+/***/ "./dist/text/index.js":
+/*!****************************!*\
+  !*** ./dist/text/index.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.DeserializeLocalizableString),
+/* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.GetLocalizableStringValue),
+/* harmony export */   ISO6391: () => (/* reexport safe */ _iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391),
+/* harmony export */   IsLocalizable: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.IsLocalizable),
+/* harmony export */   LocalString: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.LocalString)
+/* harmony export */ });
+/* harmony import */ var _iso6391__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./iso6391 */ "./dist/text/iso6391.js");
+/* harmony import */ var _localizable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./localizable */ "./dist/text/localizable.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/text/iso6391.js":
+/*!******************************!*\
+  !*** ./dist/text/iso6391.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ISO6391: () => (/* binding */ ISO6391)
+/* harmony export */ });
+const LANGUAGES_LIST = {
+    aa: {
+        name: "Afar",
+        nativeName: "Afaraf",
+    },
+    ab: {
+        name: "Abkhaz",
+        nativeName: "аҧсуа бызшәа",
+    },
+    ae: {
+        name: "Avestan",
+        nativeName: "avesta",
+    },
+    af: {
+        name: "Afrikaans",
+        nativeName: "Afrikaans",
+    },
+    ak: {
+        name: "Akan",
+        nativeName: "Akan",
+    },
+    am: {
+        name: "Amharic",
+        nativeName: "አማርኛ",
+    },
+    an: {
+        name: "Aragonese",
+        nativeName: "aragonés",
+    },
+    ar: {
+        name: "Arabic",
+        nativeName: "اللغة العربية",
+    },
+    as: {
+        name: "Assamese",
+        nativeName: "অসমীয়া",
+    },
+    av: {
+        name: "Avaric",
+        nativeName: "авар мацӀ",
+    },
+    ay: {
+        name: "Aymara",
+        nativeName: "aymar aru",
+    },
+    az: {
+        name: "Azerbaijani",
+        nativeName: "azərbaycan dili",
+    },
+    ba: {
+        name: "Bashkir",
+        nativeName: "башҡорт теле",
+    },
+    be: {
+        name: "Belarusian",
+        nativeName: "беларуская мова",
+    },
+    bg: {
+        name: "Bulgarian",
+        nativeName: "български език",
+    },
+    bh: {
+        name: "Bihari",
+        nativeName: "भोजपुरी",
+    },
+    bi: {
+        name: "Bislama",
+        nativeName: "Bislama",
+    },
+    bm: {
+        name: "Bambara",
+        nativeName: "bamanankan",
+    },
+    bn: {
+        name: "Bengali",
+        nativeName: "বাংলা",
+    },
+    bo: {
+        name: "Tibetan Standard",
+        nativeName: "བོད་ཡིག",
+    },
+    br: {
+        name: "Breton",
+        nativeName: "brezhoneg",
+    },
+    bs: {
+        name: "Bosnian",
+        nativeName: "bosanski jezik",
+    },
+    ca: {
+        name: "Catalan",
+        nativeName: "català",
+    },
+    ce: {
+        name: "Chechen",
+        nativeName: "нохчийн мотт",
+    },
+    ch: {
+        name: "Chamorro",
+        nativeName: "Chamoru",
+    },
+    co: {
+        name: "Corsican",
+        nativeName: "corsu",
+    },
+    cr: {
+        name: "Cree",
+        nativeName: "ᓀᐦᐃᔭᐍᐏᐣ",
+    },
+    cs: {
+        name: "Czech",
+        nativeName: "čeština",
+    },
+    cu: {
+        name: "Old Church Slavonic",
+        nativeName: "ѩзыкъ словѣньскъ",
+    },
+    cv: {
+        name: "Chuvash",
+        nativeName: "чӑваш чӗлхи",
+    },
+    cy: {
+        name: "Welsh",
+        nativeName: "Cymraeg",
+    },
+    da: {
+        name: "Danish",
+        nativeName: "dansk",
+    },
+    de: {
+        name: "German",
+        nativeName: "Deutsch",
+    },
+    dv: {
+        name: "Divehi",
+        nativeName: "Dhivehi",
+    },
+    dz: {
+        name: "Dzongkha",
+        nativeName: "རྫོང་ཁ",
+    },
+    ee: {
+        name: "Ewe",
+        nativeName: "Eʋegbe",
+    },
+    el: {
+        name: "Greek",
+        nativeName: "ελληνικά",
+    },
+    en: {
+        name: "English",
+        nativeName: "English",
+    },
+    eo: {
+        name: "Esperanto",
+        nativeName: "Esperanto",
+    },
+    es: {
+        name: "Spanish",
+        nativeName: "Español",
+    },
+    et: {
+        name: "Estonian",
+        nativeName: "eesti",
+    },
+    eu: {
+        name: "Basque",
+        nativeName: "euskara",
+    },
+    fa: {
+        name: "Persian",
+        nativeName: "فارسی",
+    },
+    ff: {
+        name: "Fula",
+        nativeName: "Fulfulde",
+    },
+    fi: {
+        name: "Finnish",
+        nativeName: "suomi",
+    },
+    fj: {
+        name: "Fijian",
+        nativeName: "Vakaviti",
+    },
+    fo: {
+        name: "Faroese",
+        nativeName: "føroyskt",
+    },
+    fr: {
+        name: "French",
+        nativeName: "Français",
+    },
+    fy: {
+        name: "Western Frisian",
+        nativeName: "Frysk",
+    },
+    ga: {
+        name: "Irish",
+        nativeName: "Gaeilge",
+    },
+    gd: {
+        name: "Scottish Gaelic",
+        nativeName: "Gàidhlig",
+    },
+    gl: {
+        name: "Galician",
+        nativeName: "galego",
+    },
+    gn: {
+        name: "Guaraní",
+        nativeName: "Avañe'ẽ",
+    },
+    gu: {
+        name: "Gujarati",
+        nativeName: "ગુજરાતી",
+    },
+    gv: {
+        name: "Manx",
+        nativeName: "Gaelg",
+    },
+    ha: {
+        name: "Hausa",
+        nativeName: "هَوُسَ",
+    },
+    he: {
+        name: "Hebrew",
+        nativeName: "עברית",
+    },
+    hi: {
+        name: "Hindi",
+        nativeName: "हिन्दी",
+    },
+    ho: {
+        name: "Hiri Motu",
+        nativeName: "Hiri Motu",
+    },
+    hr: {
+        name: "Croatian",
+        nativeName: "hrvatski jezik",
+    },
+    ht: {
+        name: "Haitian",
+        nativeName: "Kreyòl ayisyen",
+    },
+    hu: {
+        name: "Hungarian",
+        nativeName: "magyar",
+    },
+    hy: {
+        name: "Armenian",
+        nativeName: "Հայերեն",
+    },
+    hz: {
+        name: "Herero",
+        nativeName: "Otjiherero",
+    },
+    ia: {
+        name: "Interlingua",
+        nativeName: "Interlingua",
+    },
+    id: {
+        name: "Indonesian",
+        nativeName: "Indonesian",
+    },
+    ie: {
+        name: "Interlingue",
+        nativeName: "Interlingue",
+    },
+    ig: {
+        name: "Igbo",
+        nativeName: "Asụsụ Igbo",
+    },
+    ii: {
+        name: "Nuosu",
+        nativeName: "ꆈꌠ꒿ Nuosuhxop",
+    },
+    ik: {
+        name: "Inupiaq",
+        nativeName: "Iñupiaq",
+    },
+    io: {
+        name: "Ido",
+        nativeName: "Ido",
+    },
+    is: {
+        name: "Icelandic",
+        nativeName: "Íslenska",
+    },
+    it: {
+        name: "Italian",
+        nativeName: "Italiano",
+    },
+    iu: {
+        name: "Inuktitut",
+        nativeName: "ᐃᓄᒃᑎᑐᑦ",
+    },
+    ja: {
+        name: "Japanese",
+        nativeName: "日本語",
+    },
+    jv: {
+        name: "Javanese",
+        nativeName: "basa Jawa",
+    },
+    ka: {
+        name: "Georgian",
+        nativeName: "ქართული",
+    },
+    kg: {
+        name: "Kongo",
+        nativeName: "Kikongo",
+    },
+    ki: {
+        name: "Kikuyu",
+        nativeName: "Gĩkũyũ",
+    },
+    kj: {
+        name: "Kwanyama",
+        nativeName: "Kuanyama",
+    },
+    kk: {
+        name: "Kazakh",
+        nativeName: "қазақ тілі",
+    },
+    kl: {
+        name: "Kalaallisut",
+        nativeName: "kalaallisut",
+    },
+    km: {
+        name: "Khmer",
+        nativeName: "ខេមរភាសា",
+    },
+    kn: {
+        name: "Kannada",
+        nativeName: "ಕನ್ನಡ",
+    },
+    ko: {
+        name: "Korean",
+        nativeName: "한국어",
+    },
+    kr: {
+        name: "Kanuri",
+        nativeName: "Kanuri",
+    },
+    ks: {
+        name: "Kashmiri",
+        nativeName: "कश्मीरी",
+    },
+    ku: {
+        name: "Kurdish",
+        nativeName: "Kurdî",
+    },
+    kv: {
+        name: "Komi",
+        nativeName: "коми кыв",
+    },
+    kw: {
+        name: "Cornish",
+        nativeName: "Kernewek",
+    },
+    ky: {
+        name: "Kyrgyz",
+        nativeName: "Кыргызча",
+    },
+    la: {
+        name: "Latin",
+        nativeName: "latine",
+    },
+    lb: {
+        name: "Luxembourgish",
+        nativeName: "Lëtzebuergesch",
+    },
+    lg: {
+        name: "Ganda",
+        nativeName: "Luganda",
+    },
+    li: {
+        name: "Limburgish",
+        nativeName: "Limburgs",
+    },
+    ln: {
+        name: "Lingala",
+        nativeName: "Lingála",
+    },
+    lo: {
+        name: "Lao",
+        nativeName: "ພາສາ",
+    },
+    lt: {
+        name: "Lithuanian",
+        nativeName: "lietuvių kalba",
+    },
+    lu: {
+        name: "Luba-Katanga",
+        nativeName: "Tshiluba",
+    },
+    lv: {
+        name: "Latvian",
+        nativeName: "latviešu valoda",
+    },
+    mg: {
+        name: "Malagasy",
+        nativeName: "fiteny malagasy",
+    },
+    mh: {
+        name: "Marshallese",
+        nativeName: "Kajin M̧ajeļ",
+    },
+    mi: {
+        name: "Māori",
+        nativeName: "te reo Māori",
+    },
+    mk: {
+        name: "Macedonian",
+        nativeName: "македонски јазик",
+    },
+    ml: {
+        name: "Malayalam",
+        nativeName: "മലയാളം",
+    },
+    mn: {
+        name: "Mongolian",
+        nativeName: "Монгол хэл",
+    },
+    mr: {
+        name: "Marathi",
+        nativeName: "मराठी",
+    },
+    ms: {
+        name: "Malay",
+        nativeName: "هاس ملايو‎",
+    },
+    mt: {
+        name: "Maltese",
+        nativeName: "Malti",
+    },
+    my: {
+        name: "Burmese",
+        nativeName: "ဗမာစာ",
+    },
+    na: {
+        name: "Nauru",
+        nativeName: "Ekakairũ Naoero",
+    },
+    nb: {
+        name: "Norwegian Bokmål",
+        nativeName: "Norsk bokmål",
+    },
+    nd: {
+        name: "Northern Ndebele",
+        nativeName: "isiNdebele",
+    },
+    ne: {
+        name: "Nepali",
+        nativeName: "नेपाली",
+    },
+    ng: {
+        name: "Ndonga",
+        nativeName: "Owambo",
+    },
+    nl: {
+        name: "Dutch",
+        nativeName: "Nederlands",
+    },
+    nn: {
+        name: "Norwegian Nynorsk",
+        nativeName: "Norsk nynorsk",
+    },
+    no: {
+        name: "Norwegian",
+        nativeName: "Norsk",
+    },
+    nr: {
+        name: "Southern Ndebele",
+        nativeName: "isiNdebele",
+    },
+    nv: {
+        name: "Navajo",
+        nativeName: "Diné bizaad",
+    },
+    ny: {
+        name: "Chichewa",
+        nativeName: "chiCheŵa",
+    },
+    oc: {
+        name: "Occitan",
+        nativeName: "occitan",
+    },
+    oj: {
+        name: "Ojibwe",
+        nativeName: "ᐊᓂᔑᓈᐯᒧᐎᓐ",
+    },
+    om: {
+        name: "Oromo",
+        nativeName: "Afaan Oromoo",
+    },
+    or: {
+        name: "Oriya",
+        nativeName: "ଓଡ଼ିଆ",
+    },
+    os: {
+        name: "Ossetian",
+        nativeName: "ирон æвзаг",
+    },
+    pa: {
+        name: "Panjabi",
+        nativeName: "ਪੰਜਾਬੀ",
+    },
+    pi: {
+        name: "Pāli",
+        nativeName: "पाऴि",
+    },
+    pl: {
+        name: "Polish",
+        nativeName: "język polski",
+    },
+    ps: {
+        name: "Pashto",
+        nativeName: "پښتو",
+    },
+    pt: {
+        name: "Portuguese",
+        nativeName: "Português",
+    },
+    qu: {
+        name: "Quechua",
+        nativeName: "Runa Simi",
+    },
+    rm: {
+        name: "Romansh",
+        nativeName: "rumantsch grischun",
+    },
+    rn: {
+        name: "Kirundi",
+        nativeName: "Ikirundi",
+    },
+    ro: {
+        name: "Romanian",
+        nativeName: "limba română",
+    },
+    ru: {
+        name: "Russian",
+        nativeName: "Русский",
+    },
+    rw: {
+        name: "Kinyarwanda",
+        nativeName: "Ikinyarwanda",
+    },
+    sa: {
+        name: "Sanskrit",
+        nativeName: "संस्कृतम्",
+    },
+    sc: {
+        name: "Sardinian",
+        nativeName: "sardu",
+    },
+    sd: {
+        name: "Sindhi",
+        nativeName: "सिन्धी",
+    },
+    se: {
+        name: "Northern Sami",
+        nativeName: "Davvisámegiella",
+    },
+    sg: {
+        name: "Sango",
+        nativeName: "yângâ tî sängö",
+    },
+    si: {
+        name: "Sinhala",
+        nativeName: "සිංහල",
+    },
+    sk: {
+        name: "Slovak",
+        nativeName: "slovenčina",
+    },
+    sl: {
+        name: "Slovene",
+        nativeName: "slovenski jezik",
+    },
+    sm: {
+        name: "Samoan",
+        nativeName: "gagana fa'a Samoa",
+    },
+    sn: {
+        name: "Shona",
+        nativeName: "chiShona",
+    },
+    so: {
+        name: "Somali",
+        nativeName: "Soomaaliga",
+    },
+    sq: {
+        name: "Albanian",
+        nativeName: "Shqip",
+    },
+    sr: {
+        name: "Serbian",
+        nativeName: "српски језик",
+    },
+    ss: {
+        name: "Swati",
+        nativeName: "SiSwati",
+    },
+    st: {
+        name: "Southern Sotho",
+        nativeName: "Sesotho",
+    },
+    su: {
+        name: "Sundanese",
+        nativeName: "Basa Sunda",
+    },
+    sv: {
+        name: "Swedish",
+        nativeName: "svenska",
+    },
+    sw: {
+        name: "Swahili",
+        nativeName: "Kiswahili",
+    },
+    ta: {
+        name: "Tamil",
+        nativeName: "தமிழ்",
+    },
+    te: {
+        name: "Telugu",
+        nativeName: "తెలుగు",
+    },
+    tg: {
+        name: "Tajik",
+        nativeName: "тоҷикӣ",
+    },
+    th: {
+        name: "Thai",
+        nativeName: "ไทย",
+    },
+    ti: {
+        name: "Tigrinya",
+        nativeName: "ትግርኛ",
+    },
+    tk: {
+        name: "Turkmen",
+        nativeName: "Türkmen",
+    },
+    tl: {
+        name: "Tagalog",
+        nativeName: "Wikang Tagalog",
+    },
+    tn: {
+        name: "Tswana",
+        nativeName: "Setswana",
+    },
+    to: {
+        name: "Tonga",
+        nativeName: "faka Tonga",
+    },
+    tr: {
+        name: "Turkish",
+        nativeName: "Türkçe",
+    },
+    ts: {
+        name: "Tsonga",
+        nativeName: "Xitsonga",
+    },
+    tt: {
+        name: "Tatar",
+        nativeName: "татар теле",
+    },
+    tw: {
+        name: "Twi",
+        nativeName: "Twi",
+    },
+    ty: {
+        name: "Tahitian",
+        nativeName: "Reo Tahiti",
+    },
+    ug: {
+        name: "Uyghur",
+        nativeName: "ئۇيغۇرچە‎",
+    },
+    uk: {
+        name: "Ukrainian",
+        nativeName: "Українська",
+    },
+    ur: {
+        name: "Urdu",
+        nativeName: "اردو",
+    },
+    uz: {
+        name: "Uzbek",
+        nativeName: "Ўзбек",
+    },
+    ve: {
+        name: "Venda",
+        nativeName: "Tshivenḓa",
+    },
+    vi: {
+        name: "Vietnamese",
+        nativeName: "Tiếng Việt",
+    },
+    vo: {
+        name: "Volapük",
+        nativeName: "Volapük",
+    },
+    wa: {
+        name: "Walloon",
+        nativeName: "walon",
+    },
+    wo: {
+        name: "Wolof",
+        nativeName: "Wollof",
+    },
+    xh: {
+        name: "Xhosa",
+        nativeName: "isiXhosa",
+    },
+    yi: {
+        name: "Yiddish",
+        nativeName: "ייִדיש",
+    },
+    yo: {
+        name: "Yoruba",
+        nativeName: "Yorùbá",
+    },
+    za: {
+        name: "Zhuang",
+        nativeName: "Saɯ cueŋƅ",
+    },
+    zh: {
+        name: "Chinese",
+        nativeName: "中文",
+    },
+    zu: {
+        name: "Zulu",
+        nativeName: "isiZulu",
+    },
+};
+class ISO6391 {
+    static getName(code) {
+        return ISO6391._map.get(code)?.name;
+    }
+    static getNativeName(code) {
+        return ISO6391._map.get(code)?.nativeName;
+    }
+    static getCode(name) {
+        var lcn = name.toLowerCase();
+        for (var e of ISO6391._map.entries()) {
+            if (e[1].name.toLowerCase() === lcn || e[1].nativeName.toLowerCase() === lcn) {
+                return e[0];
+            }
+        }
+        return undefined;
+    }
+    static validate(code) {
+        return ISO6391._map.has(code);
+    }
+}
+ISO6391._map = new Map(Object.entries(LANGUAGES_LIST));
+//# sourceMappingURL=iso6391.js.map
+
+/***/ }),
+
+/***/ "./dist/text/localizable.js":
+/*!**********************************!*\
+  !*** ./dist/text/localizable.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DeserializeLocalizableString: () => (/* binding */ DeserializeLocalizableString),
+/* harmony export */   GetLocalizableStringValue: () => (/* binding */ GetLocalizableStringValue),
+/* harmony export */   IsLocalizable: () => (/* binding */ IsLocalizable),
+/* harmony export */   LocalString: () => (/* binding */ LocalString)
+/* harmony export */ });
+/* harmony import */ var _iso6391__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./iso6391 */ "./dist/text/iso6391.js");
+
+function IsLocalizable(item) {
+    return item instanceof LocalString;
+}
+function DeserializeLocalizableString(input) {
+    if (!input) {
+        return undefined;
+    }
+    if (input["contents"]) {
+        return input;
+    }
+    var ls = new LocalString();
+    ls.deserialize(input);
+    return ls;
+}
+function GetLocalizableStringValue(str, code) {
+    return str instanceof String ? str : str.getValue(code);
+}
+class LocalString {
+    constructor() {
+        this.contents = new Map();
+    }
+    tryAdd(code, value) {
+        if (_iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391.validate(code)) {
+            this.contents.set(code, value);
+            return true;
+        }
+        return false;
+    }
+    deserialize(input) {
+        this.contents.clear();
+        for (var p in input.getOwnPropertyNames()) {
+            if (_iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391.validate(p)) {
+                this.contents.set(p, input[p]);
+            }
+        }
+    }
+    getValue(code) {
+        if (code) {
+            var v = this.contents.get(code);
+            if (v || code == LocalString.DefaultCode) {
+                return v;
+            }
+        }
+        return this.contents.get(LocalString.DefaultCode);
+    }
+}
+LocalString.DefaultCode = "en";
+//# sourceMappingURL=localizable.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/index.js":
 /*!********************************!*\
   !*** ./dist/tiles/3d/index.js ***!
@@ -7513,7 +8753,11 @@ StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngine)
+/* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngine),
+/* harmony export */   Tile3dStreamingEngineOptions: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngineOptions),
+/* harmony export */   TileNode: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_0__.TileNode),
+/* harmony export */   TilesetCache: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_0__.TilesetCache),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec)
 /* harmony export */ });
 /* harmony import */ var _streaming__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming */ "./dist/tiles/3d/streaming/index.js");
 
@@ -7529,7 +8773,11 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngine)
+/* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngine),
+/* harmony export */   Tile3dStreamingEngineOptions: () => (/* reexport safe */ _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngineOptions),
+/* harmony export */   TileNode: () => (/* reexport safe */ _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__.TileNode),
+/* harmony export */   TilesetCache: () => (/* reexport safe */ _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__.TilesetCache),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec)
 /* harmony export */ });
 /* harmony import */ var _tile3d_streaming_engine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.streaming.engine */ "./dist/tiles/3d/streaming/tile3d.streaming.engine.js");
 
@@ -7546,14 +8794,61 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Tile3dStreamingEngine: () => (/* binding */ Tile3dStreamingEngine)
+/* harmony export */   Tile3dStreamingEngine: () => (/* binding */ Tile3dStreamingEngine),
+/* harmony export */   Tile3dStreamingEngineOptions: () => (/* binding */ Tile3dStreamingEngineOptions),
+/* harmony export */   TileNode: () => (/* binding */ TileNode),
+/* harmony export */   TilesetCache: () => (/* binding */ TilesetCache),
+/* harmony export */   TilesetCodec: () => (/* binding */ TilesetCodec)
 /* harmony export */ });
 /* harmony import */ var _pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _io_webClient__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../io/webClient */ "./dist/io/webClient.js");
+/* harmony import */ var _utils_text__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../utils/text */ "./dist/utils/text.js");
 
+
+
+class TilesetCodec {
+    async decodeAsync(r) {
+        return r instanceof Response ? (await r.json()) : null;
+    }
+}
+class Tile3dStreamingEngineOptions {
+}
+Tile3dStreamingEngineOptions.Default = {
+    tilesetExtension: "json",
+};
+class TileNode {
+    constructor(tile, tilesetUri, parent = null) {
+        this.tile = tile;
+        this.parent = parent;
+        this.children = [];
+        this.tilesetUri = tilesetUri;
+    }
+    addChild(child) {
+        this.children.push(child);
+    }
+}
+class TilesetCache {
+    constructor() {
+        this.cache = new Map();
+    }
+    get(tilesetUri) {
+        return this.cache.get(tilesetUri) || null;
+    }
+    set(tilesetUri, tileset) {
+        this.cache.set(tilesetUri, tileset);
+    }
+    has(tilesetUri) {
+        return this.cache.has(tilesetUri);
+    }
+}
 class Tile3dStreamingEngine extends _pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
-    constructor(uri) {
+    constructor(uri, options) {
         super();
         this._uri = uri;
+        this._root = null;
+        this._cache = new TilesetCache();
+        this._client = new _io_webClient__WEBPACK_IMPORTED_MODULE_1__.WebClient(uri, new TilesetCodec());
+        this._options = { ...Tile3dStreamingEngineOptions.Default, ...options };
     }
     setContext(state, display) {
         if (!state || !display) {
@@ -7564,8 +8859,48 @@ class Tile3dStreamingEngine extends _pipeline_tiles_pipeline_sourceblock__WEBPAC
     }
     _doClearContext() { }
     _doValidateContext(state, display) {
-        if (state && display) {
+        if (!state || !display) {
+            this._doClearContext();
+            return;
         }
+        if (this._root === null) {
+            this._doFetchTilesetAsync(this._uri).then((tileset) => {
+                if (tileset) {
+                    this._root = new TileNode(tileset.root, this._uri, null);
+                    this._doValidateContext(state, display);
+                }
+            });
+            return;
+        }
+        this._browseTilesetHierarchy(this._root.tile, state, display, this._uri);
+    }
+    async _browseTilesetHierarchy(tile, state, display, baseUrl) {
+        if (!tile)
+            return;
+        if (!this._isTileVisible(tile, state, display)) {
+            return;
+        }
+        const uri = tile.content?.uri;
+        const ext = uri ? _utils_text__WEBPACK_IMPORTED_MODULE_2__.TextUtils.GetUriExtension(uri)?.toLowerCase() : null;
+        if (uri && ext && ext === (this._options.tilesetExtension?.toLowerCase() ?? "json")) {
+            const contentUrl = new URL(uri, baseUrl).toString();
+            const tileset = await this._doFetchTilesetAsync(contentUrl);
+            if (tileset && tileset.root) {
+                await this._browseTilesetHierarchy(tileset.root, state, display, contentUrl);
+            }
+        }
+        if (tile.children) {
+            for (const child of tile.children) {
+                await this._browseTilesetHierarchy(child, state, display, baseUrl);
+            }
+        }
+    }
+    _isTileVisible(tile, state, display) {
+        return true;
+    }
+    async _doFetchTilesetAsync(uri) {
+        const result = await this._client.fetchAsync(this._uri);
+        return result.content;
     }
 }
 //# sourceMappingURL=tile3d.streaming.engine.js.map
@@ -8652,6 +9987,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_13__.Tile),
 /* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_17__.Tile3dStreamingEngine),
+/* harmony export */   Tile3dStreamingEngineOptions: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_17__.Tile3dStreamingEngineOptions),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_15__.TileCollection),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider),
@@ -8662,6 +9998,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationApi),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationStateSynchronizer),
+/* harmony export */   TileNode: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_17__.TileNode),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
 /* harmony export */   TileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileProvider),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_16__.TileSystemBounds),
@@ -8669,6 +10006,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileView),
 /* harmony export */   TileViewBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileViewBase),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClient),
+/* harmony export */   TilesetCache: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_17__.TilesetCache),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_17__.TilesetCodec),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_url_web__WEBPACK_IMPORTED_MODULE_14__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
@@ -10821,7 +12160,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class TileWebClient extends _io__WEBPACK_IMPORTED_MODULE_0__.WebClient {
     constructor(name, urlFactory, codec, metrics, options) {
-        super(name, urlFactory, codec, options);
+        super(name, codec, urlFactory, options);
         this._metrics = metrics;
         this._zindex = 0;
     }
@@ -12126,8 +13465,10 @@ MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   HasToString: () => (/* binding */ HasToString),
 /* harmony export */   IsDisposable: () => (/* binding */ IsDisposable),
 /* harmony export */   IsNumber: () => (/* binding */ IsNumber),
+/* harmony export */   IsString: () => (/* binding */ IsString),
 /* harmony export */   isArrayOfFloatArray: () => (/* binding */ isArrayOfFloatArray),
 /* harmony export */   isFloatArray: () => (/* binding */ isFloatArray),
 /* harmony export */   isValidable: () => (/* binding */ isValidable)
@@ -12156,6 +13497,12 @@ function isValidable(obj) {
 }
 function IsNumber(value) {
     return typeof value === "number" && !Number.isNaN(value);
+}
+function IsString(value) {
+    return typeof value === "string";
+}
+function HasToString(value) {
+    return value !== null && typeof value === "object" && typeof value.toString === "function";
 }
 //# sourceMappingURL=types.js.map
 
@@ -12259,6 +13606,10 @@ __webpack_require__.r(__webpack_exports__);
 class TextUtils {
     static BuildNameWithSuffix(name, suffix, separator) {
         return `${name}${separator ?? TextUtils.DEFAULT_SEPARATOR}${suffix}`;
+    }
+    static GetUriExtension(uri) {
+        const lastDot = uri.lastIndexOf(".");
+        return lastDot !== -1 ? uri.substring(lastDot + 1) : null;
     }
 }
 TextUtils.DEFAULT_SEPARATOR = ".";
@@ -12401,6 +13752,8 @@ ValidableBase.VALID_PROPERTY_NAME = "valid";
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
+(() => {
 /*!***********************!*\
   !*** ./dist/index.js ***!
   \***********************/
@@ -12444,6 +13797,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemTileWebClient),
+/* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.DeserializeLocalizableString),
 /* harmony export */   Display: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.EPSG3857),
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.ElevationHelpers),
@@ -12468,20 +13822,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeoShape: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoShape),
 /* harmony export */   GeoShapeType: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoShapeType),
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem),
+/* harmony export */   GestureStatus: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.GestureStatus),
+/* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.GetLocalizableStringValue),
 /* harmony export */   Google: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.GoogleMap2DUrlBuilder),
 /* harmony export */   HSLColor: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.HSLColor),
 /* harmony export */   HasNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.HasNavigationApi),
 /* harmony export */   HasNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.HasNavigationState),
+/* harmony export */   HasToString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.HasToString),
 /* harmony export */   HorizonVector: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.HorizonVector),
+/* harmony export */   ISO6391: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.ISO6391),
 /* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageDataTileCodec),
 /* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageDataTileCodecOptions),
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageLayer),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageTileCodec),
 /* harmony export */   InputControllerBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputControllerBase),
-/* harmony export */   InputsNavigationTarget: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationTarget),
+/* harmony export */   InputsNavigationMouseTarget: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationMouseTarget),
+/* harmony export */   InputsNavigationTargetBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationTargetBase),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
 /* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTileAddress),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounds),
@@ -12490,11 +13849,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsDrawableTileMapLayer),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
+/* harmony export */   IsLocalizable: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsNumber),
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsPhysicalDisplay),
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
+/* harmony export */   IsString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsString),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTile),
 /* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
@@ -12508,12 +13869,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileSystemBounds),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.IsTouchCapable),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.JsonTileCodec),
 /* harmony export */   JulianDate: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.JulianDate),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.KnownPlaces),
 /* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
 /* harmony export */   Line: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Line),
+/* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.LocalString),
 /* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
 /* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapZen),
@@ -12573,6 +13936,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextUtils: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.TextUtils),
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Tile),
 /* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Tile3dStreamingEngine),
+/* harmony export */   Tile3dStreamingEngineOptions: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Tile3dStreamingEngineOptions),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileAddress),
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileCollection),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileContentProvider),
@@ -12583,6 +13947,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileNavigationApi),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileNavigationStateSynchronizer),
+/* harmony export */   TileNode: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileNode),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TilePipelineLink),
 /* harmony export */   TileProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileProvider),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileSystemBounds),
@@ -12590,7 +13955,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileView),
 /* harmony export */   TileViewBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileViewBase),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileWebClient),
+/* harmony export */   TilesetCache: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TilesetCache),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TilesetCodec),
 /* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
+/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapDragGesture),
+/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapEndEvent),
+/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapEvent),
+/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapGesture),
+/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapRotateGesture),
+/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapStartEvent),
+/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapUpdateEvent),
+/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapZoomGesture),
+/* harmony export */   TouchSpot: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchSpot),
 /* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Unit),
 /* harmony export */   ValidableBase: () => (/* reexport safe */ _validable__WEBPACK_IMPORTED_MODULE_1__.ValidableBase),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.VectorTileGeomType),
@@ -12614,7 +13990,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isPolygon: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolygon),
 /* harmony export */   isPolyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolyline),
 /* harmony export */   isShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isShape),
-/* harmony export */   isSupportingTouch: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.isSupportingTouch),
 /* harmony export */   isValidable: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.isValidable),
 /* harmony export */   isViewProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.isViewProxy)
 /* harmony export */ });
@@ -12632,6 +14007,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./utils/index */ "./dist/utils/index.js");
 /* harmony import */ var _cache_index__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./cache/index */ "./dist/cache/index.js");
 /* harmony import */ var _dem_index__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./dem/index */ "./dist/dem/index.js");
+/* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./text */ "./dist/text/index.js");
+
 
 
 
@@ -12647,6 +14024,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 //# sourceMappingURL=index.js.map
+})();
+
 SPACEXR = __webpack_exports__;
 /******/ })()
 ;

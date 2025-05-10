@@ -110,12 +110,12 @@ export abstract class Quantity {
         return this.value === v.getValue(this._unit);
     }
 
-    public subtract(v: Quantity): Quantity {
+    public subtract<T extends Quantity>(v: T): T {
         const result = this.value - (v._unit === this._unit ? v.value : v.getValue(this._unit));
         return this.constructor(result, this._unit);
     }
 
-    public add(v: Quantity): Quantity {
+    public add<T extends Quantity>(v: T): T {
         const result = this.value + (v._unit === this._unit ? v.value : v.getValue(this._unit));
         return this.constructor(result, this._unit);
     }

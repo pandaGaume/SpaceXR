@@ -2,15 +2,15 @@ import { EventState, Observer } from "../../events";
 import { ITileNavigationApi } from "../../tiles";
 import { IDisposable, Nullable } from "../../types";
 import { ICartesian2WithInfos, IPointerSource, IWheelSource } from "./map.inputs.interfaces";
-import { InputsNavigationTarget } from "./map.inputs.navigation";
+import { InputsNavigationMouseTarget } from "./map.inputs.navigation.mouse";
 export declare class PointerController<S extends IPointerSource & IWheelSource> implements IDisposable {
     _src: S;
-    _target: InputsNavigationTarget<S>;
+    _target: InputsNavigationMouseTarget<S>;
     _moveObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
-    constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi);
+    constructor(src: S, target: InputsNavigationMouseTarget<S> | ITileNavigationApi);
     dispose(): void;
     protected _attachControl(src: S): void;
     protected _detachControl(src: S): void;

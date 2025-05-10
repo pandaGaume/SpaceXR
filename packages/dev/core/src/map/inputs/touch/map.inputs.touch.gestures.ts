@@ -4,8 +4,22 @@ export class TouchMapGesture {
     static X_coordinate: number = 0;
     static Y_coordinate: number = 1;
 
+    public static GetCenterToRef(spots: TouchList, center: Array<number>) {
+        let count = spots.length;
+        center[TouchMapGesture.X_coordinate] = spots[0].clientX;
+        center[TouchMapGesture.Y_coordinate] = spots[0].clientY;
+
+        for (let i = 1; i < count; i++) {
+            center[TouchMapGesture.X_coordinate] += spots[i].clientX;
+            center[TouchMapGesture.Y_coordinate] += spots[i].clientY;
+        }
+
+        center[TouchMapGesture.X_coordinate] /= count;
+        center[TouchMapGesture.Y_coordinate] /= count;
+    }
+
     private _element: HTMLElement | SVGElement | null;
-    protected _options: any;
+    protected _options: ITouchGestureOptions;
     protected _gestureType: TouchMapGestureType;
     protected _touchesA: Array<TouchSpot>;
     protected _touchesB: Array<TouchSpot>;
@@ -15,10 +29,10 @@ export class TouchMapGesture {
         this._element = typeof element == "string" ? document.getElementById(element) : element;
 
         if (this._element) {
-            this._element.addEventListener("touchstart", this.start.bind(this), false);
-            this._element.addEventListener("touchmove", this.move.bind(this), false);
-            this._element.addEventListener("touchend", this.end.bind(this), false);
-            this._element.addEventListener("touchcancel", this.cancel.bind(this), false);
+            this._element.addEventListener("touchstart", this._start.bind(this), false);
+            this._element.addEventListener("touchmove", this._move.bind(this), false);
+            this._element.addEventListener("touchend", this._end.bind(this), false);
+            this._element.addEventListener("touchcancel", this._cancel.bind(this), false);
         }
         this._gestureType = gestureType;
         this._options = options || { touchCount: 1 };
@@ -27,7 +41,11 @@ export class TouchMapGesture {
         this._status = GestureStatus.IDLE;
     }
 
-    start(e: Event): void {
+    public get element(): HTMLElement | SVGElement | null {
+        return this._element;
+    }
+
+    protected _start(e: Event): void {
         e.preventDefault();
         var evt = e as TouchEvent;
         if (!evt.touches || evt.touches.length != this._options.touchCount) {
@@ -37,12 +55,12 @@ export class TouchMapGesture {
     }
 
     protected _doStart(evt: TouchEvent) {
-        this.update(evt);
+        this._update(evt);
         this._status = GestureStatus.STARTED;
-        this.fireEvent(this.buildStartEvent(evt));
+        this._fireEvent(this._buildStartEvent(evt));
     }
 
-    move(e: Event) {
+    protected _move(e: Event) {
         e.preventDefault();
         var evt = e as TouchEvent;
         if (!evt.touches || evt.touches.length != this._options.touchCount) {
@@ -53,12 +71,12 @@ export class TouchMapGesture {
 
     protected _doMove(evt: TouchEvent) {
         // swap A & B
-        this.swap();
-        this.update(evt);
-        this.fireEvent(this.buildUpdateEvent(evt));
+        this._swap();
+        this._update(evt);
+        this._fireEvent(this._buildUpdateEvent(evt));
     }
 
-    end(e: Event) {
+    protected _end(e: Event) {
         e.preventDefault();
         var evt = e as TouchEvent;
         let l1 = evt.touches?.length ?? 0;
@@ -70,24 +88,24 @@ export class TouchMapGesture {
     }
 
     protected _doEnd(evt: TouchEvent) {
-        this.clear();
+        this._clear();
         this._status = GestureStatus.IDLE;
-        this.fireEvent(this.buildEndEvent(evt));
+        this._fireEvent(this._buildEndEvent(evt));
     }
 
-    cancel(e: Event) {
+    protected _cancel(e: Event) {
         e.preventDefault();
-        this.clear();
+        this._clear();
         this._status = GestureStatus.IDLE;
     }
 
-    protected fireEvent(e?: Event): void {
+    protected _fireEvent(e?: Event): void {
         if (e) {
             this._element?.dispatchEvent(e);
         }
     }
 
-    protected update(evt: TouchEvent) {
+    protected _update(evt: TouchEvent) {
         let now = Date.now();
         let count = evt.touches.length;
         for (let i = 0; i < count; i++) {
@@ -100,19 +118,19 @@ export class TouchMapGesture {
         }
     }
 
-    protected clear() {}
+    protected _clear() {}
 
-    protected swap() {
+    protected _swap() {
         var tmp = this._touchesB;
         this._touchesB = this._touchesA;
         this._touchesA = tmp;
     }
 
-    protected buildStartEvent(evt: TouchEvent): Event | undefined {
+    protected _buildStartEvent(evt: TouchEvent): Event | undefined {
         return new TouchMapStartEvent(evt, this._gestureType);
     }
 
-    protected buildUpdateEvent(evt: TouchEvent): Event | undefined {
+    protected _buildUpdateEvent(evt: TouchEvent): Event | undefined {
         return new TouchMapUpdateEvent(
             evt,
             this._gestureType,
@@ -121,7 +139,7 @@ export class TouchMapGesture {
         );
     }
 
-    protected buildEndEvent(evt: TouchEvent): Event | undefined {
+    protected _buildEndEvent(evt: TouchEvent): Event | undefined {
         return new TouchMapEndEvent(evt, this._gestureType);
     }
 }

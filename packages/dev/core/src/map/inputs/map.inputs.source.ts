@@ -2,22 +2,22 @@ import { EventState, Observer } from "../../events";
 import { ITileNavigationApi } from "../../tiles";
 import { IDisposable, Nullable } from "../../types";
 import { ICartesian2WithInfos, IPointerSource, IWheelSource } from "./map.inputs.interfaces";
-import { InputsNavigationTarget } from "./map.inputs.navigation";
+import { InputsNavigationMouseTarget } from "./map.inputs.navigation.mouse";
 
 /// <summary>
 /// Pointer input controller. Map basic pointer source event and forward them to the target.
 /// </summary>
 export class PointerController<S extends IPointerSource & IWheelSource> implements IDisposable {
     _src: S;
-    _target: InputsNavigationTarget<S>;
+    _target: InputsNavigationMouseTarget<S>;
     _moveObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _downObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _upObserver?: Nullable<Observer<ICartesian2WithInfos>>;
     _wheelObserver?: Nullable<Observer<number>>;
 
-    public constructor(src: S, target: InputsNavigationTarget<S> | ITileNavigationApi) {
+    public constructor(src: S, target: InputsNavigationMouseTarget<S> | ITileNavigationApi) {
         this._src = src;
-        this._target = target instanceof InputsNavigationTarget ? target : new InputsNavigationTarget(target);
+        this._target = target instanceof InputsNavigationMouseTarget ? target : new InputsNavigationMouseTarget(target);
         this._attachControl(this._src);
     }
 

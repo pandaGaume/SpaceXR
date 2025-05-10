@@ -1,5 +1,5 @@
 import { InputControllerBase } from "./map.inputs.controller";
-import { InputsNavigationTarget } from "./map.inputs.navigation";
+import { InputsNavigationMouseTarget } from "./map.inputs.navigation.mouse";
 
 type InputListenerType<K extends keyof HTMLElementEventMap> = (this: HTMLElement, ev: HTMLElementEventMap[K]) => any;
 
@@ -14,7 +14,7 @@ export class MouseInputController<T extends HTMLElement> extends InputController
     _wheel: InputListenerType<"wheel">;
     _pointerDown: InputListenerType<"pointerdown">;
 
-    public constructor(src: T, target: InputsNavigationTarget<T>) {
+    public constructor(src: T, target: InputsNavigationMouseTarget<T>) {
         super(src, target);
         this._ctxMenu = (ev: MouseEvent) => {
             ev.preventDefault();

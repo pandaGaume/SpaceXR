@@ -1,5 +1,5 @@
 import { TouchMapGesture } from "../map.inputs.touch.gestures";
-import { ITouchGestureOptions } from "../map.inputs.touch.interfaces";
+import { ITouchGestureOptions, TouchMapEvent } from "../map.inputs.touch.interfaces";
 
 export interface ITouchTapGestureOptions extends ITouchGestureOptions {
     /** Max duration (ms) between touchstart and touchend to consider it a tap */
@@ -9,55 +9,58 @@ export interface ITouchTapGestureOptions extends ITouchGestureOptions {
 }
 
 export class TouchMapTapGesture extends TouchMapGesture {
+    public static readonly DefaultTapTime = 400;
+    public static readonly DefaultTapDistance = 25;
+
     private _startTime = 0;
-    private _startX = 0;
-    private _startY = 0;
+    private _coordinateCache: [number, number];
 
     constructor(element: HTMLElement | SVGElement | string, options?: ITouchTapGestureOptions) {
         super(element, "tap", options);
+        this._coordinateCache = [0, 0];
     }
 
     protected _doStart(evt: TouchEvent) {
         super._doStart(evt);
 
-        if (evt.touches.length !== 2) return;
+        if (evt.touches.length !== this._options.touchCount) return;
 
-        const t1 = evt.touches[0];
-        const t2 = evt.touches[1];
         this._startTime = Date.now();
-        this._startX = (t1.clientX + t2.clientX) / 2;
-        this._startY = (t1.clientY + t2.clientY) / 2;
+        TouchMapGesture.GetCenterToRef(evt.touches, this._coordinateCache);
     }
 
     protected _doEnd(evt: TouchEvent) {
         super._doEnd(evt);
 
         const options = this._options as ITouchTapGestureOptions;
-        const tapTime = options.tapTime ?? 400;
-        const tapDistance = options.tapDistance ?? 25;
+        const tapTime = options.tapTime ?? TouchMapTapGesture.DefaultTapTime;
+        const tapDistance = options.tapDistance ?? TouchMapTapGesture.DefaultTapDistance;
 
-        if (evt.changedTouches.length !== 2) return;
+        if (evt.changedTouches.length !== this._options.touchCount) return;
 
         const now = Date.now();
         const dt = now - this._startTime;
         if (dt > tapTime) return;
 
-        const t1 = evt.changedTouches[0];
-        const t2 = evt.changedTouches[1];
-        const endX = (t1.clientX + t2.clientX) / 2;
-        const endY = (t1.clientY + t2.clientY) / 2;
+        const startX = this._coordinateCache[TouchMapGesture.X_coordinate];
+        const startY = this._coordinateCache[TouchMapGesture.Y_coordinate];
+        TouchMapGesture.GetCenterToRef(evt.touches, this._coordinateCache);
 
-        const dx = endX - this._startX;
-        const dy = endY - this._startY;
+        const dx = this._coordinateCache[TouchMapGesture.X_coordinate] - startX;
+        const dy = this._coordinateCache[TouchMapGesture.Y_coordinate] - startY;
         const dist = Math.hypot(dx, dy);
 
         if (dist <= tapDistance) {
-            this._fire("tap", { x: endX, y: endY });
+            this._fireEvent(this._buildTapEvent(evt, this._gestureType, this._coordinateCache[0], this._coordinateCache[1]));
         }
     }
 
     protected _doMove(evt: TouchEvent) {
         super._doMove(evt);
         // You may choose to cancel the gesture here if moved too far
+    }
+
+    protected _buildTapEvent(evt: TouchEvent, gestureType: string, x: number, y: number): TouchMapEvent | undefined {
+        return undefined;
     }
 }

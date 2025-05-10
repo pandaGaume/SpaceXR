@@ -1,16 +1,16 @@
 import { IDisposable } from "../../types";
-import { InputsNavigationTarget } from "./map.inputs.navigation";
+import { InputsNavigationMouseTarget } from "./map.inputs.navigation.mouse";
 
 export class InputControllerBase<T extends HTMLElement> implements IDisposable {
     _src: T;
-    _target: InputsNavigationTarget<T>;
+    _target: InputsNavigationMouseTarget<T>;
 
-    public constructor(src: T, target: InputsNavigationTarget<T>) {
+    public constructor(src: T, target: InputsNavigationMouseTarget<T>) {
         this._src = src;
         this._target = target;
     }
 
-    public get target(): InputsNavigationTarget<T> {
+    public get target(): InputsNavigationMouseTarget<T> {
         return this._target;
     }
 

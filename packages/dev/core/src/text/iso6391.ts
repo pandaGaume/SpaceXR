@@ -743,7 +743,7 @@ export type LanguageDefinition = {
 };
 
 export class ISO6391 {
-    static _map = new Map<string, LanguageDefinition>(LANGUAGES_LIST.getEntries());
+    static _map = new Map<string, LanguageDefinition>(Object.entries(LANGUAGES_LIST));
 
     static getName(code: string): string | undefined {
         return ISO6391._map.get(code)?.name;

@@ -24,8 +24,8 @@ export declare abstract class Quantity {
     clone(unit?: Unit): Quantity;
     getValue(unit?: Unit): number;
     equals(v: Quantity): boolean;
-    subtract(v: Quantity): Quantity;
-    add(v: Quantity): Quantity;
+    subtract<T extends Quantity>(v: T): T;
+    add<T extends Quantity>(v: T): T;
     tryParse(str: string): boolean;
     abstract unitForSymbol(symbol: string): Unit | undefined;
 }

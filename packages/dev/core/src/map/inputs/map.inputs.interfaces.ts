@@ -5,6 +5,10 @@ export interface IWheelTarget<T> {
     onWheel(src: T, d: number): void;
 }
 
+/// <summary>
+/// Interface for a target that can receive pointer events from the DOM.
+/// </summary>
+/// <typeparam name="T">Type of the source object.</typeparam>
 export interface IPointerTarget<T> {
     onPointerOver(src: T, x: number, y: number, id?: number): void;
     onPointerEnter(src: T, x: number, y: number, id?: number): void;
@@ -29,6 +33,12 @@ export interface ICartesian2WithInfos extends ICartesian2 {
     pointerId?: number;
 }
 
+/// <summary>
+/// Interface for a source that can emit pointer events, such display.
+/// This is usually used as a proxy for the Pointer events gathered througt the IPointerTarget.
+/// Despite the name we have DOM -> PointerTarget -> Controller -> PointerSource -> MapApi
+/// </summary>
+/// <typeparam name="T">Type of the source object.</typeparam>
 export interface IPointerSource {
     onPointerOverObservable: Observable<ICartesian2WithInfos>;
     onPointerEnterObservable: Observable<ICartesian2WithInfos>;

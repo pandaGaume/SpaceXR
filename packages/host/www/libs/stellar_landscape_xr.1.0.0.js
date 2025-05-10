@@ -12803,6 +12803,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TilesetCache: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TilesetCache),
 /* harmony export */   TilesetCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TilesetCodec),
 /* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchGestureType),
 /* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapDragGesture),
 /* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapEndEvent),
 /* harmony export */   TouchMapEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapEvent),
@@ -12818,6 +12819,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Voltage: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Voltage),
 /* harmony export */   Volume: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Volume),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.WebTileUrlBuilder),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.XRGestureType),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.XmlDocumentTileCodec),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.hasTileSelectionContext),
 /* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isArrayOfCartesianArray),
@@ -13248,6 +13250,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MouseInputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.MouseInputController),
 /* harmony export */   PointerController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerController),
 /* harmony export */   PointerInputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerInputController),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchGestureType),
 /* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapDragGesture),
 /* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapEndEvent),
 /* harmony export */   TouchMapEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapEvent),
@@ -13256,7 +13259,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapStartEvent),
 /* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapUpdateEvent),
 /* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchSpot)
+/* harmony export */   TouchSpot: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchSpot),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.XRGestureType)
 /* harmony export */ });
 /* harmony import */ var _canvas_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./canvas/index */ "../core/dist/map/canvas/index.js");
 /* harmony import */ var _inputs_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./inputs/index */ "../core/dist/map/inputs/index.js");
@@ -13274,33 +13278,39 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_5__.Cartesian2WithInfos),
-/* harmony export */   GestureStatus: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.GestureStatus),
-/* harmony export */   InputControllerBase: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__.InputControllerBase),
-/* harmony export */   InputsNavigationMouseTarget: () => (/* reexport safe */ _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationMouseTarget),
-/* harmony export */   InputsNavigationTargetBase: () => (/* reexport safe */ _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationTargetBase),
-/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.IsTouchCapable),
-/* harmony export */   MouseInputController: () => (/* reexport safe */ _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_0__.MouseInputController),
-/* harmony export */   PointerController: () => (/* reexport safe */ _map_inputs_source__WEBPACK_IMPORTED_MODULE_6__.PointerController),
-/* harmony export */   PointerInputController: () => (/* reexport safe */ _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_3__.PointerInputController),
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapDragGesture),
-/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapEvent),
-/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapRotateGesture),
-/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapUpdateEvent),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_7__.TouchSpot)
+/* harmony export */   Cartesian2WithInfos: () => (/* reexport safe */ _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_7__.Cartesian2WithInfos),
+/* harmony export */   GestureStatus: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.GestureStatus),
+/* harmony export */   InputControllerBase: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_6__.InputControllerBase),
+/* harmony export */   InputsNavigationMouseTarget: () => (/* reexport safe */ _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationMouseTarget),
+/* harmony export */   InputsNavigationTargetBase: () => (/* reexport safe */ _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationTargetBase),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.IsTouchCapable),
+/* harmony export */   MouseInputController: () => (/* reexport safe */ _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_2__.MouseInputController),
+/* harmony export */   PointerController: () => (/* reexport safe */ _map_inputs_source__WEBPACK_IMPORTED_MODULE_8__.PointerController),
+/* harmony export */   PointerInputController: () => (/* reexport safe */ _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_5__.PointerInputController),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType),
+/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapDragGesture),
+/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapEndEvent),
+/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapEvent),
+/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapGesture),
+/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapRotateGesture),
+/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapStartEvent),
+/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapUpdateEvent),
+/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchMapZoomGesture),
+/* harmony export */   TouchSpot: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_9__.TouchSpot),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ _map_inputs_interfaces_hands__WEBPACK_IMPORTED_MODULE_1__.XRGestureType)
 /* harmony export */ });
-/* harmony import */ var _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.mouse */ "../core/dist/map/inputs/map.inputs.mouse.js");
-/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.navigation */ "../core/dist/map/inputs/map.inputs.navigation.js");
-/* harmony import */ var _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.navigation.mouse */ "../core/dist/map/inputs/map.inputs.navigation.mouse.js");
-/* harmony import */ var _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.inputs.pointer */ "../core/dist/map/inputs/map.inputs.pointer.js");
-/* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.inputs.controller */ "../core/dist/map/inputs/map.inputs.controller.js");
-/* harmony import */ var _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.inputs.cartesian */ "../core/dist/map/inputs/map.inputs.cartesian.js");
-/* harmony import */ var _map_inputs_source__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.inputs.source */ "../core/dist/map/inputs/map.inputs.source.js");
-/* harmony import */ var _touch__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./touch */ "../core/dist/map/inputs/touch/index.js");
+/* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
+/* harmony import */ var _map_inputs_interfaces_hands__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.interfaces.hands */ "../core/dist/map/inputs/map.inputs.interfaces.hands.js");
+/* harmony import */ var _map_inputs_mouse__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.mouse */ "../core/dist/map/inputs/map.inputs.mouse.js");
+/* harmony import */ var _map_inputs_navigation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.inputs.navigation */ "../core/dist/map/inputs/map.inputs.navigation.js");
+/* harmony import */ var _map_inputs_navigation_mouse__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.inputs.navigation.mouse */ "../core/dist/map/inputs/map.inputs.navigation.mouse.js");
+/* harmony import */ var _map_inputs_pointer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map.inputs.pointer */ "../core/dist/map/inputs/map.inputs.pointer.js");
+/* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.inputs.controller */ "../core/dist/map/inputs/map.inputs.controller.js");
+/* harmony import */ var _map_inputs_cartesian__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map.inputs.cartesian */ "../core/dist/map/inputs/map.inputs.cartesian.js");
+/* harmony import */ var _map_inputs_source__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./map.inputs.source */ "../core/dist/map/inputs/map.inputs.source.js");
+/* harmony import */ var _touch__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./touch */ "../core/dist/map/inputs/touch/index.js");
+
+
 
 
 
@@ -13379,6 +13389,49 @@ class InputControllerBase {
     _detachControl(src) { }
 }
 //# sourceMappingURL=map.inputs.controller.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.interfaces.hands.js":
+/*!**************************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.interfaces.hands.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   XRGestureType: () => (/* binding */ XRGestureType)
+/* harmony export */ });
+var XRGestureType;
+(function (XRGestureType) {
+    XRGestureType["Grab"] = "grab";
+    XRGestureType["Release"] = "release";
+    XRGestureType["Pinch"] = "pinch";
+    XRGestureType["Point"] = "point";
+    XRGestureType["Swipe"] = "swipe";
+    XRGestureType["Custom"] = "custom";
+})(XRGestureType || (XRGestureType = {}));
+//# sourceMappingURL=map.inputs.interfaces.hands.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.interfaces.touch.js":
+/*!**************************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.interfaces.touch.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TouchGestureType: () => (/* binding */ TouchGestureType)
+/* harmony export */ });
+var TouchGestureType;
+(function (TouchGestureType) {
+    TouchGestureType["Tap"] = "tap";
+    TouchGestureType["Swipe"] = "swipe";
+    TouchGestureType["Pinch"] = "pinch";
+})(TouchGestureType || (TouchGestureType = {}));
+//# sourceMappingURL=map.inputs.interfaces.touch.js.map
 
 /***/ }),
 
@@ -23540,8 +23593,8 @@ __webpack_require__.r(__webpack_exports__);
 class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     constructor(name, scene) {
         super(name, scene);
-        this._controller = null;
-        this._ownController = false;
+        this._pointerController = null;
+        this._ownPointerController = false;
         this._map = this._createMap();
         this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
     }
@@ -23597,18 +23650,18 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         this.map.elevationOptions.exageration = e;
     }
     _withPointerControl(controller) {
-        if (this._controller === controller)
+        if (this._pointerController === controller)
             return this;
-        if (this._controller && this._ownController) {
-            this._controller.dispose();
+        if (this._pointerController && this._ownPointerController) {
+            this._pointerController.dispose();
         }
         if (controller instanceof core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController) {
-            this._controller = controller;
+            this._pointerController = controller;
         }
         else {
             const input = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationMouseTarget(this._map, core_map__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT, true);
-            this._controller = new core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController(controller, input);
-            this._ownController = true;
+            this._pointerController = new core_map__WEBPACK_IMPORTED_MODULE_2__.PointerController(controller, input);
+            this._ownPointerController = true;
         }
         return this;
     }
@@ -23619,7 +23672,7 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         this._map.validate();
     }
     dispose(doNotRecurse, disposeMaterialAndTextures) {
-        this._controller?.dispose();
+        this._pointerController?.dispose();
         this._beforeRenderObserver?.remove();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
@@ -26017,6 +26070,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TilesetCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TilesetCache),
 /* harmony export */   TilesetCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TilesetCodec),
 /* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Timespan),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchGestureType),
 /* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapDragGesture),
 /* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapEndEvent),
 /* harmony export */   TouchMapEvent: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapEvent),
@@ -26038,6 +26092,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.WebMapMaterial),
 /* harmony export */   WebMapTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_1__.WebMapTexture),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.WebTileUrlBuilder),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.XRGestureType),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.XmlDocumentTileCodec),
 /* harmony export */   _makeCopyRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeCopyRawTextureFunction),
 /* harmony export */   _makeCreateRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_5__._makeCreateRawTextureFunction),

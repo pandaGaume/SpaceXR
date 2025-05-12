@@ -149,6 +149,10 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
     }
 
     protected _onPrePointer(pi: BABYLON.PointerInfoPre): void {
+        // By default, Babylon.js types the event field in PointerInfo as IMouseEvent,
+        // a simplified abstraction that does not expose pointerType, even though
+        // under the hood, the actual value passed is a real PointerEvent in browsers
+        // that support pointer events.
         const type = GetPointerType(pi);
         if (type === "mouse" || type === "pen") {
             switch (pi.type) {

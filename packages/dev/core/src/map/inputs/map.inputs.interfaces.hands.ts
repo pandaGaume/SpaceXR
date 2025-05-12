@@ -1,6 +1,6 @@
 import { Observable } from "../../events";
 import { ICartesian3 } from "../../geometry"; // 3D point
-import { SwipeDirection3D } from "./map.inputs.interfaces.touch";
+import { IGesture, SwipeDirection3D } from "./map.inputs.interfaces.touch";
 
 export interface IXRHandTarget {
     /// <summary>
@@ -28,15 +28,14 @@ export enum XRGestureType {
     Custom = "custom",
 }
 
+export type XRHandType = "left" | "right";
+export type XRHandJoint = "thumb" | "index" | "middle" | "ring" | "pinky" | "wrist" | "elbow" | "shoulder";
+
 /**
  * Base XR gesture interface.
  */
-export interface IXRGesture {
-    type: string;
-    hand: "left" | "right";
-    timestamp: number;
-    duration: number; // in milliseconds
-    joints: ICartesian3[]; // raw XRHand joint positions at detection
+export interface IXRGesture extends IGesture<ICartesian3> {
+    hand: XRHandType;
 }
 
 /**

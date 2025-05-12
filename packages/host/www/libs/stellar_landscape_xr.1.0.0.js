@@ -21883,6 +21883,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+function GetPointerType(pointerInfo) {
+    const event = pointerInfo.event;
+    if (typeof PointerEvent !== "undefined" && event instanceof PointerEvent) {
+        return event.pointerType;
+    }
+    return "unknown";
+}
 class VirtualDisplayInputsSource {
     constructor(display) {
         this._display = display;
@@ -21986,25 +21993,28 @@ class VirtualDisplayInputsSource {
         this._prePointerObserver = scene.onPrePointerObservable.add(this._onPrePointer.bind(this));
     }
     _onPrePointer(pi) {
-        switch (pi.type) {
-            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE: {
-                this._onPointerMove(pi);
-                break;
-            }
-            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERUP: {
-                this._onPointerUp(pi);
-                break;
-            }
-            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERDOWN: {
-                this._onPointerDown(pi);
-                break;
-            }
-            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL: {
-                this._onWheel(pi);
-                break;
-            }
-            default: {
-                return;
+        const type = GetPointerType(pi);
+        if (type === "mouse" || type === "pen") {
+            switch (pi.type) {
+                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE: {
+                    this._onPointerMove(pi);
+                    break;
+                }
+                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERUP: {
+                    this._onPointerUp(pi);
+                    break;
+                }
+                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERDOWN: {
+                    this._onPointerDown(pi);
+                    break;
+                }
+                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL: {
+                    this._onWheel(pi);
+                    break;
+                }
+                default: {
+                    return;
+                }
             }
         }
     }

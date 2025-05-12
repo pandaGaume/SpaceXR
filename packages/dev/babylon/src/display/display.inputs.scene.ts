@@ -3,6 +3,16 @@ import { VirtualDisplay } from "./display.virtual";
 import { Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource, IWheelSource } from "core/map/inputs";
 import { Observable } from "core/events";
 
+function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "pen" | "unknown" {
+    const event = pointerInfo.event;
+
+    if (typeof PointerEvent !== "undefined" && event instanceof PointerEvent) {
+        return event.pointerType as "mouse" | "touch" | "pen";
+    }
+
+    return "unknown";
+}
+
 export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource, BABYLON.IDisposable {
     _onPointerOverObservable?: Observable<ICartesian2WithInfos>;
     _onPointerEnterObservable?: Observable<ICartesian2WithInfos>;
@@ -139,25 +149,28 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
     }
 
     protected _onPrePointer(pi: BABYLON.PointerInfoPre): void {
-        switch (pi.type) {
-            case BABYLON.PointerEventTypes.POINTERMOVE: {
-                this._onPointerMove(pi);
-                break;
-            }
-            case BABYLON.PointerEventTypes.POINTERUP: {
-                this._onPointerUp(pi);
-                break;
-            }
-            case BABYLON.PointerEventTypes.POINTERDOWN: {
-                this._onPointerDown(pi);
-                break;
-            }
-            case BABYLON.PointerEventTypes.POINTERWHEEL: {
-                this._onWheel(pi);
-                break;
-            }
-            default: {
-                return;
+        const type = GetPointerType(pi);
+        if (type === "mouse" || type === "pen") {
+            switch (pi.type) {
+                case BABYLON.PointerEventTypes.POINTERMOVE: {
+                    this._onPointerMove(pi);
+                    break;
+                }
+                case BABYLON.PointerEventTypes.POINTERUP: {
+                    this._onPointerUp(pi);
+                    break;
+                }
+                case BABYLON.PointerEventTypes.POINTERDOWN: {
+                    this._onPointerDown(pi);
+                    break;
+                }
+                case BABYLON.PointerEventTypes.POINTERWHEEL: {
+                    this._onWheel(pi);
+                    break;
+                }
+                default: {
+                    return;
+                }
             }
         }
     }

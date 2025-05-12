@@ -20,11 +20,14 @@ export enum TouchGestureType {
     Pinch = "pinch",
 }
 
-export interface ITouchGesture {
+export interface IGesture<C extends ICartesian2>{
     type: string;
     timestamp: number; // milliseconds since epoch or performance.now()
     duration: number; // in milliseconds
-    fingers: ICartesian2[]; // positions of the fingers involved
+    points: Array<C>; // positions of the points involved
+}
+
+export interface ITouchGesture extends IGesture<ICartesian2>{
 }
 
 export interface ISwipeGesture extends ITouchGesture {

@@ -1,6 +1,7 @@
 import { Observable } from "../../events";
 import { IDisposable } from "../../types";
-import { IPointerSource, IWheelSource } from "./map.inputs.interfaces";
+import { PointerToDragController } from "./map.inputs.controller.drag";
+import { IDragSource, IPointerDragEvent, IPointerSource, IWheelSource } from "./map.inputs.interfaces";
 
 /// <summary>
 /// InputControllerBase is a DOM-to-PointerSource controller that emits pointer-related
@@ -9,8 +10,8 @@ import { IPointerSource, IWheelSource } from "./map.inputs.interfaces";
 /// It also prevents the default browser context menu via `contextmenu` events.
 /// Note: The `contextmenu` event is a `MouseEvent`, not a `PointerEvent`, and is handled accordingly.
 /// </summary>
-export class InputControllerBase<T extends HTMLElement> implements IPointerSource, IWheelSource, IDisposable {
-    _src: T;
+export class InputControllerBase<T extends HTMLElement> implements IPointerSource, IWheelSource, IDragSource, IDisposable {
+    _src?: T;
 
     _onPointerOverObservable?: Observable<PointerEvent>;
     _onPointerEnterObservable?: Observable<PointerEvent>;
@@ -23,15 +24,21 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
     _onPointerGotCaptureObservable?: Observable<PointerEvent>;
     _onPointerLostCaptureObservable?: Observable<PointerEvent>;
     _onWheelObservable?: Observable<WheelEvent>;
+    _dragController: IDragSource;
 
     public constructor(src: T) {
-        this._src = src;
+        this.source = src;
+        this._dragController = new PointerToDragController(this);
+    }
+
+    public get onDragObservable(): Observable<IPointerDragEvent> {
+        return this._dragController.onDragObservable;
     }
 
     public get onWheelObservable(): Observable<WheelEvent> {
         if (!this._onWheelObservable) {
             this._onWheelObservable = new Observable<WheelEvent>();
-            this._src.addEventListener("wheel", this._onWheel);
+            this._src?.addEventListener("wheel", this._onWheel);
         }
         return this._onWheelObservable;
     }
@@ -39,7 +46,7 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
     public get onPointerOverObservable(): Observable<PointerEvent> {
         if (!this._onPointerOverObservable) {
             this._onPointerOverObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointerover", (ev: PointerEvent) => {
+            this._src?.addEventListener("pointerover", (ev: PointerEvent) => {
                 this._onPointerOverObservable?.notifyObservers(ev);
             });
         }
@@ -49,14 +56,14 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
         if (!this._onPointerEnterObservable) {
             this._onPointerEnterObservable = new Observable<PointerEvent>();
 
-            this._src.addEventListener("pointerenter", this._onPointerEnter);
+            this._src?.addEventListener("pointerenter", this._onPointerEnter);
         }
         return this._onPointerEnterObservable;
     }
     public get onPointerOutObservable(): Observable<PointerEvent> {
         if (!this._onPointerOutObservable) {
             this._onPointerOutObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointerout", this._onPointerOut);
+            this._src?.addEventListener("pointerout", this._onPointerOut);
         }
         return this._onPointerOutObservable;
     }
@@ -64,35 +71,35 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
     public get onPointerLeaveObservable(): Observable<PointerEvent> {
         if (!this._onPointerLeaveObservable) {
             this._onPointerLeaveObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointerleave", this._onPointerLeave);
+            this._src?.addEventListener("pointerleave", this._onPointerLeave);
         }
         return this._onPointerLeaveObservable;
     }
     public get onPointerMoveObservable(): Observable<PointerEvent> {
         if (!this._onPointerMoveObservable) {
             this._onPointerMoveObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointermove", this._onPointerMove);
+            this._src?.addEventListener("pointermove", this._onPointerMove);
         }
         return this._onPointerMoveObservable;
     }
     public get onPointerDownObservable(): Observable<PointerEvent> {
         if (!this._onPointerDownObservable) {
             this._onPointerDownObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointerdown", this._onPointerDown);
+            this._src?.addEventListener("pointerdown", this._onPointerDown);
         }
         return this._onPointerDownObservable;
     }
     public get onPointerUpObservable(): Observable<PointerEvent> {
         if (!this._onPointerUpObservable) {
             this._onPointerUpObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointerup", this._onPointerUp);
+            this._src?.addEventListener("pointerup", this._onPointerUp);
         }
         return this._onPointerUpObservable;
     }
     public get onPointerCancelObservable(): Observable<PointerEvent> {
         if (!this._onPointerCancelObservable) {
             this._onPointerCancelObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("pointercancel", this._onPointerCancel);
+            this._src?.addEventListener("pointercancel", this._onPointerCancel);
         }
         return this._onPointerCancelObservable;
     }
@@ -100,7 +107,7 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
     public get onPointerGotCaptureObservable(): Observable<PointerEvent> {
         if (!this._onPointerGotCaptureObservable) {
             this._onPointerGotCaptureObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("gotpointercapture", this._onPointerGotCapture);
+            this._src?.addEventListener("gotpointercapture", this._onPointerGotCapture);
         }
         return this._onPointerGotCaptureObservable;
     }
@@ -108,13 +115,21 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
     public get onPointerLostCaptureObservable(): Observable<PointerEvent> {
         if (!this._onPointerLostCaptureObservable) {
             this._onPointerLostCaptureObservable = new Observable<PointerEvent>();
-            this._src.addEventListener("lostpointercapture", this._onPointerLostCapture);
+            this._src?.addEventListener("lostpointercapture", this._onPointerLostCapture);
         }
         return this._onPointerLostCaptureObservable;
     }
 
-    public get source(): T {
+    public get source(): T | undefined {
         return this._src;
+    }
+
+    public set source(src: T) {
+        if (src !== this._src) {
+            this._detachControl(this._src);
+            this._src = src;
+            this._attachControl(src);
+        }
     }
 
     public dispose(): void {
@@ -122,51 +137,47 @@ export class InputControllerBase<T extends HTMLElement> implements IPointerSourc
         this._clearObservables();
     }
 
-    protected _attachControl(src: T) {
-        if (src !== this._src) {
-            this._detachControl(this._src);
-            this._src = src;
-            if (this._src) {
-                this._src.addEventListener("contextmenu", this._onContextMenu);
+    protected _attachControl(src?: T) {
+        if (src) {
+            src.addEventListener("contextmenu", this._onContextMenu);
 
-                if (this._onPointerOverObservable) {
-                    this._src.addEventListener("pointerover", this._onPointerOver);
-                }
-                if (this._onPointerEnterObservable) {
-                    this._src.addEventListener("pointerenter", this._onPointerEnter);
-                }
-                if (this._onPointerOutObservable) {
-                    this._src.addEventListener("pointerout", this._onPointerOut);
-                }
-                if (this._onPointerLeaveObservable) {
-                    this._src.addEventListener("pointerleave", this._onPointerLeave);
-                }
-                if (this._onPointerMoveObservable) {
-                    this._src.addEventListener("pointermove", this._onPointerMove);
-                }
-                if (this._onPointerDownObservable) {
-                    this._src.addEventListener("pointerdown", this._onPointerDown);
-                }
-                if (this._onPointerUpObservable) {
-                    this._src.addEventListener("pointerup", this._onPointerUp);
-                }
-                if (this._onPointerCancelObservable) {
-                    this._src.addEventListener("pointercancel", this._onPointerCancel);
-                }
-                if (this._onPointerGotCaptureObservable) {
-                    this._src.addEventListener("gotpointercapture", this._onPointerGotCapture);
-                }
-                if (this._onPointerLostCaptureObservable) {
-                    this._src.addEventListener("lostpointercapture", this._onPointerLostCapture);
-                }
-                if (this._onWheelObservable) {
-                    this._src.addEventListener("wheel", this._onWheel);
-                }
+            if (this._onPointerOverObservable) {
+                src.addEventListener("pointerover", this._onPointerOver);
+            }
+            if (this._onPointerEnterObservable) {
+                src.addEventListener("pointerenter", this._onPointerEnter);
+            }
+            if (this._onPointerOutObservable) {
+                src.addEventListener("pointerout", this._onPointerOut);
+            }
+            if (this._onPointerLeaveObservable) {
+                src.addEventListener("pointerleave", this._onPointerLeave);
+            }
+            if (this._onPointerMoveObservable) {
+                src.addEventListener("pointermove", this._onPointerMove);
+            }
+            if (this._onPointerDownObservable) {
+                src.addEventListener("pointerdown", this._onPointerDown);
+            }
+            if (this._onPointerUpObservable) {
+                src.addEventListener("pointerup", this._onPointerUp);
+            }
+            if (this._onPointerCancelObservable) {
+                src.addEventListener("pointercancel", this._onPointerCancel);
+            }
+            if (this._onPointerGotCaptureObservable) {
+                src.addEventListener("gotpointercapture", this._onPointerGotCapture);
+            }
+            if (this._onPointerLostCaptureObservable) {
+                src.addEventListener("lostpointercapture", this._onPointerLostCapture);
+            }
+            if (this._onWheelObservable) {
+                src.addEventListener("wheel", this._onWheel);
             }
         }
     }
 
-    protected _detachControl(src: T) {
+    protected _detachControl(src?: T) {
         if (src) {
             src.removeEventListener("contextmenu", this._onContextMenu);
 

@@ -51,7 +51,7 @@ export class VirtualDisplay implements IPhysicalDisplay {
     _uvs: Array<number>;
 
     _resolution: ISize3;
-    _pointerSource: VirtualDisplayInputsSource;
+    _inputSource: VirtualDisplayInputsSource;
     _node: Mesh;
     _center: ICartesian3;
 
@@ -83,7 +83,7 @@ export class VirtualDisplay implements IPhysicalDisplay {
         this._worldTransform = new TransformNode(`${name}_context`, this._node.getScene());
         this._worldTransform.parent = this._node;
         this._node.isPickable = true; // enable pointer events
-        this._pointerSource = new VirtualDisplayInputsSource(this);
+        this._inputSource = new VirtualDisplayInputsSource(this);
         this._unit = unit;
     }
 
@@ -115,7 +115,7 @@ export class VirtualDisplay implements IPhysicalDisplay {
     }
 
     public get pointerSource(): VirtualDisplayInputsSource {
-        return this._pointerSource;
+        return this._inputSource;
     }
 
     protected _buildUvs(mesh: Mesh): Array<number> {

@@ -66,14 +66,3 @@ export class TouchMapUpdateEvent extends TouchMapEvent {
 export interface ITouchGestureOptions {
     touchCount: number;
 }
-
-/// <summary>
-/// Returns true if the current device supports touch input.
-/// </summary>
-export function IsTouchCapable(): boolean {
-    const hasTouchEvents = "ontouchstart" in window;
-    const hasTouchConstructor = typeof window !== "undefined" && "DocumentTouch" in window && document instanceof (window as any).DocumentTouch;
-    const hasTouchPoints = navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0;
-
-    return hasTouchEvents || hasTouchConstructor || hasTouchPoints;
-}

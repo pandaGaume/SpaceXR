@@ -1,11 +1,15 @@
 import { Observable } from "../../events";
 import { ICartesian2 } from "../../geometry";
 
-export interface ITouchTarget {
-    onTouchStart(e: TouchEvent): void;
-    onTouchMove(e: TouchEvent): void;
-    onTouchEnd(e: TouchEvent): void;
-    onTouchCancel(e: TouchEvent): void;
+/// <summary>
+/// Returns true if the current device supports touch input.
+/// </summary>
+export function IsTouchCapable(): boolean {
+    const hasTouchEvents = "ontouchstart" in window;
+    const hasTouchConstructor = typeof window !== "undefined" && "DocumentTouch" in window && document instanceof (window as any).DocumentTouch;
+    const hasTouchPoints = navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0;
+
+    return hasTouchEvents || hasTouchConstructor || hasTouchPoints;
 }
 
 export type SwipeDirection = "left" | "right" | "up" | "down";
@@ -20,15 +24,14 @@ export enum TouchGestureType {
     Pinch = "pinch",
 }
 
-export interface IGesture<C extends ICartesian2>{
+export interface IGesture<C extends ICartesian2> {
     type: string;
     timestamp: number; // milliseconds since epoch or performance.now()
     duration: number; // in milliseconds
     points: Array<C>; // positions of the points involved
 }
 
-export interface ITouchGesture extends IGesture<ICartesian2>{
-}
+export interface ITouchGesture extends IGesture<ICartesian2> {}
 
 export interface ISwipeGesture extends ITouchGesture {
     type: TouchGestureType.Swipe;

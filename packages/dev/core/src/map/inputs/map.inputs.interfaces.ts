@@ -1,38 +1,6 @@
 import { Observable } from "../../events";
 import { ICartesian2 } from "../../geometry";
 
-export interface IWheelTarget<T> {
-    onWheel(src: T, d: number): void;
-}
-
-/// <summary>
-/// Interface for a target that can receive pointer events from the DOM.
-/// </summary>
-/// <typeparam name="T">Type of the source object.</typeparam>
-export interface IPointerTarget<T> {
-    onPointerOver(src: T, x: number, y: number, id?: number): void;
-    onPointerEnter(src: T, x: number, y: number, id?: number): void;
-    onPointerOut(src: T, x: number, y: number, id?: number): void;
-    onPointerLeave(src: T, x: number, y: number, id?: number): void;
-    onPointerDown(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
-    onPointerUp(src: T, x: number, y: number, buttonIndex: number, id?: number): void;
-    onPointerMove(src: T, x: number, y: number, id?: number): void;
-    onPointerCancel(src: T, x: number, y: number, id?: number): void;
-    onPointerGotCapture(src: T, x: number, y: number, id?: number): void;
-    onPointerLostCapture(src: T, x: number, y: number, id?: number): void;
-}
-
-export interface IDragTarget<T> {
-    onBeginDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
-    onDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
-    onEndDrag(src: T, dx: number, dy: number, buttonIndex: number, id?: number): void;
-}
-
-export interface ICartesian2WithInfos extends ICartesian2 {
-    buttonIndex?: number;
-    pointerId?: number;
-}
-
 /// <summary>
 /// Interface for a source that can emit pointer events, such display.
 /// This is usually used as a proxy for the Pointer events gathered througt the IPointerTarget.
@@ -40,24 +8,42 @@ export interface ICartesian2WithInfos extends ICartesian2 {
 /// </summary>
 /// <typeparam name="T">Type of the source object.</typeparam>
 export interface IPointerSource {
-    onPointerOverObservable: Observable<ICartesian2WithInfos>;
-    onPointerEnterObservable: Observable<ICartesian2WithInfos>;
-    onPointerOutObservable: Observable<ICartesian2WithInfos>;
-    onPointerLeaveObservable: Observable<ICartesian2WithInfos>;
-    onPointerMoveObservable: Observable<ICartesian2WithInfos>;
-    onPointerDownObservable: Observable<ICartesian2WithInfos>;
-    onPointerUpObservable: Observable<ICartesian2WithInfos>;
-    onPointerCancelObservable: Observable<ICartesian2WithInfos>;
-    onPointerGotCaptureObservable: Observable<ICartesian2WithInfos>;
-    onPointerLostCaptureObservable: Observable<ICartesian2WithInfos>;
+    onPointerOverObservable: Observable<PointerEvent>;
+    onPointerEnterObservable: Observable<PointerEvent>;
+    onPointerOutObservable: Observable<PointerEvent>;
+    onPointerLeaveObservable: Observable<PointerEvent>;
+    onPointerMoveObservable: Observable<PointerEvent>;
+    onPointerDownObservable: Observable<PointerEvent>;
+    onPointerUpObservable: Observable<PointerEvent>;
+    onPointerCancelObservable: Observable<PointerEvent>;
+    onPointerGotCaptureObservable: Observable<PointerEvent>;
+    onPointerLostCaptureObservable: Observable<PointerEvent>;
 }
 
 export interface IWheelSource {
-    onWheelObservable: Observable<number>;
+    onWheelObservable: Observable<WheelEvent>;
 }
 
 export interface IDragSource {
-    onBeginDragObservable: Observable<ICartesian2WithInfos>;
-    onDragObservable: Observable<ICartesian2WithInfos>;
-    onEndDragObservable: Observable<ICartesian2WithInfos>;
+    onDragObservable: Observable<IPointerDragEvent>;
+}
+
+export type DragEventType = "start" | "drag" | "end";
+
+/// <summary>
+/// Represents a semantic pointer drag event derived from low-level PointerEvents.
+/// Unlike the native DOM DragEvent ("dragstart", "drop"), this event is compatible
+/// with canvas, 3D scenes, multi-touch, and WebXR. It does not require setting
+/// draggable=true and works across all pointer types.
+/// </summary>
+export interface IPointerDragEvent extends ICartesian2 {
+    type: DragEventType;
+    pointerId: number;
+    button: number;
+    startX: number;
+    startY: number;
+    deltaX: number;
+    deltaY: number;
+    timestamp: number;
+    originalEvent: PointerEvent;
 }

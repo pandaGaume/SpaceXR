@@ -4,7 +4,7 @@ import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
-import { InputsNavigationMouseTarget, InputsNavigationTargetBase, IPointerSource, IWheelSource, PointerController } from "core/map";
+import { InputsNavigationPointerTarget, InputsNavigationTargetBase, IPointerSource, IWheelSource, PointerController } from "core/map";
 import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
 
@@ -94,7 +94,7 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         if (controller instanceof PointerController) {
             this._pointerController = controller;
         } else {
-            const input = new InputsNavigationMouseTarget(this._map, InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT, true);
+            const input = new InputsNavigationPointerTarget(this._map, InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT, true);
             this._pointerController = new PointerController(controller, input);
             this._ownPointerController = true;
         }

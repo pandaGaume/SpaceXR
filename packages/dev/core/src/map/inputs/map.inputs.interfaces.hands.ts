@@ -2,6 +2,7 @@ import { Observable } from "../../events";
 import { ICartesian3 } from "../../geometry"; // 3D point
 import { IGesture, SwipeDirection3D } from "./map.inputs.interfaces.touch";
 
+/*
 export interface IXRHandTarget {
     /// <summary>
     /// Called when the hand is first detected.
@@ -18,6 +19,7 @@ export interface IXRHandTarget {
     /// </summary>
     onXRHandEnd(inputSource: XRInputSource, frame: XRFrame): void;
 }
+*/
 
 export enum XRGestureType {
     Grab = "grab",

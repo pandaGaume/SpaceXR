@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-import { Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource, IWheelSource } from "core/map/inputs";
+import { AnyTouchGesture, Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource, ITouchGestureSource, IWheelSource } from "core/map/inputs";
 import { Observable } from "core/events";
 
 function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "pen" | "unknown" {
@@ -13,7 +13,7 @@ function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch"
     return "unknown";
 }
 
-export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource, BABYLON.IDisposable {
+export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource, ITouchGestureSource, BABYLON.IDisposable {
     _onPointerOverObservable?: Observable<ICartesian2WithInfos>;
     _onPointerEnterObservable?: Observable<ICartesian2WithInfos>;
     _onPointerOutObservable?: Observable<ICartesian2WithInfos>;
@@ -26,6 +26,8 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
     _onPointerLostCaptureObservable?: Observable<ICartesian2WithInfos>;
 
     _onWheelObservable?: Observable<number>;
+
+    _onTouchObservable?: Observable<AnyTouchGesture>;
 
     _display: VirtualDisplay;
     _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
@@ -120,6 +122,13 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         return this._onWheelObservable;
     }
 
+    public get onTouchObservable(): Observable<AnyTouchGesture> {
+        if (!this._onTouchObservable) {
+            this._onTouchObservable = new Observable<AnyTouchGesture>();
+        }
+        return this._onTouchObservable;
+    }
+
     public dispose(): void {
         const scene = this._getScene();
         if (scene) {
@@ -138,6 +147,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         this._onPointerGotCaptureObservable?.clear();
         this._onPointerLostCaptureObservable?.clear();
         this._onWheelObservable?.clear();
+        this._onTouchObservable?.clear();
     }
 
     protected _attach(): void {
@@ -176,6 +186,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
                     return;
                 }
             }
+        } else if (type === "touch") {
         }
     }
 
@@ -222,7 +233,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
                     const buttonIndex = (<any>pointerInfo.event).button;
                     const pointerId = (<any>pointerInfo.event).pointerId;
                     const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
-                    e.textureCoordinates = c;
+                    e.userCoordinates = c;
                     this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
@@ -243,7 +254,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
                 const buttonIndex = (<any>pointerInfo.event).button;
                 const pointerId = (<any>pointerInfo.event).pointerId;
                 const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
-                e.textureCoordinates = c;
+                e.userCoordinates = c;
                 this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
             }
             this._currentPosition = pixelXY;

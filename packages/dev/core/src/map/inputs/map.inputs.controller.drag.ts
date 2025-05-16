@@ -1,19 +1,21 @@
-import { Observable } from "../../events";
-import { IDisposable } from "../../types";
+import { Observable, Observer } from "../../events";
+import { IDisposable, Nullable } from "../../types";
 import { IDragSource, IPointerDragEvent, IPointerSource } from "./map.inputs.interfaces";
 
 export class PointerToDragController implements IDragSource, IDisposable {
     private _onDragObservable?: Observable<IPointerDragEvent>;
     private _pointerState = new Map<number, { startX: number; startY: number; lastX: number; lastY: number; button: number }>();
     private _source: IPointerSource;
+    private _observers: Array<Nullable<Observer<PointerEvent>>> = [];
 
     public constructor(source: IPointerSource) {
         this._source = source;
     }
 
     public dispose(): void {
-        this._detachSource(this._source);
+        this._detachSource();
         this._clearObservable();
+        this._pointerState.clear();
     }
 
     public get onDragObservable(): Observable<IPointerDragEvent> {
@@ -30,28 +32,29 @@ export class PointerToDragController implements IDragSource, IDisposable {
 
     protected _clearObservable(): void {
         this._onDragObservable?.clear();
-        this._onDragObservable = undefined;
     }
 
     protected _attachSource(source: IPointerSource): void {
         if (source && this._onDragObservable) {
-            source.onPointerDownObservable.add(this._onStart);
-            source.onPointerMoveObservable.add(this._onMove);
-            source.onPointerUpObservable.add(this._onEnd);
-            source.onPointerCancelObservable.add(this._onEnd);
+            this._observers.push(
+                source.onPointerDownObservable.add(this._onStart),
+                source.onPointerMoveObservable.add(this._onMove),
+                source.onPointerUpObservable.add(this._onEnd),
+                source.onPointerCancelObservable.add(this._onEnd)
+            );
         }
     }
 
-    protected _detachSource(source: IPointerSource): void {
-        if (source) {
-            source.onPointerDownObservable.removeCallback(this._onStart);
-            source.onPointerMoveObservable.removeCallback(this._onMove);
-            source.onPointerUpObservable.removeCallback(this._onEnd);
-            source.onPointerCancelObservable.removeCallback(this._onEnd);
+    protected _detachSource(): void {
+        for (const observer of this._observers) {
+            if (observer) {
+                observer.disconnect();
+            }
         }
+        this._observers = [];
     }
 
-    protected _onStart(e: PointerEvent): void {
+    protected _onStart = (e: PointerEvent): void => {
         this._pointerState.set(e.pointerId, {
             startX: e.clientX,
             startY: e.clientY,
@@ -59,9 +62,9 @@ export class PointerToDragController implements IDragSource, IDisposable {
             lastY: e.clientY,
             button: e.button,
         });
-    }
+    };
 
-    protected _onMove(e: PointerEvent): void {
+    protected _onMove = (e: PointerEvent): void => {
         const state = this._pointerState.get(e.pointerId);
         if (state) {
             const dx = e.clientX - state.lastX;
@@ -83,9 +86,9 @@ export class PointerToDragController implements IDragSource, IDisposable {
             state.lastX = e.clientX;
             state.lastY = e.clientY;
         }
-    }
+    };
 
-    protected _onEnd(e: PointerEvent): void {
+    protected _onEnd = (e: PointerEvent): void => {
         const state = this._pointerState.get(e.pointerId);
         if (state) {
             const dx = e.clientX - state.startX;
@@ -105,5 +108,5 @@ export class PointerToDragController implements IDragSource, IDisposable {
             });
             this._pointerState.delete(e.pointerId);
         }
-    }
+    };
 }

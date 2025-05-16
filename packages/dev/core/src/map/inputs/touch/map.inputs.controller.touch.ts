@@ -1,4 +1,4 @@
-import { Observable } from "../../../events";
+/*import { Observable } from "../../../events";
 import { Cartesian2 } from "../../../geometry";
 import { IDisposable } from "../../../types";
 import { IPointerSource } from "../map.inputs.interfaces";
@@ -163,3 +163,4 @@ export class PointerToGestureController implements ITouchGestureSource, IDisposa
         }
     }
 }
+*/

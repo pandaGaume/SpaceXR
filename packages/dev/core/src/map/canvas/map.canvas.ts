@@ -1,12 +1,12 @@
 import { ITileNavigationState } from "../../tiles";
 import { CanvasDisplay } from "./map.canvas.display";
 import { Nullable } from "../../types";
-import { InputsNavigationPointerTarget, PointerInputController } from "../inputs";
 import { Context2DTileMap } from "./map.context2d";
+import { InputController, InputsNavigationController } from "../inputs";
 
 export interface ICanvasMapOptions {
-    navigationManager?: InputsNavigationPointerTarget<HTMLCanvasElement>;
-    inputController?: PointerInputController<HTMLCanvasElement>;
+    navigationManager?: InputsNavigationController;
+    inputController?: InputController<HTMLCanvasElement>;
 }
 
 /// <summary>
@@ -32,8 +32,8 @@ export interface ICanvasMapOptions {
 /// </summary>
 export class CanvasMap<T> extends Context2DTileMap<T> {
     _context: Nullable<CanvasRenderingContext2D>;
-    _navigationManager: InputsNavigationPointerTarget<HTMLCanvasElement>;
-    _inputController: PointerInputController<HTMLCanvasElement>;
+    _navigationManager: InputsNavigationController;
+    _inputController: InputController<HTMLCanvasElement>;
 
     public constructor(display: CanvasDisplay | HTMLCanvasElement, options?: ICanvasMapOptions, nav?: ITileNavigationState) {
         if (display instanceof HTMLCanvasElement) {
@@ -42,8 +42,8 @@ export class CanvasMap<T> extends Context2DTileMap<T> {
         super(display, nav);
         this._context = display.getContext();
 
-        this._navigationManager = options?.navigationManager ?? new InputsNavigationPointerTarget<HTMLCanvasElement>(this);
-        this._inputController = options?.inputController ?? new PointerInputController(display.canvas, this._navigationManager);
+        this._inputController = options?.inputController ?? new InputController(display.canvas);
+        this._navigationManager = options?.navigationManager ?? new InputsNavigationController(this._inputController, this);
     }
 
     /// <summary>

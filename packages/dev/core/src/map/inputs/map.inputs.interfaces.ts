@@ -47,3 +47,5 @@ export interface IPointerDragEvent extends ICartesian2 {
     timestamp: number;
     originalEvent: PointerEvent;
 }
+
+export interface IInputSource extends IPointerSource, IWheelSource, IDragSource {}

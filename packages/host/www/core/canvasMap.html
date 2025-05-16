@@ -56,9 +56,6 @@
                 map.background = "white";
                 const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
 
-                const navigationManager = new SPACEXR.InputsNavigationMouseTarget(map);
-                const inputController = new SPACEXR.MouseInputController(canvas, navigationManager);
-
                 function updateCompassRotation(bearing) {
                     var compass = document.getElementById('compass');
                     compass.style.transform = 'rotate(' + bearing + 'deg)';

@@ -54,12 +54,22 @@ export class PointerToDragController implements IDragSource, IDisposable {
         this._observers = [];
     }
 
+    protected _getClientX(e: PointerEvent): number {
+        return e.clientX;
+    }
+
+    protected _getClientY(e: PointerEvent): number {
+        return e.clientY;
+    }
+
     protected _onStart = (e: PointerEvent): void => {
+        const x = this._getClientX(e);
+        const y = this._getClientY(e);
         this._pointerState.set(e.pointerId, {
-            startX: e.clientX,
-            startY: e.clientY,
-            lastX: e.clientX,
-            lastY: e.clientY,
+            startX: x,
+            startY: y,
+            lastX: x,
+            lastY: y,
             button: e.button,
         });
     };
@@ -67,40 +77,46 @@ export class PointerToDragController implements IDragSource, IDisposable {
     protected _onMove = (e: PointerEvent): void => {
         const state = this._pointerState.get(e.pointerId);
         if (state) {
-            const dx = e.clientX - state.lastX;
-            const dy = e.clientY - state.lastY;
+            const x = this._getClientX(e);
+            const y = this._getClientY(e);
+
+            const dx = x - state.lastX;
+            const dy = y - state.lastY;
             const event: IPointerDragEvent = {
                 type: "drag",
                 pointerId: e.pointerId,
                 button: state.button,
                 startX: state.startX,
                 startY: state.startY,
-                x: e.clientX,
-                y: e.clientY,
+                x: x,
+                y: y,
                 deltaX: dx,
                 deltaY: dy,
                 timestamp: performance.now(),
                 originalEvent: e,
             };
             this.onDragObservable.notifyObservers(event);
-            state.lastX = e.clientX;
-            state.lastY = e.clientY;
+            state.lastX = x;
+            state.lastY = y;
         }
     };
 
     protected _onEnd = (e: PointerEvent): void => {
         const state = this._pointerState.get(e.pointerId);
         if (state) {
-            const dx = e.clientX - state.startX;
-            const dy = e.clientY - state.startY;
+            const x = this._getClientX(e);
+            const y = this._getClientY(e);
+
+            const dx = x - state.startX;
+            const dy = y - state.startY;
             this.onDragObservable.notifyObservers({
                 type: "end",
                 pointerId: e.pointerId,
                 button: state.button,
                 startX: state.startX,
                 startY: state.startY,
-                x: e.clientX,
-                y: e.clientY,
+                x: x,
+                y: y,
                 deltaX: dx,
                 deltaY: dy,
                 timestamp: performance.now(),

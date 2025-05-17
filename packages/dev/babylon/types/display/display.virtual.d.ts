@@ -33,7 +33,7 @@ export declare class VirtualDisplay implements IPhysicalDisplay {
     _unit: Unit;
     _uvs: Array<number>;
     _resolution: ISize3;
-    _pointerSource: VirtualDisplayInputsSource;
+    _inputSource: VirtualDisplayInputsSource;
     _node: Mesh;
     _center: ICartesian3;
     _inverseWorldMatrix?: Matrix;

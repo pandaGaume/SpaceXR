@@ -1,33 +1,55 @@
 import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-import { AnyTouchGesture, Cartesian2WithInfos, ICartesian2WithInfos, IPointerSource, ITouchGestureSource, IWheelSource } from "core/map/inputs";
+import { IDragSource, IInputSource, IPointerDragEvent, PointerToDragController } from "core/map/inputs";
 import { Observable } from "core/events";
+import { IDisposable } from "core/types";
 
-function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "pen" | "unknown" {
-    const event = pointerInfo.event;
+export interface ITransformedPointerEvent extends PointerEvent {
+    displayX: number;
+    displayY: number;
+    userCoordinates?: BABYLON.Nullable<BABYLON.Vector2>;
+}
 
-    if (typeof PointerEvent !== "undefined" && event instanceof PointerEvent) {
-        return event.pointerType as "mouse" | "touch" | "pen";
+export class TransformedPointerToDragController extends PointerToDragController {
+    public constructor(source: IInputSource) {
+        super(source);
     }
 
+    protected _getClientX(e: PointerEvent): number {
+        return (<ITransformedPointerEvent>e).displayX ?? e.clientX;
+    }
+
+    protected _getClientY(e: PointerEvent): number {
+        return (<ITransformedPointerEvent>e).displayY ?? e.clientY;
+    }
+}
+
+function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "unknown" {
+    const event = pointerInfo.event;
+
+    if (typeof PointerEvent !== "undefined") {
+        if (event instanceof PointerEvent) {
+            return event.pointerType as "mouse" | "touch";
+        } else if (event instanceof WheelEvent) {
+            return "mouse";
+        }
+    }
     return "unknown";
 }
 
-export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource, ITouchGestureSource, BABYLON.IDisposable {
-    _onPointerOverObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerEnterObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerOutObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerLeaveObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerMoveObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerCancelObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerGotCaptureObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerLostCaptureObservable?: Observable<ICartesian2WithInfos>;
-
-    _onWheelObservable?: Observable<number>;
-
-    _onTouchObservable?: Observable<AnyTouchGesture>;
+export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
+    _onPointerOverObservable?: Observable<PointerEvent>;
+    _onPointerEnterObservable?: Observable<PointerEvent>;
+    _onPointerOutObservable?: Observable<PointerEvent>;
+    _onPointerLeaveObservable?: Observable<PointerEvent>;
+    _onPointerMoveObservable?: Observable<PointerEvent>;
+    _onPointerDownObservable?: Observable<PointerEvent>;
+    _onPointerUpObservable?: Observable<PointerEvent>;
+    _onPointerCancelObservable?: Observable<PointerEvent>;
+    _onPointerGotCaptureObservable?: Observable<PointerEvent>;
+    _onPointerLostCaptureObservable?: Observable<PointerEvent>;
+    _onWheelObservable?: Observable<WheelEvent>;
+    _dragController: IDragSource;
 
     _display: VirtualDisplay;
     _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
@@ -39,94 +61,92 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         this._prePointerObserver = null;
         this._currentPosition = null;
         this._attach();
+        this._dragController = new TransformedPointerToDragController(this);
     }
 
     public get display(): VirtualDisplay {
         return this._display;
     }
 
-    public get onPointerOverObservable(): Observable<ICartesian2WithInfos> {
+    public get onDragObservable(): Observable<IPointerDragEvent> {
+        return this._dragController.onDragObservable;
+    }
+
+    public get onPointerOverObservable(): Observable<PointerEvent> {
         if (!this._onPointerOverObservable) {
-            this._onPointerOverObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerOverObservable = new Observable<PointerEvent>();
         }
         return this._onPointerOverObservable;
     }
 
-    public get onPointerEnterObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerEnterObservable(): Observable<PointerEvent> {
         if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerEnterObservable = new Observable<PointerEvent>();
         }
         return this._onPointerEnterObservable;
     }
 
-    public get onPointerOutObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerOutObservable(): Observable<PointerEvent> {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerOutObservable = new Observable<PointerEvent>();
         }
         return this._onPointerOutObservable;
     }
 
-    public get onPointerLeaveObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerLeaveObservable(): Observable<PointerEvent> {
         if (!this._onPointerLeaveObservable) {
-            this._onPointerLeaveObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerLeaveObservable = new Observable<PointerEvent>();
         }
         return this._onPointerLeaveObservable;
     }
 
-    public get onPointerMoveObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerMoveObservable(): Observable<PointerEvent> {
         if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerMoveObservable = new Observable<PointerEvent>();
         }
         return this._onPointerMoveObservable;
     }
 
-    public get onPointerDownObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerDownObservable(): Observable<PointerEvent> {
         if (!this._onPointerDownObservable) {
-            this._onPointerDownObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerDownObservable = new Observable<PointerEvent>();
         }
         return this._onPointerDownObservable;
     }
 
-    public get onPointerUpObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerUpObservable(): Observable<PointerEvent> {
         if (!this._onPointerUpObservable) {
-            this._onPointerUpObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerUpObservable = new Observable<PointerEvent>();
         }
         return this._onPointerUpObservable;
     }
 
-    public get onPointerCancelObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerCancelObservable(): Observable<PointerEvent> {
         if (!this._onPointerCancelObservable) {
-            this._onPointerCancelObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerCancelObservable = new Observable<PointerEvent>();
         }
         return this._onPointerCancelObservable;
     }
 
-    public get onPointerGotCaptureObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerGotCaptureObservable(): Observable<PointerEvent> {
         if (!this._onPointerGotCaptureObservable) {
-            this._onPointerGotCaptureObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerGotCaptureObservable = new Observable<PointerEvent>();
         }
         return this._onPointerGotCaptureObservable;
     }
 
-    public get onPointerLostCaptureObservable(): Observable<ICartesian2WithInfos> {
+    public get onPointerLostCaptureObservable(): Observable<PointerEvent> {
         if (!this._onPointerLostCaptureObservable) {
-            this._onPointerLostCaptureObservable = new Observable<ICartesian2WithInfos>();
+            this._onPointerLostCaptureObservable = new Observable<PointerEvent>();
         }
         return this._onPointerLostCaptureObservable;
     }
 
-    public get onWheelObservable(): Observable<number> {
+    public get onWheelObservable(): Observable<WheelEvent> {
         if (!this._onWheelObservable) {
-            this._onWheelObservable = new Observable<number>();
+            this._onWheelObservable = new Observable<WheelEvent>();
         }
         return this._onWheelObservable;
-    }
-
-    public get onTouchObservable(): Observable<AnyTouchGesture> {
-        if (!this._onTouchObservable) {
-            this._onTouchObservable = new Observable<AnyTouchGesture>();
-        }
-        return this._onTouchObservable;
     }
 
     public dispose(): void {
@@ -147,7 +167,17 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         this._onPointerGotCaptureObservable?.clear();
         this._onPointerLostCaptureObservable?.clear();
         this._onWheelObservable?.clear();
-        this._onTouchObservable?.clear();
+        this._onPointerOverObservable = undefined;
+        this._onPointerEnterObservable = undefined;
+        this._onPointerOutObservable = undefined;
+        this._onPointerLeaveObservable = undefined;
+        this._onPointerMoveObservable = undefined;
+        this._onPointerDownObservable = undefined;
+        this._onPointerUpObservable = undefined;
+        this._onPointerCancelObservable = undefined;
+        this._onPointerGotCaptureObservable = undefined;
+        this._onPointerLostCaptureObservable = undefined;
+        this._onWheelObservable = undefined;
     }
 
     protected _attach(): void {
@@ -164,7 +194,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
         // under the hood, the actual value passed is a real PointerEvent in browsers
         // that support pointer events.
         const type = GetPointerType(pi);
-        if (type === "mouse" || type === "pen") {
+        if (type === "mouse") {
             switch (pi.type) {
                 case BABYLON.PointerEventTypes.POINTERMOVE: {
                     this._onPointerMove(pi);
@@ -193,9 +223,11 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
     private _onPointerDown(pointerInfo: BABYLON.PointerInfoPre): void {
         if (this._currentPosition) {
             const pixelXY = this._currentPosition;
-            const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, pointerInfo.event.button);
+            const base = pointerInfo.event as ITransformedPointerEvent;
+            base.displayX = pixelXY.x;
+            base.displayY = pixelXY.y;
             if (this._onPointerDownObservable && this._onPointerDownObservable.hasObservers()) {
-                this._onPointerDownObservable.notifyObservers(e, -1, this, this);
+                this._onPointerDownObservable.notifyObservers(base, -1, this, this);
             }
         }
     }
@@ -203,9 +235,11 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
     private _onPointerUp(pointerInfo: BABYLON.PointerInfoPre): void {
         if (this._currentPosition) {
             const pixelXY = this._currentPosition;
-            const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, pointerInfo.event.button);
+            const base = pointerInfo.event as ITransformedPointerEvent;
+            base.displayX = pixelXY.x;
+            base.displayY = pixelXY.y;
             if (this._onPointerUpObservable && this._onPointerUpObservable.hasObservers()) {
-                this._onPointerUpObservable.notifyObservers(e, -1, this._display, this);
+                this._onPointerUpObservable.notifyObservers(base, -1, this._display, this);
             }
         }
     }
@@ -230,11 +264,11 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
                 //const pixelXY = this._display.getPixelToRef(current.pickedPoint);
                 const pixelXY = this._display.getPixelToRef0(c);
                 if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                    const buttonIndex = (<any>pointerInfo.event).button;
-                    const pointerId = (<any>pointerInfo.event).pointerId;
-                    const e = new Cartesian2WithInfos(pixelXY.x, pixelXY.y, buttonIndex, pointerId);
-                    e.userCoordinates = c;
-                    this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
+                    const base = pointerInfo.event as ITransformedPointerEvent;
+                    base.displayX = pixelXY.x;
+                    base.displayY = pixelXY.y;
+                    base.userCoordinates = c;
+                    this._onPointerMoveObservable.notifyObservers(base, -1, this._display, this);
                 }
                 this._currentPosition = pixelXY;
                 return;
@@ -243,29 +277,29 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
             pointerInfo.skipOnPointerObservable = true;
             // enter
             if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
-                const buttonIndex = (<any>pointerInfo.event).button;
-                const pointerId = (<any>pointerInfo.event).pointerId;
-                const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
-                this._onPointerEnterObservable.notifyObservers(e, -1, this._display, this);
+                const base = pointerInfo.event as ITransformedPointerEvent;
+                base.displayX = 0;
+                base.displayY = 0;
+                this._onPointerEnterObservable.notifyObservers(base, -1, this._display, this);
             }
             // then move
             const pixelXY = this._display.getPixelToRef0(c);
             if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                const buttonIndex = (<any>pointerInfo.event).button;
-                const pointerId = (<any>pointerInfo.event).pointerId;
-                const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
-                e.userCoordinates = c;
-                this._onPointerMoveObservable.notifyObservers(e, -1, this._display, this);
+                const base = pointerInfo.event as ITransformedPointerEvent;
+                base.displayX = 0;
+                base.displayY = 0;
+                base.userCoordinates = c;
+                this._onPointerMoveObservable.notifyObservers(base, -1, this._display, this);
             }
             this._currentPosition = pixelXY;
             return;
         }
         // out
         if (this._onPointerOutObservable && this._onPointerOutObservable.hasObservers()) {
-            const buttonIndex = (<any>pointerInfo.event).button;
-            const pointerId = (<any>pointerInfo.event).pointerId;
-            const e = new Cartesian2WithInfos(0, 0, buttonIndex, pointerId);
-            this._onPointerOutObservable.notifyObservers(e, -1, this._display, this);
+            const base = pointerInfo.event as ITransformedPointerEvent;
+            base.displayX = 0;
+            base.displayY = 0;
+            this._onPointerOutObservable.notifyObservers(base, -1, this._display, this);
         }
         this._currentPosition = null;
     }
@@ -275,7 +309,7 @@ export class VirtualDisplayInputsSource implements IPointerSource, IWheelSource,
             pointerInfo.skipOnPointerObservable = true;
             const e = pointerInfo.event as WheelEvent;
             if (this._onWheelObservable && this._onWheelObservable.hasObservers()) {
-                this._onWheelObservable.notifyObservers(e.deltaY, -1, this.display, this);
+                this._onWheelObservable.notifyObservers(e, -1, this.display, this);
             }
         }
     }

@@ -4,7 +4,7 @@ import { Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
-import { InputsNavigationPointerTarget, InputsNavigationTargetBase, IPointerSource, IWheelSource, PointerController } from "core/map";
+import { IInputSource, InputsNavigationController} from "core/map";
 import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
 
@@ -14,7 +14,7 @@ import { Map3D } from "./map";
 export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi, IHasTileMapLayerContainer<Map3DContentType> {
     private _map: IMap3D;
     private _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
-    private _pointerController: Nullable<PointerController<IPointerSource & IWheelSource>> = null;
+    private _pointerController: Nullable<InputsNavigationController> = null;
     private _ownPointerController = false;
 
     public constructor(name: string, scene?: BABYLON.Scene) {
@@ -85,17 +85,16 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         this.map.elevationOptions.exageration = e;
     }
 
-    protected _withPointerControl(controller: PointerController<IPointerSource & IWheelSource> | (IPointerSource & IWheelSource)): MapNode {
+    protected _withPointerControl(controller: InputsNavigationController | IInputSource): MapNode {
         if (this._pointerController === controller) return this;
 
         if (this._pointerController && this._ownPointerController) {
             this._pointerController.dispose();
         }
-        if (controller instanceof PointerController) {
+        if (controller instanceof InputsNavigationController) {
             this._pointerController = controller;
         } else {
-            const input = new InputsNavigationPointerTarget(this._map, InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT, true);
-            this._pointerController = new PointerController(controller, input);
+            this._pointerController = new InputsNavigationController(controller, this._map);
             this._ownPointerController = true;
         }
         return this;

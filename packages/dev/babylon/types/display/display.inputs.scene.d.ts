@@ -1,35 +1,48 @@
 import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-import { ICartesian2WithInfos, IPointerSource, IWheelSource } from "core/map/inputs";
+import { IDragSource, IInputSource, IPointerDragEvent, PointerToDragController } from "core/map/inputs";
 import { Observable } from "core/events";
-export declare class VirtualDisplayInputsSource implements IPointerSource, IWheelSource, BABYLON.IDisposable {
-    _onPointerOverObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerEnterObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerOutObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerLeaveObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerMoveObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerDownObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerUpObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerCancelObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerGotCaptureObservable?: Observable<ICartesian2WithInfos>;
-    _onPointerLostCaptureObservable?: Observable<ICartesian2WithInfos>;
-    _onWheelObservable?: Observable<number>;
+import { IDisposable } from "core/types";
+export interface ITransformedPointerEvent extends PointerEvent {
+    displayX: number;
+    displayY: number;
+    userCoordinates?: BABYLON.Nullable<BABYLON.Vector2>;
+}
+export declare class TransformedPointerToDragController extends PointerToDragController {
+    constructor(source: IInputSource);
+    protected _getClientX(e: PointerEvent): number;
+    protected _getClientY(e: PointerEvent): number;
+}
+export declare class VirtualDisplayInputsSource implements IInputSource, IDisposable {
+    _onPointerOverObservable?: Observable<PointerEvent>;
+    _onPointerEnterObservable?: Observable<PointerEvent>;
+    _onPointerOutObservable?: Observable<PointerEvent>;
+    _onPointerLeaveObservable?: Observable<PointerEvent>;
+    _onPointerMoveObservable?: Observable<PointerEvent>;
+    _onPointerDownObservable?: Observable<PointerEvent>;
+    _onPointerUpObservable?: Observable<PointerEvent>;
+    _onPointerCancelObservable?: Observable<PointerEvent>;
+    _onPointerGotCaptureObservable?: Observable<PointerEvent>;
+    _onPointerLostCaptureObservable?: Observable<PointerEvent>;
+    _onWheelObservable?: Observable<WheelEvent>;
+    _dragController: IDragSource;
     _display: VirtualDisplay;
     _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
     _currentPosition: BABYLON.Nullable<BABYLON.Vector2>;
     constructor(display: VirtualDisplay);
     get display(): VirtualDisplay;
-    get onPointerOverObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerEnterObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerOutObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerLeaveObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerMoveObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerDownObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerUpObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerCancelObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerGotCaptureObservable(): Observable<ICartesian2WithInfos>;
-    get onPointerLostCaptureObservable(): Observable<ICartesian2WithInfos>;
-    get onWheelObservable(): Observable<number>;
+    get onDragObservable(): Observable<IPointerDragEvent>;
+    get onPointerOverObservable(): Observable<PointerEvent>;
+    get onPointerEnterObservable(): Observable<PointerEvent>;
+    get onPointerOutObservable(): Observable<PointerEvent>;
+    get onPointerLeaveObservable(): Observable<PointerEvent>;
+    get onPointerMoveObservable(): Observable<PointerEvent>;
+    get onPointerDownObservable(): Observable<PointerEvent>;
+    get onPointerUpObservable(): Observable<PointerEvent>;
+    get onPointerCancelObservable(): Observable<PointerEvent>;
+    get onPointerGotCaptureObservable(): Observable<PointerEvent>;
+    get onPointerLostCaptureObservable(): Observable<PointerEvent>;
+    get onWheelObservable(): Observable<WheelEvent>;
     dispose(): void;
     protected _attach(): void;
     protected _onPrePointer(pi: BABYLON.PointerInfoPre): void;

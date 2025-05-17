@@ -5465,50 +5465,56 @@ class PointerToDragController {
         this._pointerState = new Map();
         this._observers = [];
         this._onStart = (e) => {
+            const x = this._getClientX(e);
+            const y = this._getClientY(e);
             this._pointerState.set(e.pointerId, {
-                startX: e.clientX,
-                startY: e.clientY,
-                lastX: e.clientX,
-                lastY: e.clientY,
+                startX: x,
+                startY: y,
+                lastX: x,
+                lastY: y,
                 button: e.button,
             });
         };
         this._onMove = (e) => {
             const state = this._pointerState.get(e.pointerId);
             if (state) {
-                const dx = e.clientX - state.lastX;
-                const dy = e.clientY - state.lastY;
+                const x = this._getClientX(e);
+                const y = this._getClientY(e);
+                const dx = x - state.lastX;
+                const dy = y - state.lastY;
                 const event = {
                     type: "drag",
                     pointerId: e.pointerId,
                     button: state.button,
                     startX: state.startX,
                     startY: state.startY,
-                    x: e.clientX,
-                    y: e.clientY,
+                    x: x,
+                    y: y,
                     deltaX: dx,
                     deltaY: dy,
                     timestamp: performance.now(),
                     originalEvent: e,
                 };
                 this.onDragObservable.notifyObservers(event);
-                state.lastX = e.clientX;
-                state.lastY = e.clientY;
+                state.lastX = x;
+                state.lastY = y;
             }
         };
         this._onEnd = (e) => {
             const state = this._pointerState.get(e.pointerId);
             if (state) {
-                const dx = e.clientX - state.startX;
-                const dy = e.clientY - state.startY;
+                const x = this._getClientX(e);
+                const y = this._getClientY(e);
+                const dx = x - state.startX;
+                const dy = y - state.startY;
                 this.onDragObservable.notifyObservers({
                     type: "end",
                     pointerId: e.pointerId,
                     button: state.button,
                     startX: state.startX,
                     startY: state.startY,
-                    x: e.clientX,
-                    y: e.clientY,
+                    x: x,
+                    y: y,
                     deltaX: dx,
                     deltaY: dy,
                     timestamp: performance.now(),
@@ -5549,6 +5555,12 @@ class PointerToDragController {
             }
         }
         this._observers = [];
+    }
+    _getClientX(e) {
+        return e.clientX;
+    }
+    _getClientY(e) {
+        return e.clientY;
     }
 }
 //# sourceMappingURL=map.inputs.controller.drag.js.map
@@ -5801,41 +5813,53 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InputsNavigationController: () => (/* binding */ InputsNavigationController)
 /* harmony export */ });
 class InputsNavigationController {
-    constructor(source, target, zoomIncrement, invertY = true) {
+    constructor(source, target, zoomIncrement, invertY = true, invertZ = false) {
+        this._onDragObserver = null;
+        this._onWheelObserver = null;
+        this._onDrag = (event) => {
+            switch (event.type) {
+                case "drag": {
+                    switch (event.button) {
+                        case 0: {
+                            if (event.deltaX || event.deltaY) {
+                                this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
+                            }
+                            break;
+                        }
+                        case 2: {
+                            if (event.deltaX) {
+                                this._target.rotateMap(event.deltaX);
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        };
+        this._onWheel = (event) => {
+            const delta = Math.sign(event.deltaY) * (this._zoomIncrement ?? Math.abs(event.deltaY));
+            this._target.zoomMap(this._invertz ? delta : -delta);
+        };
         this._source = source;
         this._target = target;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationController.DEFAULT_ZOOM_INCREMENT;
         this._inverty = invertY;
+        this._invertz = invertZ;
         this._attachSource(this._source);
     }
+    dispose() {
+        this._detachSource();
+    }
     _attachSource(source) {
-        source.onDragObservable.add(this._onDrag.bind(this));
-        source.onWheelObservable.add(this._onWheel.bind(this));
+        this._onDragObserver = source.onDragObservable.add(this._onDrag);
+        this._onWheelObserver = source.onWheelObservable.add(this._onWheel);
     }
-    _onDrag(event) {
-        switch (event.type) {
-            case "drag": {
-                switch (event.button) {
-                    case 0: {
-                        if (event.deltaX || event.deltaY) {
-                            this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
-                        }
-                        break;
-                    }
-                    case 2: {
-                        if (event.deltaX) {
-                            this._target.rotateMap(event.deltaX);
-                        }
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    }
-    _onWheel(event) {
-        const delta = Math.sign(event.deltaY) * (this._zoomIncrement ?? Math.abs(event.deltaY));
-        this._target.zoomMap(delta);
+    _detachSource() {
+        this._onDragObserver?.disconnect();
+        this._onWheelObserver?.disconnect();
+        this._onDragObserver = null;
+        this._onWheelObserver = null;
     }
 }
 InputsNavigationController.DEFAULT_ZOOM_INCREMENT = 0.1;

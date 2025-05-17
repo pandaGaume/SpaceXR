@@ -1,6 +1,6 @@
 import { Material, Mesh, Scene, StandardMaterial } from "@babylonjs/core";
 import { ISize2 } from "core/geometry";
-import { IPointerSource, IWheelSource, InputsNavigationPointerTarget, InputsNavigationTargetBase, PointerController } from "core/map";
+import { IInputSource, InputsNavigationController } from "core/map";
 import { ITileMap } from "core/tiles";
 import { VirtualDisplay, VirtualDisplayInputsSource } from "../../display";
 import { IMapTextureOptions, WebMapTexture } from "../../materials";
@@ -10,8 +10,8 @@ export class MapDisplay extends VirtualDisplay {
     static TextureSuffix = "texture";
 
     _content: WebMapTexture;
-    _target: InputsNavigationPointerTarget<VirtualDisplayInputsSource>;
-    _controller: PointerController<IPointerSource & IWheelSource>;
+    _controller: InputsNavigationController;
+    _source: IInputSource;
 
     public constructor(name: string, dimension: ISize2, options?: IMapTextureOptions, scene?: Mesh | Scene) {
         options = options ?? WebMapTexture.OptionsHD();
@@ -19,8 +19,8 @@ export class MapDisplay extends VirtualDisplay {
         this._content = this._createTextureMap(name, options, this.getScene());
         this.node.material = this._createMaterial(name, this._content, this.getScene());
 
-        this._target = new InputsNavigationPointerTarget(this._content?.map, InputsNavigationTargetBase.DEFAULT_ZOOM_INCREMENT, options?.invertY);
-        this._controller = new PointerController(this.pointerSource, this._target);
+        this._source = new VirtualDisplayInputsSource(this);
+        this._controller = new InputsNavigationController(this._source, this._content?.map, InputsNavigationController.DEFAULT_ZOOM_INCREMENT, options?.invertY);
     }
 
     get content(): WebMapTexture {

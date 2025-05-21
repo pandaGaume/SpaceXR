@@ -12639,6 +12639,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ColorValue: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
+/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.DebugTouchConsole),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.DemTileWebClient),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.DeserializeLocalizableString),
@@ -12666,7 +12667,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeoShape: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoShape),
 /* harmony export */   GeoShapeType: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoShapeType),
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem),
-/* harmony export */   GestureStatus: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.GestureStatus),
 /* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.GetLocalizableStringValue),
 /* harmony export */   Google: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.GoogleMap2DLayerCode),
@@ -12800,15 +12800,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TilesetCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TilesetCodec),
 /* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchGestureType),
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapDragGesture),
-/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapEvent),
-/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapRotateGesture),
-/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapUpdateEvent),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchSpot),
 /* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Unit),
 /* harmony export */   ValidableBase: () => (/* reexport safe */ _validable__WEBPACK_IMPORTED_MODULE_1__.ValidableBase),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.VectorTileGeomType),
@@ -13237,21 +13228,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasMap),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap),
-/* harmony export */   GestureStatus: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.GestureStatus),
 /* harmony export */   InputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationController),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.IsTouchCapable),
 /* harmony export */   PointerToDragController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.PointerToDragController),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchGestureType),
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapDragGesture),
-/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapEvent),
-/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapRotateGesture),
-/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapUpdateEvent),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.TouchSpot),
 /* harmony export */   XRGestureType: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.XRGestureType)
 /* harmony export */ });
 /* harmony import */ var _canvas_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./canvas/index */ "../core/dist/map/canvas/index.js");
@@ -13270,21 +13251,11 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GestureStatus: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.GestureStatus),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_inputs_controller_navigation__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationController),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.IsTouchCapable),
 /* harmony export */   PointerToDragController: () => (/* reexport safe */ _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_2__.PointerToDragController),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType),
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapDragGesture),
-/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapEvent),
-/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapRotateGesture),
-/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapUpdateEvent),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ _touch__WEBPACK_IMPORTED_MODULE_5__.TouchSpot),
 /* harmony export */   XRGestureType: () => (/* reexport safe */ _map_inputs_interfaces_hands__WEBPACK_IMPORTED_MODULE_1__.XRGestureType)
 /* harmony export */ });
 /* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
@@ -13292,8 +13263,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.controller.drag */ "../core/dist/map/inputs/map.inputs.controller.drag.js");
 /* harmony import */ var _map_inputs_controller_navigation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.inputs.controller.navigation */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
 /* harmony import */ var _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map.inputs.controller */ "../core/dist/map/inputs/map.inputs.controller.js");
-/* harmony import */ var _touch__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./touch */ "../core/dist/map/inputs/touch/index.js");
-
 
 
 
@@ -13321,6 +13290,9 @@ class PointerToDragController {
         this._pointerState = new Map();
         this._observers = [];
         this._onStart = (e) => {
+            if (e.pointerType === "touch") {
+                return;
+            }
             const x = this._getClientX(e);
             const y = this._getClientY(e);
             this._pointerState.set(e.pointerId, {
@@ -13332,6 +13304,9 @@ class PointerToDragController {
             });
         };
         this._onMove = (e) => {
+            if (e.pointerType === "touch") {
+                return;
+            }
             const state = this._pointerState.get(e.pointerId);
             if (state) {
                 const x = this._getClientX(e);
@@ -13357,6 +13332,9 @@ class PointerToDragController {
             }
         };
         this._onEnd = (e) => {
+            if (e.pointerType === "touch") {
+                return;
+            }
             const state = this._pointerState.get(e.pointerId);
             if (state) {
                 const x = this._getClientX(e);
@@ -13433,8 +13411,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   InputController: () => (/* binding */ InputController)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
 /* harmony import */ var _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.controller.drag */ "../core/dist/map/inputs/map.inputs.controller.drag.js");
+/* harmony import */ var _map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.controller.touch */ "../core/dist/map/inputs/map.inputs.controller.touch.js");
+
 
 
 class InputController {
@@ -13482,16 +13462,22 @@ class InputController {
     get onDragObservable() {
         return this._dragController.onDragObservable;
     }
+    get onTouchObservable() {
+        if (!this._touchController) {
+            this._touchController = new _map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_1__.PointerToGestureController(this);
+        }
+        return this._touchController.onTouchObservable;
+    }
     get onWheelObservable() {
         if (!this._onWheelObservable) {
-            this._onWheelObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onWheelObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("wheel", this._onWheel);
         }
         return this._onWheelObservable;
     }
     get onPointerOverObservable() {
         if (!this._onPointerOverObservable) {
-            this._onPointerOverObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerOverObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointerover", (ev) => {
                 this._onPointerOverObservable?.notifyObservers(ev);
             });
@@ -13500,63 +13486,63 @@ class InputController {
     }
     get onPointerEnterObservable() {
         if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerEnterObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointerenter", this._onPointerEnter);
         }
         return this._onPointerEnterObservable;
     }
     get onPointerOutObservable() {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerOutObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointerout", this._onPointerOut);
         }
         return this._onPointerOutObservable;
     }
     get onPointerLeaveObservable() {
         if (!this._onPointerLeaveObservable) {
-            this._onPointerLeaveObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerLeaveObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointerleave", this._onPointerLeave);
         }
         return this._onPointerLeaveObservable;
     }
     get onPointerMoveObservable() {
         if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerMoveObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointermove", this._onPointerMove);
         }
         return this._onPointerMoveObservable;
     }
     get onPointerDownObservable() {
         if (!this._onPointerDownObservable) {
-            this._onPointerDownObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerDownObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointerdown", this._onPointerDown);
         }
         return this._onPointerDownObservable;
     }
     get onPointerUpObservable() {
         if (!this._onPointerUpObservable) {
-            this._onPointerUpObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerUpObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointerup", this._onPointerUp);
         }
         return this._onPointerUpObservable;
     }
     get onPointerCancelObservable() {
         if (!this._onPointerCancelObservable) {
-            this._onPointerCancelObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerCancelObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("pointercancel", this._onPointerCancel);
         }
         return this._onPointerCancelObservable;
     }
     get onPointerGotCaptureObservable() {
         if (!this._onPointerGotCaptureObservable) {
-            this._onPointerGotCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerGotCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("gotpointercapture", this._onPointerGotCapture);
         }
         return this._onPointerGotCaptureObservable;
     }
     get onPointerLostCaptureObservable() {
         if (!this._onPointerLostCaptureObservable) {
-            this._onPointerLostCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onPointerLostCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._src?.addEventListener("lostpointercapture", this._onPointerLostCapture);
         }
         return this._onPointerLostCaptureObservable;
@@ -13591,7 +13577,7 @@ class InputController {
                 src.addEventListener("pointerleave", this._onPointerLeave.bind(this));
             }
             if (this._onPointerMoveObservable) {
-                src.addEventListener("pointermove", this._onPointerMove.bind(this));
+                src.addEventListener("pointermove", this._onPointerMove.bind(this), { passive: false });
             }
             if (this._onPointerDownObservable) {
                 src.addEventListener("pointerdown", this._onPointerDown);
@@ -13672,6 +13658,7 @@ class InputsNavigationController {
     constructor(source, target, zoomIncrement, invertY = true, invertZ = false) {
         this._onDragObserver = null;
         this._onWheelObserver = null;
+        this._onTouchObserver = null;
         this._onDrag = (event) => {
             switch (event.type) {
                 case "drag": {
@@ -13697,6 +13684,28 @@ class InputsNavigationController {
             const delta = Math.sign(event.deltaY) * (this._zoomIncrement ?? Math.abs(event.deltaY));
             this._target.zoomMap(this._invertz ? delta : -delta);
         };
+        this._onTouch = (event) => {
+            switch (event.type) {
+                case "drag": {
+                    switch (event.points.length) {
+                        case 1: {
+                            this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
+                            break;
+                        }
+                        case 2: {
+                            this._target.rotateMap(event.deltaX);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case "pinch": {
+                    const delta = Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale));
+                    this._target.zoomMap(this._invertz ? delta : -delta);
+                    break;
+                }
+            }
+        };
         this._source = source;
         this._target = target;
         this._zoomIncrement = zoomIncrement ?? InputsNavigationController.DEFAULT_ZOOM_INCREMENT;
@@ -13710,6 +13719,7 @@ class InputsNavigationController {
     _attachSource(source) {
         this._onDragObserver = source.onDragObservable.add(this._onDrag);
         this._onWheelObserver = source.onWheelObservable.add(this._onWheel);
+        this._onTouchObserver = source.onTouchObservable.add(this._onTouch);
     }
     _detachSource() {
         this._onDragObserver?.disconnect();
@@ -13720,6 +13730,206 @@ class InputsNavigationController {
 }
 InputsNavigationController.DEFAULT_ZOOM_INCREMENT = 0.1;
 //# sourceMappingURL=map.inputs.controller.navigation.js.map
+
+/***/ }),
+
+/***/ "../core/dist/map/inputs/map.inputs.controller.touch.js":
+/*!**************************************************************!*\
+  !*** ../core/dist/map/inputs/map.inputs.controller.touch.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PointerToGestureController: () => (/* binding */ PointerToGestureController)
+/* harmony export */ });
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
+
+
+class PointerToGestureController {
+    constructor(source) {
+        this._pointers = new Map();
+        this._pinchStartDistance = 0;
+        this._onStart = (e) => {
+            if (e.pointerType !== "touch") {
+                return;
+            }
+            this._pointers.set(e.pointerId, {
+                id: e.pointerId,
+                startX: e.clientX,
+                startY: e.clientY,
+                x: e.clientX,
+                y: e.clientY,
+                startTime: performance.now(),
+            });
+            if (this._pointers.size === 2) {
+                const [a, b] = Array.from(this._pointers.values());
+                this._pinchStartDistance = this._distance(a, b);
+            }
+        };
+        this._onMove = (e) => {
+            if (e.pointerType !== "touch") {
+                return;
+            }
+            const p = this._pointers.get(e.pointerId);
+            if (p) {
+                p.x = e.clientX;
+                p.y = e.clientY;
+            }
+            switch (this._pointers.size) {
+                case 1: {
+                    const state = this._pointers.get(e.pointerId);
+                    if (state) {
+                        const gesture = {
+                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
+                            timestamp: performance.now(),
+                            duration: performance.now() - state.startTime,
+                            points: [{ x: state.x, y: state.y }],
+                            deltaX: state.x - state.startX,
+                            deltaY: state.y - state.startY,
+                        };
+                        state.startX = state.x;
+                        state.startY = state.y;
+                        this.onTouchObservable.notifyObservers(gesture);
+                    }
+                    break;
+                }
+                case 2: {
+                    const [a, b] = Array.from(this._pointers.values());
+                    const currentDistance = this._distance(a, b);
+                    const scale = currentDistance / this._pinchStartDistance;
+                    const centerX = (a.x + b.x) / 2;
+                    const centerY = (a.y + b.y) / 2;
+                    const isPinch = Math.abs(scale - 1.0) > 0.05;
+                    if (isPinch) {
+                        const gesture = {
+                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
+                            timestamp: performance.now(),
+                            duration: 0,
+                            points: [
+                                { x: a.x, y: a.y },
+                                { x: b.x, y: b.y },
+                            ],
+                            center: { x: centerX, y: centerY },
+                            scale: this._pinchStartDistance - currentDistance,
+                        };
+                        this._pinchStartDistance = currentDistance;
+                        this.onTouchObservable.notifyObservers(gesture);
+                    }
+                    else {
+                        const gesture = {
+                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
+                            timestamp: performance.now(),
+                            duration: 0,
+                            points: [
+                                { x: a.x, y: a.y },
+                                { x: b.x, y: b.y },
+                            ],
+                            deltaX: centerX - (a.startX + b.startX) / 2,
+                            deltaY: centerY - (a.startY + b.startY) / 2,
+                        };
+                        a.startX = a.x;
+                        a.startY = a.y;
+                        b.startX = b.x;
+                        b.startY = b.y;
+                        this.onTouchObservable.notifyObservers(gesture);
+                    }
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        };
+        this._onEnd = (e) => {
+            if (e.pointerType !== "touch") {
+                return;
+            }
+            const state = this._pointers.get(e.pointerId);
+            if (!state)
+                return;
+            const duration = performance.now() - state.startTime;
+            const dx = state.x - state.startX;
+            const dy = state.y - state.startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const fingers = [{ x: state.x, y: state.y }];
+            const timestamp = performance.now();
+            if (distance < 10 && duration < 300) {
+                const gesture = {
+                    type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Tap,
+                    timestamp: timestamp,
+                    duration: duration,
+                    points: fingers,
+                };
+                this.onTouchObservable.notifyObservers(gesture);
+            }
+            if (distance > 30 && duration < 600) {
+                const gesture = {
+                    type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Swipe,
+                    timestamp: timestamp,
+                    duration: duration,
+                    points: fingers,
+                    distance: distance,
+                    direction: this._computeSwipeDirection(dx, dy),
+                };
+                this.onTouchObservable.notifyObservers(gesture);
+            }
+            this._pointers.delete(e.pointerId);
+        };
+        this._source = source;
+    }
+    dispose() {
+        this._detachSource(this._source);
+        this._clearObservable;
+    }
+    get onTouchObservable() {
+        if (!this._onTouchObservable) {
+            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._attachSource(this._source);
+        }
+        return this._onTouchObservable;
+    }
+    get source() {
+        return this._source;
+    }
+    _clearObservable() {
+        this._onTouchObservable?.clear();
+        this._onTouchObservable = undefined;
+    }
+    _attachSource(source) {
+        if (source && this._onTouchObservable) {
+            source.onPointerDownObservable.add(this._onStart);
+            source.onPointerMoveObservable.add(this._onMove);
+            source.onPointerUpObservable.add(this._onEnd);
+            source.onPointerCancelObservable.add(this._onEnd);
+        }
+    }
+    _detachSource(source) {
+        if (source) {
+            source.onPointerDownObservable.removeCallback(this._onStart);
+            source.onPointerMoveObservable.removeCallback(this._onMove);
+            source.onPointerUpObservable.removeCallback(this._onEnd);
+            source.onPointerCancelObservable.removeCallback(this._onEnd);
+        }
+    }
+    _distance(a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    _computeSwipeDirection(dx, dy) {
+        const adx = Math.abs(dx);
+        const ady = Math.abs(dy);
+        if (adx > ady) {
+            return dx > 0 ? "right" : "left";
+        }
+        else {
+            return dy > 0 ? "down" : "up";
+        }
+    }
+}
+//# sourceMappingURL=map.inputs.controller.touch.js.map
 
 /***/ }),
 
@@ -13768,339 +13978,9 @@ var TouchGestureType;
     TouchGestureType["Tap"] = "tap";
     TouchGestureType["Swipe"] = "swipe";
     TouchGestureType["Pinch"] = "pinch";
+    TouchGestureType["Drag"] = "drag";
 })(TouchGestureType || (TouchGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.touch.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/gestures/index.js":
-/*!*******************************************************!*\
-  !*** ../core/dist/map/inputs/touch/gestures/index.js ***!
-  \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _map_inputs_touch_gestures_drag__WEBPACK_IMPORTED_MODULE_0__.TouchMapDragGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _map_inputs_touch_gestures_rotate__WEBPACK_IMPORTED_MODULE_1__.TouchMapRotateGesture),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _map_inputs_touch_gestures_zoom__WEBPACK_IMPORTED_MODULE_2__.TouchMapZoomGesture)
-/* harmony export */ });
-/* harmony import */ var _map_inputs_touch_gestures_drag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.touch.gestures.drag */ "../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.drag.js");
-/* harmony import */ var _map_inputs_touch_gestures_rotate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.touch.gestures.rotate */ "../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.rotate.js");
-/* harmony import */ var _map_inputs_touch_gestures_zoom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.touch.gestures.zoom */ "../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.zoom.js");
-
-
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.drag.js":
-/*!********************************************************************************!*\
-  !*** ../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.drag.js ***!
-  \********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TouchMapDragGesture: () => (/* binding */ TouchMapDragGesture)
-/* harmony export */ });
-/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map.inputs.touch.gestures */ "../core/dist/map/inputs/touch/map.inputs.touch.gestures.js");
-
-class TouchMapDragGesture extends _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture {
-    constructor(element, options) {
-        super(element, "drag", options);
-    }
-    _doStart(evt) {
-        super._doStart(evt);
-    }
-    _doMove(evt) {
-        super._doMove(evt);
-    }
-    _doEnd(evt) {
-        super._doEnd(evt);
-    }
-}
-//# sourceMappingURL=map.inputs.touch.gestures.drag.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.rotate.js":
-/*!**********************************************************************************!*\
-  !*** ../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.rotate.js ***!
-  \**********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TouchMapRotateGesture: () => (/* binding */ TouchMapRotateGesture)
-/* harmony export */ });
-/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map.inputs.touch.gestures */ "../core/dist/map/inputs/touch/map.inputs.touch.gestures.js");
-
-class TouchMapRotateGesture extends _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture {
-    constructor(element, options) {
-        super(element, "rotate", options);
-    }
-    _doStart(evt) {
-        super._doStart(evt);
-    }
-    _doMove(evt) {
-        super._doMove(evt);
-    }
-    _doEnd(evt) {
-        super._doEnd(evt);
-    }
-}
-//# sourceMappingURL=map.inputs.touch.gestures.rotate.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.zoom.js":
-/*!********************************************************************************!*\
-  !*** ../core/dist/map/inputs/touch/gestures/map.inputs.touch.gestures.zoom.js ***!
-  \********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TouchMapZoomGesture: () => (/* binding */ TouchMapZoomGesture)
-/* harmony export */ });
-/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../map.inputs.touch.gestures */ "../core/dist/map/inputs/touch/map.inputs.touch.gestures.js");
-
-class TouchMapZoomGesture extends _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture {
-    constructor(element, options) {
-        super(element, "zoom", options);
-    }
-    _doStart(evt) {
-        super._doStart(evt);
-    }
-    _doMove(evt) {
-        super._doMove(evt);
-    }
-    _doEnd(evt) {
-        super._doEnd(evt);
-    }
-}
-//# sourceMappingURL=map.inputs.touch.gestures.zoom.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/index.js":
-/*!**********************************************!*\
-  !*** ../core/dist/map/inputs/touch/index.js ***!
-  \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GestureStatus: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.GestureStatus),
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ _gestures__WEBPACK_IMPORTED_MODULE_2__.TouchMapDragGesture),
-/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapEvent),
-/* harmony export */   TouchMapGesture: () => (/* reexport safe */ _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__.TouchMapGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ _gestures__WEBPACK_IMPORTED_MODULE_2__.TouchMapRotateGesture),
-/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchMapUpdateEvent),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ _gestures__WEBPACK_IMPORTED_MODULE_2__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__.TouchSpot)
-/* harmony export */ });
-/* harmony import */ var _map_inputs_touch_gestures__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.touch.gestures */ "../core/dist/map/inputs/touch/map.inputs.touch.gestures.js");
-/* harmony import */ var _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.touch.interfaces */ "../core/dist/map/inputs/touch/map.inputs.touch.interfaces.js");
-/* harmony import */ var _gestures__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./gestures */ "../core/dist/map/inputs/touch/gestures/index.js");
-
-
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/map.inputs.touch.gestures.js":
-/*!******************************************************************!*\
-  !*** ../core/dist/map/inputs/touch/map.inputs.touch.gestures.js ***!
-  \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TouchMapGesture: () => (/* binding */ TouchMapGesture)
-/* harmony export */ });
-/* harmony import */ var _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.touch.interfaces */ "../core/dist/map/inputs/touch/map.inputs.touch.interfaces.js");
-
-class TouchMapGesture {
-    static GetCenterToRef(spots, center) {
-        let count = spots.length;
-        center[TouchMapGesture.X_coordinate] = spots[0].clientX;
-        center[TouchMapGesture.Y_coordinate] = spots[0].clientY;
-        for (let i = 1; i < count; i++) {
-            center[TouchMapGesture.X_coordinate] += spots[i].clientX;
-            center[TouchMapGesture.Y_coordinate] += spots[i].clientY;
-        }
-        center[TouchMapGesture.X_coordinate] /= count;
-        center[TouchMapGesture.Y_coordinate] /= count;
-    }
-    constructor(element, gestureType, options) {
-        this._element = typeof element == "string" ? document.getElementById(element) : element;
-        if (this._element) {
-            this._element.addEventListener("touchstart", this._start.bind(this), false);
-            this._element.addEventListener("touchmove", this._move.bind(this), false);
-            this._element.addEventListener("touchend", this._end.bind(this), false);
-            this._element.addEventListener("touchcancel", this._cancel.bind(this), false);
-        }
-        this._gestureType = gestureType;
-        this._options = options || { touchCount: 1 };
-        this._touchesA = Array.from({ length: this._options.touchCount }, () => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot());
-        this._touchesB = Array.from({ length: this._options.touchCount }, () => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot());
-        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.IDLE;
-    }
-    get element() {
-        return this._element;
-    }
-    _start(e) {
-        e.preventDefault();
-        var evt = e;
-        if (!evt.touches || evt.touches.length != this._options.touchCount) {
-            return;
-        }
-        this._doStart(evt);
-    }
-    _doStart(evt) {
-        this._update(evt);
-        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.STARTED;
-        this._fireEvent(this._buildStartEvent(evt));
-    }
-    _move(e) {
-        e.preventDefault();
-        var evt = e;
-        if (!evt.touches || evt.touches.length != this._options.touchCount) {
-            return;
-        }
-        this._doMove(evt);
-    }
-    _doMove(evt) {
-        this._swap();
-        this._update(evt);
-        this._fireEvent(this._buildUpdateEvent(evt));
-    }
-    _end(e) {
-        e.preventDefault();
-        var evt = e;
-        let l1 = evt.touches?.length ?? 0;
-        let l2 = evt.changedTouches?.length ?? 0;
-        var totalLength = l1 + l2;
-        if (totalLength >= this._options.touchCount) {
-            this._doEnd(evt);
-        }
-    }
-    _doEnd(evt) {
-        this._clear();
-        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.IDLE;
-        this._fireEvent(this._buildEndEvent(evt));
-    }
-    _cancel(e) {
-        e.preventDefault();
-        this._clear();
-        this._status = _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.GestureStatus.IDLE;
-    }
-    _fireEvent(e) {
-        if (e) {
-            this._element?.dispatchEvent(e);
-        }
-    }
-    _update(evt) {
-        let now = Date.now();
-        let count = evt.touches.length;
-        for (let i = 0; i < count; i++) {
-            let touch = evt.touches[i];
-            let localTouch = this._touchesB[i];
-            localTouch.id = touch.identifier;
-            localTouch.x = touch.clientX;
-            localTouch.y = touch.clientY;
-            localTouch.timestamp = now;
-        }
-    }
-    _clear() { }
-    _swap() {
-        var tmp = this._touchesB;
-        this._touchesB = this._touchesA;
-        this._touchesA = tmp;
-    }
-    _buildStartEvent(evt) {
-        return new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchMapStartEvent(evt, this._gestureType);
-    }
-    _buildUpdateEvent(evt) {
-        return new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchMapUpdateEvent(evt, this._gestureType, this._touchesA.map((v) => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot(v)), this._touchesB.map((v) => new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchSpot(v)));
-    }
-    _buildEndEvent(evt) {
-        return new _map_inputs_touch_interfaces__WEBPACK_IMPORTED_MODULE_0__.TouchMapEndEvent(evt, this._gestureType);
-    }
-}
-TouchMapGesture.X_coordinate = 0;
-TouchMapGesture.Y_coordinate = 1;
-//# sourceMappingURL=map.inputs.touch.gestures.js.map
-
-/***/ }),
-
-/***/ "../core/dist/map/inputs/touch/map.inputs.touch.interfaces.js":
-/*!********************************************************************!*\
-  !*** ../core/dist/map/inputs/touch/map.inputs.touch.interfaces.js ***!
-  \********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GestureStatus: () => (/* binding */ GestureStatus),
-/* harmony export */   TouchMapEndEvent: () => (/* binding */ TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* binding */ TouchMapEvent),
-/* harmony export */   TouchMapStartEvent: () => (/* binding */ TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* binding */ TouchMapUpdateEvent),
-/* harmony export */   TouchSpot: () => (/* binding */ TouchSpot)
-/* harmony export */ });
-var GestureStatus;
-(function (GestureStatus) {
-    GestureStatus[GestureStatus["IDLE"] = 0] = "IDLE";
-    GestureStatus[GestureStatus["STARTED"] = 1] = "STARTED";
-})(GestureStatus || (GestureStatus = {}));
-class TouchSpot {
-    constructor(spot) {
-        this.x = 0;
-        this.y = 0;
-        this.timestamp = 0;
-        if (spot) {
-            this.id = spot.id;
-            this.x = spot.x;
-            this.y = spot.y;
-            this.timestamp = spot.timestamp;
-        }
-    }
-}
-class TouchMapEvent extends Event {
-    constructor(eventSource, gestureType, name) {
-        super(name);
-        this.eventSource = eventSource;
-        this.gestureType = gestureType;
-    }
-    preventDefault() {
-        this.eventSource?.preventDefault();
-    }
-}
-class TouchMapStartEvent extends TouchMapEvent {
-    constructor(eventSource, gestureType, name) {
-        super(eventSource, gestureType, name ?? "gesturestart");
-    }
-}
-class TouchMapEndEvent extends TouchMapEvent {
-    constructor(eventSource, gestureType, name) {
-        super(eventSource, gestureType, name ?? "gestureend");
-    }
-}
-class TouchMapUpdateEvent extends TouchMapEvent {
-    constructor(eventSource, gestureType, touchesA, touchesB, name) {
-        super(eventSource, gestureType, name ?? "gestureupdate");
-        this.touchesA = touchesA;
-        this.touchesB = touchesB ?? touchesA;
-    }
-}
-//# sourceMappingURL=map.inputs.touch.interfaces.js.map
 
 /***/ }),
 
@@ -21438,6 +21318,151 @@ function HasToString(value) {
 
 /***/ }),
 
+/***/ "../core/dist/utils/debugtouch.js":
+/*!****************************************!*\
+  !*** ../core/dist/utils/debugtouch.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DebugTouchConsole: () => (/* binding */ DebugTouchConsole)
+/* harmony export */ });
+class DebugTouchConsole {
+    constructor() {
+        this.touchMap = new Map();
+        this._onDown = (e) => {
+            if (e.pointerType !== "touch")
+                return;
+            const dot = this._createOrGetDot(e.pointerId);
+            this._updateDot(dot, e.clientX, e.clientY, `↓${e.pointerId}`);
+        };
+        this._onMove = (e) => {
+            if (e.pointerType !== "touch")
+                return;
+            const dot = this._createOrGetDot(e.pointerId);
+            this._updateDot(dot, e.clientX, e.clientY, `${e.pointerId}`);
+        };
+        this._onUp = (e) => {
+            if (e.pointerType !== "touch")
+                return;
+            const dot = this._createOrGetDot(e.pointerId);
+            this._updateDot(dot, e.clientX, e.clientY, `↑${e.pointerId}`);
+            setTimeout(() => this._removeDot(e.pointerId), 500);
+        };
+        this._onCancel = (e) => {
+            this._removeDot(e.pointerId);
+        };
+        this.container = document.createElement("div");
+        this.container.style.pointerEvents = "none";
+        this.container.style.position = "fixed";
+        this.container.style.top = "0";
+        this.container.style.left = "0";
+        this.container.style.right = "0";
+        this.container.style.bottom = "0";
+        this.container.style.pointerEvents = "none";
+        this.container.style.zIndex = "99999";
+        document.body.appendChild(this.container);
+        this.logBox = document.createElement("div");
+        Object.assign(this.logBox.style, {
+            position: "fixed",
+            bottom: "0",
+            left: "0",
+            right: "0",
+            maxHeight: "35vh",
+            overflowY: "auto",
+            background: "rgba(0,0,0,0.8)",
+            color: "#0f0",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            padding: "4px",
+            whiteSpace: "pre-wrap",
+        });
+        this.container.appendChild(this.logBox);
+        this._hookConsole();
+        this._hookPointerEvents();
+    }
+    dispose() {
+        this._unhookConsole();
+        this.container.remove();
+    }
+    _hookPointerEvents() {
+        window.addEventListener("pointerdown", this._onDown, { passive: true });
+        window.addEventListener("pointermove", this._onMove, { passive: true });
+        window.addEventListener("pointerup", this._onUp, { passive: true });
+        window.addEventListener("pointercancel", this._onCancel, { passive: true });
+    }
+    _createOrGetDot(id) {
+        if (this.touchMap.has(id))
+            return this.touchMap.get(id);
+        const el = document.createElement("div");
+        el.style.position = "fixed";
+        el.style.width = "30px";
+        el.style.height = "30px";
+        el.style.borderRadius = "50%";
+        el.style.background = "rgba(255,0,0,0.5)";
+        el.style.display = "flex";
+        el.style.alignItems = "center";
+        el.style.justifyContent = "center";
+        el.style.color = "white";
+        el.style.fontSize = "10px";
+        el.style.pointerEvents = "none";
+        el.style.transform = "translate(-50%, -50%)";
+        this.container.appendChild(el);
+        this.touchMap.set(id, el);
+        return el;
+    }
+    _updateDot(dot, x, y, label) {
+        dot.style.left = `${x}px`;
+        dot.style.top = `${y}px`;
+        dot.textContent = label;
+    }
+    _removeDot(id) {
+        const el = this.touchMap.get(id);
+        if (el) {
+            el.remove();
+            this.touchMap.delete(id);
+        }
+    }
+    _hookConsole() {
+        const original = {
+            log: console.log,
+            warn: console.warn,
+            error: console.error,
+        };
+        const append = (prefix, ...args) => {
+            const line = `[${prefix}] ` + args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(" ") + "\n";
+            this.logBox.textContent += line;
+            this.logBox.scrollTop = this.logBox.scrollHeight;
+        };
+        console.log = (...args) => {
+            append("log", ...args);
+            original.log(...args);
+        };
+        console.warn = (...args) => {
+            append("warn", ...args);
+            original.warn(...args);
+        };
+        console.error = (...args) => {
+            append("error", ...args);
+            original.error(...args);
+        };
+        window.__debugConsoleRestore__ = () => {
+            console.log = original.log;
+            console.warn = original.warn;
+            console.error = original.error;
+        };
+    }
+    _unhookConsole() {
+        if (window.__debugConsoleRestore__) {
+            window.__debugConsoleRestore__();
+        }
+    }
+}
+//# sourceMappingURL=debugtouch.js.map
+
+/***/ }),
+
 /***/ "../core/dist/utils/index.js":
 /*!***********************************!*\
   !*** ../core/dist/utils/index.js ***!
@@ -21447,6 +21472,7 @@ function HasToString(value) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Assert: () => (/* reexport safe */ _runtime__WEBPACK_IMPORTED_MODULE_2__.Assert),
+/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _debugtouch__WEBPACK_IMPORTED_MODULE_3__.DebugTouchConsole),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPoolOptions),
 /* harmony export */   TextUtils: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_1__.TextUtils)
@@ -21454,6 +21480,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objectpools__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objectpools */ "../core/dist/utils/objectpools.js");
 /* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./text */ "../core/dist/utils/text.js");
 /* harmony import */ var _runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./runtime */ "../core/dist/utils/runtime.js");
+/* harmony import */ var _debugtouch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./debugtouch */ "../core/dist/utils/debugtouch.js");
+
 
 
 
@@ -21874,13 +21902,16 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GetPointerType: () => (/* binding */ GetPointerType),
 /* harmony export */   TransformedPointerToDragController: () => (/* binding */ TransformedPointerToDragController),
 /* harmony export */   VirtualDisplayInputsSource: () => (/* binding */ VirtualDisplayInputsSource)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_map_inputs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/map/inputs */ "../core/dist/map/inputs/map.inputs.controller.drag.js");
-/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map/inputs/map.inputs.controller.touch */ "../core/dist/map/inputs/map.inputs.controller.touch.js");
+
 
 
 
@@ -21918,72 +21949,78 @@ class VirtualDisplayInputsSource {
     get display() {
         return this._display;
     }
+    get onTouchObservable() {
+        if (!this._touchController) {
+            this._touchController = new core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__.PointerToGestureController(this);
+        }
+        return this._touchController.onTouchObservable;
+    }
     get onDragObservable() {
         return this._dragController.onDragObservable;
     }
     get onPointerOverObservable() {
         if (!this._onPointerOverObservable) {
-            this._onPointerOverObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerOverObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerOverObservable;
     }
     get onPointerEnterObservable() {
         if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerEnterObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerEnterObservable;
     }
     get onPointerOutObservable() {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerOutObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerOutObservable;
     }
     get onPointerLeaveObservable() {
         if (!this._onPointerLeaveObservable) {
-            this._onPointerLeaveObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerLeaveObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerLeaveObservable;
     }
     get onPointerMoveObservable() {
         if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerMoveObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerMoveObservable;
     }
     get onPointerDownObservable() {
         if (!this._onPointerDownObservable) {
-            this._onPointerDownObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerDownObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerDownObservable;
     }
     get onPointerUpObservable() {
         if (!this._onPointerUpObservable) {
-            this._onPointerUpObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerUpObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerUpObservable;
     }
     get onPointerCancelObservable() {
         if (!this._onPointerCancelObservable) {
-            this._onPointerCancelObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerCancelObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerCancelObservable;
     }
     get onPointerGotCaptureObservable() {
         if (!this._onPointerGotCaptureObservable) {
-            this._onPointerGotCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerGotCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerGotCaptureObservable;
     }
     get onPointerLostCaptureObservable() {
         if (!this._onPointerLostCaptureObservable) {
-            this._onPointerLostCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerLostCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onPointerLostCaptureObservable;
     }
     get onWheelObservable() {
         if (!this._onWheelObservable) {
-            this._onWheelObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onWheelObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
         }
         return this._onWheelObservable;
     }
@@ -22025,31 +22062,26 @@ class VirtualDisplayInputsSource {
         this._prePointerObserver = scene.onPrePointerObservable.add(this._onPrePointer.bind(this));
     }
     _onPrePointer(pi) {
-        const type = GetPointerType(pi);
-        if (type === "mouse") {
-            switch (pi.type) {
-                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE: {
-                    this._onPointerMove(pi);
-                    break;
-                }
-                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERUP: {
-                    this._onPointerUp(pi);
-                    break;
-                }
-                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERDOWN: {
-                    this._onPointerDown(pi);
-                    break;
-                }
-                case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL: {
-                    this._onWheel(pi);
-                    break;
-                }
-                default: {
-                    return;
-                }
+        switch (pi.type) {
+            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE: {
+                this._onPointerMove(pi);
+                break;
             }
-        }
-        else if (type === "touch") {
+            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERUP: {
+                this._onPointerUp(pi);
+                break;
+            }
+            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERDOWN: {
+                this._onPointerDown(pi);
+                break;
+            }
+            case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL: {
+                this._onWheel(pi);
+                break;
+            }
+            default: {
+                return;
+            }
         }
     }
     _onPointerDown(pointerInfo) {
@@ -22349,6 +22381,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ClipIndex: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.ClipIndex),
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.ClipPlaneDefinition),
+/* harmony export */   GetPointerType: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.GetPointerType),
 /* harmony export */   HasHolographicBounds: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.HasHolographicBounds),
 /* harmony export */   HolographicBoundsType: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.HolographicBoundsType),
 /* harmony export */   HolographicDisplay: () => (/* reexport safe */ _display_holographic__WEBPACK_IMPORTED_MODULE_2__.HolographicDisplay),
@@ -25912,6 +25945,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Context2DTileMap),
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_6__.CreateQuickHull),
 /* harmony export */   Current: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Current),
+/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DebugTouchConsole),
 /* harmony export */   DemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DeserializeLocalizableString),
@@ -25946,8 +25980,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoShape),
 /* harmony export */   GeoShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoShapeType),
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeodeticSystem),
-/* harmony export */   GestureStatus: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GestureStatus),
 /* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GetLocalizableStringValue),
+/* harmony export */   GetPointerType: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.GetPointerType),
 /* harmony export */   Google: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
@@ -26112,15 +26146,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TilesetCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TilesetCodec),
 /* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Timespan),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchGestureType),
-/* harmony export */   TouchMapDragGesture: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapDragGesture),
-/* harmony export */   TouchMapEndEvent: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapEndEvent),
-/* harmony export */   TouchMapEvent: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapEvent),
-/* harmony export */   TouchMapGesture: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapGesture),
-/* harmony export */   TouchMapRotateGesture: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapRotateGesture),
-/* harmony export */   TouchMapStartEvent: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapStartEvent),
-/* harmony export */   TouchMapUpdateEvent: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapUpdateEvent),
-/* harmony export */   TouchMapZoomGesture: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchMapZoomGesture),
-/* harmony export */   TouchSpot: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchSpot),
 /* harmony export */   TransformedPointerToDragController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.TransformedPointerToDragController),
 /* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Unit),
 /* harmony export */   ValidableBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ValidableBase),

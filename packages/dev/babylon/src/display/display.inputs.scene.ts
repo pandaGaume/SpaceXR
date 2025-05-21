@@ -1,8 +1,9 @@
 import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-import { IDragSource, IInputSource, IPointerDragEvent, PointerToDragController } from "core/map/inputs";
+import { AnyTouchGesture, IDragSource, IInputSource, IPointerDragEvent, ITouchGestureSource, PointerToDragController } from "core/map/inputs";
 import { Observable } from "core/events";
 import { IDisposable } from "core/types";
+import { PointerToGestureController } from "core/map/inputs/map.inputs.controller.touch";
 
 export interface ITransformedPointerEvent extends PointerEvent {
     displayX: number;
@@ -24,7 +25,7 @@ export class TransformedPointerToDragController extends PointerToDragController 
     }
 }
 
-function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "unknown" {
+export function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "unknown" {
     const event = pointerInfo.event;
 
     if (typeof PointerEvent !== "undefined") {
@@ -49,7 +50,9 @@ export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
     _onPointerGotCaptureObservable?: Observable<PointerEvent>;
     _onPointerLostCaptureObservable?: Observable<PointerEvent>;
     _onWheelObservable?: Observable<WheelEvent>;
+
     _dragController: IDragSource;
+    _touchController?: ITouchGestureSource;
 
     _display: VirtualDisplay;
     _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
@@ -67,7 +70,12 @@ export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
     public get display(): VirtualDisplay {
         return this._display;
     }
-
+    public get onTouchObservable(): Observable<AnyTouchGesture> {
+        if (!this._touchController) {
+            this._touchController = new PointerToGestureController(this);
+        }
+        return this._touchController.onTouchObservable;
+    }
     public get onDragObservable(): Observable<IPointerDragEvent> {
         return this._dragController.onDragObservable;
     }
@@ -193,30 +201,27 @@ export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
         // a simplified abstraction that does not expose pointerType, even though
         // under the hood, the actual value passed is a real PointerEvent in browsers
         // that support pointer events.
-        const type = GetPointerType(pi);
-        if (type === "mouse") {
-            switch (pi.type) {
-                case BABYLON.PointerEventTypes.POINTERMOVE: {
-                    this._onPointerMove(pi);
-                    break;
-                }
-                case BABYLON.PointerEventTypes.POINTERUP: {
-                    this._onPointerUp(pi);
-                    break;
-                }
-                case BABYLON.PointerEventTypes.POINTERDOWN: {
-                    this._onPointerDown(pi);
-                    break;
-                }
-                case BABYLON.PointerEventTypes.POINTERWHEEL: {
-                    this._onWheel(pi);
-                    break;
-                }
-                default: {
-                    return;
-                }
+        //const type = GetPointerType(pi);
+        switch (pi.type) {
+            case BABYLON.PointerEventTypes.POINTERMOVE: {
+                this._onPointerMove(pi);
+                break;
             }
-        } else if (type === "touch") {
+            case BABYLON.PointerEventTypes.POINTERUP: {
+                this._onPointerUp(pi);
+                break;
+            }
+            case BABYLON.PointerEventTypes.POINTERDOWN: {
+                this._onPointerDown(pi);
+                break;
+            }
+            case BABYLON.PointerEventTypes.POINTERWHEEL: {
+                this._onWheel(pi);
+                break;
+            }
+            default: {
+                return;
+            }
         }
     }
 

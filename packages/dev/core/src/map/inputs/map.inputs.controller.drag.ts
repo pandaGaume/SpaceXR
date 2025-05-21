@@ -63,6 +63,9 @@ export class PointerToDragController implements IDragSource, IDisposable {
     }
 
     protected _onStart = (e: PointerEvent): void => {
+        if (e.pointerType === "touch") {
+            return;
+        }
         const x = this._getClientX(e);
         const y = this._getClientY(e);
         this._pointerState.set(e.pointerId, {
@@ -75,6 +78,9 @@ export class PointerToDragController implements IDragSource, IDisposable {
     };
 
     protected _onMove = (e: PointerEvent): void => {
+        if (e.pointerType === "touch") {
+            return;
+        }
         const state = this._pointerState.get(e.pointerId);
         if (state) {
             const x = this._getClientX(e);
@@ -102,6 +108,9 @@ export class PointerToDragController implements IDragSource, IDisposable {
     };
 
     protected _onEnd = (e: PointerEvent): void => {
+        if (e.pointerType === "touch") {
+            return;
+        }
         const state = this._pointerState.get(e.pointerId);
         if (state) {
             const x = this._getClientX(e);

@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { VirtualDisplay } from "./display.virtual";
-import { IDragSource, IInputSource, IPointerDragEvent, PointerToDragController } from "core/map/inputs";
+import { AnyTouchGesture, IDragSource, IInputSource, IPointerDragEvent, ITouchGestureSource, PointerToDragController } from "core/map/inputs";
 import { Observable } from "core/events";
 import { IDisposable } from "core/types";
 export interface ITransformedPointerEvent extends PointerEvent {
@@ -13,6 +13,7 @@ export declare class TransformedPointerToDragController extends PointerToDragCon
     protected _getClientX(e: PointerEvent): number;
     protected _getClientY(e: PointerEvent): number;
 }
+export declare function GetPointerType(pointerInfo: BABYLON.PointerInfoBase): "mouse" | "touch" | "unknown";
 export declare class VirtualDisplayInputsSource implements IInputSource, IDisposable {
     _onPointerOverObservable?: Observable<PointerEvent>;
     _onPointerEnterObservable?: Observable<PointerEvent>;
@@ -26,11 +27,13 @@ export declare class VirtualDisplayInputsSource implements IInputSource, IDispos
     _onPointerLostCaptureObservable?: Observable<PointerEvent>;
     _onWheelObservable?: Observable<WheelEvent>;
     _dragController: IDragSource;
+    _touchController?: ITouchGestureSource;
     _display: VirtualDisplay;
     _prePointerObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.PointerInfoPre>>;
     _currentPosition: BABYLON.Nullable<BABYLON.Vector2>;
     constructor(display: VirtualDisplay);
     get display(): VirtualDisplay;
+    get onTouchObservable(): Observable<AnyTouchGesture>;
     get onDragObservable(): Observable<IPointerDragEvent>;
     get onPointerOverObservable(): Observable<PointerEvent>;
     get onPointerEnterObservable(): Observable<PointerEvent>;

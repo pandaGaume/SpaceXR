@@ -22,6 +22,7 @@ export enum TouchGestureType {
     Tap = "tap",
     Swipe = "swipe",
     Pinch = "pinch",
+    Drag = "drag",
 }
 
 export interface IGesture<C extends ICartesian2> {
@@ -33,9 +34,11 @@ export interface IGesture<C extends ICartesian2> {
 
 export interface ITouchGesture extends IGesture<ICartesian2> {}
 
+export type ISwipeGestureDirection = SwipeDirection | SwipeDirection2D | SwipeDirection3D;
+
 export interface ISwipeGesture extends ITouchGesture {
     type: TouchGestureType.Swipe;
-    direction: SwipeDirection | SwipeDirection2D | SwipeDirection3D;
+    direction: ISwipeGestureDirection;
     distance: number; // in pixels
 }
 
@@ -49,6 +52,11 @@ export interface ITapGesture extends ITouchGesture {
     type: TouchGestureType.Tap;
 }
 
+export interface IDragGesture extends ITouchGesture {
+    type: TouchGestureType.Drag;
+    deltaX: number; // in pixels
+    deltaY: number; // in pixels
+}
 /// <summary>
 /// Represents the mapping of known touch gesture types to their corresponding structures.
 ///
@@ -77,6 +85,7 @@ export interface TouchGestureTypeMap {
     tap: ITapGesture;
     swipe: ISwipeGesture;
     pinch: IPinchGesture;
+    drag: IDragGesture;
     // users can augment this
 }
 

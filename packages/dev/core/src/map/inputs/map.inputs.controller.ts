@@ -1,7 +1,9 @@
 import { Observable } from "../../events";
 import { IDisposable } from "../../types";
 import { PointerToDragController } from "./map.inputs.controller.drag";
+import { PointerToGestureController } from "./map.inputs.controller.touch";
 import { IDragSource, IInputSource, IPointerDragEvent } from "./map.inputs.interfaces";
+import { AnyTouchGesture, ITouchGestureSource } from "./map.inputs.interfaces.touch";
 
 /// <summary>
 /// InputControllerBase is a DOM-to-PointerSource controller that emits pointer-related
@@ -25,6 +27,7 @@ export class InputController<T extends HTMLElement> implements IInputSource, IDi
     _onPointerLostCaptureObservable?: Observable<PointerEvent>;
     _onWheelObservable?: Observable<WheelEvent>;
     _dragController: IDragSource;
+    _touchController?: ITouchGestureSource;
 
     public constructor(src: T) {
         this.source = src;
@@ -33,6 +36,13 @@ export class InputController<T extends HTMLElement> implements IInputSource, IDi
 
     public get onDragObservable(): Observable<IPointerDragEvent> {
         return this._dragController.onDragObservable;
+    }
+
+    public get onTouchObservable(): Observable<AnyTouchGesture> {
+        if (!this._touchController) {
+            this._touchController = new PointerToGestureController(this);
+        }
+        return this._touchController.onTouchObservable;
     }
 
     public get onWheelObservable(): Observable<WheelEvent> {
@@ -154,7 +164,7 @@ export class InputController<T extends HTMLElement> implements IInputSource, IDi
                 src.addEventListener("pointerleave", this._onPointerLeave.bind(this));
             }
             if (this._onPointerMoveObservable) {
-                src.addEventListener("pointermove", this._onPointerMove.bind(this));
+                src.addEventListener("pointermove", this._onPointerMove.bind(this), { passive: false });
             }
             if (this._onPointerDownObservable) {
                 src.addEventListener("pointerdown", this._onPointerDown);

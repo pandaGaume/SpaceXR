@@ -1,5 +1,6 @@
 import { Observable } from "../../events";
 import { ICartesian2 } from "../../geometry";
+import { ITouchGestureSource } from "./map.inputs.interfaces.touch";
 export interface IPointerSource {
     onPointerOverObservable: Observable<PointerEvent>;
     onPointerEnterObservable: Observable<PointerEvent>;
@@ -30,5 +31,5 @@ export interface IPointerDragEvent extends ICartesian2 {
     timestamp: number;
     originalEvent: PointerEvent;
 }
-export interface IInputSource extends IPointerSource, IWheelSource, IDragSource {
+export interface IInputSource extends IPointerSource, IWheelSource, IDragSource, ITouchGestureSource {
 }

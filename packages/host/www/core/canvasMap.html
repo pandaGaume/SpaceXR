@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../libs/spacexr.1.0.0.js"></script>
         <style>
@@ -15,13 +15,15 @@
                 width: 100%;
                 height: 100%;
                 display: block;
+                touch-action: none; /* clé pour que pointermove fonctionne */
             }
             #compass {
+                width: 10vw;
+                max-width: 200px;
+                min-width: 32px;
                 position: absolute;
                 top: 20px; /* Adjust this to position the compass */
                 right: 20px; /* Adjust this to position the compass */
-                width: 200px; /* Adjust this according to your compass image size */
-                height: 200px; /* Adjust this according to your compass image size */
                 transform-origin: center;
             }
 
@@ -35,8 +37,9 @@
         <div id="mapContainer">
             <canvas id="tileCanvas"></canvas>
             <div id="compass">
-              <img id="compassImage" src="../images/compass.png" alt="Compass">
+                <img id="compassImage" src="../images/compass.png" alt="Compass" />
             </div>
+        </div>
         <script>
             window.onload = () => {
                 // Récupérer le canvas
@@ -48,17 +51,17 @@
                 const lod = 12;
 
                 // definir la source de donnée.
-                const tileClient = SPACEXR.Google.SatelliteClient2d() ;
-                 
+                const tileClient = SPACEXR.Google.SatelliteClient2d();
+
                 // construire la carte.
                 // display may be a canvas or a display object if we want to set scale or other options.
                 const map = new SPACEXR.CanvasMap(canvas).setViewMap([27.98817689833976, 86.92491071824738], lod);
                 map.background = "white";
-                const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution:SPACEXR.Google.Attribution } ).addTo(map);
+                const layer = new SPACEXR.ImageLayer("myLayer", tileClient, { attribution: SPACEXR.Google.Attribution }).addTo(map);
 
                 function updateCompassRotation(bearing) {
-                    var compass = document.getElementById('compass');
-                    compass.style.transform = 'rotate(' + bearing + 'deg)';
+                    var compass = document.getElementById("compass");
+                    compass.style.transform = "rotate(" + bearing + "deg)";
                 }
 
                 // Function to handle the compass click event
@@ -68,28 +71,28 @@
                 }
 
                 // Get the compass element
-                var compass = document.getElementById('compass');
+                var compass = document.getElementById("compass");
 
                 // Add a click event listener to the compass
-                compass.addEventListener('click', handleCompassClick);
+                compass.addEventListener("click", handleCompassClick);
 
                 // listen to azimuth change.
-                map.navigationState.propertyChangedObservable.add((p,e)=> {
-                    if (p.propertyName === 'azimuth'){
-                       updateCompassRotation(p.newValue?.value??0);
+                map.navigationState.propertyChangedObservable.add((p, e) => {
+                    if (p.propertyName === "azimuth") {
+                        updateCompassRotation(p.newValue?.value ?? 0);
                     }
                 });
 
-                document.addEventListener('keydown', function(event) {
+                document.addEventListener("keydown", function (event) {
                     if (event.ctrlKey) {
-                        console.log('DOWN')
+                        console.log("DOWN");
                     }
                 });
-                
-                document.addEventListener('keyup', function(event) {
-                    if (event.key === 'Control' || event.key === 'Meta') {
-                          console.log('UP')
-                     }
+
+                document.addEventListener("keyup", function (event) {
+                    if (event.key === "Control" || event.key === "Meta") {
+                        console.log("UP");
+                    }
                 });
                 // Function to recursively update the animation frame
                 // This function is called every time the browser is ready to repaint the canvas

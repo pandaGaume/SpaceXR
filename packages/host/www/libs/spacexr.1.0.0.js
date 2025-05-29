@@ -5381,6 +5381,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasMap),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationController),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.IsTouchCapable),
@@ -5404,6 +5405,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_inputs_controller_navigation__WEBPACK_IMPORTED_MODULE_3__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_inputs_controller_navigation__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationController),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.IsTouchCapable),
@@ -5820,12 +5822,15 @@ class InputController {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   InpustNavigationControllerOptions: () => (/* binding */ InpustNavigationControllerOptions),
 /* harmony export */   InputsNavigationController: () => (/* binding */ InputsNavigationController)
 /* harmony export */ });
 /* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "./dist/map/inputs/map.inputs.interfaces.touch.js");
 
+class InpustNavigationControllerOptions {
+}
 class InputsNavigationController {
-    constructor(source, target, zoomIncrement, invertY = true, invertZ = false) {
+    constructor(source, target, options) {
         this._onDragObserver = null;
         this._onWheelObserver = null;
         this._onTouchObserver = null;
@@ -5841,7 +5846,7 @@ class InputsNavigationController {
                         }
                         case 2: {
                             if (event.deltaX) {
-                                this._target.rotateMap(event.deltaX);
+                                this._target.rotateMap(Math.hypot(event.deltaX, event.deltaY));
                             }
                             break;
                         }
@@ -5851,8 +5856,8 @@ class InputsNavigationController {
             }
         };
         this._onWheel = (event) => {
-            const delta = Math.sign(event.deltaY) * (this._zoomIncrement ?? Math.abs(event.deltaY));
-            this._target.zoomMap(this._invertz ? delta : -delta);
+            const delta = Math.sign(event.deltaY) * (this._options.zoomIncrement ?? Math.abs(event.deltaY));
+            this._target.zoomMap(this._options.invertZ ? delta : -delta);
         };
         this._onTouch = (event) => {
             switch (event.type) {
@@ -5861,8 +5866,8 @@ class InputsNavigationController {
                     break;
                 }
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
-                    const delta = (Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale))) / 2;
-                    this._target.zoomMap(this._invertz ? delta : -delta);
+                    const delta = Math.sign(event.scale) * (this._options.touchZoomIncrement ?? Math.abs(event.scale));
+                    this._target.zoomMap(this._options.invertZ ? -delta : delta);
                     break;
                 }
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
@@ -5873,9 +5878,7 @@ class InputsNavigationController {
         };
         this._source = source;
         this._target = target;
-        this._zoomIncrement = zoomIncrement ?? InputsNavigationController.DEFAULT_ZOOM_INCREMENT;
-        this._inverty = invertY;
-        this._invertz = invertZ;
+        this._options = options ?? InputsNavigationController.DEFAULT_OPTIONS;
         this._attachSource(this._source);
     }
     dispose() {
@@ -5894,6 +5897,13 @@ class InputsNavigationController {
     }
 }
 InputsNavigationController.DEFAULT_ZOOM_INCREMENT = 0.1;
+InputsNavigationController.DEFAULT_TOUCH_ZOOM_INCREMENT = 0.05;
+InputsNavigationController.DEFAULT_INVERT_Z = false;
+InputsNavigationController.DEFAULT_OPTIONS = {
+    zoomIncrement: InputsNavigationController.DEFAULT_ZOOM_INCREMENT,
+    touchZoomIncrement: InputsNavigationController.DEFAULT_TOUCH_ZOOM_INCREMENT,
+    invertZ: InputsNavigationController.DEFAULT_INVERT_Z,
+};
 //# sourceMappingURL=map.inputs.controller.navigation.js.map
 
 /***/ }),
@@ -13976,6 +13986,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageLayer),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageTileCodec),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationController),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),

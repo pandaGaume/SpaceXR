@@ -12682,6 +12682,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageLayer),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ImageTileCodec),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationController),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
@@ -13228,6 +13229,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.CanvasMap),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _canvas_index__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationController),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _inputs_index__WEBPACK_IMPORTED_MODULE_1__.IsTouchCapable),
@@ -13251,6 +13253,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_inputs_controller_navigation__WEBPACK_IMPORTED_MODULE_3__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_inputs_controller__WEBPACK_IMPORTED_MODULE_4__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_inputs_controller_navigation__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationController),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.IsTouchCapable),
@@ -13667,12 +13670,15 @@ class InputController {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   InpustNavigationControllerOptions: () => (/* binding */ InpustNavigationControllerOptions),
 /* harmony export */   InputsNavigationController: () => (/* binding */ InputsNavigationController)
 /* harmony export */ });
 /* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
 
+class InpustNavigationControllerOptions {
+}
 class InputsNavigationController {
-    constructor(source, target, zoomIncrement, invertY = true, invertZ = false) {
+    constructor(source, target, options) {
         this._onDragObserver = null;
         this._onWheelObserver = null;
         this._onTouchObserver = null;
@@ -13688,7 +13694,7 @@ class InputsNavigationController {
                         }
                         case 2: {
                             if (event.deltaX) {
-                                this._target.rotateMap(event.deltaX);
+                                this._target.rotateMap(Math.hypot(event.deltaX, event.deltaY));
                             }
                             break;
                         }
@@ -13698,23 +13704,18 @@ class InputsNavigationController {
             }
         };
         this._onWheel = (event) => {
-            const delta = Math.sign(event.deltaY) * (this._zoomIncrement ?? Math.abs(event.deltaY));
-            this._target.zoomMap(this._invertz ? delta : -delta);
+            const delta = Math.sign(event.deltaY) * (this._options.zoomIncrement ?? Math.abs(event.deltaY));
+            this._target.zoomMap(this._options.invertZ ? delta : -delta);
         };
         this._onTouch = (event) => {
             switch (event.type) {
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
-                    switch (event.points.length) {
-                        case 1: {
-                            this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
-                            break;
-                        }
-                    }
+                    this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
                     break;
                 }
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
-                    const delta = Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale));
-                    this._target.zoomMap(this._invertz ? delta : -delta);
+                    const delta = Math.sign(event.scale) * (this._options.touchZoomIncrement ?? Math.abs(event.scale));
+                    this._target.zoomMap(this._options.invertZ ? -delta : delta);
                     break;
                 }
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
@@ -13725,9 +13726,7 @@ class InputsNavigationController {
         };
         this._source = source;
         this._target = target;
-        this._zoomIncrement = zoomIncrement ?? InputsNavigationController.DEFAULT_ZOOM_INCREMENT;
-        this._inverty = invertY;
-        this._invertz = invertZ;
+        this._options = options ?? InputsNavigationController.DEFAULT_OPTIONS;
         this._attachSource(this._source);
     }
     dispose() {
@@ -13746,6 +13745,13 @@ class InputsNavigationController {
     }
 }
 InputsNavigationController.DEFAULT_ZOOM_INCREMENT = 0.1;
+InputsNavigationController.DEFAULT_TOUCH_ZOOM_INCREMENT = 0.05;
+InputsNavigationController.DEFAULT_INVERT_Z = false;
+InputsNavigationController.DEFAULT_OPTIONS = {
+    zoomIncrement: InputsNavigationController.DEFAULT_ZOOM_INCREMENT,
+    touchZoomIncrement: InputsNavigationController.DEFAULT_TOUCH_ZOOM_INCREMENT,
+    invertZ: InputsNavigationController.DEFAULT_INVERT_Z,
+};
 //# sourceMappingURL=map.inputs.controller.navigation.js.map
 
 /***/ }),
@@ -13760,17 +13766,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PointerToGestureController: () => (/* binding */ PointerToGestureController)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
 
 
+
+const GestureDetectionSettings = {
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate]: { threshold: 0.5 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch]: { threshold: 1 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag]: { threshold: 1 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Tap]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.LongPress]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Swipe]: { threshold: 0 },
+};
 class PointerToGestureController {
     constructor(source) {
         this._pointers = new Map();
         this._startDistance = 0;
         this._startAngle = 0;
+        this._startCenter = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
         this._moveCount = 0;
-        this._moveCountWindow = 5;
+        this._firstMoveCountThreshold = 5;
         this._onStart = (e) => {
             if (e.pointerType !== "touch") {
                 return;
@@ -13792,7 +13809,7 @@ class PointerToGestureController {
                 const [a, b] = Array.from(this._pointers.values());
                 this._startDistance = this._distance(a, b);
                 this._startAngle = this._angle(a, b);
-                this._lockedGestureType = _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None;
+                this._startCenter = this._midpoint(a, b);
                 this._moveCount = 0;
             }
         };
@@ -13802,95 +13819,99 @@ class PointerToGestureController {
             }
             const state = this._pointers.get(e.pointerId);
             if (state) {
-                const x = this._getClientX(e);
-                const y = this._getClientY(e);
-                const dx = x - state.lastX;
-                const dy = y - state.lastY;
-                state.x = x;
-                state.y = y;
+                state.x = this._getClientX(e);
+                state.y = this._getClientY(e);
                 switch (this._pointers.size) {
                     case 1: {
                         const gesture = {
                             type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
                             timestamp: performance.now(),
                             duration: performance.now() - state.startTime,
-                            points: [{ x: x, y: y }],
-                            deltaX: dx,
-                            deltaY: dy,
+                            points: [{ x: state.x, y: state.y }],
+                            deltaX: state.x - state.lastX,
+                            deltaY: state.y - state.lastY,
                         };
                         this.onTouchObservable.notifyObservers(gesture);
+                        state.lastX = state.x;
+                        state.lastY = state.y;
                         break;
                     }
                     case 2: {
-                        if (this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None && this._moveCount < this._moveCountWindow) {
-                            this._moveCount++;
-                            break;
+                        this._moveCount++;
+                        if (this._moveCount < this._firstMoveCountThreshold) {
+                            return;
                         }
                         const [a, b] = Array.from(this._pointers.values());
-                        const centerX = (a.x + b.x) / 2;
-                        const centerY = (a.y + b.y) / 2;
-                        const currentAngle = this._angle(a, b);
-                        let diff = currentAngle - this._startAngle;
-                        const isRotateMode = this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate || (this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None && Math.abs(diff) > 1);
-                        if (isRotateMode) {
-                            const gesture = {
-                                type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate,
-                                timestamp: performance.now(),
-                                duration: 0,
-                                points: [
-                                    { x: a.x, y: a.y },
-                                    { x: b.x, y: b.y },
-                                ],
-                                center: { x: centerX, y: centerY },
-                                angle: diff,
-                            };
-                            this._startAngle = currentAngle;
-                            this._lockedGestureType = _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate;
-                            this.onTouchObservable.notifyObservers(gesture);
-                            break;
+                        const center = this._midpoint(a, b);
+                        const angle = this._angle(a, b);
+                        const distance = this._distance(a, b);
+                        const deltaAngle = angle - this._startAngle;
+                        const deltaDistance = distance - this._startDistance;
+                        const deltaCenter = this._distance(center, this._startCenter);
+                        const types = this._detectActiveTypes(deltaAngle, deltaDistance, deltaCenter);
+                        for (const type of types) {
+                            switch (type) {
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
+                                    const gesture = {
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate,
+                                        timestamp: performance.now(),
+                                        duration: 0,
+                                        points: [
+                                            { x: a.x, y: a.y },
+                                            { x: b.x, y: b.y },
+                                        ],
+                                        center: center,
+                                        angle: deltaAngle,
+                                    };
+                                    this._startAngle = angle;
+                                    this.onTouchObservable.notifyObservers(gesture);
+                                    break;
+                                }
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
+                                    const gesture = {
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
+                                        timestamp: performance.now(),
+                                        duration: 0,
+                                        points: [
+                                            { x: a.x, y: a.y },
+                                            { x: b.x, y: b.y },
+                                        ],
+                                        center: center,
+                                        scale: deltaDistance,
+                                    };
+                                    this._startDistance = distance;
+                                    this.onTouchObservable.notifyObservers(gesture);
+                                    break;
+                                }
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
+                                    const gesture = {
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
+                                        timestamp: performance.now(),
+                                        duration: 0,
+                                        points: [
+                                            { x: a.x, y: a.y },
+                                            { x: b.x, y: b.y },
+                                        ],
+                                        deltaX: center.x - this._startCenter.x,
+                                        deltaY: center.y - this._startCenter.y,
+                                        startPosition: this._startCenter,
+                                    };
+                                    this._startCenter = { x: center.x, y: center.y };
+                                    this.onTouchObservable.notifyObservers(gesture);
+                                    break;
+                                }
+                            }
                         }
-                        const currentDistance = this._distance(a, b);
-                        diff = this._startDistance - currentDistance;
-                        const isPinchMode = this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch || (this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None && Math.abs(diff) > 5);
-                        if (isPinchMode) {
-                            const gesture = {
-                                type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
-                                timestamp: performance.now(),
-                                duration: 0,
-                                points: [
-                                    { x: a.x, y: a.y },
-                                    { x: b.x, y: b.y },
-                                ],
-                                center: { x: centerX, y: centerY },
-                                scale: diff,
-                            };
-                            this._startDistance = currentDistance;
-                            this._lockedGestureType = _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch;
-                            this.onTouchObservable.notifyObservers(gesture);
-                            break;
-                        }
-                        break;
-                    }
-                    default: {
                         break;
                     }
                 }
-                state.lastX = x;
-                state.lastY = y;
             }
         };
         this._onEnd = (e) => {
             if (e.pointerType !== "touch") {
                 return;
             }
-            const state = this._pointers.get(e.pointerId);
-            if (!state)
-                return;
-            try {
-            }
-            finally {
-                this._pointers.delete(e.pointerId);
-            }
+            this._pointers.delete(e.pointerId);
         };
         this._source = source;
     }
@@ -13900,7 +13921,7 @@ class PointerToGestureController {
     }
     get onTouchObservable() {
         if (!this._onTouchObservable) {
-            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._attachSource(this._source);
         }
         return this._onTouchObservable;
@@ -13943,6 +13964,25 @@ class PointerToGestureController {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         return Math.atan2(dy, dx) * (180 / Math.PI);
+    }
+    _midpoint(a, b) {
+        return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    }
+    _detectActiveTypes(angleRad, distDelta, centerDelta) {
+        const result = [];
+        const angleDeg = Math.abs(angleRad * 57.2958);
+        const pinchScore = Math.abs(distDelta);
+        const dragScore = Math.abs(centerDelta);
+        if (angleDeg > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate);
+        }
+        if (pinchScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch);
+        }
+        if (dragScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag);
+        }
+        return result;
     }
 }
 //# sourceMappingURL=map.inputs.controller.touch.js.map
@@ -13997,7 +14037,6 @@ var TouchGestureType;
     TouchGestureType[TouchGestureType["Swipe"] = 3] = "Swipe";
     TouchGestureType[TouchGestureType["Pinch"] = 4] = "Pinch";
     TouchGestureType[TouchGestureType["Drag"] = 5] = "Drag";
-    TouchGestureType[TouchGestureType["None"] = 99] = "None";
 })(TouchGestureType || (TouchGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.touch.js.map
 
@@ -23126,7 +23165,7 @@ class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
         this._content = this._createTextureMap(name, options, this.getScene());
         this.node.material = this._createMaterial(name, this._content, this.getScene());
         this._source = new _display__WEBPACK_IMPORTED_MODULE_3__.VirtualDisplayInputsSource(this);
-        this._controller = new core_map__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationController(this._source, this._content?.map, core_map__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationController.DEFAULT_ZOOM_INCREMENT, options?.invertY);
+        this._controller = new core_map__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationController(this._source, this._content?.map);
     }
     get content() {
         return this._content;
@@ -26059,6 +26098,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageLayer),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InputsNavigationController),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsArrayOfTile),

@@ -20,7 +20,7 @@ export class MapDisplay extends VirtualDisplay {
         this.node.material = this._createMaterial(name, this._content, this.getScene());
 
         this._source = new VirtualDisplayInputsSource(this);
-        this._controller = new InputsNavigationController(this._source, this._content?.map);
+        this._controller = new InputsNavigationController(this._source, this._content?.map, { invertY: true });
     }
 
     get content(): WebMapTexture {

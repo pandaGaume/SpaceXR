@@ -223,10 +223,10 @@ export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
             this._lastX = pi.event.clientX;
             this._lastY = pi.event.clientY;
         }
-        if (!this._isPointerInsideMeshScreenBounds(pi.event.clientX, pi.event.clientY, this._display.node, scene)) {
-            // If the pointer is not inside the mesh screen bounds, we skip further processing
-            return;
-        }
+        //if (!this._isPointerInsideMeshScreenBounds(pi.event.clientX, pi.event.clientY, this._display.node, scene)) {
+        // If the pointer is not inside the mesh screen bounds, we skip further processing
+        //return; TODO : There is a bug here using with the map display...
+        //}
 
         // By default, Babylon.js types the event field in PointerInfo as IMouseEvent,
         // a simplified abstraction that does not expose pointerType, even though
@@ -368,7 +368,7 @@ export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
         return this._display.getScene();
     }
 
-    protected _isPointerInsideMeshScreenBounds(x: number, y: number, mesh: BABYLON.AbstractMesh, scene: BABYLON.Scene): boolean {
+    /*protected _isPointerInsideMeshScreenBounds(x: number, y: number, mesh: BABYLON.AbstractMesh, scene: BABYLON.Scene): boolean {
         const positions = mesh.getBoundingInfo().boundingBox.vectorsWorld;
 
         if (!positions || positions.length === 0) {
@@ -391,5 +391,5 @@ export class VirtualDisplayInputsSource implements IInputSource, IDisposable {
 
         // Test si le pointeur est dans ce rectangle
         return x >= minX && x <= maxX && y >= minY && y <= maxY;
-    }
+    }*/
 }

@@ -5829,6 +5829,19 @@ __webpack_require__.r(__webpack_exports__);
 
 class InpustNavigationControllerOptions {
 }
+InpustNavigationControllerOptions.DEFAULT_ZOOM_INCREMENT = 0.1;
+InpustNavigationControllerOptions.DEFAULT_TOUCH_ZOOM_INCREMENT = 0.05;
+InpustNavigationControllerOptions.DEFAULT_INVERT_Y = false;
+InpustNavigationControllerOptions.DEFAULT_INVERT_Z = false;
+InpustNavigationControllerOptions.DEFAULT_ROTATE_FACTOR = 1;
+InpustNavigationControllerOptions.DEFAULT_TRANSLATE_FACTOR = 1;
+InpustNavigationControllerOptions.DEFAULT_ZOOM_FACTOR = 1;
+InpustNavigationControllerOptions.DEFAULT_OPTIONS = {
+    zoomIncrement: InpustNavigationControllerOptions.DEFAULT_ZOOM_INCREMENT,
+    touchZoomIncrement: InpustNavigationControllerOptions.DEFAULT_TOUCH_ZOOM_INCREMENT,
+    invertZ: InpustNavigationControllerOptions.DEFAULT_INVERT_Z,
+    invertY: InpustNavigationControllerOptions.DEFAULT_INVERT_Y,
+};
 class InputsNavigationController {
     constructor(source, target, options) {
         this._onDragObserver = null;
@@ -5840,13 +5853,16 @@ class InputsNavigationController {
                     switch (event.button) {
                         case 0: {
                             if (event.deltaX || event.deltaY) {
-                                this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
+                                const translateFactor = this._options.translateFactor ?? InpustNavigationControllerOptions?.DEFAULT_TRANSLATE_FACTOR;
+                                const invertY = this._options.invertY ?? InpustNavigationControllerOptions?.DEFAULT_INVERT_Y;
+                                this._target.translateUnitsMap(-event.deltaX * translateFactor, (invertY ? event.deltaY : -event.deltaY) * translateFactor);
                             }
                             break;
                         }
                         case 2: {
                             if (event.deltaX) {
-                                this._target.rotateMap(Math.hypot(event.deltaX, event.deltaY));
+                                const rotateFactor = this._options.rotateFactor ?? InpustNavigationControllerOptions?.DEFAULT_ROTATE_FACTOR;
+                                this._target.rotateMap(Math.sign(event.deltaX) * Math.hypot(event.deltaX, event.deltaY) * rotateFactor);
                             }
                             break;
                         }
@@ -5856,29 +5872,34 @@ class InputsNavigationController {
             }
         };
         this._onWheel = (event) => {
-            const delta = Math.sign(event.deltaY) * (this._options.zoomIncrement ?? Math.abs(event.deltaY));
+            const zoomFactor = this._options.zoomFactor ?? InpustNavigationControllerOptions?.DEFAULT_ZOOM_FACTOR;
+            const delta = Math.sign(event.deltaY) * (this._options.zoomIncrement ?? Math.abs(event.deltaY)) * zoomFactor;
             this._target.zoomMap(this._options.invertZ ? delta : -delta);
         };
         this._onTouch = (event) => {
             switch (event.type) {
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
-                    this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
+                    const translateFactor = this._options.translateFactor ?? InpustNavigationControllerOptions?.DEFAULT_TRANSLATE_FACTOR;
+                    const invertY = this._options.invertY ?? InpustNavigationControllerOptions?.DEFAULT_INVERT_Y;
+                    this._target.translateUnitsMap(-event.deltaX * translateFactor, (invertY ? event.deltaY : -event.deltaY) * translateFactor);
                     break;
                 }
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
-                    const delta = Math.sign(event.scale) * (this._options.touchZoomIncrement ?? Math.abs(event.scale));
+                    const zoomFactor = this._options.zoomFactor ?? InpustNavigationControllerOptions?.DEFAULT_ZOOM_FACTOR;
+                    const delta = Math.sign(event.scale) * (this._options.touchZoomIncrement ?? Math.abs(event.scale)) * zoomFactor;
                     this._target.zoomMap(this._options.invertZ ? -delta : delta);
                     break;
                 }
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
-                    this._target.rotateMap(event.angle);
+                    const rotateFactor = this._options.rotateFactor ?? InpustNavigationControllerOptions?.DEFAULT_ROTATE_FACTOR;
+                    this._target.rotateMap(event.angle * rotateFactor);
                     break;
                 }
             }
         };
         this._source = source;
         this._target = target;
-        this._options = options ?? InputsNavigationController.DEFAULT_OPTIONS;
+        this._options = options ?? InpustNavigationControllerOptions.DEFAULT_OPTIONS;
         this._attachSource(this._source);
     }
     dispose() {
@@ -5896,14 +5917,6 @@ class InputsNavigationController {
         this._onWheelObserver = null;
     }
 }
-InputsNavigationController.DEFAULT_ZOOM_INCREMENT = 0.1;
-InputsNavigationController.DEFAULT_TOUCH_ZOOM_INCREMENT = 0.05;
-InputsNavigationController.DEFAULT_INVERT_Z = false;
-InputsNavigationController.DEFAULT_OPTIONS = {
-    zoomIncrement: InputsNavigationController.DEFAULT_ZOOM_INCREMENT,
-    touchZoomIncrement: InputsNavigationController.DEFAULT_TOUCH_ZOOM_INCREMENT,
-    invertZ: InputsNavigationController.DEFAULT_INVERT_Z,
-};
 //# sourceMappingURL=map.inputs.controller.navigation.js.map
 
 /***/ }),

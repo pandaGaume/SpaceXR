@@ -65,5 +65,4 @@ export declare class VirtualDisplayInputsSource implements IInputSource, IDispos
     protected _getPickingInfos(scene: BABYLON.Scene): BABYLON.Nullable<BABYLON.PickingInfo>;
     protected _pickFilter(mesh: BABYLON.Nullable<any>): boolean;
     protected _getScene(): BABYLON.Scene;
-    protected _isPointerInsideMeshScreenBounds(x: number, y: number, mesh: BABYLON.AbstractMesh, scene: BABYLON.Scene): boolean;
 }

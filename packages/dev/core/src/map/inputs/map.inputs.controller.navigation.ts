@@ -7,6 +7,7 @@ import { AnyTouchGesture, TouchGestureType } from "./map.inputs.interfaces.touch
 export class InpustNavigationControllerOptions {
     static readonly DEFAULT_ZOOM_INCREMENT = 0.1;
     static readonly DEFAULT_TOUCH_ZOOM_INCREMENT = 0.05;
+    static readonly DEFAULT_INVERT_Y = false;
     static readonly DEFAULT_INVERT_Z = false;
     static readonly DEFAULT_ROTATE_FACTOR = 1;
     static readonly DEFAULT_TRANSLATE_FACTOR = 1;
@@ -16,6 +17,7 @@ export class InpustNavigationControllerOptions {
         zoomIncrement: InpustNavigationControllerOptions.DEFAULT_ZOOM_INCREMENT,
         touchZoomIncrement: InpustNavigationControllerOptions.DEFAULT_TOUCH_ZOOM_INCREMENT,
         invertZ: InpustNavigationControllerOptions.DEFAULT_INVERT_Z,
+        invertY: InpustNavigationControllerOptions.DEFAULT_INVERT_Y,
     };
 
     /// <summary>
@@ -26,6 +28,9 @@ export class InpustNavigationControllerOptions {
     /// </summary>
     touchZoomIncrement?: number;
     /// <summary>
+    /// If true, the Translate Y delta will be inverted (default: true).
+    /// </summary>
+    invertY?: boolean; /// <summary>
     /// If true, the zoom delta will be inverted (default: false).
     /// </summary>
     invertZ?: boolean;
@@ -83,9 +88,11 @@ export class InputsNavigationController implements IDisposable {
                     case 0: {
                         if (event.deltaX || event.deltaY) {
                             const translateFactor = this._options.translateFactor ?? InpustNavigationControllerOptions?.DEFAULT_TRANSLATE_FACTOR;
+                            const invertY = this._options.invertY ?? InpustNavigationControllerOptions?.DEFAULT_INVERT_Y;
+
                             // translate the center of the map according the drag displacement
                             // then we have to negate the drag displacement.
-                            this._target.translateUnitsMap(-event.deltaX * translateFactor, -event.deltaY * translateFactor);
+                            this._target.translateUnitsMap(-event.deltaX * translateFactor, (invertY ? event.deltaY : -event.deltaY) * translateFactor);
                         }
                         break;
                     }
@@ -93,7 +100,7 @@ export class InputsNavigationController implements IDisposable {
                         if (event.deltaX) {
                             const rotateFactor = this._options.rotateFactor ?? InpustNavigationControllerOptions?.DEFAULT_ROTATE_FACTOR;
                             // rotate the map according the drag displacement
-                            this._target.rotateMap(Math.hypot(event.deltaX, event.deltaY) * rotateFactor);
+                            this._target.rotateMap(Math.sign(event.deltaX) * Math.hypot(event.deltaX, event.deltaY) * rotateFactor);
                         }
                         break;
                     }
@@ -113,9 +120,11 @@ export class InputsNavigationController implements IDisposable {
         switch (event.type) {
             case TouchGestureType.Drag: {
                 const translateFactor = this._options.translateFactor ?? InpustNavigationControllerOptions?.DEFAULT_TRANSLATE_FACTOR;
+                const invertY = this._options.invertY ?? InpustNavigationControllerOptions?.DEFAULT_INVERT_Y;
+
                 // translate the center of the map according the drag displacement
                 // then we have to negate the drag displacement.
-                this._target.translateUnitsMap(-event.deltaX * translateFactor, -event.deltaY * translateFactor);
+                this._target.translateUnitsMap(-event.deltaX * translateFactor, (invertY ? event.deltaY : -event.deltaY) * translateFactor);
                 break;
             }
             case TouchGestureType.Pinch: {

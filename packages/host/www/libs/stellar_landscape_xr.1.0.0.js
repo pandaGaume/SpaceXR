@@ -13295,13 +13295,28 @@ class PointerToDragController {
             }
             const x = this._getClientX(e);
             const y = this._getClientY(e);
-            this._pointerState.set(e.pointerId, {
+            var state = {
                 startX: x,
                 startY: y,
                 lastX: x,
                 lastY: y,
                 button: e.button,
-            });
+            };
+            this._pointerState.set(e.pointerId, state);
+            const event = {
+                type: "start",
+                pointerId: e.pointerId,
+                button: state.button,
+                startX: state.startX,
+                startY: state.startY,
+                x: x,
+                y: y,
+                deltaX: 0,
+                deltaY: 0,
+                timestamp: performance.now(),
+                originalEvent: e,
+            };
+            this.onDragObservable.notifyObservers(event);
         };
         this._onMove = (e) => {
             if (e.pointerType === "touch") {
@@ -13654,6 +13669,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   InputsNavigationController: () => (/* binding */ InputsNavigationController)
 /* harmony export */ });
+/* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
+
 class InputsNavigationController {
     constructor(source, target, zoomIncrement, invertY = true, invertZ = false) {
         this._onDragObserver = null;
@@ -13686,22 +13703,22 @@ class InputsNavigationController {
         };
         this._onTouch = (event) => {
             switch (event.type) {
-                case "drag": {
+                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
                     switch (event.points.length) {
                         case 1: {
                             this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
                             break;
                         }
-                        case 2: {
-                            this._target.rotateMap(event.deltaX);
-                            break;
-                        }
                     }
                     break;
                 }
-                case "pinch": {
+                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
                     const delta = Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale));
                     this._target.zoomMap(this._invertz ? delta : -delta);
+                    break;
+                }
+                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
+                    this._target.rotateMap(event.angle);
                     break;
                 }
             }
@@ -13750,96 +13767,116 @@ __webpack_require__.r(__webpack_exports__);
 class PointerToGestureController {
     constructor(source) {
         this._pointers = new Map();
-        this._pinchStartDistance = 0;
+        this._startDistance = 0;
+        this._startAngle = 0;
+        this._moveCount = 0;
+        this._moveCountWindow = 5;
         this._onStart = (e) => {
             if (e.pointerType !== "touch") {
                 return;
             }
-            this._pointers.set(e.pointerId, {
+            const x = this._getClientX(e);
+            const y = this._getClientY(e);
+            const state = {
                 id: e.pointerId,
-                startX: e.clientX,
-                startY: e.clientY,
-                x: e.clientX,
-                y: e.clientY,
+                startX: x,
+                startY: y,
+                lastX: x,
+                lastY: y,
+                x: x,
+                y: y,
                 startTime: performance.now(),
-            });
+            };
+            this._pointers.set(e.pointerId, state);
             if (this._pointers.size === 2) {
                 const [a, b] = Array.from(this._pointers.values());
-                this._pinchStartDistance = this._distance(a, b);
+                this._startDistance = this._distance(a, b);
+                this._startAngle = this._angle(a, b);
+                this._lockedGestureType = _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None;
+                this._moveCount = 0;
             }
         };
         this._onMove = (e) => {
             if (e.pointerType !== "touch") {
                 return;
             }
-            const p = this._pointers.get(e.pointerId);
-            if (p) {
-                p.x = e.clientX;
-                p.y = e.clientY;
-            }
-            switch (this._pointers.size) {
-                case 1: {
-                    const state = this._pointers.get(e.pointerId);
-                    if (state) {
+            const state = this._pointers.get(e.pointerId);
+            if (state) {
+                const x = this._getClientX(e);
+                const y = this._getClientY(e);
+                const dx = x - state.lastX;
+                const dy = y - state.lastY;
+                state.x = x;
+                state.y = y;
+                switch (this._pointers.size) {
+                    case 1: {
                         const gesture = {
                             type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
                             timestamp: performance.now(),
                             duration: performance.now() - state.startTime,
-                            points: [{ x: state.x, y: state.y }],
-                            deltaX: state.x - state.startX,
-                            deltaY: state.y - state.startY,
+                            points: [{ x: x, y: y }],
+                            deltaX: dx,
+                            deltaY: dy,
                         };
-                        state.startX = state.x;
-                        state.startY = state.y;
                         this.onTouchObservable.notifyObservers(gesture);
+                        break;
                     }
-                    break;
-                }
-                case 2: {
-                    const [a, b] = Array.from(this._pointers.values());
-                    const currentDistance = this._distance(a, b);
-                    const scale = currentDistance / this._pinchStartDistance;
-                    const centerX = (a.x + b.x) / 2;
-                    const centerY = (a.y + b.y) / 2;
-                    const isPinch = Math.abs(scale - 1.0) > 0.05;
-                    if (isPinch) {
-                        const gesture = {
-                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
-                            timestamp: performance.now(),
-                            duration: 0,
-                            points: [
-                                { x: a.x, y: a.y },
-                                { x: b.x, y: b.y },
-                            ],
-                            center: { x: centerX, y: centerY },
-                            scale: this._pinchStartDistance - currentDistance,
-                        };
-                        this._pinchStartDistance = currentDistance;
-                        this.onTouchObservable.notifyObservers(gesture);
+                    case 2: {
+                        if (this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None && this._moveCount < this._moveCountWindow) {
+                            this._moveCount++;
+                            break;
+                        }
+                        const [a, b] = Array.from(this._pointers.values());
+                        const centerX = (a.x + b.x) / 2;
+                        const centerY = (a.y + b.y) / 2;
+                        const currentAngle = this._angle(a, b);
+                        let diff = currentAngle - this._startAngle;
+                        const isRotateMode = this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate || (this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None && Math.abs(diff) > 1);
+                        if (isRotateMode) {
+                            const gesture = {
+                                type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate,
+                                timestamp: performance.now(),
+                                duration: 0,
+                                points: [
+                                    { x: a.x, y: a.y },
+                                    { x: b.x, y: b.y },
+                                ],
+                                center: { x: centerX, y: centerY },
+                                angle: diff,
+                            };
+                            this._startAngle = currentAngle;
+                            this._lockedGestureType = _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate;
+                            this.onTouchObservable.notifyObservers(gesture);
+                            break;
+                        }
+                        const currentDistance = this._distance(a, b);
+                        diff = this._startDistance - currentDistance;
+                        const isPinchMode = this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch || (this._lockedGestureType === _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.None && Math.abs(diff) > 5);
+                        if (isPinchMode) {
+                            const gesture = {
+                                type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
+                                timestamp: performance.now(),
+                                duration: 0,
+                                points: [
+                                    { x: a.x, y: a.y },
+                                    { x: b.x, y: b.y },
+                                ],
+                                center: { x: centerX, y: centerY },
+                                scale: diff,
+                            };
+                            this._startDistance = currentDistance;
+                            this._lockedGestureType = _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch;
+                            this.onTouchObservable.notifyObservers(gesture);
+                            break;
+                        }
+                        break;
                     }
-                    else {
-                        const gesture = {
-                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
-                            timestamp: performance.now(),
-                            duration: 0,
-                            points: [
-                                { x: a.x, y: a.y },
-                                { x: b.x, y: b.y },
-                            ],
-                            deltaX: centerX - (a.startX + b.startX) / 2,
-                            deltaY: centerY - (a.startY + b.startY) / 2,
-                        };
-                        a.startX = a.x;
-                        a.startY = a.y;
-                        b.startX = b.x;
-                        b.startY = b.y;
-                        this.onTouchObservable.notifyObservers(gesture);
+                    default: {
+                        break;
                     }
-                    break;
                 }
-                default: {
-                    break;
-                }
+                state.lastX = x;
+                state.lastY = y;
             }
         };
         this._onEnd = (e) => {
@@ -13849,33 +13886,11 @@ class PointerToGestureController {
             const state = this._pointers.get(e.pointerId);
             if (!state)
                 return;
-            const duration = performance.now() - state.startTime;
-            const dx = state.x - state.startX;
-            const dy = state.y - state.startY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const fingers = [{ x: state.x, y: state.y }];
-            const timestamp = performance.now();
-            if (distance < 10 && duration < 300) {
-                const gesture = {
-                    type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Tap,
-                    timestamp: timestamp,
-                    duration: duration,
-                    points: fingers,
-                };
-                this.onTouchObservable.notifyObservers(gesture);
+            try {
             }
-            if (distance > 30 && duration < 600) {
-                const gesture = {
-                    type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Swipe,
-                    timestamp: timestamp,
-                    duration: duration,
-                    points: fingers,
-                    distance: distance,
-                    direction: this._computeSwipeDirection(dx, dy),
-                };
-                this.onTouchObservable.notifyObservers(gesture);
+            finally {
+                this._pointers.delete(e.pointerId);
             }
-            this._pointers.delete(e.pointerId);
         };
         this._source = source;
     }
@@ -13892,6 +13907,12 @@ class PointerToGestureController {
     }
     get source() {
         return this._source;
+    }
+    _getClientX(e) {
+        return e.clientX;
+    }
+    _getClientY(e) {
+        return e.clientY;
     }
     _clearObservable() {
         this._onTouchObservable?.clear();
@@ -13918,15 +13939,10 @@ class PointerToGestureController {
         const dy = b.y - a.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
-    _computeSwipeDirection(dx, dy) {
-        const adx = Math.abs(dx);
-        const ady = Math.abs(dy);
-        if (adx > ady) {
-            return dx > 0 ? "right" : "left";
-        }
-        else {
-            return dy > 0 ? "down" : "up";
-        }
+    _angle(a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        return Math.atan2(dy, dx) * (180 / Math.PI);
     }
 }
 //# sourceMappingURL=map.inputs.controller.touch.js.map
@@ -13945,12 +13961,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var XRGestureType;
 (function (XRGestureType) {
-    XRGestureType["Grab"] = "grab";
-    XRGestureType["Release"] = "release";
-    XRGestureType["Pinch"] = "pinch";
-    XRGestureType["Point"] = "point";
-    XRGestureType["Swipe"] = "swipe";
-    XRGestureType["Custom"] = "custom";
+    XRGestureType[XRGestureType["Grab"] = 100] = "Grab";
+    XRGestureType[XRGestureType["Release"] = 101] = "Release";
+    XRGestureType[XRGestureType["Pinch"] = 102] = "Pinch";
+    XRGestureType[XRGestureType["Point"] = 1033] = "Point";
+    XRGestureType[XRGestureType["Swipe"] = 104] = "Swipe";
+    XRGestureType[XRGestureType["Custom"] = 999] = "Custom";
 })(XRGestureType || (XRGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.hands.js.map
 
@@ -13975,10 +13991,13 @@ function IsTouchCapable() {
 }
 var TouchGestureType;
 (function (TouchGestureType) {
-    TouchGestureType["Tap"] = "tap";
-    TouchGestureType["Swipe"] = "swipe";
-    TouchGestureType["Pinch"] = "pinch";
-    TouchGestureType["Drag"] = "drag";
+    TouchGestureType[TouchGestureType["Tap"] = 0] = "Tap";
+    TouchGestureType[TouchGestureType["LongPress"] = 1] = "LongPress";
+    TouchGestureType[TouchGestureType["Rotate"] = 2] = "Rotate";
+    TouchGestureType[TouchGestureType["Swipe"] = 3] = "Swipe";
+    TouchGestureType[TouchGestureType["Pinch"] = 4] = "Pinch";
+    TouchGestureType[TouchGestureType["Drag"] = 5] = "Drag";
+    TouchGestureType[TouchGestureType["None"] = 99] = "None";
 })(TouchGestureType || (TouchGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.touch.js.map
 
@@ -21902,8 +21921,8 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GetPointerType: () => (/* binding */ GetPointerType),
 /* harmony export */   TransformedPointerToDragController: () => (/* binding */ TransformedPointerToDragController),
+/* harmony export */   TransformedPointerToGestureController: () => (/* binding */ TransformedPointerToGestureController),
 /* harmony export */   VirtualDisplayInputsSource: () => (/* binding */ VirtualDisplayInputsSource)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
@@ -21926,23 +21945,24 @@ class TransformedPointerToDragController extends core_map_inputs__WEBPACK_IMPORT
         return e.displayY ?? e.clientY;
     }
 }
-function GetPointerType(pointerInfo) {
-    const event = pointerInfo.event;
-    if (typeof PointerEvent !== "undefined") {
-        if (event instanceof PointerEvent) {
-            return event.pointerType;
-        }
-        else if (event instanceof WheelEvent) {
-            return "mouse";
-        }
+class TransformedPointerToGestureController extends core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__.PointerToGestureController {
+    constructor(source) {
+        super(source);
     }
-    return "unknown";
+    _getClientX(e) {
+        return e.displayX ?? e.clientX;
+    }
+    _getClientY(e) {
+        return e.displayY ?? e.clientY;
+    }
 }
 class VirtualDisplayInputsSource {
     constructor(display) {
+        this._lastX = -1;
+        this._lastY = -1;
         this._display = display;
         this._prePointerObserver = null;
-        this._currentPosition = null;
+        this._cache = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
         this._attach();
         this._dragController = new TransformedPointerToDragController(this);
     }
@@ -21951,7 +21971,7 @@ class VirtualDisplayInputsSource {
     }
     get onTouchObservable() {
         if (!this._touchController) {
-            this._touchController = new core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__.PointerToGestureController(this);
+            this._touchController = new TransformedPointerToGestureController(this);
         }
         return this._touchController.onTouchObservable;
     }
@@ -22062,17 +22082,34 @@ class VirtualDisplayInputsSource {
         this._prePointerObserver = scene.onPrePointerObservable.add(this._onPrePointer.bind(this));
     }
     _onPrePointer(pi) {
+        if (!this._display.node) {
+            return;
+        }
+        const scene = this._getScene();
+        if (!scene) {
+            return;
+        }
+        if (pi.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE) {
+            if (this._lastX === pi.event.clientX && this._lastY === pi.event.clientY) {
+                return;
+            }
+            this._lastX = pi.event.clientX;
+            this._lastY = pi.event.clientY;
+        }
+        if (!this._isPointerInsideMeshScreenBounds(pi.event.clientX, pi.event.clientY, this._display.node, scene)) {
+            return;
+        }
         switch (pi.type) {
             case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE: {
-                this._onPointerMove(pi);
+                this._onPointerMove(pi, scene);
                 break;
             }
             case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERUP: {
-                this._onPointerUp(pi);
+                this._onPointerUp(pi, scene);
                 break;
             }
             case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERDOWN: {
-                this._onPointerDown(pi);
+                this._onPointerDown(pi, scene);
                 break;
             }
             case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL: {
@@ -22084,81 +22121,83 @@ class VirtualDisplayInputsSource {
             }
         }
     }
-    _onPointerDown(pointerInfo) {
-        if (this._currentPosition) {
-            const pixelXY = this._currentPosition;
-            const base = pointerInfo.event;
-            base.displayX = pixelXY.x;
-            base.displayY = pixelXY.y;
-            if (this._onPointerDownObservable && this._onPointerDownObservable.hasObservers()) {
-                this._onPointerDownObservable.notifyObservers(base, -1, this, this);
-            }
-        }
-    }
-    _onPointerUp(pointerInfo) {
-        if (this._currentPosition) {
-            const pixelXY = this._currentPosition;
-            const base = pointerInfo.event;
-            base.displayX = pixelXY.x;
-            base.displayY = pixelXY.y;
-            if (this._onPointerUpObservable && this._onPointerUpObservable.hasObservers()) {
-                this._onPointerUpObservable.notifyObservers(base, -1, this._display, this);
-            }
-        }
-    }
-    _onPointerMove(pointerInfo) {
-        var scene = this._getScene();
-        if (!scene) {
-            return;
-        }
-        var meshUnderPointer = scene.meshUnderPointer;
-        if (meshUnderPointer && meshUnderPointer !== this._display.node) {
-            return;
-        }
-        const current = this._getPickingInfos(scene);
+    _getBasePointer(pointerInfo, current) {
+        const base = pointerInfo.event;
+        current = current ?? this._getPickingInfos(this._getScene());
         const c = current?.getTextureCoordinates();
         if (c) {
-            if (this._currentPosition) {
-                pointerInfo.skipOnPointerObservable = true;
-                const pixelXY = this._display.getPixelToRef0(c);
-                if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                    const base = pointerInfo.event;
-                    base.displayX = pixelXY.x;
-                    base.displayY = pixelXY.y;
-                    base.userCoordinates = c;
-                    this._onPointerMoveObservable.notifyObservers(base, -1, this._display, this);
-                }
-                this._currentPosition = pixelXY;
-                return;
-            }
-            pointerInfo.skipOnPointerObservable = true;
-            if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
-                const base = pointerInfo.event;
-                base.displayX = 0;
-                base.displayY = 0;
-                this._onPointerEnterObservable.notifyObservers(base, -1, this._display, this);
-            }
-            const pixelXY = this._display.getPixelToRef0(c);
-            if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
-                const base = pointerInfo.event;
-                base.displayX = 0;
-                base.displayY = 0;
-                base.userCoordinates = c;
-                this._onPointerMoveObservable.notifyObservers(base, -1, this._display, this);
-            }
-            this._currentPosition = pixelXY;
-            return;
+            const pixelXY = this._display.getPixelToRef(c, this._cache);
+            base.displayX = pixelXY.x;
+            base.displayY = pixelXY.y;
+            base.userCoordinates = c;
         }
-        if (this._onPointerOutObservable && this._onPointerOutObservable.hasObservers()) {
-            const base = pointerInfo.event;
+        else {
             base.displayX = 0;
             base.displayY = 0;
-            this._onPointerOutObservable.notifyObservers(base, -1, this._display, this);
         }
-        this._currentPosition = null;
+        return base;
+    }
+    _onPointerDown(pointerInfo, scene) {
+        var pick = this._getPickingInfos(scene);
+        var meshUnderPointer = pick ? pick.pickedMesh : scene.meshUnderPointer;
+        if (meshUnderPointer !== this._display.node) {
+            return;
+        }
+        pointerInfo.skipOnPointerObservable = true;
+        if (this._onPointerDownObservable && this._onPointerDownObservable.hasObservers()) {
+            const base = this._getBasePointer(pointerInfo, pick);
+            this._onPointerDownObservable.notifyObservers(base, -1, this._display, this);
+        }
+    }
+    _onPointerUp(pointerInfo, scene) {
+        var pick = this._getPickingInfos(scene);
+        var meshUnderPointer = pick ? pick.pickedMesh : scene.meshUnderPointer;
+        if (meshUnderPointer !== this._display.node) {
+            return;
+        }
+        pointerInfo.skipOnPointerObservable = true;
+        if (this._onPointerUpObservable && this._onPointerUpObservable.hasObservers()) {
+            const base = this._getBasePointer(pointerInfo, pick);
+            this._onPointerUpObservable.notifyObservers(base, -1, this._display, this);
+        }
+    }
+    _onPointerMove(pointerInfo, scene) {
+        var pick = this._getPickingInfos(scene);
+        var meshUnderPointer = pick ? pick.pickedMesh : scene.meshUnderPointer;
+        if (this._meshUnderPointer !== meshUnderPointer) {
+            if (this._meshUnderPointer) {
+                if (this._meshUnderPointer === this._display.node) {
+                    if (this._onPointerLeaveObservable && this._onPointerLeaveObservable.hasObservers()) {
+                        const base = pointerInfo.event;
+                        base.displayX = 0;
+                        base.displayY = 0;
+                        this._onPointerLeaveObservable.notifyObservers(base, -1, this._display, this);
+                    }
+                    pointerInfo.skipOnPointerObservable = true;
+                }
+            }
+            if (meshUnderPointer) {
+                if (meshUnderPointer === this._display.node) {
+                    if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
+                        const base = this._getBasePointer(pointerInfo, pick);
+                        this._onPointerEnterObservable.notifyObservers(base, -1, this._display, this);
+                    }
+                    pointerInfo.skipOnPointerObservable = true;
+                }
+            }
+            this._meshUnderPointer = meshUnderPointer;
+            return;
+        }
+        if (this._meshUnderPointer != this._display.node) {
+            return;
+        }
+        if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
+            const base = this._getBasePointer(pointerInfo, pick);
+            this._onPointerMoveObservable.notifyObservers(base, -1, this._display, this);
+        }
     }
     _onWheel(pointerInfo) {
-        if (this._currentPosition) {
+        if (this._meshUnderPointer === this._display.node) {
             pointerInfo.skipOnPointerObservable = true;
             const e = pointerInfo.event;
             if (this._onWheelObservable && this._onWheelObservable.hasObservers()) {
@@ -22178,6 +22217,18 @@ class VirtualDisplayInputsSource {
     }
     _getScene() {
         return this._display.getScene();
+    }
+    _isPointerInsideMeshScreenBounds(x, y, mesh, scene) {
+        const positions = mesh.getBoundingInfo().boundingBox.vectorsWorld;
+        if (!positions || positions.length === 0) {
+            return false;
+        }
+        const projected = positions.map((v) => _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Project(v, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.Identity(), scene.getTransformMatrix(), scene.activeCamera.viewport.toGlobal(scene.getEngine().getRenderWidth(), scene.getEngine().getRenderHeight())));
+        const minX = Math.min(...projected.map((p) => p.x));
+        const maxX = Math.max(...projected.map((p) => p.x));
+        const minY = Math.min(...projected.map((p) => p.y));
+        const maxY = Math.max(...projected.map((p) => p.y));
+        return x >= minX && x <= maxX && y >= minY && y <= maxY;
     }
 }
 //# sourceMappingURL=display.inputs.scene.js.map
@@ -22335,7 +22386,15 @@ class VirtualDisplay {
     get aspectRatio() {
         return this._ratio;
     }
-    getPixelToRef0(pickedCoordinates, pixel) {
+    getPixelToRef(pickedCoordinates, pixel) {
+        if (!pickedCoordinates) {
+            if (pixel) {
+                pixel.x = 0;
+                pixel.y = 0;
+                return pixel;
+            }
+            return _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
+        }
         pixel = pixel || _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector2.Zero();
         let d = pickedCoordinates.x - this._uvs[UVKind.MIN_U];
         let t = d / this._uvs[UVKind.DU];
@@ -22381,7 +22440,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ClipIndex: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.ClipIndex),
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.ClipPlaneDefinition),
-/* harmony export */   GetPointerType: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.GetPointerType),
 /* harmony export */   HasHolographicBounds: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.HasHolographicBounds),
 /* harmony export */   HolographicBoundsType: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.HolographicBoundsType),
 /* harmony export */   HolographicDisplay: () => (/* reexport safe */ _display_holographic__WEBPACK_IMPORTED_MODULE_2__.HolographicDisplay),
@@ -22390,6 +22448,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_3__.IsHolographicSphere),
 /* harmony export */   TransformedPointerToDragController: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.TransformedPointerToDragController),
+/* harmony export */   TransformedPointerToGestureController: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.TransformedPointerToGestureController),
 /* harmony export */   VirtualDisplay: () => (/* reexport safe */ _display_virtual__WEBPACK_IMPORTED_MODULE_0__.VirtualDisplay),
 /* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display_inputs_scene__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayInputsSource),
 /* harmony export */   VirtualDisplayOptions: () => (/* reexport safe */ _display_virtual__WEBPACK_IMPORTED_MODULE_0__.VirtualDisplayOptions),
@@ -25981,7 +26040,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeoShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoShapeType),
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeodeticSystem),
 /* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GetLocalizableStringValue),
-/* harmony export */   GetPointerType: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.GetPointerType),
 /* harmony export */   Google: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
@@ -26147,6 +26205,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Timespan),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchGestureType),
 /* harmony export */   TransformedPointerToDragController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.TransformedPointerToDragController),
+/* harmony export */   TransformedPointerToGestureController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.TransformedPointerToGestureController),
 /* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Unit),
 /* harmony export */   ValidableBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ValidableBase),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.VectorTileGeomType),

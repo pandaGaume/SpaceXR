@@ -2,7 +2,7 @@ import { Observer } from "../../events";
 import { ITileNavigationApi } from "../../tiles";
 import { IDisposable, Nullable } from "../../types";
 import { IInputSource, IPointerDragEvent } from "./map.inputs.interfaces";
-import { AnyTouchGesture } from "./map.inputs.interfaces.touch";
+import { AnyTouchGesture, TouchGestureType } from "./map.inputs.interfaces.touch";
 
 export class InputsNavigationController implements IDisposable {
     static readonly DEFAULT_ZOOM_INCREMENT = 0.1;
@@ -68,32 +68,25 @@ export class InputsNavigationController implements IDisposable {
     };
 
     protected _onWheel = (event: WheelEvent): void => {
-        // deltaY: vertical scroll (e.g., scroll wheel up/down or two-finger up/down)
         const delta = Math.sign(event.deltaY) * (this._zoomIncrement ?? Math.abs(event.deltaY));
         this._target.zoomMap(this._invertz ? delta : -delta);
     };
 
     protected _onTouch = (event: AnyTouchGesture): void => {
         switch (event.type) {
-            case "drag": {
-                switch (event.points.length) {
-                    case 1: {
-                        // translate the center of the map according the drag displacement
-                        // then we have to negate the drag displacement.
-                        this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
-                        break;
-                    }
-                    case 2: {
-                        // rotate the map according the drag displacement
-                        this._target.rotateMap(event.deltaX);
-                        break;
-                    }
-                }
+            case TouchGestureType.Drag: {
+                // translate the center of the map according the drag displacement
+                // then we have to negate the drag displacement.
+                this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
                 break;
             }
-            case "pinch": {
-                const delta = Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale));
+            case TouchGestureType.Pinch: {
+                const delta = (Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale))) / 2;
                 this._target.zoomMap(this._invertz ? delta : -delta);
+                break;
+            }
+            case TouchGestureType.Rotate: {
+                this._target.rotateMap(event.angle);
                 break;
             }
         }

@@ -5448,13 +5448,28 @@ class PointerToDragController {
             }
             const x = this._getClientX(e);
             const y = this._getClientY(e);
-            this._pointerState.set(e.pointerId, {
+            var state = {
                 startX: x,
                 startY: y,
                 lastX: x,
                 lastY: y,
                 button: e.button,
-            });
+            };
+            this._pointerState.set(e.pointerId, state);
+            const event = {
+                type: "start",
+                pointerId: e.pointerId,
+                button: state.button,
+                startX: state.startX,
+                startY: state.startY,
+                x: x,
+                y: y,
+                deltaX: 0,
+                deltaY: 0,
+                timestamp: performance.now(),
+                originalEvent: e,
+            };
+            this.onDragObservable.notifyObservers(event);
         };
         this._onMove = (e) => {
             if (e.pointerType === "touch") {
@@ -5807,6 +5822,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   InputsNavigationController: () => (/* binding */ InputsNavigationController)
 /* harmony export */ });
+/* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "./dist/map/inputs/map.inputs.interfaces.touch.js");
+
 class InputsNavigationController {
     constructor(source, target, zoomIncrement, invertY = true, invertZ = false) {
         this._onDragObserver = null;
@@ -5839,22 +5856,17 @@ class InputsNavigationController {
         };
         this._onTouch = (event) => {
             switch (event.type) {
-                case "drag": {
-                    switch (event.points.length) {
-                        case 1: {
-                            this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
-                            break;
-                        }
-                        case 2: {
-                            this._target.rotateMap(event.deltaX);
-                            break;
-                        }
-                    }
+                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
+                    this._target.translateUnitsMap(-event.deltaX, -event.deltaY);
                     break;
                 }
-                case "pinch": {
-                    const delta = Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale));
+                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
+                    const delta = (Math.sign(event.scale) * (this._zoomIncrement ?? Math.abs(event.scale))) / 2;
                     this._target.zoomMap(this._invertz ? delta : -delta);
+                    break;
+                }
+                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
+                    this._target.rotateMap(event.angle);
                     break;
                 }
             }
@@ -5896,137 +5908,150 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PointerToGestureController: () => (/* binding */ PointerToGestureController)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "./dist/map/inputs/map.inputs.interfaces.touch.js");
 
 
+
+const GestureDetectionSettings = {
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate]: { threshold: 0.5 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch]: { threshold: 1 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag]: { threshold: 1 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Tap]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.LongPress]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Swipe]: { threshold: 0 },
+};
 class PointerToGestureController {
     constructor(source) {
         this._pointers = new Map();
-        this._pinchStartDistance = 0;
+        this._startDistance = 0;
+        this._startAngle = 0;
+        this._startCenter = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+        this._moveCount = 0;
+        this._firstMoveCountThreshold = 5;
         this._onStart = (e) => {
             if (e.pointerType !== "touch") {
                 return;
             }
-            this._pointers.set(e.pointerId, {
+            const x = this._getClientX(e);
+            const y = this._getClientY(e);
+            const state = {
                 id: e.pointerId,
-                startX: e.clientX,
-                startY: e.clientY,
-                x: e.clientX,
-                y: e.clientY,
+                startX: x,
+                startY: y,
+                lastX: x,
+                lastY: y,
+                x: x,
+                y: y,
                 startTime: performance.now(),
-            });
+            };
+            this._pointers.set(e.pointerId, state);
             if (this._pointers.size === 2) {
                 const [a, b] = Array.from(this._pointers.values());
-                this._pinchStartDistance = this._distance(a, b);
+                this._startDistance = this._distance(a, b);
+                this._startAngle = this._angle(a, b);
+                this._startCenter = this._midpoint(a, b);
+                this._moveCount = 0;
             }
         };
         this._onMove = (e) => {
             if (e.pointerType !== "touch") {
                 return;
             }
-            const p = this._pointers.get(e.pointerId);
-            if (p) {
-                p.x = e.clientX;
-                p.y = e.clientY;
-            }
-            switch (this._pointers.size) {
-                case 1: {
-                    const state = this._pointers.get(e.pointerId);
-                    if (state) {
+            const state = this._pointers.get(e.pointerId);
+            if (state) {
+                state.x = this._getClientX(e);
+                state.y = this._getClientY(e);
+                switch (this._pointers.size) {
+                    case 1: {
                         const gesture = {
                             type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
                             timestamp: performance.now(),
                             duration: performance.now() - state.startTime,
                             points: [{ x: state.x, y: state.y }],
-                            deltaX: state.x - state.startX,
-                            deltaY: state.y - state.startY,
+                            deltaX: state.x - state.lastX,
+                            deltaY: state.y - state.lastY,
                         };
-                        state.startX = state.x;
-                        state.startY = state.y;
                         this.onTouchObservable.notifyObservers(gesture);
+                        state.lastX = state.x;
+                        state.lastY = state.y;
+                        break;
                     }
-                    break;
-                }
-                case 2: {
-                    const [a, b] = Array.from(this._pointers.values());
-                    const currentDistance = this._distance(a, b);
-                    const scale = currentDistance / this._pinchStartDistance;
-                    const centerX = (a.x + b.x) / 2;
-                    const centerY = (a.y + b.y) / 2;
-                    const isPinch = Math.abs(scale - 1.0) > 0.05;
-                    if (isPinch) {
-                        const gesture = {
-                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
-                            timestamp: performance.now(),
-                            duration: 0,
-                            points: [
-                                { x: a.x, y: a.y },
-                                { x: b.x, y: b.y },
-                            ],
-                            center: { x: centerX, y: centerY },
-                            scale: this._pinchStartDistance - currentDistance,
-                        };
-                        this._pinchStartDistance = currentDistance;
-                        this.onTouchObservable.notifyObservers(gesture);
+                    case 2: {
+                        this._moveCount++;
+                        if (this._moveCount < this._firstMoveCountThreshold) {
+                            return;
+                        }
+                        const [a, b] = Array.from(this._pointers.values());
+                        const center = this._midpoint(a, b);
+                        const angle = this._angle(a, b);
+                        const distance = this._distance(a, b);
+                        const deltaAngle = angle - this._startAngle;
+                        const deltaDistance = distance - this._startDistance;
+                        const deltaCenter = this._distance(center, this._startCenter);
+                        const types = this._detectActiveTypes(deltaAngle, deltaDistance, deltaCenter);
+                        for (const type of types) {
+                            switch (type) {
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
+                                    const gesture = {
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate,
+                                        timestamp: performance.now(),
+                                        duration: 0,
+                                        points: [
+                                            { x: a.x, y: a.y },
+                                            { x: b.x, y: b.y },
+                                        ],
+                                        center: center,
+                                        angle: deltaAngle,
+                                    };
+                                    this._startAngle = angle;
+                                    this.onTouchObservable.notifyObservers(gesture);
+                                    break;
+                                }
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
+                                    const gesture = {
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
+                                        timestamp: performance.now(),
+                                        duration: 0,
+                                        points: [
+                                            { x: a.x, y: a.y },
+                                            { x: b.x, y: b.y },
+                                        ],
+                                        center: center,
+                                        scale: deltaDistance,
+                                    };
+                                    this._startDistance = distance;
+                                    this.onTouchObservable.notifyObservers(gesture);
+                                    break;
+                                }
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
+                                    const gesture = {
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
+                                        timestamp: performance.now(),
+                                        duration: 0,
+                                        points: [
+                                            { x: a.x, y: a.y },
+                                            { x: b.x, y: b.y },
+                                        ],
+                                        deltaX: center.x - this._startCenter.x,
+                                        deltaY: center.y - this._startCenter.y,
+                                        startPosition: this._startCenter,
+                                    };
+                                    this._startCenter = { x: center.x, y: center.y };
+                                    this.onTouchObservable.notifyObservers(gesture);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
                     }
-                    else {
-                        const gesture = {
-                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
-                            timestamp: performance.now(),
-                            duration: 0,
-                            points: [
-                                { x: a.x, y: a.y },
-                                { x: b.x, y: b.y },
-                            ],
-                            deltaX: centerX - (a.startX + b.startX) / 2,
-                            deltaY: centerY - (a.startY + b.startY) / 2,
-                        };
-                        a.startX = a.x;
-                        a.startY = a.y;
-                        b.startX = b.x;
-                        b.startY = b.y;
-                        this.onTouchObservable.notifyObservers(gesture);
-                    }
-                    break;
-                }
-                default: {
-                    break;
                 }
             }
         };
         this._onEnd = (e) => {
             if (e.pointerType !== "touch") {
                 return;
-            }
-            const state = this._pointers.get(e.pointerId);
-            if (!state)
-                return;
-            const duration = performance.now() - state.startTime;
-            const dx = state.x - state.startX;
-            const dy = state.y - state.startY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const fingers = [{ x: state.x, y: state.y }];
-            const timestamp = performance.now();
-            if (distance < 10 && duration < 300) {
-                const gesture = {
-                    type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Tap,
-                    timestamp: timestamp,
-                    duration: duration,
-                    points: fingers,
-                };
-                this.onTouchObservable.notifyObservers(gesture);
-            }
-            if (distance > 30 && duration < 600) {
-                const gesture = {
-                    type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Swipe,
-                    timestamp: timestamp,
-                    duration: duration,
-                    points: fingers,
-                    distance: distance,
-                    direction: this._computeSwipeDirection(dx, dy),
-                };
-                this.onTouchObservable.notifyObservers(gesture);
             }
             this._pointers.delete(e.pointerId);
         };
@@ -6038,13 +6063,19 @@ class PointerToGestureController {
     }
     get onTouchObservable() {
         if (!this._onTouchObservable) {
-            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
             this._attachSource(this._source);
         }
         return this._onTouchObservable;
     }
     get source() {
         return this._source;
+    }
+    _getClientX(e) {
+        return e.clientX;
+    }
+    _getClientY(e) {
+        return e.clientY;
     }
     _clearObservable() {
         this._onTouchObservable?.clear();
@@ -6071,15 +6102,29 @@ class PointerToGestureController {
         const dy = b.y - a.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
-    _computeSwipeDirection(dx, dy) {
-        const adx = Math.abs(dx);
-        const ady = Math.abs(dy);
-        if (adx > ady) {
-            return dx > 0 ? "right" : "left";
+    _angle(a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        return Math.atan2(dy, dx) * (180 / Math.PI);
+    }
+    _midpoint(a, b) {
+        return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    }
+    _detectActiveTypes(angleRad, distDelta, centerDelta) {
+        const result = [];
+        const angleDeg = Math.abs(angleRad * 57.2958);
+        const pinchScore = Math.abs(distDelta);
+        const dragScore = Math.abs(centerDelta);
+        if (angleDeg > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate);
         }
-        else {
-            return dy > 0 ? "down" : "up";
+        if (pinchScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch);
         }
+        if (dragScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag);
+        }
+        return result;
     }
 }
 //# sourceMappingURL=map.inputs.controller.touch.js.map
@@ -6098,12 +6143,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var XRGestureType;
 (function (XRGestureType) {
-    XRGestureType["Grab"] = "grab";
-    XRGestureType["Release"] = "release";
-    XRGestureType["Pinch"] = "pinch";
-    XRGestureType["Point"] = "point";
-    XRGestureType["Swipe"] = "swipe";
-    XRGestureType["Custom"] = "custom";
+    XRGestureType[XRGestureType["Grab"] = 100] = "Grab";
+    XRGestureType[XRGestureType["Release"] = 101] = "Release";
+    XRGestureType[XRGestureType["Pinch"] = 102] = "Pinch";
+    XRGestureType[XRGestureType["Point"] = 1033] = "Point";
+    XRGestureType[XRGestureType["Swipe"] = 104] = "Swipe";
+    XRGestureType[XRGestureType["Custom"] = 999] = "Custom";
 })(XRGestureType || (XRGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.hands.js.map
 
@@ -6128,10 +6173,12 @@ function IsTouchCapable() {
 }
 var TouchGestureType;
 (function (TouchGestureType) {
-    TouchGestureType["Tap"] = "tap";
-    TouchGestureType["Swipe"] = "swipe";
-    TouchGestureType["Pinch"] = "pinch";
-    TouchGestureType["Drag"] = "drag";
+    TouchGestureType[TouchGestureType["Tap"] = 0] = "Tap";
+    TouchGestureType[TouchGestureType["LongPress"] = 1] = "LongPress";
+    TouchGestureType[TouchGestureType["Rotate"] = 2] = "Rotate";
+    TouchGestureType[TouchGestureType["Swipe"] = 3] = "Swipe";
+    TouchGestureType[TouchGestureType["Pinch"] = 4] = "Pinch";
+    TouchGestureType[TouchGestureType["Drag"] = 5] = "Drag";
 })(TouchGestureType || (TouchGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.touch.js.map
 

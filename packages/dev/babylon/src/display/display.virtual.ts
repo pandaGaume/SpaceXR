@@ -1,4 +1,4 @@
-import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
+import { Matrix, Mesh, Nullable, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
 
 import { Cartesian3, ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
 
@@ -199,7 +199,15 @@ export class VirtualDisplay implements IPhysicalDisplay {
         return this._ratio;
     }
 
-    public getPixelToRef0(pickedCoordinates: Vector2, pixel?: Vector2): Vector2 {
+    public getPixelToRef(pickedCoordinates?: Nullable<Vector2>, pixel?: Vector2): Vector2 {
+        if (!pickedCoordinates) {
+            if (pixel) {
+                pixel.x = 0;
+                pixel.y = 0;
+                return pixel;
+            }
+            return Vector2.Zero();
+        }
         pixel = pixel || Vector2.Zero();
 
         let d = pickedCoordinates.x - this._uvs[UVKind.MIN_U];

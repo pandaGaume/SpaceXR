@@ -68,13 +68,28 @@ export class PointerToDragController implements IDragSource, IDisposable {
         }
         const x = this._getClientX(e);
         const y = this._getClientY(e);
-        this._pointerState.set(e.pointerId, {
+        var state = {
             startX: x,
             startY: y,
             lastX: x,
             lastY: y,
             button: e.button,
-        });
+        };
+        this._pointerState.set(e.pointerId, state);
+        const event: IPointerDragEvent = {
+            type: "start",
+            pointerId: e.pointerId,
+            button: state.button,
+            startX: state.startX,
+            startY: state.startY,
+            x: x,
+            y: y,
+            deltaX: 0,
+            deltaY: 0,
+            timestamp: performance.now(),
+            originalEvent: e,
+        };
+        this.onDragObservable.notifyObservers(event);
     };
 
     protected _onMove = (e: PointerEvent): void => {

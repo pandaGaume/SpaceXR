@@ -22,12 +22,12 @@ export interface IXRHandTarget {
 */
 
 export enum XRGestureType {
-    Grab = "grab",
-    Release = "release",
-    Pinch = "pinch",
-    Point = "point",
-    Swipe = "swipe",
-    Custom = "custom",
+    Grab = 100,
+    Release = 101,
+    Pinch = 102,
+    Point = 1033,
+    Swipe = 104,
+    Custom = 999,
 }
 
 export type XRHandType = "left" | "right";

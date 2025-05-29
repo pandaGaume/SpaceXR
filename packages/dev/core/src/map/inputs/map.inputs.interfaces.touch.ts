@@ -2,7 +2,7 @@ import { Observable } from "../../events";
 import { ICartesian2 } from "../../geometry";
 
 /// <summary>
-/// Returns true if the current device supports touch input.
+/// Returns true if the current device supports touch input (multi-touch or single-touch).
 /// </summary>
 export function IsTouchCapable(): boolean {
     const hasTouchEvents = "ontouchstart" in window;
@@ -12,85 +12,147 @@ export function IsTouchCapable(): boolean {
     return hasTouchEvents || hasTouchConstructor || hasTouchPoints;
 }
 
-export type SwipeDirection = "left" | "right" | "up" | "down";
-
+/// <summary>
+/// Directions that can be recognized in a 2D swipe gesture.
+/// </summary>
 export type SwipeDirection2D = "left" | "right" | "up" | "down" | "diagonal-left-up" | "diagonal-left-down" | "diagonal-right-up" | "diagonal-right-down";
 
-export type SwipeDirection3D = "left" | "right" | "up" | "down" | "diagonal-left-up" | "diagonal-left-down" | "diagonal-right-up" | "diagonal-right-down" | "forward" | "backward";
+/// <summary>
+/// Extended directions for a 3D swipe context, including forward and backward.
+/// </summary>
+export type SwipeDirection3D = SwipeDirection2D | "forward" | "backward";
 
+/// <summary>
+/// Enumeration of known touch gesture types.
+/// </summary>
 export enum TouchGestureType {
-    Tap = "tap",
-    Swipe = "swipe",
-    Pinch = "pinch",
-    Drag = "drag",
+    Tap = 0,
+    LongPress = 1,
+    Rotate = 2,
+    Swipe = 3,
+    Pinch = 4,
+    Drag = 5,
 }
 
+/// <summary>
+/// Base interface for any touch gesture.
+/// </summary>
 export interface IGesture<C extends ICartesian2> {
-    type: string;
-    timestamp: number; // milliseconds since epoch or performance.now()
-    duration: number; // in milliseconds
-    points: Array<C>; // positions of the points involved
+    /// <summary>Type identifier (should be used for discriminating between gestures).</summary>
+    type: number;
+
+    /// <summary>Timestamp of the gesture (performance.now() or epoch in ms).</summary>
+    timestamp: number;
+
+    /// <summary>Total duration of the gesture in milliseconds.</summary>
+    duration: number;
+
+    /// <summary>Array of points involved in the gesture (e.g. fingers or touch contacts).</summary>
+    points: Array<C>;
 }
 
+/// <summary>
+/// A generic touch gesture using 2D cartesian coordinates.
+/// </summary>
 export interface ITouchGesture extends IGesture<ICartesian2> {}
 
-export type ISwipeGestureDirection = SwipeDirection | SwipeDirection2D | SwipeDirection3D;
-
-export interface ISwipeGesture extends ITouchGesture {
-    type: TouchGestureType.Swipe;
-    direction: ISwipeGestureDirection;
-    distance: number; // in pixels
-}
-
-export interface IPinchGesture extends ITouchGesture {
-    type: TouchGestureType.Pinch;
-    center: ICartesian2;
-    scale: number;
-}
-
+/// <summary>
+/// A tap gesture (brief contact with no movement).
+/// </summary>
 export interface ITapGesture extends ITouchGesture {
     type: TouchGestureType.Tap;
 }
 
+/// <summary>
+/// A long press gesture (contact held for a minimum duration).
+/// </summary>
+export interface ILongPressGesture extends ITouchGesture {
+    type: TouchGestureType.LongPress;
+}
+
+/// <summary>
+/// A drag gesture (1-finger or 2-finger continuous movement).
+/// </summary>
 export interface IDragGesture extends ITouchGesture {
     type: TouchGestureType.Drag;
-    deltaX: number; // in pixels
-    deltaY: number; // in pixels
+
+    /// <summary>Total movement along the X axis in pixels.</summary>
+    deltaX: number;
+
+    /// <summary>Total movement along the Y axis in pixels.</summary>
+    deltaY: number;
+
+    /// <summary>Optional starting point of the drag (center point if 2-finger drag).</summary>
+    startPosition?: ICartesian2;
 }
+
 /// <summary>
-/// Represents the mapping of known touch gesture types to their corresponding structures.
-///
-/// This map is used to build a discriminated union (`AnyTouchGesture`) that covers all supported gestures.
-/// Users can safely extend this map using TypeScript module augmentation without modifying the original source.
-///
-/// Example:
-/// ```ts
-/// // Extend with a custom gesture type
-/// declare module "./touch-gestures" {
-///     interface TouchGestureTypeMap {
-///         rotate: IRotateGesture;
-///     }
-/// }
-///
-/// export interface IRotateGesture extends ITouchGestureBase {
-///     type: "rotate";
-///     angle: number;
-/// }
-/// ```
-///
-/// Once augmented, your custom gesture will be recognized as part of `AnyTouchGesture`,
-/// enabling safe type narrowing and inference in gesture handlers.
+/// A pinch gesture (2-finger gesture modifying scale).
+/// </summary>
+export interface IPinchGesture extends ITouchGesture {
+    type: TouchGestureType.Pinch;
+
+    /// <summary>Center point between fingers during the pinch.</summary>
+    center: ICartesian2;
+
+    /// <summary>Scaling factor (e.g. 1.0 = no change, >1.0 = zoom in, <1.0 = zoom out).</summary>
+    scale: number;
+
+    /// <summary>Optional starting center point.</summary>
+    startPosition?: ICartesian2;
+}
+
+/// <summary>
+/// A rotate gesture (2-finger rotation around a common center).
+/// </summary>
+export interface IRotateGesture extends ITouchGesture {
+    type: TouchGestureType.Rotate;
+
+    /// <summary>Total angle of rotation in degrees (positive = clockwise).</summary>
+    angle: number;
+
+    /// <summary>Center of the rotation gesture.</summary>
+    center: ICartesian2;
+
+    /// <summary>Optional starting center point.</summary>
+    startPosition?: ICartesian2;
+}
+
+/// <summary>
+/// A swipe gesture (fast directional movement).
+/// </summary>
+export interface ISwipeGesture extends ITouchGesture {
+    type: TouchGestureType.Swipe;
+
+    /// <summary>Direction of the swipe.</summary>
+    direction: SwipeDirection2D | SwipeDirection3D;
+
+    /// <summary>Distance covered during the swipe in pixels.</summary>
+    distance: number;
+}
+
+/// <summary>
+/// Mapping between gesture type names and their corresponding structure.
+/// Extend this map via module augmentation if you introduce custom gestures.
 /// </summary>
 export interface TouchGestureTypeMap {
     tap: ITapGesture;
+    longPress: ILongPressGesture;
+    rotate: IRotateGesture;
     swipe: ISwipeGesture;
     pinch: IPinchGesture;
     drag: IDragGesture;
-    // users can augment this
 }
 
+/// <summary>
+/// Discriminated union of all touch gesture types.
+/// </summary>
 export type AnyTouchGesture = TouchGestureTypeMap[keyof TouchGestureTypeMap];
 
+/// <summary>
+/// Interface representing a source that can emit touch gestures.
+/// </summary>
 export interface ITouchGestureSource {
+    /// <summary>Observable used to notify subscribers of any detected gesture.</summary>
     onTouchObservable: Observable<AnyTouchGesture>;
 }

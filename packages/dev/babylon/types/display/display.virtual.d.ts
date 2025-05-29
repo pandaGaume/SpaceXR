@@ -1,4 +1,4 @@
-import { Matrix, Mesh, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { Matrix, Mesh, Nullable, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
 import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
@@ -55,7 +55,7 @@ export declare class VirtualDisplay implements IPhysicalDisplay {
     get pixelPerUnit(): ICartesian3;
     get dpi(): number;
     get aspectRatio(): ICartesian3;
-    getPixelToRef0(pickedCoordinates: Vector2, pixel?: Vector2): Vector2;
+    getPixelToRef(pickedCoordinates?: Nullable<Vector2>, pixel?: Vector2): Vector2;
     getXYZWorldVectors(): Array<Vector3>;
     dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void;
 }

@@ -61,7 +61,7 @@
             }
 
             async function createScene(canvas, engine) {
-                const unit = 3;
+                const unit = 1;
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
                 const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
@@ -80,17 +80,22 @@
                 light.intensity = 0.8;
                 light.diffuse = new BABYLON.Color3(1, 1, 1);
 
-                //const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(10, 2, 0), scene);
-                //pointLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
-                //pointLight.intensity = 1;
-
                 // create a basic table
                 const size = {
                     width: 3.2 * unit,
                     height: 2.4 * unit,
                 };
 
-                const resolution = SPACEXR.VirtualDisplay.QVGA;
+                // QVGA: ISize2 = new Size2(320, 240);
+                // VGA: ISize2 = new Size2(640, 480);
+                // QHD: ISize2 = new Size2(960, 540);
+                // HD: ISize2 = new Size2(1280, 720);
+                // WXGA: ISize2 = new Size2(1280, 800);
+                // FullHD: ISize2 = new Size2(1980, 1080);
+                // UltraHD: ISize2 = new Size2(3840, 2160);
+                // UltraHD2: ISize2 = new Size2(7680, 4320);
+
+                const resolution = SPACEXR.VirtualDisplay.FullHD;
 
                 // set the virtual display
                 const buildClipPlane = true;
@@ -102,17 +107,13 @@
 
                 camera.setTarget(displayMesh);
 
-                // build the map options
-                const mapOptions = {};
-
                 // build the map
-                const mapNode = new SPACEXR.Map3D("map", mapOptions, scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
+                const mapNode = new SPACEXR.MapNode("map", scene).setViewMap(defaultCenter, defaultLod).withDisplay(display);
                 mapNode.position.z = 0.1;
 
                 // build layer options
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
-                    exageration: 1.5,
                 };
 
                 // build layer and add it to the map
@@ -122,21 +123,15 @@
                 };
                 let client = SPACEXR.MapZen.DemClient(demCodecOptions);
                 const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(mapNode);
+                mapNode.withElevationExageration(1.2);
 
-                const imageLayerOptions = {
-                    zoomOffset: 1,
-                    alpha: 0.5,
-                    background: "rgb(.5,.5,.5)",
-                };
+                //const imageLayerOptions = {
+                //    alpha: 0.5,
+                //    background: "rgb(.5,.5,.5)",
+                //};
 
                 client = SPACEXR.Google.SatelliteClient2d();
-                const t = new SPACEXR.ImageLayer(`${client.name}`, client, imageLayerOptions).addTo(mapNode);
-
-                /*const material = demLayer.material;
-                const debugLayerOptions = {
-                    function:material?.debug
-                }
-                const debugLayer = new SPACEXR.DebugLayer("debugLayer", material, debugLayerOptions).addTo(map);*/
+                const t = new SPACEXR.ImageLayer(`${client.name}`, client).addTo(mapNode);
 
                 const showAxes = false;
                 if (showAxes) {
@@ -156,7 +151,7 @@
                 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
                 const scene = await createScene(canvas, engine); //Call the createScene function
 
-                scene.debugLayer.show();
+                //scene.debugLayer.show();
 
                 // initialize XR
                 //var xr = await scene.createDefaultXRExperienceAsync();

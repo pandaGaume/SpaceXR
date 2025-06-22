@@ -1,9 +1,9 @@
 import { VectorTile } from "@mapbox/vector-tile";
 import Protobuf from "pbf";
-import { ITileCodec } from "core/tiles";
 import { Nullable } from "core/types";
+import { ICodec } from "core/tiles/codecs/tiles.codecs.interfaces";
 
-export class VectorTileCodec implements ITileCodec<VectorTile> {
+export class VectorTileCodec implements ICodec<VectorTile> {
     public async decodeAsync(r: void | Response): Promise<Nullable<VectorTile>> {
         if (r instanceof Response) {
             const b = await r.blob();

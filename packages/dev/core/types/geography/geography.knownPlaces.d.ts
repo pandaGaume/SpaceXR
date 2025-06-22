@@ -63,4 +63,27 @@ export declare class KnownPlaces {
         AngkorWat: Geo2;
         HaLongBay: Geo2;
     };
+    static WorldWonders: {
+        CliffsOfMoher: Geo2;
+        Everest: Geo2;
+        Galapagos: Geo2;
+        GrandCanyon: Geo2;
+        GreatBarrierReef: Geo2;
+        HaLongBay: Geo2;
+        Kilimanjaro: Geo2;
+        Matterhorn: Geo2;
+        Roraima: Geo2;
+        TorresDelPaine: Geo2;
+        Vesuvius: Geo2;
+        Yellowstone: Geo2;
+    };
+    static Wonders: {
+        AngkorWat: Geo2;
+        MachuPicchu: Geo2;
+        Petra: Geo2;
+    };
+    static Waterfalls: {
+        IguazuFalls: Geo2;
+        VictoriaFalls: Geo2;
+    };
 }

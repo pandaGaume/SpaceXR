@@ -9929,6 +9929,29 @@ KnownPlaces.SightsAndParks = {
     AngkorWat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(13.4125, 103.8669),
     HaLongBay: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.9101, 107.1839),
 };
+KnownPlaces.WorldWonders = {
+    CliffsOfMoher: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(52.9715, -9.4265),
+    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925),
+    Galapagos: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.9538, -90.9656),
+    GrandCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.1069, -112.1129),
+    GreatBarrierReef: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-18.2871, 147.6992),
+    HaLongBay: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.9101, 107.1839),
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.0674, 37.3556),
+    Matterhorn: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.9763, 7.6586),
+    Roraima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(5.125, -60.75),
+    TorresDelPaine: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-51.1667, -73.2425),
+    Vesuvius: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(40.821, 14.426),
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.5885),
+};
+KnownPlaces.Wonders = {
+    AngkorWat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(13.4125, 103.8669),
+    MachuPicchu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-13.1631, -72.545),
+    Petra: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(30.3285, 35.4444),
+};
+KnownPlaces.Waterfalls = {
+    IguazuFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-25.6953, -54.4367),
+    VictoriaFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-17.9243, 25.8573),
+};
 //# sourceMappingURL=geography.knownPlaces.js.map
 
 /***/ }),
@@ -14128,11 +14151,63 @@ class RGBAColor {
     static NeonBlue() {
         return new RGBAColor(77, 77, 255);
     }
-    constructor(r, g, b, a = 1) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
+    static h2r(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : undefined;
+    }
+    static r2h(rgb) {
+        return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
+    }
+    static Parse(str) {
+        if (str[0] == "#") {
+            var a = RGBAColor.h2r(str);
+            if (a) {
+                return new RGBAColor(a[0], a[1], a[2]);
+            }
+        }
+        return new RGBAColor(RGBAColor.CSSMap.get(str) || RGBAColor.White());
+    }
+    constructor(r, g = 0, b = 0, a = 255) {
+        this._r = 0;
+        this._g = 0;
+        this._b = 0;
+        this._a = 255;
+        if (r instanceof RGBAColor) {
+            this.r = r.r;
+            this.g = r.g;
+            this.b = r.b;
+            this.a = r.a;
+        }
+        else {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+        this._a = a;
+    }
+    get r() {
+        return this._r;
+    }
+    get g() {
+        return this._g;
+    }
+    get b() {
+        return this._b;
+    }
+    get a() {
+        return this._a;
+    }
+    set r(value) {
+        this._r = _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(value, 0, 255);
+    }
+    set g(value) {
+        this._g = _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(value, 0, 255);
+    }
+    set b(value) {
+        this._b = _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(value, 0, 255);
+    }
+    set a(value) {
+        this._a = _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(value, 0, 255);
     }
     toHexString() {
         const intR = Math.round(this.r);
@@ -14192,6 +14267,302 @@ class RGBAColor {
         return `rgb(${this.r},${this.g},${this.b})`;
     }
 }
+RGBAColor.aliceblue = new RGBAColor(240, 248, 255);
+RGBAColor.antiquewhite = new RGBAColor(250, 235, 215);
+RGBAColor.aqua = new RGBAColor(0, 255, 255);
+RGBAColor.aquamarine = new RGBAColor(127, 255, 212);
+RGBAColor.azure = new RGBAColor(240, 255, 255);
+RGBAColor.beige = new RGBAColor(245, 245, 220);
+RGBAColor.bisque = new RGBAColor(255, 228, 196);
+RGBAColor.black = new RGBAColor(0, 0, 0);
+RGBAColor.blanchedalmond = new RGBAColor(255, 235, 205);
+RGBAColor.blue = new RGBAColor(0, 0, 255);
+RGBAColor.blueviolet = new RGBAColor(138, 43, 226);
+RGBAColor.brown = new RGBAColor(165, 42, 42);
+RGBAColor.burlywood = new RGBAColor(222, 184, 135);
+RGBAColor.cadetblue = new RGBAColor(95, 158, 160);
+RGBAColor.chartreuse = new RGBAColor(127, 255, 0);
+RGBAColor.chocolate = new RGBAColor(210, 105, 30);
+RGBAColor.coral = new RGBAColor(255, 127, 80);
+RGBAColor.cornflowerblue = new RGBAColor(100, 149, 237);
+RGBAColor.cornsilk = new RGBAColor(255, 248, 220);
+RGBAColor.crimson = new RGBAColor(220, 20, 60);
+RGBAColor.cyan = new RGBAColor(0, 255, 255);
+RGBAColor.darkblue = new RGBAColor(0, 0, 139);
+RGBAColor.darkcyan = new RGBAColor(0, 139, 139);
+RGBAColor.darkgoldenrod = new RGBAColor(184, 134, 11);
+RGBAColor.darkgray = new RGBAColor(169, 169, 169);
+RGBAColor.darkgreen = new RGBAColor(0, 100, 0);
+RGBAColor.darkgrey = new RGBAColor(169, 169, 169);
+RGBAColor.darkkhaki = new RGBAColor(189, 183, 107);
+RGBAColor.darkmagenta = new RGBAColor(139, 0, 139);
+RGBAColor.darkolivegreen = new RGBAColor(85, 107, 47);
+RGBAColor.darkorange = new RGBAColor(255, 140, 0);
+RGBAColor.darkorchid = new RGBAColor(153, 50, 204);
+RGBAColor.darkred = new RGBAColor(139, 0, 0);
+RGBAColor.darksalmon = new RGBAColor(233, 150, 122);
+RGBAColor.darkseagreen = new RGBAColor(143, 188, 143);
+RGBAColor.darkslateblue = new RGBAColor(72, 61, 139);
+RGBAColor.darkslategray = new RGBAColor(47, 79, 79);
+RGBAColor.darkslategrey = new RGBAColor(47, 79, 79);
+RGBAColor.darkturquoise = new RGBAColor(0, 206, 209);
+RGBAColor.darkviolet = new RGBAColor(148, 0, 211);
+RGBAColor.deeppink = new RGBAColor(255, 20, 147);
+RGBAColor.deepskyblue = new RGBAColor(0, 191, 255);
+RGBAColor.dimgray = new RGBAColor(105, 105, 105);
+RGBAColor.dimgrey = new RGBAColor(105, 105, 105);
+RGBAColor.dodgerblue = new RGBAColor(30, 144, 255);
+RGBAColor.firebrick = new RGBAColor(178, 34, 34);
+RGBAColor.floralwhite = new RGBAColor(255, 250, 240);
+RGBAColor.forestgreen = new RGBAColor(34, 139, 34);
+RGBAColor.fuchsia = new RGBAColor(255, 0, 255);
+RGBAColor.gainsboro = new RGBAColor(220, 220, 220);
+RGBAColor.ghostwhite = new RGBAColor(248, 248, 255);
+RGBAColor.gold = new RGBAColor(255, 215, 0);
+RGBAColor.goldenrod = new RGBAColor(218, 165, 32);
+RGBAColor.gray = new RGBAColor(128, 128, 128);
+RGBAColor.green = new RGBAColor(0, 128, 0);
+RGBAColor.greenyellow = new RGBAColor(173, 255, 47);
+RGBAColor.grey = new RGBAColor(128, 128, 128);
+RGBAColor.honeydew = new RGBAColor(240, 255, 240);
+RGBAColor.hotpink = new RGBAColor(255, 105, 180);
+RGBAColor.indianred = new RGBAColor(205, 92, 92);
+RGBAColor.indigo = new RGBAColor(75, 0, 130);
+RGBAColor.ivory = new RGBAColor(255, 255, 240);
+RGBAColor.khaki = new RGBAColor(240, 230, 140);
+RGBAColor.lavender = new RGBAColor(230, 230, 250);
+RGBAColor.lavenderblush = new RGBAColor(255, 240, 245);
+RGBAColor.lawngreen = new RGBAColor(124, 252, 0);
+RGBAColor.lemonchiffon = new RGBAColor(255, 250, 205);
+RGBAColor.lightblue = new RGBAColor(173, 216, 230);
+RGBAColor.lightcoral = new RGBAColor(240, 128, 128);
+RGBAColor.lightcyan = new RGBAColor(224, 255, 255);
+RGBAColor.lightgoldenrodyellow = new RGBAColor(250, 250, 210);
+RGBAColor.lightgray = new RGBAColor(211, 211, 211);
+RGBAColor.lightgreen = new RGBAColor(144, 238, 144);
+RGBAColor.lightgrey = new RGBAColor(211, 211, 211);
+RGBAColor.lightpink = new RGBAColor(255, 182, 193);
+RGBAColor.lightsalmon = new RGBAColor(255, 160, 122);
+RGBAColor.lightseagreen = new RGBAColor(32, 178, 170);
+RGBAColor.lightskyblue = new RGBAColor(135, 206, 250);
+RGBAColor.lightslategray = new RGBAColor(119, 136, 153);
+RGBAColor.lightslategrey = new RGBAColor(119, 136, 153);
+RGBAColor.lightsteelblue = new RGBAColor(176, 196, 222);
+RGBAColor.lightyellow = new RGBAColor(255, 255, 224);
+RGBAColor.lime = new RGBAColor(0, 255, 0);
+RGBAColor.limegreen = new RGBAColor(50, 205, 50);
+RGBAColor.linen = new RGBAColor(250, 240, 230);
+RGBAColor.magenta = new RGBAColor(255, 0, 255);
+RGBAColor.maroon = new RGBAColor(128, 0, 0);
+RGBAColor.mediumaquamarine = new RGBAColor(102, 205, 170);
+RGBAColor.mediumblue = new RGBAColor(0, 0, 205);
+RGBAColor.mediumorchid = new RGBAColor(186, 85, 211);
+RGBAColor.mediumpurple = new RGBAColor(147, 112, 219);
+RGBAColor.mediumseagreen = new RGBAColor(60, 179, 113);
+RGBAColor.mediumslateblue = new RGBAColor(123, 104, 238);
+RGBAColor.mediumspringgreen = new RGBAColor(0, 250, 154);
+RGBAColor.mediumturquoise = new RGBAColor(72, 209, 204);
+RGBAColor.mediumvioletred = new RGBAColor(199, 21, 133);
+RGBAColor.midnightblue = new RGBAColor(25, 25, 112);
+RGBAColor.mintcream = new RGBAColor(245, 255, 250);
+RGBAColor.mistyrose = new RGBAColor(255, 228, 225);
+RGBAColor.moccasin = new RGBAColor(255, 228, 181);
+RGBAColor.navajowhite = new RGBAColor(255, 222, 173);
+RGBAColor.navy = new RGBAColor(0, 0, 128);
+RGBAColor.oldlace = new RGBAColor(253, 245, 230);
+RGBAColor.olive = new RGBAColor(128, 128, 0);
+RGBAColor.olivedrab = new RGBAColor(107, 142, 35);
+RGBAColor.orange = new RGBAColor(255, 165, 0);
+RGBAColor.orangered = new RGBAColor(255, 69, 0);
+RGBAColor.orchid = new RGBAColor(218, 112, 214);
+RGBAColor.palegoldenrod = new RGBAColor(238, 232, 170);
+RGBAColor.palegreen = new RGBAColor(152, 251, 152);
+RGBAColor.paleturquoise = new RGBAColor(175, 238, 238);
+RGBAColor.palevioletred = new RGBAColor(219, 112, 147);
+RGBAColor.papayawhip = new RGBAColor(255, 239, 213);
+RGBAColor.peachpuff = new RGBAColor(255, 218, 185);
+RGBAColor.peru = new RGBAColor(205, 133, 63);
+RGBAColor.pink = new RGBAColor(255, 192, 203);
+RGBAColor.plum = new RGBAColor(221, 160, 221);
+RGBAColor.powderblue = new RGBAColor(176, 224, 230);
+RGBAColor.purple = new RGBAColor(128, 0, 128);
+RGBAColor.red = new RGBAColor(255, 0, 0);
+RGBAColor.rosybrown = new RGBAColor(188, 143, 143);
+RGBAColor.royalblue = new RGBAColor(65, 105, 225);
+RGBAColor.saddlebrown = new RGBAColor(139, 69, 19);
+RGBAColor.salmon = new RGBAColor(250, 128, 114);
+RGBAColor.sandybrown = new RGBAColor(244, 164, 96);
+RGBAColor.seagreen = new RGBAColor(46, 139, 87);
+RGBAColor.seashell = new RGBAColor(255, 245, 238);
+RGBAColor.sienna = new RGBAColor(160, 82, 45);
+RGBAColor.silver = new RGBAColor(192, 192, 192);
+RGBAColor.skyblue = new RGBAColor(135, 206, 235);
+RGBAColor.slateblue = new RGBAColor(106, 90, 205);
+RGBAColor.slategray = new RGBAColor(112, 128, 144);
+RGBAColor.slategrey = new RGBAColor(112, 128, 144);
+RGBAColor.snow = new RGBAColor(255, 250, 250);
+RGBAColor.springgreen = new RGBAColor(0, 255, 127);
+RGBAColor.steelblue = new RGBAColor(70, 130, 180);
+RGBAColor.tan = new RGBAColor(210, 180, 140);
+RGBAColor.teal = new RGBAColor(0, 128, 128);
+RGBAColor.thistle = new RGBAColor(216, 191, 216);
+RGBAColor.tomato = new RGBAColor(255, 99, 71);
+RGBAColor.turquoise = new RGBAColor(64, 224, 208);
+RGBAColor.violet = new RGBAColor(238, 130, 238);
+RGBAColor.wheat = new RGBAColor(245, 222, 179);
+RGBAColor.white = new RGBAColor(255, 255, 255);
+RGBAColor.whitesmoke = new RGBAColor(245, 245, 245);
+RGBAColor.yellow = new RGBAColor(255, 255, 0);
+RGBAColor.yellowgreen = new RGBAColor(154, 205, 50);
+RGBAColor.CSSMap = new Map([
+    ["aliceblue", RGBAColor.aliceblue],
+    ["antiquewhite", RGBAColor.antiquewhite],
+    ["aqua", RGBAColor.aqua],
+    ["aquamarine", RGBAColor.aquamarine],
+    ["azure", RGBAColor.azure],
+    ["beige", RGBAColor.beige],
+    ["bisque", RGBAColor.bisque],
+    ["black", RGBAColor.black],
+    ["blanchedalmond", RGBAColor.blanchedalmond],
+    ["blue", RGBAColor.blue],
+    ["blueviolet", RGBAColor.blueviolet],
+    ["brown", RGBAColor.brown],
+    ["burlywood", RGBAColor.burlywood],
+    ["cadetblue", RGBAColor.cadetblue],
+    ["chartreuse", RGBAColor.chartreuse],
+    ["chocolate", RGBAColor.chocolate],
+    ["coral", RGBAColor.coral],
+    ["cornflowerblue", RGBAColor.cornflowerblue],
+    ["cornsilk", RGBAColor.cornsilk],
+    ["crimson", RGBAColor.crimson],
+    ["cyan", RGBAColor.cyan],
+    ["darkblue", RGBAColor.darkblue],
+    ["darkcyan", RGBAColor.darkcyan],
+    ["darkgoldenrod", RGBAColor.darkgoldenrod],
+    ["darkgray", RGBAColor.darkgray],
+    ["darkgreen", RGBAColor.darkgreen],
+    ["darkgrey", RGBAColor.darkgrey],
+    ["darkkhaki", RGBAColor.darkkhaki],
+    ["darkmagenta", RGBAColor.darkmagenta],
+    ["darkolivegreen", RGBAColor.darkolivegreen],
+    ["darkorange", RGBAColor.darkorange],
+    ["darkorchid", RGBAColor.darkorchid],
+    ["darkred", RGBAColor.darkred],
+    ["darksalmon", RGBAColor.darksalmon],
+    ["darkseagreen", RGBAColor.darkseagreen],
+    ["darkslateblue", RGBAColor.darkslateblue],
+    ["darkslategray", RGBAColor.darkslategray],
+    ["darkslategrey", RGBAColor.darkslategrey],
+    ["darkturquoise", RGBAColor.darkturquoise],
+    ["darkviolet", RGBAColor.darkviolet],
+    ["deeppink", RGBAColor.deeppink],
+    ["deepskyblue", RGBAColor.deepskyblue],
+    ["dimgray", RGBAColor.dimgray],
+    ["dimgrey", RGBAColor.dimgrey],
+    ["dodgerblue", RGBAColor.dodgerblue],
+    ["firebrick", RGBAColor.firebrick],
+    ["floralwhite", RGBAColor.floralwhite],
+    ["forestgreen", RGBAColor.forestgreen],
+    ["fuchsia", RGBAColor.fuchsia],
+    ["gainsboro", RGBAColor.gainsboro],
+    ["ghostwhite", RGBAColor.ghostwhite],
+    ["gold", RGBAColor.gold],
+    ["goldenrod", RGBAColor.goldenrod],
+    ["gray", RGBAColor.gray],
+    ["green", RGBAColor.green],
+    ["greenyellow", RGBAColor.greenyellow],
+    ["grey", RGBAColor.grey],
+    ["honeydew", RGBAColor.honeydew],
+    ["hotpink", RGBAColor.hotpink],
+    ["indianred", RGBAColor.indianred],
+    ["indigo", RGBAColor.indigo],
+    ["ivory", RGBAColor.ivory],
+    ["khaki", RGBAColor.khaki],
+    ["lavender", RGBAColor.lavender],
+    ["lavenderblush", RGBAColor.lavenderblush],
+    ["lawngreen", RGBAColor.lawngreen],
+    ["lemonchiffon", RGBAColor.lemonchiffon],
+    ["lightblue", RGBAColor.lightblue],
+    ["lightcoral", RGBAColor.lightcoral],
+    ["lightcyan", RGBAColor.lightcyan],
+    ["lightgoldenrodyellow", RGBAColor.lightgoldenrodyellow],
+    ["lightgray", RGBAColor.lightgray],
+    ["lightgreen", RGBAColor.lightgreen],
+    ["lightgrey", RGBAColor.lightgrey],
+    ["lightpink", RGBAColor.lightpink],
+    ["lightsalmon", RGBAColor.lightsalmon],
+    ["lightseagreen", RGBAColor.lightseagreen],
+    ["lightskyblue", RGBAColor.lightskyblue],
+    ["lightslategray", RGBAColor.lightslategray],
+    ["lightslategrey", RGBAColor.lightslategrey],
+    ["lightsteelblue", RGBAColor.lightsteelblue],
+    ["lightyellow", RGBAColor.lightyellow],
+    ["lime", RGBAColor.lime],
+    ["limegreen", RGBAColor.limegreen],
+    ["linen", RGBAColor.linen],
+    ["magenta", RGBAColor.magenta],
+    ["maroon", RGBAColor.maroon],
+    ["mediumaquamarine", RGBAColor.mediumaquamarine],
+    ["mediumblue", RGBAColor.mediumblue],
+    ["mediumorchid", RGBAColor.mediumorchid],
+    ["mediumpurple", RGBAColor.mediumpurple],
+    ["mediumseagreen", RGBAColor.mediumseagreen],
+    ["mediumslateblue", RGBAColor.mediumslateblue],
+    ["mediumspringgreen", RGBAColor.mediumspringgreen],
+    ["mediumturquoise", RGBAColor.mediumturquoise],
+    ["mediumvioletred", RGBAColor.mediumvioletred],
+    ["midnightblue", RGBAColor.midnightblue],
+    ["mintcream", RGBAColor.mintcream],
+    ["mistyrose", RGBAColor.mistyrose],
+    ["moccasin", RGBAColor.moccasin],
+    ["navajowhite", RGBAColor.navajowhite],
+    ["navy", RGBAColor.navy],
+    ["oldlace", RGBAColor.oldlace],
+    ["olive", RGBAColor.olive],
+    ["olivedrab", RGBAColor.olivedrab],
+    ["orange", RGBAColor.orange],
+    ["orangered", RGBAColor.orangered],
+    ["orchid", RGBAColor.orchid],
+    ["palegoldenrod", RGBAColor.palegoldenrod],
+    ["palegreen", RGBAColor.palegreen],
+    ["paleturquoise", RGBAColor.paleturquoise],
+    ["palevioletred", RGBAColor.palevioletred],
+    ["papayawhip", RGBAColor.papayawhip],
+    ["peachpuff", RGBAColor.peachpuff],
+    ["peru", RGBAColor.peru],
+    ["pink", RGBAColor.pink],
+    ["plum", RGBAColor.plum],
+    ["powderblue", RGBAColor.powderblue],
+    ["purple", RGBAColor.purple],
+    ["red", RGBAColor.red],
+    ["rosybrown", RGBAColor.rosybrown],
+    ["royalblue", RGBAColor.royalblue],
+    ["saddlebrown", RGBAColor.saddlebrown],
+    ["salmon", RGBAColor.salmon],
+    ["sandybrown", RGBAColor.sandybrown],
+    ["seagreen", RGBAColor.seagreen],
+    ["seashell", RGBAColor.seashell],
+    ["sienna", RGBAColor.sienna],
+    ["silver", RGBAColor.silver],
+    ["skyblue", RGBAColor.skyblue],
+    ["slateblue", RGBAColor.slateblue],
+    ["slategray", RGBAColor.slategray],
+    ["slategrey", RGBAColor.slategrey],
+    ["snow", RGBAColor.snow],
+    ["springgreen", RGBAColor.springgreen],
+    ["steelblue", RGBAColor.steelblue],
+    ["tan", RGBAColor.tan],
+    ["teal", RGBAColor.teal],
+    ["thistle", RGBAColor.thistle],
+    ["tomato", RGBAColor.tomato],
+    ["turquoise", RGBAColor.turquoise],
+    ["violet", RGBAColor.violet],
+    ["wheat", RGBAColor.wheat],
+    ["white", RGBAColor.white],
+    ["whitesmoke", RGBAColor.whitesmoke],
+    ["yellow", RGBAColor.yellow],
+    ["yellowgreen", RGBAColor.yellowgreen],
+]);
 class HSLColor {
     static hue2rgb(p, q, t) {
         if (t < 0)
@@ -21224,7 +21595,7 @@ class Google {
 Google.KEY = "google";
 Google.MaxLevelOfDetail = 20;
 Google.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_3__.EPSG3857({ maxLOD: Google.MaxLevelOfDetail });
-Google.Attribution = "Map data © Google";
+Google.Attribution = "Imagery © Google";
 //# sourceMappingURL=tiles.vendors.google.js.map
 
 /***/ }),

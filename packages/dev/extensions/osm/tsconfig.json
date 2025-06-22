@@ -1,0 +1,20 @@
+{
+    "extends": "../../../../tsconfig.json",
+    "name": "spacexr-osm",
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "composite": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declarationDir": "./types",
+        "skipLibCheck": true,
+        // paths are used to resolve modules
+        "paths": {
+            "core/*": ["./dev/core/src/*"]
+        }
+    },
+    // you MUST use reference to the core tsconfig
+    "references": [{ "path": "../../core" }],
+    "include": ["./src/**/*.ts"],
+    "exclude": ["**/node_modules", "**/dist", "**/types"]
+}

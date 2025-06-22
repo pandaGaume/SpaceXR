@@ -1,0 +1,29 @@
+{
+    "name": "spacexr-osm",
+    "version": "1.0.0",
+    "main": "dist/index",
+    "module": "dist/index",
+    "esnext": "dist/index",
+    "types": "dist/index",
+    "private": true,
+    "files": [
+        "./src"
+    ],
+    "scripts": {
+        "build:osm:dev": "npm run clean:osm && npm run compile:osm",
+        "clean:osm": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+        "compile:osm": "npm run compile:osm:source",
+        "compile:osm:source": "tsc --project tsconfig.json",
+        "webpack:osm:dev": "webpack --mode development",
+        "copy:osm:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
+        "publish:osm:dev": "npm run build:osm:dev && npm run webpack:osm:dev && npm run copy:osm:bundle",
+        "test:osm": "jest -c ./jest.config.ts --verbose"
+    },
+    "sideEffects": false,
+    "devDependencies": {
+        "rimraf": "^4.4.1"
+    },
+    "dependencies": {
+        "protobufjs-cli": "^1.1.2"
+    }
+}

@@ -3,17 +3,14 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Exemple d'un ecrans virtuel</title>
-        <!--script src="https://cdn.babylonjs.com/babylon.js"></script-->
+        <title>3D Map Display</title>
         <script src="../libs/babylon.js"></script>
-        <!--script src="../libs/babylon.inspector.bundle.js"></script-->
-        <!--script src="../libs/babylon.glTF2FileLoader.min.js"></script-->
-
         <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
 
         <style>
             html,
             body {
+                background-color: rgb(37, 37, 37);
                 overflow: hidden;
                 width: 100%;
                 height: 100%;
@@ -23,27 +20,315 @@
             #mapcontainer {
                 position: relative;
                 width: 100%;
-                height: 70%;
-                margin: 0px auto;
+                height: 100%;
             }
-
             #mapcanvas3d {
                 width: 100%;
                 height: 100%;
             }
-            .babylon-purple-bg {
-                background-color: #34344a;
+            .icons-bar {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                display: flex;
+                gap: 10px;
+                z-index: 1;
+            }
+            .icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 5px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+            .icon img {
+                max-width: 100%;
+                max-height: 100%;
+            }
+            .dropdown {
+                display: none;
+                position: absolute;
+                top: 100%; /* Ensure dropdown is immediately below the icon */
+                left: 0;
+                background-color: #d9d9d9;
+                border: 1px solid #ddd;
+                z-index: 10;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border-radius: 8px; /* Add rounded corners */
+            }
+
+            .dropdown a {
+                display: block;
+                padding: 10px;
+                text-decoration: none;
+                color: black;
+            }
+            .dropdown a:hover {
+                background-color: #a2a2a2;
+            }
+            /* Style for the category label in the dropdown */
+            .dropdown .category-label {
+                display: block;
+                padding: 10px;
+                font-weight: bold;
+                text-align: left;
+                color: black;
+                background-color: #cfcfcf;
+                border-bottom: 1px solid #ddd;
+                border-top-left-radius: 8px; /* Add rounded corners only at the top-left */
+                border-top-right-radius: 8px; /* Add rounded corners only at the top-right */
+            }
+            .info-icon {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 60px;
+                height: 60px;
+                z-index: 2;
+                cursor: pointer;
+            }
+
+            .info-icon img {
+                width: 100%;
+                height: 100%;
+                filter: brightness(1.2);
+            }
+
+            /* Base panel */
+            .info-panel {
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.4s ease;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(20, 20, 20, 0.8);
                 color: white;
+                z-index: 3;
+                padding: 20px;
+                box-sizing: border-box;
+                pointer-events: none;
+            }
+
+            /* Shown state */
+            .info-panel.show {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+
+            .info-content {
+                max-width: 500px;
+                margin: 50px auto;
+                background: rgba(0, 0, 0, 0.5);
+                padding: 20px;
+                border-radius: 10px;
+                font-family: sans-serif;
+            }
+
+            .info-content h2 {
+                margin-top: 0;
+                font-size: 24px;
+            }
+
+            .info-content p {
+                font-size: 16px;
+                line-height: 1.4;
+            }
+
+            #closeInfoBtn {
+                margin-top: 20px;
+                padding: 8px 16px;
+                font-size: 14px;
+                background-color: #444;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .map-attribution {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                background-color: rgba(0, 0, 0, 0.4); /* transparent dark background */
+                color: white;
+                font-size: 11px;
+                font-family: sans-serif;
+                padding: 8px 10px;
+                border-radius: 6px;
+                max-width: 300px;
+                z-index: 2;
+                line-height: 1.4;
+                pointer-events: none; /* ensures it's non-interactive */
+            }
+
+            .map-attribution p {
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         </style>
     </head>
     <body>
         <div id="mapcontainer">
             <canvas id="mapcanvas3d"></canvas>
+            <!-- Icon bar replacing the select dropdown -->
+            <div class="icons-bar" id="placesIconsBar"></div>
+            <!-- Info Icon -->
+            <div class="info-icon" id="infoIcon">
+                <img src="../images/infos_icon.png" alt="Info" />
+            </div>
+            <!-- Info Panel -->
+            <div class="info-panel" id="infoPanel">
+                <div class="info-content">
+                    <h2>About This 3D Map</h2>
+                    <p>
+                        This is a worlwide 3D map using <strong>Babylon.js</strong> and the <strong>SpaceXR</strong> library. You can navigate using <strong>mouse</strong> or
+                        <strong>touch</strong> inputs.
+                    </p>
+                    <p>
+                        The core navigation technology relies on a virtual screen that emulates both touch and mouse events on a 3D plane. The geography system is built upon a tile
+                        engine that handles 2D tiles such as <strong>raster</strong>, <strong>vector</strong>, and <strong>DEM</strong> data.
+                    </p>
+                    <p>
+                        Additionally, <strong>3D Tiles and related GLTF extensions</strong> are used to render features such as buildings and assets. The purpose of this
+                        representation is <strong>NOT to mimic</strong> existing 3D globes but to explore how we can render geography <strong>on a table</strong> using XR
+                        technologies.
+                    </p>
+
+                    <p>A 3D globe is also supported—<strong>mathematically, everything is straightforward</strong>.</p>
+                    <p>
+                        To manage tiled data and achieve high rendering performance, this engine uses a <strong>custom shader</strong> pipeline and additional support for
+                        <strong>3D textures</strong>, which are not natively available in Babylon.js. This approach enables efficient GPU usage for terrain and imagery blending at
+                        multiple levels of detail.
+                    </p>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #888" />
+
+                    <p style="font-size: 12px; color: #ccc">
+                        © 2025 Guillaume Pelletier. All rights reserved. The libraries used in this project are <strong>not provided as open source</strong>. Any disassembly,
+                        reverse engineering, or use without explicit permission is strictly prohibited.
+                    </p>
+                    <button id="closeInfoBtn">Close</button>
+                </div>
+            </div>
+            <!-- Attribution panel -->
+            <div class="map-attribution" id="mapAttribution"></div>
         </div>
+
         <script>
+            // Info panel Fade In/Out Logic
+            const infoIcon = document.getElementById("infoIcon");
+            const infoPanel = document.getElementById("infoPanel");
+            const closeInfoBtn = document.getElementById("closeInfoBtn");
+
+            infoIcon.addEventListener("click", () => {
+                infoPanel.classList.add("show");
+            });
+
+            closeInfoBtn.addEventListener("click", () => {
+                infoPanel.classList.remove("show");
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    infoPanel.classList.remove("show");
+                }
+            });
+
+            // contributions
+            const contributionSet = new Set();
+
+            function addContribution(text) {
+                if (!text || contributionSet.has(text)) return;
+
+                contributionSet.add(text);
+
+                const container = document.getElementById("mapAttribution");
+                const p = document.createElement("p");
+                p.textContent = text;
+                container.appendChild(p);
+            }
+
+            // Default center and level of detail (LOD) for the map
             const defaultCenter = SPACEXR.KnownPlaces.Mountains.MontBlanc;
             const defaultLod = 12;
+
+            // Replace select dropdown with icons
+            const categories = [
+                { name: "Mountains", icon: "../images/mountain-icon.png", locations: SPACEXR.KnownPlaces.Mountains },
+                { name: "Volcanoes", icon: "../images/volcano-icon.png", locations: SPACEXR.KnownPlaces.Volcanoes },
+                { name: "Sights and Parks", icon: "../images/national-park-icon.png", locations: SPACEXR.KnownPlaces.SightsAndParks },
+                { name: "World Wonders", icon: "../images/machu-picchu-icon.png", locations: SPACEXR.KnownPlaces.WorldWonders },
+                { name: "Wonders", icon: "../images/aztec-pyramid-icon.png", locations: SPACEXR.KnownPlaces.Wonders },
+                { name: "Waterfalls", icon: "../images/waterfall-icon.png", locations: SPACEXR.KnownPlaces.Waterfalls },
+            ];
+
+            function populateIcons(placesIconsBar, categories, callback) {
+                categories.forEach((category) => {
+                    const iconDiv = document.createElement("div");
+                    iconDiv.className = "icon";
+                    const img = document.createElement("img");
+                    img.src = category.icon; // Icon path
+                    img.alt = category.name;
+                    iconDiv.appendChild(img);
+
+                    // Create the dropdown list
+                    const dropdown = document.createElement("div");
+                    dropdown.className = "dropdown";
+
+                    // Add the category name at the top of the dropdown (non-clickable)
+                    const categoryLabel = document.createElement("div");
+                    categoryLabel.textContent = category.name;
+                    categoryLabel.className = "category-label"; // Styled similarly to dropdown items
+                    dropdown.appendChild(categoryLabel);
+
+                    // Populate dropdown with locations
+                    Object.keys(category.locations).forEach((location) => {
+                        const link = document.createElement("a");
+                        link.href = "#";
+                        link.textContent = location;
+                        link.onclick = () => {
+                            const coords = category.locations[location];
+                            callback(location, coords);
+                        };
+                        dropdown.appendChild(link);
+                    });
+
+                    // Toggle dropdown visibility on icon click
+                    iconDiv.onclick = () => {
+                        const isDropdownVisible = dropdown.style.display === "block";
+                        dropdown.style.display = isDropdownVisible ? "none" : "block";
+                    };
+
+                    // Keep dropdown open when moving between the icon and the dropdown
+                    iconDiv.addEventListener("mouseenter", () => {
+                        dropdown.style.display = "block";
+                    });
+                    iconDiv.addEventListener("mouseleave", (e) => {
+                        if (!dropdown.contains(e.relatedTarget)) {
+                            dropdown.style.display = "none";
+                        }
+                    });
+
+                    dropdown.addEventListener("mouseenter", () => {
+                        dropdown.style.display = "block";
+                    });
+
+                    dropdown.addEventListener("mouseleave", () => {
+                        dropdown.style.display = "none";
+                    });
+
+                    iconDiv.appendChild(dropdown);
+                    placesIconsBar.appendChild(iconDiv);
+                });
+            }
 
             function createGlassMaterial(scene, reflectionTexture, refractionTexture) {
                 // Create a PBR material
@@ -64,12 +349,12 @@
                 const unit = 1;
                 const scene = new BABYLON.Scene(engine);
                 // Parameters: name, alpha, beta, radius, target position, scene
-                const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
+                const camera = new BABYLON.ArcRotateCamera("MainCamera", Math.PI / 4, Math.PI / 3, 3 * unit, new BABYLON.Vector3(0, 0, 0), scene);
 
                 camera.setTarget(new BABYLON.Vector3(0, 0, 0));
                 camera.wheelPrecision = 50;
                 camera.minZ = 0;
-                //camera.upperBetaLimit = Math.PI / 2 - Math.PI / 10;
+                camera.upperBetaLimit = Math.PI / 2 - Math.PI / 10;
 
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, true);
@@ -80,24 +365,11 @@
                 light.intensity = 0.8;
                 light.diffuse = new BABYLON.Color3(1, 1, 1);
 
-                //const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(10, 2, 0), scene);
-                //pointLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
-                //pointLight.intensity = 1;
-
-                // create a basic table
+                // create a basic table (in centimeter)
                 const size = {
                     width: 3.2 * unit,
                     height: 2.4 * unit,
                 };
-
-                // QVGA: ISize2 = new Size2(320, 240);
-                // VGA: ISize2 = new Size2(640, 480);
-                // QHD: ISize2 = new Size2(960, 540);
-                // HD: ISize2 = new Size2(1280, 720);
-                // WXGA: ISize2 = new Size2(1280, 800);
-                // FullHD: ISize2 = new Size2(1980, 1080);
-                // UltraHD: ISize2 = new Size2(3840, 2160);
-                // UltraHD2: ISize2 = new Size2(7680, 4320);
 
                 const resolution = SPACEXR.VirtualDisplay.FullHD;
 
@@ -119,9 +391,10 @@
                 const demLayerOptions = {
                     attribution: SPACEXR.MapZen.Attribution,
                 };
+                addContribution(SPACEXR.MapZen.Attribution);
 
                 // build layer and add it to the map
-                //const filter = new SPACEXR.MedianFilter(3,30);
+                // const filter = new SPACEXR.MedianFilter(3, 30);
                 const demCodecOptions = {
                     //filter: filter
                 };
@@ -129,44 +402,42 @@
                 const demLayer = new SPACEXR.ElevationLayer(`${client.name}`, client, demLayerOptions).addTo(mapNode);
                 mapNode.withElevationExageration(1.2);
 
-                //const imageLayerOptions = {
-                //    alpha: 0.5,
-                //    background: "rgb(.5,.5,.5)",
-                //};
-
                 client = SPACEXR.Google.SatelliteClient2d();
+                addContribution(SPACEXR.Google.Attribution);
                 const t = new SPACEXR.ImageLayer(`${client.name}`, client).addTo(mapNode);
 
-                const showAxes = false;
-                if (showAxes) {
-                    const axes = new BABYLON.Debug.AxesViewer(scene, size.width / 10);
-                    axes.xAxis.parent = display;
-                    axes.yAxis.parent = display;
-                    axes.zAxis.parent = display;
+                // ui related
+                // Get the computed background color of the body
+                const bodyStyle = window.getComputedStyle(document.body);
+                const bgColor = bodyStyle.backgroundColor;
 
-                    const mainaxes = new BABYLON.Debug.AxesViewer(scene, size.width / 5);
+                // Convert the RGB color to Babylon.js Color3 or Color4
+                const rgbValues = bgColor.match(/\d+/g); // Extract RGB values from "rgb(255, 255, 255)" string
+                if (rgbValues) {
+                    const [r, g, b] = rgbValues.map(Number).map((v) => v / 255); // Normalize to [0, 1] range
+                    scene.clearColor = new BABYLON.Color3(r, g, b); // Set clearColor using the computed background color
                 }
+                const placesIconsBar = document.getElementById("placesIconsBar");
+
+                populateIcons(placesIconsBar, categories, (name, coord) => {
+                    console.log(`Selected: ${name}, Coordinates: ${coord}`);
+                    // Update map view
+                    mapNode.setViewMap(coord, defaultLod);
+                });
 
                 return scene;
             }
 
             window.onload = async () => {
-                const canvas = document.getElementById("mapcanvas3d"); // Get the canvas element
-                const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-                const scene = await createScene(canvas, engine); //Call the createScene function
+                const canvas = document.getElementById("mapcanvas3d");
+                const engine = new BABYLON.Engine(canvas, true);
+                const scene = await createScene(canvas, engine);
 
-                //scene.debugLayer.show();
-
-                // initialize XR
-                //var xr = await scene.createDefaultXRExperienceAsync();
-
-                // Register a render loop to repeatedly render the scene
-                engine.runRenderLoop(function () {
+                engine.runRenderLoop(() => {
                     scene.render();
                 });
 
-                // Watch for browser/canvas resize events
-                window.addEventListener("resize", function () {
+                window.addEventListener("resize", () => {
                     engine.resize();
                 });
             };

@@ -32,7 +32,7 @@ export class Google {
     public static MaxLevelOfDetail = 20;
     public static Metrics = new EPSG3857({ maxLOD: Google.MaxLevelOfDetail });
 
-    public static Attribution = "Map data © Google";
+    public static Attribution = "Imagery © Google";
 
     public static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: WebClientOptions) {
         return new TileWebClient(`${Google.KEY}_2d`, urlBuilder, new ImageTileCodec(), Google.Metrics, options);

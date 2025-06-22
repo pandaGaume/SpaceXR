@@ -96,4 +96,27 @@ export class KnownPlaces {
         AngkorWat: new Geo2(13.4125, 103.8669), // Angkor Wat, Cambodia
         HaLongBay: new Geo2(20.9101, 107.1839), // Ha Long Bay, Vietnam
     };
+    public static WorldWonders = {
+        CliffsOfMoher: new Geo2(52.9715, -9.4265),
+        Everest: new Geo2(27.9881, 86.925),
+        Galapagos: new Geo2(-0.9538, -90.9656),
+        GrandCanyon: new Geo2(36.1069, -112.1129),
+        GreatBarrierReef: new Geo2(-18.2871, 147.6992),
+        HaLongBay: new Geo2(20.9101, 107.1839),
+        Kilimanjaro: new Geo2(-3.0674, 37.3556),
+        Matterhorn: new Geo2(45.9763, 7.6586),
+        Roraima: new Geo2(5.125, -60.75),
+        TorresDelPaine: new Geo2(-51.1667, -73.2425),
+        Vesuvius: new Geo2(40.821, 14.426),
+        Yellowstone: new Geo2(44.428, -110.5885),
+    };
+    public static Wonders = {
+        AngkorWat: new Geo2(13.4125, 103.8669),
+        MachuPicchu: new Geo2(-13.1631, -72.545),
+        Petra: new Geo2(30.3285, 35.4444),
+    };
+    public static Waterfalls = {
+        IguazuFalls: new Geo2(-25.6953, -54.4367),
+        VictoriaFalls: new Geo2(-17.9243, 25.8573),
+    };
 }

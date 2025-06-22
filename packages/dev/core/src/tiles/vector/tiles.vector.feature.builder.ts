@@ -7,8 +7,8 @@ export class VectorTileFeatureBuilder {
         [false, false, false, false, false, false], // UNKNOWN
         [false, true, false, false, false, false], // POINT
         [false, false, true, true, false, true], // LINESTRING
-        [false, false, false, true, false, false],
-    ]; // POLYGON
+        [false, false, false, true, false, false], // POLYGON
+    ]; 
 
     _type: VectorTileGeomType;
     _bounds?: IBounds;

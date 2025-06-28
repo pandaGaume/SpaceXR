@@ -15,6 +15,6 @@
     },
     // you MUST use reference to the core tsconfig and the babylon-ext tsconfig
     "references": [{ "path": "../core" }],
-    "include": ["./src/**/*.ts", "../core/src/map/inputs/map.inputs.source.ts"],
+    "include": ["./src/**/*.ts", "../core/src/map/inputs/map.inputs.source.ts", "../core/src/tiles/3d/tile3d.node.ts", "../core/src/tiles/3d/tile3d.interfaces.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

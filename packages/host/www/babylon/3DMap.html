@@ -85,8 +85,8 @@
                 position: absolute;
                 top: 10px;
                 right: 10px;
-                width: 60px;
-                height: 60px;
+                width: 40px;
+                height: 40px;
                 z-index: 2;
                 cursor: pointer;
             }
@@ -98,7 +98,8 @@
             }
 
             /* Base panel */
-            .info-panel {
+            .info-panel,
+            .help-panel {
                 opacity: 0;
                 visibility: hidden;
                 transition: opacity 0.4s ease;
@@ -113,13 +114,22 @@
                 padding: 20px;
                 box-sizing: border-box;
                 pointer-events: none;
+                overflow: hidden;
             }
 
             /* Shown state */
-            .info-panel.show {
+            .info-panel.show,
+            .help-panel.show {
                 opacity: 1;
                 visibility: visible;
                 pointer-events: auto;
+            }
+
+            .scrollable-content {
+                height: 100%;
+                overflow-y: auto;
+                padding: 60px 20px 20px 20px;
+                box-sizing: border-box;
             }
 
             .info-content {
@@ -141,15 +151,26 @@
                 line-height: 1.4;
             }
 
-            #closeInfoBtn {
-                margin-top: 20px;
-                padding: 8px 16px;
-                font-size: 14px;
-                background-color: #444;
+            .panel-close-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 10;
+                background: transparent;
                 color: white;
                 border: none;
-                border-radius: 5px;
+                font-size: 20px;
                 cursor: pointer;
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .panel-close-btn:hover {
+                background: rgba(255, 255, 255, 0.1);
             }
             .map-attribution {
                 position: absolute;
@@ -173,6 +194,33 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+
+            .help-icon {
+                position: absolute;
+                top: 10px;
+                right: 60px; /* leave space between info/help */
+                width: 40px;
+                height: 40px;
+                z-index: 2;
+                cursor: pointer;
+            }
+
+            .help-icon:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .help-icon img {
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Help panel styling (reuses info-panel style) */
+
+            .help-panel ul {
+                margin-top: 5px;
+                margin-bottom: 20px;
+                padding-left: 20px;
+            }
         </style>
     </head>
     <body>
@@ -184,9 +232,14 @@
             <div class="info-icon" id="infoIcon">
                 <img src="../images/infos_icon.png" alt="Info" />
             </div>
+            <!-- Help Icon -->
+            <div class="help-icon" id="helpIcon">
+                <img src="../images/help_icon.png" alt="Help" />
+            </div>
             <!-- Info Panel -->
             <div class="info-panel" id="infoPanel">
-                <div class="info-content">
+                <div class="info-content scrollable-content">
+                    <button class="panel-close-btn" id="closeInfoBtn">✕</button>
                     <h2>About This 3D Map</h2>
                     <p>
                         This is a worlwide 3D map using <strong>Babylon.js</strong> and the <strong>SpaceXR</strong> library. You can navigate using <strong>mouse</strong> or
@@ -215,9 +268,33 @@
                         © 2025 Guillaume Pelletier. All rights reserved. The libraries used in this project are <strong>not provided as open source</strong>. Any disassembly,
                         reverse engineering, or use without explicit permission is strictly prohibited.
                     </p>
-                    <button id="closeInfoBtn">Close</button>
                 </div>
             </div>
+            <!-- Help Panel -->
+            <div class="help-panel" id="helpPanel">
+                <button class="panel-close-btn" id="closeHelpBtn">✕</button>
+                <div class="info-content scrollable-content">
+                    <h2>Map Navigation Help</h2>
+
+                    <h3>Mouse (on the map)</h3>
+                    <ul>
+                        <li><strong>Left-click + drag</strong>: Move the map</li>
+                        <li><strong>Right-click + drag</strong>: Rotate the map</li>
+                        <li><strong>Mouse wheel</strong>: Zoom in/out</li>
+                    </ul>
+                    <p style="margin-top: 10px; font-size: 13px; color: #ccc">Outside the map area, the default camera behavior of Babylon.js still applies.</p>
+
+                    <h3>Touch (on the map)</h3>
+                    <ul>
+                        <li><strong>1 finger drag</strong>: Move the map</li>
+                        <li><strong>2 fingers pinch</strong>: Zoom</li>
+                        <li><strong>2 fingers rotate</strong>: Rotate the map</li>
+                    </ul>
+
+                    <p style="margin-top: 10px; font-size: 13px; color: #ccc">Touch gestures outside the map area will interact with the Babylon.js scene as usual.</p>
+                </div>
+            </div>
+
             <!-- Attribution panel -->
             <div class="map-attribution" id="mapAttribution"></div>
         </div>
@@ -236,12 +313,25 @@
                 infoPanel.classList.remove("show");
             });
 
+            const helpIcon = document.getElementById("helpIcon");
+            const helpPanel = document.getElementById("helpPanel");
+            const closeHelpBtn = document.getElementById("closeHelpBtn");
+
+            helpIcon.addEventListener("click", () => {
+                helpPanel.classList.add("show");
+            });
+
+            closeHelpBtn.addEventListener("click", () => {
+                helpPanel.classList.remove("show");
+            });
+
+            // Optional: ESC key closes both panels
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") {
+                    helpPanel.classList.remove("show");
                     infoPanel.classList.remove("show");
                 }
             });
-
             // contributions
             const contributionSet = new Set();
 

@@ -1,28 +1,27 @@
 import { IBounded, IBounds } from "../geometry";
-import { ISpatialTree, ISpatialTreeContext, ISpatialTreeNode, SubdivisionScheme } from "./tree.spatial.interfaces";
-import { SpatialTreeNode } from "./tree.spatial.node";
+import { ISpatialTree, ISpatialTreeContext, ISpatialTreeNode, ISplitter } from "./tree.spatial.interfaces";
+import { QuadtreeSplitter, SpatialTreeNode } from "./tree.spatial.node";
 
 export class SpatialTree<T extends IBounds | IBounded> implements ISpatialTree<T> {
     public static DefaultMaxDepth = 32;
     public static DefaultMaxItemPerNode = 32;
-    public static DefaultSubdivision = SubdivisionScheme.QUADTREE;
     public static DefaultLookupThreshold = 512;
 
     protected _root: ISpatialTreeNode<T>;
-    protected _subdivision: SubdivisionScheme;
     protected _maxDepth: number;
     protected _maxItemPerNode: number;
     protected _lookupThresold: number;
+    protected _splitter: ISplitter<T>;
 
     private _context: ISpatialTreeContext<T>;
 
     public constructor(
         maxDepth: number = SpatialTree.DefaultMaxDepth,
         maxItemPerNode = SpatialTree.DefaultMaxItemPerNode,
-        subdivision = SpatialTree.DefaultSubdivision,
+        subdivision = new QuadtreeSplitter<T>(),
         lookupThreshold = SpatialTree.DefaultLookupThreshold
     ) {
-        this._subdivision = subdivision;
+        this._splitter = subdivision;
         this._maxDepth = maxDepth;
         this._maxItemPerNode = maxItemPerNode;
         this._lookupThresold = lookupThreshold;
@@ -34,8 +33,8 @@ export class SpatialTree<T extends IBounds | IBounded> implements ISpatialTree<T
         return this._root;
     }
 
-    public get subdivision(): SubdivisionScheme {
-        return this._subdivision;
+    public get spliter(): ISplitter<T> {
+        return this._splitter;
     }
 
     public get maxDepth(): number {
@@ -71,6 +70,6 @@ export class SpatialTree<T extends IBounds | IBounded> implements ISpatialTree<T
     }
 
     protected _buildContext(): ISpatialTreeContext<T> {
-        return { tree: this };
+        return { tree: this, lookupThreshold: this._lookupThresold };
     }
 }

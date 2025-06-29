@@ -1,7 +1,113 @@
 import { BoundedCollection, Bounds, IBounded, IBounds, IsBounds } from "../geometry";
 import { Nullable } from "../types";
 import { SpatialTree } from "./tree.spatial";
-import { ISpatialTreeOptions, ISpatialTreeNode, SubdivisionScheme, ISpatialTreeContext, RoundRobin } from "./tree.spatial.interfaces";
+import { ISpatialTreeOptions, ISpatialTreeNode, ISpatialTreeContext, RoundRobin, ISplitter, IKdtreeSplitter } from "./tree.spatial.interfaces";
+
+export class QuadtreeSplitter<T extends IBounds | IBounded> implements ISplitter<T> {
+    public split(node: ISpatialTreeNode<T>, options: ISpatialTreeOptions<T>): Array<IBounds> {
+        if (node.boundingBox) {
+            const { xmin, ymin, zmin, width, height } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+            return [
+                new Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0),
+                new Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0), // Top-left
+                new Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0), // Bottom-right
+                new Bounds(midX, midY, halfWidth, halfHeight, zmin, 0), // Top-right
+            ];
+        }
+        return [] as Array<IBounds>;
+    }
+}
+
+export class OctreeSplitter<T extends IBounds | IBounded> implements ISplitter<T> {
+    public split(node: ISpatialTreeNode<T>, options: ISpatialTreeOptions<T>): Array<IBounds> {
+        if (node.boundingBox) {
+            const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+
+            const halfDepth = depth / 2;
+            const midZ = zmin + halfDepth;
+
+            return [
+                new Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth), // Bottom-left-front
+                new Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth), // Top-left-front
+                new Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth), // Bottom-right-front
+                new Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth), // Top-right-front
+                new Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth), // Bottom-left-back
+                new Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth), // Top-left-back
+                new Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth), // Bottom-right-back
+                new Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth), // Top-right-back
+            ];
+        }
+        return [] as Array<IBounds>;
+    }
+}
+
+export class KdtreeSplitter<T extends IBounds | IBounded> implements IKdtreeSplitter<T> {
+    public splitAxisSelector?: (depth: number, dimension: number) => number;
+    public dimension?: 2 | 3;
+
+    public constructor(splitAxisSelector?: (depth: number, dimension: number) => number, dimension: 2 | 3 = 2) {
+        this.splitAxisSelector = splitAxisSelector;
+        this.dimension = dimension;
+    }
+
+    public split(node: ISpatialTreeNode<T>, options: ISpatialTreeOptions<T>): Array<IBounds> {
+        if (node.boundingBox) {
+            const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+
+            const halfDepth = depth / 2;
+            const midZ = zmin + halfDepth;
+            const axe = this.splitAxisSelector ? this.splitAxisSelector(node.depth, this.dimension ?? 3) : RoundRobin(node.depth, this.dimension ?? 3);
+            switch (axe) {
+                case 0: // X-axis
+                    let center = node.items?.data.map((item) => (IsBounds(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
+                    if (center && center.length > 0) {
+                        const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
+                        const size = splitPlane - xmin;
+                        return [
+                            new Bounds(xmin, ymin, size, height, zmin, depth), // Left
+                            new Bounds(splitPlane, ymin, size, height, zmin, depth), // Right
+                        ];
+                    }
+                    break;
+                case 1: // Y-axis
+                    center = node.items?.data.map((item) => (IsBounds(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
+                    if (center && center.length > 0) {
+                        const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
+                        const size = splitPlane - ymin;
+                        return [
+                            new Bounds(xmin, ymin, width, size, zmin, depth), // bottom
+                            new Bounds(xmin, splitPlane, width, size, zmin, depth), // top
+                        ];
+                    }
+                    break;
+                case 2: // Z-axis
+                    center = node.items?.data.map((item) => (IsBounds(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
+                    if (center && center.length > 0) {
+                        const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
+                        const size = splitPlane - zmin;
+                        return [
+                            new Bounds(xmin, ymin, width, height, zmin, size), // lower
+                            new Bounds(xmin, ymin, width, height, splitPlane, size), // upper
+                        ];
+                    }
+                    break;
+            }
+        }
+        return [] as Array<IBounds>;
+    }
+}
 
 export class SpatialTreeNode<T extends IBounds | IBounded> implements ISpatialTreeNode<T> {
     boundingBox?: IBounds;
@@ -33,72 +139,13 @@ export class SpatialTreeNode<T extends IBounds | IBounded> implements ISpatialTr
     }
 
     public subdivide(options: ISpatialTreeOptions<T>) {
-        if (this.boundingBox) {
-            const { xmin, ymin, zmin, width, height, depth } = this.boundingBox;
-            const halfWidth = width / 2;
-            const halfHeight = height / 2;
-            const halfDepth = depth / 2;
-            const midX = xmin + halfWidth;
-            const midY = ymin + halfHeight;
-            const midZ = zmin + halfDepth;
-            const d = this.depth + 1;
-
-            if (options.subdivision === SubdivisionScheme.QUADTREE) {
-                this.children = [
-                    this.createInstance(options, new Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0), d), // Bottom-left
-                    this.createInstance(options, new Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0), d), // Top-left
-                    this.createInstance(options, new Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0), d), // Bottom-right
-                    this.createInstance(options, new Bounds(midX, midY, halfWidth, halfHeight, zmin, 0), d), // Top-right
-                ];
-            } else if (options.subdivision === SubdivisionScheme.OCTREE) {
-                this.children = [
-                    this.createInstance(options, new Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth), d), // Bottom-left-front
-                    this.createInstance(options, new Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth), d), // Top-left-front
-                    this.createInstance(options, new Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth), d), // Bottom-right-front
-                    this.createInstance(options, new Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth), d), // Top-right-front
-                    this.createInstance(options, new Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth), d), // Bottom-left-back
-                    this.createInstance(options, new Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth), d), // Top-left-back
-                    this.createInstance(options, new Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth), d), // Bottom-right-back
-                    this.createInstance(options, new Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth), d), // Top-right-back
-                ];
-            } else if (options.subdivision === SubdivisionScheme.KDTREE) {
-                const axe = options.splitAxisSelector ? options.splitAxisSelector(this.depth, options.dimension ?? 3) : RoundRobin(this.depth, options.dimension ?? 3);
-                switch (axe) {
-                    case 0: // X-axis
-                        let center = this.items?.data.map((item) => (IsBounds(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
-                        if (center && center.length > 0) {
-                            const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
-                            const size = splitPlane - xmin;
-                            this.children = [
-                                this.createInstance(options, new Bounds(xmin, ymin, size, height, zmin, depth), d), // Left
-                                this.createInstance(options, new Bounds(splitPlane, ymin, size, height, zmin, depth), d), // Right
-                            ];
-                        }
-                        break;
-                    case 1: // Y-axis
-                        center = this.items?.data.map((item) => (IsBounds(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
-                        if (center && center.length > 0) {
-                            const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
-                            const size = splitPlane - ymin;
-                            this.children = [
-                                this.createInstance(options, new Bounds(xmin, ymin, width, size, zmin, depth), d), // bottom
-                                this.createInstance(options, new Bounds(xmin, splitPlane, width, size, zmin, depth), d), // top
-                            ];
-                        }
-                        break;
-                    case 2: // Z-axis
-                        center = this.items?.data.map((item) => (IsBounds(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
-                        if (center && center.length > 0) {
-                            const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
-                            const size = splitPlane - zmin;
-                            this.children = [
-                                this.createInstance(options, new Bounds(xmin, ymin, width, height, zmin, size), d), // lower
-                                this.createInstance(options, new Bounds(xmin, ymin, width, height, splitPlane, size), d), // upper
-                            ];
-                        }
-                        break;
-                }
+        if (options.spliter != undefined) {
+            const splitBounds = options.spliter.split(this, options);
+            if (splitBounds && splitBounds.length > 0) {
+                const d = this.depth + 1;
+                this.children = splitBounds.map((b) => this.createInstance(options, b, d));
             }
+            return;
         }
     }
 

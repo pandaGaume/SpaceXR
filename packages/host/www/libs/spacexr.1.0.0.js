@@ -13934,15 +13934,12 @@ MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   RoundRobin: () => (/* binding */ RoundRobin),
-/* harmony export */   SubdivisionScheme: () => (/* binding */ SubdivisionScheme)
+/* harmony export */   IsKDTreeSplitter: () => (/* binding */ IsKDTreeSplitter),
+/* harmony export */   RoundRobin: () => (/* binding */ RoundRobin)
 /* harmony export */ });
-var SubdivisionScheme;
-(function (SubdivisionScheme) {
-    SubdivisionScheme[SubdivisionScheme["QUADTREE"] = 0] = "QUADTREE";
-    SubdivisionScheme[SubdivisionScheme["OCTREE"] = 1] = "OCTREE";
-    SubdivisionScheme[SubdivisionScheme["KDTREE"] = 2] = "KDTREE";
-})(SubdivisionScheme || (SubdivisionScheme = {}));
+function IsKDTreeSplitter(splitter) {
+    return splitter.splitAxisSelector !== undefined;
+}
 function RoundRobin(depth, dimension) {
     return depth % dimension;
 }
@@ -13960,13 +13957,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SpatialTree: () => (/* binding */ SpatialTree)
 /* harmony export */ });
-/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "./dist/tree/tree.spatial.interfaces.js");
 /* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.node */ "./dist/tree/tree.spatial.node.js");
 
-
 class SpatialTree {
-    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = SpatialTree.DefaultSubdivision, lookupThreshold = SpatialTree.DefaultLookupThreshold) {
-        this._subdivision = subdivision;
+    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
+        this._splitter = subdivision;
         this._maxDepth = maxDepth;
         this._maxItemPerNode = maxItemPerNode;
         this._lookupThresold = lookupThreshold;
@@ -13976,8 +13971,8 @@ class SpatialTree {
     get root() {
         return this._root;
     }
-    get subdivision() {
-        return this._subdivision;
+    get spliter() {
+        return this._splitter;
     }
     get maxDepth() {
         return this._maxDepth;
@@ -14004,12 +13999,11 @@ class SpatialTree {
         return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode(bounds, depth);
     }
     _buildContext() {
-        return { tree: this };
+        return { tree: this, lookupThreshold: this._lookupThresold };
     }
 }
 SpatialTree.DefaultMaxDepth = 32;
 SpatialTree.DefaultMaxItemPerNode = 32;
-SpatialTree.DefaultSubdivision = _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__.SubdivisionScheme.QUADTREE;
 SpatialTree.DefaultLookupThreshold = 512;
 //# sourceMappingURL=tree.spatial.js.map
 
@@ -14023,16 +14017,115 @@ SpatialTree.DefaultLookupThreshold = 512;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   KdtreeSplitter: () => (/* binding */ KdtreeSplitter),
+/* harmony export */   OctreeSplitter: () => (/* binding */ OctreeSplitter),
+/* harmony export */   QuadtreeSplitter: () => (/* binding */ QuadtreeSplitter),
 /* harmony export */   SpatialTreeNode: () => (/* binding */ SpatialTreeNode)
 /* harmony export */ });
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.interfaces.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.collection.js");
 /* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial */ "./dist/tree/tree.spatial.js");
-/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "./dist/tree/tree.spatial.interfaces.js");
+/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "./dist/tree/tree.spatial.interfaces.js");
 
 
 
+class QuadtreeSplitter {
+    split(node, options) {
+        if (node.boundingBox) {
+            const { xmin, ymin, zmin, width, height } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+            return [
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, midY, halfWidth, halfHeight, zmin, 0),
+            ];
+        }
+        return [];
+    }
+}
+class OctreeSplitter {
+    split(node, options) {
+        if (node.boundingBox) {
+            const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+            const halfDepth = depth / 2;
+            const midZ = zmin + halfDepth;
+            return [
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth),
+            ];
+        }
+        return [];
+    }
+}
+class KdtreeSplitter {
+    constructor(splitAxisSelector, dimension = 2) {
+        this.splitAxisSelector = splitAxisSelector;
+        this.dimension = dimension;
+    }
+    split(node, options) {
+        if (node.boundingBox) {
+            const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            const midX = xmin + halfWidth;
+            const midY = ymin + halfHeight;
+            const halfDepth = depth / 2;
+            const midZ = zmin + halfDepth;
+            const axe = this.splitAxisSelector ? this.splitAxisSelector(node.depth, this.dimension ?? 3) : (0,_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__.RoundRobin)(node.depth, this.dimension ?? 3);
+            switch (axe) {
+                case 0:
+                    let center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
+                    if (center && center.length > 0) {
+                        const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
+                        const size = splitPlane - xmin;
+                        return [
+                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, size, height, zmin, depth),
+                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(splitPlane, ymin, size, height, zmin, depth),
+                        ];
+                    }
+                    break;
+                case 1:
+                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
+                    if (center && center.length > 0) {
+                        const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
+                        const size = splitPlane - ymin;
+                        return [
+                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, width, size, zmin, depth),
+                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, splitPlane, width, size, zmin, depth),
+                        ];
+                    }
+                    break;
+                case 2:
+                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
+                    if (center && center.length > 0) {
+                        const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
+                        const size = splitPlane - zmin;
+                        return [
+                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, width, height, zmin, size),
+                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, width, height, splitPlane, size),
+                        ];
+                    }
+                    break;
+            }
+        }
+        return [];
+    }
+}
 class SpatialTreeNode {
     constructor(bounds, depth) {
         this.boundingBox = bounds;
@@ -14055,73 +14148,13 @@ class SpatialTreeNode {
         return null;
     }
     subdivide(options) {
-        if (this.boundingBox) {
-            const { xmin, ymin, zmin, width, height, depth } = this.boundingBox;
-            const halfWidth = width / 2;
-            const halfHeight = height / 2;
-            const halfDepth = depth / 2;
-            const midX = xmin + halfWidth;
-            const midY = ymin + halfHeight;
-            const midZ = zmin + halfDepth;
-            const d = this.depth + 1;
-            if (options.subdivision === _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.SubdivisionScheme.QUADTREE) {
-                this.children = [
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, zmin, 0), d),
-                ];
+        if (options.spliter != undefined) {
+            const splitBounds = options.spliter.split(this, options);
+            if (splitBounds && splitBounds.length > 0) {
+                const d = this.depth + 1;
+                this.children = splitBounds.map((b) => this.createInstance(options, b, d));
             }
-            else if (options.subdivision === _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.SubdivisionScheme.OCTREE) {
-                this.children = [
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth), d),
-                    this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth), d),
-                ];
-            }
-            else if (options.subdivision === _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.SubdivisionScheme.KDTREE) {
-                const axe = options.splitAxisSelector ? options.splitAxisSelector(this.depth, options.dimension ?? 3) : (0,_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.RoundRobin)(this.depth, options.dimension ?? 3);
-                switch (axe) {
-                    case 0:
-                        let center = this.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
-                        if (center && center.length > 0) {
-                            const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
-                            const size = splitPlane - xmin;
-                            this.children = [
-                                this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, size, height, zmin, depth), d),
-                                this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(splitPlane, ymin, size, height, zmin, depth), d),
-                            ];
-                        }
-                        break;
-                    case 1:
-                        center = this.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
-                        if (center && center.length > 0) {
-                            const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
-                            const size = splitPlane - ymin;
-                            this.children = [
-                                this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, width, size, zmin, depth), d),
-                                this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, splitPlane, width, size, zmin, depth), d),
-                            ];
-                        }
-                        break;
-                    case 2:
-                        center = this.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
-                        if (center && center.length > 0) {
-                            const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
-                            const size = splitPlane - zmin;
-                            this.children = [
-                                this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, width, height, zmin, size), d),
-                                this.createInstance(options, new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, width, height, splitPlane, size), d),
-                            ];
-                        }
-                        break;
-                }
-            }
+            return;
         }
     }
     lookupToRef(context, bounds, ref) {

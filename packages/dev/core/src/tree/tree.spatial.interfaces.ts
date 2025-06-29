@@ -1,21 +1,25 @@
 import { BoundedCollection, IBounded, IBounds } from "../geometry";
 import { Nullable } from "../types";
 
-export enum SubdivisionScheme {
-    QUADTREE,
-    OCTREE,
-    KDTREE,
+export interface ISplitter<T extends IBounds | IBounded> {
+    split: (node: ISpatialTreeNode<T>, options: ISpatialTreeOptions<T>) => Array<IBounds>;
+}
+
+export interface IKdtreeSplitter<T extends IBounds | IBounded> extends ISplitter<T> {
+    splitAxisSelector?: (depth: number, dimension: number) => number;
+    dimension?: number;
+}
+
+export function IsKDTreeSplitter<T extends IBounds | IBounded>(splitter: ISplitter<T>): splitter is IKdtreeSplitter<T> {
+    return (splitter as IKdtreeSplitter<T>).splitAxisSelector !== undefined;
 }
 
 export interface ISpatialTreeOptions<T extends IBounds | IBounded> {
     maxDepth: number;
     maxItemPerNode: number;
-    subdivision: SubdivisionScheme;
     factory: (a?: IBounds, b?: number) => ISpatialTreeNode<T>;
+    spliter: ISplitter<T>;
     lookupThreshold?: number;
-    // Optional: Only used for KDTREE, defines dimension and axis to split at each level
-    dimension?: 2 | 3;
-    splitAxisSelector?: (depth: number, dimension: number) => number;
 }
 
 // Round-robin for ND

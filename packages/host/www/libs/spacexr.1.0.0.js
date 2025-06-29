@@ -13926,6 +13926,34 @@ MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 
 /***/ }),
 
+/***/ "./dist/tree/index.js":
+/*!****************************!*\
+  !*** ./dist/tree/index.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsKDTreeSplitter),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.KdtreeSplitter),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.OctreeSplitter),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.QuadtreeSplitter),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.RoundRobin),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ _tree_spatial__WEBPACK_IMPORTED_MODULE_3__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode)
+/* harmony export */ });
+/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "./dist/tree/tree.spatial.interfaces.js");
+/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.node */ "./dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tree.spatial.splitters */ "./dist/tree/tree.spatial.splitters.js");
+/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial */ "./dist/tree/tree.spatial.js");
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
 /***/ "./dist/tree/tree.spatial.interfaces.js":
 /*!**********************************************!*\
   !*** ./dist/tree/tree.spatial.interfaces.js ***!
@@ -13957,15 +13985,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SpatialTree: () => (/* binding */ SpatialTree)
 /* harmony export */ });
-/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.node */ "./dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.node */ "./dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.splitters */ "./dist/tree/tree.spatial.splitters.js");
+
 
 class SpatialTree {
-    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
+    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_0__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
         this._splitter = subdivision;
         this._maxDepth = maxDepth;
         this._maxItemPerNode = maxItemPerNode;
         this._lookupThresold = lookupThreshold;
-        this._root = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode();
+        this._root = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode();
         this._context = this._buildContext();
     }
     get root() {
@@ -13996,7 +14026,7 @@ class SpatialTree {
         this._root.lookupToRef(this._context, bounds, ref);
     }
     _buildNode(bounds, depth) {
-        return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode(bounds, depth);
+        return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode(bounds, depth);
     }
     _buildContext() {
         return { tree: this, lookupThreshold: this._lookupThresold };
@@ -14017,17 +14047,164 @@ SpatialTree.DefaultLookupThreshold = 512;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SpatialTreeNode: () => (/* binding */ SpatialTreeNode)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.collection.js");
+/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial */ "./dist/tree/tree.spatial.js");
+
+
+class SpatialTreeNode {
+    constructor(bounds, depth) {
+        this.boundingBox = bounds;
+        this.depth = depth ?? 1;
+    }
+    get isLeaf() {
+        return (this.children?.length ?? 0) != 0;
+    }
+    *[Symbol.iterator](predicate) {
+        if (this.children) {
+            if (predicate) {
+                for (const t of this.children) {
+                    if (predicate(t)) {
+                        yield t;
+                    }
+                }
+            }
+            return this.children;
+        }
+        return null;
+    }
+    subdivide(options) {
+        if (options.spliter != undefined) {
+            const splitBounds = options.spliter.split(this, options);
+            if (splitBounds && splitBounds.length > 0) {
+                const d = this.depth + 1;
+                this.children = splitBounds.map((b) => this.createInstance(options, b, d));
+            }
+            return;
+        }
+    }
+    lookupToRef(context, bounds, ref) {
+        const nodeBox = this.boundingBox;
+        const lookupBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(bounds) ? bounds : bounds.boundingBox;
+        if (lookupBox == undefined || lookupBox.intersects(nodeBox) == false) {
+            return;
+        }
+        if (this.items) {
+            const threshold = context.tree.lookupThreshold ?? _tree_spatial__WEBPACK_IMPORTED_MODULE_1__.SpatialTree.DefaultLookupThreshold;
+            if (this.items.length < threshold) {
+                const contentBounds = this.items.boundingBox;
+                if (lookupBox.intersects(contentBounds) == false) {
+                    return;
+                }
+            }
+            for (const v of this.items.data) {
+                const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(v) ? v : v.boundingBox;
+                if (dataBox && dataBox.intersects(lookupBox)) {
+                    ref.push(v);
+                }
+            }
+            return;
+        }
+        if (this.children) {
+            for (const c of this.children) {
+                c.lookupToRef(context, bounds, ref);
+            }
+        }
+    }
+    _checkBounds(data) {
+        const nodeBox = this.boundingBox;
+        const accepted = [];
+        const indicesToRemove = [];
+        for (let i = 0; i < data.length; i++) {
+            const v = data[i];
+            const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(v) ? v : v.boundingBox;
+            if (dataBox?.intersects(nodeBox)) {
+                accepted.push(v);
+                indicesToRemove.push(i);
+            }
+        }
+        for (let i = indicesToRemove.length - 1; i >= 0; i--) {
+            data.splice(indicesToRemove[i], 1);
+        }
+        return accepted;
+    }
+    createInstance(ctx, box, depth) {
+        const ctor = this.constructor;
+        return new ctor();
+    }
+    add(context, data) {
+        const accepted = this._checkBounds(data);
+        if (accepted.length == 0) {
+            return;
+        }
+        if (this.children?.length) {
+            for (const c of this.children) {
+                c.add(context, accepted);
+                if (accepted.length == 0) {
+                    break;
+                }
+            }
+            return;
+        }
+        if (this.depth == context.tree.maxDepth) {
+            this.items = this.items ?? new _geometry__WEBPACK_IMPORTED_MODULE_2__.BoundedCollection();
+            this.items.push(...accepted);
+            return;
+        }
+        if (this.items && this.items.length + accepted.length > context.tree.maxItemPerNode) {
+            this.subdivide(context.tree);
+            accepted.push(...this.items.data);
+            this.items = undefined;
+            if (this.children) {
+                for (const c of this.children) {
+                    c.add(context, accepted);
+                    if (data.length == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    remove(context, data) {
+        const accepted = this._checkBounds(data);
+        if (accepted.length == 0) {
+            return;
+        }
+        if (this.items) {
+            const removeSet = new Set(accepted);
+            const kept = this.items.data.filter((item) => !removeSet.has(item));
+            if (kept.length !== this.items.data.length) {
+                this.items.data = kept;
+            }
+        }
+        if (this.children) {
+            for (const c of this.children) {
+                c.remove(context, accepted);
+            }
+        }
+    }
+}
+//# sourceMappingURL=tree.spatial.node.js.map
+
+/***/ }),
+
+/***/ "./dist/tree/tree.spatial.splitters.js":
+/*!*********************************************!*\
+  !*** ./dist/tree/tree.spatial.splitters.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   KdtreeSplitter: () => (/* binding */ KdtreeSplitter),
 /* harmony export */   OctreeSplitter: () => (/* binding */ OctreeSplitter),
-/* harmony export */   QuadtreeSplitter: () => (/* binding */ QuadtreeSplitter),
-/* harmony export */   SpatialTreeNode: () => (/* binding */ SpatialTreeNode)
+/* harmony export */   QuadtreeSplitter: () => (/* binding */ QuadtreeSplitter)
 /* harmony export */ });
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.bounds.collection.js");
-/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial */ "./dist/tree/tree.spatial.js");
 /* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "./dist/tree/tree.spatial.interfaces.js");
-
 
 
 class QuadtreeSplitter {
@@ -14126,139 +14303,7 @@ class KdtreeSplitter {
         return [];
     }
 }
-class SpatialTreeNode {
-    constructor(bounds, depth) {
-        this.boundingBox = bounds;
-        this.depth = depth ?? 1;
-    }
-    get isLeaf() {
-        return (this.children?.length ?? 0) != 0;
-    }
-    *[Symbol.iterator](predicate) {
-        if (this.children) {
-            if (predicate) {
-                for (const t of this.children) {
-                    if (predicate(t)) {
-                        yield t;
-                    }
-                }
-            }
-            return this.children;
-        }
-        return null;
-    }
-    subdivide(options) {
-        if (options.spliter != undefined) {
-            const splitBounds = options.spliter.split(this, options);
-            if (splitBounds && splitBounds.length > 0) {
-                const d = this.depth + 1;
-                this.children = splitBounds.map((b) => this.createInstance(options, b, d));
-            }
-            return;
-        }
-    }
-    lookupToRef(context, bounds, ref) {
-        const nodeBox = this.boundingBox;
-        const lookupBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(bounds) ? bounds : bounds.boundingBox;
-        if (lookupBox == undefined || lookupBox.intersects(nodeBox) == false) {
-            return;
-        }
-        if (this.items) {
-            const threshold = context.tree.lookupThreshold ?? _tree_spatial__WEBPACK_IMPORTED_MODULE_3__.SpatialTree.DefaultLookupThreshold;
-            if (this.items.length < threshold) {
-                const contentBounds = this.items.boundingBox;
-                if (lookupBox.intersects(contentBounds) == false) {
-                    return;
-                }
-            }
-            for (const v of this.items.data) {
-                const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(v) ? v : v.boundingBox;
-                if (dataBox && dataBox.intersects(lookupBox)) {
-                    ref.push(v);
-                }
-            }
-            return;
-        }
-        if (this.children) {
-            for (const c of this.children) {
-                c.lookupToRef(context, bounds, ref);
-            }
-        }
-    }
-    _checkBounds(data) {
-        const nodeBox = this.boundingBox;
-        const accepted = [];
-        const indicesToRemove = [];
-        for (let i = 0; i < data.length; i++) {
-            const v = data[i];
-            const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(v) ? v : v.boundingBox;
-            if (dataBox?.intersects(nodeBox)) {
-                accepted.push(v);
-                indicesToRemove.push(i);
-            }
-        }
-        for (let i = indicesToRemove.length - 1; i >= 0; i--) {
-            data.splice(indicesToRemove[i], 1);
-        }
-        return accepted;
-    }
-    createInstance(ctx, box, depth) {
-        const ctor = this.constructor;
-        return new ctor();
-    }
-    add(context, data) {
-        const accepted = this._checkBounds(data);
-        if (accepted.length == 0) {
-            return;
-        }
-        if (this.children?.length) {
-            for (const c of this.children) {
-                c.add(context, accepted);
-                if (accepted.length == 0) {
-                    break;
-                }
-            }
-            return;
-        }
-        if (this.depth == context.tree.maxDepth) {
-            this.items = this.items ?? new _geometry__WEBPACK_IMPORTED_MODULE_4__.BoundedCollection();
-            this.items.push(...accepted);
-            return;
-        }
-        if (this.items && this.items.length + accepted.length > context.tree.maxItemPerNode) {
-            this.subdivide(context.tree);
-            accepted.push(...this.items.data);
-            this.items = undefined;
-            if (this.children) {
-                for (const c of this.children) {
-                    c.add(context, accepted);
-                    if (data.length == 0) {
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    remove(context, data) {
-        const accepted = this._checkBounds(data);
-        if (accepted.length == 0) {
-            return;
-        }
-        if (this.items) {
-            const removeSet = new Set(accepted);
-            const kept = this.items.data.filter((item) => !removeSet.has(item));
-            if (kept.length !== this.items.data.length) {
-                this.items.data = kept;
-            }
-        }
-        if (this.children) {
-            for (const c of this.children) {
-                c.remove(context, accepted);
-            }
-        }
-    }
-}
-//# sourceMappingURL=tree.spatial.node.js.map
+//# sourceMappingURL=tree.spatial.splitters.js.map
 
 /***/ }),
 
@@ -14801,6 +14846,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsDrawableTileMapLayer),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.IsKDTreeSplitter),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsNumber),
@@ -14824,6 +14870,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.IsTouchCapable),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.JsonTileCodec),
 /* harmony export */   JulianDate: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.JulianDate),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.KdtreeSplitter),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.KnownPlaces),
 /* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
@@ -14846,6 +14893,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observer),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.OctreeSplitter),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),
@@ -14857,6 +14905,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Projections: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.PythagoreanFlatEarthCalculator),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.QuadtreeSplitter),
 /* harmony export */   Quantity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.QuantityRange),
 /* harmony export */   QuickHull: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.QuickHull),
@@ -14866,6 +14915,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Range),
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.RefinementStrategy),
 /* harmony export */   RegionCode: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RegionCode),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.RoundRobin),
 /* harmony export */   Scalar: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Scalar),
 /* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ScreenSpaceError),
 /* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ScreenSpaceError0),
@@ -14875,6 +14925,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size3),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.SpatialTreeNode),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SpectralClass),
 /* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
@@ -14955,6 +15007,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _cache_index__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./cache/index */ "./dist/cache/index.js");
 /* harmony import */ var _dem_index__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./dem/index */ "./dist/dem/index.js");
 /* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./text */ "./dist/text/index.js");
+/* harmony import */ var _tree__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tree */ "./dist/tree/index.js");
+
 
 
 

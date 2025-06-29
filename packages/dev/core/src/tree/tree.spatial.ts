@@ -1,6 +1,7 @@
 import { IBounded, IBounds } from "../geometry";
 import { ISpatialTree, ISpatialTreeContext, ISpatialTreeNode, ISplitter } from "./tree.spatial.interfaces";
-import { QuadtreeSplitter, SpatialTreeNode } from "./tree.spatial.node";
+import { SpatialTreeNode } from "./tree.spatial.node";
+import { QuadtreeSplitter } from "./tree.spatial.splitters";
 
 export class SpatialTree<T extends IBounds | IBounded> implements ISpatialTree<T> {
     public static DefaultMaxDepth = 32;

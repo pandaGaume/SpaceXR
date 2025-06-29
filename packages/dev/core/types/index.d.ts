@@ -13,3 +13,4 @@ export * from "./utils/index";
 export * from "./cache/index";
 export * from "./dem/index";
 export * from "./text";
+export * from "./tree";

@@ -4,7 +4,7 @@
 
 **Babylon.js 3D Mapping Extension**  
 _A Next-Generation WebGL/WebXR Mapping Solution_  
-**Presented by:** Guillaume Pelletier and David Catuhe  
+**Presented by:** Guillaume Pelletier  
 **Date:** 30/01/2025
 
 ---
@@ -38,7 +38,7 @@ _A Next-Generation WebGL/WebXR Mapping Solution_
 
 ✅ **Extends Babylon.js instead of reinventing**  
 ✅ **Leverages the existing Babylon.js community**  
-✅ **WebGL & WebXR support natively**  
+✅ **WebGL & WebGPU & WebXR support natively**  
 ✅ **Faster development cycles and feature expansion**
 
 ---

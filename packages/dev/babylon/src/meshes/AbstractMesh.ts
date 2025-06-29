@@ -11,7 +11,7 @@ Object.defineProperty(AbstractMesh.prototype, "boundingBox", {
         if (!bb) return undefined;
         const min = bb.minimumWorld;
         const max = bb.maximumWorld;
-        return new Bounds(min.x, min.y, min.z, max.x - min.x, max.y - min.y, max.z - min.z) as IBounds;
+        return new Bounds(min.x, min.y, min.z, max.x - min.x, max.y - min.y, max.z - min.z);
     },
     configurable: true,
     enumerable: true,

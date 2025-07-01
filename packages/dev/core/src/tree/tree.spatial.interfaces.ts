@@ -46,7 +46,6 @@ export interface ISpatialTreeNode<T extends IBounds | IBounded> extends IBounded
 
 export interface ISpatialTree<T extends IBounds | IBounded> extends ISpatialTreeOptions<T>, IBounded {
     root: ISpatialTreeNode<T>;
-
     add(...data: Array<T>): void;
     remove(...data: Array<T>): void;
     lookupToRef(bounds: IBounds | IBounded, ref: Array<T>): void;

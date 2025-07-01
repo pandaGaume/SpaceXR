@@ -6,6 +6,12 @@ export enum RefinementStrategy {
     ADDITIVE,
     REPLACEMENT,
 }
+/// <summary>
+/// Defines extensions, allowing for additional functionality in streamed tilesets.
+/// </summary>
+export interface ITile3DExtensions {
+    [key: string]: any;
+}
 
 // 3D Tiles uses a right-handed Cartesian coordinate system; that is, the cross product of x and y yields z.
 // 3D Tiles defines the z axis as up for local Cartesian coordinate systems. A tileset’s global coordinate
@@ -38,6 +44,8 @@ export interface ITile3DNode<T extends IBounds | IBounded> extends ISpatialTreeN
     // to that tileset. In general, a higher geometric error means a tile will be refined more aggressively, and children tiles will be
     // loaded and rendered sooner.
     geometricError: number;
+
+    extensions?: ITile3DExtensions;
 }
 
 export function ScreenSpaceError<T extends IBounds | IBounded>(node: ITile3DNode<T>, position: Cartesian3, viewportHeight: number, fov: number): number {

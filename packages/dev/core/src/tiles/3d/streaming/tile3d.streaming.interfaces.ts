@@ -4,6 +4,7 @@
 import { Nullable } from "../../../types";
 import { ICameraState } from "../../navigation";
 import { IDisplay } from "../../map";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 
 /// </summary>
 export interface IStreamingTileset {
@@ -56,6 +57,7 @@ export interface IStreamingBoundingVolume {
 /// </summary>
 export interface IStreamingContent {
     uri: string; // Can point to .b3dm, .i3dm, .pnts, .glb, .gltf, or another tileset.json
+    content?: TransformNode;
     boundingVolume?: IStreamingBoundingVolume;
     extensions?: IStreamingExtensions;
 }

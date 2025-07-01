@@ -19,6 +19,8 @@ export class Tile3dStreamingEngineOptions {
     };
 
     tilesetExtension?: string;
+    webClient?: WebClient<string, IStreamingTileset>;
+    cache?: TilesetCache;
 }
 
 export class TileNode {
@@ -66,12 +68,14 @@ export class Tile3dStreamingEngine extends SourceBlock<TileNode> {
     _client: WebClient<string, IStreamingTileset>;
     _options: Tile3dStreamingEngineOptions;
 
+    _actives: Array<TileNode> = []; // Active tiles in the current context
+
     public constructor(uri: string, options?: Tile3dStreamingEngineOptions) {
         super();
         this._uri = uri;
         this._root = null;
-        this._cache = new TilesetCache();
-        this._client = new WebClient<string, IStreamingTileset>(uri, new TilesetCodec());
+        this._cache = options?.cache ?? new TilesetCache();
+        this._client = options?.webClient ?? new WebClient<string, IStreamingTileset>(uri, new TilesetCodec()); // uri is used for the name of the client.
         this._options = { ...Tile3dStreamingEngineOptions.Default, ...options };
     }
 
@@ -85,12 +89,7 @@ export class Tile3dStreamingEngine extends SourceBlock<TileNode> {
 
     protected _doClearContext(): void {}
 
-    protected _doValidateContext(state: Nullable<ICameraState>, display: Nullable<IDisplay>): void {
-        if (!state || !display) {
-            this._doClearContext();
-            return;
-        }
-
+    protected _doValidateContext(state: ICameraState, display: IDisplay): void {
         if (this._root === null) {
             // Fetch root tileset asynchronously, then retry validation
             this._doFetchTilesetAsync(this._uri).then((tileset) => {

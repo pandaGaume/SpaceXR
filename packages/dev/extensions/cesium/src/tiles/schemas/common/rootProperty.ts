@@ -7,5 +7,4 @@ import { IExtras } from "./extras";
 export interface IRootProperty {
     extensions?: IExtension;
     extras?: IExtras;
-    [k: string]: unknown;
 }

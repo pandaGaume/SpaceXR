@@ -48,5 +48,4 @@ export interface ITileset {
      * @minItems 1
      */
     extensionsRequired?: [string, ...string[]];
-    [k: string]: unknown;
 }

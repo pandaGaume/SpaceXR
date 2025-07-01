@@ -10,5 +10,4 @@ export interface IStatistics {
     classes?: {
         [k: string]: IClassStatistics;
     };
-    [k: string]: unknown;
 }

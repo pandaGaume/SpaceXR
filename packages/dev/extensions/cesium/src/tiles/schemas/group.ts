@@ -14,5 +14,4 @@ export interface IGroupMetadata {
     properties?: {
         [k: string]: AnyValue;
     };
-    [k: string]: unknown;
 }

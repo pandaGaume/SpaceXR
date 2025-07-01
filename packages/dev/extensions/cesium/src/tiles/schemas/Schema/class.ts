@@ -18,5 +18,4 @@ export interface IClass {
     properties?: {
         [k: string]: IClassProperty;
     };
-    [k: string]: unknown;
 }

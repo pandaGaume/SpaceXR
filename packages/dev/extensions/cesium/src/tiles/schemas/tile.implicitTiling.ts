@@ -1,5 +1,6 @@
 import { ISubtrees } from "./subtrees";
 
+export type subdivisionSchemeType = "QUADTREE" | "OCTREE" | string;
 /**
  * This object allows a tile to be implicitly subdivided. Tile and content availability and metadata is stored in subtrees which are referenced externally.
  */
@@ -7,7 +8,7 @@ export interface IImplicitTiling {
     /**
      * A string describing the subdivision scheme used within the tileset.
      */
-    subdivisionScheme: "QUADTREE" | "OCTREE" | string;
+    subdivisionScheme: subdivisionSchemeType;
     /**
      * The number of distinct levels in each subtree. For example, a quadtree with `subtreeLevels = 2` will have subtrees with 5 nodes (one root and 4 children).
      */
@@ -17,5 +18,4 @@ export interface IImplicitTiling {
      */
     availableLevels: number;
     subtrees: ISubtrees;
-    [k: string]: unknown;
 }

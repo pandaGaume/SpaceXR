@@ -23,5 +23,4 @@ export interface IBoundingVolume {
      * @maxItems 4
      */
     sphere?: [number, number, number, number];
-    [k: string]: unknown;
 }

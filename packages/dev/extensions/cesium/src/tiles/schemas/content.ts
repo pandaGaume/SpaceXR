@@ -15,5 +15,4 @@ export interface IContent {
      * The group this content belongs to. The value is an index into the array of `groups` that is defined for the containing tileset.
      */
     group?: number;
-    [k: string]: unknown;
 }

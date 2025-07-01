@@ -14,5 +14,4 @@ export interface IClassStatistics {
     properties?: {
         [k: string]: IPropertyStatistics;
     };
-    [k: string]: unknown;
 }

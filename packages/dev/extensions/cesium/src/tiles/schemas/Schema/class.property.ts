@@ -50,5 +50,4 @@ export interface IClassProperty {
      * An identifier that describes how this property should be interpreted. The semantic cannot be used by other properties in the class.
      */
     semantic?: string;
-    [k: string]: unknown;
 }

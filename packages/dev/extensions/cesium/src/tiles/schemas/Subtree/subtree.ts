@@ -44,5 +44,4 @@ export interface ISubtree {
      */
     contentMetadata?: [number, ...number[]];
     subtreeMetadata?: IMetadataEntity;
-    [k: string]: unknown;
 }

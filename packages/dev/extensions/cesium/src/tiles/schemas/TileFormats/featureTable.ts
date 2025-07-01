@@ -31,7 +31,6 @@ export interface IBinaryBodyOffset {
      * The offset into the buffer in bytes.
      */
     byteOffset: number;
-    [k: string]: unknown;
 }
 
 /**

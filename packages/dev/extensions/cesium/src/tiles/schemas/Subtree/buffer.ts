@@ -14,5 +14,4 @@ export interface IBuffer {
      * The name of the buffer.
      */
     name?: string;
-    [k: string]: unknown;
 }

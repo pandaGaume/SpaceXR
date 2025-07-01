@@ -17,5 +17,4 @@ export interface IPropertyStatistics {
     occurrences?: {
         [k: string]: number | [number, ...number[]];
     };
-    [k: string]: unknown;
 }

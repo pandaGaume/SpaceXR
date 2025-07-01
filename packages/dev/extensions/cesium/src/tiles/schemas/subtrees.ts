@@ -5,5 +5,4 @@ import { TemplateURI } from "./templateUri";
  */
 export interface ISubtrees {
     uri: TemplateURI;
-    [k: string]: unknown;
 }

@@ -9,5 +9,4 @@ export interface IPointCloudStyle {
      * A `number expression` or `conditions` property which determines the size of the points in pixels.
      */
     pointSize?: NumberExpression | IConditions;
-    [k: string]: unknown;
 }

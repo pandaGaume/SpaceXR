@@ -18,5 +18,4 @@ export interface IBufferView {
      * The name of the `bufferView`.
      */
     name?: string;
-    [k: string]: unknown;
 }

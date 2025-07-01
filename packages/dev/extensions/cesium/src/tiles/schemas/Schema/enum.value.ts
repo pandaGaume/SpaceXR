@@ -14,5 +14,4 @@ export interface IEnumValue {
      * The integer enum value.
      */
     value: number;
-    [k: string]: unknown;
 }

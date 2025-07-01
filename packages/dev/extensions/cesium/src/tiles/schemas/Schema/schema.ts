@@ -33,5 +33,4 @@ export interface ISchema {
     enums?: {
         [k: string]: IEnum;
     };
-    [k: string]: unknown;
 }

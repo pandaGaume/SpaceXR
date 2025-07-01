@@ -29,5 +29,4 @@ export interface IEnum {
      * @minItems 1
      */
     values: [IEnumValue, ...IEnumValue[]];
-    [k: string]: unknown;
 }

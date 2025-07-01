@@ -22,5 +22,4 @@ export interface IPropertyTable {
     properties?: {
         [k: string]: IPropertyTableProperty;
     };
-    [k: string]: unknown;
 }

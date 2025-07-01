@@ -28,5 +28,4 @@ export interface IPropertyTableProperty {
     scale?: NumericValue;
     max?: NumericValue;
     min?: NumericValue;
-    [k: string]: unknown;
 }

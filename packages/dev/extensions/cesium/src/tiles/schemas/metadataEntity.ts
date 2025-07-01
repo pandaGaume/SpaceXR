@@ -14,5 +14,4 @@ export interface IMetadataEntity {
     properties?: {
         [k: string]: AnyValue;
     };
-    [k: string]: unknown;
 }

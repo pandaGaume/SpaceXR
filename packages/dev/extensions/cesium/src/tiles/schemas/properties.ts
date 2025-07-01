@@ -10,5 +10,4 @@ export interface IProperties {
      * The minimum value of this property of all the features in the tileset. The maximum value shall not be smaller than the minimum value.
      */
     minimum: number;
-    [k: string]: unknown;
 }

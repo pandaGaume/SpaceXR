@@ -10,5 +10,4 @@ export interface IAsset {
      * Application-specific version of this tileset, e.g., for when an existing tileset is updated.
      */
     tilesetVersion?: string;
-    [k: string]: unknown;
 }

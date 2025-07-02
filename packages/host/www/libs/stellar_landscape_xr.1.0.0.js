@@ -8961,38 +8961,56 @@ class PythagoreanFlatEarthCalculator extends _geodesy_calculators__WEBPACK_IMPOR
     constructor(e) {
         super(e);
     }
-    getDistanceFromFloat(lata, lona, latb, lonb) {
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb, deg) {
         if (lata === latb && lona === lonb) {
             return 0;
         }
-        const a = Math.PI / 2 - lata * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const b = Math.PI / 2 - latb * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD));
+        if (deg) {
+            lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
+        const a = Math.PI / 2 - lata;
+        const b = Math.PI / 2 - latb;
+        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(lona - lonb));
         let distance = this._ellipsoid.semiMajorAxis * c;
         return distance;
     }
-    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2, deg) {
         if (lat1 === lat2 && lon1 === lon2) {
             return 0;
         }
-        lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const dLon = lon2 - lon1;
         const dLat = lat2 - lat1;
-        let azimuth = Math.atan2(dLon, dLat) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        let azimuth = Math.atan2(dLon, dLat);
         if (azimuth < 0) {
-            azimuth += 360;
+            azimuth += _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.PI_2;
+        }
+        if (deg) {
+            azimuth *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
         }
         return azimuth;
     }
-    getLocationAtDistanceAzimuth(lat1, lon1, dist, az) {
+    getLocationAtDistanceAzimuth(lat1, lon1, dist, az, deg) {
         const unit2deg = 1 / (((2 * Math.PI) / 360) * this._ellipsoid.semiMajorAxis);
-        az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lat1;
+        if (deg) {
+            az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         let newLat = lat1 + dist * Math.cos(az) * unit2deg;
-        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1 * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD);
+        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1);
+        if (deg) {
+            newLat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+            newLon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        }
         return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(newLat, newLon);
     }
 }
@@ -9021,14 +9039,16 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
     constructor(e) {
         super(e);
     }
-    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb, deg) {
         if (lata === latb && lona === lonb && alta === altb) {
             return 0;
         }
-        lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const dLat = (latb - lata) / 2;
         const dLon = (lonb - lona) / 2;
         const sdLat = Math.sin(dLat);
@@ -9042,36 +9062,48 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
         }
         return distance;
     }
-    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2, deg) {
         if (lat1 === lat2 && lon1 === lon2) {
             return 0;
         }
-        lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const dlon = lon2 - lon1;
         const coslat2 = Math.cos(lat2);
         const y = Math.sin(dlon) * coslat2;
         const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * coslat2 * Math.cos(dlon);
-        return Math.atan2(y, x) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        let az = Math.atan2(y, x);
+        if (deg) {
+            az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        }
+        return az;
     }
-    getLocationAtDistanceAzimuth(lat, lon, dist, az) {
+    getLocationAtDistanceAzimuth(lat, lon, dist, az, deg) {
         if (dist == 0) {
             return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat, lon);
         }
-        lat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const ddr = dist / this._ellipsoid.semiMajorAxis;
         const cosddr = Math.cos(ddr);
         const sinddr = Math.sin(ddr);
         const coslat = Math.cos(lat);
         const sinlat = Math.sin(lat);
         const coslatsinddr = coslat * sinddr;
-        const lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
-        const lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
-        return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1 * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG, lon1 * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG);
+        let lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
+        let lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
+        if (deg) {
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        }
+        return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1, lon1);
     }
 }
 SphericalCalculator.Shared = new SphericalCalculator();
@@ -9265,6 +9297,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
 /* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -9340,33 +9374,35 @@ class GeodeticSystem {
     get cartesianMode() {
         return this._enuReference !== undefined ? CartesianMode.ENU : CartesianMode.ECEF;
     }
-    geodeticToCartesianToRef(geo, target) {
-        if (geo && target) {
-            let lambda = geo.lat * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-            let phi = geo.lon * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-            let alt = geo.alt || 0;
-            const sin_lambda = Math.sin(lambda);
-            const cos_lambda = Math.cos(lambda);
-            const cos_phi = Math.cos(phi);
-            const sin_phi = Math.sin(phi);
-            const N = this._ellipsoid._a / Math.sqrt(1.0 - this._ellipsoid._ee * sin_lambda * sin_lambda);
-            const tmp = (alt + N) * cos_lambda;
-            let x = tmp * cos_phi;
-            let y = tmp * sin_phi;
-            let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
-            if (this.ENUTransform) {
-                const m = this.ENUTransform;
-                const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
-                const ry = x * m[1] + y * m[5] + z * m[9] + m[13];
-                const rz = x * m[2] + y * m[6] + z * m[10] + m[14];
-                x = rx;
-                y = ry;
-                z = rz;
-            }
-            target.x = x;
-            target.y = y;
-            target.z = z;
+    geodeticFloatToCartesianToRef(lat, lon, alt, target, deg = true) {
+        target = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
+        let lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD : lat;
+        let phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD : lon;
+        const sin_lambda = Math.sin(lambda);
+        const cos_lambda = Math.cos(lambda);
+        const cos_phi = Math.cos(phi);
+        const sin_phi = Math.sin(phi);
+        const N = this._ellipsoid._a / Math.sqrt(1.0 - this._ellipsoid._ee * sin_lambda * sin_lambda);
+        const tmp = (alt + N) * cos_lambda;
+        let x = tmp * cos_phi;
+        let y = tmp * sin_phi;
+        let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
+        if (this.ENUTransform) {
+            const m = this.ENUTransform;
+            const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
+            const ry = x * m[1] + y * m[5] + z * m[9] + m[13];
+            const rz = x * m[2] + y * m[6] + z * m[10] + m[14];
+            x = rx;
+            y = ry;
+            z = rz;
         }
+        target.x = x;
+        target.y = y;
+        target.z = z;
+        return target;
+    }
+    geodeticToCartesianToRef(geo, target) {
+        return this.geodeticFloatToCartesianToRef(geo.lat, geo.lon, geo.alt || 0, target);
     }
 }
 GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84);
@@ -9543,6 +9579,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Envelope {
+    static RegionIntersectsRegion(a, b) {
+        if (a[1] > b[3] || a[3] < b[1] || a[0] > b[2] || a[2] < b[0] || a[4] > b[5] || a[5] < b[4]) {
+            return false;
+        }
+        return true;
+    }
+    static RegionContainsFloat(a, lat, lon, alt) {
+        return lat >= a[1] && lat <= a[3] && (lon === undefined || (lon >= a[0] && lon <= a[2])) && (alt === undefined || (alt >= a[4] && alt <= a[5]));
+    }
     static Zero() {
         return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero());
     }
@@ -9709,6 +9754,20 @@ class Envelope {
     intersects(bounds) {
         if (bounds === undefined)
             return false;
+        if (Array.isArray(bounds)) {
+            if (this._min.lat > bounds[3] || this._max.lat < bounds[1] || this._min.lon > bounds[2] || this._max.lon < bounds[0]) {
+                return false;
+            }
+            if (this.hasAltitude && bounds.length === 6) {
+                if (this._min.alt > bounds[5] || this._max.alt < bounds[4]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(bounds)) {
+            return this.intersects(bounds.geoBounds);
+        }
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
             return false;
         }
@@ -12716,6 +12775,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsDrawableTileMapLayer),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.IsKDTreeSplitter),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsNumber),
@@ -12739,6 +12799,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.IsTouchCapable),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.JsonTileCodec),
 /* harmony export */   JulianDate: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.JulianDate),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.KdtreeSplitter),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.KnownPlaces),
 /* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
@@ -12761,6 +12822,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observer),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.OctreeSplitter),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),
@@ -12772,6 +12834,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Projections: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.PythagoreanFlatEarthCalculator),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.QuadtreeSplitter),
 /* harmony export */   Quantity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.QuantityRange),
 /* harmony export */   QuickHull: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.QuickHull),
@@ -12781,6 +12844,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Range),
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.RefinementStrategy),
 /* harmony export */   RegionCode: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RegionCode),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.RoundRobin),
 /* harmony export */   Scalar: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Scalar),
 /* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ScreenSpaceError),
 /* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.ScreenSpaceError0),
@@ -12790,6 +12854,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size3),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.SpatialTreeNode),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SpectralClass),
 /* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
@@ -12870,6 +12936,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _cache_index__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./cache/index */ "../core/dist/cache/index.js");
 /* harmony import */ var _dem_index__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./dem/index */ "../core/dist/dem/index.js");
 /* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./text */ "../core/dist/text/index.js");
+/* harmony import */ var _tree__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tree */ "../core/dist/tree/index.js");
+
 
 
 
@@ -13084,9 +13152,10 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
         this.canvas = canvas;
         this._resizeToFitClient = f;
         this._scale = scale;
+        const canvasAsElement = canvas;
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
-                if (entry.target === canvas) {
+                if (entry.target === canvasAsElement) {
                     if (this._resizeToFitClient) {
                         CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
                     }
@@ -13094,7 +13163,7 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
                 }
             }
         });
-        this._resizeObserver.observe(canvas);
+        this._resizeObserver.observe(canvasAsElement);
     }
     getContext(options) {
         return this.canvas.getContext("2d", options);
@@ -17089,10 +17158,11 @@ class TilesetCache {
 class Tile3dStreamingEngine extends _pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
     constructor(uri, options) {
         super();
+        this._actives = [];
         this._uri = uri;
         this._root = null;
-        this._cache = new TilesetCache();
-        this._client = new _io_webClient__WEBPACK_IMPORTED_MODULE_1__.WebClient(uri, new TilesetCodec());
+        this._cache = options?.cache ?? new TilesetCache();
+        this._client = options?.webClient ?? new _io_webClient__WEBPACK_IMPORTED_MODULE_1__.WebClient(uri, new TilesetCodec());
         this._options = { ...Tile3dStreamingEngineOptions.Default, ...options };
     }
     setContext(state, display) {
@@ -17104,10 +17174,6 @@ class Tile3dStreamingEngine extends _pipeline_tiles_pipeline_sourceblock__WEBPAC
     }
     _doClearContext() { }
     _doValidateContext(state, display) {
-        if (!state || !display) {
-            this._doClearContext();
-            return;
-        }
         if (this._root === null) {
             this._doFetchTilesetAsync(this._uri).then((tileset) => {
                 if (tileset) {
@@ -19589,6 +19655,12 @@ class CameraState {
             }
         }
     }
+    get tanfov2() {
+        if (!this._tanfov2) {
+            this._tanfov2 = Math.tan((this._fov * Math.PI) / 360);
+        }
+        return this._tanfov2;
+    }
 }
 CameraState.POSITION_PROPERTY_NAME = "position";
 CameraState.TARGET_PROPERTY_NAME = "target";
@@ -21778,6 +21850,34 @@ MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 
 /***/ }),
 
+/***/ "../core/dist/tree/index.js":
+/*!**********************************!*\
+  !*** ../core/dist/tree/index.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsKDTreeSplitter),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.KdtreeSplitter),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.OctreeSplitter),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.QuadtreeSplitter),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.RoundRobin),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ _tree_spatial__WEBPACK_IMPORTED_MODULE_3__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode)
+/* harmony export */ });
+/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "../core/dist/tree/tree.spatial.interfaces.js");
+/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tree.spatial.splitters */ "../core/dist/tree/tree.spatial.splitters.js");
+/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
 /***/ "../core/dist/tree/tree.spatial.interfaces.js":
 /*!****************************************************!*\
   !*** ../core/dist/tree/tree.spatial.interfaces.js ***!
@@ -21809,15 +21909,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SpatialTree: () => (/* binding */ SpatialTree)
 /* harmony export */ });
-/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.splitters */ "../core/dist/tree/tree.spatial.splitters.js");
+
 
 class SpatialTree {
-    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
+    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_0__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
         this._splitter = subdivision;
         this._maxDepth = maxDepth;
         this._maxItemPerNode = maxItemPerNode;
         this._lookupThresold = lookupThreshold;
-        this._root = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode();
+        this._root = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode();
         this._context = this._buildContext();
     }
     get root() {
@@ -21848,7 +21950,7 @@ class SpatialTree {
         this._root.lookupToRef(this._context, bounds, ref);
     }
     _buildNode(bounds, depth) {
-        return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode(bounds, depth);
+        return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode(bounds, depth);
     }
     _buildContext() {
         return { tree: this, lookupThreshold: this._lookupThresold };
@@ -21869,17 +21971,164 @@ SpatialTree.DefaultLookupThreshold = 512;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SpatialTreeNode: () => (/* binding */ SpatialTreeNode)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.collection.js");
+/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
+
+
+class SpatialTreeNode {
+    constructor(bounds, depth) {
+        this.boundingBox = bounds;
+        this.depth = depth ?? 1;
+    }
+    get isLeaf() {
+        return (this.children?.length ?? 0) != 0;
+    }
+    *[Symbol.iterator](predicate) {
+        if (this.children) {
+            if (predicate) {
+                for (const t of this.children) {
+                    if (predicate(t)) {
+                        yield t;
+                    }
+                }
+            }
+            return this.children;
+        }
+        return null;
+    }
+    subdivide(options) {
+        if (options.spliter != undefined) {
+            const splitBounds = options.spliter.split(this, options);
+            if (splitBounds && splitBounds.length > 0) {
+                const d = this.depth + 1;
+                this.children = splitBounds.map((b) => this.createInstance(options, b, d));
+            }
+            return;
+        }
+    }
+    lookupToRef(context, bounds, ref) {
+        const nodeBox = this.boundingBox;
+        const lookupBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(bounds) ? bounds : bounds.boundingBox;
+        if (lookupBox == undefined || lookupBox.intersects(nodeBox) == false) {
+            return;
+        }
+        if (this.items) {
+            const threshold = context.tree.lookupThreshold ?? _tree_spatial__WEBPACK_IMPORTED_MODULE_1__.SpatialTree.DefaultLookupThreshold;
+            if (this.items.length < threshold) {
+                const contentBounds = this.items.boundingBox;
+                if (lookupBox.intersects(contentBounds) == false) {
+                    return;
+                }
+            }
+            for (const v of this.items.data) {
+                const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(v) ? v : v.boundingBox;
+                if (dataBox && dataBox.intersects(lookupBox)) {
+                    ref.push(v);
+                }
+            }
+            return;
+        }
+        if (this.children) {
+            for (const c of this.children) {
+                c.lookupToRef(context, bounds, ref);
+            }
+        }
+    }
+    _checkBounds(data) {
+        const nodeBox = this.boundingBox;
+        const accepted = [];
+        const indicesToRemove = [];
+        for (let i = 0; i < data.length; i++) {
+            const v = data[i];
+            const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(v) ? v : v.boundingBox;
+            if (dataBox?.intersects(nodeBox)) {
+                accepted.push(v);
+                indicesToRemove.push(i);
+            }
+        }
+        for (let i = indicesToRemove.length - 1; i >= 0; i--) {
+            data.splice(indicesToRemove[i], 1);
+        }
+        return accepted;
+    }
+    createInstance(ctx, box, depth) {
+        const ctor = this.constructor;
+        return new ctor();
+    }
+    add(context, data) {
+        const accepted = this._checkBounds(data);
+        if (accepted.length == 0) {
+            return;
+        }
+        if (this.children?.length) {
+            for (const c of this.children) {
+                c.add(context, accepted);
+                if (accepted.length == 0) {
+                    break;
+                }
+            }
+            return;
+        }
+        if (this.depth == context.tree.maxDepth) {
+            this.items = this.items ?? new _geometry__WEBPACK_IMPORTED_MODULE_2__.BoundedCollection();
+            this.items.push(...accepted);
+            return;
+        }
+        if (this.items && this.items.length + accepted.length > context.tree.maxItemPerNode) {
+            this.subdivide(context.tree);
+            accepted.push(...this.items.data);
+            this.items = undefined;
+            if (this.children) {
+                for (const c of this.children) {
+                    c.add(context, accepted);
+                    if (data.length == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    remove(context, data) {
+        const accepted = this._checkBounds(data);
+        if (accepted.length == 0) {
+            return;
+        }
+        if (this.items) {
+            const removeSet = new Set(accepted);
+            const kept = this.items.data.filter((item) => !removeSet.has(item));
+            if (kept.length !== this.items.data.length) {
+                this.items.data = kept;
+            }
+        }
+        if (this.children) {
+            for (const c of this.children) {
+                c.remove(context, accepted);
+            }
+        }
+    }
+}
+//# sourceMappingURL=tree.spatial.node.js.map
+
+/***/ }),
+
+/***/ "../core/dist/tree/tree.spatial.splitters.js":
+/*!***************************************************!*\
+  !*** ../core/dist/tree/tree.spatial.splitters.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   KdtreeSplitter: () => (/* binding */ KdtreeSplitter),
 /* harmony export */   OctreeSplitter: () => (/* binding */ OctreeSplitter),
-/* harmony export */   QuadtreeSplitter: () => (/* binding */ QuadtreeSplitter),
-/* harmony export */   SpatialTreeNode: () => (/* binding */ SpatialTreeNode)
+/* harmony export */   QuadtreeSplitter: () => (/* binding */ QuadtreeSplitter)
 /* harmony export */ });
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.collection.js");
-/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
 /* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "../core/dist/tree/tree.spatial.interfaces.js");
-
 
 
 class QuadtreeSplitter {
@@ -21978,139 +22227,7 @@ class KdtreeSplitter {
         return [];
     }
 }
-class SpatialTreeNode {
-    constructor(bounds, depth) {
-        this.boundingBox = bounds;
-        this.depth = depth ?? 1;
-    }
-    get isLeaf() {
-        return (this.children?.length ?? 0) != 0;
-    }
-    *[Symbol.iterator](predicate) {
-        if (this.children) {
-            if (predicate) {
-                for (const t of this.children) {
-                    if (predicate(t)) {
-                        yield t;
-                    }
-                }
-            }
-            return this.children;
-        }
-        return null;
-    }
-    subdivide(options) {
-        if (options.spliter != undefined) {
-            const splitBounds = options.spliter.split(this, options);
-            if (splitBounds && splitBounds.length > 0) {
-                const d = this.depth + 1;
-                this.children = splitBounds.map((b) => this.createInstance(options, b, d));
-            }
-            return;
-        }
-    }
-    lookupToRef(context, bounds, ref) {
-        const nodeBox = this.boundingBox;
-        const lookupBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(bounds) ? bounds : bounds.boundingBox;
-        if (lookupBox == undefined || lookupBox.intersects(nodeBox) == false) {
-            return;
-        }
-        if (this.items) {
-            const threshold = context.tree.lookupThreshold ?? _tree_spatial__WEBPACK_IMPORTED_MODULE_3__.SpatialTree.DefaultLookupThreshold;
-            if (this.items.length < threshold) {
-                const contentBounds = this.items.boundingBox;
-                if (lookupBox.intersects(contentBounds) == false) {
-                    return;
-                }
-            }
-            for (const v of this.items.data) {
-                const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(v) ? v : v.boundingBox;
-                if (dataBox && dataBox.intersects(lookupBox)) {
-                    ref.push(v);
-                }
-            }
-            return;
-        }
-        if (this.children) {
-            for (const c of this.children) {
-                c.lookupToRef(context, bounds, ref);
-            }
-        }
-    }
-    _checkBounds(data) {
-        const nodeBox = this.boundingBox;
-        const accepted = [];
-        const indicesToRemove = [];
-        for (let i = 0; i < data.length; i++) {
-            const v = data[i];
-            const dataBox = (0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(v) ? v : v.boundingBox;
-            if (dataBox?.intersects(nodeBox)) {
-                accepted.push(v);
-                indicesToRemove.push(i);
-            }
-        }
-        for (let i = indicesToRemove.length - 1; i >= 0; i--) {
-            data.splice(indicesToRemove[i], 1);
-        }
-        return accepted;
-    }
-    createInstance(ctx, box, depth) {
-        const ctor = this.constructor;
-        return new ctor();
-    }
-    add(context, data) {
-        const accepted = this._checkBounds(data);
-        if (accepted.length == 0) {
-            return;
-        }
-        if (this.children?.length) {
-            for (const c of this.children) {
-                c.add(context, accepted);
-                if (accepted.length == 0) {
-                    break;
-                }
-            }
-            return;
-        }
-        if (this.depth == context.tree.maxDepth) {
-            this.items = this.items ?? new _geometry__WEBPACK_IMPORTED_MODULE_4__.BoundedCollection();
-            this.items.push(...accepted);
-            return;
-        }
-        if (this.items && this.items.length + accepted.length > context.tree.maxItemPerNode) {
-            this.subdivide(context.tree);
-            accepted.push(...this.items.data);
-            this.items = undefined;
-            if (this.children) {
-                for (const c of this.children) {
-                    c.add(context, accepted);
-                    if (data.length == 0) {
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    remove(context, data) {
-        const accepted = this._checkBounds(data);
-        if (accepted.length == 0) {
-            return;
-        }
-        if (this.items) {
-            const removeSet = new Set(accepted);
-            const kept = this.items.data.filter((item) => !removeSet.has(item));
-            if (kept.length !== this.items.data.length) {
-                this.items.data = kept;
-            }
-        }
-        if (this.children) {
-            for (const c of this.children) {
-                c.remove(context, accepted);
-            }
-        }
-    }
-}
-//# sourceMappingURL=tree.spatial.node.js.map
+//# sourceMappingURL=tree.spatial.splitters.js.map
 
 /***/ }),
 
@@ -26662,6 +26779,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicSphere),
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsKDTreeSplitter),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsNumber),
@@ -26687,6 +26805,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTouchCapable),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
 /* harmony export */   JulianDate: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.JulianDate),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KdtreeSplitter),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KnownPlaces),
 /* harmony export */   Length: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Length),
@@ -26714,6 +26833,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Observer),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.OctreeSplitter),
 /* harmony export */   PNTSLoader: () => (/* reexport safe */ _tiles_3d__WEBPACK_IMPORTED_MODULE_0__.PNTSLoader),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PlaneDefinition),
@@ -26726,6 +26846,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Projections: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PropertyChangedEventArgs),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PythagoreanFlatEarthCalculator),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuadtreeSplitter),
 /* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Quantity),
 /* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuantityRange),
 /* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuickHull),
@@ -26735,6 +26856,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Range: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Range),
 /* harmony export */   RefinementStrategy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RefinementStrategy),
 /* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RegionCode),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RoundRobin),
 /* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Scalar),
 /* harmony export */   ScreenSpaceError: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ScreenSpaceError),
 /* harmony export */   ScreenSpaceError0: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ScreenSpaceError0),
@@ -26744,6 +26866,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size3),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTreeNode),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpectralClass),
 /* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SphericalCalculator),

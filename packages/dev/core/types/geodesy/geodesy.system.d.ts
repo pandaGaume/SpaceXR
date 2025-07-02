@@ -22,5 +22,6 @@ export declare class GeodeticSystem {
     get ENUTransform(): Array<number> | undefined;
     get ENUObservable(): Observable<GeodeticSystem>;
     get cartesianMode(): CartesianMode;
-    geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): void;
+    geodeticFloatToCartesianToRef(lat: number, lon: number, alt: number, target: ICartesian3, deg?: boolean): ICartesian3;
+    geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): ICartesian3;
 }

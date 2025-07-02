@@ -1,3 +1,4 @@
+
 import { Display } from "../../tiles";
 
 export class CanvasDisplay extends Display {
@@ -46,13 +47,14 @@ export class CanvasDisplay extends Display {
             // so we need to adapt the buffer size to the client size.
             CanvasDisplay.ResizeToDisplaySize(canvas, scale);
         }
-        super(canvas); // canvas has wdth and height properties.
+        super(canvas); // canvas has width and height properties.
         this._resizeToFitClient = f;
         this._scale = scale;
+        const canvasAsElement = canvas as unknown as Element; // trick to avoid the requestPointerLock(...) bug in the canvas element.
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
                 // Check if the resized element is our canvas
-                if (entry.target === canvas) {
+                if (entry.target === canvasAsElement) {
                     if (this._resizeToFitClient) {
                         CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
                     }
@@ -60,7 +62,7 @@ export class CanvasDisplay extends Display {
                 }
             }
         });
-        this._resizeObserver.observe(canvas);
+        this._resizeObserver.observe(canvasAsElement);
     }
 
     public getContext(options?: CanvasRenderingContext2DSettings | undefined): CanvasRenderingContext2D | null {

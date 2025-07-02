@@ -6,6 +6,17 @@ import { Geo3 } from "./geography.position";
 import { Size3 } from "../geometry/geometry.size";
 
 export class Envelope implements IEnvelope {
+    public static RegionIntersectsRegion(a: [number, number, number, number, number, number], b: [number, number, number, number, number, number]): boolean {
+        if (a[1] > b[3] || a[3] < b[1] || a[0] > b[2] || a[2] < b[0] || a[4] > b[5] || a[5] < b[4]) {
+            return false;
+        }
+        return true;
+    }
+
+    public static RegionContainsFloat(a: [number, number, number, number, number, number], lat: number, lon: number, alt?: number): boolean {
+        return lat >= a[1] && lat <= a[3] && (lon === undefined || (lon >= a[0] && lon <= a[2])) && (alt === undefined || (alt >= a[4] && alt <= a[5]));
+    }
+
     public static MaxLongitude = 540;
     public static MaxLatitude = 90;
     public static MinLongitude = -Envelope.MaxLongitude;
@@ -230,8 +241,32 @@ export class Envelope implements IEnvelope {
         return this;
     }
 
-    public intersects(bounds?: IEnvelope): boolean {
+    /// An Envelope or  An array of six numbers that define a bounding geographic region in EPSG:4979 coordinates
+    /// with the order [west, south, east, north, minimum height, maximum height].
+    /// Longitudes and latitudes are in decimal. The range for latitudes is [-90,+90].
+    /// The range for longitudes is [-180,180].
+    /// The heights are in meters above (or below) the WGS84 ellipsoid.
+
+    public intersects(bounds?: IEnvelope | IGeoBounded | [number, number, number, number] | [number, number, number, number, number, number]): boolean {
         if (bounds === undefined) return false;
+        if (Array.isArray(bounds)) {
+            if (this._min.lat > bounds[3] || this._max.lat < bounds[1] || this._min.lon > bounds[2] || this._max.lon < bounds[0]) {
+                return false;
+            }
+
+            if (this.hasAltitude && bounds.length === 6) {
+                if (this._min.alt! > bounds[5] || this._max.alt! < bounds[4]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (IsGeoBounded(bounds)) {
+            return this.intersects(bounds.geoBounds);
+        }
+
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
             return false;
         }
@@ -241,7 +276,6 @@ export class Envelope implements IEnvelope {
                 return false;
             }
         }
-
         return true;
     }
 

@@ -29,7 +29,7 @@ export interface IEnvelope extends IComparable<IEnvelope> {
     addInPlace(lat: number | IGeo2 | IGeo3, lon?: number, alt?: number): IEnvelope;
     unionInPlace(other?: IEnvelope): IEnvelope;
     scaleInPlace(scale: number): IEnvelope;
-    intersects(bounds?: IEnvelope): boolean;
+    intersects(bounds?: IEnvelope | IGeoBounded | [number, number, number, number] | [number, number, number, number, number, number]): boolean;
     contains(other?: IEnvelope | IGeo3): boolean;
     containsFloat(lat: number, lon?: number, alt?: number): boolean;
     clone(): IEnvelope;

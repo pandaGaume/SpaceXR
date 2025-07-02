@@ -3,6 +3,7 @@ import { IEnvelope, IGeo3 } from "../geography/geography.interfaces";
 import { ICartesian3 } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { Scalar } from "../math";
+import { Cartesian3 } from "../geometry";
 
 export enum CartesianMode {
     ECEF,
@@ -105,39 +106,42 @@ export class GeodeticSystem {
         return this._enuReference !== undefined ? CartesianMode.ENU : CartesianMode.ECEF;
     }
 
-    public geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): void {
-        if (geo && target) {
-            let lambda = geo.lat * Scalar.DEG2RAD;
-            let phi = geo.lon * Scalar.DEG2RAD;
-            let alt = geo.alt || 0;
+    public geodeticFloatToCartesianToRef(lat: number, lon: number, alt: number, target: ICartesian3, deg: boolean = true): ICartesian3 {
+        target = target || Cartesian3.Zero();
 
-            // firs pass is to ECEF
-            const sin_lambda = Math.sin(lambda);
-            const cos_lambda = Math.cos(lambda);
-            const cos_phi = Math.cos(phi);
-            const sin_phi = Math.sin(phi);
-            const N = this._ellipsoid._a / Math.sqrt(1.0 - this._ellipsoid._ee * sin_lambda * sin_lambda);
-            const tmp = (alt + N) * cos_lambda;
+        let lambda = deg ? lat * Scalar.DEG2RAD : lat;
+        let phi = deg ? lon * Scalar.DEG2RAD : lon;
 
-            let x = tmp * cos_phi;
-            let y = tmp * sin_phi;
-            let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
+        // firs pass is to ECEF
+        const sin_lambda = Math.sin(lambda);
+        const cos_lambda = Math.cos(lambda);
+        const cos_phi = Math.cos(phi);
+        const sin_phi = Math.sin(phi);
+        const N = this._ellipsoid._a / Math.sqrt(1.0 - this._ellipsoid._ee * sin_lambda * sin_lambda);
+        const tmp = (alt + N) * cos_lambda;
 
-            // then to ENU if the transformation is set
-            if (this.ENUTransform) {
-                const m = this.ENUTransform;
+        let x = tmp * cos_phi;
+        let y = tmp * sin_phi;
+        let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
 
-                const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
-                const ry = x * m[1] + y * m[5] + z * m[9] + m[13];
-                const rz = x * m[2] + y * m[6] + z * m[10] + m[14];
+        // then to ENU if the transformation is set
+        if (this.ENUTransform) {
+            const m = this.ENUTransform;
 
-                x = rx;
-                y = ry;
-                z = rz;
-            }
-            target.x = x;
-            target.y = y;
-            target.z = z;
+            const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
+            const ry = x * m[1] + y * m[5] + z * m[9] + m[13];
+            const rz = x * m[2] + y * m[6] + z * m[10] + m[14];
+
+            x = rx;
+            y = ry;
+            z = rz;
         }
+        target.x = x;
+        target.y = y;
+        target.z = z;
+        return target;
+    }
+    public geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): ICartesian3 {
+        return this.geodeticFloatToCartesianToRef(geo.lat, geo.lon, geo.alt || 0, target);
     }
 }

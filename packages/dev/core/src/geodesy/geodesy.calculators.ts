@@ -15,7 +15,7 @@ export abstract class CalculatorBase implements IGeoProcessor {
     public get ellipsoid(): Ellipsoid {
         return this._ellipsoid;
     }
-    abstract getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number;
-    abstract getAzimuthFromFloat(lata: number, lona: number, latb: number, lonb: number): number;
-    abstract getLocationAtDistanceAzimuth(lat: number, lon: number, distance: number, azimuth: number): IGeo2;
+    abstract getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number, deg?: boolean): number;
+    abstract getAzimuthFromFloat(lata: number, lona: number, latb: number, lonb: number, deg?: boolean): number;
+    abstract getLocationAtDistanceAzimuth(lat: number, lon: number, distance: number, azimuth: number, deg?: boolean): IGeo2;
 }

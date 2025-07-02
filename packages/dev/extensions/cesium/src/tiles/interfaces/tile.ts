@@ -4,7 +4,7 @@ import { IMetadataEntity } from "./metadataEntity";
 import { IImplicitTiling } from "./tile.implicitTiling";
 
 export type RefineType = "ADD" | "REPLACE" | string;
-
+export type Mat44Type = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
 /**
  * A tile in a 3D Tiles tileset.
  */
@@ -25,14 +25,14 @@ export interface ITile {
      * @minItems 16
      * @maxItems 16
      */
-    transform?: [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
+    transform?: Mat44Type;
     content?: IContent;
     /**
      * An array of contents. When this is defined, then `content` shall be undefined.
      *
      * @minItems 1
      */
-    contents?: [IContent, ...IContent[]];
+    contents?: Array<IContent>;
     metadata?: IMetadataEntity;
     implicitTiling?: IImplicitTiling;
     /**

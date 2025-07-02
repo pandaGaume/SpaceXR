@@ -14,6 +14,7 @@ export interface ITileset {
     /**
      * @deprecated
      * A dictionary object of metadata about per-feature properties.
+     * see EXT_structural_metadata for GLTF 2.0 tilesets.
      */
     properties?: {
         [k: string]: IProperties;

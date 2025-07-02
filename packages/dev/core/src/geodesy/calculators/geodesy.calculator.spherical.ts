@@ -10,15 +10,17 @@ export class SphericalCalculator extends CalculatorBase {
         super(e);
     }
 
-    public getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number): number {
+    public getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number, deg?: true): number {
         if (lata === latb && lona === lonb && alta === altb) {
             return 0;
         }
 
-        lata *= Scalar.DEG2RAD;
-        lona *= Scalar.DEG2RAD;
-        latb *= Scalar.DEG2RAD;
-        lonb *= Scalar.DEG2RAD;
+        if (deg) {
+            lata *= Scalar.DEG2RAD;
+            lona *= Scalar.DEG2RAD;
+            latb *= Scalar.DEG2RAD;
+            lonb *= Scalar.DEG2RAD;
+        }
 
         const dLat = (latb - lata) / 2;
         const dLon = (lonb - lona) / 2;
@@ -38,31 +40,39 @@ export class SphericalCalculator extends CalculatorBase {
         return distance;
     }
 
-    public getAzimuthFromFloat(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    public getAzimuthFromFloat(lat1: number, lon1: number, lat2: number, lon2: number, deg?: true): number {
         if (lat1 === lat2 && lon1 === lon2) {
             return 0;
         }
 
-        lat1 *= Scalar.DEG2RAD;
-        lon1 *= Scalar.DEG2RAD;
-        lat2 *= Scalar.DEG2RAD;
-        lon2 *= Scalar.DEG2RAD;
+        if (deg) {
+            lat1 *= Scalar.DEG2RAD;
+            lon1 *= Scalar.DEG2RAD;
+            lat2 *= Scalar.DEG2RAD;
+            lon2 *= Scalar.DEG2RAD;
+        }
         const dlon = lon2 - lon1;
         const coslat2 = Math.cos(lat2);
 
         const y = Math.sin(dlon) * coslat2;
         const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * coslat2 * Math.cos(dlon);
-        return Math.atan2(y, x) * Scalar.RAD2DEG;
+        let az = Math.atan2(y, x);
+        if (deg) {
+            az *= Scalar.RAD2DEG;
+        }
+        return az;
     }
 
-    public getLocationAtDistanceAzimuth(lat: number, lon: number, dist: number, az: number): IGeo2 {
+    public getLocationAtDistanceAzimuth(lat: number, lon: number, dist: number, az: number, deg?: true): IGeo2 {
         if (dist == 0) {
             return new Geo2(lat, lon);
         }
 
-        lat *= Scalar.DEG2RAD;
-        lon *= Scalar.DEG2RAD;
-        az *= Scalar.DEG2RAD;
+        if (deg) {
+            lat *= Scalar.DEG2RAD;
+            lon *= Scalar.DEG2RAD;
+            az *= Scalar.DEG2RAD;
+        }
 
         const ddr = dist / this._ellipsoid.semiMajorAxis;
         const cosddr = Math.cos(ddr);
@@ -71,8 +81,12 @@ export class SphericalCalculator extends CalculatorBase {
         const sinlat = Math.sin(lat);
         const coslatsinddr = coslat * sinddr;
 
-        const lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
-        const lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
-        return new Geo2(lat1 * Scalar.RAD2DEG, lon1 * Scalar.RAD2DEG);
+        let lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
+        let lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
+        if (deg) {
+            lat1 *= Scalar.RAD2DEG;
+            lon1 *= Scalar.RAD2DEG;
+        }
+        return new Geo2(lat1, lon1);
     }
 }

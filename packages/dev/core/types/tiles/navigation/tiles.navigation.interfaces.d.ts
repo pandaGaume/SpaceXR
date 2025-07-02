@@ -12,6 +12,7 @@ export interface ICameraState {
     position: ICartesian3;
     target: ICartesian3;
     fov: number;
+    tanfov2: number;
 }
 export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;

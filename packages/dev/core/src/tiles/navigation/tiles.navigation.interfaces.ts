@@ -50,6 +50,16 @@ export interface ICameraState {
     /// for tiles closer to the target.
     /// </summary>
     fov: number;
+
+    /// <summary>
+    /// The tangent of half the field of view, which is used in calculations related to
+    /// screen space error and Level of Detail (LOD). This value is derived from the FOV
+    /// and is essential for determining how much detail is needed based on the camera's
+    /// perspective. It helps in calculating the screen space error, which is a measure of
+    /// how much detail is required for tiles based on their distance from the camera and
+    /// the camera's field of view.
+    /// </summary>
+    tanfov2: number;
 }
 
 /// <summary>

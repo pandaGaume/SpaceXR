@@ -23,52 +23,70 @@ export class PythagoreanFlatEarthCalculator extends CalculatorBase {
         super(e);
     }
 
-    public getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number): number {
+    public getDistanceFromFloat(lata: number, lona: number, latb: number, lonb: number, alta?: number, altb?: number, deg?: boolean): number {
         if (lata === latb && lona === lonb) {
             return 0;
         }
-        const a = Math.PI / 2 - lata * Scalar.DEG2RAD;
-        const b = Math.PI / 2 - latb * Scalar.DEG2RAD;
-        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * Scalar.DEG2RAD));
+        if (deg) {
+            lata *= Scalar.DEG2RAD;
+            lona *= Scalar.DEG2RAD;
+            latb *= Scalar.DEG2RAD;
+            lonb *= Scalar.DEG2RAD;
+        }
+        const a = Math.PI / 2 - lata;
+        const b = Math.PI / 2 - latb;
+        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(lona - lonb));
         let distance = this._ellipsoid.semiMajorAxis * c;
 
         return distance;
     }
 
-    public getAzimuthFromFloat(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    public getAzimuthFromFloat(lat1: number, lon1: number, lat2: number, lon2: number, deg?: boolean): number {
         if (lat1 === lat2 && lon1 === lon2) {
             return 0;
         }
-        lat1 *= Scalar.DEG2RAD;
-        lon1 *= Scalar.DEG2RAD;
-        lat2 *= Scalar.DEG2RAD;
-        lon2 *= Scalar.DEG2RAD;
+        if (deg) {
+            lat1 *= Scalar.DEG2RAD;
+            lon1 *= Scalar.DEG2RAD;
+            lat2 *= Scalar.DEG2RAD;
+            lon2 *= Scalar.DEG2RAD;
+        }
         // Calculate differences in coordinates
         const dLon = lon2 - lon1;
         const dLat = lat2 - lat1;
 
         // Calculate azimuth
-        let azimuth = Math.atan2(dLon, dLat) * Scalar.RAD2DEG;
-
+        let azimuth = Math.atan2(dLon, dLat);
         // Normalize to 0-360 degrees
         if (azimuth < 0) {
-            azimuth += 360;
+            azimuth += Scalar.PI_2;
+        }
+        // Convert to degrees if required
+        if (deg) {
+            azimuth *= Scalar.RAD2DEG;
         }
 
         return azimuth;
     }
 
-    public getLocationAtDistanceAzimuth(lat1: number, lon1: number, dist: number, az: number): IGeo2 {
+    public getLocationAtDistanceAzimuth(lat1: number, lon1: number, dist: number, az: number, deg?: boolean): IGeo2 {
         const unit2deg = 1 / (((2 * Math.PI) / 360) * this._ellipsoid.semiMajorAxis);
 
         // Convert azimuth to radians
-        az *= Scalar.DEG2RAD;
-        lat1;
+        if (deg) {
+            az *= Scalar.DEG2RAD;
+            lat1 *= Scalar.DEG2RAD;
+            lon1 *= Scalar.DEG2RAD;
+        }
 
         // Calculate new latitude and longitude in degrees
         let newLat = lat1 + dist * Math.cos(az) * unit2deg;
-        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1 * Scalar.DEG2RAD);
+        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1);
 
+        if (deg) {
+            newLat *= Scalar.RAD2DEG;
+            newLon *= Scalar.RAD2DEG;
+        }
         return new Geo2(newLat, newLon);
     }
 }

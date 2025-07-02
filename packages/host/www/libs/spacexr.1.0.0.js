@@ -1379,38 +1379,56 @@ class PythagoreanFlatEarthCalculator extends _geodesy_calculators__WEBPACK_IMPOR
     constructor(e) {
         super(e);
     }
-    getDistanceFromFloat(lata, lona, latb, lonb) {
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb, deg) {
         if (lata === latb && lona === lonb) {
             return 0;
         }
-        const a = Math.PI / 2 - lata * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const b = Math.PI / 2 - latb * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((lona - lonb) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD));
+        if (deg) {
+            lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
+        const a = Math.PI / 2 - lata;
+        const b = Math.PI / 2 - latb;
+        const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(lona - lonb));
         let distance = this._ellipsoid.semiMajorAxis * c;
         return distance;
     }
-    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2, deg) {
         if (lat1 === lat2 && lon1 === lon2) {
             return 0;
         }
-        lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const dLon = lon2 - lon1;
         const dLat = lat2 - lat1;
-        let azimuth = Math.atan2(dLon, dLat) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        let azimuth = Math.atan2(dLon, dLat);
         if (azimuth < 0) {
-            azimuth += 360;
+            azimuth += _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.PI_2;
+        }
+        if (deg) {
+            azimuth *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
         }
         return azimuth;
     }
-    getLocationAtDistanceAzimuth(lat1, lon1, dist, az) {
+    getLocationAtDistanceAzimuth(lat1, lon1, dist, az, deg) {
         const unit2deg = 1 / (((2 * Math.PI) / 360) * this._ellipsoid.semiMajorAxis);
-        az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lat1;
+        if (deg) {
+            az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         let newLat = lat1 + dist * Math.cos(az) * unit2deg;
-        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1 * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD);
+        let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1);
+        if (deg) {
+            newLat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+            newLon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        }
         return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(newLat, newLon);
     }
 }
@@ -1439,14 +1457,16 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
     constructor(e) {
         super(e);
     }
-    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb) {
+    getDistanceFromFloat(lata, lona, latb, lonb, alta, altb, deg) {
         if (lata === latb && lona === lonb && alta === altb) {
             return 0;
         }
-        lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lata *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lona *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            latb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lonb *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const dLat = (latb - lata) / 2;
         const dLon = (lonb - lona) / 2;
         const sdLat = Math.sin(dLat);
@@ -1460,36 +1480,48 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
         }
         return distance;
     }
-    getAzimuthFromFloat(lat1, lon1, lat2, lon2) {
+    getAzimuthFromFloat(lat1, lon1, lat2, lon2, deg) {
         if (lat1 === lat2 && lon1 === lon2) {
             return 0;
         }
-        lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const dlon = lon2 - lon1;
         const coslat2 = Math.cos(lat2);
         const y = Math.sin(dlon) * coslat2;
         const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * coslat2 * Math.cos(dlon);
-        return Math.atan2(y, x) * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        let az = Math.atan2(y, x);
+        if (deg) {
+            az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        }
+        return az;
     }
-    getLocationAtDistanceAzimuth(lat, lon, dist, az) {
+    getLocationAtDistanceAzimuth(lat, lon, dist, az, deg) {
         if (dist == 0) {
             return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat, lon);
         }
-        lat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        lon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        if (deg) {
+            lat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            lon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+            az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        }
         const ddr = dist / this._ellipsoid.semiMajorAxis;
         const cosddr = Math.cos(ddr);
         const sinddr = Math.sin(ddr);
         const coslat = Math.cos(lat);
         const sinlat = Math.sin(lat);
         const coslatsinddr = coslat * sinddr;
-        const lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
-        const lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
-        return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1 * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG, lon1 * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG);
+        let lat1 = Math.asin(sinlat * cosddr + coslatsinddr * Math.cos(az));
+        let lon1 = lon + Math.atan2(coslatsinddr * Math.sin(az), cosddr - sinlat * Math.sin(lat1));
+        if (deg) {
+            lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+            lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
+        }
+        return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1, lon1);
     }
 }
 SphericalCalculator.Shared = new SphericalCalculator();
@@ -1683,6 +1715,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
 /* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "./dist/events/events.observable.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "./dist/math/math.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "./dist/geometry/geometry.cartesian.js");
+
 
 
 
@@ -1758,33 +1792,35 @@ class GeodeticSystem {
     get cartesianMode() {
         return this._enuReference !== undefined ? CartesianMode.ENU : CartesianMode.ECEF;
     }
-    geodeticToCartesianToRef(geo, target) {
-        if (geo && target) {
-            let lambda = geo.lat * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-            let phi = geo.lon * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-            let alt = geo.alt || 0;
-            const sin_lambda = Math.sin(lambda);
-            const cos_lambda = Math.cos(lambda);
-            const cos_phi = Math.cos(phi);
-            const sin_phi = Math.sin(phi);
-            const N = this._ellipsoid._a / Math.sqrt(1.0 - this._ellipsoid._ee * sin_lambda * sin_lambda);
-            const tmp = (alt + N) * cos_lambda;
-            let x = tmp * cos_phi;
-            let y = tmp * sin_phi;
-            let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
-            if (this.ENUTransform) {
-                const m = this.ENUTransform;
-                const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
-                const ry = x * m[1] + y * m[5] + z * m[9] + m[13];
-                const rz = x * m[2] + y * m[6] + z * m[10] + m[14];
-                x = rx;
-                y = ry;
-                z = rz;
-            }
-            target.x = x;
-            target.y = y;
-            target.z = z;
+    geodeticFloatToCartesianToRef(lat, lon, alt, target, deg = true) {
+        target = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
+        let lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD : lat;
+        let phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD : lon;
+        const sin_lambda = Math.sin(lambda);
+        const cos_lambda = Math.cos(lambda);
+        const cos_phi = Math.cos(phi);
+        const sin_phi = Math.sin(phi);
+        const N = this._ellipsoid._a / Math.sqrt(1.0 - this._ellipsoid._ee * sin_lambda * sin_lambda);
+        const tmp = (alt + N) * cos_lambda;
+        let x = tmp * cos_phi;
+        let y = tmp * sin_phi;
+        let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
+        if (this.ENUTransform) {
+            const m = this.ENUTransform;
+            const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
+            const ry = x * m[1] + y * m[5] + z * m[9] + m[13];
+            const rz = x * m[2] + y * m[6] + z * m[10] + m[14];
+            x = rx;
+            y = ry;
+            z = rz;
         }
+        target.x = x;
+        target.y = y;
+        target.z = z;
+        return target;
+    }
+    geodeticToCartesianToRef(geo, target) {
+        return this.geodeticFloatToCartesianToRef(geo.lat, geo.lon, geo.alt || 0, target);
     }
 }
 GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84);
@@ -1961,6 +1997,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Envelope {
+    static RegionIntersectsRegion(a, b) {
+        if (a[1] > b[3] || a[3] < b[1] || a[0] > b[2] || a[2] < b[0] || a[4] > b[5] || a[5] < b[4]) {
+            return false;
+        }
+        return true;
+    }
+    static RegionContainsFloat(a, lat, lon, alt) {
+        return lat >= a[1] && lat <= a[3] && (lon === undefined || (lon >= a[0] && lon <= a[2])) && (alt === undefined || (alt >= a[4] && alt <= a[5]));
+    }
     static Zero() {
         return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero());
     }
@@ -2127,6 +2172,20 @@ class Envelope {
     intersects(bounds) {
         if (bounds === undefined)
             return false;
+        if (Array.isArray(bounds)) {
+            if (this._min.lat > bounds[3] || this._max.lat < bounds[1] || this._min.lon > bounds[2] || this._max.lon < bounds[0]) {
+                return false;
+            }
+            if (this.hasAltitude && bounds.length === 6) {
+                if (this._min.alt > bounds[5] || this._max.alt < bounds[4]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(bounds)) {
+            return this.intersects(bounds.geoBounds);
+        }
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
             return false;
         }
@@ -5232,9 +5291,10 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
         this.canvas = canvas;
         this._resizeToFitClient = f;
         this._scale = scale;
+        const canvasAsElement = canvas;
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
-                if (entry.target === canvas) {
+                if (entry.target === canvasAsElement) {
                     if (this._resizeToFitClient) {
                         CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
                     }
@@ -5242,7 +5302,7 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
                 }
             }
         });
-        this._resizeObserver.observe(canvas);
+        this._resizeObserver.observe(canvasAsElement);
     }
     getContext(options) {
         return this.canvas.getContext("2d", options);
@@ -9237,10 +9297,11 @@ class TilesetCache {
 class Tile3dStreamingEngine extends _pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
     constructor(uri, options) {
         super();
+        this._actives = [];
         this._uri = uri;
         this._root = null;
-        this._cache = new TilesetCache();
-        this._client = new _io_webClient__WEBPACK_IMPORTED_MODULE_1__.WebClient(uri, new TilesetCodec());
+        this._cache = options?.cache ?? new TilesetCache();
+        this._client = options?.webClient ?? new _io_webClient__WEBPACK_IMPORTED_MODULE_1__.WebClient(uri, new TilesetCodec());
         this._options = { ...Tile3dStreamingEngineOptions.Default, ...options };
     }
     setContext(state, display) {
@@ -9252,10 +9313,6 @@ class Tile3dStreamingEngine extends _pipeline_tiles_pipeline_sourceblock__WEBPAC
     }
     _doClearContext() { }
     _doValidateContext(state, display) {
-        if (!state || !display) {
-            this._doClearContext();
-            return;
-        }
         if (this._root === null) {
             this._doFetchTilesetAsync(this._uri).then((tileset) => {
                 if (tileset) {
@@ -11736,6 +11793,12 @@ class CameraState {
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
+    }
+    get tanfov2() {
+        if (!this._tanfov2) {
+            this._tanfov2 = Math.tan((this._fov * Math.PI) / 360);
+        }
+        return this._tanfov2;
     }
 }
 CameraState.POSITION_PROPERTY_NAME = "position";

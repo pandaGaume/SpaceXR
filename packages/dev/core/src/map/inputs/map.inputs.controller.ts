@@ -12,7 +12,7 @@ import { AnyTouchGesture, ITouchGestureSource } from "./map.inputs.interfaces.to
 /// It also prevents the default browser context menu via `contextmenu` events.
 /// Note: The `contextmenu` event is a `MouseEvent`, not a `PointerEvent`, and is handled accordingly.
 /// </summary>
-export class InputController<T extends HTMLElement> implements IInputSource, IDisposable {
+export class InputController<T extends HTMLCanvasElement> implements IInputSource, IDisposable {
     _src?: T;
 
     _onPointerOverObservable?: Observable<PointerEvent>;

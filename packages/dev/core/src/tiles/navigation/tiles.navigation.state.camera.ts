@@ -12,6 +12,7 @@ export class CameraState implements ICameraState {
     private _position: ICartesian3;
     private _target: ICartesian3;
     private _fov: number;
+    private _tanfov2?: number;
 
     constructor(position: ICartesian3, target: ICartesian3, fov: number) {
         this._position = position;
@@ -78,5 +79,12 @@ export class CameraState implements ICameraState {
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
+    }
+
+    get tanfov2(): number {
+        if (!this._tanfov2) {
+            this._tanfov2 = Math.tan((this._fov * Math.PI) / 360); // Convert FOV from degrees to radians and calculate tan(fov/2)
+        }
+        return this._tanfov2;
     }
 }

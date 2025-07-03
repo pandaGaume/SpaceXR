@@ -1,7 +1,7 @@
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
 import { Nullable } from "core/types";
 import { FetchResult, WebClient } from "core/io";
-import { ICameraState, IDisplay } from "core/tiles";
+import { CameraState, ICameraState, IDisplay } from "core/tiles";
 import { Envelope } from "core/geography";
 import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy";
 
@@ -92,7 +92,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
         display: IDisplay,
         bounds: RegionType, // [west, south, east, north, minimum height, maximum height]
         system: GeodeticSystem,
-        geometricError?: number
+        geometricError?: number // inherited geometric error from the parent.
     ): void {
         if (!tile) {
             return; // No tileset loaded
@@ -121,7 +121,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
             // ideally we may compute our own box from the region at loading time.
             const center = this._getRegionCenterToCartesianRef(region, system, this._cartesianCache[0]);
 
-            const distanceToCamera = Cartesian3.Distance(center, cameraState.position);
+            const distanceToCamera = Cartesian3.Distance(center, cameraState.position) * (cameraState.scale ?? CameraState.DefaultScale); // scale is used to adjust the distance based on the observed scene size
             const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
 
             const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;

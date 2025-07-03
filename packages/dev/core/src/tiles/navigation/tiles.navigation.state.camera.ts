@@ -3,7 +3,10 @@ import { ICartesian3 } from "../../geometry";
 import { ICameraState } from "./tiles.navigation.interfaces";
 
 export class CameraState implements ICameraState {
+    public static readonly DefaultScale: number = 1.0;
+
     public static readonly POSITION_PROPERTY_NAME: string = "position";
+    public static readonly SCALE_PROPERTY_NAME: string = "scale";
     public static readonly TARGET_PROPERTY_NAME: string = "target";
     public static readonly FOV_PROPERTY_NAME: string = "fov";
 
@@ -13,11 +16,13 @@ export class CameraState implements ICameraState {
     private _target: ICartesian3;
     private _fov: number;
     private _tanfov2?: number;
+    private _scale: number;
 
-    constructor(position: ICartesian3, target: ICartesian3, fov: number) {
+    constructor(position: ICartesian3, target: ICartesian3, fov: number, scale?: number) {
         this._position = position;
         this._target = target;
         this._fov = fov;
+        this._scale = scale ?? CameraState.DefaultScale;
     }
 
     /// <summary>
@@ -26,6 +31,21 @@ export class CameraState implements ICameraState {
     public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ICameraState, unknown>> {
         if (!this._propertyChangedObservable) this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ICameraState, unknown>>();
         return this._propertyChangedObservable;
+    }
+
+    get scale(): number {
+        return this._scale;
+    }
+
+    set scale(value: number) {
+        if (this._scale !== value) {
+            const old = this._scale;
+            this._scale = value;
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new PropertyChangedEventArgs(this, old, this._scale, CameraState.SCALE_PROPERTY_NAME);
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
+        }
     }
     /// <summary>
     /// Gets or sets the position of the camera. When set, notifies observers of the change.

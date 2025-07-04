@@ -17,6 +17,16 @@ export function ScreenSpaceError(tileGeometricError: number, distanceToCamera: n
     return (tileGeometricError * viewportHeight) / (distanceToCamera * tanfov2);
 }
 
+export class Tile3dGeodeticOptions {
+    static readonly Default: Tile3dGeodeticOptions = {
+        system: GeodeticSystem.Default,
+        calculator: new SphericalCalculator(GeodeticSystem.Default.ellipsoid), // Default geo-processor for region to box conversion
+    };
+
+    system?: GeodeticSystem;
+    calculator?: IGeoProcessor; // Optional geo-processor for region to box conversion
+}
+
 export class Tile3dStreamingEngineOptions {
     static readonly DefaultTilesetExtension = ".json"; // Default extension for tilesets
     static readonly DefaultMaximumScreenSpaceError = 16; // Default maximum screen space error
@@ -24,13 +34,13 @@ export class Tile3dStreamingEngineOptions {
     static readonly Default: Tile3dStreamingEngineOptions = {
         tilesetExtension: Tile3dStreamingEngineOptions.DefaultTilesetExtension,
         maximumScreenSpaceError: Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError, // Default maximum screen space error
-        system: GeodeticSystem.Default,
+        geo: Tile3dGeodeticOptions.Default,
     };
 
     tilesetExtension?: string;
     webClient?: WebClient<string, ITileset>;
     maximumScreenSpaceError?: number; // Maximum screen space error for tile refinement
-    system?: GeodeticSystem = GeodeticSystem.Default;
+    geo?: Tile3dGeodeticOptions;
 }
 
 export class Tile3dStreamingEngine extends SourceBlock<ITile> {
@@ -115,15 +125,17 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
             }
 
             const tileGeometricError = tile.geometricError ?? geometricError;
-            const system = this._options.system ?? GeodeticSystem.Default;
+            const system = this._options.geo?.system ?? GeodeticSystem.Default;
             // here we decided to not trust the sored geometry such box.
             // we compute the center of the tile region in radians
             // and compute the distance to the camera.
-            // we may find a startegy to use the box in the future, where the cartesian center is already defined.
+            // we may find a strategy to use the box in the future, where the cartesian center is already defined.
             // ideally we may compute our own box from the region at loading time.
+            // we may introduce a computedBox property in the tile interface.
             const center = this._getRegionCenterToCartesianRef(region, system, this._cartesianCache[0]);
-
-            const distanceToCamera = Cartesian3.Distance(center, cameraState.position) * (navigationState?.mapscale ?? CameraState.DefaultScale); // scale is used to adjust the distance based on the observed scene size
+            let scale = navigationState?.mapscale ?? CameraState.DefaultScale;
+            scale = scale < 0 ? CameraState.DefaultScale : scale; // Ensure scale is positive & non zero
+            const distanceToCamera = Cartesian3.Distance(center, cameraState.position) / scale; // scale is used to adjust the distance based on the observed scene size
             const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
 
             const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;

@@ -1,7 +1,7 @@
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
 import { Nullable } from "core/types";
 import { FetchResult, WebClient } from "core/io";
-import { CameraState, ICameraState, IDisplay } from "core/tiles";
+import { CameraState, ICameraState, IDisplay, ITileNavigationState } from "core/tiles";
 import { Envelope } from "core/geography";
 import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy";
 
@@ -24,11 +24,13 @@ export class Tile3dStreamingEngineOptions {
     static readonly Default: Tile3dStreamingEngineOptions = {
         tilesetExtension: Tile3dStreamingEngineOptions.DefaultTilesetExtension,
         maximumScreenSpaceError: Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError, // Default maximum screen space error
+        system: GeodeticSystem.Default,
     };
 
     tilesetExtension?: string;
     webClient?: WebClient<string, ITileset>;
     maximumScreenSpaceError?: number; // Maximum screen space error for tile refinement
+    system?: GeodeticSystem = GeodeticSystem.Default;
 }
 
 export class Tile3dStreamingEngine extends SourceBlock<ITile> {
@@ -53,9 +55,9 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
 
     public setContext(
         cameraState: Nullable<ICameraState>,
+        navigationState: Nullable<ITileNavigationState>,
         display: IDisplay,
-        bounds: [number, number, number, number, number, number],
-        system: GeodeticSystem = GeodeticSystem.Default
+        bounds: [number, number, number, number, number, number]
     ): void {
         if (!cameraState || !bounds) {
             this._actives = [];
@@ -65,33 +67,33 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
             this._loadAsync(this._uri).then((tileset) => {
                 if (tileset) {
                     this._root = tileset;
-                    this._activateTileset(this._root, cameraState, display, bounds, system);
+                    this._activateTileset(this._root, cameraState, navigationState, display, bounds);
                 }
             });
         } else {
-            this._activateTileset(this._root, cameraState, display, bounds, system);
+            this._activateTileset(this._root, cameraState, navigationState, display, bounds);
         }
     }
 
     protected _activateTileset(
         tileset: ITileset,
         cameraState: ICameraState,
+        navigationState: Nullable<ITileNavigationState>,
         display: IDisplay,
-        bounds: [number, number, number, number, number, number],
-        system: GeodeticSystem
+        bounds: [number, number, number, number, number, number]
     ): void {
         if (!tileset) {
             return; // No tileset loaded
         }
-        this._activateTile(tileset.root, cameraState, display, bounds, system, tileset.geometricError);
+        this._activateTile(tileset.root, cameraState, navigationState, display, bounds, tileset.geometricError);
     }
 
     protected _activateTile(
         tile: ITile,
         cameraState: ICameraState,
+        navigationState: Nullable<ITileNavigationState>,
         display: IDisplay,
         bounds: RegionType, // [west, south, east, north, minimum height, maximum height]
-        system: GeodeticSystem,
         geometricError?: number // inherited geometric error from the parent.
     ): void {
         if (!tile) {
@@ -113,7 +115,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
             }
 
             const tileGeometricError = tile.geometricError ?? geometricError;
-
+            const system = this._options.system ?? GeodeticSystem.Default;
             // here we decided to not trust the sored geometry such box.
             // we compute the center of the tile region in radians
             // and compute the distance to the camera.
@@ -121,7 +123,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
             // ideally we may compute our own box from the region at loading time.
             const center = this._getRegionCenterToCartesianRef(region, system, this._cartesianCache[0]);
 
-            const distanceToCamera = Cartesian3.Distance(center, cameraState.position) * (cameraState.scale ?? CameraState.DefaultScale); // scale is used to adjust the distance based on the observed scene size
+            const distanceToCamera = Cartesian3.Distance(center, cameraState.position) * (navigationState?.mapscale ?? CameraState.DefaultScale); // scale is used to adjust the distance based on the observed scene size
             const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
 
             const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;
@@ -137,7 +139,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
                             // Load external tileset and activate its root
                             this._loadAsync(uri).then((tileset) => {
                                 if (tileset) {
-                                    this._activateTileset(tileset, cameraState, display, bounds, system);
+                                    this._activateTileset(tileset, cameraState, navigationState, display, bounds);
                                 }
                             });
                         }
@@ -147,7 +149,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
                 // we have to refine if it's not a leaf tile
                 if (!hasExternalTileset && tile.children && tile.children.length > 0) {
                     for (const child of tile.children) {
-                        this._activateTile(child, cameraState, display, bounds, system, tileGeometricError);
+                        this._activateTile(child, cameraState, navigationState, display, bounds, tileGeometricError);
                     }
                 }
                 return; // No need to add this tile, it will be refined

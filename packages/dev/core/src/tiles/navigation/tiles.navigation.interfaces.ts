@@ -60,14 +60,6 @@ export interface ICameraState {
     /// the camera's field of view.
     /// </summary>
     tanfov2: number;
-
-    /// <summary>
-    /// the optional scale of the observed scene, which is the ratio of the size of the observed scene and the real size of the scene.
-    /// This scale is used to determine the logical distance between the camera and the tiles, which is crucial for
-    /// calculating the Level of Detail (LOD) and the required resolution of tiles.
-    /// default value is 1.0, which means that the observed scene is at its real size. This is the case for example when the camera itsel is on ECEF coordinates.
-    /// </summary>
-    scale?: number;
 }
 
 /// <summary>
@@ -139,6 +131,14 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     /// navigation state instances.
     /// </summary>
     syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
+
+    /// <summary>
+    /// the optional scale of the observed scene, which is the ratio of the size of the observed scene and the real size of the scene.
+    /// This scale is used to determine the logical distance between the camera and the tiles, which is crucial for
+    /// calculating the Level of Detail (LOD) and the required resolution of tiles.
+    /// default value is 1.0, which means that the observed scene is at its real size. This is the case for example when the camera itsel is on ECEF coordinates.
+    /// </summary>
+    mapscale?: number;
 }
 
 export function IsTileNavigationState(b: unknown): b is ITileNavigationState {

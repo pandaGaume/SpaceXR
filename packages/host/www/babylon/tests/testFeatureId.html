@@ -12,6 +12,7 @@
         <style>
             html,
             body {
+                background-color: rgb(185, 185, 185);
                 overflow: hidden;
                 width: 100%;
                 height: 100%;
@@ -98,6 +99,18 @@
                         camera.minZ = size;
                         camera.maxZ = size * 2;
                     });
+                }
+
+                // ui related
+                // Get the computed background color of the body
+                const bodyStyle = window.getComputedStyle(document.body);
+                const bgColor = bodyStyle.backgroundColor;
+
+                // Convert the RGB color to Babylon.js Color3 or Color4
+                const rgbValues = bgColor.match(/\d+/g); // Extract RGB values from "rgb(255, 255, 255)" string
+                if (rgbValues) {
+                    const [r, g, b] = rgbValues.map(Number).map((v) => v / 255); // Normalize to [0, 1] range
+                    scene.clearColor = new BABYLON.Color3(r, g, b); // Set clearColor using the computed background color
                 }
                 return scene;
             }

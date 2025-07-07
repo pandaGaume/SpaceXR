@@ -115,17 +115,17 @@ export interface ITileMetricsProvider {
     metrics: ITileMetrics;
 }
 export declare function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider;
-export interface ITileDatasource<T, A extends ITileAddress2> extends ITileMetricsProvider {
+export interface ITileDatasource<T, A extends ITileAddress2 | ITileAddress3> extends ITileMetricsProvider {
     name: string;
     fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
-export declare function IsTileDatasource<T, A extends ITileAddress2>(b: unknown): b is ITileDatasource<T, A>;
-export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2> {
+export declare function IsTileDatasource<T, A extends ITileAddress2 | ITileAddress3>(b: unknown): b is ITileDatasource<T, A>;
+export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2 | ITileAddress3> {
 }
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
     name: string;
-    datasource: ITileDatasource<T, ITileAddress2>;
-    accept(address: ITileAddress2): boolean;
+    datasource: ITileDatasource<T, ITileAddress2 | ITileAddress3>;
+    accept(address: ITileAddress2 | ITileAddress3): boolean;
     fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>;
 }
 export interface IHasNamespace {

@@ -11745,15 +11745,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.args.js");
 
 class CameraState {
-    constructor(position, target, fov) {
+    constructor(position, target, fov, scale) {
         this._position = position;
         this._target = target;
         this._fov = fov;
+        this._scale = scale ?? CameraState.DefaultScale;
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
             this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         return this._propertyChangedObservable;
+    }
+    get scale() {
+        return this._scale;
+    }
+    set scale(value) {
+        if (this._scale !== value) {
+            const old = this._scale;
+            this._scale = value;
+            if (this._propertyChangedObservable?.hasObservers()) {
+                const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._scale, CameraState.SCALE_PROPERTY_NAME);
+                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
+            }
+        }
     }
     get position() {
         return this._position;
@@ -11801,7 +11815,9 @@ class CameraState {
         return this._tanfov2;
     }
 }
+CameraState.DefaultScale = 1.0;
 CameraState.POSITION_PROPERTY_NAME = "position";
+CameraState.SCALE_PROPERTY_NAME = "scale";
 CameraState.TARGET_PROPERTY_NAME = "target";
 CameraState.FOV_PROPERTY_NAME = "fov";
 //# sourceMappingURL=tiles.navigation.state.camera.js.map

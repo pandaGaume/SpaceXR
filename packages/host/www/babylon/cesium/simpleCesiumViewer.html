@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Cesium Mont Blanc (await)</title>
+        <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+        <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+        <style>
+            html,
+            body,
+            #cesiumContainer {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="cesiumContainer"></div>
+        <script type="module">
+            // Utiliser une IIFE async pour pouvoir utiliser await
+            (async () => {
+                Cesium.Ion.defaultAccessToken = "token";
+                // Chargement asynchrone du terrain
+                const terrainProvider = await Cesium.createWorldTerrainAsync();
+
+                // Initialisation du viewer
+                const viewer = new Cesium.Viewer("cesiumContainer", {
+                    terrainProvider,
+                    shouldAnimate: false,
+                    timeline: false,
+                    animation: false,
+                });
+
+                // Coordonnées du Mont Blanc
+                const lon = 6.865;
+                const lat = 45.8326;
+                const height = 4809;
+
+                const position = Cesium.Cartesian3.fromDegrees(lon, lat, height + 2000);
+
+                // Positionner la caméra
+                viewer.camera.setView({
+                    destination: position,
+                    orientation: {
+                        heading: Cesium.Math.toRadians(0),
+                        pitch: Cesium.Math.toRadians(-45),
+                        roll: 0,
+                    },
+                });
+
+                // Afficher un point au sommet
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(lon, lat, height),
+                    point: {
+                        pixelSize: 10,
+                        color: Cesium.Color.RED,
+                    },
+                    label: {
+                        text: "Mont Blanc",
+                        pixelOffset: new Cesium.Cartesian2(0, -20),
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    },
+                });
+            })();
+        </script>
+    </body>
+</html>

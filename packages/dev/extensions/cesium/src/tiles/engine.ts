@@ -1,11 +1,10 @@
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
 import { Nullable } from "core/types";
 import { FetchResult, WebClient } from "core/io";
-import { CameraState, ICameraState, IDisplay, ITileNavigationState } from "core/tiles";
-import { Envelope } from "core/geography";
+import { ICameraState, IDisplay } from "core/tiles";
 import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy";
 
-import { BoxType, ITile, ITileset, RegionType } from "./interfaces";
+import { BoxType, ITile, ITileset, Mat44Type, Point3Type, RegionType, TransformPoint3, TransformVec3 } from "./interfaces";
 import { Tile3dCodec } from "./codecs";
 import { Cartesian3, ICartesian3 } from "core/geometry";
 
@@ -51,8 +50,14 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
 
     _actives: Array<ITile> = []; // Active tiles in the current context
     _loadingPromises: Map<string, Promise<FetchResult<string, Nullable<ITileset>>>>;
-    _cartesianCache: ICartesian3[] = [Cartesian3.Zero(), Cartesian3.Zero()]; // Cache for Cartesian coordinates to avoid reallocating frequently
-    _boxCache: Array<BoxType> = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]; // Cache for box coordinates to avoid reallocating frequently
+    _cartesianCache: Array<Point3Type> = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]; // Cache for Cartesian coordinates to avoid reallocating frequently
+    _boxCache: Array<BoxType> = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]; // Cache for box coordinates to avoid reallocating frequently
 
     public constructor(uri: string, options?: Tile3dStreamingEngineOptions) {
         super();
@@ -65,111 +70,117 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
 
     public setContext(
         cameraState: Nullable<ICameraState>,
-        navigationState: Nullable<ITileNavigationState>,
         display: IDisplay,
-        bounds: [number, number, number, number, number, number]
+        bounds: RegionType // An array of six numbers that define a bounding geographic region in EPSG:4979 coordinates
     ): void {
         if (!cameraState || !bounds) {
             this._actives = [];
             return;
         }
+
+        const system = this._options.geo?.system ?? GeodeticSystem.Default;
+        const calculator = this._options.geo?.calculator ?? new SphericalCalculator(system.ellipsoid);
+        const box = this._getRegionToBoxRef(bounds, system, this._boxCache[0], calculator);
         if (!this._root) {
+            const clonedBox: BoxType = box.slice() as BoxType; // need to be clonned to avoid concurrent access.
             this._loadAsync(this._uri).then((tileset) => {
                 if (tileset) {
                     this._root = tileset;
-                    this._activateTileset(this._root, cameraState, navigationState, display, bounds);
+                    this._activateTileset(this._root, cameraState, display, clonedBox);
                 }
             });
         } else {
-            this._activateTileset(this._root, cameraState, navigationState, display, bounds);
+            this._activateTileset(this._root, cameraState, display, box);
         }
     }
 
-    protected _activateTileset(
-        tileset: ITileset,
-        cameraState: ICameraState,
-        navigationState: Nullable<ITileNavigationState>,
-        display: IDisplay,
-        bounds: [number, number, number, number, number, number]
-    ): void {
+    protected _activateTileset(tileset: ITileset, cameraState: ICameraState, display: IDisplay, bounds: BoxType): void {
         if (!tileset) {
             return; // No tileset loaded
         }
-        this._activateTile(tileset.root, cameraState, navigationState, display, bounds, tileset.geometricError);
+        this._activateTile(tileset.root, cameraState, display, bounds, tileset.geometricError);
     }
 
     protected _activateTile(
         tile: ITile,
         cameraState: ICameraState,
-        navigationState: Nullable<ITileNavigationState>,
         display: IDisplay,
-        bounds: RegionType, // [west, south, east, north, minimum height, maximum height]
+        bounds: BoxType,
         geometricError?: number // inherited geometric error from the parent.
     ): void {
-        if (!tile) {
-            return; // No tileset loaded
-        }
-        const region = tile.boundingVolume?.region;
-        if (!region) {
-            return; // No bounding volume defined
-        }
+        if (!tile) return;
 
-        if (Envelope.RegionIntersectsRegion(bounds, region)) {
-            if (tile.viewerRequestVolume) {
-                // If the tile has a viewer request volume, we check if the camera is within that volume.
-                const viewerRegion = tile.viewerRequestVolume.region;
-                if (viewerRegion) {
-                    // TODO : If the camera is not within the viewer request volume, we skip this tile.
-                    // const box = this._getRegionToBoxRef(viewerRegion, system, this._boxCache[0]);
-                }
+        let box = tile.boundingVolume?.box;
+        if (!box) {
+            const region = tile.boundingVolume?.region;
+            if (region) {
+                const system = this._options.geo?.system ?? GeodeticSystem.Default;
+                const calculator = this._options.geo?.calculator ?? new SphericalCalculator(system.ellipsoid);
+                box = this._getRegionToBoxRef(region, system, this._boxCache[1], calculator);
+            } else {
+                return;
             }
+        }
 
-            const tileGeometricError = tile.geometricError ?? geometricError;
-            const system = this._options.geo?.system ?? GeodeticSystem.Default;
-            // here we decided to not trust the sored geometry such box.
-            // we compute the center of the tile region in radians
-            // and compute the distance to the camera.
-            // we may find a strategy to use the box in the future, where the cartesian center is already defined.
-            // ideally we may compute our own box from the region at loading time.
-            // we may introduce a computedBox property in the tile interface.
-            const center = this._getRegionCenterToCartesianRef(region, system, this._cartesianCache[0]);
-            let scale = navigationState?.mapscale ?? CameraState.DefaultScale;
-            scale = scale < 0 ? CameraState.DefaultScale : scale; // Ensure scale is positive & non zero
-            const distanceToCamera = Cartesian3.Distance(center, cameraState.position) / scale; // scale is used to adjust the distance based on the observed scene size
-            const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
+        const transform = tile.transform as Mat44Type | undefined;
 
-            const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;
-            if (sse > maxsse) {
-                const contents = tile.content ? [tile.content] : tile.contents;
+        const boxCenter: Point3Type = [box[0], box[1], box[2]];
+        const worldBoxCenter = transform ? TransformPoint3(transform, boxCenter, this._cartesianCache[0]) : boxCenter;
 
-                let hasExternalTileset = false;
-                if (contents && contents.length > 0) {
-                    for (const content of contents) {
-                        const uri = content.uri;
-                        if (uri && uri.toLowerCase().endsWith((this._options.tilesetExtension ?? Tile3dStreamingEngineOptions.DefaultTilesetExtension).toLowerCase())) {
-                            hasExternalTileset = true;
-                            // Load external tileset and activate its root
-                            this._loadAsync(uri).then((tileset) => {
-                                if (tileset) {
-                                    this._activateTileset(tileset, cameraState, navigationState, display, bounds);
-                                }
-                            });
-                        }
+        const viewBox = tile.viewerRequestVolume?.box;
+        if (viewBox) {
+            const viewCenter: Point3Type = [viewBox[0], viewBox[1], viewBox[2]];
+            const worldViewCenter = transform ? TransformPoint3(transform, viewCenter, this._cartesianCache[1]) : viewCenter;
+
+            const xAxis = TransformVec3(transform!, [viewBox[3], viewBox[4], viewBox[5]]);
+            const yAxis = TransformVec3(transform!, [viewBox[6], viewBox[7], viewBox[8]]);
+            const zAxis = TransformVec3(transform!, [viewBox[9], viewBox[10], viewBox[11]]);
+
+            const dx = cameraState.position.x - worldViewCenter[0];
+            const dy = cameraState.position.y - worldViewCenter[1];
+            const dz = cameraState.position.z - worldViewCenter[2];
+
+            const proj = (a: number[], bx: number, by: number, bz: number) => Math.abs(a[0] * bx + a[1] * by + a[2] * bz);
+            const len = (a: number[]) => Math.sqrt(a[0] ** 2 + a[1] ** 2 + a[2] ** 2);
+
+            if (proj(xAxis, dx, dy, dz) > len(xAxis) || proj(yAxis, dx, dy, dz) > len(yAxis) || proj(zAxis, dx, dy, dz) > len(zAxis)) {
+                return; // camera is outside viewer request volume
+            }
+        }
+
+        const dx = worldBoxCenter[0] - cameraState.position.x;
+        const dy = worldBoxCenter[1] - cameraState.position.y;
+        const dz = worldBoxCenter[2] - cameraState.position.z;
+        const distanceToCamera = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        const tileGeometricError = tile.geometricError ?? geometricError;
+        const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
+        const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;
+
+        if (sse > maxsse) {
+            const contents = tile.content ? [tile.content] : tile.contents;
+
+            let hasExternalTileset = false;
+            if (contents && contents.length > 0) {
+                for (const content of contents) {
+                    const uri = content.uri;
+                    if (uri && uri.toLowerCase().endsWith((this._options.tilesetExtension ?? Tile3dStreamingEngineOptions.DefaultTilesetExtension).toLowerCase())) {
+                        hasExternalTileset = true;
+                        this._loadAsync(uri).then((tileset) => {
+                            if (tileset) {
+                                this._activateTileset(tileset, cameraState, display, bounds);
+                            }
+                        });
                     }
                 }
+            }
 
-                // we have to refine if it's not a leaf tile
-                if (!hasExternalTileset && tile.children && tile.children.length > 0) {
-                    for (const child of tile.children) {
-                        this._activateTile(child, cameraState, navigationState, display, bounds, tileGeometricError);
-                    }
+            if (!hasExternalTileset && tile.children && tile.children.length > 0) {
+                for (const child of tile.children) {
+                    this._activateTile(child, cameraState, display, bounds, tileGeometricError);
                 }
-                return; // No need to add this tile, it will be refined
             }
-
-            if (!this._actives.includes(tile)) {
-                this._actives.push(tile);
-            }
+            return;
         }
     }
 
@@ -212,7 +223,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
 
         // Centre en géodésique
         const calculator = proc ?? new SphericalCalculator(system.ellipsoid);
-        const centerCartesian = system.geodeticFloatToCartesianToRef(latCenter, lonCenter, heightCenter, this._cartesianCache[0], false);
+        const centerCartesian = system.geodeticFloatToCartesianToRef(latCenter, lonCenter, heightCenter, Cartesian3.Zero(), false);
         target[0] = centerCartesian.x;
         target[1] = centerCartesian.y;
         target[2] = centerCartesian.z;
@@ -229,7 +240,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
         // Vecteur Est (X axis)
         const azimuthX = 90; // Est géographique
         const geoX = calculator.getLocationAtDistanceAzimuth(latCenter, lonCenter, halfX, azimuthX, false);
-        const xEnd = system.geodeticFloatToCartesianToRef(geoX.lat, geoX.lon, heightCenter, this._cartesianCache[1], false);
+        const xEnd = system.geodeticFloatToCartesianToRef(geoX.lat, geoX.lon, heightCenter, Cartesian3.Zero(), false);
         target[3] = xEnd.x - centerCartesian.x;
         target[4] = xEnd.y - centerCartesian.y;
         target[5] = xEnd.z - centerCartesian.z;
@@ -237,13 +248,13 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile> {
         // Vecteur Nord (Y axis)
         const azimuthY = 0; // Nord géographique
         const geoY = calculator.getLocationAtDistanceAzimuth(latCenter, lonCenter, halfY, azimuthY);
-        const yEnd = system.geodeticFloatToCartesianToRef(geoY.lat, geoY.lon, heightCenter, this._cartesianCache[1], false);
+        const yEnd = system.geodeticFloatToCartesianToRef(geoY.lat, geoY.lon, heightCenter, Cartesian3.Zero(), false);
         target[6] = yEnd.x - centerCartesian.x;
         target[7] = yEnd.y - centerCartesian.y;
         target[8] = yEnd.z - centerCartesian.z;
 
         // Vecteur vertical (Z axis)
-        const zEnd = system.geodeticFloatToCartesianToRef(latCenter, lonCenter, heightCenter + halfZ, this._cartesianCache[1], false);
+        const zEnd = system.geodeticFloatToCartesianToRef(latCenter, lonCenter, heightCenter + halfZ, Cartesian3.Zero(), false);
         target[9] = zEnd.x - centerCartesian.x;
         target[10] = zEnd.y - centerCartesian.y;
         target[11] = zEnd.z - centerCartesian.z;

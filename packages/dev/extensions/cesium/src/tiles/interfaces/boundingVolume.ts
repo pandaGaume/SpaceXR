@@ -35,3 +35,29 @@ export interface IBoundingVolume {
      */
     sphere?: SphereType;
 }
+
+export type IBoxType = [number, number, number, number, number, number, number, number, number, number, number, number];
+
+export function AreBoxIntersect(a: IBoxType, b: IBoxType): boolean {
+    for (let i = 0; i < 3; ++i) {
+        const ai = 3 + i * 3;
+        const aj = ai + 1;
+        const ak = ai + 2;
+
+        const aHalf = Math.sqrt(a[ai] ** 2 + a[aj] ** 2 + a[ak] ** 2);
+        const bHalf = Math.sqrt(b[ai] ** 2 + b[aj] ** 2 + b[ak] ** 2);
+
+        const aMin = a[i] - aHalf;
+        const aMax = a[i] + aHalf;
+
+        const bMin = b[i] - bHalf;
+        const bMax = b[i] + bHalf;
+
+        // Sort early if separated on this axis
+        if (aMax < bMin || aMin > bMax) {
+            return false;
+        }
+    }
+
+    return true;
+}

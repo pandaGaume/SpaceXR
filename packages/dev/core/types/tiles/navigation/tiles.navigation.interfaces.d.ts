@@ -25,6 +25,7 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     camera?: ICameraState;
     copy(state: ITileNavigationState): ITileNavigationState;
     syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
+    mapscale?: number;
 }
 export declare function IsTileNavigationState(b: unknown): b is ITileNavigationState;
 export interface ITileNavigationApi extends IHasNavigationState, IDisposable {

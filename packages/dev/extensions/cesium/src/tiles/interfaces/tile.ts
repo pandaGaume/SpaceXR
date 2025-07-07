@@ -5,6 +5,43 @@ import { IImplicitTiling } from "./tile.implicitTiling";
 
 export type RefineType = "ADD" | "REPLACE" | string;
 export type Mat44Type = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
+export type Vec3Type = [number, number, number];
+export type Point3Type = [number, number, number];
+
+export function TransformVec3(transform: Mat44Type, v: Vec3Type, ref?: Vec3Type): Vec3Type {
+    const x = v[0],
+        y = v[1],
+        z = v[2];
+    const tx = transform[0] * x + transform[4] * y + transform[8] * z + transform[12];
+    const ty = transform[1] * x + transform[5] * y + transform[9] * z + transform[13];
+    const tz = transform[2] * x + transform[6] * y + transform[10] * z + transform[14];
+
+    if (ref) {
+        ref[0] = tx;
+        ref[1] = ty;
+        ref[2] = tz;
+        return ref;
+    }
+    return [tx, ty, tz];
+}
+
+export function TransformPoint3(transform: Mat44Type, v: Point3Type, ref?: Point3Type): Point3Type {
+    const x = v[0],
+        y = v[1],
+        z = v[2];
+    const tx = transform[0] * x + transform[4] * y + transform[8] * z;
+    const ty = transform[1] * x + transform[5] * y + transform[9] * z;
+    const tz = transform[2] * x + transform[6] * y + transform[10] * z;
+
+    if (ref) {
+        ref[0] = tx;
+        ref[1] = ty;
+        ref[2] = tz;
+        return ref;
+    }
+    return [tx, ty, tz];
+}
+
 /**
  * A tile in a 3D Tiles tileset.
  */

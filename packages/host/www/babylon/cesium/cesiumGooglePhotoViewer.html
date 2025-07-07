@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Cesium Goggle Photorealistic</title>
+        <script src="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Cesium.js"></script>
+        <link href="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+        <style>
+            html,
+            body,
+            #cesiumContainer {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="cesiumContainer"></div>
+        <script type="module">
+            // Grant CesiumJS access to your ion assets
+            Cesium.Ion.defaultAccessToken = "token";
+
+            const viewer = new Cesium.Viewer("cesiumContainer", {
+                // This is a global 3D Tiles tileset so disable the
+                // globe to prevent it from interfering with the data
+                globe: false,
+                // Disabling the globe means we need to manually
+                // re-enable the atmosphere
+                skyAtmosphere: new Cesium.SkyAtmosphere(),
+                // 2D and Columbus View are not currently supported
+                // for global 3D Tiles tilesets
+                sceneModePicker: false,
+                // Imagery layers are not currently supported for
+                // global 3D Tiles tilesets
+                baseLayerPicker: false,
+                // Use the Google geocoder instead of Bing
+                geocoder: Cesium.IonGeocodeProviderType.GOOGLE,
+            });
+
+            try {
+                const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(2275207);
+                viewer.scene.primitives.add(tileset);
+            } catch (error) {
+                console.log(error);
+            }
+        </script>
+    </body>
+</html>

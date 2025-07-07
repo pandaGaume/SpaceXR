@@ -9,8 +9,8 @@ module.exports = [
         },
         devtool: "source-map",
         output: {
-            library: "SPACEXR_TILE3D",
-            libraryTarget: "var",
+            library: ["SPACEXR", "Cesium"],
+            libraryTarget: "assign", // <-- clé ici
             filename: "[name]." + config.version + ".js",
             path: path.resolve(__dirname, "bundles"),
         },

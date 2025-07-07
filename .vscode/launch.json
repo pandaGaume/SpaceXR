@@ -148,6 +148,20 @@
             "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?root=glb&file=Google3DTile.glb",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test Cesium Native",
+            "url": "http://localhost:1338/packages/host/www/babylon/cesium/simpleCesiumViewer.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test Cesium Google",
+            "url": "http://localhost:1338/packages/host/www/babylon/cesium/cesiumGooglePhotoViewer.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/"
         }
     ]
 }

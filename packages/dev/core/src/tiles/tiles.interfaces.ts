@@ -204,25 +204,25 @@ export function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider {
     return (<ITileMetricsProvider>b).metrics !== undefined;
 }
 
-export interface ITileDatasource<T, A extends ITileAddress2> extends ITileMetricsProvider {
+export interface ITileDatasource<T, A extends ITileAddress2 | ITileAddress3> extends ITileMetricsProvider {
     name: string;
     fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
 
-export function IsTileDatasource<T, A extends ITileAddress2>(b: unknown): b is ITileDatasource<T, A> {
+export function IsTileDatasource<T, A extends ITileAddress2 | ITileAddress3>(b: unknown): b is ITileDatasource<T, A> {
     if (b === null || typeof b !== "object") return false;
     return (<ITileDatasource<T, A>>b).fetchAsync !== undefined && (<ITileDatasource<T, A>>b).metrics !== undefined;
 }
 
-export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2> {}
+export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2 | ITileAddress3> {}
 
 /// <summary>
 /// Act as decorator arround ITileDatasource to provide address filtering, content generation and also caching capabilities
 /// </summary>
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
     name: string; // usually shortcut for datasource?.name
-    datasource: ITileDatasource<T, ITileAddress2>; // the underlying data source
-    accept(address: ITileAddress2): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
+    datasource: ITileDatasource<T, ITileAddress2 | ITileAddress3>; // the underlying data source
+    accept(address: ITileAddress2 | ITileAddress3): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
     fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
 }
 

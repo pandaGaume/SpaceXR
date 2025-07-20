@@ -8,8 +8,9 @@ import { IHasHolographicBounds } from "../display";
 
 export type TextureType = ImageLayerContentType;
 export type ElevationType = IDemInfos;
+export type Object3dType = Array<AbstractMesh> | AbstractMesh;
 
-export type Map3DContentType = ElevationType | TextureType;
+export type Map3DContentType = ElevationType | TextureType | Object3dType;
 
 export interface IMap3D extends ITileMap<Map3DContentType>, IValidable {
     root: TransformNode;

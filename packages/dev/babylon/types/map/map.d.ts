@@ -4,9 +4,14 @@ import { Mesh, Scene, TransformNode } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { ICartesian3, ISize2 } from "core/geometry";
-export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
+export declare class Map3DOptions {
     static DefaultGridSize: number;
     static DefaultExageration: number;
+    gridSize?: number | ISize2;
+    offset?: ICartesian3;
+    exageration?: number;
+}
+export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
     static TEMPLATE_SUFFIX: string;
     static MATERIAL_SUFFIX: string;
     _root: TransformNode;
@@ -15,7 +20,7 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     _exageration?: number;
     _grid: Mesh;
     _material: IMap3DMaterial;
-    constructor(root: TransformNode);
+    constructor(root: TransformNode, options?: Map3DOptions);
     get elevationOptions(): IElevationOptions;
     get material(): IMap3DMaterial;
     get grid(): Mesh;
@@ -42,7 +47,7 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     protected _buildMaterialName(): string;
     protected _buildMaterial(name: string, scene?: Scene): IMap3DMaterial;
     protected _buildTemplate(scene?: Scene): Mesh;
-    protected _buildMesh(name: string, scene?: Scene): Mesh;
+    protected _buildMeshForTemplate(name: string, scene?: Scene): Mesh;
     protected _buildGridFactory(): IElevationGridFactory;
     private _buildGridFactoryInternal;
 }

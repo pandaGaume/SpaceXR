@@ -64,7 +64,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    public get metrics(): ITileMetrics {
+    public get metrics(): ITileMetrics | undefined {
         return this.factory.metrics;
     }
 

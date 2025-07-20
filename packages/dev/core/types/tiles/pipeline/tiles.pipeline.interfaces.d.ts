@@ -45,7 +45,7 @@ export interface ITileSelectionContextOptions {
     zoomOffset?: number;
 }
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics?: ITileMetrics, options?: ITileSelectionContextOptions): void;
 }
 export declare function hasTileSelectionContext(b: unknown): b is ITileSelectionContext;
 export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITileAddress2>, ITileSelectionContext {

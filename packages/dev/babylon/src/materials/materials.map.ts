@@ -24,7 +24,19 @@ import { ICartesian3, ISize3, Size3 } from "core/geometry";
 import { ClipIndex, ClipPlaneDefinition, IHolographicBounds, IsHolographicBox, IsHolographicCylinder, IsHolographicSphere } from "../display";
 import { ITexture3Layer, Texture3 } from "./textures";
 import { EventState, Observer } from "core/events";
-import { IPipelineMessageType, ITargetBlock, ITile, ITileAddress2, ITileMapLayerView, ITileMetrics, NeighborsAddress, TargetProxy, Tile, TileAddress } from "core/tiles";
+import {
+    AbstractTileMetrics,
+    IPipelineMessageType,
+    ITargetBlock,
+    ITile,
+    ITileAddress2,
+    ITileMapLayerView,
+    ITileMetrics,
+    NeighborsAddress,
+    TargetProxy,
+    Tile,
+    TileAddress,
+} from "core/tiles";
 import { IDisposable } from "core/types";
 import { ElevationLayerView, TextureLayerView } from "../map";
 import { Range } from "core/math";
@@ -328,7 +340,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     protected _ensureTextureSamplersReady(src: TextureLayerView): void {
         if (!this._textureSampler) {
-            let size = src.metrics.tileSize;
+            let size = src.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
             this._textureSampler = this._buildTextureSampler(size, size);
             this._ensureInstanceBufferReady(src._map.grid);
         }
@@ -336,7 +348,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     protected _ensureElevationSamplersReady(src: ElevationLayerView): void {
         if (!this._elevationSampler) {
-            let size = src.metrics.tileSize;
+            let size = src.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
             // we try optimize the depth using the zoom offset.
             const offset = src.layer.zoomOffset ?? 0;
             const r = offset == 0 ? 1.0 : offset > 0 ? Math.pow(2, offset) : 1.0 / Math.pow(2, -offset);
@@ -558,7 +570,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     private _imagesAdded(data: IPipelineMessageType<ITileWithGridElevation<TextureType>>, state: EventState): void {
         const host = state.currentTarget;
-        if (host instanceof TextureLayerView) {
+        if (host instanceof TextureLayerView && host.metrics) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 if (this._textureTileLayouts.has(key)) {
@@ -633,7 +645,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     private _elevationsAdded(data: IPipelineMessageType<ITile<ElevationType>>, state: EventState): void {
         const host = state.currentTarget;
-        if (host instanceof ElevationLayerView) {
+        if (host instanceof ElevationLayerView && host.metrics) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 if (this._elevationTileLayouts.has(key)) {
@@ -684,7 +696,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     private _processElevations(layout: ElevationLayout, view: ElevationLayerView) {
         const tile = layout.tile;
-        if (tile.content?.elevations) {
+        if (tile.content?.elevations && view.metrics) {
             // update the elevation range
             this._updateElevationRange(tile.content);
 
@@ -799,7 +811,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         const addresses = layout._neighbors;
         if (layout.tile.content?.elevations) {
             const elevations = layout.tile.content.elevations;
-            const elevationTileSize = layout.layer.metrics.tileSize;
+            const elevationTileSize = layout.layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
 
             // checking the north-west neighbour
             // we push the current upper left corner to neighbour lower right corner.
@@ -809,7 +821,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 if (nwLayout && nwLayout.area) {
                     // we may update the elevation texture with the upper left corner
                     const buffer = new Float32Array([elevations[0]]);
-                    const size = nwLayout.layer.metrics.tileSize;
+                    const size = nwLayout.layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
                     nwLayout.area.update(buffer, size, size, 1, 1);
                 }
             }
@@ -821,7 +833,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 const nLayout = this._elevationTileLayouts.get(a.quadkey);
                 if (nLayout && nLayout.area) {
                     const buffer = ElevationHelpers.GetFirstRow(elevations, elevationTileSize);
-                    const size = nLayout.layer.metrics.tileSize;
+                    const size = nLayout.layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
                     nLayout.area.update(buffer, 0, size, size, 1);
                 }
             }
@@ -833,7 +845,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 const eLayout = this._elevationTileLayouts.get(a.quadkey);
                 const eElevations = eLayout?.tile.content?.elevations;
                 if (eElevations && layout.area) {
-                    const size = layout.layer.metrics.tileSize;
+                    const size = layout.layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
                     const buffer = ElevationHelpers.GetFirstColumn(eElevations, size, size);
                     layout.area.update(buffer, elevationTileSize, 0, 1, elevationTileSize);
                 }
@@ -858,7 +870,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 const sLayout = this._elevationTileLayouts.get(a.quadkey);
                 const sElevations = sLayout?.tile.content?.elevations;
                 if (sElevations && layout.area) {
-                    const size = layout.layer.metrics.tileSize;
+                    const size = layout.layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
                     const buffer = ElevationHelpers.GetFirstRow(sElevations, size);
                     layout.area.update(buffer, 0, elevationTileSize, elevationTileSize, 1);
                 }
@@ -871,7 +883,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 const wLayout = this._elevationTileLayouts.get(a.quadkey);
                 if (wLayout?.area) {
                     const buffer = ElevationHelpers.GetFirstColumn(elevations, elevationTileSize, elevationTileSize);
-                    const size = layout.layer.metrics.tileSize;
+                    const size = layout.layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
                     wLayout.area.update(buffer, size, 0, 1, size);
                 }
             }

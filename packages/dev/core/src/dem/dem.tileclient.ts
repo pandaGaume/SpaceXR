@@ -29,12 +29,12 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
         this._zindex = v;
     }
 
-    public get metrics(): ITileMetrics {
+    public get metrics(): ITileMetrics | undefined {
         return this._elevationsDataSource.metrics;
     }
 
     public async fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<ITileAddress2, Nullable<IDemInfos>>> {
-        const requests: Array<Promise<FetchResult<ITileAddress2|ITileAddress3, Nullable<Float32Array> | Nullable<Uint8ClampedArray> | Nullable<HTMLImageElement>>>> = [];
+        const requests: Array<Promise<FetchResult<ITileAddress2 | ITileAddress3, Nullable<Float32Array> | Nullable<Uint8ClampedArray> | Nullable<HTMLImageElement>>>> = [];
         requests.push(this._elevationsDataSource.fetchAsync(request, env, ...userArgs));
         if (this._normalsDataSource) {
             requests.push(this._normalsDataSource.fetchAsync(request, env, ...userArgs));
@@ -62,7 +62,7 @@ export class DemTileWebClient implements ITileClient<IDemInfos> {
                 normals = <Nullable<Uint8ClampedArray>>results[1].value.content;
             }
         }
-        if (normals == null) {
+        if (normals == null && this.metrics) {
             const s = this.metrics.tileSize;
             normals = this.computeNormals(elevations, s, s);
         }

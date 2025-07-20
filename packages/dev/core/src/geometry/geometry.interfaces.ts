@@ -122,6 +122,11 @@ export interface IBounded {
     boundingSphere?: IBoundingSphere;
 }
 
+export function IsBounded(b: unknown): b is IBounded {
+    if (typeof b !== "object" || b === null) return false;
+    return (<IBounded>b).boundingBox !== undefined || (<IBounded>b).boundingSphere !== undefined;
+}
+
 export interface IPlane {
     point: ICartesian3;
     normal: ICartesian3;

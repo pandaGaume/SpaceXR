@@ -1,14 +1,14 @@
 import { IMemoryCache, MemoryCache } from "../../cache/cache";
-import { ITile, ITileAddress2, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { ITile, ITileAddress2, ITileAddress3, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { TileAddress } from "../address/tiles.address";
 
 export class TileContentProvider<T> implements ITileContentProvider<T> {
     private _cache: IMemoryCache<string, TileContentType<T>>;
     private _ownCache: boolean;
-    private _datasource: ITileDatasource<T, ITileAddress2>;
+    private _datasource: ITileDatasource<T, ITileAddress2 | ITileAddress3>;
     private _prefix?: string;
 
-    public constructor(datasource: ITileDatasource<T, ITileAddress2>, cache?: IMemoryCache<string, TileContentType<T>>) {
+    public constructor(datasource: ITileDatasource<T, ITileAddress2 | ITileAddress3>, cache?: IMemoryCache<string, TileContentType<T>>) {
         this._datasource = datasource;
         this._cache = cache || new MemoryCache<string, TileContentType<T>>();
         if (cache) {
@@ -20,18 +20,18 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
     }
 
     public accept(address: ITileAddress2): boolean {
-        return TileAddress.IsValidAddress(address, this.metrics);
+        return this.metrics != undefined && TileAddress.IsValidAddress(address, this.metrics);
     }
 
     public get name(): string {
         return this._datasource.name;
     }
 
-    public get datasource(): ITileDatasource<T, ITileAddress2> {
+    public get datasource(): ITileDatasource<T, ITileAddress2 | ITileAddress3> {
         return this._datasource;
     }
 
-    public get metrics(): ITileMetrics {
+    public get metrics(): ITileMetrics | undefined {
         return this._datasource.metrics;
     }
 

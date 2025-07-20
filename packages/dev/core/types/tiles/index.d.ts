@@ -15,4 +15,3 @@ export * from "./tiles";
 export * from "./tiles.url.web";
 export * from "./tiles.collection";
 export * from "./tiles.system";
-export * from "./3d";

@@ -15,6 +15,6 @@
     },
     // you MUST use reference to the core tsconfig and the babylon tsconfig
     "references": [{ "path": "../../core" }, { "path": "../../babylon" }],
-    "include": ["./src/**/*.ts"],
+    "include": ["./src/**/*.ts", "../../babylon/src/camera/camera.Geodetic.ts"],
     "exclude": ["**/node_modules", "**/dist", "**/types"]
 }

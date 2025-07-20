@@ -1,4 +1,4 @@
-import { IDisplay, ImageLayer, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
+import { AbstractTileMetrics, IDisplay, ImageLayer, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
 import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
 import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { Nullable } from "core/types";
@@ -11,11 +11,19 @@ import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
 import { ElevationLayerView } from "./map.layer.dem";
+import { Tile3dLayerView } from "./map.layer.object";
+import { ObjectLayer } from "../tiles/3d/tile3d.layer";
 
-export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
+export class Map3DOptions {
     public static DefaultGridSize: number = 32;
     public static DefaultExageration: number = 1.0;
 
+    gridSize?: number | ISize2;
+    offset?: ICartesian3;
+    exageration?: number;
+}
+
+export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IElevationOptions {
     public static TEMPLATE_SUFFIX = "grid";
     public static MATERIAL_SUFFIX = "material";
 
@@ -27,12 +35,12 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     _grid: Mesh;
     _material: IMap3DMaterial;
 
-    public constructor(root: TransformNode) {
+    public constructor(root: TransformNode, options?: Map3DOptions) {
         super();
         this._root = root;
-        this._gridSize = Map3D.DefaultGridSize;
-        this._offset = Cartesian3.Zero();
-        this._exageration = Map3D.DefaultExageration;
+        this._gridSize = options?.gridSize ?? Map3DOptions.DefaultGridSize;
+        this._offset = options?.offset ?? Cartesian3.Zero();
+        this._exageration = options?.exageration ?? Map3DOptions.DefaultExageration;
 
         const scene = this._root.getScene();
         this._grid = this._buildTemplate(scene);
@@ -98,11 +106,14 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics.tileSize);
+            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize);
             return new ElevationLayerView(this, layer, this._display, new TileView(zoomOffset));
         }
         if (layer instanceof ImageLayer) {
             return new TextureLayerView(this, layer, this.display, this.view);
+        }
+        if (layer instanceof ObjectLayer) {
+            return new Tile3dLayerView(this, layer, this.display, this.view);
         }
         return null;
     }
@@ -199,9 +210,9 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
     }
 
     protected _buildTemplate(scene?: Scene): Mesh {
-        const mesh = this._buildMesh(this._buildTemplateName() ?? this.name, scene);
+        const mesh = this._buildMeshForTemplate(this._buildTemplateName() ?? this.name, scene);
         const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
-        const gridSize = this.gridSize ?? Map3D.DefaultGridSize;
+        const gridSize = this.gridSize ?? Map3DOptions.DefaultGridSize;
         const grid = gridFactory.buildTopology(gridSize);
         if (grid instanceof VertexData) {
             grid.applyToMesh(mesh);
@@ -216,7 +227,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         return mesh;
     }
 
-    protected _buildMesh(name: string, scene?: Scene): Mesh {
+    protected _buildMeshForTemplate(name: string, scene?: Scene): Mesh {
         const mesh = new Mesh(name, scene);
         return mesh;
     }

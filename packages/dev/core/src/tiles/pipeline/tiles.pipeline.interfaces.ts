@@ -63,7 +63,7 @@ export interface ITileSelectionContextOptions {
 }
 
 export interface ITileSelectionContext {
-    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics: ITileMetrics, options?: ITileSelectionContextOptions): void;
+    setContext(state: Nullable<ITileNavigationState>, display: Nullable<IDisplay>, metrics?: ITileMetrics, options?: ITileSelectionContextOptions): void;
 }
 
 export function hasTileSelectionContext(b: unknown): b is ITileSelectionContext {

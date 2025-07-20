@@ -1,5 +1,6 @@
+import { Cartesian2 } from "../../geometry";
 import { Scalar } from "../../math";
-import { IDisplay, IsDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
+import { AbstractTileMetrics, IDisplay, IsDrawableTileMapLayer, ITileMapLayer, ITileNavigationState, TileMapBase } from "../../tiles";
 
 // intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
 export class Context2DTileMap<T> extends TileMapBase<T> {
@@ -66,8 +67,8 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
                 const lat = navigation.center.lat;
                 const lon = navigation.center.lon;
                 const metrics = layer.metrics;
-                const center = metrics.getLatLonToPointXY(lat, lon, currentLod);
-                const size = metrics.tileSize;
+                const center = metrics?.getLatLonToPointXY(lat, lon, currentLod) ?? Cartesian2.Zero();
+                const size = metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize; // default tile size is 256 pixels
 
                 const tiles = view.activTiles;
                 for (const tile of tiles) {

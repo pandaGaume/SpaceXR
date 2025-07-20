@@ -66,6 +66,7 @@ export interface IBounded {
     boundingBox?: IBounds;
     boundingSphere?: IBoundingSphere;
 }
+export declare function IsBounded(b: unknown): b is IBounded;
 export interface IPlane {
     point: ICartesian3;
     normal: ICartesian3;

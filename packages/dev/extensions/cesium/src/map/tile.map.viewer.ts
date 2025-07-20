@@ -3,13 +3,13 @@ import { TileMapBase } from "core/tiles";
 import { Nullable } from "core/types";
 import { ITileset } from "../tiles";
 import { Ellipsoid } from "core/geodesy";
-import { GeodeticFlightCamera } from "./tile.map.camera";
+import { GeodeticCamera } from "../../../../babylon/src/camera/camera.Geodetic";
 
 export interface IViewerOptions {
     ellipsoid: Ellipsoid;
 }
 
-export class Viewer extends TileMapBase<ITileset> {
+export class ViewerBase extends TileMapBase<ITileset> {
     public static DefaultCanvasId = "";
     private static CanvasKeyword = "canvas";
 
@@ -18,7 +18,7 @@ export class Viewer extends TileMapBase<ITileset> {
     _canvas: Nullable<HTMLCanvasElement> = null;
     _engine: Nullable<BABYLON.Engine> = null;
     _scene: Nullable<BABYLON.Scene> = null;
-    _camera: Nullable<GeodeticFlightCamera> = null;
+    _camera: Nullable<GeodeticCamera> = null;
 
     public constructor(targetId: string, options: IViewerOptions) {
         super();
@@ -31,9 +31,9 @@ export class Viewer extends TileMapBase<ITileset> {
         this._target = target;
 
         // existing canvas or create a new one.
-        let canvas = this._target.querySelector(Viewer.CanvasKeyword) as Nullable<HTMLCanvasElement>;
+        let canvas = this._target.querySelector(ViewerBase.CanvasKeyword) as Nullable<HTMLCanvasElement>;
         if (!canvas) {
-            canvas = this._createCanvas(Viewer.DefaultCanvasId) as Nullable<HTMLCanvasElement>;
+            canvas = this._createCanvas(ViewerBase.DefaultCanvasId) as Nullable<HTMLCanvasElement>;
             if (canvas) {
                 this._target.appendChild(canvas);
             }
@@ -55,17 +55,17 @@ export class Viewer extends TileMapBase<ITileset> {
         return this._canvas;
     }
 
-    public get camera(): Nullable<GeodeticFlightCamera> {
+    public get camera(): Nullable<GeodeticCamera> {
         return this._camera;
     }
 
-    protected _createCamera(name: string, scene: BABYLON.Scene, ellipsoid: Ellipsoid): GeodeticFlightCamera {
-        const cam = new GeodeticFlightCamera(name, scene, ellipsoid ?? Ellipsoid.WGS84);
+    protected _createCamera(name: string, scene: BABYLON.Scene, ellipsoid: Ellipsoid): GeodeticCamera {
+        const cam = new GeodeticCamera(name, scene, ellipsoid ?? Ellipsoid.WGS84);
         return cam;
     }
 
     protected _createCanvas(id: string): Nullable<HTMLElement> {
-        const canvas = document.createElement(Viewer.CanvasKeyword);
+        const canvas = document.createElement(ViewerBase.CanvasKeyword);
         if (canvas) {
             canvas.id = "id";
             return canvas;

@@ -1,5 +1,6 @@
 import { AbstractMesh, Material, Mesh, Scene, TransformNode } from "@babylonjs/core";
 import {
+    AbstractTileMetrics,
     IDisplay,
     ImageLayerContentType,
     IPhysicalDisplay,
@@ -80,7 +81,7 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         if (m) {
             m.parent = this._tilesRoot;
 
-            m.scaling.x = m.scaling.y = this.metrics.tileSize;
+            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
             m.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
 
             // set the surface 3D
@@ -173,7 +174,7 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     }
 
     protected _onZoomChanged(): void {
-        if (this.isReady && IsPhysicalDisplay(this.display)) {
+        if (this.isReady && IsPhysicalDisplay(this.display) && this.metrics) {
             this._setScale(this.navigationState!, this.display, this.layer, this.metrics);
         }
     }
@@ -196,7 +197,7 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
 
     protected _getCenter(force: boolean = false): ICartesian2 | undefined {
         const nav = this.navigationState;
-        if (nav) {
+        if (nav && this.metrics) {
             if (force || !this._cartesianCenterCache) {
                 const geo = nav.center;
                 this._cartesianCenterCache = this.metrics.getLatLonToPointXY(geo.lat, geo.lon, nav.lod);

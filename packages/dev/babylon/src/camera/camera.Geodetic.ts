@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { Ellipsoid, GeodeticSystem } from "core/geodesy";
 
-export class GeodeticFlightCamera extends BABYLON.ArcRotateCamera {
+export class GeodeticCamera extends BABYLON.ArcRotateCamera {
     private _system: GeodeticSystem;
 
     constructor(name: string, scene: BABYLON.Scene, ellipsoid: Ellipsoid) {

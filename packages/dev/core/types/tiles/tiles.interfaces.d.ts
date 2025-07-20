@@ -6,6 +6,7 @@ import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
 import { FetchResult } from "../io";
 export declare function IsTileAddress(b: unknown): b is ITileAddress2;
+export declare function IsTileAddress3(b: unknown): b is ITileAddress3;
 export declare function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress2>;
 export declare enum NeighborsAddress {
     NW = 0,
@@ -62,7 +63,7 @@ export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress2): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
-    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    withMetrics(metrics?: ITileMetrics): ITileBuilder<T>;
     withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
     build(): ITile<T>;
 }
@@ -112,7 +113,7 @@ export interface ITileMetrics extends ITileSystem {
     getPointXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }
 export interface ITileMetricsProvider {
-    metrics: ITileMetrics;
+    metrics?: ITileMetrics;
 }
 export declare function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider;
 export interface ITileDatasource<T, A extends ITileAddress2 | ITileAddress3> extends ITileMetricsProvider {

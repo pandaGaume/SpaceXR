@@ -12,7 +12,7 @@ export declare class DemTileWebClient implements ITileClient<IDemInfos> {
     get name(): string;
     get zindex(): number;
     set zindex(v: number);
-    get metrics(): ITileMetrics;
+    get metrics(): ITileMetrics | undefined;
     fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<ITileAddress2, Nullable<IDemInfos>>>;
     private computeNormals;
     private getNormalsWindows;

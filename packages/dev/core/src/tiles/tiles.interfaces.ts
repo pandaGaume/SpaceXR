@@ -1,6 +1,6 @@
 import { ICloneable, IDisposable, IValidable, Nullable } from "../types";
 import { IEnvelope, IGeo2, IGeoBounded } from "../geography/geography.interfaces";
-import { IBounded, ICartesian2, IBounds } from "../geometry/geometry.interfaces";
+import { IBounded, ICartesian2, IBounds, IsBounded } from "../geometry/geometry.interfaces";
 import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
@@ -9,6 +9,11 @@ import { FetchResult } from "../io";
 export function IsTileAddress(b: unknown): b is ITileAddress2 {
     if (typeof b !== "object" || b === null) return false;
     return (<ITileAddress2>b).x !== undefined && (<ITileAddress2>b).y !== undefined && (<ITileAddress2>b).levelOfDetail !== undefined;
+}
+
+export function IsTileAddress3(b: unknown): b is ITileAddress3 {
+    if (typeof b !== "object" || b === null) return false;
+    return (<ITileAddress3>b).tileId !== undefined && IsBounded(b);
 }
 
 export function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress2> {
@@ -196,7 +201,7 @@ export interface ITileMetrics extends ITileSystem {
 }
 
 export interface ITileMetricsProvider {
-    metrics: ITileMetrics;
+    metrics?: ITileMetrics;
 }
 
 export function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider {

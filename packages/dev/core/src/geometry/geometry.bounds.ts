@@ -111,6 +111,15 @@ export class Bounds extends Cartesian3 implements IBounds {
     public get center(): ICartesian3 {
         return new Cartesian3(this.x + this.width / 2, this.y + this.height / 2, this.z + this.depth / 2);
     }
+    public get minimum(): ICartesian3 {
+        return this;
+    }
+    public get maximum(): ICartesian3 {
+        return new Cartesian3(this.x + this.width, this.y + this.height, this.z + this.depth);
+    }
+    public get extendSize(): ICartesian3 {
+        return new Cartesian3(this.width, this.height, this.depth);
+    }
 
     public intersects(other?: IBounds): boolean {
         if (!other || this.xmin > other.xmax || this.xmax < other.xmin || this.ymin > other.ymax || this.ymax < other.ymin || this.zmin > other.zmax || this.zmax < other.zmin) {

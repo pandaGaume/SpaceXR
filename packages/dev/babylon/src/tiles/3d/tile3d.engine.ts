@@ -7,14 +7,7 @@ import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy
 import { BoxType, ITile3d, ITileset, Mat44Type, Point3Type, RegionType, TransformPoint3, TransformVec3 } from "./interfaces";
 import { Cartesian3, ICartesian3 } from "core/geometry";
 import { Tile3dWebClient } from "./tile3d.client";
-
-///<summary>
-/// Computes the screen space error (SSE) for a tile based on its geometric error,
-/// the distance to the camera, the viewport height, and the tangent of half the field of view.
-///</summary>
-export function ScreenSpaceError(tileGeometricError: number, distanceToCamera: number, viewportHeight: number, tanfov2: number): number {
-    return (tileGeometricError * viewportHeight) / (distanceToCamera * tanfov2);
-}
+import { ScreenSpaceError } from "../../map/map.object.interfaces";
 
 export class Tile3dGeodeticOptions {
     static readonly Default: Tile3dGeodeticOptions = {

@@ -131,7 +131,7 @@ export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITileAddress2): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
-    withMetrics(metrics: ITileMetrics): ITileBuilder<T>;
+    withMetrics(metrics?: ITileMetrics): ITileBuilder<T>;
     withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
     build(): ITile<T>;
 }

@@ -2,7 +2,7 @@ import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
-import { ICartesian3 } from "../../geometry";
+import { ICartesian3, IPlane } from "../../geometry";
 export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
 }
@@ -13,7 +13,15 @@ export interface ICameraState {
     target: ICartesian3;
     fov: number;
     tanfov2: number;
+    getFrustumPlanes(options?: IFrustumOpts): Array<IPlane>;
 }
+export interface IFrustumOpts {
+    aspect?: number;
+    near?: number;
+    far?: number;
+    up?: ICartesian3;
+}
+export declare function BuildFrustumPlanesFromCameraState(cam: ICameraState, opts?: IFrustumOpts): IPlane[];
 export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     center: IGeo2;

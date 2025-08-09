@@ -7,3 +7,5 @@ export * from "./map.layer.dem";
 export * from "./map.tile";
 export * from "./map.grid.factory";
 export * from "./map.layer.view";
+export * from "./map.object.interfaces";
+export * from "./map.camera.fetch";

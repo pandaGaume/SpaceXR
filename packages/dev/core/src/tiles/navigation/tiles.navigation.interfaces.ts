@@ -2,7 +2,7 @@ import { IGeo2, IsLocation, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
-import { ICartesian3 } from "../../geometry";
+import { ICartesian3, IPlane } from "../../geometry";
 
 export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
@@ -13,6 +13,19 @@ export function HasNavigationState(obj: unknown): obj is IHasNavigationState {
     return (<IHasNavigationState>obj).navigationState !== undefined;
 }
 
+/**
+ * Options required to turn an ICameraState into a perspective frustum.
+ */
+export interface IFrustumValues {
+    /** Viewport aspect ratio (width/height). Default: 16/9. */
+    aspect?: number;
+    /** Near plane distance (> 0). Default: 0.1. */
+    near?: number;
+    /** Far plane distance (> near). Default: 10_000. */
+    far?: number;
+    /** World up vector. Default: {0,1,0}. */
+    up?: ICartesian3;
+}
 /// <summary>
 /// Represents the state of the camera, including its position, the target it is looking at,
 /// and the field of view (FOV). This information is essential in certain scenarios where
@@ -20,10 +33,10 @@ export function HasNavigationState(obj: unknown): obj is IHasNavigationState {
 /// camera's position and target, which define the perspective and distance to the tiles,
 /// as well as the field of view, which affects how much of the scene is visible at once.
 /// </summary>
-export interface ICameraState {
+export interface ICameraState extends IFrustumValues {
     /// <summary>
     /// An observable that notifies subscribers of changes to properties in the camera state.
-    /// This enables reactive updates when properties like `position`, `traget`, or `fov` are modified.
+    /// This enables reactive updates when properties like `position`, `target`, or `fov` or any Frustum values are modified.
     /// </summary>
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
 
@@ -60,6 +73,14 @@ export interface ICameraState {
     /// the camera's field of view.
     /// </summary>
     tanfov2: number;
+
+    /// <summary>
+    /// Computes and returns the list of frustum planes for the current camera state.
+    /// These planes define the camera's visible region in 3D space and are used in
+    /// frustum culling operations, such as checking whether a mesh or tile is within
+    /// the camera's field of view using methods like `isInFrustum()`.
+    /// </summary>
+    getFrustumPlanes(options?: IFrustumValues): Array<IPlane>;
 }
 
 /// <summary>

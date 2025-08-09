@@ -18,6 +18,10 @@ export class SourceBlock<T> implements ISourceBlock<T> {
         this._links = [];
     }
 
+    public get links(): Array<ITilePipelineLink<T>> | undefined {
+        return this._links;
+    }
+
     public get addedObservable(): Observable<IPipelineMessageType<T>> {
         this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<T>>();
         return this._addedObservable!;

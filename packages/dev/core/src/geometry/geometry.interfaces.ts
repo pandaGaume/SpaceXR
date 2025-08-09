@@ -78,20 +78,50 @@ export function IsSize3(size: ISize2 | ISize3): size is ISize3 {
     return IsSize(size) && (size as ISize3).depth !== undefined;
 }
 
+/**
+ * Describes a 3D bounding sphere (as in Babylon.js BoundingSphere).
+ */
 export interface IBoundingSphere {
+    /**
+     * The center point of the sphere.
+     */
     center: ICartesian3;
+
+    /**
+     * The radius of the sphere.
+     */
     radius: number;
 }
 
-export interface IBounds extends ISize3, ICartesian3, ICloneable<IBounds> {
+export interface IBoundingBox {
+    /**
+     * The minimum point (corner) of the bounding box.
+     */
+    minimum: ICartesian3;
+
+    /**
+     * The maximum point (corner) of the bounding box.
+     */
+    maximum: ICartesian3;
+
+    /**
+     * The center point of the bounding box.
+     */
+    center: ICartesian3;
+
+    /**
+     * The extend size (half-dimensions) from center to box side.
+     */
+    extendSize: ICartesian3;
+}
+
+export interface IBounds extends IBoundingBox, ISize3, ICartesian3, ICloneable<IBounds> {
     ymax: number;
     xmax: number;
     zmax: number;
     xmin: number;
     ymin: number;
     zmin: number;
-
-    center: ICartesian3;
 
     intersects(other?: IBounds): boolean;
     intersection(other?: IBounds, ref?: IBounds): IBounds | undefined;
@@ -128,6 +158,17 @@ export function IsBounded(b: unknown): b is IBounded {
 }
 
 export interface IPlane {
-    point: ICartesian3;
+    d: number;
     normal: ICartesian3;
+}
+
+export function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3, hull: Array<ICartesian3>): IPlane {
+    // Normalize the normal
+    const len = Math.hypot(normal.x, normal.y, normal.z);
+    const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
+
+    // Compute scalar d
+    const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
+
+    return { d: d, normal: n };
 }

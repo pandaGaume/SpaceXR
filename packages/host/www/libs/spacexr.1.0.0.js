@@ -3011,6 +3011,15 @@ class Bounds extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3
     get center() {
         return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.x + this.width / 2, this.y + this.height / 2, this.z + this.depth / 2);
     }
+    get minimum() {
+        return this;
+    }
+    get maximum() {
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.x + this.width, this.y + this.height, this.z + this.depth);
+    }
+    get extendSize() {
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(this.width, this.height, this.depth);
+    }
     intersects(other) {
         if (!other || this.xmin > other.xmax || this.xmax < other.xmin || this.ymin > other.ymax || this.ymax < other.ymin || this.zmin > other.zmax || this.zmax < other.zmin) {
             return false;
@@ -3833,6 +3842,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsBounds: () => (/* binding */ IsBounds),
 /* harmony export */   IsSize: () => (/* binding */ IsSize),
 /* harmony export */   IsSize3: () => (/* binding */ IsSize3),
+/* harmony export */   MakePlaneFromPointAndNormal: () => (/* binding */ MakePlaneFromPointAndNormal),
 /* harmony export */   RegionCode: () => (/* binding */ RegionCode),
 /* harmony export */   Side: () => (/* binding */ Side),
 /* harmony export */   isArrayOfCartesianArray: () => (/* binding */ isArrayOfCartesianArray),
@@ -3903,6 +3913,12 @@ function IsBounded(b) {
         return false;
     return b.boundingBox !== undefined || b.boundingSphere !== undefined;
 }
+function MakePlaneFromPointAndNormal(point, normal, hull) {
+    const len = Math.hypot(normal.x, normal.y, normal.z);
+    const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
+    const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
+    return { d: d, normal: n };
+}
 //# sourceMappingURL=geometry.interfaces.js.map
 
 /***/ }),
@@ -3925,14 +3941,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class PlaneDefinition {
-    constructor(p, n, hull) {
+    static MakePlaneFromPointAndNormal(point, normal, hull) {
+        const len = Math.hypot(normal.x, normal.y, normal.z);
+        const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
+        const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
+        return new PlaneDefinition(d, n, hull);
+    }
+    constructor(d, n, hull) {
         this._hull = [];
-        this._point = p;
+        this._d = d;
         this._normal = n;
         this._hull = hull;
     }
-    get point() {
-        return this._point;
+    get d() {
+        return this._d;
     }
     get normal() {
         return this._normal;
@@ -3986,7 +4008,7 @@ class PlaneCruncher {
                 const point = { x: p.x, y: p.y, z: 0 };
                 return this._transformPoint(point, inv);
             });
-            const p = new PlaneDefinition(g.center, g.normal, convertedHull);
+            const p = PlaneDefinition.MakePlaneFromPointAndNormal(g.center, g.normal, convertedHull);
             planes.push(p);
         }
         return planes;
@@ -4344,6 +4366,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsSize3),
 /* harmony export */   Line: () => (/* reexport safe */ _shapes__WEBPACK_IMPORTED_MODULE_7__.Line),
+/* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.MakePlaneFromPointAndNormal),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_plane_cruncher__WEBPACK_IMPORTED_MODULE_6__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_plane_cruncher__WEBPACK_IMPORTED_MODULE_6__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _shapes__WEBPACK_IMPORTED_MODULE_7__.Point),
@@ -10226,6 +10249,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__.AbstractTileMetrics),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileProvider),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
+/* harmony export */   BuildFrustumPlanesFromCameraState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.BuildFrustumPlanesFromCameraState),
 /* harmony export */   CameraState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.CameraState),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.CanvasTileCodec),
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodec),
@@ -11278,6 +11302,7 @@ class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.T
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BuildFrustumPlanesFromCameraState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.BuildFrustumPlanesFromCameraState),
 /* harmony export */   CameraState: () => (/* reexport safe */ _tiles_navigation_state_camera__WEBPACK_IMPORTED_MODULE_3__.CameraState),
 /* harmony export */   HasNavigationApi: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.HasNavigationApi),
 /* harmony export */   HasNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.HasNavigationState),
@@ -11447,6 +11472,7 @@ class TileNavigationApi {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BuildFrustumPlanesFromCameraState: () => (/* binding */ BuildFrustumPlanesFromCameraState),
 /* harmony export */   HasNavigationApi: () => (/* binding */ HasNavigationApi),
 /* harmony export */   HasNavigationState: () => (/* binding */ HasNavigationState),
 /* harmony export */   IsTileNavigationApi: () => (/* binding */ IsTileNavigationApi),
@@ -11461,6 +11487,63 @@ function HasNavigationState(obj) {
     if (typeof obj !== "object" || obj === null)
         return false;
     return obj.navigationState !== undefined;
+}
+function BuildFrustumPlanesFromCameraState(cam, opts = {}) {
+    const aspect = opts.aspect ?? 16 / 9;
+    const near = opts.near ?? 0.1;
+    const far = opts.far ?? 10_000;
+    const upGuess = opts.up ?? { x: 0, y: 1, z: 0 };
+    const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
+    const add = (a, b) => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
+    const mul = (a, s) => ({ x: a.x * s, y: a.y * s, z: a.z * s });
+    const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
+    const cross = (a, b) => ({
+        x: a.y * b.z - a.z * b.y,
+        y: a.z * b.x - a.x * b.z,
+        z: a.x * b.y - a.y * b.x,
+    });
+    const len = (v) => Math.hypot(v.x, v.y, v.z);
+    const norm = (v) => {
+        const l = len(v) || 1;
+        return { x: v.x / l, y: v.y / l, z: v.z / l };
+    };
+    const pos = cam.position;
+    const fwd = norm(sub(cam.target, cam.position));
+    const right = norm(cross(fwd, norm(upGuess)));
+    const up = norm(cross(right, fwd));
+    const tanHalfV = cam.tanfov2;
+    const tanHalfH = tanHalfV * aspect;
+    const nearC = add(pos, mul(fwd, near));
+    const farC = add(pos, mul(fwd, far));
+    const nh = near * tanHalfV;
+    const nw = near * tanHalfH;
+    const fh = far * tanHalfV;
+    const fw = far * tanHalfH;
+    const ntl = add(add(nearC, mul(up, nh)), mul(right, -nw));
+    const ntr = add(add(nearC, mul(up, nh)), mul(right, nw));
+    const nbl = add(add(nearC, mul(up, -nh)), mul(right, -nw));
+    const nbr = add(add(nearC, mul(up, -nh)), mul(right, nw));
+    const ftl = add(add(farC, mul(up, fh)), mul(right, -fw));
+    const ftr = add(add(farC, mul(up, fh)), mul(right, fw));
+    const fbl = add(add(farC, mul(up, -fh)), mul(right, -fw));
+    const fbr = add(add(farC, mul(up, -fh)), mul(right, fw));
+    const planeFromCCW = (a, b, c) => {
+        const n = norm(cross(sub(b, a), sub(c, a)));
+        const d = -dot(n, a);
+        return { normal: n, d };
+    };
+    const ensureInward = (p) => {
+        const insideProbe = add(pos, mul(fwd, (near + far) * 0.5));
+        const side = dot(p.normal, insideProbe) + p.d;
+        return side >= 0 ? p : { normal: mul(p.normal, -1), d: -p.d };
+    };
+    const nearP = ensureInward(planeFromCCW(ntr, ntl, nbl));
+    const farP = ensureInward(planeFromCCW(ftl, ftr, fbr));
+    const leftP = ensureInward(planeFromCCW(ntl, ftl, fbl));
+    const rightP = ensureInward(planeFromCCW(ftr, ntr, nbr));
+    const topP = ensureInward(planeFromCCW(ntr, ftr, ftl));
+    const botP = ensureInward(planeFromCCW(fbl, fbr, nbr));
+    return [leftP, rightP, topP, botP, nearP, farP];
 }
 function IsTileNavigationState(b) {
     if (b === null || typeof b !== "object")
@@ -11504,6 +11587,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.args.js");
+/* harmony import */ var _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.navigation.interfaces */ "./dist/tiles/navigation/tiles.navigation.interfaces.js");
+
 
 class CameraState {
     constructor(position, target, fov, scale) {
@@ -11511,6 +11596,7 @@ class CameraState {
         this._target = target;
         this._fov = fov;
         this._scale = scale ?? CameraState.DefaultScale;
+        this._planes = null;
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
@@ -11524,6 +11610,7 @@ class CameraState {
         if (this._scale !== value) {
             const old = this._scale;
             this._scale = value;
+            this._planes = null;
             if (this._propertyChangedObservable?.hasObservers()) {
                 const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._scale, CameraState.SCALE_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
@@ -11537,6 +11624,7 @@ class CameraState {
         if (this._position !== value) {
             const old = this._position;
             this._position = value;
+            this._planes = null;
             if (this._propertyChangedObservable?.hasObservers()) {
                 const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._position, CameraState.POSITION_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
@@ -11550,6 +11638,7 @@ class CameraState {
         if (this._target !== value) {
             const old = this._target;
             this._target = value;
+            this._planes = null;
             if (this._propertyChangedObservable?.hasObservers()) {
                 const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._target, CameraState.TARGET_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
@@ -11563,6 +11652,7 @@ class CameraState {
         if (this._fov !== value) {
             const old = this._fov;
             this._fov = value;
+            this._planes = null;
             if (this._propertyChangedObservable?.hasObservers()) {
                 const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._fov, CameraState.TARGET_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
@@ -11574,6 +11664,12 @@ class CameraState {
             this._tanfov2 = Math.tan((this._fov * Math.PI) / 360);
         }
         return this._tanfov2;
+    }
+    getFrustumPlanes(options) {
+        if (this._planes == null) {
+            this._planes = (0,_tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_2__.BuildFrustumPlanesFromCameraState)(this, options);
+        }
+        return this._planes;
     }
 }
 CameraState.DefaultScale = 1.0;
@@ -11975,6 +12071,9 @@ class SourceBlock {
             l.dispose();
         }
         this._links = [];
+    }
+    get links() {
+        return this._links;
     }
     get addedObservable() {
         this._addedObservable = this._addedObservable || new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
@@ -14617,6 +14716,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Bounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.BoundedCollection),
 /* harmony export */   Bounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounds),
+/* harmony export */   BuildFrustumPlanesFromCameraState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.BuildFrustumPlanesFromCameraState),
 /* harmony export */   CacheEntry: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntry),
 /* harmony export */   CacheEntryOptions: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntryOptions),
 /* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CacheEntryOptionsBuilder),
@@ -14727,6 +14827,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Line: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Line),
 /* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.LocalString),
 /* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
+/* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.MakePlaneFromPointAndNormal),
 /* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.MapZenDemUrlBuilder),

@@ -1,7 +1,7 @@
 import { TileWebClient } from "../tiles.client";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { WebTileUrlBuilder } from "../tiles.url.web";
 import { WebClientOptions } from "../../io";
+import { TileMetrics } from "../tiles.metrics";
 export declare enum GoogleMap2DLayerCode {
     street = "m",
     satellite = "s",
@@ -18,7 +18,7 @@ export declare class GoogleMap2DUrlBuilder extends WebTileUrlBuilder {
 export declare class Google {
     private static readonly KEY;
     static MaxLevelOfDetail: number;
-    static Metrics: EPSG3857;
+    static Metrics: TileMetrics;
     static Attribution: string;
     static Client2d(urlBuilder: GoogleMap2DUrlBuilder, options?: WebClientOptions): TileWebClient<HTMLImageElement>;
     static StreetClient2d(options?: WebClientOptions): TileWebClient<HTMLImageElement>;

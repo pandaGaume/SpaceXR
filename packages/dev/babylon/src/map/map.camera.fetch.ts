@@ -8,7 +8,7 @@ import {
     ScreenSpaceError,
 } from "./map.object.interfaces";
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
-import { ICameraState, ITargetBlock } from "core/tiles";
+import { ITargetBlock, ITileNavigationState } from "core/tiles";
 import { Cartesian3, ISize2 } from "core/geometry";
 import { EventState } from "core/events";
 
@@ -34,11 +34,17 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
         this._activeNodes = new Map();
     }
 
-    public onCameraStateChange(camState: ICameraState, displaySize: ISize2): void {
+    public onNavigationStateChange(navState: ITileNavigationState, displaySize: ISize2): void {
+        const camState = navState.camera;
+        if (!camState) {
+            return;
+        }
         const frustumPlanes = camState.getFrustumPlanes();
         const toAdd: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> = [];
         const toRemove: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> = [];
         let offset: number | undefined = undefined;
+
+        const scale = navState.metersToLocalScale ?? 1.0;
 
         for (var n of this._activeNodes.values()) {
             var bounds = n.getBoundingInfo ? n.getBoundingInfo() : null;
@@ -53,7 +59,7 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
             }
             const fn = n.screenSpaceError ?? ScreenSpaceError;
             const distanceToCamera = Cartesian3.Distance(bounds.boundingSphere.center, camState.position);
-            const sse = fn(n.geometricError, distanceToCamera, displaySize.height, camState.tanfov2);
+            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanfov2);
 
             if (sse > this._options.maxScreenSpaceError) {
                 // refine.
@@ -81,6 +87,9 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
             }
         }
 
+        // Deduplicate by object reference (covers the case where the same refinement
+        // target is pushed multiple times in the same pass).
+        // This works because nodes are unique object instances in the engine.
         const singleRemove = Array.from(new Set(toRemove));
         if (singleRemove.length && this._removedObservable?.hasObservers()) {
             this._removedObservable.notifyObservers(singleRemove, -1, this, this);

@@ -2,16 +2,20 @@ import { ICartesian2 } from "../geometry/geometry.interfaces";
 import { IGeo2 } from "../geography/geography.interfaces";
 import { ITileMetrics, CellCoordinateReference } from "./tiles.interfaces";
 import { TileSystemBounds } from "./tiles.system";
-export declare abstract class AbstractTileMetrics extends TileSystemBounds implements ITileMetrics {
+import { Ellipsoid } from "../geodesy";
+export declare class TileMetrics extends TileSystemBounds implements ITileMetrics {
     static DefaultTileSize: number;
     static DefaultCellSize: number;
     static DefaultCoordinateReference: CellCoordinateReference;
     static DefaultOverlap: number;
+    private static _shared;
+    static get Shared(): TileMetrics;
     _tileSize: number;
     _cellSize: number;
     _cellCoordinateReference: CellCoordinateReference;
     _overlap: number;
-    constructor(options?: Partial<ITileMetrics>);
+    _ellipsoid: Ellipsoid;
+    constructor(options?: Partial<ITileMetrics>, ellipsoid?: Ellipsoid);
     mapSize(levelOfDetail: number): number;
     get tileSize(): number;
     set tileSize(v: number);
@@ -22,17 +26,17 @@ export declare abstract class AbstractTileMetrics extends TileSystemBounds imple
     get overlap(): number;
     set overlap(v: number);
     mapScale(latitude: number, levelOfDetail: number, pixelPerUnit: number): number;
-    abstract groundResolution(latitude: number, levelOfDetail: number): number;
     getLatLonToTileXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
     getTileXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
     getLatLonToPointXY(latitude: number, longitude: number, levelOfDetail: number): ICartesian2;
     getPointXYToLatLon(x: number, y: number, levelOfDetail: number): IGeo2;
     getTileXYToPointXY(x: number, y: number): ICartesian2;
     getPointXYToTileXY(x: number, y: number): ICartesian2;
-    abstract getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void;
-    abstract getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2 | undefined): void;
-    abstract getLatLonToPointXYToRef(latitude: number, longitude: number, levelOfDetail: number, pointXY?: ICartesian2): void;
-    abstract getPointXYToLatLonToRef(x: number, y: number, levelOfDetail: number, latLon?: IGeo2): void;
-    abstract getTileXYToPointXYToRef(x: number, y: number, pointXY?: ICartesian2): void;
-    abstract getPointXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
+    groundResolution(latitude: number, levelOfDetail: number): number;
+    getLatLonToTileXYToRef(latitude: number, longitude: number, levelOfDetail: number, tileXY?: ICartesian2 | undefined): void;
+    getTileXYToLatLonToRef(x: number, y: number, levelOfDetail: number, loc?: IGeo2): void;
+    getLatLonToPointXYToRef(latitude: number, longitude: number, levelOfDetail: number, pointXY: ICartesian2): void;
+    getPointXYToLatLonToRef(pointX: number, pointY: number, levelOfDetail: number, latLon: IGeo2): void;
+    getTileXYToPointXYToRef(tileX: number, tileY: number, pointXY: ICartesian2): void;
+    getPointXYToTileXYToRef(pointX: number, pointY: number, tileXY: ICartesian2): void;
 }

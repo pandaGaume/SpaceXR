@@ -34,20 +34,31 @@ export class TileSystemBounds implements ITileSystemBounds {
     public static DefaultMinLongitude = -180;
     public static DefaultMaxLongitude = 180;
 
-    public static Shared: TileSystemBounds = new TileSystemBounds();
-
-    _minLOD: number = TileSystemBounds.DefaultMinLOD;
-    _maxLOD: number = TileSystemBounds.DefaultMaxLOD;
-    _minLatitude: number = TileSystemBounds.DefaultMinLatitude;
-    _maxLatitude: number = TileSystemBounds.DefaultMaxLatitude;
-    _minLongitude: number = TileSystemBounds.DefaultMinLongitude;
-    _maxLongitude: number = TileSystemBounds.DefaultMaxLongitude;
+    _minLOD: number;
+    _maxLOD: number;
+    _minLatitude: number;
+    _maxLatitude: number;
+    _minLongitude: number;
+    _maxLongitude: number;
 
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileSystemBounds, unknown>>;
 
     public constructor(p?: Partial<ITileSystemBounds>) {
+        // 1) set safe defaults
+        this._minLOD = TileSystemBounds.DefaultMinLOD;
+        this._maxLOD = TileSystemBounds.DefaultMaxLOD;
+        this._minLatitude = TileSystemBounds.DefaultMinLatitude;
+        this._maxLatitude = TileSystemBounds.DefaultMaxLatitude;
+        this._minLongitude = TileSystemBounds.DefaultMinLongitude;
+        this._maxLongitude = TileSystemBounds.DefaultMaxLongitude;
+
         if (p) {
-            Object.assign(this, p);
+            if (p.minLOD != undefined) this.minLOD = p.minLOD;
+            if (p.maxLOD != undefined) this.maxLOD = p.maxLOD;
+            if (p.minLatitude != undefined) this.minLatitude = p.minLatitude;
+            if (p.maxLatitude != undefined) this.maxLatitude = p.maxLatitude;
+            if (p.minLongitude != undefined) this.minLongitude = p.minLongitude;
+            if (p.maxLongitude != undefined) this.maxLongitude = p.maxLongitude;
         }
     }
 

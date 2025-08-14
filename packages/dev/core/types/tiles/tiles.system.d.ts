@@ -11,7 +11,6 @@ export declare class TileSystemBounds implements ITileSystemBounds {
     static DefaultMaxLatitude: number;
     static DefaultMinLongitude: number;
     static DefaultMaxLongitude: number;
-    static Shared: TileSystemBounds;
     _minLOD: number;
     _maxLOD: number;
     _minLatitude: number;

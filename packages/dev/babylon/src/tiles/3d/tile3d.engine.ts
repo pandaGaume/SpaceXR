@@ -1,7 +1,7 @@
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
 import { Nullable } from "core/types";
 import { FetchResult, WebClient } from "core/io";
-import { ICameraState, IDisplay, ITileAddress3 } from "core/tiles";
+import { ICameraViewState, IDisplay, ITileAddress3 } from "core/tiles";
 import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy";
 
 import { BoxType, ITile3d, ITileset, Mat44Type, Point3Type, RegionType, TransformPoint3, TransformVec3 } from "./interfaces";
@@ -62,7 +62,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
     }
 
     public setContext(
-        cameraState: Nullable<ICameraState>,
+        cameraState: Nullable<ICameraViewState>,
         display: IDisplay,
         bounds: RegionType // An array of six numbers that define a bounding geographic region in EPSG:4979 coordinates
     ): void {
@@ -87,7 +87,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
         }
     }
 
-    protected _activateTileset(tileset: ITileset, cameraState: ICameraState, display: IDisplay, bounds: BoxType): void {
+    protected _activateTileset(tileset: ITileset, cameraState: ICameraViewState, display: IDisplay, bounds: BoxType): void {
         if (!tileset) {
             return; // No tileset loaded
         }
@@ -96,7 +96,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
 
     protected _activateTile(
         tile: ITile3d,
-        cameraState: ICameraState,
+        cameraState: ICameraViewState,
         display: IDisplay,
         bounds: BoxType,
         geometricError?: number // inherited geometric error from the parent.

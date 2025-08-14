@@ -1,5 +1,5 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
-import { ICameraState, ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ICameraViewState, ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileSystemBounds } from "../tiles.interfaces";
@@ -34,7 +34,7 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
     _lod: number;
     _scale: number;
-    _camera?: ICameraState;
+    _camera?: ICameraViewState;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
 
@@ -143,11 +143,11 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
         }
     }
 
-    public get camera(): ICameraState | undefined {
+    public get camera(): ICameraViewState | undefined {
         return this._camera;
     }
 
-    public set camera(c: ICameraState) {
+    public set camera(c: ICameraViewState) {
         if (this._camera !== c) {
             const old = this._camera;
             this._camera = c;

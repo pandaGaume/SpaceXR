@@ -1,6 +1,6 @@
 import { AbstractMesh, Material, Mesh, Scene, TransformNode } from "@babylonjs/core";
 import {
-    AbstractTileMetrics,
+    TileMetrics,
     IDisplay,
     ImageLayerContentType,
     IPhysicalDisplay,
@@ -81,7 +81,7 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         if (m) {
             m.parent = this._tilesRoot;
 
-            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
+            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? TileMetrics.DefaultTileSize;
             m.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
 
             // set the surface 3D

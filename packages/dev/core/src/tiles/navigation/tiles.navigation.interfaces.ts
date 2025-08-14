@@ -27,59 +27,27 @@ export interface IFrustumValues {
     up?: ICartesian3;
 }
 /// <summary>
-/// Represents the state of the camera, including its position, the target it is looking at,
-/// and the field of view (FOV). This information is essential in certain scenarios where
-/// the Level of Detail (LOD) of the tiles must be computed. The LOD depends on the
-/// camera's position and target, which define the perspective and distance to the tiles,
-/// as well as the field of view, which affects how much of the scene is visible at once.
+/// Represents the camera view (pose + optics) used to derive frustum and SSE.
+/// Distances are expressed in local scene units; geometric errors are in meters.
+/// The renderer uses `metersToLocalScale` to compare them coherently.
 /// </summary>
-export interface ICameraState extends IFrustumValues {
-    /// <summary>
-    /// An observable that notifies subscribers of changes to properties in the camera state.
-    /// This enables reactive updates when properties like `position`, `target`, or `fov` or any Frustum values are modified.
-    /// </summary>
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
+export interface ICameraViewState extends IFrustumValues {
+    /// <summary>Notifies when any property changes (pose, optics, frustum inputs).</summary>
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
 
-    /// <summary>
-    /// The position of the camera in a 3D Cartesian coordinate system.
-    /// This is crucial for determining the camera's proximity to tiles, which
-    /// influences the required resolution or detail level of each tile.
-    /// </summary>
+    /// <summary>Camera position in local scene coordinates.</summary>
     position: ICartesian3;
 
-    /// <summary>
-    /// The target point in the 3D space that the camera is focused on.
-    /// Knowing the target helps define the direction of the camera's view,
-    /// which is necessary for calculating which tiles are in the field of view
-    /// and require higher or lower detail levels.
-    /// </summary>
+    /// <summary>Point the camera looks at (local scene coordinates).</summary>
     target: ICartesian3;
 
-    /// <summary>
-    /// The field of view (FOV) of the camera, typically measured in degrees.
-    /// The FOV determines the angle of the visible area and affects how much of
-    /// the scene can be seen at a given distance. A wider FOV may require less
-    /// detailed tiles further away, while a narrower FOV may demand higher detail
-    /// for tiles closer to the target.
-    /// </summary>
-    fov: number;
+    /// <summary>Vertical field of view in radians.</summary>
+    fovY: number;
 
-    /// <summary>
-    /// The tangent of half the field of view, which is used in calculations related to
-    /// screen space error and Level of Detail (LOD). This value is derived from the FOV
-    /// and is essential for determining how much detail is needed based on the camera's
-    /// perspective. It helps in calculating the screen space error, which is a measure of
-    /// how much detail is required for tiles based on their distance from the camera and
-    /// the camera's field of view.
-    /// </summary>
+    /// <summary>tan(fovY/2) precomputed for SSE; keep in sync with fovY.</summary>
     tanfov2: number;
 
-    /// <summary>
-    /// Computes and returns the list of frustum planes for the current camera state.
-    /// These planes define the camera's visible region in 3D space and are used in
-    /// frustum culling operations, such as checking whether a mesh or tile is within
-    /// the camera's field of view using methods like `isInFrustum()`.
-    /// </summary>
+    /// <summary>Compute frustum planes for culling in current view.</summary>
     getFrustumPlanes(options?: IFrustumValues): Array<IPlane>;
 }
 
@@ -138,7 +106,7 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     /// position, target, and field of view (FOV), which are critical for calculating the Level of
     /// Detail (LOD) dynamically based on the camera's perspective and proximity to tiles.
     /// </summary>
-    camera?: ICameraState;
+    camera?: ICameraViewState;
 
     /// <summary>
     /// Copies the properties from the provided state into the current state. This is used for
@@ -154,12 +122,19 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
 
     /// <summary>
-    /// the optional scale of the observed scene, which is the ratio of the size of the observed scene and the real size of the scene.
-    /// This scale is used to determine the logical distance between the camera and the tiles, which is crucial for
-    /// calculating the Level of Detail (LOD) and the required resolution of tiles.
-    /// default value is 1.0, which means that the observed scene is at its real size. This is the case for example when the camera itsel is on ECEF coordinates.
-    /// </summary>
-    mapscale?: number;
+    /// Scale factor that converts real-world meters to local scene units.
+    /// Example: if 1 m (real) equals 0.01 units (tabletop hologram), set 0.01.
+    /// Default = 1.0 (ECEF/ENU scenes at real scale).
+    /// Used in SSE/LOD to compare geometric error (meters) with camera distance (local units).
+    /// <summary>
+
+    metersToLocalScale?: number;
+
+    /// <summary>
+    /// Monotonically increasing token incremented whenever any field changes
+    // (center/zoom/azimuth/bounds/camera/metersToLocalScale).
+    /// <summary>
+    version?: number;
 }
 
 export function IsTileNavigationState(b: unknown): b is ITileNavigationState {

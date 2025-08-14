@@ -1,4 +1,4 @@
-import { AbstractTileMetrics, IDisplay, ImageLayer, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
+import { TileMetrics, IDisplay, ImageLayer, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
 import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
 import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { Nullable } from "core/types";
@@ -106,7 +106,7 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
      */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>> {
         if (layer instanceof ElevationLayer) {
-            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize);
+            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics?.tileSize ?? TileMetrics.DefaultTileSize);
             return new ElevationLayerView(this, layer, this._display, new TileView(zoomOffset));
         }
         if (layer instanceof ImageLayer) {

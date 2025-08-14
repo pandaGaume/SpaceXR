@@ -3,7 +3,7 @@ import { IDisposable } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ICartesian2, Cartesian2 } from "../../geometry";
 import { IGeo2, IsLocation, Bearing, Geo2 } from "../../geography";
-import { EPSG3857 } from "../geography";
+import { TileMetrics } from "../tiles.metrics";
 
 export class TileNavigationApi implements ITileNavigationApi, IDisposable {
     private _navigation: ITileNavigationState;
@@ -12,7 +12,7 @@ export class TileNavigationApi implements ITileNavigationApi, IDisposable {
 
     public constructor(navigation: ITileNavigationState, metrics?: ITileMetrics) {
         this._navigation = navigation;
-        this._metrics = metrics ?? EPSG3857.Shared;
+        this._metrics = metrics ?? TileMetrics.Shared;
     }
 
     public get navigationState(): ITileNavigationState {

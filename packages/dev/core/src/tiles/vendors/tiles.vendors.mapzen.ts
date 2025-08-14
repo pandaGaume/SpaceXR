@@ -1,12 +1,12 @@
 import { TileWebClient } from "../tiles.client";
 import { WebTileUrlBuilder } from "../tiles.url.web";
 import { Float32TileCodec, Float32TileCodecOptions, ImageTileCodec, RGBTileCodec } from "../codecs/tiles.codecs.image";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { DemTileWebClient } from "../../dem/dem.tileclient";
 import { IPixelDecoder, isFilter } from "../codecs/tiles.codecs.interfaces";
 import { Cartesian4, ICartesian4 } from "../../geometry";
 import { Cartesian4TileCodec } from "../codecs/tiles.codecs.cartesian";
 import { WebClientOptions } from "../../io";
+import { TileMetrics } from "../tiles.metrics";
 
 export class MapZenDemUrlBuilder extends WebTileUrlBuilder {
     public static Terrarium = new MapZenDemUrlBuilder("terrarium");
@@ -52,7 +52,7 @@ export class MapZen {
 
     // in theory, mapzen is going to zoom 15, but we experiencing too many elevation error.
     public static MaxLevelOfDetail = 15;
-    public static Metrics = new EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
+    public static Metrics = new TileMetrics({ maxLOD: MapZen.MaxLevelOfDetail });
     public static Attribution = "Freely provided by MapZen - with thanks.";
 
     public static ElevationsImagesClient(options?: WebClientOptions) {

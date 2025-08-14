@@ -1,8 +1,8 @@
 import { TileWebClient } from "../tiles.client";
 import { ImageTileCodec } from "../codecs/tiles.codecs.image";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { WebTileUrlBuilder } from "../tiles.url.web";
 import { WebClientOptions } from "../../io";
+import { TileMetrics } from "../tiles.metrics";
 
 export enum GoogleMap2DLayerCode {
     street = "m",
@@ -30,7 +30,7 @@ export class Google {
     private static readonly KEY = "google";
 
     public static MaxLevelOfDetail = 20;
-    public static Metrics = new EPSG3857({ maxLOD: Google.MaxLevelOfDetail });
+    public static Metrics = new TileMetrics({ maxLOD: Google.MaxLevelOfDetail });
 
     public static Attribution = "Imagery © Google";
 

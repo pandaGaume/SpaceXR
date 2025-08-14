@@ -7,21 +7,20 @@ export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
 }
 export declare function HasNavigationState(obj: unknown): obj is IHasNavigationState;
-export interface ICameraState {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
-    position: ICartesian3;
-    target: ICartesian3;
-    fov: number;
-    tanfov2: number;
-    getFrustumPlanes(options?: IFrustumOpts): Array<IPlane>;
-}
-export interface IFrustumOpts {
+export interface IFrustumValues {
     aspect?: number;
     near?: number;
     far?: number;
     up?: ICartesian3;
 }
-export declare function BuildFrustumPlanesFromCameraState(cam: ICameraState, opts?: IFrustumOpts): IPlane[];
+export interface ICameraViewState extends IFrustumValues {
+    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
+    position: ICartesian3;
+    target: ICartesian3;
+    fovY: number;
+    tanfov2: number;
+    getFrustumPlanes(options?: IFrustumValues): Array<IPlane>;
+}
 export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     center: IGeo2;
@@ -30,10 +29,11 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     bounds: ITileSystemBounds;
     lod: number;
     scale: number;
-    camera?: ICameraState;
+    camera?: ICameraViewState;
     copy(state: ITileNavigationState): ITileNavigationState;
     syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;
-    mapscale?: number;
+    metersToLocalScale?: number;
+    version?: number;
 }
 export declare function IsTileNavigationState(b: unknown): b is ITileNavigationState;
 export interface ITileNavigationApi extends IHasNavigationState, IDisposable {

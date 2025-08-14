@@ -1,5 +1,5 @@
 import { IBoundingBox, IBoundingSphere, IPlane, ISize2 } from "core/geometry";
-import { ICameraState, ISourceBlock, ITileAddress2 } from "core/tiles";
+import { ISourceBlock, ITileAddress2, ITileNavigationState } from "core/tiles";
 
 // Module augmentation for Babylon.js
 declare module "@babylonjs/core/Meshes/abstractMesh" {
@@ -161,5 +161,5 @@ export interface ICameraFetchEngine extends ISourceBlock<IMap3dObjectNodeRef<Map
      * @param state - The new camera state, including position, target, and field of view.
      * @param displaySize - the projection plan size in pixel.
      */
-    onCameraStateChange(state: ICameraState, displaySize: ISize2): void;
+    onNavigationStateChange(state: ITileNavigationState, displaySize: ISize2): void;
 }

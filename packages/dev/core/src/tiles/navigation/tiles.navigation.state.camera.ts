@@ -1,13 +1,13 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
 import { Cartesian3, ICartesian3, IPlane } from "../../geometry";
 import { Nullable } from "../../types";
-import { ICameraState, IFrustumValues } from "./tiles.navigation.interfaces";
+import { ICameraViewState, IFrustumValues } from "./tiles.navigation.interfaces";
 
 /// <summary>
 /// Concrete ICameraState with change notifications, cached frustum planes,
 /// and settable frustum parameters (aspect, near, far, up).
 /// </summary>
-export class CameraState implements ICameraState {
+export class CameraState implements ICameraViewState {
     public static readonly DefaultScale = 1.0;
     public static readonly DefaultAspect = 16 / 9;
     public static readonly DefaultNear = 0.1;
@@ -23,11 +23,11 @@ export class CameraState implements ICameraState {
     public static readonly FAR_PROPERTY_NAME = "far";
     public static readonly UP_PROPERTY_NAME = "up";
 
-    private _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
+    private _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
 
     private _position: ICartesian3;
     private _target: ICartesian3;
-    private _fov: number; // degrees
+    private _fovY: number; // degrees
     private _tanfov2?: number; // cache
     private _scale: number;
 
@@ -41,14 +41,14 @@ export class CameraState implements ICameraState {
     constructor(position: ICartesian3, target: ICartesian3, fovDeg: number, scale?: number) {
         this._position = position;
         this._target = target;
-        this._fov = fovDeg;
+        this._fovY = fovDeg;
         this._scale = scale ?? CameraState.DefaultScale;
     }
 
     /// <summary>Observable for property change notifications.</summary>
-    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ICameraState, unknown>> {
+    public get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ICameraViewState, unknown>> {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ICameraState, unknown>>();
+            this._propertyChangedObservable = new Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>();
         }
         return this._propertyChangedObservable;
     }
@@ -82,24 +82,23 @@ export class CameraState implements ICameraState {
     }
 
     /// <summary>Field of view in degrees.</summary>
-    get fov(): number {
-        return this._fov;
+    get fovY(): number {
+        return this._fovY;
     }
-    set fov(value: number) {
-        if (this._fov !== value) {
-            const old = this._fov;
-            this._fov = value;
+    set fovY(value: number) {
+        if (this._fovY !== value) {
+            const old = this._fovY;
+            this._fovY = value;
             this._tanfov2 = undefined;
             this.invalidateFrustum();
             this.notifyChange(old, value, CameraState.FOV_PROPERTY_NAME);
         }
     }
 
-    /// <summary>tan(FOV/2) in radians (lazy-computed from `fov` in degrees).</summary>
+    /// <summary>tan(FOV/2) in radians (lazy-computed from `fovY`).</summary>
     get tanfov2(): number {
         if (this._tanfov2 === undefined) {
-            const rad = (this._fov * Math.PI) / 180;
-            this._tanfov2 = Math.tan(rad / 2);
+            this._tanfov2 = Math.tan(this._fovY / 2);
         }
         return this._tanfov2;
     }
@@ -189,12 +188,12 @@ export class CameraState implements ICameraState {
 
     private notifyChange<T>(oldValue: T, newValue: T, name: string): void {
         if (this._propertyChangedObservable?.hasObservers()) {
-            const e = new PropertyChangedEventArgs<ICameraState, T>(this, oldValue, newValue, name);
+            const e = new PropertyChangedEventArgs<ICameraViewState, T>(this, oldValue, newValue, name);
             this._propertyChangedObservable.notifyObservers(e, -1, this, this);
         }
     }
 
-    private _buildFrustumPlanesFromCameraState(cam: ICameraState, opts: IFrustumValues = {}): IPlane[] {
+    private _buildFrustumPlanesFromCameraState(cam: ICameraViewState, opts: IFrustumValues = {}): IPlane[] {
         // --- defaults
         const aspect = opts.aspect ?? 16 / 9;
         const near = opts.near ?? 0.1;

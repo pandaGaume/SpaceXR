@@ -4,8 +4,13 @@ import { IEnvelope, IGeo2, IGeo3, IGeoBounded, IsEnvelope, IsGeoBounded, IsLocat
 import { ISize3 } from "../geometry/geometry.interfaces";
 import { Geo3 } from "./geography.position";
 import { Size3 } from "../geometry/geometry.size";
+import { IGeoProcessor, SphericalCalculator } from "../geodesy";
 
 export class Envelope implements IEnvelope {
+    public static GetDiagonalLength(env: IEnvelope, proc: IGeoProcessor = SphericalCalculator.Shared): number {
+        return proc.getDistanceFromFloat(env.south, env.west, env.north, env.east, env.bottom, env.top);
+    }
+
     public static RegionIntersectsRegion(a: [number, number, number, number, number, number], b: [number, number, number, number, number, number]): boolean {
         if (a[1] > b[3] || a[3] < b[1] || a[0] > b[2] || a[2] < b[0] || a[4] > b[5] || a[5] < b[4]) {
             return false;

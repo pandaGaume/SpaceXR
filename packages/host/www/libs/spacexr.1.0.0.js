@@ -1988,15 +1988,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Envelope: () => (/* binding */ Envelope),
 /* harmony export */   GeoBounded: () => (/* binding */ GeoBounded)
 /* harmony export */ });
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
-/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.interfaces */ "./dist/geography/geography.interfaces.js");
-/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.position */ "./dist/geography/geography.position.js");
-/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../math/math */ "./dist/math/math.js");
+/* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.interfaces */ "./dist/geography/geography.interfaces.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.position */ "./dist/geography/geography.position.js");
+/* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geometry/geometry.size */ "./dist/geometry/geometry.size.js");
+/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy */ "./dist/geodesy/calculators/geodesy.calculator.spherical.js");
+
 
 
 
 
 class Envelope {
+    static GetDiagonalLength(env, proc = _geodesy__WEBPACK_IMPORTED_MODULE_0__.SphericalCalculator.Shared) {
+        return proc.getDistanceFromFloat(env.south, env.west, env.north, env.east, env.bottom, env.top);
+    }
     static RegionIntersectsRegion(a, b) {
         if (a[1] > b[3] || a[3] < b[1] || a[0] > b[2] || a[2] < b[0] || a[4] > b[5] || a[5] < b[4]) {
             return false;
@@ -2007,39 +2012,39 @@ class Envelope {
         return lat >= a[1] && lat <= a[3] && (lon === undefined || (lon >= a[0] && lon <= a[2])) && (alt === undefined || (alt >= a[4] && alt <= a[5]));
     }
     static Zero() {
-        return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero());
+        return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3.Zero());
     }
     static Split2(a) {
         if (a) {
-            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(a)) {
+            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsGeoBounded)(a)) {
                 return Envelope.Split2(a.geoBounds);
             }
             const center = a.center;
             return [
-                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon)),
-                new Envelope(center, new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east)),
-                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west), center),
-                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east)),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, a.west), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.north, center.lon)),
+                new Envelope(center, new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.north, a.east)),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.south, a.west), center),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.south, center.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, a.east)),
             ];
         }
         return [];
     }
     static Split3(a) {
         if (a) {
-            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(a)) {
+            if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsGeoBounded)(a)) {
                 return Envelope.Split3(a.geoBounds);
             }
             if (a.hasAltitude) {
                 const center = a.center;
                 return [
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon, center.alt)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east, center.alt)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west, a.bottom), center),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east, center.alt)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon, a.top)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east, a.top)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, a.top)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, a.west, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.north, center.lon, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.north, a.east, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.south, a.west, a.bottom), center),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.south, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, a.east, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.north, center.lon, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.north, a.east, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.south, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, center.lon, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(a.south, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(center.lat, a.east, a.top)),
                 ];
             }
         }
@@ -2048,10 +2053,10 @@ class Envelope {
     static FromPoints(...array) {
         const a = array[0];
         const hasAlt = a.alt !== undefined && a.alt !== undefined;
-        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
-        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_3__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt0 = hasAlt ? a.alt : undefined;
-        const env = new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0));
+        const env = new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(lat0, lon0, alt0), new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(lat0, lon0, alt0));
         for (let i = 1; i < array.length; i++) {
             env.addInPlace(array[i]);
         }
@@ -2062,7 +2067,7 @@ class Envelope {
         for (let i = 0; i < array.length; i++) {
             let a = array[i];
             if (a) {
-                if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsEnvelope)(a)) {
+                if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsEnvelope)(a)) {
                     env = env ? env.unionInPlace(a) : a.clone();
                 }
                 else {
@@ -2101,16 +2106,16 @@ class Envelope {
         return this._max.alt;
     }
     get nw() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.north, this.west);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.north, this.west);
     }
     get sw() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.south, this.west);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.south, this.west);
     }
     get ne() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.north, this.east);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.north, this.east);
     }
     get se() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.south, this.east);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(this.south, this.east);
     }
     equals(other) {
         return (other !== undefined &&
@@ -2131,19 +2136,19 @@ class Envelope {
         const lon = this._min.lon + (this._max.lon - this._min.lon) / 2;
         const lat = this._min.lat + (this._max.lat - this._min.lat) / 2;
         const alt = this.hasAltitude ? this._min.alt + (this._max.alt - this._min.alt) / 2 : undefined;
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat, lon, alt);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_1__.Geo3(lat, lon, alt);
     }
     get size() {
         const w = this._max.lon - this._min.lon;
         const h = this._max.lat - this._min.lat;
         const t = this.hasAltitude ? this._max.alt - this._min.alt : 0;
-        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_3__.Size3(w, h, t);
+        return new _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_4__.Size3(w, h, t);
     }
     add(lat, lon, alt) {
         return this.clone().addInPlace(lat, lon, alt);
     }
     addInPlace(lat, lon, alt) {
-        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsLocation)(lat)) {
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsLocation)(lat)) {
             return this.addInPlace(lat.lat, lat.lon, lat.alt);
         }
         this._min.lat = Math.min(this._min.lat, lat);
@@ -2183,7 +2188,7 @@ class Envelope {
             }
             return true;
         }
-        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(bounds)) {
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsGeoBounded)(bounds)) {
             return this.intersects(bounds.geoBounds);
         }
         if (this._min.lat > bounds.north || this._max.lat < bounds.south || this._min.lon > bounds.east || this._max.lon < bounds.west) {
@@ -2199,7 +2204,7 @@ class Envelope {
     contains(other) {
         if (!other)
             return false;
-        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsLocation)(other)) {
+        if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsLocation)(other)) {
             return this.containsFloat(other.lat, other.lon, other.alt);
         }
         return (this.containsFloat(other.south, other.west) &&

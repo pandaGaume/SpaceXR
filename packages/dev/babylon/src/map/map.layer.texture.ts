@@ -10,6 +10,8 @@ import {
     ITileNavigationState,
     ITileView,
     TileNavigationState,
+    TileAddress,
+    ITileAddress2,
 } from "core/tiles";
 import { Nullable } from "core/types";
 import { IMap3D, ITileWithMesh } from "./map.interfaces";
@@ -17,6 +19,8 @@ import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
 import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { Map3dLayerView } from "./map.layer.view";
+import { Envelope } from "core/geography";
+import { IMap3dObjectNodeRef, Map3dObjectRefineType } from "./map.object.interfaces";
 
 export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     public static DefaultExageration: number = 1.0;
@@ -112,8 +116,20 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     }
 
     protected _buildInstance(tile: ITileWithMesh<ImageLayerContentType>): AbstractMesh {
-        const instance = this._map.grid.createInstance(this._buildInstanceName(tile));
-        return instance;
+        const instance: AbstractMesh = this._map.grid.createInstance(this._buildInstanceName(tile));
+
+        return this._augmentInstanceAsObjectNode(tile, instance);
+    }
+
+    protected _augmentInstanceAsObjectNode(tile: ITileWithMesh<ImageLayerContentType>, m: AbstractMesh): AbstractMesh {
+        var env = tile.geoBounds;
+        if (env) {
+            m.geometricError = Envelope.GetDiagonalLength(env);
+            m.refine = Map3dObjectRefineType.replace;
+            m.refinedFrom = { address: TileAddress.QuadKeyToTileXY(TileAddress.ToParentKey(tile.quadkey)) };
+            m.refinements = TileAddress.ToChildsKey(tile.quadkey).map((k) => <IMap3dObjectNodeRef<ITileAddress2>>{ address: TileAddress.QuadKeyToTileXY(k) });
+        }
+        return m;
     }
 
     protected _setTilePosition(tile: ITileWithMesh<ImageLayerContentType>, center: ICartesian2): void {

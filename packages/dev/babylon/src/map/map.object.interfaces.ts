@@ -54,10 +54,6 @@ export interface IBoundingInfo extends ICullable {
 
 export interface IMap3dObjectNodeRef<T> {
     /**
-     * return the bounding infos.
-     */
-    getBoundingInfo?(): IBoundingInfo;
-    /**
      * A uri that points to object content.
      */
     address: T;
@@ -70,6 +66,9 @@ export type Map3dObjectNodeRefType = ITileAddress2 | string;
  * This interface is designed to handle the streaming process only. Other aspects, such as transformations, are managed by the underlying 3D framework.
  */
 export interface IMap3dObjectNode extends IMap3dObjectNodeRef<Map3dObjectNodeRefType> {
+    /** */
+    getBoundingInfo(): IBoundingInfo;
+
     /**
      * The geometric error, in meters, introduced if this object is rendered and its children are not.
      * At runtime, the geometric error is used to compute screen space error (SSE), i.e., the error measured in pixels.

@@ -1,6 +1,8 @@
 import { IEnvelope, IGeo2, IGeo3, IGeoBounded } from "./geography.interfaces";
 import { ISize3 } from "../geometry/geometry.interfaces";
+import { IGeoProcessor } from "../geodesy";
 export declare class Envelope implements IEnvelope {
+    static GetDiagonalLength(env: IEnvelope, proc?: IGeoProcessor): number;
     static RegionIntersectsRegion(a: [number, number, number, number, number, number], b: [number, number, number, number, number, number]): boolean;
     static RegionContainsFloat(a: [number, number, number, number, number, number], lat: number, lon: number, alt?: number): boolean;
     static MaxLongitude: number;

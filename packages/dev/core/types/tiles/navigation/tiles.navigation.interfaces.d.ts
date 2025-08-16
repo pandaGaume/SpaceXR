@@ -28,7 +28,7 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     azimuth: Bearing;
     bounds: ITileSystemBounds;
     lod: number;
-    scale: number;
+    transitionScale: number;
     camera?: ICameraViewState;
     copy(state: ITileNavigationState): ITileNavigationState;
     syncWith(state: Nullable<ITileNavigationState>): ITileNavigationState;

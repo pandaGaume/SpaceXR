@@ -35,7 +35,7 @@ export class Context2DTileMap<T> extends TileMapBase<T> {
             const y = yoffset;
             const w = display.resolution.width;
             const h = display.resolution.height;
-            const scale = this.navigationState?.scale ?? 1.0;
+            const scale = this.navigationState?.transitionScale ?? 1.0;
 
             // we clear the canvas
             ctx.clearRect(x, y, w, h);

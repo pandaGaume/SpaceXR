@@ -160,11 +160,11 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         }
 
         // x & y are unitless, so we define the size in meter using scale and groundResolution
-        this._tilesRoot.scaling.x = x * groundResolution * nav.scale;
-        this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
+        this._tilesRoot.scaling.x = x * groundResolution * nav.transitionScale;
+        this._tilesRoot.scaling.y = y * groundResolution * nav.transitionScale;
 
         // z data are already in meter so they just need to be scaled, and exagerated.
-        this._tilesRoot.scaling.z = z * (this._map.elevationOptions?.exageration ?? TextureLayerView.DefaultExageration) * nav.scale;
+        this._tilesRoot.scaling.z = z * (this._map.elevationOptions?.exageration ?? TextureLayerView.DefaultExageration) * nav.transitionScale;
     }
 
     protected _onNavigationChanged(oldValue: Nullable<ITileNavigationState>, newValue: Nullable<ITileNavigationState>): void {

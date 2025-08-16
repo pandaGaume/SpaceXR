@@ -99,7 +99,7 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     /// The scale factor corresponding to the decimal part of the `zoom` property. This allows for
     /// smooth transitions between zoom levels and finer control over tile rendering.
     /// </summary>
-    scale: number;
+    transitionScale: number;
 
     /// <summary>
     /// Optional property representing the camera state. When provided, it includes parameters like

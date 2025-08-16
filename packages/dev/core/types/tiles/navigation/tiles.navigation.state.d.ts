@@ -13,7 +13,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     static readonly AZIMUTH_PROPERTY_NAME: string;
     static readonly BOUNDS_PROPERTY_NAME: string;
     static readonly CAMERA_PROPERTY_NAME: string;
-    static GetLodScale(lod: number): number;
+    static GetLodTransitionScale(lod: number): number;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     _lodf: number;
     _center: IGeo2;
@@ -21,7 +21,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _bounds: ITileSystemBounds;
     _cartesianCache: ICartesian2;
     _lod: number;
-    _scale: number;
+    _transitionScale: number;
     _camera?: ICameraViewState;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
@@ -29,7 +29,7 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     clone(): ITileNavigationState;
     dispose(): void;
     get lod(): number;
-    get scale(): number;
+    get transitionScale(): number;
     get center(): IGeo2;
     set center(center: IGeo2);
     get zoom(): number;

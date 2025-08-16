@@ -36,7 +36,7 @@ export class TileView extends TileViewBase {
             if (target != lod) {
                 return;
             }
-            let scale = state.scale;
+            let scale = state.transitionScale;
 
             const nwTileXY = Cartesian2.Zero();
             const seTileXY = Cartesian2.Zero();

@@ -5436,7 +5436,7 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
             const y = yoffset;
             const w = display.resolution.width;
             const h = display.resolution.height;
-            const scale = this.navigationState?.scale ?? 1.0;
+            const scale = this.navigationState?.transitionScale ?? 1.0;
             ctx.clearRect(x, y, w, h);
             ctx.translate(x + w / 2, y + h / 2);
             if (this.navigationState?.azimuth?.value) {
@@ -11001,7 +11001,7 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
             if (target != lod) {
                 return;
             }
-            let scale = state.scale;
+            let scale = state.transitionScale;
             const nwTileXY = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
             const seTileXY = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
             const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
@@ -11665,7 +11665,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
-    static GetLodScale(lod) {
+    static GetLodTransitionScale(lod) {
         let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         return scale;
@@ -11679,7 +11679,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         this._bounds = bounds ?? new _tiles_system__WEBPACK_IMPORTED_MODULE_5__.TileSystemBounds();
         this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
         this._lod = Math.round(this._lodf);
-        this._scale = TileNavigationState.GetLodScale(this._lodf);
+        this._transitionScale = TileNavigationState.GetLodTransitionScale(this._lodf);
         this._sync = null;
     }
     clone() {
@@ -11696,8 +11696,8 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
     get lod() {
         return this._lod;
     }
-    get scale() {
-        return this._scale;
+    get transitionScale() {
+        return this._transitionScale;
     }
     get center() {
         return this._center;
@@ -11738,7 +11738,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
                     event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, oldLod, this._lod, TileNavigationState.LOD_PROPERTY_NAME);
                 }
             }
-            this._scale = TileNavigationState.GetLodScale(this._lodf);
+            this._transitionScale = TileNavigationState.GetLodTransitionScale(this._lodf);
             this.invalidate();
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 if (event) {

@@ -129,9 +129,9 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
             const yAxis = TransformVec3(transform!, [viewBox[6], viewBox[7], viewBox[8]]);
             const zAxis = TransformVec3(transform!, [viewBox[9], viewBox[10], viewBox[11]]);
 
-            const dx = cameraState.position.x - worldViewCenter[0];
-            const dy = cameraState.position.y - worldViewCenter[1];
-            const dz = cameraState.position.z - worldViewCenter[2];
+            const dx = cameraState.worldPosition.x - worldViewCenter[0];
+            const dy = cameraState.worldPosition.y - worldViewCenter[1];
+            const dz = cameraState.worldPosition.z - worldViewCenter[2];
 
             const proj = (a: number[], bx: number, by: number, bz: number) => Math.abs(a[0] * bx + a[1] * by + a[2] * bz);
             const len = (a: number[]) => Math.sqrt(a[0] ** 2 + a[1] ** 2 + a[2] ** 2);
@@ -141,13 +141,13 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
             }
         }
 
-        const dx = worldBoxCenter[0] - cameraState.position.x;
-        const dy = worldBoxCenter[1] - cameraState.position.y;
-        const dz = worldBoxCenter[2] - cameraState.position.z;
+        const dx = worldBoxCenter[0] - cameraState.worldPosition.x;
+        const dy = worldBoxCenter[1] - cameraState.worldPosition.y;
+        const dz = worldBoxCenter[2] - cameraState.worldPosition.z;
         const distanceToCamera = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
         const tileGeometricError = tile.geometricError ?? geometricError;
-        const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
+        const sse = ScreenSpaceError(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanFov2);
         const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;
 
         if (sse > maxsse) {

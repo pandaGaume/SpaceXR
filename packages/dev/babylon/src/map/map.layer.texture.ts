@@ -20,8 +20,32 @@ import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { Map3dLayerView } from "./map.layer.view";
 import { Envelope } from "core/geography";
-import { IMap3dObjectNodeRef, Map3dObjectRefineType } from "./map.object.interfaces";
+import { IMap3dObjectNode, IMap3dObjectNodeRef, Map3dObjectRefineType } from "./map.object.interfaces";
+import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
+import { CameraFetchEngine } from "./map.camera.fetch";
 
+/**
+ * The `Map3D` enforces a simplified but powerful layer model:
+ *
+ * - Exactly one texture layer is allowed, but this layer may be a compound layer.
+ *   The compound texture layer can aggregate multiple image layers (via `IDrawableTileMapLayer`
+ *   to render the imagery into a local canvas). These layers are composited into a single texture
+ *   according to their defined order, options, and sub-layer settings. Consequently, Vector layer are also supported.
+ *
+ * - The `ImageLayerContentType` may be one of several supported types
+ *   (`HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | ImageBitmap | OffscreenCanvas`),
+ *   providing flexibility in how texture content is supplied. All of these types are natively
+ *   supported by WebGL 2 as texture sources. However, due to restriction of using 3DTexture, only raw data are supported.
+ *   Instead, it only accepts typed array data (ArrayBufferView, e.g. Uint8Array, Float32Array) or null (to allocate storage).
+ *
+ * - In the case of multiple image sources (imagery layers), they are aggregated as sub-layers
+ *   of the compound texture, ensuring a single texture pass on the terrain. This approach
+ *   simplifies shader logic, streaming, and rendering performance.
+ *
+ * This design choice reduces complexity, avoids ambiguity in elevation/texture handling,
+ * and provides a predictable rendering pipeline while preserving flexibility through
+ * compound texture aggregation.
+ */
 export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     public static DefaultExageration: number = 1.0;
 
@@ -33,6 +57,9 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     // cached cartesian center
     _cartesianCenterCache: Nullable<ICartesian2> = null;
     _cachedSize: ISize2;
+
+    _objectsSource?: SourceBlock<IMap3dObjectNode>;
+    _fetchEngine?: CameraFetchEngine;
 
     public constructor(map: IMap3D, layer: ITileMapLayer<ImageLayerContentType>, display: Nullable<IDisplay>, source: ITileView) {
         super(map, layer, display, source);
@@ -50,6 +77,12 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         // build the root for the tiles
         const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
+        this._objectsSource = new SourceBlock<IMap3dObjectNode>();
+        this._fetchEngine = new CameraFetchEngine({
+            maxScreenSpaceError: CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
+            hysteresisPercent: CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
+        });
+        this._objectsSource.linkTo(this._fetchEngine);
     }
 
     public get grid(): Mesh {
@@ -155,10 +188,10 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         const x = display.dimension.width / (display.resolution.width * groundResolution);
         const y = display.dimension.height / (display.resolution.height * groundResolution);
         let z = Math.max(x, y);
+        nav.metersToLocalScale = z;
         if (display.dimension.depth && display.resolution.depth) {
             z = display.dimension.depth / (display.resolution.depth * groundResolution);
         }
-
         // x & y are unitless, so we define the size in meter using scale and groundResolution
         this._tilesRoot.scaling.x = x * groundResolution * nav.transitionScale;
         this._tilesRoot.scaling.y = y * groundResolution * nav.transitionScale;

@@ -2,7 +2,7 @@ import { IGeo2, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
-import { ICartesian3, IPlane } from "../../geometry";
+import { ICartesian3, IPlane, IQuaternion } from "../../geometry";
 export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
 }
@@ -14,13 +14,13 @@ export interface IFrustumValues {
     up?: ICartesian3;
 }
 export interface ICameraViewState extends IFrustumValues {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
-    position: ICartesian3;
-    target: ICartesian3;
+    worldPosition: ICartesian3;
+    worldRotation: IQuaternion;
     fovY: number;
-    tanfov2: number;
-    getFrustumPlanes(options?: IFrustumValues): Array<IPlane>;
+    tanFov2: number;
+    frustumPlanes?: Array<IPlane>;
 }
+export type CameraStateListener = (state: ICameraViewState) => void;
 export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     center: IGeo2;
@@ -44,6 +44,7 @@ export interface ITileNavigationApi extends IHasNavigationState, IDisposable {
     translateUnitsMap(tx: number, ty: number, validate?: boolean): ITileNavigationApi;
     translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): ITileNavigationApi;
     rotateMap(r: number, validate?: boolean): ITileNavigationApi;
+    setCameraState(camera: ICameraViewState, validate?: boolean): ITileNavigationApi;
 }
 export declare function IsTileNavigationApi(b: unknown): b is ITileNavigationApi;
 export interface IHasNavigationApi {

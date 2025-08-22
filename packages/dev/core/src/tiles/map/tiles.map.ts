@@ -1,5 +1,5 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
+import { ICameraViewState, ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
 import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
@@ -154,6 +154,10 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         }
         return this;
     }
+    public setCameraState(camera: ICameraViewState, validate?: boolean): ITileNavigationApi {
+        this._api?.setCameraState(camera, validate);
+        return this;
+    }
 
     public get isValid(): boolean {
         return super.isValid && this._layers?.isValid && this._layerViews?.isValid;
@@ -164,11 +168,20 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         this._layerViews?.validate();
     }
 
+    protected _onBeforeLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): boolean {
+        return true;
+    }
+
+    protected _onAfterLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {}
+
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void {
-        const views = eventData.map((l) => this._buildLayerView(l)).filter((i): i is ITileMapLayerView<T> => i !== null && i !== undefined);
-        if (views.length > 0) {
-            this._layerViews.add(...views);
-            this.invalidate();
+        if (this._onBeforeLayerAdded(eventData, eventstate)) {
+            const views = eventData.map((l) => this._buildLayerView(l)).filter((i): i is ITileMapLayerView<T> => i !== null && i !== undefined);
+            if (views.length > 0) {
+                this._layerViews.add(...views);
+                this.invalidate();
+            }
+            this._onAfterLayerAdded(eventData, eventstate);
         }
     }
 

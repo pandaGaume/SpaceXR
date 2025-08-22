@@ -1,12 +1,13 @@
 import * as BABYLON from "@babylonjs/core";
-import { IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileNavigationApi } from "core/tiles";
-import { Nullable } from "core/types";
+import { ICameraViewState, IDisplay, IHasTileMapLayerContainer, ITileMapLayerContainer, ITileNavigationApi } from "core/tiles";
+import { IDisposable, Nullable } from "core/types";
 import { EventState } from "core/events";
 import { IGeo2 } from "core/geography";
 import { VirtualDisplay } from "../display";
-import { IInputSource, InputsNavigationController} from "core/map";
+import { IInputSource, InputsNavigationController } from "core/map";
 import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
+import { SetupCameraStateSync, SyncActiveCameraState } from "./map.camera.sync";
 
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering event of the scene
@@ -16,11 +17,20 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
     private _beforeRenderObserver: Nullable<BABYLON.Observer<BABYLON.Scene>>;
     private _pointerController: Nullable<InputsNavigationController> = null;
     private _ownPointerController = false;
+    private _cameraMonitoring?: IDisposable;
+    private _activCameraChangeMonitor: IDisposable;
 
     public constructor(name: string, scene?: BABYLON.Scene) {
         super(name, scene);
         this._map = this._createMap();
-        this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
+        scene = scene ?? this.getScene();
+        this._beforeRenderObserver = scene.onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
+        let current: BABYLON.Camera | null = scene.activeCamera ?? null;
+        let listener = this._onCameraState.bind(this);
+        if (current) {
+            this._cameraMonitoring = SetupCameraStateSync(scene, current, listener);
+        }
+        this._activCameraChangeMonitor = SyncActiveCameraState(scene, listener);
     }
 
     public get layers(): ITileMapLayerContainer<Map3DContentType> {
@@ -66,6 +76,11 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         return this;
     }
 
+    public setCameraState(cam: ICameraViewState, validate?: boolean): ITileNavigationApi {
+        this._map.setCameraState(cam, validate);
+        return this;
+    }
+
     public get map(): IMap3D {
         return this._map;
     }
@@ -108,9 +123,15 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         this._map.validate();
     }
 
+    protected _onCameraState(eventData: ICameraViewState) {
+        this.setCameraState(eventData);
+    }
+
     public dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void {
         this._pointerController?.dispose();
         this._beforeRenderObserver?.remove();
+        this._cameraMonitoring?.dispose();
+        this._activCameraChangeMonitor?.dispose();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
     }

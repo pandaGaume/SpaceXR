@@ -10156,7 +10156,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileProvider),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
-/* harmony export */   CameraState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.CameraState),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.CanvasTileCodec),
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodec),
 /* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodecOptions),
@@ -10482,6 +10481,10 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         }
         return this;
     }
+    setCameraState(camera, validate) {
+        this._api?.setCameraState(camera, validate);
+        return this;
+    }
     get isValid() {
         return super.isValid && this._layers?.isValid && this._layerViews?.isValid;
     }
@@ -10489,11 +10492,18 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layers?.validate();
         this._layerViews?.validate();
     }
+    _onBeforeLayerAdded(eventData, eventstate) {
+        return true;
+    }
+    _onAfterLayerAdded(eventData, eventstate) { }
     _onLayerAdded(eventData, eventstate) {
-        const views = eventData.map((l) => this._buildLayerView(l)).filter((i) => i !== null && i !== undefined);
-        if (views.length > 0) {
-            this._layerViews.add(...views);
-            this.invalidate();
+        if (this._onBeforeLayerAdded(eventData, eventstate)) {
+            const views = eventData.map((l) => this._buildLayerView(l)).filter((i) => i !== null && i !== undefined);
+            if (views.length > 0) {
+                this._layerViews.add(...views);
+                this.invalidate();
+            }
+            this._onAfterLayerAdded(eventData, eventstate);
         }
     }
     _onLayerRemoved(eventData, eventstate) {
@@ -11208,21 +11218,18 @@ class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.T
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CameraState: () => (/* reexport safe */ _tiles_navigation_state_camera__WEBPACK_IMPORTED_MODULE_3__.CameraState),
 /* harmony export */   HasNavigationApi: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.HasNavigationApi),
 /* harmony export */   HasNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.HasNavigationState),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileNavigationState),
-/* harmony export */   TileNavigationApi: () => (/* reexport safe */ _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_4__.TileNavigationApi),
+/* harmony export */   TileNavigationApi: () => (/* reexport safe */ _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__.TileNavigationApi),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_navigation_state__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_navigation_state_sync__WEBPACK_IMPORTED_MODULE_2__.TileNavigationStateSynchronizer)
 /* harmony export */ });
 /* harmony import */ var _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.navigation.interfaces */ "./dist/tiles/navigation/tiles.navigation.interfaces.js");
 /* harmony import */ var _tiles_navigation_state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.navigation.state */ "./dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var _tiles_navigation_state_sync__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.navigation.state.sync */ "./dist/tiles/navigation/tiles.navigation.state.sync.js");
-/* harmony import */ var _tiles_navigation_state_camera__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.navigation.state.camera */ "./dist/tiles/navigation/tiles.navigation.state.camera.js");
-/* harmony import */ var _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.navigation.api */ "./dist/tiles/navigation/tiles.navigation.api.js");
-
+/* harmony import */ var _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.navigation.api */ "./dist/tiles/navigation/tiles.navigation.api.js");
 
 
 
@@ -11357,6 +11364,13 @@ class TileNavigationApi {
         }
         return this;
     }
+    setCameraState(state, validate) {
+        this._navigation.camera = state;
+        if (validate === undefined || validate === true) {
+            this._navigation.validate();
+        }
+        return this;
+    }
     rotatePointInv(x, y, target) {
         const r = target || _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         const azimuth = this._navigation.azimuth;
@@ -11419,223 +11433,6 @@ function HasNavigationApi(obj) {
     return obj.navigationApi !== undefined;
 }
 //# sourceMappingURL=tiles.navigation.interfaces.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/navigation/tiles.navigation.state.camera.js":
-/*!****************************************************************!*\
-  !*** ./dist/tiles/navigation/tiles.navigation.state.camera.js ***!
-  \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CameraState: () => (/* binding */ CameraState)
-/* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "./dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "./dist/events/events.args.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
-
-
-class CameraState {
-    constructor(position, target, fovDeg, scale) {
-        this._aspect = CameraState.DefaultAspect;
-        this._near = CameraState.DefaultNear;
-        this._far = CameraState.DefaultFar;
-        this._up = CameraState.DefaultUp;
-        this._planes = null;
-        this._position = position;
-        this._target = target;
-        this._fovY = fovDeg;
-        this._scale = scale ?? CameraState.DefaultScale;
-    }
-    get propertyChangedObservable() {
-        if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
-        }
-        return this._propertyChangedObservable;
-    }
-    get position() {
-        return this._position;
-    }
-    set position(value) {
-        if (this._position !== value) {
-            const old = this._position;
-            this._position = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.POSITION_PROPERTY_NAME);
-        }
-    }
-    get target() {
-        return this._target;
-    }
-    set target(value) {
-        if (this._target !== value) {
-            const old = this._target;
-            this._target = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.TARGET_PROPERTY_NAME);
-        }
-    }
-    get fovY() {
-        return this._fovY;
-    }
-    set fovY(value) {
-        if (this._fovY !== value) {
-            const old = this._fovY;
-            this._fovY = value;
-            this._tanfov2 = undefined;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.FOV_PROPERTY_NAME);
-        }
-    }
-    get tanfov2() {
-        if (this._tanfov2 === undefined) {
-            this._tanfov2 = Math.tan(this._fovY / 2);
-        }
-        return this._tanfov2;
-    }
-    get scale() {
-        return this._scale;
-    }
-    set scale(value) {
-        if (this._scale !== value) {
-            const old = this._scale;
-            this._scale = value;
-            this.notifyChange(old, value, CameraState.SCALE_PROPERTY_NAME);
-        }
-    }
-    get aspect() {
-        return this._aspect;
-    }
-    set aspect(value) {
-        if (this._aspect !== value) {
-            const old = this._aspect;
-            this._aspect = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.ASPECT_PROPERTY_NAME);
-        }
-    }
-    get near() {
-        return this._near;
-    }
-    set near(value) {
-        if (this._near !== value) {
-            const old = this._near;
-            this._near = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.NEAR_PROPERTY_NAME);
-        }
-    }
-    get far() {
-        return this._far;
-    }
-    set far(value) {
-        if (this._far !== value) {
-            const old = this._far;
-            this._far = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.FAR_PROPERTY_NAME);
-        }
-    }
-    get up() {
-        return this._up;
-    }
-    set up(value) {
-        if (this._up !== value) {
-            const old = this._up;
-            this._up = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.UP_PROPERTY_NAME);
-        }
-    }
-    getFrustumPlanes() {
-        if (this._planes == null) {
-            this._planes = this._buildFrustumPlanesFromCameraState(this, this);
-        }
-        return this._planes;
-    }
-    invalidateFrustum() {
-        this._planes = null;
-    }
-    notifyChange(oldValue, newValue, name) {
-        if (this._propertyChangedObservable?.hasObservers()) {
-            const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, newValue, name);
-            this._propertyChangedObservable.notifyObservers(e, -1, this, this);
-        }
-    }
-    _buildFrustumPlanesFromCameraState(cam, opts = {}) {
-        const aspect = opts.aspect ?? 16 / 9;
-        const near = opts.near ?? 0.1;
-        const far = opts.far ?? 10_000;
-        const upGuess = opts.up ?? { x: 0, y: 1, z: 0 };
-        const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
-        const add = (a, b) => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
-        const mul = (a, s) => ({ x: a.x * s, y: a.y * s, z: a.z * s });
-        const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
-        const cross = (a, b) => ({
-            x: a.y * b.z - a.z * b.y,
-            y: a.z * b.x - a.x * b.z,
-            z: a.x * b.y - a.y * b.x,
-        });
-        const len = (v) => Math.hypot(v.x, v.y, v.z);
-        const norm = (v) => {
-            const l = len(v) || 1;
-            return { x: v.x / l, y: v.y / l, z: v.z / l };
-        };
-        const pos = cam.position;
-        const fwd = norm(sub(cam.target, cam.position));
-        const right = norm(cross(fwd, norm(upGuess)));
-        const up = norm(cross(right, fwd));
-        const tanHalfV = cam.tanfov2;
-        const tanHalfH = tanHalfV * aspect;
-        const nearC = add(pos, mul(fwd, near));
-        const farC = add(pos, mul(fwd, far));
-        const nh = near * tanHalfV;
-        const nw = near * tanHalfH;
-        const fh = far * tanHalfV;
-        const fw = far * tanHalfH;
-        const ntl = add(add(nearC, mul(up, nh)), mul(right, -nw));
-        const ntr = add(add(nearC, mul(up, nh)), mul(right, nw));
-        const nbl = add(add(nearC, mul(up, -nh)), mul(right, -nw));
-        const nbr = add(add(nearC, mul(up, -nh)), mul(right, nw));
-        const ftl = add(add(farC, mul(up, fh)), mul(right, -fw));
-        const ftr = add(add(farC, mul(up, fh)), mul(right, fw));
-        const fbl = add(add(farC, mul(up, -fh)), mul(right, -fw));
-        const fbr = add(add(farC, mul(up, -fh)), mul(right, fw));
-        const planeFromCCW = (a, b, c) => {
-            const n = norm(cross(sub(b, a), sub(c, a)));
-            const d = -dot(n, a);
-            return { normal: n, d };
-        };
-        const ensureInward = (p) => {
-            const insideProbe = add(pos, mul(fwd, (near + far) * 0.5));
-            const side = dot(p.normal, insideProbe) + p.d;
-            return side >= 0 ? p : { normal: mul(p.normal, -1), d: -p.d };
-        };
-        const nearP = ensureInward(planeFromCCW(ntr, ntl, nbl));
-        const farP = ensureInward(planeFromCCW(ftl, ftr, fbr));
-        const leftP = ensureInward(planeFromCCW(ntl, ftl, fbl));
-        const rightP = ensureInward(planeFromCCW(ftr, ntr, nbr));
-        const topP = ensureInward(planeFromCCW(ntr, ftr, ftl));
-        const botP = ensureInward(planeFromCCW(fbl, fbr, nbr));
-        return [leftP, rightP, topP, botP, nearP, farP];
-    }
-}
-CameraState.DefaultScale = 1.0;
-CameraState.DefaultAspect = 16 / 9;
-CameraState.DefaultNear = 0.1;
-CameraState.DefaultFar = 10_000;
-CameraState.DefaultUp = new _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(0, 1, 0);
-CameraState.POSITION_PROPERTY_NAME = "position";
-CameraState.TARGET_PROPERTY_NAME = "target";
-CameraState.FOV_PROPERTY_NAME = "fov";
-CameraState.SCALE_PROPERTY_NAME = "scale";
-CameraState.ASPECT_PROPERTY_NAME = "aspect";
-CameraState.NEAR_PROPERTY_NAME = "near";
-CameraState.FAR_PROPERTY_NAME = "far";
-CameraState.UP_PROPERTY_NAME = "up";
-//# sourceMappingURL=tiles.navigation.state.camera.js.map
 
 /***/ }),
 
@@ -12059,6 +11856,24 @@ class SourceBlock {
             return l;
         }
         return undefined;
+    }
+    notifyAdded(eventData, mask = -1, target, currentTarget, userInfo) {
+        if (this._addedObservable?.hasObservers()) {
+            return this._addedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
+    }
+    notifyRemoved(eventData, mask = -1, target, currentTarget, userInfo) {
+        if (this._removedObservable?.hasObservers()) {
+            return this._removedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
+    }
+    notifyUpdated(eventData, mask = -1, target, currentTarget, userInfo) {
+        if (this._updatedObservable?.hasObservers()) {
+            return this._updatedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
     }
 }
 //# sourceMappingURL=tiles.pipeline.sourceblock.js.map
@@ -14775,7 +14590,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CachePolicy: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CachePolicy),
 /* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CachePolicyBuilder),
 /* harmony export */   CalculatorBase: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.CalculatorBase),
-/* harmony export */   CameraState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.CameraState),
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.CanvasMap),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.CanvasTileCodec),

@@ -12738,7 +12738,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CachePolicy: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CachePolicy),
 /* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.CachePolicyBuilder),
 /* harmony export */   CalculatorBase: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.CalculatorBase),
-/* harmony export */   CameraState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.CameraState),
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.CanvasMap),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.CanvasTileCodec),
@@ -18010,7 +18009,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileProvider),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
-/* harmony export */   CameraState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.CameraState),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.CanvasTileCodec),
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodec),
 /* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodecOptions),
@@ -18336,6 +18334,10 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         }
         return this;
     }
+    setCameraState(camera, validate) {
+        this._api?.setCameraState(camera, validate);
+        return this;
+    }
     get isValid() {
         return super.isValid && this._layers?.isValid && this._layerViews?.isValid;
     }
@@ -18343,11 +18345,18 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layers?.validate();
         this._layerViews?.validate();
     }
+    _onBeforeLayerAdded(eventData, eventstate) {
+        return true;
+    }
+    _onAfterLayerAdded(eventData, eventstate) { }
     _onLayerAdded(eventData, eventstate) {
-        const views = eventData.map((l) => this._buildLayerView(l)).filter((i) => i !== null && i !== undefined);
-        if (views.length > 0) {
-            this._layerViews.add(...views);
-            this.invalidate();
+        if (this._onBeforeLayerAdded(eventData, eventstate)) {
+            const views = eventData.map((l) => this._buildLayerView(l)).filter((i) => i !== null && i !== undefined);
+            if (views.length > 0) {
+                this._layerViews.add(...views);
+                this.invalidate();
+            }
+            this._onAfterLayerAdded(eventData, eventstate);
         }
     }
     _onLayerRemoved(eventData, eventstate) {
@@ -19062,21 +19071,18 @@ class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.T
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CameraState: () => (/* reexport safe */ _tiles_navigation_state_camera__WEBPACK_IMPORTED_MODULE_3__.CameraState),
 /* harmony export */   HasNavigationApi: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.HasNavigationApi),
 /* harmony export */   HasNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.HasNavigationState),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileNavigationState),
-/* harmony export */   TileNavigationApi: () => (/* reexport safe */ _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_4__.TileNavigationApi),
+/* harmony export */   TileNavigationApi: () => (/* reexport safe */ _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__.TileNavigationApi),
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_navigation_state__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_navigation_state_sync__WEBPACK_IMPORTED_MODULE_2__.TileNavigationStateSynchronizer)
 /* harmony export */ });
 /* harmony import */ var _tiles_navigation_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.navigation.interfaces */ "../core/dist/tiles/navigation/tiles.navigation.interfaces.js");
 /* harmony import */ var _tiles_navigation_state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.navigation.state */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var _tiles_navigation_state_sync__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.navigation.state.sync */ "../core/dist/tiles/navigation/tiles.navigation.state.sync.js");
-/* harmony import */ var _tiles_navigation_state_camera__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.navigation.state.camera */ "../core/dist/tiles/navigation/tiles.navigation.state.camera.js");
-/* harmony import */ var _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
-
+/* harmony import */ var _tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
 
 
 
@@ -19211,6 +19217,13 @@ class TileNavigationApi {
         }
         return this;
     }
+    setCameraState(state, validate) {
+        this._navigation.camera = state;
+        if (validate === undefined || validate === true) {
+            this._navigation.validate();
+        }
+        return this;
+    }
     rotatePointInv(x, y, target) {
         const r = target || _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         const azimuth = this._navigation.azimuth;
@@ -19273,223 +19286,6 @@ function HasNavigationApi(obj) {
     return obj.navigationApi !== undefined;
 }
 //# sourceMappingURL=tiles.navigation.interfaces.js.map
-
-/***/ }),
-
-/***/ "../core/dist/tiles/navigation/tiles.navigation.state.camera.js":
-/*!**********************************************************************!*\
-  !*** ../core/dist/tiles/navigation/tiles.navigation.state.camera.js ***!
-  \**********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CameraState: () => (/* binding */ CameraState)
-/* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-
-
-class CameraState {
-    constructor(position, target, fovDeg, scale) {
-        this._aspect = CameraState.DefaultAspect;
-        this._near = CameraState.DefaultNear;
-        this._far = CameraState.DefaultFar;
-        this._up = CameraState.DefaultUp;
-        this._planes = null;
-        this._position = position;
-        this._target = target;
-        this._fovY = fovDeg;
-        this._scale = scale ?? CameraState.DefaultScale;
-    }
-    get propertyChangedObservable() {
-        if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
-        }
-        return this._propertyChangedObservable;
-    }
-    get position() {
-        return this._position;
-    }
-    set position(value) {
-        if (this._position !== value) {
-            const old = this._position;
-            this._position = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.POSITION_PROPERTY_NAME);
-        }
-    }
-    get target() {
-        return this._target;
-    }
-    set target(value) {
-        if (this._target !== value) {
-            const old = this._target;
-            this._target = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.TARGET_PROPERTY_NAME);
-        }
-    }
-    get fovY() {
-        return this._fovY;
-    }
-    set fovY(value) {
-        if (this._fovY !== value) {
-            const old = this._fovY;
-            this._fovY = value;
-            this._tanfov2 = undefined;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.FOV_PROPERTY_NAME);
-        }
-    }
-    get tanfov2() {
-        if (this._tanfov2 === undefined) {
-            this._tanfov2 = Math.tan(this._fovY / 2);
-        }
-        return this._tanfov2;
-    }
-    get scale() {
-        return this._scale;
-    }
-    set scale(value) {
-        if (this._scale !== value) {
-            const old = this._scale;
-            this._scale = value;
-            this.notifyChange(old, value, CameraState.SCALE_PROPERTY_NAME);
-        }
-    }
-    get aspect() {
-        return this._aspect;
-    }
-    set aspect(value) {
-        if (this._aspect !== value) {
-            const old = this._aspect;
-            this._aspect = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.ASPECT_PROPERTY_NAME);
-        }
-    }
-    get near() {
-        return this._near;
-    }
-    set near(value) {
-        if (this._near !== value) {
-            const old = this._near;
-            this._near = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.NEAR_PROPERTY_NAME);
-        }
-    }
-    get far() {
-        return this._far;
-    }
-    set far(value) {
-        if (this._far !== value) {
-            const old = this._far;
-            this._far = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.FAR_PROPERTY_NAME);
-        }
-    }
-    get up() {
-        return this._up;
-    }
-    set up(value) {
-        if (this._up !== value) {
-            const old = this._up;
-            this._up = value;
-            this.invalidateFrustum();
-            this.notifyChange(old, value, CameraState.UP_PROPERTY_NAME);
-        }
-    }
-    getFrustumPlanes() {
-        if (this._planes == null) {
-            this._planes = this._buildFrustumPlanesFromCameraState(this, this);
-        }
-        return this._planes;
-    }
-    invalidateFrustum() {
-        this._planes = null;
-    }
-    notifyChange(oldValue, newValue, name) {
-        if (this._propertyChangedObservable?.hasObservers()) {
-            const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, newValue, name);
-            this._propertyChangedObservable.notifyObservers(e, -1, this, this);
-        }
-    }
-    _buildFrustumPlanesFromCameraState(cam, opts = {}) {
-        const aspect = opts.aspect ?? 16 / 9;
-        const near = opts.near ?? 0.1;
-        const far = opts.far ?? 10_000;
-        const upGuess = opts.up ?? { x: 0, y: 1, z: 0 };
-        const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
-        const add = (a, b) => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
-        const mul = (a, s) => ({ x: a.x * s, y: a.y * s, z: a.z * s });
-        const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
-        const cross = (a, b) => ({
-            x: a.y * b.z - a.z * b.y,
-            y: a.z * b.x - a.x * b.z,
-            z: a.x * b.y - a.y * b.x,
-        });
-        const len = (v) => Math.hypot(v.x, v.y, v.z);
-        const norm = (v) => {
-            const l = len(v) || 1;
-            return { x: v.x / l, y: v.y / l, z: v.z / l };
-        };
-        const pos = cam.position;
-        const fwd = norm(sub(cam.target, cam.position));
-        const right = norm(cross(fwd, norm(upGuess)));
-        const up = norm(cross(right, fwd));
-        const tanHalfV = cam.tanfov2;
-        const tanHalfH = tanHalfV * aspect;
-        const nearC = add(pos, mul(fwd, near));
-        const farC = add(pos, mul(fwd, far));
-        const nh = near * tanHalfV;
-        const nw = near * tanHalfH;
-        const fh = far * tanHalfV;
-        const fw = far * tanHalfH;
-        const ntl = add(add(nearC, mul(up, nh)), mul(right, -nw));
-        const ntr = add(add(nearC, mul(up, nh)), mul(right, nw));
-        const nbl = add(add(nearC, mul(up, -nh)), mul(right, -nw));
-        const nbr = add(add(nearC, mul(up, -nh)), mul(right, nw));
-        const ftl = add(add(farC, mul(up, fh)), mul(right, -fw));
-        const ftr = add(add(farC, mul(up, fh)), mul(right, fw));
-        const fbl = add(add(farC, mul(up, -fh)), mul(right, -fw));
-        const fbr = add(add(farC, mul(up, -fh)), mul(right, fw));
-        const planeFromCCW = (a, b, c) => {
-            const n = norm(cross(sub(b, a), sub(c, a)));
-            const d = -dot(n, a);
-            return { normal: n, d };
-        };
-        const ensureInward = (p) => {
-            const insideProbe = add(pos, mul(fwd, (near + far) * 0.5));
-            const side = dot(p.normal, insideProbe) + p.d;
-            return side >= 0 ? p : { normal: mul(p.normal, -1), d: -p.d };
-        };
-        const nearP = ensureInward(planeFromCCW(ntr, ntl, nbl));
-        const farP = ensureInward(planeFromCCW(ftl, ftr, fbr));
-        const leftP = ensureInward(planeFromCCW(ntl, ftl, fbl));
-        const rightP = ensureInward(planeFromCCW(ftr, ntr, nbr));
-        const topP = ensureInward(planeFromCCW(ntr, ftr, ftl));
-        const botP = ensureInward(planeFromCCW(fbl, fbr, nbr));
-        return [leftP, rightP, topP, botP, nearP, farP];
-    }
-}
-CameraState.DefaultScale = 1.0;
-CameraState.DefaultAspect = 16 / 9;
-CameraState.DefaultNear = 0.1;
-CameraState.DefaultFar = 10_000;
-CameraState.DefaultUp = new _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(0, 1, 0);
-CameraState.POSITION_PROPERTY_NAME = "position";
-CameraState.TARGET_PROPERTY_NAME = "target";
-CameraState.FOV_PROPERTY_NAME = "fov";
-CameraState.SCALE_PROPERTY_NAME = "scale";
-CameraState.ASPECT_PROPERTY_NAME = "aspect";
-CameraState.NEAR_PROPERTY_NAME = "near";
-CameraState.FAR_PROPERTY_NAME = "far";
-CameraState.UP_PROPERTY_NAME = "up";
-//# sourceMappingURL=tiles.navigation.state.camera.js.map
 
 /***/ }),
 
@@ -19913,6 +19709,24 @@ class SourceBlock {
             return l;
         }
         return undefined;
+    }
+    notifyAdded(eventData, mask = -1, target, currentTarget, userInfo) {
+        if (this._addedObservable?.hasObservers()) {
+            return this._addedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
+    }
+    notifyRemoved(eventData, mask = -1, target, currentTarget, userInfo) {
+        if (this._removedObservable?.hasObservers()) {
+            return this._removedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
+    }
+    notifyUpdated(eventData, mask = -1, target, currentTarget, userInfo) {
+        if (this._updatedObservable?.hasObservers()) {
+            return this._updatedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
     }
 }
 //# sourceMappingURL=tiles.pipeline.sourceblock.js.map
@@ -24150,7 +23964,7 @@ class CameraFetchEngine extends core_tiles_pipeline_tiles_pipeline_sourceblock__
         if (!camState) {
             return;
         }
-        const frustumPlanes = camState.getFrustumPlanes();
+        const frustumPlanes = camState.frustumPlanes;
         const toAdd = [];
         const toRemove = [];
         let offset = undefined;
@@ -24160,15 +23974,15 @@ class CameraFetchEngine extends core_tiles_pipeline_tiles_pipeline_sourceblock__
             if (bounds == null) {
                 continue;
             }
-            if (!bounds.isInFrustum(frustumPlanes)) {
+            if (frustumPlanes && !bounds.isInFrustum(frustumPlanes)) {
                 continue;
             }
             if (n.geometricError === undefined) {
                 continue;
             }
             const fn = n.screenSpaceError ?? _map_object_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError;
-            const distanceToCamera = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Distance(bounds.boundingSphere.center, camState.position);
-            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanfov2);
+            const distanceToCamera = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Distance(bounds.boundingSphere.center, camState.worldPosition);
+            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanFov2);
             if (sse > this._options.maxScreenSpaceError) {
                 if (n.refinements && n.refinements.length) {
                     toAdd.push(...n.refinements);
@@ -24219,6 +24033,122 @@ CameraFetchEngine.DEFAULT_OPTIONS = {
     hysteresisPercent: CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
 };
 //# sourceMappingURL=map.camera.fetch.js.map
+
+/***/ }),
+
+/***/ "./dist/map/map.camera.sync.js":
+/*!*************************************!*\
+  !*** ./dist/map/map.camera.sync.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SetupCameraStateSync: () => (/* binding */ SetupCameraStateSync),
+/* harmony export */   SyncActiveCameraState: () => (/* binding */ SyncActiveCameraState)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+function SetupCameraStateSync(scene, camera, onState, eps = 1e-6) {
+    let viewDirty = true;
+    let projDirty = true;
+    let lastPos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.NaN, Number.NaN, Number.NaN);
+    let lastRot = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
+    let lastFov = Number.NaN;
+    const vObs = camera.onViewMatrixChangedObservable.add(() => {
+        viewDirty = true;
+    });
+    const pObs = camera.onProjectionMatrixChangedObservable.add(() => {
+        projDirty = true;
+    });
+    const aObs = camera.onAfterCheckInputsObservable.add(() => {
+        viewDirty = true;
+    });
+    const getWorldRotation = () => {
+        const wm = camera.getWorldMatrix();
+        const rotM = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix();
+        wm.getRotationMatrixToRef(rotM);
+        const q = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion();
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.FromRotationMatrixToRef(rotM, q);
+        return q;
+    };
+    const getFovY = () => (camera.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA ? camera.fov : 0);
+    const frameObs = scene.onBeforeRenderObservable.add(() => {
+        if (!viewDirty && !projDirty)
+            return;
+        const pos = camera.globalPosition;
+        const rot = getWorldRotation();
+        const fov = getFovY();
+        const posChanged = Math.abs(pos.x - lastPos.x) > eps ||
+            Math.abs(pos.y - lastPos.y) > eps ||
+            Math.abs(pos.z - lastPos.z) > eps ||
+            Number.isNaN(lastPos.x) ||
+            Number.isNaN(lastPos.y) ||
+            Number.isNaN(lastPos.z);
+        const rotChanged = Math.abs(rot.x - lastRot.x) > eps ||
+            Math.abs(rot.y - lastRot.y) > eps ||
+            Math.abs(rot.z - lastRot.z) > eps ||
+            Math.abs(rot.w - lastRot.w) > eps ||
+            Number.isNaN(rot.x) ||
+            Number.isNaN(rot.y) ||
+            Number.isNaN(rot.z) ||
+            Number.isNaN(rot.w);
+        const fovChanged = Math.abs(fov - lastFov) > eps || Number.isNaN(lastFov);
+        if (posChanged || rotChanged || fovChanged) {
+            lastPos.copyFrom(pos);
+            lastRot.copyFrom(rot);
+            lastFov = fov;
+            onState({
+                worldPosition: pos.clone(),
+                worldRotation: rot.clone(),
+                fovY: fov,
+                tanFov2: fov > 0 ? Math.tan(fov * 0.5) : 0,
+                frustumPlanes: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(camera.getTransformationMatrix()),
+            });
+        }
+        viewDirty = false;
+        projDirty = false;
+    });
+    return {
+        dispose() {
+            camera.onViewMatrixChangedObservable.remove(vObs);
+            camera.onProjectionMatrixChangedObservable.remove(pObs);
+            camera.onAfterCheckInputsObservable.remove(aObs);
+            scene.onBeforeRenderObservable.remove(frameObs);
+        },
+    };
+}
+function SyncActiveCameraState(scene, onState, eps = 1e-6) {
+    let current = scene.activeCamera ?? null;
+    let currentSync = null;
+    if (current) {
+        currentSync = SetupCameraStateSync(scene, current, onState, eps);
+    }
+    const camChangedObs = scene.onActiveCameraChanged.add(() => {
+        const next = scene.activeCamera ?? null;
+        if (next === current)
+            return;
+        if (currentSync) {
+            currentSync.dispose();
+            currentSync = null;
+        }
+        current = next;
+        if (current) {
+            currentSync = SetupCameraStateSync(scene, current, onState, eps);
+        }
+    });
+    return {
+        dispose() {
+            if (currentSync) {
+                currentSync.dispose();
+                currentSync = null;
+            }
+            scene.onActiveCameraChanged.remove(camChangedObs);
+        },
+    };
+}
+//# sourceMappingURL=map.camera.sync.js.map
 
 /***/ }),
 
@@ -24573,16 +24503,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
 /* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
 /* harmony import */ var _map_layer_view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.layer.view */ "./dist/map/map.layer.view.js");
-/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _map_object_interfaces__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map.object.interfaces */ "./dist/map/map.object.interfaces.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./map.object.interfaces */ "./dist/map/map.object.interfaces.js");
+/* harmony import */ var core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.camera.fetch */ "./dist/map/map.camera.fetch.js");
+
+
 
 
 
@@ -24605,6 +24539,12 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         }
         const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
+        this._objectsSource = new core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_5__.SourceBlock();
+        this._fetchEngine = new _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine({
+            maxScreenSpaceError: _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
+            hysteresisPercent: _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
+        });
+        this._objectsSource.linkTo(this._fetchEngine);
     }
     get grid() {
         return this._map.grid;
@@ -24631,7 +24571,7 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         const m = this._buildInstance(tile);
         if (m) {
             m.parent = this._tilesRoot;
-            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_5__.TileMetrics.DefaultTileSize;
+            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.TileMetrics.DefaultTileSize;
             m.scaling.z = 1.0;
             tile.surface = m;
             tile.gridSize = this._cachedSize;
@@ -24662,10 +24602,10 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
     _augmentInstanceAsObjectNode(tile, m) {
         var env = tile.geoBounds;
         if (env) {
-            m.geometricError = core_geography__WEBPACK_IMPORTED_MODULE_6__.Envelope.GetDiagonalLength(env);
-            m.refine = _map_object_interfaces__WEBPACK_IMPORTED_MODULE_7__.Map3dObjectRefineType.replace;
-            m.refinedFrom = { address: core_tiles__WEBPACK_IMPORTED_MODULE_8__.TileAddress.QuadKeyToTileXY(core_tiles__WEBPACK_IMPORTED_MODULE_8__.TileAddress.ToParentKey(tile.quadkey)) };
-            m.refinements = core_tiles__WEBPACK_IMPORTED_MODULE_8__.TileAddress.ToChildsKey(tile.quadkey).map((k) => ({ address: core_tiles__WEBPACK_IMPORTED_MODULE_8__.TileAddress.QuadKeyToTileXY(k) }));
+            m.geometricError = core_geography__WEBPACK_IMPORTED_MODULE_8__.Envelope.GetDiagonalLength(env);
+            m.refine = _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__.Map3dObjectRefineType.replace;
+            m.refinedFrom = { address: core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.QuadKeyToTileXY(core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.ToParentKey(tile.quadkey)) };
+            m.refinements = core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.ToChildsKey(tile.quadkey).map((k) => ({ address: core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.QuadKeyToTileXY(k) }));
         }
         return m;
     }
@@ -24689,6 +24629,7 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         const x = display.dimension.width / (display.resolution.width * groundResolution);
         const y = display.dimension.height / (display.resolution.height * groundResolution);
         let z = Math.max(x, y);
+        nav.metersToLocalScale = z;
         if (display.dimension.depth && display.resolution.depth) {
             z = display.dimension.depth / (display.resolution.depth * groundResolution);
         }
@@ -24703,13 +24644,13 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
     }
     _onNavigationPropertyChanged(event, state) {
         switch (event.propertyName) {
-            case core_tiles__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState.CENTER_PROPERTY_NAME: {
+            case core_tiles__WEBPACK_IMPORTED_MODULE_11__.TileNavigationState.CENTER_PROPERTY_NAME: {
                 this._cartesianCenterCache = null;
                 this._onCenterChanged();
                 this._onZoomChanged();
                 break;
             }
-            case core_tiles__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState.ZOOM_PROPERTY_NAME: {
+            case core_tiles__WEBPACK_IMPORTED_MODULE_11__.TileNavigationState.ZOOM_PROPERTY_NAME: {
                 this._onZoomChanged();
                 break;
             }
@@ -24717,7 +24658,7 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         super._onNavigationPropertyChanged(event, state);
     }
     _onZoomChanged() {
-        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_10__.IsPhysicalDisplay)(this.display) && this.metrics) {
+        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_12__.IsPhysicalDisplay)(this.display) && this.metrics) {
             this._setScale(this.navigationState, this.display, this.layer, this.metrics);
         }
     }
@@ -24796,9 +24737,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
+/* harmony import */ var _map_camera_sync__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.camera.sync */ "./dist/map/map.camera.sync.js");
+
 
 
 
@@ -24809,7 +24752,14 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         this._pointerController = null;
         this._ownPointerController = false;
         this._map = this._createMap();
-        this._beforeRenderObserver = this.getScene().onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
+        scene = scene ?? this.getScene();
+        this._beforeRenderObserver = scene.onBeforeRenderObservable.add(this._onBeforeRender.bind(this));
+        let current = scene.activeCamera ?? null;
+        let listener = this._onCameraState.bind(this);
+        if (current) {
+            this._cameraMonitoring = (0,_map_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SetupCameraStateSync)(scene, current, listener);
+        }
+        this._activCameraChangeMonitor = (0,_map_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SyncActiveCameraState)(scene, listener);
     }
     get layers() {
         return this._map.layers;
@@ -24845,12 +24795,16 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         this._map.rotateMap(r, validate);
         return this;
     }
+    setCameraState(cam, validate) {
+        this._map.setCameraState(cam, validate);
+        return this;
+    }
     get map() {
         return this._map;
     }
     withDisplay(display) {
         this._map.display = display;
-        if (display instanceof _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay) {
+        if (display instanceof _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplay) {
             this.parent = display.context3D;
             return this._withPointerControl(display.pointerSource);
         }
@@ -24868,24 +24822,29 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         if (this._pointerController && this._ownPointerController) {
             this._pointerController.dispose();
         }
-        if (controller instanceof core_map__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationController) {
+        if (controller instanceof core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationController) {
             this._pointerController = controller;
         }
         else {
-            this._pointerController = new core_map__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationController(controller, this._map);
+            this._pointerController = new core_map__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationController(controller, this._map);
             this._ownPointerController = true;
         }
         return this;
     }
     _createMap() {
-        return new _map__WEBPACK_IMPORTED_MODULE_3__.Map3D(this);
+        return new _map__WEBPACK_IMPORTED_MODULE_4__.Map3D(this);
     }
     _onBeforeRender(eventData, eventState) {
         this._map.validate();
     }
+    _onCameraState(eventData) {
+        this.setCameraState(eventData);
+    }
     dispose(doNotRecurse, disposeMaterialAndTextures) {
         this._pointerController?.dispose();
         this._beforeRenderObserver?.remove();
+        this._cameraMonitoring?.dispose();
+        this._activCameraChangeMonitor?.dispose();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
     }
@@ -24961,7 +24920,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials_ellipsoidalMap__WEBPACK_IMPORTED_MODULE_3__.EllipsoidalMapMaterial),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials_map__WEBPACK_IMPORTED_MODULE_1__.Map3dMaterial),
-/* harmony export */   SurfaceTexture: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.SurfaceTexture),
 /* harmony export */   Texture3: () => (/* reexport safe */ _textures__WEBPACK_IMPORTED_MODULE_0__.Texture3),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials_map__WEBPACK_IMPORTED_MODULE_1__.TileBorder),
 /* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials_webMap__WEBPACK_IMPORTED_MODULE_2__.WebMapMaterial),
@@ -25725,44 +25683,14 @@ WebMapMaterial.ShaderName = "webmap";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SurfaceTexture: () => (/* reexport safe */ _texture_map__WEBPACK_IMPORTED_MODULE_2__.SurfaceTexture),
 /* harmony export */   Texture3: () => (/* reexport safe */ _texture_texture3__WEBPACK_IMPORTED_MODULE_1__.Texture3),
 /* harmony export */   WebMapTexture: () => (/* reexport safe */ _textures_webMapTexture__WEBPACK_IMPORTED_MODULE_0__.WebMapTexture)
 /* harmony export */ });
 /* harmony import */ var _textures_webMapTexture__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./textures.webMapTexture */ "./dist/materials/textures/textures.webMapTexture.js");
 /* harmony import */ var _texture_texture3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./texture.texture3 */ "./dist/materials/textures/texture.texture3.js");
-/* harmony import */ var _texture_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./texture.map */ "./dist/materials/textures/texture.map.js");
-
 
 
 //# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/materials/textures/texture.map.js":
-/*!************************************************!*\
-  !*** ./dist/materials/textures/texture.map.js ***!
-  \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SurfaceTexture: () => (/* binding */ SurfaceTexture)
-/* harmony export */ });
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/map */ "../core/dist/map/canvas/map.context2d.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-
-
-class SurfaceTexture extends core_map__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap {
-    constructor(tile, display) {
-        super(display, new core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState(tile.geoBounds?.center, tile.address.levelOfDetail));
-        this._tile = tile;
-    }
-    get tile() {
-        return this._tile;
-    }
-}
-//# sourceMappingURL=texture.map.js.map
 
 /***/ }),
 
@@ -26393,21 +26321,21 @@ class Tile3dStreamingEngine extends core_tiles_pipeline_tiles_pipeline_sourceblo
             const xAxis = (0,_interfaces__WEBPACK_IMPORTED_MODULE_4__.TransformVec3)(transform, [viewBox[3], viewBox[4], viewBox[5]]);
             const yAxis = (0,_interfaces__WEBPACK_IMPORTED_MODULE_4__.TransformVec3)(transform, [viewBox[6], viewBox[7], viewBox[8]]);
             const zAxis = (0,_interfaces__WEBPACK_IMPORTED_MODULE_4__.TransformVec3)(transform, [viewBox[9], viewBox[10], viewBox[11]]);
-            const dx = cameraState.position.x - worldViewCenter[0];
-            const dy = cameraState.position.y - worldViewCenter[1];
-            const dz = cameraState.position.z - worldViewCenter[2];
+            const dx = cameraState.worldPosition.x - worldViewCenter[0];
+            const dy = cameraState.worldPosition.y - worldViewCenter[1];
+            const dz = cameraState.worldPosition.z - worldViewCenter[2];
             const proj = (a, bx, by, bz) => Math.abs(a[0] * bx + a[1] * by + a[2] * bz);
             const len = (a) => Math.sqrt(a[0] ** 2 + a[1] ** 2 + a[2] ** 2);
             if (proj(xAxis, dx, dy, dz) > len(xAxis) || proj(yAxis, dx, dy, dz) > len(yAxis) || proj(zAxis, dx, dy, dz) > len(zAxis)) {
                 return;
             }
         }
-        const dx = worldBoxCenter[0] - cameraState.position.x;
-        const dy = worldBoxCenter[1] - cameraState.position.y;
-        const dz = worldBoxCenter[2] - cameraState.position.z;
+        const dx = worldBoxCenter[0] - cameraState.worldPosition.x;
+        const dy = worldBoxCenter[1] - cameraState.worldPosition.y;
+        const dz = worldBoxCenter[2] - cameraState.worldPosition.z;
         const distanceToCamera = Math.sqrt(dx * dx + dy * dy + dz * dz);
         const tileGeometricError = tile.geometricError ?? geometricError;
-        const sse = (0,_map_map_object_interfaces__WEBPACK_IMPORTED_MODULE_5__.ScreenSpaceError)(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanfov2);
+        const sse = (0,_map_map_object_interfaces__WEBPACK_IMPORTED_MODULE_5__.ScreenSpaceError)(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanFov2);
         const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;
         if (sse > maxsse) {
             const contents = tile.content ? [tile.content] : tile.contents;
@@ -27139,7 +27067,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
 /* harmony export */   CalculatorBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CalculatorBase),
 /* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.CameraFetchEngine),
-/* harmony export */   CameraState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CameraState),
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasMap),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasTileCodec),
@@ -27328,7 +27255,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SphericalCalculator),
 /* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
-/* harmony export */   SurfaceTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.SurfaceTexture),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainGridOptions),

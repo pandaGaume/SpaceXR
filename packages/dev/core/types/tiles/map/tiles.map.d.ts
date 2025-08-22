@@ -1,5 +1,5 @@
 import { EventState, Observable, Observer, PropertyChangedEventArgs } from "../../events";
-import { ITileNavigationApi, ITileNavigationState } from "../navigation";
+import { ICameraViewState, ITileNavigationApi, ITileNavigationState } from "../navigation";
 import { IDisplay, ITileMap, ITileMapLayer, ITileMapLayerContainer, ITileMapLayerView, ITileMapLayerViewContainer } from "./tiles.map.interfaces";
 import { Nullable } from "../../types";
 import { IGeo2 } from "../../geography/geography.interfaces";
@@ -41,8 +41,11 @@ export declare class TileMapBase<T> extends ValidableBase implements ITileMap<T>
     translateUnitsMap(tx: number, ty: number): ITileNavigationApi;
     translateMap(lat: IGeo2 | Array<number> | number, lon?: number): ITileNavigationApi;
     rotateMap(r: number): ITileNavigationApi;
+    setCameraState(camera: ICameraViewState, validate?: boolean): ITileNavigationApi;
     get isValid(): boolean;
     protected _doValidate(): void;
+    protected _onBeforeLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): boolean;
+    protected _onAfterLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
     protected _onLayerAdded(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
     protected _onLayerRemoved(eventData: Array<ITileMapLayer<T>>, eventstate: EventState): void;
     protected _onLayerViewAdded(eventData: Array<ITileMapLayerView<T>>, eventstate: EventState): void;

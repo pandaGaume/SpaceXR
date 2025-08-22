@@ -14,8 +14,8 @@ import { EventState } from "core/events";
 
 export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> implements ITargetBlock<IMap3dObjectNode>, ICameraFetchEngine {
     // Default options
-    private static DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
-    private static DEFAULT_HYSTERESIS_PERCENT = 0.1;
+    public static DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
+    public static DEFAULT_HYSTERESIS_PERCENT = 0.1;
     private static readonly DEFAULT_OPTIONS: ICameraFetchEngineOptions = {
         maxScreenSpaceError: CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
         hysteresisPercent: CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
@@ -39,7 +39,7 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
         if (!camState) {
             return;
         }
-        const frustumPlanes = camState.getFrustumPlanes();
+        const frustumPlanes = camState.frustumPlanes;
         const toAdd: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> = [];
         const toRemove: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> = [];
         let offset: number | undefined = undefined;
@@ -51,15 +51,15 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
             if (bounds == null) {
                 continue;
             }
-            if (!bounds.isInFrustum(frustumPlanes)) {
+            if (frustumPlanes && !bounds.isInFrustum(frustumPlanes)) {
                 continue;
             }
             if (n.geometricError === undefined) {
                 continue;
             }
             const fn = n.screenSpaceError ?? ScreenSpaceError;
-            const distanceToCamera = Cartesian3.Distance(bounds.boundingSphere.center, camState.position);
-            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanfov2);
+            const distanceToCamera = Cartesian3.Distance(bounds.boundingSphere.center, camState.worldPosition);
+            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanFov2);
 
             if (sse > this._options.maxScreenSpaceError) {
                 // refine.

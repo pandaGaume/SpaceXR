@@ -1,4 +1,4 @@
-import { ITileNavigationApi, ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ICameraViewState, ITileNavigationApi, ITileNavigationState } from "./tiles.navigation.interfaces";
 import { IDisposable } from "../../types";
 import { ITileMetrics } from "../tiles.interfaces";
 import { ICartesian2, Cartesian2 } from "../../geometry";
@@ -119,6 +119,14 @@ export class TileNavigationApi implements ITileNavigationApi, IDisposable {
 
     public rotateMap(r: number, validate?: boolean): ITileNavigationApi {
         this._navigation.azimuth = new Bearing(this._navigation.azimuth.value + r);
+        if (validate === undefined || validate === true) {
+            this._navigation.validate();
+        }
+        return this;
+    }
+
+    public setCameraState(state: ICameraViewState, validate?: boolean): ITileNavigationApi {
+        this._navigation.camera = state;
         if (validate === undefined || validate === true) {
             this._navigation.validate();
         }

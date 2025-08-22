@@ -23,6 +23,8 @@ export declare function isCartesian3(b: unknown): b is ICartesian3;
 export declare function isCartesianArray(b: unknown): b is CartesianArray;
 export declare function isArrayOfCartesianArray(input: any): input is Array<CartesianArray>;
 export declare function isCartesian4(b: unknown): b is ICartesian4;
+export interface IQuaternion extends ICartesian4 {
+}
 export interface ISize2 {
     height: number;
     width: number;

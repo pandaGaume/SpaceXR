@@ -2,7 +2,7 @@ import { IGeo2, IsLocation, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
-import { ICartesian3, IPlane } from "../../geometry";
+import { ICartesian3, IPlane, IQuaternion } from "../../geometry";
 
 export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
@@ -32,24 +32,14 @@ export interface IFrustumValues {
 /// The renderer uses `metersToLocalScale` to compare them coherently.
 /// </summary>
 export interface ICameraViewState extends IFrustumValues {
-    /// <summary>Notifies when any property changes (pose, optics, frustum inputs).</summary>
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
-
-    /// <summary>Camera position in local scene coordinates.</summary>
-    position: ICartesian3;
-
-    /// <summary>Point the camera looks at (local scene coordinates).</summary>
-    target: ICartesian3;
-
-    /// <summary>Vertical field of view in radians.</summary>
-    fovY: number;
-
-    /// <summary>tan(fovY/2) precomputed for SSE; keep in sync with fovY.</summary>
-    tanfov2: number;
-
-    /// <summary>Compute frustum planes for culling in current view.</summary>
-    getFrustumPlanes(options?: IFrustumValues): Array<IPlane>;
+    worldPosition: ICartesian3; // position in world space
+    worldRotation: IQuaternion; // orientation in world space
+    fovY: number; // perspective FOV in radians (0 if ortho)
+    tanFov2: number; // Math.tan(fovY / 2)
+    frustumPlanes?: Array<IPlane>; // frustum plane. Should be lazzy initialisation.
 }
+
+export type CameraStateListener = (state: ICameraViewState) => void;
 
 /// <summary>
 /// Represents the navigation state of a tile-based system, encompassing essential properties
@@ -158,6 +148,7 @@ export interface ITileNavigationApi extends IHasNavigationState, IDisposable {
     translateUnitsMap(tx: number, ty: number, validate?: boolean): ITileNavigationApi;
     translateMap(dlat: IGeo2 | Array<number> | number, dlon?: number, validate?: boolean): ITileNavigationApi;
     rotateMap(r: number, validate?: boolean): ITileNavigationApi;
+    setCameraState(camera: ICameraViewState, validate?: boolean): ITileNavigationApi;
 }
 
 export function IsTileNavigationApi(b: unknown): b is ITileNavigationApi {

@@ -51,6 +51,8 @@ export function isCartesian4(b: unknown): b is ICartesian4 {
     return (<ICartesian4>b).x !== undefined && (<ICartesian4>b).y !== undefined && (<ICartesian4>b).z !== undefined && (<ICartesian4>b).w !== undefined;
 }
 
+export interface IQuaternion extends ICartesian4 {}
+
 export interface ISize2 {
     height: number;
     width: number;

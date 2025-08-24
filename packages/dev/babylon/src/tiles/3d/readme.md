@@ -79,6 +79,47 @@
 
 ---
 
+## Towards a Hybrid Dynamic Approach
+
+In a hybrid approach, tile addressing and content streaming can combine both 2D and 3D logic:
+
+1. **By scale (global LOD)**
+
+    - The map can be addressed using a global level of detail, similar to the zoom concept in 2D tiling.
+    - This allows fast positioning or loading of a region at a chosen resolution (e.g., `zoom=12` centered on a geographic coordinate).
+
+2. **By the map center position**
+
+    - Whether the map is geographic (planetary terrain) or immersive (local 3D scene), the current view center can serve as an anchor to trigger tile loading around it.
+
+3. **By camera distance and screen-space metrics**
+    - In 3D Tiles, refinement is purely camera-driven: bounding volumes are loaded based on projected screen-space error (SSE).
+    - This resembles the LOD system used in Babylon.js for meshes, but implemented differently:
+        - Babylon.js LOD switches mesh versions depending on camera distance.
+        - 3D Tiles LOD refines bounding volumes dynamically through hierarchical subdivision.
+
+---
+
+## Hybrid Applications in XR
+
+This hybrid model is particularly well-suited for **projecting 2D maps into 3D displays**, enabling immersive navigation:
+
+-   **XR interfaces**: 2D maps can be visualized as holographic layers inside a 3D scene, preserving their grid-based addressing but rendered in an immersive way.
+-   **Mixed workflows**: Users can interact with both traditional 2D map views (imagery, DEM, vector) and 3D objects (terrain meshes, buildings, photogrammetry) in the same XR environment.
+-   **Interactive manipulation**: The same interface can handle zooming and panning on a 2D map, or rotating, scaling, and walking around a holographic globe or city model.
+
+---
+
+## GIS–XR Continuum
+
+This hybrid approach highlights a **continuum between GIS and XR**:
+
+-   On the **GIS side**, 2D tiles provide deterministic addressing and fast access to imagery, DEM, and vector data.
+-   On the **XR side**, 3D Tiles allow immersive exploration of detailed environments, with camera-driven refinement ensuring scalability.
+-   By blending the two, developers can build interfaces where **2D cartography and 3D immersive visualization are not separate paradigms but connected layers of the same spatial experience**.
+
+---
+
 ## Key Point
 
 -   2D tile hierarchies are a special case of 3D spatial tiling.
@@ -87,3 +128,4 @@
     -   **2D tiles = LOD + location + camera**
     -   **3D tiles = camera-driven only (through SSE against bounding volumes)**
 -   Importantly, **3D Tiles do not define an ontology**. They only describe how to structure and refine spatial data. The interpretation of the content (terrain, DEM, buildings, photogrammetry) is entirely vendor-dependent.
+-   A **hybrid dynamic approach** bridges the GIS–XR continuum, enabling both traditional cartography and immersive holographic exploration within a unified framework.

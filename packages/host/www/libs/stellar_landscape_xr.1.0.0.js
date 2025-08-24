@@ -12886,6 +12886,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size3),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.SourceBlock),
 /* harmony export */   SpatialTree: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.SpatialTree),
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.SpatialTreeNode),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SpectralClass),
@@ -18058,6 +18059,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollectionEventArgs),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.SourceBlock),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_13__.Tile),
@@ -19538,6 +19540,7 @@ class TileNavigationStateSynchronizer {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ _tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_3__.SourceBlock),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_pipeline_target_proxy__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__.hasTileSelectionContext),
@@ -19546,6 +19549,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_pipeline_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.pipeline.interfaces */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
 /* harmony import */ var _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.pipeline.link */ "../core/dist/tiles/pipeline/tiles.pipeline.link.js");
 /* harmony import */ var _tiles_pipeline_target_proxy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.pipeline.target.proxy */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
+/* harmony import */ var _tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+
 
 
 
@@ -23894,17 +23899,14 @@ MapDisplay.TextureSuffix = "texture";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _map_camera_fetch__WEBPACK_IMPORTED_MODULE_10__.CameraFetchEngine),
 /* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map_grid_factory__WEBPACK_IMPORTED_MODULE_7__.ElevationGridFactory),
 /* harmony export */   ElevationLayerView: () => (/* reexport safe */ _map_layer_dem__WEBPACK_IMPORTED_MODULE_5__.ElevationLayerView),
 /* harmony export */   IsTileWithMesh: () => (/* reexport safe */ _map_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileWithMesh),
 /* harmony export */   Map3D: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.Map3D),
 /* harmony export */   Map3DOptions: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_3__.Map3DOptions),
 /* harmony export */   Map3dLayerView: () => (/* reexport safe */ _map_layer_view__WEBPACK_IMPORTED_MODULE_8__.Map3dLayerView),
-/* harmony export */   Map3dObjectRefineType: () => (/* reexport safe */ _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__.Map3dObjectRefineType),
 /* harmony export */   MapDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_2__.MapDisplay),
 /* harmony export */   MapNode: () => (/* reexport safe */ _map_node__WEBPACK_IMPORTED_MODULE_1__.MapNode),
-/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__.ScreenSpaceError),
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map_layer_texture__WEBPACK_IMPORTED_MODULE_4__.TextureLayerView),
 /* harmony export */   TileWithElevation: () => (/* reexport safe */ _map_tile__WEBPACK_IMPORTED_MODULE_6__.TileWithElevation)
 /* harmony export */ });
@@ -23917,10 +23919,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
 /* harmony import */ var _map_grid_factory__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map.grid.factory */ "./dist/map/map.grid.factory.js");
 /* harmony import */ var _map_layer_view__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./map.layer.view */ "./dist/map/map.layer.view.js");
-/* harmony import */ var _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./map.object.interfaces */ "./dist/map/map.object.interfaces.js");
-/* harmony import */ var _map_camera_fetch__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./map.camera.fetch */ "./dist/map/map.camera.fetch.js");
-
-
 
 
 
@@ -23931,224 +23929,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 //# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/map/map.camera.fetch.js":
-/*!**************************************!*\
-  !*** ./dist/map/map.camera.fetch.js ***!
-  \**************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CameraFetchEngine: () => (/* binding */ CameraFetchEngine)
-/* harmony export */ });
-/* harmony import */ var _map_object_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.object.interfaces */ "./dist/map/map.object.interfaces.js");
-/* harmony import */ var core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
-
-
-
-class CameraFetchEngine extends core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
-    constructor(options) {
-        super();
-        this._options = {
-            ...CameraFetchEngine.DEFAULT_OPTIONS,
-            ...options,
-        };
-        this._activeNodes = new Map();
-    }
-    onNavigationStateChange(navState, displaySize) {
-        const camState = navState.camera;
-        if (!camState) {
-            return;
-        }
-        const frustumPlanes = camState.frustumPlanes;
-        const toAdd = [];
-        const toRemove = [];
-        let offset = undefined;
-        const scale = navState.metersToLocalScale ?? 1.0;
-        for (var n of this._activeNodes.values()) {
-            var bounds = n.getBoundingInfo ? n.getBoundingInfo() : null;
-            if (bounds == null) {
-                continue;
-            }
-            if (frustumPlanes && !bounds.isInFrustum(frustumPlanes)) {
-                continue;
-            }
-            if (n.geometricError === undefined) {
-                continue;
-            }
-            const fn = n.screenSpaceError ?? _map_object_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError;
-            const distanceToCamera = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Distance(bounds.boundingSphere.center, camState.worldPosition);
-            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanFov2);
-            if (sse > this._options.maxScreenSpaceError) {
-                if (n.refinements && n.refinements.length) {
-                    toAdd.push(...n.refinements);
-                    if (n.refine == _map_object_interfaces__WEBPACK_IMPORTED_MODULE_1__.Map3dObjectRefineType.replace) {
-                        toRemove.push(n);
-                    }
-                }
-            }
-            else {
-                offset =
-                    offset ??
-                        this._options.hysteresisOffset ??
-                        this._options.maxScreenSpaceError * (this._options.hysteresisPercent ?? CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT);
-                if (sse < this._options.maxScreenSpaceError - offset) {
-                    toRemove.push(n);
-                    if (n.refinedFrom) {
-                        if (!this._activeNodes.has(n.refinedFrom.address)) {
-                            toAdd.push(n.refinedFrom);
-                        }
-                    }
-                }
-            }
-        }
-        const singleRemove = Array.from(new Set(toRemove));
-        if (singleRemove.length && this._removedObservable?.hasObservers()) {
-            this._removedObservable.notifyObservers(singleRemove, -1, this, this);
-        }
-        const singleAdd = Array.from(new Set(toAdd));
-        if (singleAdd.length && this._addedObservable?.hasObservers()) {
-            this._addedObservable.notifyObservers(singleAdd, -1, this, this);
-        }
-    }
-    added(eventData, eventState) {
-        for (const n of eventData) {
-            this._activeNodes.set(n.address, n);
-        }
-    }
-    removed(eventData, eventState) {
-        for (const n of eventData) {
-            this._activeNodes.delete(n.address);
-        }
-    }
-}
-CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
-CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT = 0.1;
-CameraFetchEngine.DEFAULT_OPTIONS = {
-    maxScreenSpaceError: CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
-    hysteresisPercent: CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
-};
-//# sourceMappingURL=map.camera.fetch.js.map
-
-/***/ }),
-
-/***/ "./dist/map/map.camera.sync.js":
-/*!*************************************!*\
-  !*** ./dist/map/map.camera.sync.js ***!
-  \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SetupCameraStateSync: () => (/* binding */ SetupCameraStateSync),
-/* harmony export */   SyncActiveCameraState: () => (/* binding */ SyncActiveCameraState)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-
-function SetupCameraStateSync(scene, camera, onState, eps = 1e-6) {
-    let viewDirty = true;
-    let projDirty = true;
-    let lastPos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.NaN, Number.NaN, Number.NaN);
-    let lastRot = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
-    let lastFov = Number.NaN;
-    const vObs = camera.onViewMatrixChangedObservable.add(() => {
-        viewDirty = true;
-    });
-    const pObs = camera.onProjectionMatrixChangedObservable.add(() => {
-        projDirty = true;
-    });
-    const aObs = camera.onAfterCheckInputsObservable.add(() => {
-        viewDirty = true;
-    });
-    const getWorldRotation = () => {
-        const wm = camera.getWorldMatrix();
-        const rotM = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix();
-        wm.getRotationMatrixToRef(rotM);
-        const q = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion();
-        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.FromRotationMatrixToRef(rotM, q);
-        return q;
-    };
-    const getFovY = () => (camera.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA ? camera.fov : 0);
-    const frameObs = scene.onBeforeRenderObservable.add(() => {
-        if (!viewDirty && !projDirty)
-            return;
-        const pos = camera.globalPosition;
-        const rot = getWorldRotation();
-        const fov = getFovY();
-        const posChanged = Math.abs(pos.x - lastPos.x) > eps ||
-            Math.abs(pos.y - lastPos.y) > eps ||
-            Math.abs(pos.z - lastPos.z) > eps ||
-            Number.isNaN(lastPos.x) ||
-            Number.isNaN(lastPos.y) ||
-            Number.isNaN(lastPos.z);
-        const rotChanged = Math.abs(rot.x - lastRot.x) > eps ||
-            Math.abs(rot.y - lastRot.y) > eps ||
-            Math.abs(rot.z - lastRot.z) > eps ||
-            Math.abs(rot.w - lastRot.w) > eps ||
-            Number.isNaN(rot.x) ||
-            Number.isNaN(rot.y) ||
-            Number.isNaN(rot.z) ||
-            Number.isNaN(rot.w);
-        const fovChanged = Math.abs(fov - lastFov) > eps || Number.isNaN(lastFov);
-        if (posChanged || rotChanged || fovChanged) {
-            lastPos.copyFrom(pos);
-            lastRot.copyFrom(rot);
-            lastFov = fov;
-            onState({
-                worldPosition: pos.clone(),
-                worldRotation: rot.clone(),
-                fovY: fov,
-                tanFov2: fov > 0 ? Math.tan(fov * 0.5) : 0,
-                frustumPlanes: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(camera.getTransformationMatrix()),
-            });
-        }
-        viewDirty = false;
-        projDirty = false;
-    });
-    return {
-        dispose() {
-            camera.onViewMatrixChangedObservable.remove(vObs);
-            camera.onProjectionMatrixChangedObservable.remove(pObs);
-            camera.onAfterCheckInputsObservable.remove(aObs);
-            scene.onBeforeRenderObservable.remove(frameObs);
-        },
-    };
-}
-function SyncActiveCameraState(scene, onState, eps = 1e-6) {
-    let current = scene.activeCamera ?? null;
-    let currentSync = null;
-    if (current) {
-        currentSync = SetupCameraStateSync(scene, current, onState, eps);
-    }
-    const camChangedObs = scene.onActiveCameraChanged.add(() => {
-        const next = scene.activeCamera ?? null;
-        if (next === current)
-            return;
-        if (currentSync) {
-            currentSync.dispose();
-            currentSync = null;
-        }
-        current = next;
-        if (current) {
-            currentSync = SetupCameraStateSync(scene, current, onState, eps);
-        }
-    });
-    return {
-        dispose() {
-            if (currentSync) {
-                currentSync.dispose();
-                currentSync = null;
-            }
-            scene.onActiveCameraChanged.remove(camChangedObs);
-        },
-    };
-}
-//# sourceMappingURL=map.camera.sync.js.map
 
 /***/ }),
 
@@ -24503,20 +24283,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.envelope.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
 /* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
 /* harmony import */ var _map_layer_view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.layer.view */ "./dist/map/map.layer.view.js");
-/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./map.object.interfaces */ "./dist/map/map.object.interfaces.js");
-/* harmony import */ var core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-/* harmony import */ var _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.camera.fetch */ "./dist/map/map.camera.fetch.js");
-
-
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../tiles */ "./dist/tiles/3d/engine/tile3d.stream.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../tiles */ "./dist/tiles/3d/engine/tile3d.stream.interfaces.js");
 
 
 
@@ -24539,10 +24317,10 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         }
         const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
-        this._objectsSource = new core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_5__.SourceBlock();
-        this._fetchEngine = new _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine({
-            maxScreenSpaceError: _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
-            hysteresisPercent: _map_camera_fetch__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
+        this._objectsSource = new core_tiles__WEBPACK_IMPORTED_MODULE_5__.SourceBlock();
+        this._fetchEngine = new _tiles__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine({
+            maxScreenSpaceError: _tiles__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
+            hysteresisPercent: _tiles__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
         });
         this._objectsSource.linkTo(this._fetchEngine);
     }
@@ -24603,9 +24381,9 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         var env = tile.geoBounds;
         if (env) {
             m.geometricError = core_geography__WEBPACK_IMPORTED_MODULE_8__.Envelope.GetDiagonalLength(env);
-            m.refine = _map_object_interfaces__WEBPACK_IMPORTED_MODULE_9__.Map3dObjectRefineType.replace;
-            m.refinedFrom = { address: core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.QuadKeyToTileXY(core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.ToParentKey(tile.quadkey)) };
-            m.refinements = core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.ToChildsKey(tile.quadkey).map((k) => ({ address: core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.QuadKeyToTileXY(k) }));
+            m.refine = _tiles__WEBPACK_IMPORTED_MODULE_9__.Map3dObjectRefineType.replace;
+            m.refinedFrom = core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.QuadKeyToTileXY(core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.ToParentKey(tile.quadkey));
+            m.refinements = core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.ToChildsKey(tile.quadkey).map((k) => core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileAddress.QuadKeyToTileXY(k));
         }
         return m;
     }
@@ -24740,7 +24518,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
-/* harmony import */ var _map_camera_sync__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.camera.sync */ "./dist/map/map.camera.sync.js");
+/* harmony import */ var _tiles_3d_babylon_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/3d/babylon/tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
 
 
 
@@ -24757,9 +24535,9 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         let current = scene.activeCamera ?? null;
         let listener = this._onCameraState.bind(this);
         if (current) {
-            this._cameraMonitoring = (0,_map_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SetupCameraStateSync)(scene, current, listener);
+            this._cameraMonitoring = (0,_tiles_3d_babylon_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SetupCameraStateSync)(scene, current, listener);
         }
-        this._activCameraChangeMonitor = (0,_map_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SyncActiveCameraState)(scene, listener);
+        this._activCameraChangeMonitor = (0,_tiles_3d_babylon_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SyncActiveCameraState)(scene, listener);
     }
     get layers() {
         return this._map.layers;
@@ -24850,28 +24628,6 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
     }
 }
 //# sourceMappingURL=map.node.js.map
-
-/***/ }),
-
-/***/ "./dist/map/map.object.interfaces.js":
-/*!*******************************************!*\
-  !*** ./dist/map/map.object.interfaces.js ***!
-  \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Map3dObjectRefineType: () => (/* binding */ Map3dObjectRefineType),
-/* harmony export */   ScreenSpaceError: () => (/* binding */ ScreenSpaceError)
-/* harmony export */ });
-var Map3dObjectRefineType;
-(function (Map3dObjectRefineType) {
-    Map3dObjectRefineType[Map3dObjectRefineType["add"] = 0] = "add";
-    Map3dObjectRefineType[Map3dObjectRefineType["replace"] = 1] = "replace";
-    Map3dObjectRefineType[Map3dObjectRefineType["unknown"] = 999] = "unknown";
-})(Map3dObjectRefineType || (Map3dObjectRefineType = {}));
-const ScreenSpaceError = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) => (tileGeometricError * viewportHeight) / (distanceToCamera * tanfov2);
-//# sourceMappingURL=map.object.interfaces.js.map
 
 /***/ }),
 
@@ -26007,6 +25763,139 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./dist/tiles/3d/babylon/index.js":
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/babylon/index.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
+/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState)
+/* harmony export */ });
+/* harmony import */ var _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/tile3d.camera.sync.js":
+/*!*****************************************************!*\
+  !*** ./dist/tiles/3d/babylon/tile3d.camera.sync.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SetupCameraStateSync: () => (/* binding */ SetupCameraStateSync),
+/* harmony export */   SyncActiveCameraState: () => (/* binding */ SyncActiveCameraState)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+
+function SetupCameraStateSync(scene, camera, onState, eps = 1e-6) {
+    let viewDirty = true;
+    let projDirty = true;
+    let lastPos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.NaN, Number.NaN, Number.NaN);
+    let lastRot = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
+    let lastFov = Number.NaN;
+    const vObs = camera.onViewMatrixChangedObservable.add(() => {
+        viewDirty = true;
+    });
+    const pObs = camera.onProjectionMatrixChangedObservable.add(() => {
+        projDirty = true;
+    });
+    const aObs = camera.onAfterCheckInputsObservable.add(() => {
+        viewDirty = true;
+    });
+    const getWorldRotation = () => {
+        const wm = camera.getWorldMatrix();
+        const rotM = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix();
+        wm.getRotationMatrixToRef(rotM);
+        const q = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion();
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.FromRotationMatrixToRef(rotM, q);
+        return q;
+    };
+    const getFovY = () => (camera.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA ? camera.fov : 0);
+    const frameObs = scene.onBeforeRenderObservable.add(() => {
+        if (!viewDirty && !projDirty)
+            return;
+        const pos = camera.globalPosition;
+        const rot = getWorldRotation();
+        const fov = getFovY();
+        const posChanged = Math.abs(pos.x - lastPos.x) > eps ||
+            Math.abs(pos.y - lastPos.y) > eps ||
+            Math.abs(pos.z - lastPos.z) > eps ||
+            Number.isNaN(lastPos.x) ||
+            Number.isNaN(lastPos.y) ||
+            Number.isNaN(lastPos.z);
+        const rotChanged = Math.abs(rot.x - lastRot.x) > eps ||
+            Math.abs(rot.y - lastRot.y) > eps ||
+            Math.abs(rot.z - lastRot.z) > eps ||
+            Math.abs(rot.w - lastRot.w) > eps ||
+            Number.isNaN(rot.x) ||
+            Number.isNaN(rot.y) ||
+            Number.isNaN(rot.z) ||
+            Number.isNaN(rot.w);
+        const fovChanged = Math.abs(fov - lastFov) > eps || Number.isNaN(lastFov);
+        if (posChanged || rotChanged || fovChanged) {
+            lastPos.copyFrom(pos);
+            lastRot.copyFrom(rot);
+            lastFov = fov;
+            onState({
+                worldPosition: pos.clone(),
+                worldRotation: rot.clone(),
+                fovY: fov,
+                tanFov2: fov > 0 ? Math.tan(fov * 0.5) : 0,
+                frustumPlanes: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(camera.getTransformationMatrix()),
+            });
+        }
+        viewDirty = false;
+        projDirty = false;
+    });
+    return {
+        dispose() {
+            camera.onViewMatrixChangedObservable.remove(vObs);
+            camera.onProjectionMatrixChangedObservable.remove(pObs);
+            camera.onAfterCheckInputsObservable.remove(aObs);
+            scene.onBeforeRenderObservable.remove(frameObs);
+        },
+    };
+}
+function SyncActiveCameraState(scene, onState, eps = 1e-6) {
+    let current = scene.activeCamera ?? null;
+    let currentSync = null;
+    if (current) {
+        currentSync = SetupCameraStateSync(scene, current, onState, eps);
+    }
+    const camChangedObs = scene.onActiveCameraChanged.add(() => {
+        const next = scene.activeCamera ?? null;
+        if (next === current)
+            return;
+        if (currentSync) {
+            currentSync.dispose();
+            currentSync = null;
+        }
+        current = next;
+        if (current) {
+            currentSync = SetupCameraStateSync(scene, current, onState, eps);
+        }
+    });
+    return {
+        dispose() {
+            if (currentSync) {
+                currentSync.dispose();
+                currentSync = null;
+            }
+            scene.onActiveCameraChanged.remove(camChangedObs);
+        },
+    };
+}
+//# sourceMappingURL=tile3d.camera.sync.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/codecs/index.js":
 /*!***************************************!*\
   !*** ./dist/tiles/3d/codecs/index.js ***!
@@ -26046,6 +25935,156 @@ class TilesetCodec {
 
 /***/ }),
 
+/***/ "./dist/tiles/3d/engine/index.js":
+/*!***************************************!*\
+  !*** ./dist/tiles/3d/engine/index.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _tile3d_stream__WEBPACK_IMPORTED_MODULE_1__.CameraFetchEngine),
+/* harmony export */   Map3dObjectRefineType: () => (/* reexport safe */ _tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_0__.Map3dObjectRefineType),
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_0__.ScreenSpaceError)
+/* harmony export */ });
+/* harmony import */ var _tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.stream.interfaces */ "./dist/tiles/3d/engine/tile3d.stream.interfaces.js");
+/* harmony import */ var _tile3d_stream__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.stream */ "./dist/tiles/3d/engine/tile3d.stream.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/engine/tile3d.stream.interfaces.js":
+/*!**********************************************************!*\
+  !*** ./dist/tiles/3d/engine/tile3d.stream.interfaces.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Map3dObjectRefineType: () => (/* binding */ Map3dObjectRefineType),
+/* harmony export */   ScreenSpaceError: () => (/* binding */ ScreenSpaceError)
+/* harmony export */ });
+var Map3dObjectRefineType;
+(function (Map3dObjectRefineType) {
+    Map3dObjectRefineType[Map3dObjectRefineType["add"] = 0] = "add";
+    Map3dObjectRefineType[Map3dObjectRefineType["replace"] = 1] = "replace";
+    Map3dObjectRefineType[Map3dObjectRefineType["unknown"] = 999] = "unknown";
+})(Map3dObjectRefineType || (Map3dObjectRefineType = {}));
+const ScreenSpaceError = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) => (tileGeometricError * viewportHeight) / (distanceToCamera * tanfov2);
+//# sourceMappingURL=tile3d.stream.interfaces.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/engine/tile3d.stream.js":
+/*!***********************************************!*\
+  !*** ./dist/tiles/3d/engine/tile3d.stream.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CameraFetchEngine: () => (/* binding */ CameraFetchEngine)
+/* harmony export */ });
+/* harmony import */ var _tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.stream.interfaces */ "./dist/tiles/3d/engine/tile3d.stream.interfaces.js");
+/* harmony import */ var core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
+
+
+
+class CameraFetchEngine extends core_tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor(options) {
+        super();
+        this._options = {
+            ...CameraFetchEngine.DEFAULT_OPTIONS,
+            ...options,
+        };
+        this._activeNodes = new Map();
+    }
+    onNavigationStateChange(navState, displaySize) {
+        const camState = navState.camera;
+        if (!camState) {
+            return;
+        }
+        const frustumPlanes = camState.frustumPlanes;
+        const toAdd = [];
+        const toRemove = [];
+        let offset = undefined;
+        const scale = navState.metersToLocalScale ?? 1.0;
+        for (var n of this._activeNodes.values()) {
+            var bounds = n.getBoundingInfo ? n.getBoundingInfo() : null;
+            if (bounds == null) {
+                continue;
+            }
+            if (frustumPlanes && !bounds.isInFrustum(frustumPlanes)) {
+                continue;
+            }
+            if (n.geometricError === undefined) {
+                continue;
+            }
+            const fn = n.screenSpaceError ?? _tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceError;
+            const distanceToCamera = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Distance(bounds.boundingSphere.center, camState.worldPosition);
+            const sse = fn(n.geometricError * scale, distanceToCamera, displaySize.height, camState.tanFov2);
+            if (sse > this._options.maxScreenSpaceError) {
+                if (n.refinements && n.refinements.length) {
+                    toAdd.push(...n.refinements);
+                    if (n.address && n.refine == _tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_1__.Map3dObjectRefineType.replace) {
+                        toRemove.push(n.address);
+                    }
+                }
+            }
+            else {
+                offset =
+                    offset ??
+                        this._options.hysteresisOffset ??
+                        this._options.maxScreenSpaceError * (this._options.hysteresisPercent ?? CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT);
+                if (sse < this._options.maxScreenSpaceError - offset) {
+                    if (n.address) {
+                        toRemove.push(n.address);
+                    }
+                    if (n.refinedFrom) {
+                        if (!this._activeNodes.has(n.refinedFrom)) {
+                            toAdd.push(n.refinedFrom);
+                        }
+                    }
+                }
+            }
+        }
+        const singleRemove = Array.from(new Set(toRemove));
+        if (singleRemove.length && this._removedObservable?.hasObservers()) {
+            this._removedObservable.notifyObservers(singleRemove, -1, this, this);
+        }
+        const singleAdd = Array.from(new Set(toAdd));
+        if (singleAdd.length && this._addedObservable?.hasObservers()) {
+            this._addedObservable.notifyObservers(singleAdd, -1, this, this);
+        }
+    }
+    added(eventData, eventState) {
+        for (const n of eventData) {
+            if (n.address) {
+                this._activeNodes.set(n.address, n);
+            }
+        }
+    }
+    removed(eventData, eventState) {
+        for (const n of eventData) {
+            if (n.address) {
+                this._activeNodes.delete(n.address);
+            }
+        }
+    }
+}
+CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
+CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT = 0.1;
+CameraFetchEngine.DEFAULT_OPTIONS = {
+    maxScreenSpaceError: CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
+    hysteresisPercent: CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
+};
+//# sourceMappingURL=tile3d.stream.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/index.js":
 /*!********************************!*\
   !*** ./dist/tiles/3d/index.js ***!
@@ -26055,7 +26094,12 @@ class TilesetCodec {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_6__.CameraFetchEngine),
+/* harmony export */   Map3dObjectRefineType: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_6__.Map3dObjectRefineType),
 /* harmony export */   ObjectLayer: () => (/* reexport safe */ _tile3d_layer__WEBPACK_IMPORTED_MODULE_2__.ObjectLayer),
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_6__.ScreenSpaceError),
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_5__.SetupCameraStateSync),
+/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_5__.SyncActiveCameraState),
 /* harmony export */   Tile3dGeodeticOptions: () => (/* reexport safe */ _tile3d_engine__WEBPACK_IMPORTED_MODULE_4__.Tile3dGeodeticOptions),
 /* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _tile3d_engine__WEBPACK_IMPORTED_MODULE_4__.Tile3dStreamingEngine),
 /* harmony export */   Tile3dStreamingEngineOptions: () => (/* reexport safe */ _tile3d_engine__WEBPACK_IMPORTED_MODULE_4__.Tile3dStreamingEngineOptions),
@@ -26069,6 +26113,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile3d_layer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.layer */ "./dist/tiles/3d/tile3d.layer.js");
 /* harmony import */ var _tile3d_client__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.client */ "./dist/tiles/3d/tile3d.client.js");
 /* harmony import */ var _tile3d_engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tile3d.engine */ "./dist/tiles/3d/tile3d.engine.js");
+/* harmony import */ var _babylon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./babylon */ "./dist/tiles/3d/babylon/index.js");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./engine */ "./dist/tiles/3d/engine/index.js");
+
 
 
 
@@ -26228,7 +26275,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./interfaces */ "./dist/tiles/3d/interfaces/tile3d.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _tile3d_client__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.client */ "./dist/tiles/3d/tile3d.client.js");
-/* harmony import */ var _map_map_object_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../map/map.object.interfaces */ "./dist/map/map.object.interfaces.js");
+/* harmony import */ var _engine_tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./engine/tile3d.stream.interfaces */ "./dist/tiles/3d/engine/tile3d.stream.interfaces.js");
 
 
 
@@ -26334,7 +26381,7 @@ class Tile3dStreamingEngine extends core_tiles_pipeline_tiles_pipeline_sourceblo
         const dz = worldBoxCenter[2] - cameraState.worldPosition.z;
         const distanceToCamera = Math.sqrt(dx * dx + dy * dy + dz * dz);
         const tileGeometricError = tile.geometricError ?? geometricError;
-        const sse = (0,_map_map_object_interfaces__WEBPACK_IMPORTED_MODULE_5__.ScreenSpaceError)(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanFov2);
+        const sse = (0,_engine_tile3d_stream_interfaces__WEBPACK_IMPORTED_MODULE_5__.ScreenSpaceError)(tileGeometricError, distanceToCamera, display.resolution.height, cameraState.tanFov2);
         const maxsse = this._options.maximumScreenSpaceError ?? Tile3dStreamingEngineOptions.DefaultMaximumScreenSpaceError;
         if (sse > maxsse) {
             const contents = tile.content ? [tile.content] : tile.contents;
@@ -26459,7 +26506,12 @@ class ObjectLayer extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapLayer {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.CameraFetchEngine),
+/* harmony export */   Map3dObjectRefineType: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Map3dObjectRefineType),
 /* harmony export */   ObjectLayer: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ObjectLayer),
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ScreenSpaceError),
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
+/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState),
 /* harmony export */   Tile3dGeodeticOptions: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dGeodeticOptions),
 /* harmony export */   Tile3dStreamingEngine: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngine),
 /* harmony export */   Tile3dStreamingEngineOptions: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamingEngineOptions),
@@ -27065,7 +27117,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CachePolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
 /* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
 /* harmony export */   CalculatorBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CalculatorBase),
-/* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.CameraFetchEngine),
+/* harmony export */   CameraFetchEngine: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.CameraFetchEngine),
 /* harmony export */   CanvasDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasDisplay),
 /* harmony export */   CanvasMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasMap),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasTileCodec),
@@ -27197,7 +27249,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Map3DOptions: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3DOptions),
 /* harmony export */   Map3dLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3dLayerView),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial),
-/* harmony export */   Map3dObjectRefineType: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3dObjectRefineType),
+/* harmony export */   Map3dObjectRefineType: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Map3dObjectRefineType),
 /* harmony export */   MapDisplay: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.MapDisplay),
 /* harmony export */   MapNode: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.MapNode),
 /* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapScale),
@@ -27240,13 +27292,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RegionCode),
 /* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RoundRobin),
 /* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Scalar),
-/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.ScreenSpaceError),
+/* harmony export */   ScreenSpaceError: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.ScreenSpaceError),
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.SetupCameraStateSync),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
 /* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeType),
 /* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Size3),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SourceBlock),
 /* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpatialTree),
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpatialTreeNode),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpectralClass),
@@ -27254,6 +27308,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SphericalCalculator),
 /* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
+/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.SyncActiveCameraState),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainGridOptions),

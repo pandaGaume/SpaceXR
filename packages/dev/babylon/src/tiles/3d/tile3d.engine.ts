@@ -7,7 +7,7 @@ import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy
 import { BoxType, ITile3d, ITileset, Mat44Type, Point3Type, RegionType, TransformPoint3, TransformVec3 } from "./interfaces";
 import { Cartesian3, ICartesian3 } from "core/geometry";
 import { Tile3dWebClient } from "./tile3d.client";
-import { ScreenSpaceError } from "../../map/map.object.interfaces";
+import { ScreenSpaceError } from "./engine/tile3d.stream.interfaces";
 
 export class Tile3dGeodeticOptions {
     static readonly Default: Tile3dGeodeticOptions = {

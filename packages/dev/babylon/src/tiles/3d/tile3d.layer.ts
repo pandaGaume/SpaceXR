@@ -1,6 +1,11 @@
-import { ITileAddress3, ITileContentProvider, ITileDatasource, TileMapLayer } from "core/tiles";
+import { ITileAddress3, ITileContentProvider, ITileDatasource, ITileMapLayer, ITileMapLayerOptions, TileMapLayer } from "core/tiles";
 import { Object3dType } from "../../map";
-import { IObjectLayer, IObjectLayerOptions } from "./tile3d.interfaces";
+
+
+
+export interface IObjectLayerOptions extends ITileMapLayerOptions<Object3dType> {}
+
+export interface IObjectLayer extends ITileMapLayer<Object3dType>, IObjectLayerOptions {}
 
 export class ObjectLayer extends TileMapLayer<Object3dType> implements IObjectLayer {
     public constructor(

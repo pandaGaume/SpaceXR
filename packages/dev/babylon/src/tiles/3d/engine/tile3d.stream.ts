@@ -1,18 +1,10 @@
-import {
-    ICameraFetchEngine,
-    ICameraFetchEngineOptions,
-    IMap3dObjectNode,
-    IMap3dObjectNodeRef,
-    Map3dObjectNodeRefType,
-    Map3dObjectRefineType,
-    ScreenSpaceError,
-} from "./map.object.interfaces";
+import { ICameraFetchEngine, ICameraFetchEngineOptions, IMap3dObjectNode, Map3dObjectNodeRefType, Map3dObjectRefineType, ScreenSpaceError } from "./tile3d.stream.interfaces";
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
 import { ITargetBlock, ITileNavigationState } from "core/tiles";
 import { Cartesian3, ISize2 } from "core/geometry";
 import { EventState } from "core/events";
 
-export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> implements ITargetBlock<IMap3dObjectNode>, ICameraFetchEngine {
+export class CameraFetchEngine extends SourceBlock<Map3dObjectNodeRefType> implements ITargetBlock<IMap3dObjectNode>, ICameraFetchEngine {
     // Default options
     public static DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
     public static DEFAULT_HYSTERESIS_PERCENT = 0.1;
@@ -40,8 +32,8 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
             return;
         }
         const frustumPlanes = camState.frustumPlanes;
-        const toAdd: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> = [];
-        const toRemove: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> = [];
+        const toAdd: Array<Map3dObjectNodeRefType> = [];
+        const toRemove: Array<Map3dObjectNodeRefType> = [];
         let offset: number | undefined = undefined;
 
         const scale = navState.metersToLocalScale ?? 1.0;
@@ -65,8 +57,8 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
                 // refine.
                 if (n.refinements && n.refinements.length) {
                     toAdd.push(...n.refinements);
-                    if (n.refine == Map3dObjectRefineType.replace) {
-                        toRemove.push(n);
+                    if (n.address && n.refine == Map3dObjectRefineType.replace) {
+                        toRemove.push(n.address);
                     }
                 }
             } else {
@@ -76,9 +68,11 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
                     this._options.maxScreenSpaceError * (this._options.hysteresisPercent ?? CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT);
                 if (sse < this._options.maxScreenSpaceError - offset) {
                     // coarse
-                    toRemove.push(n);
+                    if (n.address) {
+                        toRemove.push(n.address);
+                    }
                     if (n.refinedFrom) {
-                        if (!this._activeNodes.has(n.refinedFrom.address)) {
+                        if (!this._activeNodes.has(n.refinedFrom)) {
                             // only push is not already active (case of additive refinement)
                             toAdd.push(n.refinedFrom);
                         }
@@ -104,13 +98,17 @@ export class CameraFetchEngine extends SourceBlock<IMap3dObjectNodeRef<Map3dObje
     // #region Target<IMap3dObjectNode>
     public added(eventData: Array<IMap3dObjectNode>, eventState: EventState): void {
         for (const n of eventData) {
-            this._activeNodes.set(n.address, n);
+            if (n.address) {
+                this._activeNodes.set(n.address, n);
+            }
         }
     }
 
     public removed(eventData: Array<IMap3dObjectNode>, eventState: EventState): void {
         for (const n of eventData) {
-            this._activeNodes.delete(n.address);
+            if (n.address) {
+                this._activeNodes.delete(n.address);
+            }
         }
     }
     // #endregion

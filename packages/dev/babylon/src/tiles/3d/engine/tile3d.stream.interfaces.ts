@@ -56,7 +56,7 @@ export interface IMap3dObjectNodeRef<T> {
     /**
      * A uri that points to object content.
      */
-    address: T;
+    address?: T;
 }
 
 export type Map3dObjectNodeRefType = ITileAddress2 | string;
@@ -84,12 +84,12 @@ export interface IMap3dObjectNode extends IMap3dObjectNodeRef<Map3dObjectNodeRef
     /**
      * The broader or original link this node is refined from.
      */
-    refinedFrom?: IMap3dObjectNodeRef<Map3dObjectNodeRefType>;
+    refinedFrom?: Map3dObjectNodeRefType;
 
     /**
      * The more specific or refined links derived from this node.
      */
-    refinements?: Array<IMap3dObjectNodeRef<Map3dObjectNodeRefType>>;
+    refinements?: Array<Map3dObjectNodeRefType>;
 
     /**
      * Optional function to compute the screen space error (SSE) for this object.
@@ -150,7 +150,7 @@ export interface ICameraFetchEngineOptions {
  * Engine interface for fetching resources based on camera state changes.
  * Inherits from ISourceBlock to provide a stream of resource addresses to download (e.g., tiles).
  */
-export interface ICameraFetchEngine extends ISourceBlock<IMap3dObjectNodeRef<Map3dObjectNodeRefType>> {
+export interface ICameraFetchEngine extends ISourceBlock<Map3dObjectNodeRefType> {
     /**
      * Notifies the engine of a change in camera state.
      * The engine should process the new camera state and, as a result, emit the list of resource addresses

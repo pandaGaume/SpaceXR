@@ -11,18 +11,17 @@ import {
     ITileView,
     TileNavigationState,
     TileAddress,
-    ITileAddress2,
+    SourceBlock,
 } from "core/tiles";
 import { Nullable } from "core/types";
-import { IMap3D, ITileWithMesh } from "./map.interfaces";
-import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
-import { TileWithElevation } from "./map.tile";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { Map3dLayerView } from "./map.layer.view";
 import { Envelope } from "core/geography";
-import { IMap3dObjectNode, IMap3dObjectNodeRef, Map3dObjectRefineType } from "./map.object.interfaces";
-import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
-import { CameraFetchEngine } from "./map.camera.fetch";
+import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
+
+import { IMap3D, ITileWithMesh } from "./map.interfaces";
+import { TileWithElevation } from "./map.tile";
+import { Map3dLayerView } from "./map.layer.view";
+import { CameraFetchEngine, IMap3dObjectNode, Map3dObjectRefineType } from "../tiles";
 
 /**
  * The `Map3D` enforces a simplified but powerful layer model:
@@ -159,8 +158,8 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         if (env) {
             m.geometricError = Envelope.GetDiagonalLength(env);
             m.refine = Map3dObjectRefineType.replace;
-            m.refinedFrom = { address: TileAddress.QuadKeyToTileXY(TileAddress.ToParentKey(tile.quadkey)) };
-            m.refinements = TileAddress.ToChildsKey(tile.quadkey).map((k) => <IMap3dObjectNodeRef<ITileAddress2>>{ address: TileAddress.QuadKeyToTileXY(k) });
+            m.refinedFrom = TileAddress.QuadKeyToTileXY(TileAddress.ToParentKey(tile.quadkey));
+            m.refinements = TileAddress.ToChildsKey(tile.quadkey).map((k) => TileAddress.QuadKeyToTileXY(k));
         }
         return m;
     }

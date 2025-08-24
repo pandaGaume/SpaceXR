@@ -7,7 +7,7 @@ import { VirtualDisplay } from "../display";
 import { IInputSource, InputsNavigationController } from "core/map";
 import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
-import { SetupCameraStateSync, SyncActiveCameraState } from "./map.camera.sync";
+import { SetupCameraStateSync, SyncActiveCameraState } from "../tiles/3d/babylon/tile3d.camera.sync";
 
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering event of the scene

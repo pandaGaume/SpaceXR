@@ -2,8 +2,8 @@ import { IBoundingBox, IBoundingSphere, IPlane, ISize2 } from "core/geometry";
 import { ISourceBlock, ITileAddress2, ITileNavigationState } from "core/tiles";
 
 // Module augmentation for Babylon.js
-declare module "@babylonjs/core/Meshes/abstractMesh" {
-    interface AbstractMesh extends IMap3dObjectNode {}
+declare module "@babylonjs/core" {
+    interface TransformNode extends IMap3dObjectNode {}
 }
 
 /**
@@ -67,7 +67,7 @@ export type Map3dObjectNodeRefType = ITileAddress2 | string;
  */
 export interface IMap3dObjectNode extends IMap3dObjectNodeRef<Map3dObjectNodeRefType> {
     /** */
-    getBoundingInfo(): IBoundingInfo;
+    getBoundingInfo?(): IBoundingInfo;
 
     /**
      * The geometric error, in meters, introduced if this object is rendered and its children are not.

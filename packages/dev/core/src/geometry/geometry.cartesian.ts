@@ -1,6 +1,6 @@
 import { Quantity, Scalar, Unit } from "../math";
 import { Bounds } from "./geometry.bounds";
-import { ICartesian2, ICartesian3, ICartesian4, isCartesianArray, RegionCode } from "./geometry.interfaces";
+import { ICartesian2, ICartesian3, ICartesian4, IPlane, isCartesianArray, RegionCode } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
     public static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number> {
@@ -226,6 +226,10 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return Cartesian3.Magnitude(Cartesian3.Subtract(b, a));
     }
 
+    public static DistanceToPlane(a: ICartesian3, p: IPlane): number {
+        return p.normal.x * a.x + p.normal.y * a.y + p.normal.z * a.z + p.d;
+    }
+
     public static Magnitude(a: ICartesian3): number {
         return Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
     }
@@ -313,7 +317,6 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;
     }
 }
-
 export class Cartesian4 extends Cartesian3 implements ICartesian4 {
     public static Zero() {
         return new Cartesian4(0, 0, 0);

@@ -3635,6 +3635,9 @@ class Cartesian3 extends Cartesian2 {
     static Distance(a, b) {
         return Cartesian3.Magnitude(Cartesian3.Subtract(b, a));
     }
+    static DistanceToPlane(a, p) {
+        return p.normal.x * a.x + p.normal.y * a.y + p.normal.z * a.z + p.d;
+    }
     static Magnitude(a) {
         return Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
     }
@@ -14671,12 +14674,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _debugtouch__WEBPACK_IMPORTED_MODULE_3__.DebugTouchConsole),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPoolOptions),
+/* harmony export */   PathUtils: () => (/* reexport safe */ _path__WEBPACK_IMPORTED_MODULE_4__.PathUtils),
 /* harmony export */   TextUtils: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_1__.TextUtils)
 /* harmony export */ });
 /* harmony import */ var _objectpools__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objectpools */ "./dist/utils/objectpools.js");
 /* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./text */ "./dist/utils/text.js");
 /* harmony import */ var _runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./runtime */ "./dist/utils/runtime.js");
 /* harmony import */ var _debugtouch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./debugtouch */ "./dist/utils/debugtouch.js");
+/* harmony import */ var _path__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./path */ "./dist/utils/path.js");
+
 
 
 
@@ -14725,6 +14731,63 @@ class ObjectPool {
     }
 }
 //# sourceMappingURL=objectpools.js.map
+
+/***/ }),
+
+/***/ "./dist/utils/path.js":
+/*!****************************!*\
+  !*** ./dist/utils/path.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PathUtils: () => (/* binding */ PathUtils)
+/* harmony export */ });
+class PathUtils {
+    static SplitRootAndFile(url) {
+        const u = new URL(url);
+        const i = u.pathname.lastIndexOf("/");
+        const dir = i >= 0 ? u.pathname.substring(0, i + 1) : "/";
+        const file = u.pathname.substring(i + 1);
+        return { rootUrl: u.origin + dir, fileName: file + u.search + u.hash };
+    }
+    static EndsWith(u, ...pattern) {
+        if (!u)
+            return false;
+        const path = u.split(/[?#]/)[0].toLowerCase();
+        for (const p in pattern) {
+            if (path.endsWith(p)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    static IsRelativeUrl(u) {
+        try {
+            new URL(u);
+            return false;
+        }
+        catch {
+            return true;
+        }
+    }
+    static GetBaseUrl(absoluteUrl) {
+        const url = new URL(absoluteUrl);
+        url.pathname = url.pathname.replace(/\/[^/]*$/, "/");
+        return url.toString();
+    }
+    static ResolveUri(baseUrl, uri) {
+        try {
+            return new URL(uri, baseUrl).toString();
+        }
+        catch {
+            const sep = baseUrl.endsWith("/") ? "" : "/";
+            return baseUrl + sep + uri;
+        }
+    }
+}
+//# sourceMappingURL=path.js.map
 
 /***/ }),
 
@@ -15055,6 +15118,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Observer: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observer),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.OctreeSplitter),
 /* harmony export */   OrderedCollection: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.OrderedCollection),
+/* harmony export */   PathUtils: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.PathUtils),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),

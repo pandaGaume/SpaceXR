@@ -135,7 +135,6 @@ export class WebClient<R, T> {
                 return result;
             } catch (error: any) {
                 console.error(`Error fetching ${url}: ${error.message || error}`);
-
                 if (retryCount >= maxRetry - 1) {
                     throw new FetchError(`Exceeded maximum retries for URL: ${url}`, ...userArgs);
                 }

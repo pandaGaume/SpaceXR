@@ -1,46 +1,11 @@
 import { IBoundingVolume } from "./boundingVolume";
 import { IContent } from "./content";
+import { Mat44Type } from "./math/math";
 import { IMetadataEntity } from "./metadataEntity";
 import { IImplicitTiling } from "./tile.implicitTiling";
 
 export type RefineType = "ADD" | "REPLACE" | string;
-export type Mat44Type = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
-export type Vec3Type = [number, number, number];
-export type Point3Type = [number, number, number];
 
-export function TransformVec3(transform: Mat44Type, v: Vec3Type, ref?: Vec3Type): Vec3Type {
-    const x = v[0],
-        y = v[1],
-        z = v[2];
-    const tx = transform[0] * x + transform[4] * y + transform[8] * z + transform[12];
-    const ty = transform[1] * x + transform[5] * y + transform[9] * z + transform[13];
-    const tz = transform[2] * x + transform[6] * y + transform[10] * z + transform[14];
-
-    if (ref) {
-        ref[0] = tx;
-        ref[1] = ty;
-        ref[2] = tz;
-        return ref;
-    }
-    return [tx, ty, tz];
-}
-
-export function TransformPoint3(transform: Mat44Type, v: Point3Type, ref?: Point3Type): Point3Type {
-    const x = v[0],
-        y = v[1],
-        z = v[2];
-    const tx = transform[0] * x + transform[4] * y + transform[8] * z;
-    const ty = transform[1] * x + transform[5] * y + transform[9] * z;
-    const tz = transform[2] * x + transform[6] * y + transform[10] * z;
-
-    if (ref) {
-        ref[0] = tx;
-        ref[1] = ty;
-        ref[2] = tz;
-        return ref;
-    }
-    return [tx, ty, tz];
-}
 
 /**
  * A tile in a 3D Tiles tileset.
@@ -86,4 +51,28 @@ export interface ITile3d {
      * @minItems 1
      */
     children?: [ITile3d, ...ITile3d[]];
+}
+
+/**
+ * Type guard to check if an object is a valid ITile3d
+ */
+export function IsTile3d(obj: unknown): obj is ITile3d {
+    if (typeof obj !== "object" || obj === null) {
+        return false;
+    }
+    const t = obj as ITile3d;
+
+    // Required property
+    if (typeof t.geometricError !== "number") return false;
+    if (!t.boundingVolume || typeof t.boundingVolume !== "object") return false;
+
+    // Optional checks (lightweight, only structure)
+    if (t.viewerRequestVolume && typeof t.viewerRequestVolume !== "object") return false;
+    if (t.refine && typeof t.refine !== "string") return false;
+    if (t.transform && (!Array.isArray(t.transform) || t.transform.length !== 16)) return false;
+    if (t.content && typeof t.content !== "object") return false;
+    if (t.contents && !Array.isArray(t.contents)) return false;
+    if (t.children && !Array.isArray(t.children)) return false;
+
+    return true;
 }

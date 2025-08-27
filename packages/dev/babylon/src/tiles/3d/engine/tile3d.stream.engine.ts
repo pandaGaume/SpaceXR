@@ -1,9 +1,13 @@
 import { Nullable } from "core/types";
-import { ICameraViewState, ICodec, IDisplay, IHasDisplay, ISourceBlock, SourceBlock } from "core/tiles";
-import { IBoundingVolume, ITile3d, ITileset } from "../interfaces";
-import { TilesetCodec } from "../codecs";
-import { Cartesian3, ICartesian3, IPlane } from "core/geometry";
+import { ICameraViewState, IDisplay, IHasDisplay, ISourceBlock, SourceBlock } from "core/tiles";
+import { IPlane } from "core/geometry";
 import { Fifo } from "core/collections";
+import { WebClient } from "core/io";
+import { PathUtils } from "core/utils";
+
+import { IsTile3d, ITile3d, ITileset } from "../interfaces";
+import { Distance, IDENTITY44, IsBoxInFrustum, IsPointInBox, IsPointInSphere, IsSphereInFrustum, Mat44Type, MulMat44, TransformPointToRef } from "../interfaces/math/math";
+import { TilesetClient } from "./tile3d.stream.client";
 
 /**
  * Enumeration for the refinement strategy used when traversing the object hierarchy for rendering.
@@ -32,7 +36,6 @@ export type ScreenSpaceErrorFn = (tileGeometricError: number, distanceToCamera: 
  * used to test if the object is within camera view boundaries.
  */
 interface ICullable {
-    isCompletelyInFrustum(frustumPlanes: IPlane[]): boolean;
     isInFrustum(frustumPlanes: IPlane[]): boolean;
 }
 
@@ -54,9 +57,11 @@ export interface IStreamableNode {}
 /** Augmentation for the engine */
 declare module "../interfaces/tile3d" {
     interface ITile3d extends IStreamableNode, ICullable {
-        owner?: ITileset;
-        parent?: ITile3d;
+        ownerSet?: [string, ITileset];
+        externalSets?: Array<[string, ITileset]>;
+        parent?: ITile3d | ITileset;
         worldTransform?: Mat44Type;
+        refineType: Tile3dRefineType;
     }
 }
 
@@ -68,6 +73,19 @@ declare module "../interfaces/tileset" {
 }
 
 export interface ITile3dStreamEngineNavOptions {
+    /**
+     * If true, the engine tests each tile’s bounding volume
+     * against the active camera frustum for visibility culling.
+     */
+    testFrustum?: boolean;
+
+    /**
+     * If true, the engine tests the camera (viewer) position
+     * against the tile’s optional viewer request volume.
+     * This determines whether the tile should be considered for loading/rendering.
+     */
+    testViewerVolume?: boolean;
+
     /**
      * The maximum allowed screen-space error (SSE), in pixels,
      * before a object should be refined (loaded at higher LOD).
@@ -105,15 +123,7 @@ export interface ITile3dStreamEngineNavOptions {
     screenSpaceError?: ScreenSpaceErrorFn;
 }
 
-export interface ITransformManager<T> {}
-
-export interface ITile3dContentManager<T> {}
-
-export interface ITile3dStreamEngineContentOptions<T, M> {
-    transformManager: ITransformManager<M>;
-    contentManager: ITile3dContentManager<T>;
-    codec: ICodec<ITileset>;
-}
+export interface ITile3dStreamEngineContentOptions {}
 
 export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay {
     setContext(state: ICameraViewState): void;
@@ -143,7 +153,7 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
 
     private readonly _uri: string;
     private readonly _navOptions: ITile3dStreamEngineNavOptions;
-    private readonly _contentOptions: ITile3dStreamEngineContentOptions<T, M>;
+    private readonly _tilesetClient: WebClient<string, ITileset>;
 
     private _activeTiles = new Set<ITile3d>();
     private readonly _tileSets = new Map<string, ITileset>();
@@ -153,19 +163,19 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
     private readonly _display: IDisplay;
 
     // Root loading coordination
-    private _rootPromise: Promise<ITileset | null> | null = null;
+    private _rootPromise: Promise<[string, Nullable<ITileset>]> | null = null;
 
     // Keep latest view-state to re-process after async loads
     private _pendingState: ICameraViewState | null = null;
     private _isProcessing = false;
 
-    private _cartesianCache: Array<ICartesian3> = [Cartesian3.Zero()];
+    private _cartesianCache: number[] = [0, 0, 0, 0, 0, 0];
 
-    public constructor(uri: string, display: IDisplay, contentOptions: ITile3dStreamEngineContentOptions<T, M>, navOptions?: ITile3dStreamEngineNavOptions) {
+    public constructor(uri: string, display: IDisplay, client?: WebClient<string, ITileset>, navOptions?: ITile3dStreamEngineNavOptions) {
         super();
         this._uri = uri;
         this._display = display;
-        this._contentOptions = contentOptions;
+        this._tilesetClient = client ?? new TilesetClient(uri);
         this._navOptions = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
     }
 
@@ -196,11 +206,14 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
                 if (!this._rootPromise) {
                     this._rootPromise = this._loadSetAsync(this._uri);
                 }
-                const ts = await this._rootPromise;
-                if (ts) {
-                    this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
-                    if (ts.root) {
-                        this._activeTiles.add(ts?.root);
+                const result = await this._rootPromise;
+                if (result) {
+                    const ts = result[1];
+                    if (ts) {
+                        this._initializeSet(this._uri, ts); // this is where we link the nodes and set the worldTransform
+                        if (ts.root) {
+                            this._activeTiles.add(ts?.root);
+                        }
                     }
                 }
                 // fallthrough: after load, we’ll consume latest pending state
@@ -227,27 +240,52 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
             const toProcess = new Fifo<ITile3d>(...this.activeTiles);
             do {
                 const tile = toProcess.dequeue();
-                if (!tile) {
+                if (!tile || tile.geometricError === undefined || tile.boundingVolume === undefined) {
                     continue;
                 }
-                if (tile.geometricError === undefined || tile.boundingVolume === undefined) {
-                    return;
+
+                // is the camera inside request volume ?
+                if (tile.viewerRequestVolume && this._navOptions.testViewerVolume) {
+                    if (tile.viewerRequestVolume.sphere) {
+                        if (!IsPointInSphere(tile.viewerRequestVolume.sphere, state.worldPosition)) {
+                            continue;
+                        }
+                    } else if (tile.viewerRequestVolume.box) {
+                        if (!IsPointInBox(tile.viewerRequestVolume.box, state.worldPosition)) {
+                            continue;
+                        }
+                    }
+                }
+
+                // is the tile viewed by the camera ??
+                if (this._navOptions.testFrustum && state.frustumPlanes) {
+                    if (tile.boundingVolume.sphere) {
+                        if (!IsSphereInFrustum(tile.boundingVolume.sphere, state.frustumPlanes)) {
+                            continue;
+                        }
+                    } else if (tile.boundingVolume.box) {
+                        if (!IsBoxInFrustum(tile.boundingVolume.box, state.frustumPlanes)) {
+                            continue;
+                        }
+                    }
                 }
 
                 // we compute the distance from the camera, using the center of the bounding volume
                 // which may be a box, a sphere or a region. For region we must know the reference system such ECEF or ENU
                 // This information is provided as an options.
                 // Default reference frame is ECEF (Earth-Centered, Earth-Fixed) with the WGS84 ellipsoid.
-                const center = this._cartesianCache[0];
-                this._getWorldCenterToRef(tile.boundingVolume, center);
-                const distanceToCamera = Cartesian3.Distance(center, state.worldPosition);
+                const center = this._cartesianCache;
+                if (!this._tryGetWorldCenterToRef(tile, center, 0)) {
+                    continue;
+                }
+                const distanceToCamera = Distance(state.worldPosition, center, 0);
 
                 const fn = this._navOptions.screenSpaceError ?? ScreenSpaceError;
                 const sse = fn(tile.geometricError, distanceToCamera, this._display.resolution.height, state.tanFov2);
                 if (sse > this._navOptions.maxScreenSpaceError) {
                     // refine.
-                    const refine = tile.refine ?? "REPLACE";
-                    if (refine === "REPLACE") {
+                    const refine = tile.refineType;
+                    if (refine == Tile3dRefineType.replace) {
                         // deactivate tile
                         if (this._activeTiles.has(tile)) {
                             toRemove.push(tile);
@@ -268,10 +306,11 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
 
                 if (sse < this._navOptions.maxScreenSpaceError - offset) {
                     // coarse
-                    if (tile.parent) {
-                        if (!toProcess.includes(tile.parent)) {
+                    const p = tile.parent;
+                    if (p && IsTile3d(p)) {
+                        if (!toProcess.includes(p)) {
                             // enqueue only if not already in
-                            toProcess.enqueue(tile.parent);
+                            toProcess.enqueue(p);
                         }
                     }
                     if (this._activeTiles.has(tile)) {
@@ -282,6 +321,32 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
 
                 // keep the tile activ or add it
                 if (!this._activeTiles.has(tile)) {
+                    // check the content for external ref
+                    const content = tile.contents ?? [tile.content];
+                    const jsonRefs: string[] = [];
+                    for (const c of content) {
+                        if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
+                            // here we are sure it's absolute because it has been initialized after the loading
+                            jsonRefs.push(c.uri);
+                        }
+                    }
+                    if (jsonRefs.length) {
+                        // we might think of doing this async...
+                        const loaded = await Promise.all(jsonRefs.map((absolutePath) => this._loadSetAsync(absolutePath)));
+                        // Filter out null values and tell TypeScript that the result contains only ITileset.
+                        const result = loaded.filter((entry): entry is [string, ITileset] => !!entry[1]);
+                        if (result && result.length) {
+                            tile.externalSets = result;
+                            for (var ts of result) {
+                                const path = ts[0];
+                                const item = ts[1];
+                                this._initializeSet(path, item, tile); // itialize the set using the current tile as reference.
+                                if (item.root) {
+                                    toProcess.enqueue(item.root);
+                                }
+                            }
+                        }
+                    }
                     toAdd.push(tile);
                 }
             } while (!toProcess.isEmpty);
@@ -314,34 +379,107 @@ export class Tile3dStreamEngine<T, M> extends SourceBlock<ITile3d> implements IT
         }
     }
 
-    protected _getWorldCenterToRef(bv: IBoundingVolume, ref: ICartesian3): void {}
+    protected _tryGetWorldCenterToRef(tile: ITile3d, ref: number[], offset: number = 0): boolean {
+        const bv = tile.boundingVolume;
+        if (!bv) {
+            return false;
+        }
+        let src: number[] = (bv.box ? bv.box : bv.sphere) as number[];
+        if (src) {
+            if (tile.worldTransform) {
+                TransformPointToRef(tile.worldTransform, src, 0, ref, offset);
+            } else {
+                ref[offset++] = src[0];
+                ref[offset++] = src[1];
+                ref[offset] = src[2];
+            }
+            return true;
+        }
+        return false;
+    }
 
-    protected async _loadSetAsync(uri: string, signal?: AbortSignal): Promise<Nullable<ITileset>> {
-        if (this._loadings.has(uri)) return null;
+    protected async _loadSetAsync(uri: string): Promise<[string, Nullable<ITileset>]> {
+        if (this._tileSets.has(uri)) {
+            return [uri, this._tileSets.get(uri) ?? null];
+        }
+        if (this._loadings.has(uri)) return [uri, null];
         this._loadings.add(uri);
         try {
-            const ts = await this._loadSet0Async(uri, signal);
-            if (signal?.aborted) return null; // caller cancelled; don't cache
-            if (ts) {
-                this._tileSets.set(uri, ts);
+            const result = await this._tilesetClient.fetchAsync(uri);
+            if (result.ok && result.content) {
+                this._tileSets.set(uri, result.content);
             }
-            return ts ?? null;
+            return [uri, result.content];
         } catch (err) {
             // If aborted, swallow..
-            if ((err as DOMException)?.name === "AbortError") return null;
+            if ((err as DOMException)?.name === "AbortError") return [uri, null];
             throw err;
         } finally {
             this._loadings.delete(uri);
         }
     }
 
-    // TODO : Replace with WebClient !!
-    protected async _loadSet0Async(uri: string, signal?: AbortSignal): Promise<Nullable<ITileset>> {
-        const codec = this._contentOptions.codec ?? TilesetCodec.Shared;
-        const res = await fetch(uri, { signal });
-        if (!res.ok) throw new Error(`Failed to load ${uri} (${res.status})`);
-        return codec.decodeAsync(res);
-    }
+    protected _initializeSet(path: string, tileset: ITileset, from?: ITile3d): [string, ITileset] {
+        // init the parents, owner
+        tileset.parent = from;
+        const owner: [string, ITileset] = [path, tileset];
+        const queue = new Fifo<ITile3d>();
+        if (tileset.root) {
+            const root = tileset.root;
 
-    protected _initializeSet(tileset: ITileset, from?: ITile3d) {}
+            root.parent = tileset;
+            let parentTransform = from?.worldTransform ?? IDENTITY44;
+            let localTransform = root.transform ?? IDENTITY44;
+            root.worldTransform = MulMat44(parentTransform, localTransform);
+            queue.enqueue(root);
+
+            const baseUrl = PathUtils.GetBaseUrl(path);
+            do {
+                const t = queue.dequeue();
+                if (t) {
+                    t.ownerSet = owner;
+                    const refine = t.refine ?? "REPLACE";
+                    switch (refine) {
+                        case "ADD": {
+                            t.refineType = Tile3dRefineType.add;
+                            break;
+                        }
+                        case "REPLACE":
+                        default: {
+                            t.refineType = Tile3dRefineType.replace;
+                            break;
+                        }
+                    }
+                    // compute and set absolute paths for every content uri.
+                    if (t.content) {
+                        // transfert everything to contents..
+                        t.contents = t.contents ?? [];
+                        t.contents.push(t.content);
+                    }
+                    if (t.contents) {
+                        for (const c of t.contents) {
+                            let uri = c.uri;
+                            if (PathUtils.IsRelativeUrl(uri)) {
+                                uri = PathUtils.ResolveUri(baseUrl, uri);
+                            }
+                            c.uri = uri;
+                        }
+                    }
+                    // recursively add childrens
+                    if (t.children) {
+                        parentTransform = t.worldTransform ?? IDENTITY44;
+                        for (const subtile of t.children) {
+                            subtile.parent = t;
+                            localTransform = subtile.transform ?? IDENTITY44;
+                            subtile.worldTransform = MulMat44(parentTransform, localTransform);
+
+                            queue.enqueue(subtile);
+                        }
+                    }
+                }
+            } while (!queue.isEmpty());
+        }
+
+        return owner;
+    }
 }

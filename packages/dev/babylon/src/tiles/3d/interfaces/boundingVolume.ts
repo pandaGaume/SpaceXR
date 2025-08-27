@@ -36,9 +36,7 @@ export interface IBoundingVolume {
     sphere?: SphereType;
 }
 
-export type IBoxType = [number, number, number, number, number, number, number, number, number, number, number, number];
-
-export function AreBoxIntersect(a: IBoxType, b: IBoxType): boolean {
+export function AreBoxIntersect(a: BoxType, b: BoxType): boolean {
     for (let i = 0; i < 3; ++i) {
         const ai = 3 + i * 3;
         const aj = ai + 1;

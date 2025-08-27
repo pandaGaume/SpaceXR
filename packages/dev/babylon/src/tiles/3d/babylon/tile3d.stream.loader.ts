@@ -61,13 +61,13 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
                         // normalize results for the global callback
                         const results = settled.map((s) => {
                             if (s.status === "fulfilled") {
-                                const v = s.value as { tile: ITile3d; container?: BABYLON.AssetContainer; error?: unknown };
+                                const v = s.value as { tile: ITile3d; content: IContent; container?: BABYLON.AssetContainer; error?: unknown };
                                 return v.container
-                                    ? { tile: v.tile, status: "fulfilled" as const, value: v.container }
-                                    : { tile: v.tile, status: "rejected" as const, reason: v.error };
+                                    ? { tile: v.tile, content: v.content, status: "fulfilled" as const, value: v.container }
+                                    : { tile: v.tile, content: v.content, status: "rejected" as const, reason: v.error };
                             } else {
                                 // Should be rare because we catch above, but keep it robust
-                                return { tile: undefined as unknown as ITile3d, status: "rejected" as const, reason: s.reason };
+                                return { tile: undefined as unknown as ITile3d, content: undefined as unknown as IContent, status: "rejected" as const, reason: s.reason };
                             }
                         });
                         // global “all done” event
@@ -91,5 +91,7 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
         // this is where we need to deploy a strategy depending policy.
     }
 
-    protected _onAllContainersSettled(results: Array<{ tile: ITile3d; status: "fulfilled" | "rejected"; value?: BABYLON.AssetContainer; reason?: unknown }>): void {}
+    protected _onAllContainersSettled(
+        results: Array<{ tile: ITile3d; content: IContent; status: "fulfilled" | "rejected"; value?: BABYLON.AssetContainer; reason?: unknown }>
+    ): void {}
 }

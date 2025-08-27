@@ -7,7 +7,7 @@ export class TileNavigationStateSynchronizer implements IDisposable {
     _source: ITileNavigationState;
     _target: ITileNavigationState;
     _sourceChangedObserver?: Nullable<Observer<boolean>>;
-    _propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
+    _propertyChangedObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
     _enabled: boolean;
 
     public constructor(source: ITileNavigationState, target: ITileNavigationState, enabled: boolean = true) {
@@ -15,7 +15,7 @@ export class TileNavigationStateSynchronizer implements IDisposable {
         this._target = target;
         this._enabled = enabled;
         this._sourceChangedObserver = this._source.validationObservable?.add(this._onSourceValidation.bind(this));
-        this._propertyChangedObserver = this._source.propertyChangedObservable.add(this._onSourcePropertyChanged.bind(this));
+        this._propertyChangedObserver = this._source.propertyChangedObservable?.add(this._onSourcePropertyChanged.bind(this));
     }
 
     public dispose(): void {

@@ -32,6 +32,11 @@ export interface IFrustumValues {
 /// The renderer uses `metersToLocalScale` to compare them coherently.
 /// </summary>
 export interface ICameraViewState extends IFrustumValues {
+    /// <summary>
+    /// An observable that notifies subscribers of changes to properties in the camera state.
+    /// </summary>
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
+
     worldPosition: ICartesian3; // position in world space
     worldRotation: IQuaternion; // orientation in world space
     fovY: number; // perspective FOV in radians (0 if ortho)
@@ -52,7 +57,7 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     /// An observable that notifies subscribers of changes to properties in the navigation state.
     /// This enables reactive updates when properties like `zoom`, `azimuth`, or `bounds` are modified.
     /// </summary>
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
 
     /// <summary>
     /// The geographic center of the current view, defined as latitude and longitude coordinates.

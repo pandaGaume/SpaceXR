@@ -4,7 +4,8 @@ import { IAvailability } from "./availability";
 import { IBufferView } from "./bufferView";
 
 /**
- * An object describing the availability of tiles and content in a subtree, as well as availability of children subtrees. May also store metadata for available tiles and content.
+ * An object describing the availability of tiles and content in a subtree,
+ * as well as availability of children subtrees. May also store metadata for available tiles and content.
  */
 export interface ISubtree {
     /**

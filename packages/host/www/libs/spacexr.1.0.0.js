@@ -490,6 +490,249 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
 
 /***/ }),
 
+/***/ "./dist/collections/fifo.js":
+/*!**********************************!*\
+  !*** ./dist/collections/fifo.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Fifo: () => (/* binding */ Fifo)
+/* harmony export */ });
+class Fifo {
+    constructor(...data) {
+        this._items = [];
+        this._items = data ?? [];
+    }
+    enqueue(item) {
+        this._items.push(item);
+    }
+    dequeue() {
+        return this._items.shift();
+    }
+    peek() {
+        return this._items[0];
+    }
+    isEmpty() {
+        return this._items.length === 0;
+    }
+    size() {
+        return this._items.length;
+    }
+    clear() {
+        this._items = [];
+    }
+    includes(item) {
+        return this._items.includes(item);
+    }
+}
+//# sourceMappingURL=fifo.js.map
+
+/***/ }),
+
+/***/ "./dist/collections/index.js":
+/*!***********************************!*\
+  !*** ./dist/collections/index.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Collection: () => (/* reexport safe */ _collection__WEBPACK_IMPORTED_MODULE_0__.Collection),
+/* harmony export */   Fifo: () => (/* reexport safe */ _fifo__WEBPACK_IMPORTED_MODULE_4__.Fifo),
+/* harmony export */   LinkedList: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedList),
+/* harmony export */   LinkedListNode: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedListNode),
+/* harmony export */   OrderedCollection: () => (/* reexport safe */ _orderedCollection__WEBPACK_IMPORTED_MODULE_2__.OrderedCollection),
+/* harmony export */   Stack: () => (/* reexport safe */ _stack__WEBPACK_IMPORTED_MODULE_3__.Stack)
+/* harmony export */ });
+/* harmony import */ var _collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./collection */ "./dist/collections/collection.js");
+/* harmony import */ var _linkedlist__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./linkedlist */ "./dist/collections/linkedlist.js");
+/* harmony import */ var _orderedCollection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./orderedCollection */ "./dist/collections/orderedCollection.js");
+/* harmony import */ var _stack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stack */ "./dist/collections/stack.js");
+/* harmony import */ var _fifo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fifo */ "./dist/collections/fifo.js");
+
+
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/collections/linkedlist.js":
+/*!****************************************!*\
+  !*** ./dist/collections/linkedlist.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LinkedList: () => (/* binding */ LinkedList),
+/* harmony export */   LinkedListNode: () => (/* binding */ LinkedListNode)
+/* harmony export */ });
+class LinkedListNode {
+    constructor(value) {
+        this.value = value;
+        this.next = null;
+        this.prev = null;
+    }
+}
+class LinkedList {
+    constructor(...values) {
+        this._head = null;
+        this._tail = null;
+        this._length = 0;
+        for (var value of values) {
+            this.add(value);
+        }
+    }
+    get head() {
+        return this._head;
+    }
+    get tail() {
+        return this._tail;
+    }
+    get length() {
+        return this._length;
+    }
+    [Symbol.iterator]() {
+        let node = this._head;
+        const iterator = {
+            next() {
+                if (node) {
+                    const status = {
+                        done: false,
+                        value: node.value,
+                    };
+                    node = node.next;
+                    return status;
+                }
+                return {
+                    done: true,
+                    value: null,
+                };
+            },
+            [Symbol.iterator]() {
+                return this;
+            },
+        };
+        return iterator;
+    }
+    add(value) {
+        return this.addLast(value);
+    }
+    addLast(value) {
+        if (this._tail === null) {
+            this._head = this._tail = this._buildNode(value);
+            this._length++;
+        }
+        return this.addAfter(value, this._tail);
+    }
+    addAfter(value, node) {
+        if (this._tail === null || !node) {
+            return this.add(value);
+        }
+        var newNode = this._buildNode(value);
+        this._addAfter(node, newNode);
+        return newNode;
+    }
+    addFirst(value) {
+        if (this._head === null) {
+            this._head = this._tail = this._buildNode(value);
+            this._length++;
+        }
+        return this.addBefore(value, this._head);
+    }
+    addBefore(value, node) {
+        if (this._tail === null || !node) {
+            return this.add(value);
+        }
+        var newNode = this._buildNode(value);
+        this._addBefore(node, newNode);
+        return newNode;
+    }
+    _addAfter(newNode, node) {
+        newNode.next = node.next;
+        newNode.prev = node;
+        node.next = newNode;
+        if (newNode.next) {
+            newNode.next.prev = newNode;
+        }
+        this._length++;
+        if (node === this._tail) {
+            this._tail = newNode;
+        }
+    }
+    _addBefore(newNode, node) {
+        newNode.prev = node.prev;
+        newNode.next = node;
+        node.prev = newNode;
+        if (newNode.prev) {
+            newNode.prev.next = newNode;
+        }
+        this._length++;
+        if (node === this._head) {
+            this._head = newNode;
+        }
+    }
+    remove(item) {
+        if (item) {
+            if (this._head === item) {
+                this.removeFirst();
+            }
+            else if (this._tail === item) {
+                this.removeLast();
+            }
+            else {
+                if (item.prev) {
+                    item.prev.next = item.next;
+                }
+                if (item.next) {
+                    item.next.prev = item.prev;
+                }
+            }
+        }
+    }
+    removeFirst() {
+        if (this._head) {
+            var toRemove = this._head;
+            if (!toRemove.next) {
+                this._head = this._tail = null;
+            }
+            else {
+                this._head = toRemove.next;
+                this._head.prev = null;
+            }
+            this._length--;
+        }
+    }
+    removeLast() {
+        if (this._tail) {
+            var toRemove = this._tail;
+            if (!toRemove.prev) {
+                this._head = this._tail = null;
+            }
+            else {
+                this._tail = toRemove.prev;
+                this._tail.next = null;
+            }
+            this._length--;
+        }
+    }
+    clear() {
+        this._head = this._tail = null;
+        this._length = 0;
+    }
+    _buildNode(value) {
+        return new LinkedListNode(value);
+    }
+}
+//# sourceMappingURL=linkedlist.js.map
+
+/***/ }),
+
 /***/ "./dist/collections/orderedCollection.js":
 /*!***********************************************!*\
   !*** ./dist/collections/orderedCollection.js ***!
@@ -551,6 +794,47 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
     }
 }
 //# sourceMappingURL=orderedCollection.js.map
+
+/***/ }),
+
+/***/ "./dist/collections/stack.js":
+/*!***********************************!*\
+  !*** ./dist/collections/stack.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Stack: () => (/* binding */ Stack)
+/* harmony export */ });
+class Stack {
+    constructor(...data) {
+        this._items = [];
+        this._items = data ?? [];
+    }
+    push(item) {
+        this._items.push(item);
+    }
+    pop() {
+        return this._items.pop();
+    }
+    peek() {
+        return this._items[this._items.length - 1];
+    }
+    isEmpty() {
+        return this._items.length === 0;
+    }
+    size() {
+        return this._items.length;
+    }
+    clear() {
+        this._items = [];
+    }
+    includes(item) {
+        return this._items.includes(item);
+    }
+}
+//# sourceMappingURL=stack.js.map
 
 /***/ }),
 
@@ -1828,6 +2112,55 @@ GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED
 
 /***/ }),
 
+/***/ "./dist/geodesy/geodesy.utm.js":
+/*!*************************************!*\
+  !*** ./dist/geodesy/geodesy.utm.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   UTM: () => (/* binding */ UTM)
+/* harmony export */ });
+class UTM {
+    static FromLatLon(latDeg, lonDeg, useExceptions = true) {
+        let lon = ((((lonDeg + 180) % 360) + 360) % 360) - 180;
+        const lat = Math.max(Math.min(latDeg, 90), -90);
+        let zone = Math.floor((lon + 180) / 6) + 1;
+        zone = Math.max(1, Math.min(zone, 60));
+        if (useExceptions) {
+            if (lat >= 56 && lat < 64 && lon >= 3 && lon < 12) {
+                zone = 32;
+            }
+            if (lat >= 72 && lat < 84) {
+                if (lon >= 0 && lon < 9)
+                    zone = 31;
+                else if (lon >= 9 && lon < 21)
+                    zone = 33;
+                else if (lon >= 21 && lon < 33)
+                    zone = 35;
+                else if (lon >= 33 && lon < 42)
+                    zone = 37;
+            }
+        }
+        const hemisphere = lat >= 0 ? "N" : "S";
+        const epsgBase = hemisphere === "N" ? 32600 : 32700;
+        const epsg = epsgBase + zone;
+        const centralMeridian = -183 + 6 * zone;
+        return { zone, hemisphere, epsg, centralMeridian };
+    }
+    static ToEPSG(zone, hemisphere) {
+        const epsgBase = hemisphere === "N" ? 32600 : 32700;
+        return epsgBase + zone;
+    }
+    static YoEPSGString(zone, hemisphere) {
+        return `EPSG:${this.ToEPSG(zone, hemisphere)}`;
+    }
+}
+//# sourceMappingURL=geodesy.utm.js.map
+
+/***/ }),
+
 /***/ "./dist/geodesy/index.js":
 /*!*******************************!*\
   !*** ./dist/geodesy/index.js ***!
@@ -1842,13 +2175,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ _geodesy_system__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem),
 /* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_scale__WEBPACK_IMPORTED_MODULE_4__.MapScale),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ _calculators__WEBPACK_IMPORTED_MODULE_3__.PythagoreanFlatEarthCalculator),
-/* harmony export */   SphericalCalculator: () => (/* reexport safe */ _calculators__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator)
+/* harmony export */   SphericalCalculator: () => (/* reexport safe */ _calculators__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
+/* harmony export */   UTM: () => (/* reexport safe */ _geodesy_utm__WEBPACK_IMPORTED_MODULE_5__.UTM)
 /* harmony export */ });
 /* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
 /* harmony import */ var _geodesy_system__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geodesy.system */ "./dist/geodesy/geodesy.system.js");
 /* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geodesy.calculators */ "./dist/geodesy/geodesy.calculators.js");
 /* harmony import */ var _calculators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./calculators */ "./dist/geodesy/calculators/index.js");
 /* harmony import */ var _geodesy_scale__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geodesy.scale */ "./dist/geodesy/geodesy.scale.js");
+/* harmony import */ var _geodesy_utm__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./geodesy.utm */ "./dist/geodesy/geodesy.utm.js");
+
 
 
 
@@ -10866,7 +11202,7 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvi
             this._navigation = value;
             if (this._navigation) {
                 this._api = new _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__.TileNavigationApi(this._navigation, this.metrics);
-                this._navigationObserver = this._navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+                this._navigationObserver = this._navigation.propertyChangedObservable?.add(this._onNavigationPropertyChanged.bind(this));
             }
             this._onNavigationChanged(tmp, value);
         }
@@ -11644,7 +11980,7 @@ class TileNavigationStateSynchronizer {
         this._target = target;
         this._enabled = enabled;
         this._sourceChangedObserver = this._source.validationObservable?.add(this._onSourceValidation.bind(this));
-        this._propertyChangedObserver = this._source.propertyChangedObservable.add(this._onSourcePropertyChanged.bind(this));
+        this._propertyChangedObserver = this._source.propertyChangedObservable?.add(this._onSourcePropertyChanged.bind(this));
     }
     dispose() {
         this._sourceChangedObserver?.disconnect();
@@ -14607,6 +14943,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CelestialTracker: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.CelestialTracker),
 /* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.CellCoordinateReference),
 /* harmony export */   Circle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Circle),
+/* harmony export */   Collection: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.Collection),
 /* harmony export */   ColorValue: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
@@ -14623,6 +14960,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EventEmitter: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventEmitter),
 /* harmony export */   EventState: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventState),
 /* harmony export */   EvictionReason: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_12__.EvictionReason),
+/* harmony export */   Fifo: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.Fifo),
 /* harmony export */   Float32Layer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Float32Layer),
 /* harmony export */   Float32TileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Float32TileCodec),
 /* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.Float32TileCodecOptions),
@@ -14694,6 +15032,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.KnownPlaces),
 /* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
 /* harmony export */   Line: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Line),
+/* harmony export */   LinkedList: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.LinkedList),
+/* harmony export */   LinkedListNode: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.LinkedListNode),
 /* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_14__.LocalString),
 /* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
 /* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.MakePlaneFromPointAndNormal),
@@ -14714,6 +15054,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observer),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_15__.OctreeSplitter),
+/* harmony export */   OrderedCollection: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.OrderedCollection),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),
@@ -14748,6 +15089,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SpectralClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SpectralClass),
 /* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
+/* harmony export */   Stack: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.Stack),
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TargetProxy),
@@ -14778,6 +15120,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TileWebClient),
 /* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchGestureType),
+/* harmony export */   UTM: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.UTM),
 /* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Unit),
 /* harmony export */   ValidableBase: () => (/* reexport safe */ _validable__WEBPACK_IMPORTED_MODULE_1__.ValidableBase),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.VectorTileGeomType),
@@ -14821,6 +15164,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dem_index__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./dem/index */ "./dist/dem/index.js");
 /* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./text */ "./dist/text/index.js");
 /* harmony import */ var _tree__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tree */ "./dist/tree/index.js");
+/* harmony import */ var _collections__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./collections */ "./dist/collections/index.js");
+
 
 
 

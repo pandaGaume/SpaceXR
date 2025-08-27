@@ -9,19 +9,15 @@ import {
     ITileMetrics,
     ITileNavigationState,
     ITileView,
-    TileNavigationState,
-    TileAddress,
-    SourceBlock,
+    TileNavigationState
 } from "core/tiles";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { Envelope } from "core/geography";
 import { ICartesian2, ISize2, IsSize, Size2 } from "core/geometry";
 
 import { IMap3D, ITileWithMesh } from "./map.interfaces";
 import { TileWithElevation } from "./map.tile";
 import { Map3dLayerView } from "./map.layer.view";
-import { CameraFetchEngine, IMap3dObjectNode, Map3dObjectRefineType } from "../tiles";
 
 /**
  * The `Map3D` enforces a simplified but powerful layer model:
@@ -57,9 +53,6 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
     _cartesianCenterCache: Nullable<ICartesian2> = null;
     _cachedSize: ISize2;
 
-    _objectsSource?: SourceBlock<IMap3dObjectNode>;
-    _fetchEngine?: CameraFetchEngine;
-
     public constructor(map: IMap3D, layer: ITileMapLayer<ImageLayerContentType>, display: Nullable<IDisplay>, source: ITileView) {
         super(map, layer, display, source);
         // ensure factory is with correct type.
@@ -76,12 +69,6 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
         // build the root for the tiles
         const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
-        this._objectsSource = new SourceBlock<IMap3dObjectNode>();
-        this._fetchEngine = new CameraFetchEngine({
-            maxScreenSpaceError: CameraFetchEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
-            hysteresisPercent: CameraFetchEngine.DEFAULT_HYSTERESIS_PERCENT,
-        });
-        this._objectsSource.linkTo(this._fetchEngine);
     }
 
     public get grid(): Mesh {
@@ -149,18 +136,10 @@ export class TextureLayerView extends Map3dLayerView<ImageLayerContentType> {
 
     protected _buildInstance(tile: ITileWithMesh<ImageLayerContentType>): AbstractMesh {
         const instance: AbstractMesh = this._map.grid.createInstance(this._buildInstanceName(tile));
-
-        return this._augmentInstanceAsObjectNode(tile, instance);
+        return this._augmentInstance(tile, instance);
     }
 
-    protected _augmentInstanceAsObjectNode(tile: ITileWithMesh<ImageLayerContentType>, m: AbstractMesh): AbstractMesh {
-        var env = tile.geoBounds;
-        if (env) {
-            m.geometricError = Envelope.GetDiagonalLength(env);
-            m.refine = Map3dObjectRefineType.replace;
-            m.refinedFrom = TileAddress.QuadKeyToTileXY(TileAddress.ToParentKey(tile.quadkey));
-            m.refinements = TileAddress.ToChildsKey(tile.quadkey).map((k) => TileAddress.QuadKeyToTileXY(k));
-        }
+    protected _augmentInstance(tile: ITileWithMesh<ImageLayerContentType>, m: AbstractMesh): AbstractMesh {
         return m;
     }
 

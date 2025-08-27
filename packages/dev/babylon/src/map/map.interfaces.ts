@@ -5,11 +5,11 @@ import { ImageLayerContentType, IsTile, ITargetBlock, ITile, ITileMap } from "co
 import { IValidable, Nullable } from "core/types";
 import { AbstractMesh, Mesh, TransformNode } from "@babylonjs/core";
 import { IHasHolographicBounds } from "../display";
-import { IMap3dObjectNode } from "../tiles/3d/engine/tile3d.stream.interfaces";
+import { ITile3d } from "../tiles";
 
 export type TextureType = ImageLayerContentType;
 export type ElevationType = IDemInfos;
-export type Object3dType = Array<IMap3dObjectNode> | IMap3dObjectNode;
+export type Object3dType = ITile3d;
 
 export type Map3DContentType = ElevationType | TextureType | Object3dType;
 

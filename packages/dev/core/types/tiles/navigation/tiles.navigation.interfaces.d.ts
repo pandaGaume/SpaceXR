@@ -14,6 +14,7 @@ export interface IFrustumValues {
     up?: ICartesian3;
 }
 export interface ICameraViewState extends IFrustumValues {
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
     worldPosition: ICartesian3;
     worldRotation: IQuaternion;
     fovY: number;
@@ -22,7 +23,7 @@ export interface ICameraViewState extends IFrustumValues {
 }
 export type CameraStateListener = (state: ICameraViewState) => void;
 export interface ITileNavigationState extends IValidable, ICloneable<ITileNavigationState>, IDisposable {
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;
     center: IGeo2;
     zoom: number;
     azimuth: Bearing;

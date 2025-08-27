@@ -5,7 +5,7 @@ export declare class TileNavigationStateSynchronizer implements IDisposable {
     _source: ITileNavigationState;
     _target: ITileNavigationState;
     _sourceChangedObserver?: Nullable<Observer<boolean>>;
-    _propertyChangedObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
+    _propertyChangedObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>>;
     _enabled: boolean;
     constructor(source: ITileNavigationState, target: ITileNavigationState, enabled?: boolean);
     dispose(): void;

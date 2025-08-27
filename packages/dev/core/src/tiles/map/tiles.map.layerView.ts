@@ -19,7 +19,7 @@ export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLaye
     private _selectionContext?: ITileSelectionContext;
     private _ownSource: boolean = false;
     private _navigation: Nullable<ITileNavigationState> = null;
-    private _navigationObserver: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
+    private _navigationObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileNavigationState, unknown>>> = null;
     private _api: Nullable<ITileNavigationApi> = null;
     private _display: Nullable<IDisplay> = null;
     private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
@@ -86,7 +86,7 @@ export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLaye
             this._navigation = value;
             if (this._navigation) {
                 this._api = new TileNavigationApi(this._navigation, this.metrics);
-                this._navigationObserver = this._navigation.propertyChangedObservable.add(this._onNavigationPropertyChanged.bind(this));
+                this._navigationObserver = this._navigation.propertyChangedObservable?.add(this._onNavigationPropertyChanged.bind(this));
             }
             this._onNavigationChanged(tmp, value);
         }

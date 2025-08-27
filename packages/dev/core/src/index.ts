@@ -14,3 +14,4 @@ export * from "./cache/index";
 export * from "./dem/index";
 export * from "./text";
 export * from "./tree";
+export * from "./collections";

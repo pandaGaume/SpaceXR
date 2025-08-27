@@ -1,39 +1,36 @@
-export class Stack<T> {
+import { IFifo } from "./collections.interfaces";
+
+export class Fifo<T> implements IFifo<T> {
     private _items: T[] = [];
 
     public constructor(...data: Array<T>) {
         this._items = data ?? [];
     }
 
-    /** Push an element onto the stack */
-    public push(item: T): void {
+    public enqueue(item: T): void {
         this._items.push(item);
     }
 
-    /** Pop an element from the stack (removes and returns it) */
-    public pop(): T | undefined {
-        return this._items.pop();
+    public dequeue(): T | undefined {
+        return this._items.shift();
     }
 
-    /** Peek at the top element without removing it */
     public peek(): T | undefined {
-        return this._items[this._items.length - 1];
+        return this._items[0];
     }
 
-    /** Check if the stack is empty */
     public isEmpty(): boolean {
         return this._items.length === 0;
     }
 
-    /** Get the number of elements in the stack */
     public size(): number {
         return this._items.length;
     }
 
-    /** Clear the stack */
     public clear(): void {
         this._items = [];
     }
+
     public includes(item: T): boolean {
         return this._items.includes(item);
     }

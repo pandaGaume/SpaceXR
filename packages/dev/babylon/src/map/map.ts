@@ -3,15 +3,15 @@ import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3D
 import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
-import { TextureLayerView } from "./map.layer.texture";
+import { TextureLayerView } from "./map.layer.view.texture";
 import { ElevationLayer } from "../dem";
 import { Cartesian3, ICartesian3, ISize2, IsSize } from "core/geometry";
 import { ElevationGridFactory } from "./map.grid.factory";
 import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
-import { ElevationLayerView } from "./map.layer.dem";
-import { Tile3dLayerView } from "./map.layer.object";
+import { ElevationLayerView } from "./map.layer.view.dem";
+import { Tile3dLayerView } from "./map.layer.view.object";
 import { ObjectLayer } from "../tiles/3d/tile3d.layer";
 
 export class Map3DOptions {

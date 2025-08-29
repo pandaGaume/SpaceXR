@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { CameraStateListener } from "core/tiles";
 
-export function SetupCameraStateSync(scene: BABYLON.Scene, camera: BABYLON.Camera, onState: CameraStateListener, eps = 1e-6): BABYLON.IDisposable {
+export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scene, onState: CameraStateListener, eps = 1e-6): BABYLON.IDisposable {
     let viewDirty = true;
     let projDirty = true;
 
@@ -93,7 +93,7 @@ export function SyncActiveCameraState(scene: BABYLON.Scene, onState: CameraState
 
     // Attach to initial camera (if any)
     if (current) {
-        currentSync = SetupCameraStateSync(scene, current, onState, eps);
+        currentSync = SetupCameraStateSync(current, scene, onState, eps);
     }
 
     // React to active camera changes
@@ -111,7 +111,7 @@ export function SyncActiveCameraState(scene: BABYLON.Scene, onState: CameraState
 
         // Attach to new active camera
         if (current) {
-            currentSync = SetupCameraStateSync(scene, current, onState, eps);
+            currentSync = SetupCameraStateSync(current, scene, onState, eps);
         }
     });
 

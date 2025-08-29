@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>3D Map Display</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+
+        <style>
+            html,
+            body {
+                background-color: rgb(37, 37, 37);
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #mapcontainer {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                display: block; /* removes unwanted inline spacing */
+            }
+            .map-attribution {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                background-color: rgba(0, 0, 0, 0.4); /* transparent dark background */
+                color: white;
+                font-size: 11px;
+                font-family: sans-serif;
+                padding: 8px 10px;
+                border-radius: 6px;
+                max-width: 300px;
+                z-index: 2;
+                line-height: 1.4;
+                pointer-events: none; /* ensures it's non-interactive */
+            }
+            .map-attribution p {
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapcontainer">
+            <!-- Attribution panel -->
+            <div class="map-attribution" id="mapAttribution"></div>
+        </div>
+
+        <script>
+            // contributions
+            const contributionSet = new Set();
+
+            function addContribution(text) {
+                if (!text || contributionSet.has(text)) return;
+
+                contributionSet.add(text);
+
+                const container = document.getElementById("mapAttribution");
+                const p = document.createElement("p");
+                p.textContent = text;
+                container.appendChild(p);
+            }
+
+            const apiKey = "AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg";
+            const viewer = new SPACEXR.Map3DViewer("mapcontainer", {
+                uri: `https://tile.googleapis.com/v1/3dtiles/root.json`,
+                resolver: new SPACEXR.GoogleTiles3dUriResolver(apiKey),
+                names: {
+                    camera: "spacexr cam",
+                    map: "google tile map",
+                },
+            });
+        </script>
+    </body>
+</html>

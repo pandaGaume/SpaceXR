@@ -14756,7 +14756,7 @@ class PathUtils {
         if (!u)
             return false;
         const path = u.split(/[?#]/)[0].toLowerCase();
-        for (const p in pattern) {
+        for (const p of pattern) {
             if (path.endsWith(p)) {
                 return true;
             }

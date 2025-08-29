@@ -97,7 +97,15 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch 3D map on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/3DMap.html",
+            "url": "http://localhost:1338/packages/host/www/babylon/3dMap.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Tile3d map on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/tile3dMap.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },

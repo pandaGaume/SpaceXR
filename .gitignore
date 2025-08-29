@@ -16,3 +16,4 @@ lib/*.js
 **/bundles
 **/*.tsbuildinfo
 
+*.keys.json

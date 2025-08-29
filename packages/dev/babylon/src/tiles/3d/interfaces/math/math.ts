@@ -301,3 +301,48 @@ export function IsPointInBox(box: BoxType, point: ICartesian3): boolean {
     // Inside if absolute projection ≤ squared length of each half-axis
     return projX * projX <= lenX2 && projY * projY <= lenY2 && projZ * projZ <= lenZ2;
 }
+
+/** Convert a 3D Tiles OBB from Right-Handed (ECEF/glTF) to Babylon Left-Handed. */
+export function RHBoxToLHInPlace(box: BoxType): BoxType {
+    const cx = box[0],
+        cy = box[1],
+        cz = box[2];
+    const ux = box[3],
+        uy = box[4],
+        uz = box[5];
+    const vx = box[6],
+        vy = box[7],
+        vz = box[8];
+    const wx = box[9],
+        wy = box[10],
+        wz = box[11];
+
+    // center
+    box[0] = cx;
+    box[1] = cy;
+    box[2] = -cz;
+    // U
+    box[3] = ux;
+    box[4] = uy;
+    box[5] = -uz;
+    // V
+    box[6] = vx;
+    box[7] = vy;
+    box[8] = -vz;
+    // W
+    box[9] = -wx;
+    box[10] = -wy;
+    box[11] = wz;
+
+    return box;
+}
+
+/** Also handy for spheres. */
+export function RHSphereToLHInPlace(s: SphereType): SphereType {
+    s[2] = -s[2];
+    return s;
+}
+
+/** Convert back LH→RH (same transformation, since R⁻¹ = R). */
+export const LHBoxToRHInPlace = RHBoxToLHInPlace;
+export const LHSphereToRHInPlace = RHSphereToLHInPlace;

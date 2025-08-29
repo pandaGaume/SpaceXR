@@ -4,12 +4,13 @@ import { IPipelineMessageType, ITargetBlock, SourceBlock } from "core/tiles";
 import { IContent, ITile3d } from "../interfaces";
 import { EventState } from "core/events";
 import { PathUtils } from "core/utils";
+import { ITile3dStreamEngine } from "../engine";
 
 /** Augmentation for the engine */
 declare module "../interfaces/content" {
     interface IContent {
         container?: BABYLON.AssetContainer;
-        addedToscene?: boolean; // flag to let the engine know that the container has been added to the scene.
+        isLoadedInScene?: boolean; // flag to let the engine know that the container has been added to the scene.
     }
 }
 
@@ -21,7 +22,7 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
     public constructor(scene: BABYLON.Scene, ...extensions: Array<string>) {
         super();
         this._scene = scene;
-        this._extensions = extensions ?? Tile3dContentLoader.DefaultExtensions;
+        this._extensions = extensions.length > 0 ? extensions : Tile3dContentLoader.DefaultExtensions;
     }
 
     public added(eventData: IPipelineMessageType<ITile3d>, eventState: EventState): void {
@@ -31,18 +32,25 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
 
             // the try to load the content -> forward updated event when loaded.
             const pending: Promise<{ tile: ITile3d; content: IContent; container: BABYLON.AssetContainer } | { tile: ITile3d; content: IContent; error: unknown }>[] = [];
+            const engine = eventState.currentTarget as ITile3dStreamEngine;
+            const resolver = engine?.options?.uriResolver;
+
             for (const tile of eventData) {
                 const contents = tile.contents ?? [tile.content];
                 if (!contents || !contents.length) {
                     continue;
                 }
+
                 const toload = contents.filter((c): c is IContent => !!(c && c.uri && PathUtils.EndsWith(c.uri, ...this._extensions)));
                 for (const c of toload) {
                     if (c.container) {
                         // container already loaded.
                         continue;
                     }
-                    const { rootUrl, fileName } = PathUtils.SplitRootAndFile(c.uri);
+                    /// Here we need the resolver because we want to avoid exposing the credentials whenever possible.
+                    /// The resolver is typically used for credential injection.
+                    const targetUri: string = resolver?.resolve(c.uri) ?? c.uri;
+                    const { rootUrl, fileName } = PathUtils.SplitRootAndFile(targetUri);
                     const currentTile = tile; // capture
                     const currentContent = c;
                     const p = BABYLON.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined)

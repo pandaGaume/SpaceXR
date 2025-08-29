@@ -10,7 +10,7 @@ export class PathUtils {
     public static EndsWith(u: string, ...pattern: string[]): u is string {
         if (!u) return false;
         const path = u.split(/[?#]/)[0].toLowerCase();
-        for (const p in pattern) {
+        for (const p of pattern) {
             if (path.endsWith(p)) {
                 return true;
             }

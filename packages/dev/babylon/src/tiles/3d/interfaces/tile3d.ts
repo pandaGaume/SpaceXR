@@ -6,7 +6,6 @@ import { IImplicitTiling } from "./tile.implicitTiling";
 
 export type RefineType = "ADD" | "REPLACE" | string;
 
-
 /**
  * A tile in a 3D Tiles tileset.
  */
@@ -53,6 +52,9 @@ export interface ITile3d {
     children?: [ITile3d, ...ITile3d[]];
 }
 
+export function GetTile3dContents(tile: ITile3d): IContent[] | undefined {
+    return tile.contents ?? (tile.content ? [tile.content] : undefined);
+}
 /**
  * Type guard to check if an object is a valid ITile3d
  */

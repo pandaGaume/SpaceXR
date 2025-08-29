@@ -28,7 +28,7 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         let current: BABYLON.Camera | null = scene.activeCamera ?? null;
         let listener = this._onCameraState.bind(this);
         if (current) {
-            this._cameraMonitoring = SetupCameraStateSync(scene, current, listener);
+            this._cameraMonitoring = SetupCameraStateSync(current, scene, listener);
         }
         this._activCameraChangeMonitor = SyncActiveCameraState(scene, listener);
     }

@@ -61,6 +61,16 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                         for (const m of container.rootNodes) {
                             m.parent = this;
                         }
+                        for (const mat of container.materials) {
+                            // this is a trick to keep precision into the z-buffer along large dimension.
+                            // instead of that, we might want to scale the scene at reasonable size...
+                            mat.useLogarithmicDepth = true;
+                        }
+                        /*for (const m of container.meshes) {
+                            if (m instanceof BABYLON.Mesh) {
+                                this._flipWindingAndRecomputeNormals(m);
+                            }
+                        }*/
                         container.addAllToScene();
                     } finally {
                         c.isLoadedInScene = true;
@@ -90,5 +100,34 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                 }
             }
         }
+    }
+
+    protected _flipWindingAndRecomputeNormals(mesh: BABYLON.Mesh): void {
+        const positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+        const indices = mesh.getIndices();
+
+        if (!positions || !indices) return;
+
+        // 1) Inverser l’ordre des sommets de chaque triangle (i, i+1, i+2) -> (i, i+2, i+1)
+        for (let i = 0; i < indices.length; i += 3) {
+            const tmp = indices[i + 1];
+            indices[i + 1] = indices[i + 2];
+            indices[i + 2] = tmp;
+        }
+
+        // 2) Recalculer les normales
+        const normals = new Array<number>(positions.length);
+        BABYLON.VertexData.ComputeNormals(positions, indices, normals);
+
+        // 3) Appliquer au mesh
+        mesh.setIndices(indices);
+        if (mesh.isVerticesDataPresent(BABYLON.VertexBuffer.NormalKind)) {
+            mesh.updateVerticesData(BABYLON.VertexBuffer.NormalKind, normals, true);
+        } else {
+            mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, normals, true);
+        }
+
+        // Optionnel: si le mesh paraît « à l’envers », vérifier le culling
+        // mesh.material && (mesh.material.backFaceCulling = true);
     }
 }

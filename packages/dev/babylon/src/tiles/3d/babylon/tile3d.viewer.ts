@@ -6,10 +6,9 @@ import { IUriResolver, Tile3dStreamEngine } from "../engine";
 import { CanvasDisplay } from "core/map";
 import { Tile3dScene } from "./tile3d.scene";
 import { Tile3dContentLoader } from "./tile3d.loader";
-import { SetupCameraStateSync } from "./tile3d.camera.sync";
 import { ITileset } from "../interfaces";
 import { EventState } from "core/events";
-import { SetupAdaptiveUniversalCamera } from "./tile3d.camera.nav";
+import { SetupCameraStateSync } from "./tile3d.camera.sync";
 
 export interface IViewerOptions {
     uri: string;
@@ -26,7 +25,7 @@ export class Map3DViewer {
     readonly _canvas: Nullable<HTMLCanvasElement> = null;
     readonly _engine: Nullable<BABYLON.Engine> = null;
     readonly _scene: Nullable<BABYLON.Scene> = null;
-    _camera: Nullable<BABYLON.UniversalCamera> = null;
+    _camera: Nullable<BABYLON.Camera> = null;
 
     _display: Nullable<IDisplay> = null;
     _streamEngine: Nullable<Tile3dStreamEngine> = null;
@@ -63,6 +62,7 @@ export class Map3DViewer {
                     if (options.resolver) {
                         this._streamEngine.options.uriResolver = options.resolver;
                     }
+                    this._streamEngine.options.maxScreenSpaceError = 512;
                     this._loader = new Tile3dContentLoader(this._scene);
                     this._map = new Tile3dScene(options.names?.map ?? "map", this._scene);
                     this._streamEngine.linkTo(this._loader);
@@ -89,7 +89,9 @@ export class Map3DViewer {
             this._camera = this._createCamera(this._getCameraName(), eventData, scene, this._options);
             if (this._camera) {
                 this._cameraSync = SetupCameraStateSync(this._camera, scene, this.onCameraStateUpdate.bind(this));
-                this._cameraNav = SetupAdaptiveUniversalCamera(this._camera, scene);
+                //this._cameraNav = SetupAdaptiveUniversalCamera(this._camera, scene);
+                // This attaches the camera to the canvas
+                this._camera.attachControl(this._canvas, true);
             }
 
             engine.runRenderLoop(() => {
@@ -131,9 +133,10 @@ export class Map3DViewer {
         return scene;
     }
 
-    protected _createCamera(name: string, root: ITileset, scene: BABYLON.Scene, options: IViewerOptions): Nullable<BABYLON.UniversalCamera> {
+    protected _createCamera(name: string, root: ITileset, scene: BABYLON.Scene, options: IViewerOptions): Nullable<BABYLON.Camera> {
         if (this._scene && this._display && root.root.boundingVolume.box) {
-            return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
+            return this._setupArcRotateCamera(root.root.boundingVolume.box, this._scene);
+            //return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
         }
         return null;
     }
@@ -144,6 +147,25 @@ export class Map3DViewer {
 
     protected _getCameraName(): string {
         return this._options.names?.camera ?? "camera";
+    }
+
+    protected _setupArcRotateCamera(box: number[], scene: BABYLON.Scene, margin = 1.5): BABYLON.Camera {
+        const C = new BABYLON.Vector3(box[0], box[1], box[2]);
+        const U = new BABYLON.Vector3(box[3], box[4], box[5]);
+        const V = new BABYLON.Vector3(box[6], box[7], box[8]);
+        const W = new BABYLON.Vector3(box[9], box[10], box[11]);
+
+        const u = U.length();
+        const v = V.length();
+        const w = W.length();
+        const size = Math.hypot(u, v, w) * margin;
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, size, C, scene);
+
+        // Set camera near and far planes based on bounding size
+        camera.minZ = 0;
+        camera.maxZ = size * 2;
+        return camera;
     }
 
     protected _setupUniversalCameraForTilesetRoot(

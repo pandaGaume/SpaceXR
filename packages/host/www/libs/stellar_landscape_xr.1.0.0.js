@@ -26584,6 +26584,9 @@ class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transform
                         for (const m of container.rootNodes) {
                             m.parent = this;
                         }
+                        for (const mat of container.materials) {
+                            mat.useLogarithmicDepth = true;
+                        }
                         container.addAllToScene();
                     }
                     finally {
@@ -26615,6 +26618,26 @@ class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transform
             }
         }
     }
+    _flipWindingAndRecomputeNormals(mesh) {
+        const positions = mesh.getVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind);
+        const indices = mesh.getIndices();
+        if (!positions || !indices)
+            return;
+        for (let i = 0; i < indices.length; i += 3) {
+            const tmp = indices[i + 1];
+            indices[i + 1] = indices[i + 2];
+            indices[i + 2] = tmp;
+        }
+        const normals = new Array(positions.length);
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData.ComputeNormals(positions, indices, normals);
+        mesh.setIndices(indices);
+        if (mesh.isVerticesDataPresent(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.NormalKind)) {
+            mesh.updateVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.NormalKind, normals, true);
+        }
+        else {
+            mesh.setVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.NormalKind, normals, true);
+        }
+    }
 }
 //# sourceMappingURL=tile3d.scene.js.map
 
@@ -26637,8 +26660,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/babylon/tile3d.scene.js");
 /* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
 /* harmony import */ var _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
-/* harmony import */ var _tile3d_camera_nav__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile3d.camera.nav */ "./dist/tiles/3d/babylon/tile3d.camera.nav.js");
-
 
 
 
@@ -26682,6 +26703,7 @@ class Map3DViewer {
                     if (options.resolver) {
                         this._streamEngine.options.uriResolver = options.resolver;
                     }
+                    this._streamEngine.options.maxScreenSpaceError = 512;
                     this._loader = new _tile3d_loader__WEBPACK_IMPORTED_MODULE_3__.Tile3dContentLoader(this._scene);
                     this._map = new _tile3d_scene__WEBPACK_IMPORTED_MODULE_4__.Tile3dScene(options.names?.map ?? "map", this._scene);
                     this._streamEngine.linkTo(this._loader);
@@ -26700,7 +26722,7 @@ class Map3DViewer {
             this._camera = this._createCamera(this._getCameraName(), eventData, scene, this._options);
             if (this._camera) {
                 this._cameraSync = (0,_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_5__.SetupCameraStateSync)(this._camera, scene, this.onCameraStateUpdate.bind(this));
-                this._cameraNav = (0,_tile3d_camera_nav__WEBPACK_IMPORTED_MODULE_6__.SetupAdaptiveUniversalCamera)(this._camera, scene);
+                this._camera.attachControl(this._canvas, true);
             }
             engine.runRenderLoop(() => {
                 scene.render();
@@ -26736,7 +26758,7 @@ class Map3DViewer {
     }
     _createCamera(name, root, scene, options) {
         if (this._scene && this._display && root.root.boundingVolume.box) {
-            return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
+            return this._setupArcRotateCamera(root.root.boundingVolume.box, this._scene);
         }
         return null;
     }
@@ -26745,6 +26767,20 @@ class Map3DViewer {
     }
     _getCameraName() {
         return this._options.names?.camera ?? "camera";
+    }
+    _setupArcRotateCamera(box, scene, margin = 1.5) {
+        const C = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[0], box[1], box[2]);
+        const U = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[3], box[4], box[5]);
+        const V = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[6], box[7], box[8]);
+        const W = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[9], box[10], box[11]);
+        const u = U.length();
+        const v = V.length();
+        const w = W.length();
+        const size = Math.hypot(u, v, w) * margin;
+        const camera = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, size, C, scene);
+        camera.minZ = 0;
+        camera.maxZ = size * 2;
+        return camera;
     }
     _setupUniversalCameraForTilesetRoot(box, scene, canvasWidth, canvasHeight, margin = 1.5, camera) {
         const C = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[0], box[1], box[2]);
@@ -26761,7 +26797,7 @@ class Map3DViewer {
         const dH = u / Math.tan(hFov / 2);
         let d = margin * Math.max(dV, dH);
         d = Math.max(d, w * 1.05);
-        const forward = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, 1);
+        const forward = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, -1);
         const up = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Up();
         const position = C.subtract(forward.scale(d));
         if (camera) {

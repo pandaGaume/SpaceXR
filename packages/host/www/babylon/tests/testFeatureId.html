@@ -69,21 +69,13 @@
                 const root = window.getUrlParameter("root") ?? "gltf";
                 const file = window.getUrlParameter("file");
                 if (file) {
-                    BABYLON.SceneLoader.ImportMesh(null, `../../models/tests/${root}/`, file, scene, function (meshes) {
-                        for (const m of meshes) {
-                            if (m.structuralMetadata) {
-                                console.log("metadata found");
-                            }
-                            if (m.featureIds) {
-                                console.log("feature ids found");
-                            }
-                            if (m.thinInstanceIds) {
-                                console.log("instance ids found");
-                            }
-                        }
+                    BABYLON.SceneLoader.LoadAssetContainerAsync(`../../models/tests/${root}/`, file, scene).then((container) => {
+                        container.addAllToScene();
+
+                        const meshes = container.meshes;
 
                         // Compute the bounding box of all loaded meshes, but the root.
-                        const boundingInfo = BABYLON.Mesh.MinMax(meshes.toSpliced(0, 1));
+                        const boundingInfo = BABYLON.Mesh.MinMax(meshes.toSpliced());
 
                         const center = boundingInfo.min.add(boundingInfo.max).scale(0.5);
                         const size = boundingInfo.max.subtract(boundingInfo.min).length() * 0.8;
@@ -100,6 +92,38 @@
                         camera.maxZ = size * 2;
                     });
                 }
+
+                /*                    BABYLON.SceneLoader.ImportMesh(null, `../../models/tests/${root}/`, file, scene, function (meshes) {
+                                    for (const m of meshes) {
+                                        if (m.structuralMetadata) {
+                                            console.log("metadata found");
+                                        }
+                                        if (m.featureIds) {
+                                            console.log("feature ids found");
+                                        }
+                                        if (m.thinInstanceIds) {
+                                            console.log("instance ids found");
+                                        }
+                                    }
+
+                                    // Compute the bounding box of all loaded meshes, but the root.
+                                    const boundingInfo = BABYLON.Mesh.MinMax(meshes.toSpliced(0, 1));
+
+                                    const center = boundingInfo.min.add(boundingInfo.max).scale(0.5);
+                                    const size = boundingInfo.max.subtract(boundingInfo.min).length() * 0.8;
+
+                                    // Position the camera at a good distance ( 0.8 * box diagonal size)
+                                    camera.position.copyFromFloats(center.x + size, center.y + size, center.z + size);
+
+                                    // Ensure camera is looking at the target
+                                    const target = new BABYLON.Vector3(center.x, center.y, center.z);
+                                    camera.setTarget(target);
+
+                                    // Set camera near and far planes based on bounding size
+                                    camera.minZ = size;
+                                    camera.maxZ = size * 2;
+                                });
+                            }*/
 
                 // ui related
                 // Get the computed background color of the body

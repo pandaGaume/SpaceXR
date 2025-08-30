@@ -66,11 +66,6 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                             // instead of that, we might want to scale the scene at reasonable size...
                             mat.useLogarithmicDepth = true;
                         }
-                        /*for (const m of container.meshes) {
-                            if (m instanceof BABYLON.Mesh) {
-                                this._flipWindingAndRecomputeNormals(m);
-                            }
-                        }*/
                         container.addAllToScene();
                     } finally {
                         c.isLoadedInScene = true;

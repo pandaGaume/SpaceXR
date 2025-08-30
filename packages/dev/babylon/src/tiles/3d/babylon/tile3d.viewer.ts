@@ -165,6 +165,10 @@ export class Map3DViewer {
         // Set camera near and far planes based on bounding size
         camera.minZ = 0;
         camera.maxZ = size * 2;
+
+        // Adaptive zoom by percentage of radius
+        camera.wheelDeltaPercentage = 0.005; // .5% par cran
+        camera.wheelPrecision = 0; // ignore l'ancien mode
         return camera;
     }
 

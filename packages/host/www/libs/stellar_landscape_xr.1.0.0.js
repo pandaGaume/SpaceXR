@@ -26780,6 +26780,8 @@ class Map3DViewer {
         const camera = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, size, C, scene);
         camera.minZ = 0;
         camera.maxZ = size * 2;
+        camera.wheelDeltaPercentage = 0.005;
+        camera.wheelPrecision = 0;
         return camera;
     }
     _setupUniversalCameraForTilesetRoot(box, scene, canvasWidth, canvasHeight, margin = 1.5, camera) {

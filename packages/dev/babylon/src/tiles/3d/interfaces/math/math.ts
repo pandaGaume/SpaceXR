@@ -1,14 +1,17 @@
 import { ICartesian3, IPlane } from "core/geometry";
 import { BoxType, SphereType } from "../boundingVolume";
 
-export type Mat44Type = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number] | Float32Array;
+export type Mat44Type =
+    | [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number]
+    | Float32Array
+    | Float64Array;
 
 // Column-major identity
-export const IDENTITY44: Mat44Type = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+export const IDENTITY44: Mat44Type = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
 // A for (xb, yb, zb) = (-x, +z, -y)
-export const A: Mat44Type = new Float32Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
-export const Ainv: Mat44Type = new Float32Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+export const A: Mat44Type = new Float64Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+export const Ainv: Mat44Type = new Float64Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
 
 /// <summary>
 /// Why `M_bjs = A * M_ecef * A^{-1}` ?  (change of basis)

@@ -6,7 +6,7 @@ import { WebClient } from "core/io";
 import { PathUtils } from "core/utils";
 
 import { GetTile3dContents, ITile3d, ITileset } from "../interfaces";
-import { Distance, IDENTITY44, IsBoxInFrustum, IsPointInBox, IsPointInSphere, IsSphereInFrustum, Mat44Type, MulMat44 } from "../interfaces/math/math";
+import { Distance, IDENTITY44, IsBoxInFrustum, IsPointInBox, IsPointInSphere, IsSphereInFrustum, Mat44MultToRef, Mat44Type } from "../interfaces/math/math";
 import { TilesetClient } from "./tile3d.stream.client";
 import { Observable } from "core/events";
 
@@ -554,7 +554,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             root.parent = tileset;
             let parentTransform = from?.worldTransform ?? IDENTITY44;
             let localTransform = root.transform ?? IDENTITY44;
-            root.worldTransform = MulMat44(parentTransform, localTransform);
+            root.worldTransform = new Float64Array(16);
+            Mat44MultToRef(parentTransform, localTransform, root.worldTransform);
             queue.enqueue(root);
 
             const baseUrl = PathUtils.GetBaseUrl(path);
@@ -604,7 +605,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                         for (const subtile of t.children) {
                             subtile.parent = t;
                             localTransform = subtile.transform ?? IDENTITY44;
-                            subtile.worldTransform = MulMat44(parentTransform, localTransform);
+                            subtile.worldTransform = new Float64Array(16);
+                            Mat44MultToRef(parentTransform, localTransform, subtile.worldTransform);
                             subtile.depth = t.depth + 1;
                             queue.enqueue(subtile);
                         }

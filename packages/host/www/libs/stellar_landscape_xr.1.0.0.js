@@ -27271,7 +27271,8 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.SourceB
             root.parent = tileset;
             let parentTransform = from?.worldTransform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IDENTITY44;
             let localTransform = root.transform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IDENTITY44;
-            root.worldTransform = (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.MulMat44)(parentTransform, localTransform);
+            root.worldTransform = new Float64Array(16);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.Mat44MultToRef)(parentTransform, localTransform, root.worldTransform);
             queue.enqueue(root);
             const baseUrl = core_utils__WEBPACK_IMPORTED_MODULE_4__.PathUtils.GetBaseUrl(path);
             do {
@@ -27308,7 +27309,8 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.SourceB
                         for (const subtile of t.children) {
                             subtile.parent = t;
                             localTransform = subtile.transform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IDENTITY44;
-                            subtile.worldTransform = (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.MulMat44)(parentTransform, localTransform);
+                            subtile.worldTransform = new Float64Array(16);
+                            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.Mat44MultToRef)(parentTransform, localTransform, subtile.worldTransform);
                             subtile.depth = t.depth + 1;
                             queue.enqueue(subtile);
                         }
@@ -27442,26 +27444,37 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (/* binding */ A),
+/* harmony export */   Ainv: () => (/* binding */ Ainv),
 /* harmony export */   Distance: () => (/* binding */ Distance),
 /* harmony export */   DistanceFromPlane: () => (/* binding */ DistanceFromPlane),
 /* harmony export */   Dot3: () => (/* binding */ Dot3),
+/* harmony export */   EcefBoxToBjsInPlace: () => (/* binding */ EcefBoxToBjsInPlace),
+/* harmony export */   EcefMatToBjsToRef: () => (/* binding */ EcefMatToBjsToRef),
+/* harmony export */   EcefSphereToBjsInPlace: () => (/* binding */ EcefSphereToBjsInPlace),
+/* harmony export */   EcefToBjs: () => (/* binding */ EcefToBjs),
+/* harmony export */   EcefToBjsBufferInPlace: () => (/* binding */ EcefToBjsBufferInPlace),
+/* harmony export */   EcefToBjsInPlace: () => (/* binding */ EcefToBjsInPlace),
 /* harmony export */   IDENTITY44: () => (/* binding */ IDENTITY44),
 /* harmony export */   IsBoxInFrustum: () => (/* binding */ IsBoxInFrustum),
 /* harmony export */   IsPointInBox: () => (/* binding */ IsPointInBox),
 /* harmony export */   IsPointInSphere: () => (/* binding */ IsPointInSphere),
 /* harmony export */   IsSphereInFrustum: () => (/* binding */ IsSphereInFrustum),
-/* harmony export */   LHBoxToRHInPlace: () => (/* binding */ LHBoxToRHInPlace),
-/* harmony export */   LHSphereToRHInPlace: () => (/* binding */ LHSphereToRHInPlace),
-/* harmony export */   MulMat44: () => (/* binding */ MulMat44),
-/* harmony export */   RHBoxToLHInPlace: () => (/* binding */ RHBoxToLHInPlace),
-/* harmony export */   RHSphereToLHInPlace: () => (/* binding */ RHSphereToLHInPlace),
+/* harmony export */   Mat44MultToRef: () => (/* binding */ Mat44MultToRef),
 /* harmony export */   TransformBoxToRef: () => (/* binding */ TransformBoxToRef),
 /* harmony export */   TransformPointToRef: () => (/* binding */ TransformPointToRef),
 /* harmony export */   TransformSphereToRef: () => (/* binding */ TransformSphereToRef),
 /* harmony export */   TransformVectorToRef: () => (/* binding */ TransformVectorToRef)
 /* harmony export */ });
-const IDENTITY44 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-function MulMat44(a, b) {
+const IDENTITY44 = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+const A = new Float64Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+const Ainv = new Float64Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+function EcefMatToBjsToRef(M_ecef, ref) {
+    const tmp = new Float32Array(16);
+    Mat44MultToRef(A, M_ecef, tmp);
+    Mat44MultToRef(tmp, Ainv, ref);
+}
+function Mat44MultToRef(a, b, ref) {
     const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
     const a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
     const a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
@@ -27470,25 +27483,22 @@ function MulMat44(a, b) {
     const b10 = b[4], b11 = b[5], b12 = b[6], b13 = b[7];
     const b20 = b[8], b21 = b[9], b22 = b[10], b23 = b[11];
     const b30 = b[12], b31 = b[13], b32 = b[14], b33 = b[15];
-    const out = [
-        a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03,
-        a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03,
-        a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03,
-        a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03,
-        a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13,
-        a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13,
-        a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13,
-        a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13,
-        a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23,
-        a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23,
-        a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23,
-        a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23,
-        a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33,
-        a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33,
-        a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33,
-        a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33,
-    ];
-    return out;
+    ref[0] = a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03;
+    ref[1] = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03;
+    ref[2] = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03;
+    ref[3] = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03;
+    ref[4] = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13;
+    ref[5] = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13;
+    ref[6] = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13;
+    ref[7] = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13;
+    ref[8] = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23;
+    ref[9] = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23;
+    ref[10] = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23;
+    ref[11] = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23;
+    ref[12] = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33;
+    ref[13] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
+    ref[14] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;
+    ref[15] = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33;
 }
 function Dot3(n, coordinates, offset) {
     return n.x * coordinates[offset] + n.y * coordinates[offset + 1] + n.z * coordinates[offset + 2];
@@ -27538,9 +27548,7 @@ function TransformSphereToRef(sphere, m, out) {
 function IsBoxInFrustum(box, frustum) {
     const CENTER = 0, EX = 3, EY = 6, EZ = 9;
     for (const pl of frustum) {
-        const r = Math.abs(Dot3(pl.normal, box, EX)) +
-            Math.abs(Dot3(pl.normal, box, EY)) +
-            Math.abs(Dot3(pl.normal, box, EZ));
+        const r = Math.abs(Dot3(pl.normal, box, EX)) + Math.abs(Dot3(pl.normal, box, EY)) + Math.abs(Dot3(pl.normal, box, EZ));
         const s = DistanceFromPlane(pl, box, CENTER);
         if (s < -r)
             return false;
@@ -27580,31 +27588,35 @@ function IsPointInBox(box, point) {
     const lenZ2 = ezx * ezx + ezy * ezy + ezz * ezz;
     return projX * projX <= lenX2 && projY * projY <= lenY2 && projZ * projZ <= lenZ2;
 }
-function RHBoxToLHInPlace(box) {
-    const cx = box[0], cy = box[1], cz = box[2];
-    const ux = box[3], uy = box[4], uz = box[5];
-    const vx = box[6], vy = box[7], vz = box[8];
-    const wx = box[9], wy = box[10], wz = box[11];
-    box[0] = cx;
-    box[1] = cy;
-    box[2] = -cz;
-    box[3] = ux;
-    box[4] = uy;
-    box[5] = -uz;
-    box[6] = vx;
-    box[7] = vy;
-    box[8] = -vz;
-    box[9] = -wx;
-    box[10] = -wy;
-    box[11] = wz;
-    return box;
+function EcefToBjsInPlace(v, offset = 0, stride = 1) {
+    v[offset] = -v[offset];
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
 }
-function RHSphereToLHInPlace(s) {
-    s[2] = -s[2];
-    return s;
+function EcefToBjs(x, y, z) {
+    return [-x, z, -y];
 }
-const LHBoxToRHInPlace = RHBoxToLHInPlace;
-const LHSphereToRHInPlace = RHSphereToLHInPlace;
+function EcefToBjsBufferInPlace(data, startOffset = 0, stride = 1, count) {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToBjsInPlace(data, off, stride);
+    }
+}
+function EcefBoxToBjsInPlace(box) {
+    EcefToBjsInPlace(box, 0, 1);
+    EcefToBjsInPlace(box, 3, 1);
+    EcefToBjsInPlace(box, 6, 1);
+    EcefToBjsInPlace(box, 9, 1);
+}
+function EcefSphereToBjsInPlace(v) {
+    EcefToBjsInPlace(v);
+}
 //# sourceMappingURL=math.js.map
 
 /***/ }),

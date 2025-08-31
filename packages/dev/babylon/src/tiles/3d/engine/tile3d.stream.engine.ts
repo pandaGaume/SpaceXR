@@ -6,19 +6,7 @@ import { WebClient } from "core/io";
 import { PathUtils } from "core/utils";
 
 import { GetTile3dContents, ITile3d, ITileset } from "../interfaces";
-import {
-    Distance,
-    IDENTITY44,
-    IsBoxInFrustum,
-    IsPointInBox,
-    IsPointInSphere,
-    IsSphereInFrustum,
-    Mat44Type,
-    MulMat44,
-    RHBoxToLHInPlace,
-    RHSphereToLHInPlace,
-    TransformPointToRef,
-} from "../interfaces/math/math";
+import { Distance, IDENTITY44, IsBoxInFrustum, IsPointInBox, IsPointInSphere, IsSphereInFrustum, Mat44Type, MulMat44 } from "../interfaces/math/math";
 import { TilesetClient } from "./tile3d.stream.client";
 import { Observable } from "core/events";
 
@@ -150,6 +138,7 @@ export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay 
     rootReadyObservable: Observable<ITileset>;
     options: ITile3dStreamEngineOptions;
     setContext(state?: ICameraViewState): void;
+    retreiveMetasAsync(): Promise<any>;
 }
 
 /**
@@ -230,6 +219,81 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     public setContext(state?: ICameraViewState): void {
         this._pendingState = state ?? null;
         void this._process();
+    }
+
+    public async retreiveMetasAsync(): Promise<any> {
+        if (!this._root) {
+            if (!this._rootPromise) {
+                let uri = this._resolveUri(this._uri);
+                this._rootPromise = this._loadSetAsync(uri);
+            }
+            const result = await this._rootPromise;
+            if (result) {
+                const ts = result[1];
+                if (ts) {
+                    this._root = ts;
+                    this._initializeSet(this._uri, ts); // this is where we link the nodes and set the worldTransform
+                    this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+                }
+            }
+            // fallthrough: after load, we’ll consume latest pending state
+        }
+        if (this._root) {
+            return await this._prepareMetaForTileSetAsync(this._root);
+        }
+    }
+
+    protected async _prepareMetaForTileSetAsync(ts: ITileset, meta?: any): Promise<any> {
+        meta = meta ?? {};
+        const t3d = ts.root;
+        if (t3d) {
+            return await this._prepareMetaForTile3dAsync(t3d, meta);
+        }
+        return meta;
+    }
+
+    protected async _prepareMetaForTile3dAsync(tile: ITile3d, meta?: any): Promise<any> {
+        meta.depths = meta.depths ?? [];
+        if (tile.depth > meta.depths.length) {
+            const m: any = { depth: tile.depth, error: tile.geometricError };
+            const contents = GetTile3dContents(tile);
+            if (contents) {
+                m.uri = contents[0].uri;
+            }
+            meta.depths.push(m);
+        }
+
+        if (tile.children) {
+            return await this._prepareMetaForTile3dAsync(tile.children[0], meta);
+        }
+
+        // check the content for external ref
+        const content = GetTile3dContents(tile);
+        if (content) {
+            const jsonRefs: string[] = [];
+            for (const c of content) {
+                if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
+                    // here we are sure it's absolute because it has been initialized after the loading
+                    jsonRefs.push(c.uri);
+                }
+            }
+            if (jsonRefs.length) {
+                // we might think of doing this async...
+                const loaded = await Promise.all(jsonRefs.map((absolutePath) => this._loadSetAsync(absolutePath)));
+                // Filter out null values and tell TypeScript that the result contains only ITileset.
+                const result = loaded.filter((entry): entry is [string, ITileset] => !!entry[1]);
+                if (result && result.length) {
+                    tile.externalSets = result;
+                    for (var res of result) {
+                        const path = res[0];
+                        const item = res[1];
+                        this._initializeSet(path, item, tile); // itialize the set using the current tile as reference.
+                        return await this._prepareMetaForTileSetAsync(item, meta);
+                    }
+                }
+            }
+        }
+        return meta;
     }
 
     protected async _process(): Promise<void> {
@@ -440,14 +504,17 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         }
         let src: number[] = (bv.box ? bv.box : bv.sphere) as number[];
         if (src) {
+            // ECEF to Babylonjs (Left Handed)
+            ref[offset++] = -src[0];
+            ref[offset++] = src[2];
+            ref[offset] = -src[1];
             if (tile.worldTransform) {
-                TransformPointToRef(tile.worldTransform, src, 0, ref, offset);
-            } else {
-                ref[offset++] = src[0];
-                ref[offset++] = src[1];
-                ref[offset] = src[2];
+                //TransformPointToRef(tile.worldTransform, src, 0, ref, offset);
             }
             return true;
+        } else {
+            if (bv.region) {
+            }
         }
         return false;
     }
@@ -507,14 +574,14 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                             break;
                         }
                     }
-                    if (t.boundingVolume) {
+                    /*if (t.boundingVolume) {
                         if (t.boundingVolume.box) {
                             t.boundingVolume.box = RHBoxToLHInPlace(t.boundingVolume.box);
                         }
                         if (t.boundingVolume.sphere) {
                             t.boundingVolume.sphere = RHSphereToLHInPlace(t.boundingVolume.sphere);
                         }
-                    }
+                    }*/
                     // compute and set absolute paths for every content uri.
                     if (t.content) {
                         // transfert everything to contents..

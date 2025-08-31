@@ -1,0 +1,66 @@
+{
+    "depths": [
+        { "depth": 1, "error": 1e100 },
+        { "depth": 2, "error": 1e100 },
+        {
+            "depth": 3,
+            "error": 525957.5361033019,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2yAn68wZXLHL49GiB1LDNIZTuobHHRJgG51UHsIJPo4-l9vk9KbECG-uEyVfbVBLVaifUh9VUAaAcigeeSbAd-RR23OozOKqL6lR3_qz2RqgOK-7tfGBSsL.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 4,
+            "error": 262978.76805165096,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2xItuJNowSgfP354goUYQroaJ5VpL-ZxNdHCwnwdT_gtqVtLlmlqJo4FKGx9zB63cUrV2krOo7cAgi3JEgi6oFuYQ5a-A10IYOu0o1hYhxE46KWypdOFXdW.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 5,
+            "error": 131489.38402582548,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2yAzMVpcjmJczBgNzISRKPdz-ioaIDZoy9qtZW-S_qipEfGrr1-HfsbVK4kXiJppkc-3Z3GV9GQjH8D2tf4flG7YEru_HfvbY1C7rWowTqqMQrSYhFbYp14AquBjg.json?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 6,
+            "error": 131489.38402582548,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2wIHfDESgiCVsCVqv8YhJS-ytYE3lhPkFdQK03k9m8bSAeaHNKygRKrj-5vSiZqn-quDI2Gt7MDJVVh6GQqT6_tvYksXBH2bLTf047p7ZSzikwwNIwb-SjDUncoow.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 7,
+            "error": 65744.69201291274,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2xVLLjJf6uaSovW_0ZLxyXaIlbQCN9Aun8XlV6Wj5EmLaN3jAmHqa4vKrguflOVuadue6SYezLDE8S80kcoFyRoi6spIFMR_cK3272LrT0xQPLnpm-Ul4FYlGow-w.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 8,
+            "error": 32872.34600645637,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2z1MuJ-HzhLaO6tbxN2ywOESPekzxPTKHaQ8dAm6CaPLj-Pkx4WpoI1DBBCFYks3ols82-WeF0YvftD_PwCb_84g8czx_NwbHthlqpaf1K2BI8idygB54NbHeeP8A.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 9,
+            "error": 16436.173003228185,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2xxAqnjALgiBfV1L8NcVtrYeFKnmGDRaO-kb3fOGW6t-Su-LixoE7jg0gAZbcC-PbSIf6h859q8_ai4QRmoXUL4lSmWuRkKlG5FgDrepMzdKepBMdbrNhgXPSm32FsBQ1M.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 10,
+            "error": 8218.086501614092,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2zMZ_1KPvE1U9ksNLuCnmI_cUJltWelnLtl7Q1t9reWvltV95UjNm7Vwnqp8NaJviNWLcn2wcqj9WWfsQxIEwpM-uX1MX6gaBFuHbLNJ5W6JF_FsMkXmK5Pcuqte9Zwx4A.json?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 11,
+            "error": 8218.086501614092,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2w9QlKdgY5HZQufKvb88w6i10aE4Cn3e-XL6CEt6T99ydooPHISsBQU2-6gwqYQUgkoOIMSYeGd8TQz8MTKWJj5PUpMxn_LhT1PZ2zLR0cebm1VpkUhP3c6xQAzZP540Gw.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 12,
+            "error": 4109.043250807046,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2wO_LjafYiu7M1J1Uvr8BbBWZaZSipkJ4_jj8zXcJ2AxpFrp8xVQBlNT2L6-1Pa5hlKIgcCDV8KORLoVGC0zYRFT5qXGPJE_QqxIgPPbEAdfVPfPwhkR-xxEMbESfDPFs8.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 13,
+            "error": 2054.521625403523,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2zOxd-kIFBP6tKYHvPo2Paieu__ySbPbSRDHKJejTLsBXSFkUkKA4Z7qnncFvRlAzluS7E-d6Ce1SAOc-ucDAchiSjQf8TQN34001RLnSYgd4Q3rETYTKJZqqZ82CGQxySvHvXK.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        },
+        {
+            "depth": 14,
+            "error": 1027.2608127017616,
+            "uri": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2yN3j482rnghJuns8zDf4VUlj7JbtUAGLXjPJ09v0Uxkwtx1Zbv7X2w5JhICfPb1Rfu0WS_TAf496NeJOYVcLeXOT8yqG_qUyIuyDNG9XAXpnwmj8irXxZ4KT2Q9efbPfLvYjhQ.glb?session=CN700eD2wu2WdhCC3M3FBg&key=AIzaSyAcehTKk0jZfFoOQZ3bKfpus28cc6DfEVg"
+        }
+    ]
+}

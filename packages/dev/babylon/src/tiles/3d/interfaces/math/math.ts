@@ -1,17 +1,74 @@
 import { ICartesian3, IPlane } from "core/geometry";
 import { BoxType, SphereType } from "../boundingVolume";
 
-export type Mat44Type = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
-export type Point3 = [number, number, number];
+export type Mat44Type = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number] | Float32Array;
 
 // Column-major identity
-export const IDENTITY44: Mat44Type = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+export const IDENTITY44: Mat44Type = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
-/**
- * Column-major mat4 multiply: out = a * b
- * (column vectors convention; v' = a * b * v)
- */
-export function MulMat44(a: Mat44Type, b: Mat44Type): Mat44Type {
+// A for (xb, yb, zb) = (-x, +z, -y)
+export const A: Mat44Type = new Float32Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+export const Ainv: Mat44Type = new Float32Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+
+/// <summary>
+/// Why `M_bjs = A * M_ecef * A^{-1}` ?  (change of basis)
+///
+/// We have two coordinate systems:
+///   - ECEF (right-handed), where tiles/boxes/transforms are defined
+///   - Babylon (left-handed, Y up), where we render
+///
+/// Let A be the fixed 4×4 matrix that converts a vector from ECEF to Babylon:
+///     p_bjs = A * p_ecef
+/// Then its inverse converts back:
+///     p_ecef = A^{-1} * p_bjs
+///
+/// If a child point transforms in ECEF as:
+///     p_parent_ecef = M_ecef * p_child_ecef
+/// substitute p_ecef = A^{-1} * p_bjs:
+///     p_parent_bjs = A * p_parent_ecef
+///                   = A * M_ecef * p_child_ecef
+///                   = A * M_ecef * (A^{-1} * p_child_bjs)
+///                   = (A * M_ecef * A^{-1}) * p_child_bjs
+///
+/// Therefore the same hierarchical relation holds in Babylon with:
+///     M_bjs = A * M_ecef * A^{-1}
+///
+/// Reading order (column-vector convention): right → left.
+/// So when applied to a point, A^{-1} acts first (go to ECEF),
+/// then M_ecef, then A (return to Babylon).
+///
+/// With your axis mapping (xb, yb, zb) = (-x, +z, -y), the matrices are:
+///   A =
+///     [ -1  0  0  0
+///       0   0  1  0
+///       0  -1  0  0
+///       0   0  0  1 ]
+///   A^{-1} = Aᵀ =
+///     [ -1  0   0  0
+///       0   0  -1  0
+///       0   1   0  0
+///       0   0   0  1 ]
+///
+/// Practical split for affine M = [R t; 0 1]:
+///   R_bjs = A * R_ecef * A^{-1}
+///   t_bjs = A * t_ecef      // just transform the translation as a vector
+///
+/// Sanity checks:
+///   - Pure translation t maps to the same component-wise mapping as points.
+///   - Rotation about ECEF-Z becomes rotation about Babylon-Y (since z→y).
+/// </summary>
+export function EcefMatToBjsToRef(M_ecef: Mat44Type, ref: Mat44Type): void {
+    const tmp = new Float32Array(16);
+    Mat44MultToRef(A, M_ecef, tmp); // t = A * M
+    Mat44MultToRef(tmp, Ainv, ref); // M_bjs = t * Ainv
+}
+
+/// <summary>
+/// Column-major 4x4 multiply: ref = a * b
+/// Safe if ref === a or ref === b.
+/// </summary>
+export function Mat44MultToRef(a: Mat44Type, b: Mat44Type, ref: Mat44Type): void {
+    // cache inputs (handles aliasing)
     const a00 = a[0],
         a01 = a[1],
         a02 = a[2],
@@ -46,33 +103,29 @@ export function MulMat44(a: Mat44Type, b: Mat44Type): Mat44Type {
         b32 = b[14],
         b33 = b[15];
 
-    const out: Mat44Type = [
-        // column 0
-        a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03,
-        a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03,
-        a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03,
-        a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03,
+    // column 0
+    ref[0] = a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03;
+    ref[1] = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03;
+    ref[2] = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03;
+    ref[3] = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03;
 
-        // column 1
-        a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13,
-        a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13,
-        a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13,
-        a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13,
+    // column 1
+    ref[4] = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13;
+    ref[5] = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13;
+    ref[6] = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13;
+    ref[7] = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13;
 
-        // column 2
-        a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23,
-        a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23,
-        a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23,
-        a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23,
+    // column 2
+    ref[8] = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23;
+    ref[9] = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23;
+    ref[10] = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23;
+    ref[11] = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23;
 
-        // column 3 (translation column)
-        a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33,
-        a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33,
-        a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33,
-        a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33,
-    ];
-
-    return out;
+    // column 3 (translation column)
+    ref[12] = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33;
+    ref[13] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
+    ref[14] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;
+    ref[15] = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33;
 }
 
 /**
@@ -112,30 +165,32 @@ export function DistanceFromPlane(p: IPlane, coordinates: number[], offset: numb
  * @returns        Euclidean distance between the two points
  */
 export function Distance(pointA: ICartesian3, pointB: number[], offset: number): number {
-    const dx = pointA.x - pointB[offset];
-    const dy = pointA.y - pointB[offset + 1];
-    const dz = pointA.z - pointB[offset + 2];
+    const dx = pointA.x - pointB[offset++];
+    const dy = pointA.y - pointB[offset++];
+    const dz = pointA.z - pointB[offset];
     return Math.hypot(dx, dy, dz);
 }
 
 /** Transforms a point by a column-major 4x4 affine matrix (includes translation). */
-export function TransformPointToRef(transform: Mat44Type, v: number[], offset: number, ref: number[], refOffset: number): void {
-    const x = transform[0] * v[offset] + transform[4] * v[offset + 1] + transform[8] * v[offset + 2] + transform[12];
-    const y = transform[1] * v[offset] + transform[5] * v[offset + 1] + transform[9] * v[offset + 2] + transform[13];
-    const z = transform[2] * v[offset] + transform[6] * v[offset + 1] + transform[10] * v[offset + 2] + transform[14];
-    ref[refOffset] = x;
-    ref[refOffset + 1] = y;
-    ref[refOffset + 2] = z;
+export function TransformPointToRef(transform: Mat44Type, v: number[] | Float32Array, offset: number, ref: number[], refOffset: number): void {
+    const a = v[offset++];
+    const b = v[offset++];
+    const c = v[offset];
+
+    ref[refOffset++] = transform[0] * a + transform[4] * b + transform[8] * c + transform[12];
+    ref[refOffset++] = transform[1] * a + transform[5] * b + transform[9] * c + transform[13];
+    ref[refOffset] = transform[2] * a + transform[6] * b + transform[10] * c + transform[14];
 }
 
 /** Transforms a direction/half-axis by the linear (3x3) part only (no translation). */
-export function TransformVectorToRef(m: Mat44Type, v: number[], offset: number, ref: number[], refOffset: number): void {
-    const x = m[0] * v[offset] + m[4] * v[offset + 1] + m[8] * v[offset + 2];
-    const y = m[1] * v[offset] + m[5] * v[offset + 1] + m[9] * v[offset + 2];
-    const z = m[2] * v[offset] + m[6] * v[offset + 1] + m[10] * v[offset + 2];
-    ref[refOffset] = x;
-    ref[refOffset + 1] = y;
-    ref[refOffset + 2] = z;
+export function TransformVectorToRef(m: Mat44Type, v: number[] | Float32Array, offset: number, ref: number[] | Float32Array, refOffset: number): void {
+    const a = v[offset++];
+    const b = v[offset++];
+    const c = v[offset];
+
+    ref[refOffset++] = m[0] * a + m[4] * b + m[8] * c;
+    ref[refOffset++] = m[1] * a + m[5] * b + m[9] * c;
+    ref[refOffset] = m[2] * a + m[6] * b + m[10] * c;
 }
 
 /**
@@ -148,12 +203,12 @@ export function TransformVectorToRef(m: Mat44Type, v: number[], offset: number, 
  */
 export function TransformBoxToRef(box: BoxType, m: Mat44Type, out: BoxType): void {
     // center (uses full affine: rotate/scale + translate)
-    TransformPointToRef(m, box as unknown as number[], 0, out, 0);
+    TransformPointToRef(m, box, 0, out, 0);
 
     // half-axes (use only linear part: rotate/scale/shear, no translation)
-    TransformVectorToRef(m, box as unknown as number[], 3, out, 3);
-    TransformVectorToRef(m, box as unknown as number[], 6, out, 6);
-    TransformVectorToRef(m, box as unknown as number[], 9, out, 9);
+    TransformVectorToRef(m, box, 3, out, 3);
+    TransformVectorToRef(m, box, 6, out, 6);
+    TransformVectorToRef(m, box, 9, out, 9);
 }
 
 /**
@@ -167,7 +222,7 @@ export function TransformBoxToRef(box: BoxType, m: Mat44Type, out: BoxType): voi
  */
 export function TransformSphereToRef(sphere: SphereType, m: Mat44Type, out: SphereType): void {
     // Transform center (includes translation)
-    TransformPointToRef(m, sphere as unknown as number[], 0, out, 0);
+    TransformPointToRef(m, sphere, 0, out, 0);
 
     // Compute conservative scale factor = max column length of the upper-left 3x3
     const c0x = m[0],
@@ -206,13 +261,10 @@ export function IsBoxInFrustum(box: BoxType, frustum: IPlane[]): boolean {
 
     for (const pl of frustum) {
         // Project OBB half-axes onto plane normal to get projected radius
-        const r =
-            Math.abs(Dot3(pl.normal, box as unknown as number[], EX)) +
-            Math.abs(Dot3(pl.normal, box as unknown as number[], EY)) +
-            Math.abs(Dot3(pl.normal, box as unknown as number[], EZ));
+        const r = Math.abs(Dot3(pl.normal, box, EX)) + Math.abs(Dot3(pl.normal, box, EY)) + Math.abs(Dot3(pl.normal, box, EZ));
 
         // Signed distance of box center to plane
-        const s = DistanceFromPlane(pl, box as unknown as number[], CENTER);
+        const s = DistanceFromPlane(pl, box, CENTER);
 
         // If the center is farther behind the plane than its projected radius,
         // the box is entirely outside this plane -> outside the frustum
@@ -232,7 +284,7 @@ export function IsSphereInFrustum(sphere: SphereType, frustum: IPlane[]): boolea
     const r = sphere[3];
 
     for (const pl of frustum) {
-        const s = DistanceFromPlane(pl, sphere as unknown as number[], CENTER);
+        const s = DistanceFromPlane(pl, sphere, CENTER);
 
         // If the sphere center is farther behind the plane than its radius,
         // the sphere is completely outside this plane → outside frustum
@@ -302,47 +354,63 @@ export function IsPointInBox(box: BoxType, point: ICartesian3): boolean {
     return projX * projX <= lenX2 && projY * projY <= lenY2 && projZ * projZ <= lenZ2;
 }
 
-/** Convert a 3D Tiles OBB from Right-Handed (ECEF/glTF) to Babylon Left-Handed. */
-export function RHBoxToLHInPlace(box: BoxType): BoxType {
-    const cx = box[0],
-        cy = box[1],
-        cz = box[2];
-    const ux = box[3],
-        uy = box[4],
-        uz = box[5];
-    const vx = box[6],
-        vy = box[7],
-        vz = box[8];
-    const wx = box[9],
-        wy = box[10],
-        wz = box[11];
+/// <summary>
+/// In-place ECEF → Babylon (LH, Y up) for a single vec3 stored in a strided array.
+/// Mapping: (xb, yb, zb) = (-x, +z, -y)
+/// </summary>
+export function EcefToBjsInPlace(v: number[] | Float32Array, offset = 0, stride = 1): void {
+    // x' = -x
+    v[offset] = -v[offset];
 
-    // center
-    box[0] = cx;
-    box[1] = cy;
-    box[2] = -cz;
-    // U
-    box[3] = ux;
-    box[4] = uy;
-    box[5] = -uz;
-    // V
-    box[6] = vx;
-    box[7] = vy;
-    box[8] = -vz;
-    // W
-    box[9] = -wx;
-    box[10] = -wy;
-    box[11] = wz;
+    // swap/sign for y' and z'  (y' =  z,  z' = -y)
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
 
-    return box;
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
 }
 
-/** Also handy for spheres. */
-export function RHSphereToLHInPlace(s: SphereType): SphereType {
-    s[2] = -s[2];
-    return s;
+/// <summary>
+/// Non-in-place version returning a tuple [x', y', z'].
+/// </summary>
+export function EcefToBjs(x: number, y: number, z: number): [number, number, number] {
+    // (-x, +z, -y)
+    return [-x, z, -y];
 }
 
-/** Convert back LH→RH (same transformation, since R⁻¹ = R). */
-export const LHBoxToRHInPlace = RHBoxToLHInPlace;
-export const LHSphereToRHInPlace = RHSphereToLHInPlace;
+/// <summary>
+/// In-place transform of N consecutive vec3 in a buffer (with stride).
+/// If count is omitted, it is inferred from length.
+/// </summary>
+export function EcefToBjsBufferInPlace(data: number[] | Float32Array, startOffset = 0, stride = 1, count?: number): void {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToBjsInPlace(data, off, stride);
+    }
+}
+
+/// <summary>
+/// 3D Tiles boundingVolume.box (12 numbers) ECEF → Babylon (LH, Y up).
+/// Applies the same mapping to center and the 3 half-axes.
+/// Orientation fix is intentionally omitted (not needed for your frustum checks).
+/// </summary>
+export function EcefBoxToBjsInPlace(box: number[] | Float32Array): void {
+    // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
+    // convert each triplet in place
+    EcefToBjsInPlace(box, 0, 1); // C
+    EcefToBjsInPlace(box, 3, 1); // U
+    EcefToBjsInPlace(box, 6, 1); // V
+    EcefToBjsInPlace(box, 9, 1); // W
+}
+
+/// <summary>
+/// In-place ECEF → Babylon (LH, Y up) for a 3D Tiles sphere [cx,cy,cz,r].
+/// Mapping: (xb, yb, zb) = (-x, +z, -y). Radius unchanged.
+/// </summary>
+export function EcefSphereToBjsInPlace(v: number[] | Float32Array): void {
+    EcefToBjsInPlace(v);
+}

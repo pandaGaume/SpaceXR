@@ -9,6 +9,7 @@ import { Tile3dContentLoader } from "./tile3d.loader";
 import { ITileset } from "../interfaces";
 import { EventState } from "core/events";
 import { SetupCameraStateSync } from "./tile3d.camera.sync";
+import { GoogleTile3dErrorFn } from "../vendors";
 
 export interface IViewerOptions {
     uri: string;
@@ -62,13 +63,14 @@ export class Map3DViewer {
                     if (options.resolver) {
                         this._streamEngine.options.uriResolver = options.resolver;
                     }
-                    this._streamEngine.options.maxScreenSpaceError = 512;
+                    this._streamEngine.options.maxScreenSpaceErrorFn = GoogleTile3dErrorFn;
                     this._loader = new Tile3dContentLoader(this._scene);
                     this._map = new Tile3dScene(options.names?.map ?? "map", this._scene);
+                    //this._map.scaling = new BABYLON.Vector3(-1, 1, -1);
                     this._streamEngine.linkTo(this._loader);
                     this._loader.linkTo(this._map);
-                    this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
-                    this._streamEngine.setContext(); // start the root loading.
+                    //this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
+                    // this._streamEngine.setContext(); // start the root loading.
 
                     /*this._scene.useRightHandedSystem = true;
                     BABYLON.SceneLoader.OnPluginActivatedObservable.add((p) => {
@@ -76,7 +78,10 @@ export class Map3DViewer {
                             (p as any).useRightHandedSystem = true; // glTF loader matches scene
                         }
                     });*/
-                    this._scene.debugLayer.show();
+                    // this._scene.debugLayer.show();
+                    this._streamEngine.retreiveMetasAsync().then((m) => {
+                        console.log(`Meta = ${JSON.stringify(m)}`);
+                    });
                 }
             }
         }
@@ -149,7 +154,7 @@ export class Map3DViewer {
         return this._options.names?.camera ?? "camera";
     }
 
-    protected _setupArcRotateCamera(box: number[], scene: BABYLON.Scene, margin = 1.5): BABYLON.Camera {
+    protected _setupArcRotateCamera(box: number[], scene: BABYLON.Scene, margin = 2): BABYLON.Camera {
         const C = new BABYLON.Vector3(box[0], box[1], box[2]);
         const U = new BABYLON.Vector3(box[3], box[4], box[5]);
         const V = new BABYLON.Vector3(box[6], box[7], box[8]);
@@ -158,17 +163,18 @@ export class Map3DViewer {
         const u = U.length();
         const v = V.length();
         const w = W.length();
-        const size = Math.hypot(u, v, w) * margin;
+        const size = Math.hypot(u, v, w);
 
-        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, size, C, scene);
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI / 2, size * margin, C, scene);
 
         // Set camera near and far planes based on bounding size
         camera.minZ = 0;
         camera.maxZ = size * 2;
 
         // Adaptive zoom by percentage of radius
-        camera.wheelDeltaPercentage = 0.005; // .5% par cran
+        camera.wheelDeltaPercentage = 0.00005;
         camera.wheelPrecision = 0; // ignore l'ancien mode
+
         return camera;
     }
 

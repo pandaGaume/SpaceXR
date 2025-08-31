@@ -65,14 +65,62 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                             // this is a trick to keep precision into the z-buffer along large dimension.
                             // instead of that, we might want to scale the scene at reasonable size...
                             mat.useLogarithmicDepth = true;
+                            //mat.wireframe = true;
                         }
                         container.addAllToScene();
+                        //const box = this._createContainerBoundingBox(container, this.getScene());
+                        //box.parent = this;
                     } finally {
                         c.isLoadedInScene = true;
                     }
                 }
             }
         }
+    }
+
+    protected _createContainerBoundingBox(container: BABYLON.AssetContainer, scene: BABYLON.Scene): BABYLON.Mesh {
+        if (container.meshes.length === 0) {
+            throw new Error("Container has no meshes");
+        }
+
+        // Init min/max avec le premier mesh
+        let min = new BABYLON.Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+        let max = new BABYLON.Vector3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+
+        for (const mesh of container.meshes) {
+            if (!mesh.getBoundingInfo) continue;
+
+            const bounding = mesh.getBoundingInfo().boundingBox;
+            const vmin = bounding.minimumWorld;
+            const vmax = bounding.maximumWorld;
+
+            min = BABYLON.Vector3.Minimize(min, vmin);
+            max = BABYLON.Vector3.Maximize(max, vmax);
+        }
+
+        // Dimensions et centre
+        const size = max.subtract(min);
+        const center = min.add(size.scale(0.5));
+
+        // Crée une box wireframe
+        const box = BABYLON.MeshBuilder.CreateBox(
+            "containerBBox",
+            {
+                width: size.x,
+                height: size.y,
+                depth: size.z,
+            },
+            scene
+        );
+
+        box.position.copyFrom(center);
+
+        const mat = new BABYLON.StandardMaterial("bboxMat", scene);
+        mat.wireframe = true;
+        mat.emissiveColor = BABYLON.Color3.Red(); // plus visible
+        box.material = mat;
+
+        return box;
     }
 
     protected _removeContents(tile: ITile3d): void {

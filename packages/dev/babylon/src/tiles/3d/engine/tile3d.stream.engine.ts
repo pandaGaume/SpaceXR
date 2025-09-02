@@ -1,14 +1,25 @@
 import { Nullable } from "core/types";
 import { ICameraViewState, IDisplay, IHasDisplay, ISourceBlock, SourceBlock } from "core/tiles";
-import { IPlane } from "core/geometry";
+import { Cartesian3, IPlane } from "core/geometry";
 import { Fifo } from "core/collections";
 import { WebClient } from "core/io";
 import { PathUtils } from "core/utils";
 
-import { GetTile3dContents, ITile3d, ITileset } from "../interfaces";
-import { Distance, IDENTITY44, IsBoxInFrustum, IsPointInBox, IsPointInSphere, IsSphereInFrustum, Mat44MultToRef, Mat44Type } from "../interfaces/math/math";
+import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, ITile3d, ITileset, SphereType } from "../interfaces";
+import {
+    EcefBoxToBjsInPlace,
+    EcefSphereToBjsInPlace,
+    IDENTITY44,
+    IsPointInBox,
+    IsPointInSphere,
+    IsSphereInFrustum,
+    IsTileSphereBeyondHorizon,
+    Mat44MultToRef,
+    Mat44Type,
+} from "../interfaces/math/math";
 import { TilesetClient } from "./tile3d.stream.client";
 import { Observable } from "core/events";
+import { Ellipsoid } from "core/geodesy";
 
 /**
  * Enumeration for the refinement strategy used when traversing the object hierarchy for rendering.
@@ -34,13 +45,6 @@ export enum Tile3dRefineType {
 export type ScreenSpaceErrorFn = (tileGeometricError: number, distanceToCamera: number, viewportHeight: number, tanfov2: number) => number;
 
 /**
- * used to test if the object is within camera view boundaries.
- */
-interface ICullable {
-    isInFrustum(frustumPlanes: IPlane[]): boolean;
-}
-
-/**
  * Computes the screen space error (SSE) for an object based on its geometric error,
  * the distance to the camera, the viewport height, and the tangent of half the field of view.
  *
@@ -50,8 +54,15 @@ interface ICullable {
  * @param tanfov2 - The tangent of half the field of view (unitless).
  * @returns The screen space error, typically in pixels.
  */
-export const ScreenSpaceError: ScreenSpaceErrorFn = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) =>
+export const DefaultScreenSpaceError: ScreenSpaceErrorFn = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) =>
     (tileGeometricError * viewportHeight) / (2 * distanceToCamera * tanfov2);
+
+/**
+ * used to test if the object is within camera view boundaries.
+ */
+interface ICullable {
+    isInFrustum(frustumPlanes: IPlane[]): boolean;
+}
 
 export interface IStreamableNode {}
 
@@ -64,6 +75,7 @@ declare module "../interfaces/tile3d" {
         worldTransform?: Mat44Type;
         refineType: Tile3dRefineType;
         depth: number;
+        worldBoundingVolume?: IBoundingVolume;
     }
 }
 
@@ -80,22 +92,10 @@ export interface IUriResolver {
 
 export type MaxScreenSpaceErrorFn = (level: number) => number;
 
-export interface ITile3dStreamEngineOptions {
+export interface ITile3dStreamEngineContentOptions {
+    ellipsoid?: Ellipsoid;
+
     uriResolver?: IUriResolver;
-
-    /**
-     * If true, the engine tests each tile’s bounding volume
-     * against the active camera frustum for visibility culling.
-     */
-    testFrustum?: boolean;
-
-    /**
-     * If true, the engine tests the camera (viewer) position
-     * against the tile’s optional viewer request volume.
-     * This determines whether the tile should be considered for loading/rendering.
-     */
-    testViewerVolume?: boolean;
-
     /**
      * The maximum allowed screen-space error (SSE), in pixels,
      * before a object should be refined (loaded at higher LOD).
@@ -103,7 +103,10 @@ export interface ITile3dStreamEngineOptions {
      */
     maxScreenSpaceError?: number;
     maxScreenSpaceErrorFn?: MaxScreenSpaceErrorFn;
+}
 
+export interface ITile3dStreamEngineOptions {
+    client?: WebClient<string, ITileset>;
     /**
      * Optional fixed hysteresis offset, in pixels, applied when coarsening LOD.
      * This avoids constant refine/coarsen flicker when SSE is near the threshold.
@@ -129,7 +132,7 @@ export interface ITile3dStreamEngineOptions {
     hysteresisPercent?: number;
 
     /**
-     * Optional function to compute the screen space error (SSE) for this object.
+     * Optional function to compute the screen space error (SSE) for this engine.
      */
     screenSpaceError?: ScreenSpaceErrorFn;
 }
@@ -137,34 +140,26 @@ export interface ITile3dStreamEngineOptions {
 export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay {
     rootReadyObservable: Observable<ITileset>;
     options: ITile3dStreamEngineOptions;
+    contentOptions: ITile3dStreamEngineContentOptions;
+    root: Nullable<ITileset>;
+    activeTiles: ITile3d[];
+    display: Nullable<IDisplay>;
     setContext(state?: ICameraViewState): void;
-    retreiveMetasAsync(): Promise<any>;
 }
 
-/**
- * Coordinate reference system for Tile3D.
- *
- * - Default: ECEF (Earth-Centered, Earth-Fixed) Cartesian coordinates
- *   with the WGS84 ellipsoid as the geodetic reference.
- *
- * - Local frames: Tilesets may specify a `transform` matrix at the root
- *   or per-tile level, allowing conversion to local systems such as ENU
- *   (East-North-Up), NED (North-East-Down), or projected systems (e.g., UTM).
- *
- * - Note: Datasets like CityGML or CAD may originate in local coordinates;
- *   the tileset JSON typically provides a root `transform` to align them
- *   with the global ECEF/WGS84 frame.
- */
 export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dStreamEngine {
-    public static DEFAULT_MAX_SCREEN_SPACE_ERROR = 64;
+    public static DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
     public static DEFAULT_HYSTERESIS_PERCENT = 0.1;
     private static readonly DEFAULT_NAV_OPTIONS: ITile3dStreamEngineOptions = {
-        maxScreenSpaceError: Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
         hysteresisPercent: Tile3dStreamEngine.DEFAULT_HYSTERESIS_PERCENT,
+    };
+    private static readonly DEFAULT_CONTENT_OPTIONS: ITile3dStreamEngineContentOptions = {
+        maxScreenSpaceError: Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
     };
 
     private readonly _uri: string;
-    private readonly _navOptions: ITile3dStreamEngineOptions;
+    private readonly _options: ITile3dStreamEngineOptions;
+    private readonly _contentOptions: ITile3dStreamEngineContentOptions;
     private readonly _tilesetClient: WebClient<string, ITileset>;
 
     private _activeTiles = new Set<ITile3d>();
@@ -183,14 +178,15 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     private _pendingState: ICameraViewState | null = null;
     private _isProcessing = false;
 
-    private _cartesianCache: number[] = [0, 0, 0, 0, 0, 0];
+    private _cartesianCache: Cartesian3[] = [Cartesian3.Zero()];
 
-    public constructor(uri: string, display: IDisplay, client?: WebClient<string, ITileset>, navOptions?: ITile3dStreamEngineOptions) {
+    public constructor(uri: string, display: IDisplay, contentOptions?: ITile3dStreamEngineContentOptions, navOptions?: ITile3dStreamEngineOptions) {
         super();
         this._uri = uri;
         this._display = display;
-        this._tilesetClient = client ?? new TilesetClient(uri);
-        this._navOptions = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
+        this._tilesetClient = navOptions?.client ?? new TilesetClient(uri);
+        this._options = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
+        this._contentOptions = contentOptions ?? Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS;
     }
 
     public get rootReadyObservable(): Observable<ITileset> {
@@ -201,14 +197,18 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     }
 
     public get options(): ITile3dStreamEngineOptions {
-        return this._navOptions;
+        return this._options;
+    }
+
+    public get contentOptions(): ITile3dStreamEngineContentOptions {
+        return this._contentOptions;
     }
 
     public get display(): Nullable<IDisplay> {
         return this._display;
     }
 
-    public get activeTiles(): readonly ITile3d[] {
+    public get activeTiles(): ITile3d[] {
         return Array.from(this._activeTiles);
     }
 
@@ -219,81 +219,6 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     public setContext(state?: ICameraViewState): void {
         this._pendingState = state ?? null;
         void this._process();
-    }
-
-    public async retreiveMetasAsync(): Promise<any> {
-        if (!this._root) {
-            if (!this._rootPromise) {
-                let uri = this._resolveUri(this._uri);
-                this._rootPromise = this._loadSetAsync(uri);
-            }
-            const result = await this._rootPromise;
-            if (result) {
-                const ts = result[1];
-                if (ts) {
-                    this._root = ts;
-                    this._initializeSet(this._uri, ts); // this is where we link the nodes and set the worldTransform
-                    this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
-                }
-            }
-            // fallthrough: after load, we’ll consume latest pending state
-        }
-        if (this._root) {
-            return await this._prepareMetaForTileSetAsync(this._root);
-        }
-    }
-
-    protected async _prepareMetaForTileSetAsync(ts: ITileset, meta?: any): Promise<any> {
-        meta = meta ?? {};
-        const t3d = ts.root;
-        if (t3d) {
-            return await this._prepareMetaForTile3dAsync(t3d, meta);
-        }
-        return meta;
-    }
-
-    protected async _prepareMetaForTile3dAsync(tile: ITile3d, meta?: any): Promise<any> {
-        meta.depths = meta.depths ?? [];
-        if (tile.depth > meta.depths.length) {
-            const m: any = { depth: tile.depth, error: tile.geometricError };
-            const contents = GetTile3dContents(tile);
-            if (contents) {
-                m.uri = contents[0].uri;
-            }
-            meta.depths.push(m);
-        }
-
-        if (tile.children) {
-            return await this._prepareMetaForTile3dAsync(tile.children[0], meta);
-        }
-
-        // check the content for external ref
-        const content = GetTile3dContents(tile);
-        if (content) {
-            const jsonRefs: string[] = [];
-            for (const c of content) {
-                if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
-                    // here we are sure it's absolute because it has been initialized after the loading
-                    jsonRefs.push(c.uri);
-                }
-            }
-            if (jsonRefs.length) {
-                // we might think of doing this async...
-                const loaded = await Promise.all(jsonRefs.map((absolutePath) => this._loadSetAsync(absolutePath)));
-                // Filter out null values and tell TypeScript that the result contains only ITileset.
-                const result = loaded.filter((entry): entry is [string, ITileset] => !!entry[1]);
-                if (result && result.length) {
-                    tile.externalSets = result;
-                    for (var res of result) {
-                        const path = res[0];
-                        const item = res[1];
-                        this._initializeSet(path, item, tile); // itialize the set using the current tile as reference.
-                        return await this._prepareMetaForTileSetAsync(item, meta);
-                    }
-                }
-            }
-        }
-        return meta;
     }
 
     protected async _process(): Promise<void> {
@@ -326,7 +251,10 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             this._pendingState = null;
 
             if (this._activeTiles.size == 0) {
-                return; // nothing to do
+                if (!this._root?.root) {
+                    return;
+                }
+                this._activeTiles.add(this._root?.root);
             }
 
             // main stream logic
@@ -341,53 +269,66 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
             // we loop over every activ tiles, while not empty. at this point we know that there is at least one activ tile.
             const toProcess = new Fifo<ITile3d>(...this.activeTiles);
+            const fn = this._options.screenSpaceError ?? DefaultScreenSpaceError;
+            let mse = this._contentOptions.maxScreenSpaceError ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+            const ellipsoid = this._contentOptions.ellipsoid ?? Ellipsoid.WGS84;
+            const planetRadius = ellipsoid.semiMajorAxis;
             do {
                 const tile = toProcess.dequeue();
                 if (!tile || tile.geometricError === undefined || tile.boundingVolume === undefined) {
                     continue;
                 }
 
+                if (!tile.worldBoundingVolume || !tile.worldBoundingVolume.sphere) {
+                    continue;
+                }
+
+                const tileCenter = this._cartesianCache[0];
+                tileCenter.resetFromArray(tile.worldBoundingVolume.sphere);
+
+                if (IsTileSphereBeyondHorizon(tile.worldBoundingVolume.sphere, state.worldPosition, planetRadius)) {
+                    if (this._activeTiles.has(tile)) {
+                        toRemove.push(tile);
+                    }
+                    continue;
+                }
+
                 // is the camera inside request volume ?
-                if (tile.viewerRequestVolume && this._navOptions.testViewerVolume) {
+                if (tile.viewerRequestVolume) {
                     if (tile.viewerRequestVolume.sphere) {
                         if (!IsPointInSphere(tile.viewerRequestVolume.sphere, state.worldPosition)) {
+                            if (this._activeTiles.has(tile)) {
+                                toRemove.push(tile);
+                            }
                             continue;
                         }
-                    } else if (tile.viewerRequestVolume.box) {
+                    }
+
+                    if (tile.viewerRequestVolume.box) {
                         if (!IsPointInBox(tile.viewerRequestVolume.box, state.worldPosition)) {
+                            if (this._activeTiles.has(tile)) {
+                                toRemove.push(tile);
+                            }
                             continue;
                         }
                     }
                 }
 
-                // is the tile viewed by the camera ??
-                if (this._navOptions.testFrustum && state.frustumPlanes) {
-                    if (tile.boundingVolume.sphere) {
-                        if (!IsSphereInFrustum(tile.boundingVolume.sphere, state.frustumPlanes)) {
-                            continue;
+                // is the tile viewed by the camera ?
+                if (state.frustumPlanes) {
+                    if (!IsSphereInFrustum(tile.worldBoundingVolume.sphere, state.frustumPlanes)) {
+                        if (this._activeTiles.has(tile)) {
+                            toRemove.push(tile);
                         }
-                    } else if (tile.boundingVolume.box) {
-                        if (!IsBoxInFrustum(tile.boundingVolume.box, state.frustumPlanes)) {
-                            continue;
-                        }
+                        continue;
                     }
                 }
 
                 // we compute the distance from the camera, using the center of the bounding volume
-                // which may be a box, a sphere or a region. For region we must know the reference system such ECEF or ENU
-                // This information is provided as an options.
-                // Default reference frame is ECEF (Earth-Centered, Earth-Fixed) with the WGS84 ellipsoid.
-                const center = this._cartesianCache;
-                if (!this._tryGetWorldCenterToRef(tile, center, 0)) {
-                    continue;
-                }
-                const distanceToCamera = Distance(state.worldPosition, center, 0);
-
-                const fn = this._navOptions.screenSpaceError ?? ScreenSpaceError;
+                const distanceToCamera = Cartesian3.Distance(state.worldPosition, tileCenter);
                 const sse = fn(tile.geometricError, distanceToCamera, this._display.resolution.height, state.tanFov2);
-                let mse = this._navOptions.maxScreenSpaceError ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
-                if (this._navOptions.maxScreenSpaceErrorFn) {
-                    mse = this._navOptions.maxScreenSpaceErrorFn(tile.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                if (this._contentOptions.maxScreenSpaceErrorFn) {
+                    mse = this._contentOptions.maxScreenSpaceErrorFn(tile.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
                 }
                 if (sse > mse) {
                     // refine.
@@ -459,7 +400,6 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                                 continue;
                             }
                         }
-
                         toAdd.push(tile);
                     }
                 }
@@ -476,6 +416,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             // const remains: ITile3d[] = Array.from(this._activeTiles);
 
             if (toAdd.length) {
+                //this._activeTiles.add(toAdd[0]);
+                //this.notifyAdded([toAdd[0]], -1, this, this);
                 for (const item of toAdd) {
                     this._activeTiles.add(item);
                 }
@@ -494,29 +436,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     }
 
     protected _resolveUri(uri: string): string {
-        return this._navOptions.uriResolver?.resolve(uri) ?? uri;
-    }
-
-    protected _tryGetWorldCenterToRef(tile: ITile3d, ref: number[], offset: number = 0): boolean {
-        const bv = tile.boundingVolume;
-        if (!bv) {
-            return false;
-        }
-        let src: number[] = (bv.box ? bv.box : bv.sphere) as number[];
-        if (src) {
-            // ECEF to Babylonjs (Left Handed)
-            ref[offset++] = -src[0];
-            ref[offset++] = src[2];
-            ref[offset] = -src[1];
-            if (tile.worldTransform) {
-                //TransformPointToRef(tile.worldTransform, src, 0, ref, offset);
-            }
-            return true;
-        } else {
-            if (bv.region) {
-            }
-        }
-        return false;
+        return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
     }
 
     protected async _loadSetAsync(uri: string): Promise<[string, Nullable<ITileset>]> {
@@ -526,7 +446,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         if (this._loadings.has(uri)) return [uri, null];
         this._loadings.add(uri);
         try {
-            const result = await this._tilesetClient.fetchAsync(uri);
+            const resolvedUri = this._contentOptions.uriResolver?.resolve(uri) ?? uri;
+            const result = await this._tilesetClient.fetchAsync(resolvedUri);
             if (result.ok && result.content) {
                 this._tileSets.set(uri, result.content);
             } else {
@@ -542,79 +463,74 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         }
     }
 
-    protected _initializeSet(path: string, tileset: ITileset, from?: ITile3d): [string, ITileset] {
+    protected _initializeSet(baseUrl: string, tileset: ITileset, from?: ITile3d): [string, ITileset] {
         // init the parents, owner
         tileset.parent = from;
-        const owner: [string, ITileset] = [path, tileset];
-        const queue = new Fifo<ITile3d>();
-        let currentDepth = from?.depth ?? 0;
         if (tileset.root) {
-            const root = tileset.root;
-            root.depth = currentDepth + 1;
-            root.parent = tileset;
-            let parentTransform = from?.worldTransform ?? IDENTITY44;
-            let localTransform = root.transform ?? IDENTITY44;
-            root.worldTransform = new Float64Array(16);
-            Mat44MultToRef(parentTransform, localTransform, root.worldTransform);
-            queue.enqueue(root);
+            this._initializeTile(baseUrl, tileset.root, from);
+        }
+        return [baseUrl, tileset];
+    }
 
-            const baseUrl = PathUtils.GetBaseUrl(path);
-            do {
-                const t = queue.dequeue();
-                if (t) {
-                    t.ownerSet = owner;
-                    const refine = t.refine ?? "REPLACE";
-                    switch (refine) {
-                        case "ADD": {
-                            t.refineType = Tile3dRefineType.add;
-                            break;
-                        }
-                        case "REPLACE":
-                        default: {
-                            t.refineType = Tile3dRefineType.replace;
-                            break;
-                        }
-                    }
-                    /*if (t.boundingVolume) {
-                        if (t.boundingVolume.box) {
-                            t.boundingVolume.box = RHBoxToLHInPlace(t.boundingVolume.box);
-                        }
-                        if (t.boundingVolume.sphere) {
-                            t.boundingVolume.sphere = RHSphereToLHInPlace(t.boundingVolume.sphere);
-                        }
-                    }*/
-                    // compute and set absolute paths for every content uri.
-                    if (t.content) {
-                        // transfert everything to contents..
-                        t.contents = t.contents ?? [];
-                        t.contents.push(t.content);
-                    }
-                    if (t.contents) {
-                        for (const c of t.contents) {
-                            let uri = PathUtils.IsRelativeUrl(c.uri) ? PathUtils.ResolveUri(baseUrl, c.uri) : c.uri;
+    protected _initializeTile(baseUrl: string, tile: ITile3d, parent?: ITile3d) {
+        tile.parent = parent;
 
-                            if (this._navOptions.uriResolver) {
-                                uri = this._navOptions.uriResolver.resolve(uri);
-                            }
-                            c.uri = uri;
-                        }
-                    }
-                    // recursively add childrens
-                    if (t.children) {
-                        parentTransform = t.worldTransform ?? IDENTITY44;
-                        for (const subtile of t.children) {
-                            subtile.parent = t;
-                            localTransform = subtile.transform ?? IDENTITY44;
-                            subtile.worldTransform = new Float64Array(16);
-                            Mat44MultToRef(parentTransform, localTransform, subtile.worldTransform);
-                            subtile.depth = t.depth + 1;
-                            queue.enqueue(subtile);
-                        }
-                    }
-                }
-            } while (!queue.isEmpty());
+        if (parent?.worldTransform || tile.transform) {
+            const parentTransform = parent?.worldTransform ?? IDENTITY44;
+            const localTransform = tile.transform ?? IDENTITY44;
+            tile.worldTransform = new Float64Array(16);
+            Mat44MultToRef(parentTransform, localTransform, tile.worldTransform);
         }
 
-        return owner;
+        tile.depth = parent !== undefined ? parent.depth + 1 : 0;
+
+        const refine = tile.refine ?? "REPLACE";
+        switch (refine) {
+            case "ADD": {
+                tile.refineType = Tile3dRefineType.add;
+                break;
+            }
+            case "REPLACE":
+            default: {
+                tile.refineType = Tile3dRefineType.replace;
+                break;
+            }
+        }
+
+        if (tile.boundingVolume) {
+            if (!tile.boundingVolume.box) {
+                if (tile.boundingVolume.region) {
+                }
+            }
+            if (tile.boundingVolume.box) {
+                if (!tile.boundingVolume.sphere) {
+                    tile.boundingVolume.sphere = CreateTileSphereFromBox(tile.boundingVolume.box);
+                }
+            }
+            tile.worldBoundingVolume = {
+                sphere: tile.boundingVolume.sphere?.slice(0, 4) as unknown as SphereType,
+                box: tile.boundingVolume.box?.slice(0, 12) as unknown as BoxType,
+            };
+            EcefBoxToBjsInPlace(tile.worldBoundingVolume.box!);
+            EcefSphereToBjsInPlace(tile.worldBoundingVolume.sphere!);
+        }
+        // compute and set absolute paths for every content uri.
+        if (tile.content) {
+            // transfert everything to contents..
+            tile.contents = tile.contents ?? [];
+            tile.contents.push(tile.content);
+        }
+
+        if (tile.contents) {
+            for (const c of tile.contents) {
+                let uri = PathUtils.IsRelativeUrl(c.uri) ? PathUtils.ResolveUri(baseUrl, c.uri) : c.uri;
+                c.uri = uri;
+            }
+        }
+        if (tile.children) {
+            for (const t of tile.children) {
+                this._initializeTile(baseUrl, t, tile);
+            }
+        }
     }
 }

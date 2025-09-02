@@ -11,9 +11,8 @@ export class Scalar {
     public static PI_2 = Math.PI / 2;
     public static PI_4 = Math.PI / 4;
 
-    public static WithinEpsilon(a: number, b: number, epsilon: number = Scalar.EPSILON) {
-        const num = a - b;
-        return -epsilon <= num && num <= epsilon;
+    public static WithinEpsilon(a: number, epsilon: number = Scalar.EPSILON) {
+        return -epsilon <= a && a <= epsilon;
     }
 
     public static Sign(value: number) {

@@ -1,11 +1,10 @@
 import { Unit } from "../math";
-import { Bounds } from "./geometry.bounds";
-import { ICartesian2, ICartesian3, ICartesian4, IPlane, RegionCode } from "./geometry.interfaces";
+import { IBounds, ICartesian2, ICartesian3, ICartesian4, IPlane, RegionCode } from "./geometry.interfaces";
 export declare class Cartesian2 implements ICartesian2 {
     x: number;
     y: number;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
-    static ComputeCode(point: ICartesian2, clipArea: Bounds): RegionCode;
+    static ComputeCode(point: ICartesian2, clipArea: IBounds): RegionCode;
     static Dot(a: ICartesian2, b: ICartesian2): number;
     static Cross(a: ICartesian2, b: ICartesian2): ICartesian2;
     static Subtract(a: ICartesian2, b: ICartesian2): ICartesian2;
@@ -22,10 +21,10 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static Dot(a: ICartesian3, b: ICartesian3): number;
     static Cross(a: ICartesian3, b: ICartesian3): ICartesian3;
     static Subtract(a: ICartesian3, b: ICartesian3): ICartesian3;
-    static Normalize(a: ICartesian3): ICartesian3;
-    static NormalizeInPlace(a: ICartesian3): ICartesian3;
+    static Normalize(a: ICartesian3, magnitude?: number): ICartesian3;
+    static NormalizeInPlace(a: ICartesian3, magnitude?: number): ICartesian3;
     static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3;
-    static NormalizeToRef(a: ICartesian3, ref: ICartesian3): ICartesian3;
+    static NormalizeToRef(a: ICartesian3, ref: ICartesian3, magnitude?: number): ICartesian3;
     static AreCoincident(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     static AreCollinear(a: ICartesian3, b: ICartesian3, c: ICartesian3, epsilon?: number): boolean;
     static IsWithinTheBounds(a: ICartesian3, b: ICartesian3, p: ICartesian3): boolean;
@@ -46,13 +45,15 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static ConvertInPlace(value: ICartesian3 | ICartesian4, from: Unit, to: Unit): ICartesian3;
     static ConvertToRef(value: ICartesian3 | ICartesian4, from: Unit, to: Unit, ref?: ICartesian3): ICartesian3;
     static Centroid(values: Array<ICartesian3> | Float32Array | Array<number>, ref?: ICartesian3): ICartesian3;
-    static Zero(): ICartesian3;
-    static One(): ICartesian3;
-    static Infinity(): ICartesian3;
-    static FromArray(array: Float32Array | Array<number>, offset?: number, stride?: number): ICartesian3;
+    static Zero(): Cartesian3;
+    static One(): Cartesian3;
+    static Infinity(): Cartesian3;
+    static FromArray(array: Float32Array | Array<number>, offset?: number, stride?: number): Cartesian3;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     constructor(x: number, y: number, z?: number);
+    reset(x: number, y: number, z?: number): void;
+    resetFromArray(src: number[], offset?: number, stride?: number): void;
     toString(): string;
 }
 export declare class Cartesian4 extends Cartesian3 implements ICartesian4 {

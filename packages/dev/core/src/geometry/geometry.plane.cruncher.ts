@@ -285,7 +285,7 @@ export class PlaneCruncher {
         return inv;
     }
 
-    private _transformPoint(point: ICartesian3, transformationMatrix: number[][]): ICartesian3 {
+    private _transformPoint(point: ICartesian3, transformationMatrix: number[][]): Cartesian3 {
         const pointHomogeneous = [point.x, point.y, point.z, 1];
         const transformedPointHomogeneous = [0, 0, 0, 0];
 
@@ -295,10 +295,10 @@ export class PlaneCruncher {
             }
         }
 
-        return {
-            x: transformedPointHomogeneous[0] / transformedPointHomogeneous[3],
-            y: transformedPointHomogeneous[1] / transformedPointHomogeneous[3],
-            z: transformedPointHomogeneous[2] / transformedPointHomogeneous[3],
-        };
+        return new Cartesian3(
+            transformedPointHomogeneous[0] / transformedPointHomogeneous[3],
+            transformedPointHomogeneous[1] / transformedPointHomogeneous[3],
+            transformedPointHomogeneous[2] / transformedPointHomogeneous[3]
+        );
     }
 }

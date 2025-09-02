@@ -33,7 +33,7 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
             // the try to load the content -> forward updated event when loaded.
             const pending: Promise<{ tile: ITile3d; content: IContent; container: BABYLON.AssetContainer } | { tile: ITile3d; content: IContent; error: unknown }>[] = [];
             const engine = eventState.currentTarget as ITile3dStreamEngine;
-            const resolver = engine?.options?.uriResolver;
+            const resolver = engine?.contentOptions?.uriResolver;
 
             for (const tile of eventData) {
                 const contents = tile.contents ?? [tile.content];

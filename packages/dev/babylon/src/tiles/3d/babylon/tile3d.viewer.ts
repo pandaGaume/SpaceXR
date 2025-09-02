@@ -61,16 +61,15 @@ export class Map3DViewer {
                     this._display = new CanvasDisplay(this._canvas);
                     this._streamEngine = new Tile3dStreamEngine(options.uri, this._display);
                     if (options.resolver) {
-                        this._streamEngine.options.uriResolver = options.resolver;
+                        this._streamEngine.contentOptions.uriResolver = options.resolver;
                     }
-                    this._streamEngine.options.maxScreenSpaceErrorFn = GoogleTile3dErrorFn;
+                    this._streamEngine.contentOptions.maxScreenSpaceErrorFn = GoogleTile3dErrorFn;
                     this._loader = new Tile3dContentLoader(this._scene);
-                    this._map = new Tile3dScene(options.names?.map ?? "map", this._scene);
-                    //this._map.scaling = new BABYLON.Vector3(-1, 1, -1);
+                    this._map = new Tile3dScene(options.names?.map ?? "map", this._scene, {});
                     this._streamEngine.linkTo(this._loader);
                     this._loader.linkTo(this._map);
-                    //this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
-                    // this._streamEngine.setContext(); // start the root loading.
+                    this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
+                    this._streamEngine.setContext(); // start the root loading.
 
                     /*this._scene.useRightHandedSystem = true;
                     BABYLON.SceneLoader.OnPluginActivatedObservable.add((p) => {
@@ -78,13 +77,17 @@ export class Map3DViewer {
                             (p as any).useRightHandedSystem = true; // glTF loader matches scene
                         }
                     });*/
-                    // this._scene.debugLayer.show();
-                    this._streamEngine.retreiveMetasAsync().then((m) => {
+
+                    /*this._streamEngine.retreiveMetasAsync().then((m) => {
                         console.log(`Meta = ${JSON.stringify(m)}`);
-                    });
+                    });*/
                 }
             }
         }
+    }
+
+    public getScene(): Nullable<BABYLON.Scene> {
+        return this._scene;
     }
 
     protected _onRootReady(eventData: ITileset, eventState: EventState): void {

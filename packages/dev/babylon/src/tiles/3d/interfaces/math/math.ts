@@ -1,5 +1,6 @@
-import { ICartesian3, IPlane } from "core/geometry";
+import { Cartesian3, ICartesian3, IPlane } from "core/geometry";
 import { BoxType, SphereType } from "../boundingVolume";
+import { Scalar } from "core/math";
 
 export type Mat44Type =
     | [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number]
@@ -9,9 +10,15 @@ export type Mat44Type =
 // Column-major identity
 export const IDENTITY44: Mat44Type = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
-// A for (xb, yb, zb) = (-x, +z, -y)
+// A for (xb, yb, zb) = (x, z, y)
 export const A: Mat44Type = new Float64Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
 export const Ainv: Mat44Type = new Float64Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+
+// +90° about X (Y-up -> Z-up), row-major
+export const R_YupToZup: Mat44Type = new Float64Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+
+// -90° about X (Z-up -> Y-up), row-major
+export const R_ZupToYup: Mat44Type = new Float64Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
 
 /// <summary>
 /// Why `M_bjs = A * M_ecef * A^{-1}` ?  (change of basis)
@@ -156,22 +163,6 @@ export function Dot3(n: ICartesian3, coordinates: number[], offset: number): num
  */
 export function DistanceFromPlane(p: IPlane, coordinates: number[], offset: number): number {
     return Dot3(p.normal, coordinates, offset) + p.d;
-}
-
-/**
- * Computes the Euclidean distance between a point (ICartesian3)
- * and another point stored in a flat number array with offset.
- *
- * @param pointA   First point as ICartesian3
- * @param pointB   Array containing the second point
- * @param offset   Start index of the second point (x at offset, y at offset+1, z at offset+2)
- * @returns        Euclidean distance between the two points
- */
-export function Distance(pointA: ICartesian3, pointB: number[], offset: number): number {
-    const dx = pointA.x - pointB[offset++];
-    const dy = pointA.y - pointB[offset++];
-    const dz = pointA.z - pointB[offset];
-    return Math.hypot(dx, dy, dz);
 }
 
 /** Transforms a point by a column-major 4x4 affine matrix (includes translation). */
@@ -361,10 +352,20 @@ export function IsPointInBox(box: BoxType, point: ICartesian3): boolean {
 /// In-place ECEF → Babylon (LH, Y up) for a single vec3 stored in a strided array.
 /// Mapping: (xb, yb, zb) = (-x, +z, -y)
 /// </summary>
-export function EcefToBjsInPlace(v: number[] | Float32Array, offset = 0, stride = 1): void {
+export function EcefToBjsInPlace(v: number[] | Float32Array | Float64Array, offset = 0, stride = 1): void {
     // x' = -x
     v[offset] = -v[offset];
 
+    // swap/sign for y' and z'  (y' =  z,  z' = -y)
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
+
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
+}
+
+export function EcefToRHInPlace(v: number[] | Float32Array | Float64Array, offset = 0, stride = 1): void {
     // swap/sign for y' and z'  (y' =  z,  z' = -y)
     const yIdx = offset + stride;
     const zIdx = yIdx + stride;
@@ -383,10 +384,17 @@ export function EcefToBjs(x: number, y: number, z: number): [number, number, num
 }
 
 /// <summary>
+/// Non-in-place version returning a tuple [x', y', z'].
+/// </summary>
+export function EcefToRH(x: number, y: number, z: number): [number, number, number] {
+    return [x, z, -y];
+}
+
+/// <summary>
 /// In-place transform of N consecutive vec3 in a buffer (with stride).
 /// If count is omitted, it is inferred from length.
 /// </summary>
-export function EcefToBjsBufferInPlace(data: number[] | Float32Array, startOffset = 0, stride = 1, count?: number): void {
+export function EcefToBjsBufferInPlace(data: number[] | Float32Array | Float64Array, startOffset = 0, stride = 1, count?: number): void {
     const step = 3 * stride;
     const maxCount = Math.floor((data.length - startOffset) / step);
     const n = Math.min(count ?? maxCount, maxCount);
@@ -396,12 +404,22 @@ export function EcefToBjsBufferInPlace(data: number[] | Float32Array, startOffse
     }
 }
 
+export function EcefToRHBufferInPlace(data: number[] | Float32Array | Float64Array, startOffset = 0, stride = 1, count?: number): void {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToRHInPlace(data, off, stride);
+    }
+}
+
 /// <summary>
 /// 3D Tiles boundingVolume.box (12 numbers) ECEF → Babylon (LH, Y up).
 /// Applies the same mapping to center and the 3 half-axes.
 /// Orientation fix is intentionally omitted (not needed for your frustum checks).
 /// </summary>
-export function EcefBoxToBjsInPlace(box: number[] | Float32Array): void {
+export function EcefBoxToBjsInPlace(box: number[] | Float32Array | Float64Array): void {
     // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
     // convert each triplet in place
     EcefToBjsInPlace(box, 0, 1); // C
@@ -410,10 +428,116 @@ export function EcefBoxToBjsInPlace(box: number[] | Float32Array): void {
     EcefToBjsInPlace(box, 9, 1); // W
 }
 
+export function EcefBoxToRHInPlace(box: number[] | Float32Array | Float64Array): void {
+    // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
+    // convert each triplet in place
+    EcefToRHInPlace(box, 0, 1); // C
+    EcefToRHInPlace(box, 3, 1); // U
+    EcefToRHInPlace(box, 6, 1); // V
+    EcefToRHInPlace(box, 9, 1); // W
+}
+
 /// <summary>
 /// In-place ECEF → Babylon (LH, Y up) for a 3D Tiles sphere [cx,cy,cz,r].
 /// Mapping: (xb, yb, zb) = (-x, +z, -y). Radius unchanged.
 /// </summary>
-export function EcefSphereToBjsInPlace(v: number[] | Float32Array): void {
+export function EcefSphereToBjsInPlace(v: number[] | Float32Array | Float64Array): void {
     EcefToBjsInPlace(v);
+}
+export function EcefSphereToRYInPlace(v: number[] | Float32Array | Float64Array): void {
+    EcefToRHInPlace(v);
+}
+
+/**
+ * Compute whether a direction to a point on the globe is beyond the geometric horizon.
+ * Uses the spherical Earth test: a point direction `v` is visible iff
+ * dot(u, v) >= R / |C|, where u = normalize(camera), v = normalize(point).
+ *
+ * This is a conservative FAST test for tiles near the surface.
+ * Returns true if the tile center is beyond horizon (i.e., can be culled).
+ *
+ * @param tileCenter  Tile center (e.g., ECEF or your LH world with Earth at origin).
+ * @param camera      Camera position in the same frame.
+ * @param planetRadius    Planet radius (meters). Earth ≈ 6_371_000.
+ * @param safetyDeg       Extra angular safety margin (deg). Positive => less popping (culls a bit later).
+ */
+export function IsTileCenterBeyondHorizon(tileCenter: ICartesian3, camera: ICartesian3, planetRadius: number, safetyDeg = 0): boolean {
+    const rCam = Cartesian3.Magnitude(camera);
+    if (rCam <= planetRadius) {
+        // On/inside planet: geometric horizon test not meaningful -> don't cull.
+        return false;
+    }
+
+    const rCenter = Cartesian3.Magnitude(tileCenter);
+    if (Scalar.WithinEpsilon(rCenter)) {
+        // Degenerate center (e.g. root at origin). Treat as visible.
+        return false;
+    }
+    // Unit vectors
+    const u = Cartesian3.Normalize(camera, rCam); // we already computed the length...
+    const v = Cartesian3.Normalize(tileCenter, rCenter);
+
+    // cos θ between camera dir and point dir
+    const cosTheta = Scalar.Clamp(Cartesian3.Dot(u, v), -1, 1);
+
+    // Quick sure-cull: strict back hemisphere
+    if (cosTheta < 0) return true;
+
+    // Horizon threshold with optional safety angle s (radians)
+    //const cosH = Scalar.Clamp(planetRadius / rCam, 0, 1);
+    if (safetyDeg === 0) {
+        //return cosTheta < cosH;
+    } else {
+        //const s = safetyDeg * Scalar.DEG2RAD;
+        //const coss = Math.cos(s);
+        //const sins = Math.sin(s);
+        //const sinH = Math.sqrt(Math.max(0, 1 - cosH * cosH));
+        //const cosHWithSafety = cosH * coss - sinH * sins; // cos(θ_h + s)
+        //return cosTheta < cosHWithSafety;
+    }
+    return false;
+}
+
+/**
+ * Robust test: a whole tile sphere (center S, radius rs) is fully beyond the horizon if
+ * (θ_s - δ) > θ_h, where:
+ *  - θ_s = angle between camera direction u and sphere center direction ŝ
+ *  - δ   = angular radius of the sphere as seen from the planet center = asin(rs / |S|)
+ *  - θ_h = horizon angle = acos(R / |C|)
+ * We cull only when the *entire* sphere is beyond the horizon (no popping).
+ *
+ * @param tileSphere      Tile bounding sphere. (e.g., ECEF or your LH world with Earth at origin)
+ * @param camera          Camera position in same frame.
+ * @param planetRadius    Planet radius.
+ * @param extraMeters     Extra radial padding (grow rs) to be conservative.
+ */
+export function IsTileSphereBeyondHorizon(tileSphere: SphereType, camera: ICartesian3, planetRadius: number, extraMeters = 0): boolean {
+    const C = camera;
+    const rCam = Cartesian3.Magnitude(C);
+    if (rCam <= planetRadius) {
+        return false;
+    }
+
+    const S = new Cartesian3(tileSphere[0], tileSphere[1], tileSphere[2]);
+    const rS = Cartesian3.Magnitude(S);
+    if (rCam <= planetRadius || Scalar.WithinEpsilon(rS)) {
+        return false;
+    }
+
+    const sphereRadius = Math.max(0, tileSphere[3] + extraMeters);
+
+    const u = Cartesian3.Normalize(C, rCam);
+    const shat = Cartesian3.Normalize(S, rS);
+
+    const cosThetaS = Scalar.Clamp(Cartesian3.Dot(u, shat), -1, 1);
+    const thetaS = Math.acos(cosThetaS);
+
+    const sinDelta = Scalar.Clamp(sphereRadius / rS, -1, 1);
+    const delta = Math.asin(sinDelta);
+
+    const cosH = Scalar.Clamp(planetRadius / rCam, -1, 1);
+    const thetaH = Math.acos(cosH);
+
+    // Fully beyond horizon?
+    return thetaS - delta > thetaH;
 }

@@ -59,7 +59,7 @@ export class UTM {
     /// <summary>
     /// Build an EPSG string like "EPSG:32631".
     /// </summary>
-    public static YoEPSGString(zone: number, hemisphere: "N" | "S"): string {
+    public static ToEPSGString(zone: number, hemisphere: "N" | "S"): string {
         return `EPSG:${this.ToEPSG(zone, hemisphere)}`;
     }
 }

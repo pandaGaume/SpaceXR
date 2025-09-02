@@ -2153,7 +2153,7 @@ class UTM {
         const epsgBase = hemisphere === "N" ? 32600 : 32700;
         return epsgBase + zone;
     }
-    static YoEPSGString(zone, hemisphere) {
+    static ToEPSGString(zone, hemisphere) {
         return `EPSG:${this.ToEPSG(zone, hemisphere)}`;
     }
 }
@@ -3538,17 +3538,17 @@ class Cartesian3 extends Cartesian2 {
     static Subtract(a, b) {
         return new Cartesian3(a.x - b.x, a.y - b.y, a.z - b.z);
     }
-    static Normalize(a) {
-        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero());
+    static Normalize(a, magnitude) {
+        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero(), magnitude);
     }
-    static NormalizeInPlace(a) {
-        return Cartesian3.NormalizeToRef(a, a);
+    static NormalizeInPlace(a, magnitude) {
+        return Cartesian3.NormalizeToRef(a, a, magnitude);
     }
     static Normal(v0, v1, v2) {
         return Cartesian3.NormalizeInPlace(Cartesian3.Cross(Cartesian3.Subtract(v1, v0), Cartesian3.Subtract(v2, v0)));
     }
-    static NormalizeToRef(a, ref) {
-        const length = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    static NormalizeToRef(a, ref, magnitude) {
+        const length = magnitude ?? Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
         ref.x = a.x / length;
         ref.y = a.y / length;
         ref.z = a.z / length;
@@ -3705,11 +3705,23 @@ class Cartesian3 extends Cartesian2 {
     }
     static Equals(a, b, epsilon) {
         epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON;
-        return _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.x, b.x, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.y, b.y, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.z, b.z, epsilon);
+        return _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.x - b.x, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.y - b.y, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.z - b.z, epsilon);
     }
     constructor(x, y, z = 0.0) {
         super(x, y);
         this.z = z;
+    }
+    reset(x, y, z = 0.0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+    resetFromArray(src, offset = 0, stride = 1) {
+        this.x = src[offset];
+        offset += stride;
+        this.y = src[offset];
+        offset += stride;
+        this.z = src[offset];
     }
     toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;
@@ -4506,11 +4518,7 @@ class PlaneCruncher {
                 transformedPointHomogeneous[i] += transformationMatrix[i][j] * pointHomogeneous[j];
             }
         }
-        return {
-            x: transformedPointHomogeneous[0] / transformedPointHomogeneous[3],
-            y: transformedPointHomogeneous[1] / transformedPointHomogeneous[3],
-            z: transformedPointHomogeneous[2] / transformedPointHomogeneous[3],
-        };
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(transformedPointHomogeneous[0] / transformedPointHomogeneous[3], transformedPointHomogeneous[1] / transformedPointHomogeneous[3], transformedPointHomogeneous[2] / transformedPointHomogeneous[3]);
     }
 }
 PlaneCruncher.DEFAULT_TOLERANCE = 0.0001;
@@ -7203,9 +7211,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Scalar: () => (/* binding */ Scalar)
 /* harmony export */ });
 class Scalar {
-    static WithinEpsilon(a, b, epsilon = Scalar.EPSILON) {
-        const num = a - b;
-        return -epsilon <= num && num <= epsilon;
+    static WithinEpsilon(a, epsilon = Scalar.EPSILON) {
+        return -epsilon <= a && a <= epsilon;
     }
     static Sign(value) {
         return value > 0 ? 1 : -1;

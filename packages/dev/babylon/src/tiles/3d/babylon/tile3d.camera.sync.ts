@@ -69,7 +69,7 @@ export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scen
                 worldRotation: rot.clone(),
                 fovY: fov,
                 tanFov2: fov > 0 ? Math.tan(fov * 0.5) : 0,
-                frustumPlanes: BABYLON.Frustum.GetPlanes(camera.getTransformationMatrix()),
+                frustumPlanes: BABYLON.Frustum.GetPlanes(scene.getTransformMatrix()),
             });
         }
 

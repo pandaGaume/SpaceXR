@@ -1,6 +1,5 @@
 import { Quantity, Scalar, Unit } from "../math";
-import { Bounds } from "./geometry.bounds";
-import { ICartesian2, ICartesian3, ICartesian4, IPlane, isCartesianArray, RegionCode } from "./geometry.interfaces";
+import { IBounds, ICartesian2, ICartesian3, ICartesian4, IPlane, isCartesianArray, RegionCode } from "./geometry.interfaces";
 
 export class Cartesian2 implements ICartesian2 {
     public static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number> {
@@ -12,7 +11,7 @@ export class Cartesian2 implements ICartesian2 {
         }
         return ref;
     }
-    public static ComputeCode(point: ICartesian2, clipArea: Bounds): RegionCode {
+    public static ComputeCode(point: ICartesian2, clipArea: IBounds): RegionCode {
         // initialized as being inside
         let code = RegionCode.INSIDE;
 
@@ -87,20 +86,20 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(a.x - b.x, a.y - b.y, a.z - b.z);
     }
 
-    public static Normalize(a: ICartesian3): ICartesian3 {
-        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero());
+    public static Normalize(a: ICartesian3, magnitude?: number): ICartesian3 {
+        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero(), magnitude);
     }
 
-    public static NormalizeInPlace(a: ICartesian3): ICartesian3 {
-        return Cartesian3.NormalizeToRef(a, a);
+    public static NormalizeInPlace(a: ICartesian3, magnitude?: number): ICartesian3 {
+        return Cartesian3.NormalizeToRef(a, a, magnitude);
     }
 
     public static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3 {
         return Cartesian3.NormalizeInPlace(Cartesian3.Cross(Cartesian3.Subtract(v1, v0), Cartesian3.Subtract(v2, v0)));
     }
 
-    public static NormalizeToRef(a: ICartesian3, ref: ICartesian3): ICartesian3 {
-        const length = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    public static NormalizeToRef(a: ICartesian3, ref: ICartesian3, magnitude?: number): ICartesian3 {
+        const length = magnitude ?? Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
         ref.x = a.x / length;
         ref.y = a.y / length;
         ref.z = a.z / length;
@@ -273,19 +272,19 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return ref;
     }
 
-    public static Zero(): ICartesian3 {
+    public static Zero(): Cartesian3 {
         return new Cartesian3(0, 0, 0);
     }
 
-    public static One(): ICartesian3 {
+    public static One(): Cartesian3 {
         return new Cartesian3(1.0, 1.0, 1.0);
     }
 
-    public static Infinity(): ICartesian3 {
+    public static Infinity(): Cartesian3 {
         return new Cartesian3(Infinity, Infinity, Infinity);
     }
 
-    public static FromArray(array: Float32Array | Array<number>, offset: number = 0, stride: number = 3): ICartesian3 {
+    public static FromArray(array: Float32Array | Array<number>, offset: number = 0, stride: number = 3): Cartesian3 {
         let i = 0;
         const x = array[offset + i];
         const y = i < stride ? array[offset + ++i] : 0;
@@ -306,11 +305,25 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
 
     public static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
         epsilon = epsilon ?? Scalar.EPSILON;
-        return Scalar.WithinEpsilon(a.x, b.x, epsilon) && Scalar.WithinEpsilon(a.y, b.y, epsilon) && Scalar.WithinEpsilon(a.z, b.z, epsilon);
+        return Scalar.WithinEpsilon(a.x - b.x, epsilon) && Scalar.WithinEpsilon(a.y - b.y, epsilon) && Scalar.WithinEpsilon(a.z - b.z, epsilon);
     }
 
     public constructor(x: number, y: number, public z: number = 0.0) {
         super(x, y);
+    }
+
+    public reset(x: number, y: number, z: number = 0.0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public resetFromArray(src: number[], offset: number = 0, stride: number = 1) {
+        this.x = src[offset];
+        offset += stride;
+        this.y = src[offset];
+        offset += stride;
+        this.z = src[offset];
     }
 
     public toString() {

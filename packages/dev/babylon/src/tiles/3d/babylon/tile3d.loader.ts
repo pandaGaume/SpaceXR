@@ -97,6 +97,7 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
 
     protected _onContainerFailed(tile: ITile3d, content: IContent, error: unknown): void {
         // this is where we need to deploy a strategy depending policy.
+        console.log(`failed to load ${content.uri} cause of ${error}`);
     }
 
     protected _onAllContainersSettled(

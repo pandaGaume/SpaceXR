@@ -287,10 +287,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 tileCenter.resetFromArray(tile.worldBoundingVolume.sphere);
 
                 if (IsTileSphereBeyondHorizon(tile.worldBoundingVolume.sphere, state.worldPosition, planetRadius)) {
-                    if (this._activeTiles.has(tile)) {
-                        toRemove.push(tile);
-                    }
-                    continue;
+                    //continue;
                 }
 
                 // is the camera inside request volume ?
@@ -306,9 +303,6 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
                     if (tile.viewerRequestVolume.box) {
                         if (!IsPointInBox(tile.viewerRequestVolume.box, state.worldPosition)) {
-                            if (this._activeTiles.has(tile)) {
-                                toRemove.push(tile);
-                            }
                             continue;
                         }
                     }
@@ -317,10 +311,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 // is the tile viewed by the camera ?
                 if (state.frustumPlanes) {
                     if (!IsSphereInFrustum(tile.worldBoundingVolume.sphere, state.frustumPlanes)) {
-                        if (this._activeTiles.has(tile)) {
-                            toRemove.push(tile);
-                        }
-                        continue;
+                        //continue;
                     }
                 }
 

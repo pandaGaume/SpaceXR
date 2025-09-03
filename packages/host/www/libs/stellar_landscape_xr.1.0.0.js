@@ -26389,7 +26389,7 @@ function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
                 worldRotation: rot.clone(),
                 fovY: fov,
                 tanFov2: fov > 0 ? Math.tan(fov * 0.5) : 0,
-                frustumPlanes: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(scene.getTransformMatrix()),
+                frustumPlanes: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(camera.getTransformationMatrix()),
             });
         }
         viewDirty = false;
@@ -26518,6 +26518,7 @@ class Tile3dContentLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.Source
         this.notifyUpdated([tile], -1, this, this);
     }
     _onContainerFailed(tile, content, error) {
+        console.log(`failed to load ${content.uri} cause of ${error}`);
     }
     _onAllContainersSettled(results) { }
 }
@@ -26607,13 +26608,13 @@ class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transform
                                 this._createMeshFromTileSphere(transformedTileSphere, this.getScene());
                             }
                         }
-                        for (const m of container.transformNodes) {
-                            m.parent = this;
-                        }
                         for (const mat of container.materials) {
                             mat.useLogarithmicDepth = true;
                         }
-                        container.addAllToScene();
+                        try {
+                            container.addAllToScene();
+                        }
+                        catch { }
                     }
                     finally {
                         c.isLoadedInScene = true;
@@ -26893,7 +26894,7 @@ class Map3DViewer {
     _getCameraName() {
         return this._options.names?.camera ?? "camera";
     }
-    _setupArcRotateCamera(box, scene, margin = 2) {
+    _setupArcRotateCamera(box, scene, margin = 1.5) {
         const C = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[0], box[1], box[2]);
         const U = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[3], box[4], box[5]);
         const V = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[6], box[7], box[8]);
@@ -26904,7 +26905,7 @@ class Map3DViewer {
         const size = Math.hypot(u, v, w);
         const camera = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera("Camera", Math.PI, Math.PI / 2, size * margin, C, scene);
         camera.minZ = 0;
-        camera.maxZ = size * 2;
+        camera.maxZ = size * margin * 2;
         camera.wheelDeltaPercentage = 0.00005;
         camera.wheelPrecision = 0;
         return camera;
@@ -27158,11 +27159,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.SourceB
                 }
                 const tileCenter = this._cartesianCache[0];
                 tileCenter.resetFromArray(tile.worldBoundingVolume.sphere);
-                if ((0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IsTileCenterBeyondHorizon)(tileCenter, state.worldPosition, planetRadius)) {
-                    if (this._activeTiles.has(tile)) {
-                        toRemove.push(tile);
-                    }
-                    continue;
+                if ((0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IsTileSphereBeyondHorizon)(tile.worldBoundingVolume.sphere, state.worldPosition, planetRadius)) {
                 }
                 if (tile.viewerRequestVolume) {
                     if (tile.viewerRequestVolume.sphere) {
@@ -27175,19 +27172,12 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.SourceB
                     }
                     if (tile.viewerRequestVolume.box) {
                         if (!(0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IsPointInBox)(tile.viewerRequestVolume.box, state.worldPosition)) {
-                            if (this._activeTiles.has(tile)) {
-                                toRemove.push(tile);
-                            }
                             continue;
                         }
                     }
                 }
                 if (state.frustumPlanes) {
                     if (!(0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IsSphereInFrustum)(tile.worldBoundingVolume.sphere, state.frustumPlanes)) {
-                        if (this._activeTiles.has(tile)) {
-                            toRemove.push(tile);
-                        }
-                        continue;
                     }
                 }
                 const distanceToCamera = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Distance(state.worldPosition, tileCenter);
@@ -27376,6 +27366,7 @@ Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _utils__WEBPACK_IMPORTED_MODULE_5__.ConcurrentLoaderQueue),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.DefaultScreenSpaceError),
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
@@ -27397,6 +27388,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./babylon */ "./dist/tiles/3d/babylon/index.js");
 /* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./engine */ "./dist/tiles/3d/engine/index.js");
 /* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/3d/vendors/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils */ "./dist/tiles/3d/utils/index.js");
+
 
 
 
@@ -27805,6 +27798,192 @@ function IsTile3d(obj) {
 
 /***/ }),
 
+/***/ "./dist/tiles/3d/utils/index.js":
+/*!**************************************!*\
+  !*** ./dist/tiles/3d/utils/index.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _loader_concurrent__WEBPACK_IMPORTED_MODULE_0__.ConcurrentLoaderQueue)
+/* harmony export */ });
+/* harmony import */ var _loader_concurrent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loader.concurrent */ "./dist/tiles/3d/utils/loader.concurrent.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/utils/loader.concurrent.js":
+/*!**************************************************!*\
+  !*** ./dist/tiles/3d/utils/loader.concurrent.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ConcurrentLoaderQueue: () => (/* binding */ ConcurrentLoaderQueue)
+/* harmony export */ });
+class CancelledError extends Error {
+    constructor(message = "Cancelled") { super(message); this.name = "CancelledError"; }
+}
+class ConcurrentLoaderQueue {
+    constructor(loader, concurrency = 4) {
+        this.running = 0;
+        this.queue = [];
+        this.queuedByUrl = new Map();
+        this.inFlight = new Map();
+        this.settledListeners = new Set();
+        if (concurrency < 1)
+            throw new Error("concurrency must be >= 1");
+        this.loader = loader;
+        this.concurrency = concurrency;
+    }
+    on(event, listener) {
+        if (event !== "settled")
+            throw new Error("Only 'settled' supported");
+        this.settledListeners.add(listener);
+        return () => this.settledListeners.delete(listener);
+    }
+    setConcurrency(n) {
+        if (n < 1)
+            throw new Error("concurrency must be >= 1");
+        this.concurrency = n;
+        this.tick();
+    }
+    enqueue(url, opts) {
+        const existing = this.queuedByUrl.get(url);
+        if (existing) {
+            if (opts?.onSettled) {
+                const prev = existing.onSettled;
+                existing.onSettled = prev
+                    ? (e) => { try {
+                        prev(e);
+                    }
+                    finally {
+                        try {
+                            opts.onSettled(e);
+                        }
+                        catch { }
+                    } }
+                    : opts.onSettled;
+            }
+            return new Promise((resolve, reject) => {
+                existing.resolve = this.chainResolve(existing.resolve, resolve);
+                existing.reject = this.chainReject(existing.reject, reject);
+            });
+        }
+        let _resolve;
+        let _reject;
+        const p = new Promise((resolve, reject) => { _resolve = resolve; _reject = reject; });
+        const item = { url, resolve: _resolve, reject: _reject, onSettled: opts?.onSettled };
+        this.queue.push(item);
+        this.queuedByUrl.set(url, item);
+        this.tick();
+        return p;
+    }
+    cancelPending(url) {
+        const item = this.queuedByUrl.get(url);
+        if (!item)
+            return false;
+        const idx = this.queue.indexOf(item);
+        if (idx >= 0)
+            this.queue.splice(idx, 1);
+        this.queuedByUrl.delete(url);
+        const now = performance.now();
+        const evt = {
+            url,
+            status: "cancelled",
+            startedAt: now,
+            endedAt: now,
+            durationMs: 0,
+            reason: new CancelledError(`Cancelled pending: ${url}`),
+        };
+        item.reject(evt.reason);
+        this.emitSettled(evt, item.onSettled);
+        return true;
+    }
+    cancelAllPending() {
+        const items = [...this.queue];
+        this.queue = [];
+        this.queuedByUrl.clear();
+        for (const item of items) {
+            const now = performance.now();
+            const reason = new CancelledError(`Cancelled pending: ${item.url}`);
+            item.reject(reason);
+            this.emitSettled({ url: item.url, status: "cancelled", startedAt: now, endedAt: now, durationMs: 0, reason }, item.onSettled);
+        }
+    }
+    get pendingCount() { return this.queue.length; }
+    get runningCount() { return this.running; }
+    tick() {
+        while (this.running < this.concurrency && this.queue.length > 0) {
+            const item = this.queue.shift();
+            this.queuedByUrl.delete(item.url);
+            this.start(item);
+        }
+    }
+    start(item) {
+        const controller = new AbortController();
+        this.inFlight.set(item.url, { controller });
+        this.running++;
+        const startedAt = performance.now();
+        this.loader(item.url, controller.signal)
+            .then((value) => {
+            item.resolve(value);
+            const endedAt = performance.now();
+            this.emitSettled({ url: item.url, status: "fulfilled", value, startedAt, endedAt, durationMs: endedAt - startedAt }, item.onSettled);
+        })
+            .catch((reason) => {
+            item.reject(reason);
+            const endedAt = performance.now();
+            this.emitSettled({ url: item.url, status: "rejected", reason, startedAt, endedAt, durationMs: endedAt - startedAt }, item.onSettled);
+        })
+            .finally(() => {
+            this.inFlight.delete(item.url);
+            this.running--;
+            this.tick();
+        });
+    }
+    emitSettled(evt, perItem) {
+        try {
+            perItem?.(evt);
+        }
+        catch { }
+        for (const l of this.settledListeners) {
+            try {
+                l(evt);
+            }
+            catch { }
+        }
+    }
+    chainResolve(a, b) {
+        return (v) => { try {
+            a(v);
+        }
+        finally {
+            try {
+                b(v);
+            }
+            catch { }
+        } };
+    }
+    chainReject(a, b) {
+        return (e) => { try {
+            a(e);
+        }
+        finally {
+            try {
+                b(e);
+            }
+            catch { }
+        } };
+    }
+}
+//# sourceMappingURL=loader.concurrent.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/vendors/google/google.uri.js":
 /*!****************************************************!*\
   !*** ./dist/tiles/3d/vendors/google/google.uri.js ***!
@@ -27816,7 +27995,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GoogleTile3dErrorFn: () => (/* binding */ GoogleTile3dErrorFn),
 /* harmony export */   GoogleTiles3dUriResolver: () => (/* binding */ GoogleTiles3dUriResolver)
 /* harmony export */ });
-const __errorGoggle__ = [64, 64, 64, 32, 32, 32, 16, 16, 16, 10];
+const __errorGoggle__ = [64, 64, 64, 32];
 function GoogleTile3dErrorFn(depth) {
     const i = Math.min(depth, __errorGoggle__.length - 1);
     return __errorGoggle__[i];
@@ -27887,6 +28066,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ConcurrentLoaderQueue),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
@@ -28517,6 +28697,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition),
 /* harmony export */   Collection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Collection),
 /* harmony export */   ColorValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
+/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.ConcurrentLoaderQueue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Context2DTileMap),
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_5__.CreateQuickHull),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.CreateTileSphereFromBox),

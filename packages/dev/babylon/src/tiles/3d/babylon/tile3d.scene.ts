@@ -87,16 +87,19 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                             }
                         }
 
-                        for (const m of container.transformNodes) {
+                        /*for (const m of container.getNodes().filter((n) => n.name && n.name == "__root__")) {
                             m.parent = this;
-                        }
+                        }*/
+
                         for (const mat of container.materials) {
                             // this is a trick to keep precision into the z-buffer along large dimension.
                             // instead of that, we might want to scale the scene at reasonable size...
                             mat.useLogarithmicDepth = true;
                             //mat.wireframe = true;
                         }
-                        container.addAllToScene();
+                        try {
+                            container.addAllToScene();
+                        } catch {}
                     } finally {
                         c.isLoadedInScene = true;
                     }

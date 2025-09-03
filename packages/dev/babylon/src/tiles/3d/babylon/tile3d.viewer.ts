@@ -157,7 +157,7 @@ export class Map3DViewer {
         return this._options.names?.camera ?? "camera";
     }
 
-    protected _setupArcRotateCamera(box: number[], scene: BABYLON.Scene, margin = 2): BABYLON.Camera {
+    protected _setupArcRotateCamera(box: number[], scene: BABYLON.Scene, margin = 1.5): BABYLON.Camera {
         const C = new BABYLON.Vector3(box[0], box[1], box[2]);
         const U = new BABYLON.Vector3(box[3], box[4], box[5]);
         const V = new BABYLON.Vector3(box[6], box[7], box[8]);
@@ -172,7 +172,7 @@ export class Map3DViewer {
 
         // Set camera near and far planes based on bounding size
         camera.minZ = 0;
-        camera.maxZ = size * 2;
+        camera.maxZ = size * margin * 2;
 
         // Adaptive zoom by percentage of radius
         camera.wheelDeltaPercentage = 0.00005;

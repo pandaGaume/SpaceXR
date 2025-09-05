@@ -1,8 +1,8 @@
 import { Nullable } from "core/types";
 import { ICameraViewState, IDisplay, IHasDisplay, ISourceBlock, SourceBlock } from "core/tiles";
 import { Cartesian3, IPlane } from "core/geometry";
-import { Fifo } from "core/collections";
-import { WebClient } from "core/io";
+import { Fifo, PriorityQueue } from "core/collections";
+import { FetchResult, WebClient } from "core/io";
 import { PathUtils } from "core/utils";
 
 import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, ITile3d, ITileset, SphereType } from "../interfaces";
@@ -66,24 +66,35 @@ interface ICullable {
 
 export interface IStreamableNode {}
 
+export enum TileStatus {
+    idle,
+    selected,
+    loading,
+    ready,
+    error,
+    unkknown = 999,
+}
+
 /** Augmentation for the engine */
 declare module "../interfaces/tile3d" {
     interface ITile3d extends IStreamableNode, ICullable {
-        ownerSet?: [string, ITileset];
-        externalSets?: Array<[string, ITileset]>;
-        parent?: ITile3d | ITileset;
-        worldTransform?: Mat44Type;
-        refineType: Tile3dRefineType;
-        depth: number;
-        worldBoundingVolume?: IBoundingVolume;
+        status: TileStatus;
+        parent?: ITile3d;
+        worldTransform?: Mat44Type; // ECEF world transform
+        refineType: Tile3dRefineType; // refine type enum value
+        depth: number; // the depth into the hierarchy
+        worldBoundingVolume?: IBoundingVolume; // precomputed bounding box ECEF * world transform * ECEFToRH (x,z,-y) * RH2Babylon (-x)
+        lastVisibleFrame?: number; // frame index for visibility aging
+        lastUsedFrame?: number; // frame index for usage aging
+        sse: number; // last computed SSE, updated per frame
+        priority?: number; // request priority
+        hasExternal?: boolean; // define that the tile is pointing to external data set.
     }
 }
 
 /** Augmentation for the engine */
 declare module "../interfaces/tileset" {
-    interface ITileset extends IStreamableNode {
-        parent?: ITile3d;
-    }
+    interface ITileset extends IStreamableNode {}
 }
 
 export interface IUriResolver {
@@ -135,6 +146,35 @@ export interface ITile3dStreamEngineOptions {
      * Optional function to compute the screen space error (SSE) for this engine.
      */
     screenSpaceError?: ScreenSpaceErrorFn;
+
+    maxRefinePerFrame?: number;
+    maxCoarsenPerFrame?: number;
+}
+
+export class ActiveView {
+    cut: Set<ITile3d>; // current render leaves
+    parents: Set<ITile3d>; // ancestors of cut (for coarsen checks)
+    frontier: Set<ITile3d>; // neighbors/children probables
+    refinePQ: PriorityQueue<ITile3d>; // ordered by sse (desc)
+    coarsenPQ: PriorityQueue<ITile3d>; // ordered by sse (asc)
+
+    public constructor(data?: ITile3d | Iterable<ITile3d>) {
+        if (!data) {
+            this.cut = new Set<ITile3d>();
+        } else if (Array.isArray(data)) {
+            this.cut = new Set<ITile3d>(data);
+        } else if (typeof (data as any)[Symbol.iterator] === "function") {
+            // generic iterable (e.g. Set, Map keys, etc.)
+            this.cut = new Set<ITile3d>(data as Iterable<ITile3d>);
+        } else {
+            // single ITile3d
+            this.cut = new Set<ITile3d>([data as ITile3d]);
+        }
+        this.parents = new Set();
+        this.frontier = new Set();
+        this.refinePQ = PriorityQueue.fromMax((t) => t.sse);
+        this.coarsenPQ = PriorityQueue.fromMin((t) => t.sse);
+    }
 }
 
 export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay {
@@ -142,7 +182,7 @@ export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay 
     options: ITile3dStreamEngineOptions;
     contentOptions: ITile3dStreamEngineContentOptions;
     root: Nullable<ITileset>;
-    activeTiles: ITile3d[];
+    activeView: Nullable<ActiveView>;
     display: Nullable<IDisplay>;
     setContext(state?: ICameraViewState): void;
 }
@@ -158,20 +198,23 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     };
 
     private readonly _uri: string;
+    private readonly _baseUri: string;
     private readonly _options: ITile3dStreamEngineOptions;
     private readonly _contentOptions: ITile3dStreamEngineContentOptions;
     private readonly _tilesetClient: WebClient<string, ITileset>;
 
-    private _activeTiles = new Set<ITile3d>();
+    private _views: [Nullable<ActiveView>, Nullable<ActiveView>] = [null, null];
+
     private _root: Nullable<ITileset> = null;
-    private readonly _tileSets = new Map<string, ITileset>();
-    private readonly _loadings = new Set<string>();
+    private _visited: Array<ITile3d> = [];
+
+    private readonly _tileSets = new Map<string, Nullable<ITileset>>();
+    private readonly _loadings = new Map<string, Promise<FetchResult<string, Nullable<ITileset>>>>();
 
     // display
     private readonly _display: IDisplay;
 
     // Root loading coordination
-    private _rootPromise: Promise<[string, Nullable<ITileset>]> | null = null;
     private _rootReadyObservable?: Observable<ITileset>;
 
     // Keep latest view-state to re-process after async loads
@@ -183,6 +226,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     public constructor(uri: string, display: IDisplay, contentOptions?: ITile3dStreamEngineContentOptions, navOptions?: ITile3dStreamEngineOptions) {
         super();
         this._uri = uri;
+        this._baseUri = PathUtils.GetBaseUrl(uri);
         this._display = display;
         this._tilesetClient = navOptions?.client ?? new TilesetClient(uri);
         this._options = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
@@ -208,8 +252,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         return this._display;
     }
 
-    public get activeTiles(): ITile3d[] {
-        return Array.from(this._activeTiles);
+    public get activeView(): Nullable<ActiveView> {
+        return this._views[0];
     }
 
     public get root(): Nullable<ITileset> {
@@ -218,6 +262,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
     public setContext(state?: ICameraViewState): void {
         this._pendingState = state ?? null;
+        this._visited = [];
         void this._process();
     }
 
@@ -227,171 +272,140 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         try {
             // Ensure root tileset is loaded once
             if (!this._root) {
-                if (!this._rootPromise) {
-                    let uri = this._resolveUri(this._uri);
-                    this._rootPromise = this._loadSetAsync(uri);
-                }
-                const result = await this._rootPromise;
-                if (result) {
-                    const ts = result[1];
-                    if (ts) {
-                        this._root = ts;
-                        this._initializeSet(this._uri, ts); // this is where we link the nodes and set the worldTransform
-                        if (ts.root) {
-                            this._activeTiles.add(ts?.root);
-                        }
-                        this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+                const ts = await this._loadSetAsync(this._uri);
+                if (ts) {
+                    this._root = ts;
+                    if (ts.root) {
+                        this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
+                        this._activeTiles.add(ts.root);
                     }
+                    this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
                 }
                 // fallthrough: after load, we’ll consume latest pending state
             }
 
-            const state = this._pendingState;
-            if (!state) return; // nothing to do
+            const camState = this._pendingState;
+            if (!camState) return; // nothing to do
             this._pendingState = null;
 
-            if (this._activeTiles.size == 0) {
+            // build the current view
+            var lastView = this._views[0]; // the view from last frame
+            let currentView: ActiveView; // the one to build.
+
+            if (!lastView || (lastView.cut.size ?? 0) == 0) {
                 if (!this._root?.root) {
                     return;
                 }
-                this._activeTiles.add(this._root?.root);
+                currentView = new ActiveView(this._root?.root);
+            } else {
+                currentView = new ActiveView(lastView.cut);
             }
+
+            this._views[1] = lastView;
+            this._views[0] = currentView;
 
             // main stream logic
             // -----------------
             // the tile to add
             const toAdd: ITile3d[] = [];
             // the tile to remove
-            const toRemove: ITile3d[] = [];
-            // Used to cache the computed offset value. The offset stabilizes the refinement process
-            // by introducing a threshold before coarsening back.
-            //let offset: number | undefined = undefined;
+            const unvisibles: ITile3d[] = [];
+            const toReplace: ITile3d[] = [];
 
-            // we loop over every activ tiles, while not empty. at this point we know that there is at least one activ tile.
-            const toProcess = new Fifo<ITile3d>(...this.activeTiles);
             const fn = this._options.screenSpaceError ?? DefaultScreenSpaceError;
             let mse = this._contentOptions.maxScreenSpaceError ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
             const ellipsoid = this._contentOptions.ellipsoid ?? Ellipsoid.WGS84;
             const planetRadius = ellipsoid.semiMajorAxis;
-            do {
-                const tile = toProcess.dequeue();
-                if (!tile || tile.geometricError === undefined || tile.boundingVolume === undefined) {
+            const refineBudget: number = this._options.maxRefinePerFrame ?? Number.MAX_VALUE;
+            const coarsenBudget: number = this._options.maxCoarsenPerFrame ?? Number.MAX_VALUE;
+
+            for (const leaf of currentView.cut) {
+                this._visited.push(leaf);
+
+                if (!leaf.geometricError === undefined || !leaf.worldBoundingVolume || !leaf.worldBoundingVolume.sphere) {
+                    // we can not process the tile due to a severe lack of informations
+                    // Not supposed to happen because we iterate over already checked tiles.
                     continue;
                 }
 
-                if (!tile.worldBoundingVolume || !tile.worldBoundingVolume.sphere) {
+                if (!this._isVisible(leaf, camState, planetRadius)) {
+                    unvisibles.push(leaf);
                     continue;
                 }
 
                 const tileCenter = this._cartesianCache[0];
-                tileCenter.resetFromArray(tile.worldBoundingVolume.sphere);
-
-                if (IsTileSphereBeyondHorizon(tile.worldBoundingVolume.sphere, state.worldPosition, planetRadius)) {
-                    //continue;
-                }
-
-                // is the camera inside request volume ?
-                if (tile.viewerRequestVolume) {
-                    if (tile.viewerRequestVolume.sphere) {
-                        if (!IsPointInSphere(tile.viewerRequestVolume.sphere, state.worldPosition)) {
-                            if (this._activeTiles.has(tile)) {
-                                toRemove.push(tile);
-                            }
-                            continue;
-                        }
-                    }
-
-                    if (tile.viewerRequestVolume.box) {
-                        if (!IsPointInBox(tile.viewerRequestVolume.box, state.worldPosition)) {
-                            continue;
-                        }
-                    }
-                }
-
-                // is the tile viewed by the camera ?
-                if (state.frustumPlanes) {
-                    if (!IsSphereInFrustum(tile.worldBoundingVolume.sphere, state.frustumPlanes)) {
-                        //continue;
-                    }
-                }
+                tileCenter.resetFromArray(leaf.worldBoundingVolume.sphere);
 
                 // we compute the distance from the camera, using the center of the bounding volume
-                const distanceToCamera = Cartesian3.Distance(state.worldPosition, tileCenter);
-                const sse = fn(tile.geometricError, distanceToCamera, this._display.resolution.height, state.tanFov2);
-                if (this._contentOptions.maxScreenSpaceErrorFn) {
-                    mse = this._contentOptions.maxScreenSpaceErrorFn(tile.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                const distanceToCamera = Cartesian3.Distance(camState.worldPosition, tileCenter);
+                leaf.sse = fn(leaf.geometricError, distanceToCamera, this._display.resolution.height, camState.tanFov2);
+            }
+
+            // remove every unvisible tiles from the active view
+            if (unvisibles.length) {
+                for (const item of unvisibles) {
+                    currentView.cut.delete(item);
                 }
-                if (sse > mse) {
-                    // refine.
-                    const refine = tile.refineType;
-                    if (refine == Tile3dRefineType.replace) {
-                        // deactivate tile
-                        if (this._activeTiles.has(tile)) {
-                            toRemove.push(tile);
-                        }
-                    }
-                    if (tile.children?.length) {
-                        for (const subtile of tile.children) {
-                            toProcess.enqueue(subtile);
-                        }
-                    }
+            }
+
+            //Build refine/coarsen queues from *visible leaves only*
+            for (const leaf of currentView.cut) {
+                mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                if (leaf.sse > mse) {
+                    currentView.refinePQ.push(leaf);
+                }
+            }
+
+            while (refineBudget == 0 || currentView.refinePQ.isEmpty) {
+                const leaf = currentView.refinePQ.pop();
+                if (!leaf) {
                     continue;
                 }
-
-                /*
-                offset =
-                    offset ??
-                    this._navOptions.hysteresisOffset ??
-                    this._navOptions.maxScreenSpaceError * (this._navOptions.hysteresisPercent ?? Tile3dStreamEngine.DEFAULT_HYSTERESIS_PERCENT);
-
-                if (sse < this._navOptions.maxScreenSpaceError - offset) {
-                    // coarse
-                    const p = tile.parent;
-                    if (p && IsTile3d(p)) {
-                        if (!toProcess.includes(p)) {
-                            // enqueue only if not already in
-                            toProcess.enqueue(p);
+                switch (leaf.refineType) {
+                    case Tile3dRefineType.add: {
+                        break;
+                    }
+                    case Tile3dRefineType.replace:
+                    default: {
+                        toReplace.push(leaf);
+                        break;
+                    }
+                }
+                if (leaf.children) {
+                    for (const child of leaf.children) {
+                        if (this._isVisible(child, camState, planetRadius)) {
+                            toAdd.push(child);
                         }
                     }
-                    if (this._activeTiles.has(tile)) {
-                        toRemove.push(tile);
-                    }
-                    continue;
-                }*/
+                }
+            }
+            if (toReplace.length) {
+                for (const item of toReplace) {
+                    currentView.cut.delete(item);
+                }
+            }
 
-                // keep the tile activ or add it
-                if (!this._activeTiles.has(tile)) {
-                    // check the content for external ref
+            while (coarsenBudget == 0 || currentView.coarsenPQ.isEmpty) {}
+
+            /*                   // check the content for external ref
                     const content = GetTile3dContents(tile);
                     if (content) {
-                        const jsonRefs: string[] = [];
+                        let hasExternalOnly = true;
                         for (const c of content) {
                             if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
-                                // here we are sure it's absolute because it has been initialized after the loading
-                                jsonRefs.push(c.uri);
-                            }
-                        }
-                        if (jsonRefs.length) {
-                            // we might think of doing this async...
-                            const loaded = await Promise.all(jsonRefs.map((absolutePath) => this._loadSetAsync(absolutePath)));
-                            // Filter out null values and tell TypeScript that the result contains only ITileset.
-                            const result = loaded.filter((entry): entry is [string, ITileset] => !!entry[1]);
-                            if (result && result.length) {
-                                tile.externalSets = result;
-                                for (var ts of result) {
-                                    const path = ts[0];
-                                    const item = ts[1];
-                                    this._initializeSet(path, item, tile); // itialize the set using the current tile as reference.
-                                    if (item.root) {
-                                        toProcess.enqueue(item.root);
+                                const loaded = await this._loadSetAsync(c.uri);
+                                if (loaded) {
+                                    this._initializeSet(loaded, tile);
+                                    if (loaded.root) {
+                                        toProcess.enqueue(loaded.root);
                                     }
                                 }
                             }
-                            if (jsonRefs.length == content.length) {
-                                continue;
-                            }
+                            hasExternalOnly = false;
                         }
-                        toAdd.push(tile);
+                        if (hasExternalOnly) {
+                            continue;
+                        }
                     }
                 }
             } while (!toProcess.isEmpty());
@@ -413,7 +427,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                     this._activeTiles.add(item);
                 }
                 this.notifyAdded(toAdd, -1, this, this);
-            }
+            } */
         } finally {
             this._isProcessing = false;
 
@@ -426,44 +440,75 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         }
     }
 
-    protected _resolveUri(uri: string): string {
+    protected _isVisible(leaf: ITile3d, camState: ICameraViewState, radius: number): boolean {
+        if (!leaf.worldBoundingVolume?.sphere) {
+            return true;
+        }
+        if (IsTileSphereBeyondHorizon(leaf.worldBoundingVolume.sphere, camState.worldPosition, radius)) {
+            return false;
+        }
+        return IsSphereInFrustum(leaf.worldBoundingVolume.sphere, camState.frustumPlanes);
+    }
+
+    protected _internalResolveUri(uri: string): string {
         return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
     }
 
-    protected async _loadSetAsync(uri: string): Promise<[string, Nullable<ITileset>]> {
-        if (this._tileSets.has(uri)) {
-            return [uri, this._tileSets.get(uri) ?? null];
+    protected async _loadSetAsync(uri: string, signal?: AbortSignal): Promise<Nullable<ITileset>> {
+        // Return from cache if present
+        const cached = this._tileSets.get(uri);
+        if (cached) {
+            return cached;
         }
-        if (this._loadings.has(uri)) return [uri, null];
-        this._loadings.add(uri);
+        // In-flight de-dupe
+        let loadPromise = this._loadings.get(uri);
+        if (!loadPromise) {
+            // Single producer of the promise
+            // we resolve here to keep the credential out of cache.
+            const resolvedUri = this._internalResolveUri(uri);
+            const p = this._tilesetClient.fetchAsync(resolvedUri, { signal });
+            this._loadings.set(uri, p);
+            loadPromise = p;
+        }
         try {
-            const resolvedUri = this._contentOptions.uriResolver?.resolve(uri) ?? uri;
-            const result = await this._tilesetClient.fetchAsync(resolvedUri);
-            if (result.ok && result.content) {
-                this._tileSets.set(uri, result.content);
-            } else {
-                return [uri, null];
+            const result = await loadPromise;
+            // 4) Normalize outcomes
+            if (!result?.ok) {
+                // Policy: null for 404/no content, throw otherwise
+                if (result?.status === 404 || result?.status === 410 || result?.content == null) {
+                    return null;
+                }
+                throw new Error(`Tileset fetch failed (${result?.status ?? "unknown"}) for ${uri}`);
             }
-            return [uri, result.content];
+            // Guard against empty success
+            if (!result.content) {
+                return null;
+            }
+
+            this._tileSets.set(uri, result.content);
+            return result.content;
         } catch (err) {
             // If aborted, swallow..
-            if ((err as DOMException)?.name === "AbortError") return [uri, null];
+            if ((err as DOMException)?.name === "AbortError") {
+                return null;
+            }
             throw err;
         } finally {
-            this._loadings.delete(uri);
+            // Race-proof cleanup
+            const current = this._loadings.get(uri);
+            if (current === loadPromise) {
+                this._loadings.delete(uri);
+            }
         }
     }
 
-    protected _initializeSet(baseUrl: string, tileset: ITileset, from?: ITile3d): [string, ITileset] {
-        // init the parents, owner
-        tileset.parent = from;
+    protected _initializeSet(tileset: ITileset, from?: ITile3d): void {
         if (tileset.root) {
-            this._initializeTile(baseUrl, tileset.root, from);
+            this._initializeTile(tileset.root, from);
         }
-        return [baseUrl, tileset];
     }
 
-    protected _initializeTile(baseUrl: string, tile: ITile3d, parent?: ITile3d) {
+    protected _initializeTile(tile: ITile3d, parent?: ITile3d): void {
         tile.parent = parent;
 
         if (parent?.worldTransform || tile.transform) {
@@ -510,17 +555,22 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             // transfert everything to contents..
             tile.contents = tile.contents ?? [];
             tile.contents.push(tile.content);
+            tile.content = undefined;
         }
 
         if (tile.contents) {
+            tile.hasExternal = false;
             for (const c of tile.contents) {
-                let uri = PathUtils.IsRelativeUrl(c.uri) ? PathUtils.ResolveUri(baseUrl, c.uri) : c.uri;
+                let uri = PathUtils.IsRelativeUrl(c.uri) ? PathUtils.ResolveUri(this._baseUri, c.uri) : c.uri;
                 c.uri = uri;
+                if (c.uri && PathUtils.EndsWith(c.uri, ".json")) {
+                    tile.hasExternal = true;
+                }
             }
         }
         if (tile.children) {
             for (const t of tile.children) {
-                this._initializeTile(baseUrl, t, tile);
+                this._initializeTile(t, tile);
             }
         }
     }

@@ -273,7 +273,10 @@ export function IsBoxInFrustum(box: BoxType, frustum: IPlane[]): boolean {
  * @param sphere [cx,cy,cz,r]
  * @param frustum Array of planes with convention: inside ⇔ dot(n, x) + d >= 0
  */
-export function IsSphereInFrustum(sphere: SphereType, frustum: IPlane[]): boolean {
+export function IsSphereInFrustum(sphere: SphereType, frustum?: IPlane[]): boolean {
+    if (frustum === undefined) {
+        return true;
+    }
     const CENTER = 0; // offset for sphere center (x,y,z)
     const r = sphere[3];
 

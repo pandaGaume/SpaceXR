@@ -1,6 +1,6 @@
 import { IUriResolver } from "../../engine";
 
-const __errorGoggle__: number[] = [64, 64, 64, 32];
+const __errorGoggle__: number[] = [128, 96, 64, 64, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 16];
 export function GoogleTile3dErrorFn(depth: number): number {
     const i = Math.min(depth, __errorGoggle__.length - 1);
     return __errorGoggle__[i];

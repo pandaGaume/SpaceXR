@@ -1,22 +1,12 @@
 import { Nullable } from "core/types";
 import { ICameraViewState, IDisplay, IHasDisplay, ISourceBlock, SourceBlock } from "core/tiles";
 import { Cartesian3, IPlane } from "core/geometry";
-import { Fifo, PriorityQueue } from "core/collections";
+import { PriorityQueue } from "core/collections";
 import { FetchResult, WebClient } from "core/io";
 import { PathUtils } from "core/utils";
 
 import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, ITile3d, ITileset, SphereType } from "../interfaces";
-import {
-    EcefBoxToBjsInPlace,
-    EcefSphereToBjsInPlace,
-    IDENTITY44,
-    IsPointInBox,
-    IsPointInSphere,
-    IsSphereInFrustum,
-    IsTileSphereBeyondHorizon,
-    Mat44MultToRef,
-    Mat44Type,
-} from "../interfaces/math/math";
+import { EcefBoxToBjsInPlace, EcefSphereToBjsInPlace, IDENTITY44, IsSphereInFrustum, IsTileSphereBeyondHorizon, Mat44MultToRef, Mat44Type } from "../interfaces/math/math";
 import { TilesetClient } from "./tile3d.stream.client";
 import { Observable } from "core/events";
 import { Ellipsoid } from "core/geodesy";
@@ -272,15 +262,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         try {
             // Ensure root tileset is loaded once
             if (!this._root) {
-                const ts = await this._loadSetAsync(this._uri);
-                if (ts) {
-                    this._root = ts;
-                    if (ts.root) {
-                        this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
-                        this._activeTiles.add(ts.root);
-                    }
-                    this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
-                }
+                await this._loadRootAsync();
                 // fallthrough: after load, we’ll consume latest pending state
             }
 
@@ -309,15 +291,14 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             // the tile to add
             const toAdd: ITile3d[] = [];
             // the tile to remove
-            const unvisibles: ITile3d[] = [];
-            const toReplace: ITile3d[] = [];
+            const toRemove: ITile3d[] = [];
 
             const fn = this._options.screenSpaceError ?? DefaultScreenSpaceError;
             let mse = this._contentOptions.maxScreenSpaceError ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
             const ellipsoid = this._contentOptions.ellipsoid ?? Ellipsoid.WGS84;
             const planetRadius = ellipsoid.semiMajorAxis;
-            const refineBudget: number = this._options.maxRefinePerFrame ?? Number.MAX_VALUE;
-            const coarsenBudget: number = this._options.maxCoarsenPerFrame ?? Number.MAX_VALUE;
+            let refineBudget: number = this._options.maxRefinePerFrame ?? Number.MAX_VALUE;
+            let coarsenBudget: number = this._options.maxCoarsenPerFrame ?? Number.MAX_VALUE;
 
             for (const leaf of currentView.cut) {
                 this._visited.push(leaf);
@@ -329,7 +310,9 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 }
 
                 if (!this._isVisible(leaf, camState, planetRadius)) {
-                    unvisibles.push(leaf);
+                    if (leaf.status == TileStatus.ready) {
+                        toRemove.push(leaf);
+                    }
                     continue;
                 }
 
@@ -342,8 +325,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             }
 
             // remove every unvisible tiles from the active view
-            if (unvisibles.length) {
-                for (const item of unvisibles) {
+            if (toRemove.length) {
+                for (const item of toRemove) {
                     currentView.cut.delete(item);
                 }
             }
@@ -351,83 +334,71 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             //Build refine/coarsen queues from *visible leaves only*
             for (const leaf of currentView.cut) {
                 mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
-                if (leaf.sse > mse) {
+                if (leaf.hasExternal || leaf.sse > mse) {
                     currentView.refinePQ.push(leaf);
                 }
             }
 
-            while (refineBudget == 0 || currentView.refinePQ.isEmpty) {
-                const leaf = currentView.refinePQ.pop();
-                if (!leaf) {
-                    continue;
-                }
-                switch (leaf.refineType) {
-                    case Tile3dRefineType.add: {
-                        break;
+            if (refineBudget != 0 && !currentView.refinePQ.isEmpty()) {
+                do {
+                    const leaf = currentView.refinePQ.pop();
+                    refineBudget--;
+                    if (!leaf) {
+                        continue;
                     }
-                    case Tile3dRefineType.replace:
-                    default: {
-                        toReplace.push(leaf);
-                        break;
-                    }
-                }
-                if (leaf.children) {
-                    for (const child of leaf.children) {
-                        if (this._isVisible(child, camState, planetRadius)) {
-                            toAdd.push(child);
-                        }
-                    }
-                }
-            }
-            if (toReplace.length) {
-                for (const item of toReplace) {
-                    currentView.cut.delete(item);
-                }
-            }
-
-            while (coarsenBudget == 0 || currentView.coarsenPQ.isEmpty) {}
-
-            /*                   // check the content for external ref
-                    const content = GetTile3dContents(tile);
-                    if (content) {
-                        let hasExternalOnly = true;
-                        for (const c of content) {
-                            if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
-                                const loaded = await this._loadSetAsync(c.uri);
-                                if (loaded) {
-                                    this._initializeSet(loaded, tile);
-                                    if (loaded.root) {
-                                        toProcess.enqueue(loaded.root);
+                    if (leaf.children) {
+                        switch (leaf.refineType) {
+                            case Tile3dRefineType.add: {
+                                for (const child of leaf.children) {
+                                    if (this._isVisible(child, camState, planetRadius)) {
+                                        toAdd.push(child);
                                     }
                                 }
+                                break;
                             }
-                            hasExternalOnly = false;
+                            case Tile3dRefineType.replace:
+                            default: {
+                                if (!leaf.contents?.length || leaf.status == TileStatus.ready) {
+                                    for (const child of leaf.children) {
+                                        if (this._isVisible(child, camState, planetRadius)) {
+                                            toAdd.push(child);
+                                        }
+                                    }
+                                    toRemove.push(leaf);
+                                    currentView.cut.delete(leaf);
+                                }
+                                break;
+                            }
                         }
-                        if (hasExternalOnly) {
-                            continue;
+                    } else {
+                        // thanks to the specification, it might be a tile with external reference set
+                        if (leaf.status == TileStatus.idle) {
+                            leaf.status = TileStatus.loading;
+                            this._loadExternalSet(leaf);
                         }
                     }
-                }
-            } while (!toProcess.isEmpty());
+                } while (refineBudget != 0 && !currentView.refinePQ.isEmpty());
+            }
+
+            if (coarsenBudget != 0 && !currentView.coarsenPQ.isEmpty()) {
+                do {
+                    coarsenBudget--;
+                } while (coarsenBudget != 0 && !currentView.coarsenPQ.isEmpty());
+            }
 
             if (toRemove.length) {
-                for (const item of toRemove) {
-                    this._activeTiles.delete(item);
-                }
                 this.notifyRemoved(toRemove, -1, this, this);
             }
 
             // the remain tiles
-            // const remains: ITile3d[] = Array.from(this._activeTiles);
+            //const remains: ITile3d[] = Array.from(currentView.cut);
 
             if (toAdd.length) {
-                //this._activeTiles.add(toAdd[0]);
-                //this.notifyAdded([toAdd[0]], -1, this, this);
                 for (const item of toAdd) {
-                    this._activeTiles.add(item);
+                    currentView.cut.add(item);
                 }
                 this.notifyAdded(toAdd, -1, this, this);
-            } */
+            }
         } finally {
             this._isProcessing = false;
 
@@ -452,6 +423,46 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
     protected _internalResolveUri(uri: string): string {
         return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
+    }
+
+    protected async _loadRootAsync(): Promise<void> {
+        const ts = await this._loadSetAsync(this._uri);
+        if (ts) {
+            this._root = ts;
+            if (ts.root) {
+                this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
+                this._views[0] = new ActiveView(ts.root);
+            }
+            this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+        }
+    }
+
+    protected _loadExternalSet(tile: ITile3d): void {
+        const content = GetTile3dContents(tile);
+        if (content) {
+            for (const c of content) {
+                if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
+                    if (this._loadings.has(c.uri)) {
+                        continue;
+                    }
+                    const uri = c.uri;
+                    const engine = this;
+                    const leaf = tile;
+                    this._loadSetAsync(uri).then((ts) => {
+                        if (ts && ts.root) {
+                            engine._initializeSet(ts, leaf);
+                            if (!leaf.children) {
+                                leaf.children = [ts.root];
+                            } else {
+                                // may happen if several external set linked to one tile.
+                                leaf.children.push(ts.root);
+                            }
+                            leaf.status = TileStatus.ready;
+                        }
+                    });
+                }
+            }
+        }
     }
 
     protected async _loadSetAsync(uri: string, signal?: AbortSignal): Promise<Nullable<ITileset>> {
@@ -510,6 +521,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
     protected _initializeTile(tile: ITile3d, parent?: ITile3d): void {
         tile.parent = parent;
+        tile.status = TileStatus.idle;
 
         if (parent?.worldTransform || tile.transform) {
             const parentTransform = parent?.worldTransform ?? IDENTITY44;

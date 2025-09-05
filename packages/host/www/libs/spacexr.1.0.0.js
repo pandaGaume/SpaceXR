@@ -544,6 +544,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LinkedList: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedList),
 /* harmony export */   LinkedListNode: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedListNode),
 /* harmony export */   OrderedCollection: () => (/* reexport safe */ _orderedCollection__WEBPACK_IMPORTED_MODULE_2__.OrderedCollection),
+/* harmony export */   PriorityQueue: () => (/* reexport safe */ _priorityQueue__WEBPACK_IMPORTED_MODULE_5__.PriorityQueue),
 /* harmony export */   Stack: () => (/* reexport safe */ _stack__WEBPACK_IMPORTED_MODULE_3__.Stack)
 /* harmony export */ });
 /* harmony import */ var _collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./collection */ "./dist/collections/collection.js");
@@ -551,6 +552,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _orderedCollection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./orderedCollection */ "./dist/collections/orderedCollection.js");
 /* harmony import */ var _stack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stack */ "./dist/collections/stack.js");
 /* harmony import */ var _fifo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fifo */ "./dist/collections/fifo.js");
+/* harmony import */ var _priorityQueue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./priorityQueue */ "./dist/collections/priorityQueue.js");
+
 
 
 
@@ -794,6 +797,95 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
     }
 }
 //# sourceMappingURL=orderedCollection.js.map
+
+/***/ }),
+
+/***/ "./dist/collections/priorityQueue.js":
+/*!*******************************************!*\
+  !*** ./dist/collections/priorityQueue.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PriorityQueue: () => (/* binding */ PriorityQueue)
+/* harmony export */ });
+class PriorityQueue {
+    constructor(compare) {
+        this._heap = [];
+        this._compare = compare;
+    }
+    size() {
+        return this._heap.length;
+    }
+    isEmpty() {
+        return this._heap.length === 0;
+    }
+    peek() {
+        return this._heap[0];
+    }
+    push(value) {
+        this._heap.push(value);
+        this._siftUp(this._heap.length - 1);
+    }
+    pop() {
+        const n = this._heap.length;
+        if (n === 0)
+            return undefined;
+        this._swap(0, n - 1);
+        const out = this._heap.pop();
+        if (this._heap.length > 0)
+            this._siftDown(0);
+        return out;
+    }
+    clear() {
+        this._heap.length = 0;
+    }
+    static fromMin(key) {
+        return new PriorityQueue((a, b) => key(a) - key(b));
+    }
+    static fromMax(key) {
+        return new PriorityQueue((a, b) => key(b) - key(a));
+    }
+    _siftUp(i) {
+        while (i > 0) {
+            const p = (i - 1) >> 1;
+            if (this._compare(this._heap[i], this._heap[p]) < 0) {
+                this._swap(i, p);
+                i = p;
+            }
+            else
+                break;
+        }
+    }
+    _siftDown(i) {
+        const n = this._heap.length;
+        while (true) {
+            const l = (i << 1) + 1;
+            const r = l + 1;
+            let best = i;
+            if (l < n && this._compare(this._heap[l], this._heap[best]) < 0)
+                best = l;
+            if (r < n && this._compare(this._heap[r], this._heap[best]) < 0)
+                best = r;
+            if (best !== i) {
+                this._swap(i, best);
+                i = best;
+            }
+            else
+                break;
+        }
+    }
+    _swap(a, b) {
+        const tmp = this._heap[a];
+        this._heap[a] = this._heap[b];
+        this._heap[b] = tmp;
+    }
+    includes(item) {
+        return this._heap.includes(item);
+    }
+}
+//# sourceMappingURL=priorityQueue.js.map
 
 /***/ }),
 
@@ -15134,6 +15226,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Polyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Polyline),
 /* harmony export */   PolylineSimplifier: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PolylineSimplifier),
 /* harmony export */   Power: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Power),
+/* harmony export */   PriorityQueue: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.PriorityQueue),
 /* harmony export */   Projections: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.PythagoreanFlatEarthCalculator),

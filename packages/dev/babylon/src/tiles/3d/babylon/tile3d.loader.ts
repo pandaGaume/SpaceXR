@@ -4,7 +4,7 @@ import { IPipelineMessageType, ITargetBlock, SourceBlock } from "core/tiles";
 import { IContent, ITile3d } from "../interfaces";
 import { EventState } from "core/events";
 import { PathUtils } from "core/utils";
-import { ITile3dStreamEngine } from "../engine";
+import { ITile3dStreamEngine, TileStatus } from "../engine";
 
 /** Augmentation for the engine */
 declare module "../interfaces/content" {
@@ -36,6 +36,10 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
             const resolver = engine?.contentOptions?.uriResolver;
 
             for (const tile of eventData) {
+                if (tile.status == TileStatus.loading || tile.status == TileStatus.ready) {
+                    continue;
+                }
+
                 const contents = tile.contents ?? [tile.content];
                 if (!contents || !contents.length) {
                     continue;
@@ -53,6 +57,7 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
                     const { rootUrl, fileName } = PathUtils.SplitRootAndFile(targetUri);
                     const currentTile = tile; // capture
                     const currentContent = c;
+                    tile.status = TileStatus.loading;
                     const p = BABYLON.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined)
                         .then((container) => {
                             this._onContainerLoaded(currentTile, currentContent, container);
@@ -70,11 +75,16 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
                         const results = settled.map((s) => {
                             if (s.status === "fulfilled") {
                                 const v = s.value as { tile: ITile3d; content: IContent; container?: BABYLON.AssetContainer; error?: unknown };
-                                return v.container
-                                    ? { tile: v.tile, content: v.content, status: "fulfilled" as const, value: v.container }
-                                    : { tile: v.tile, content: v.content, status: "rejected" as const, reason: v.error };
+                                if (v.container) {
+                                    tile.status = TileStatus.ready;
+                                    return { tile: v.tile, content: v.content, status: "fulfilled" as const, value: v.container };
+                                } else {
+                                    tile.status = TileStatus.error;
+                                    return { tile: v.tile, content: v.content, status: "rejected" as const, reason: v.error };
+                                }
                             } else {
                                 // Should be rare because we catch above, but keep it robust
+                                tile.status = TileStatus.error;
                                 return { tile: undefined as unknown as ITile3d, content: undefined as unknown as IContent, status: "rejected" as const, reason: s.reason };
                             }
                         });

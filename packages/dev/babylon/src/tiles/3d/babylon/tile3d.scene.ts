@@ -87,9 +87,9 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                             }
                         }
 
-                        /*for (const m of container.getNodes().filter((n) => n.name && n.name == "__root__")) {
-                            m.parent = this;
-                        }*/
+                        for (const m of container.getNodes().filter((n) => n.parent == null)) {
+                            m.name = `tile ${tile.depth}`;
+                        }
 
                         for (const mat of container.materials) {
                             // this is a trick to keep precision into the z-buffer along large dimension.
@@ -102,6 +102,29 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
                         } catch {}
                     } finally {
                         c.isLoadedInScene = true;
+                    }
+                }
+            }
+        }
+    }
+    protected _removeContents(tile: ITile3d): void {
+        const contents = GetTile3dContents(tile);
+        if (contents) {
+            for (const c of contents) {
+                const container = c?.container;
+                if (container) {
+                    if (!c.isLoadedInScene) {
+                        continue;
+                    }
+                    try {
+                        for (const m of container.getNodes().filter((n) => n.parent == null)) {
+                            console.log(`remove ${m.name}`);
+                        }
+
+                        container.removeAllFromScene();
+                        c.container = undefined;
+                    } finally {
+                        c.isLoadedInScene = false;
                     }
                 }
             }
@@ -307,27 +330,5 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
         box.material = mat;
 
         return box;
-    }
-
-    protected _removeContents(tile: ITile3d): void {
-        const contents = GetTile3dContents(tile);
-        if (contents) {
-            for (const c of contents) {
-                const container = c?.container;
-                if (container) {
-                    if (!c.isLoadedInScene) {
-                        continue;
-                    }
-                    try {
-                        for (const m of container.rootNodes) {
-                            m.parent = null;
-                        }
-                        container.removeAllFromScene();
-                    } finally {
-                        c.isLoadedInScene = false;
-                    }
-                }
-            }
-        }
     }
 }

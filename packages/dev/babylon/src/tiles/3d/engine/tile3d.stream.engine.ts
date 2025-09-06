@@ -11,6 +11,10 @@ import { TilesetClient } from "./tile3d.stream.client";
 import { Observable } from "core/events";
 import { Ellipsoid } from "core/geodesy";
 
+export const Tile3dMinPriority: number = 0;
+export const Tile3dNormalPriority: number = 30;
+export const Tile3dMaxPriority: number = 100;
+
 /**
  * Enumeration for the refinement strategy used when traversing the object hierarchy for rendering.
  * - `add`: Children are added to the current set of rendered objects (additive refinement).
@@ -56,19 +60,19 @@ interface ICullable {
 
 export interface IStreamableNode {}
 
-export enum TileStatus {
-    idle,
-    selected,
-    loading,
-    ready,
-    error,
+export enum TileContentStatus {
+    idle, // initialized
+    pending, // queued fro loading
+    loading, // loading (ie-network operation in progress)
+    ready, // loaded, content ready
+    error, // on error after network operation
     unkknown = 999,
 }
 
 /** Augmentation for the engine */
 declare module "../interfaces/tile3d" {
     interface ITile3d extends IStreamableNode, ICullable {
-        status: TileStatus;
+        status: TileContentStatus;
         parent?: ITile3d;
         worldTransform?: Mat44Type; // ECEF world transform
         refineType: Tile3dRefineType; // refine type enum value
@@ -141,7 +145,7 @@ export interface ITile3dStreamEngineOptions {
     maxCoarsenPerFrame?: number;
 }
 
-export class ActiveView {
+export class ActiveContext {
     cut: Set<ITile3d>; // current render leaves
     parents: Set<ITile3d>; // ancestors of cut (for coarsen checks)
     frontier: Set<ITile3d>; // neighbors/children probables
@@ -172,7 +176,7 @@ export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay 
     options: ITile3dStreamEngineOptions;
     contentOptions: ITile3dStreamEngineContentOptions;
     root: Nullable<ITileset>;
-    activeView: Nullable<ActiveView>;
+    activeView: Nullable<ActiveContext>;
     display: Nullable<IDisplay>;
     setContext(state?: ICameraViewState): void;
 }
@@ -193,7 +197,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     private readonly _contentOptions: ITile3dStreamEngineContentOptions;
     private readonly _tilesetClient: WebClient<string, ITileset>;
 
-    private _views: [Nullable<ActiveView>, Nullable<ActiveView>] = [null, null];
+    private _views: [Nullable<ActiveContext>, Nullable<ActiveContext>] = [null, null];
 
     private _root: Nullable<ITileset> = null;
     private _visited: Array<ITile3d> = [];
@@ -242,7 +246,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         return this._display;
     }
 
-    public get activeView(): Nullable<ActiveView> {
+    public get activeView(): Nullable<ActiveContext> {
         return this._views[0];
     }
 
@@ -272,15 +276,15 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
             // build the current view
             var lastView = this._views[0]; // the view from last frame
-            let currentView: ActiveView; // the one to build.
+            let currentView: ActiveContext; // the one to build.
 
             if (!lastView || (lastView.cut.size ?? 0) == 0) {
                 if (!this._root?.root) {
                     return;
                 }
-                currentView = new ActiveView(this._root?.root);
+                currentView = new ActiveContext(this._root?.root);
             } else {
-                currentView = new ActiveView(lastView.cut);
+                currentView = new ActiveContext(lastView.cut);
             }
 
             this._views[1] = lastView;
@@ -310,7 +314,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 }
 
                 if (!this._isVisible(leaf, camState, planetRadius)) {
-                    if (leaf.status == TileStatus.ready) {
+                    if (leaf.status == TileContentStatus.ready) {
                         toRemove.push(leaf);
                     }
                     continue;
@@ -335,13 +339,13 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             for (const leaf of currentView.cut) {
                 mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
                 if (leaf.hasExternal || leaf.sse > mse) {
-                    currentView.refinePQ.push(leaf);
+                    currentView.refinePQ.enqueue(leaf);
                 }
             }
 
             if (refineBudget != 0 && !currentView.refinePQ.isEmpty()) {
                 do {
-                    const leaf = currentView.refinePQ.pop();
+                    const leaf = currentView.refinePQ.dequeue();
                     refineBudget--;
                     if (!leaf) {
                         continue;
@@ -358,7 +362,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                             }
                             case Tile3dRefineType.replace:
                             default: {
-                                if (!leaf.contents?.length || leaf.status == TileStatus.ready) {
+                                if (!leaf.contents?.length || leaf.status == TileContentStatus.ready) {
                                     for (const child of leaf.children) {
                                         if (this._isVisible(child, camState, planetRadius)) {
                                             toAdd.push(child);
@@ -372,8 +376,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                         }
                     } else {
                         // thanks to the specification, it might be a tile with external reference set
-                        if (leaf.status == TileStatus.idle) {
-                            leaf.status = TileStatus.loading;
+                        if (leaf.status == TileContentStatus.idle) {
+                            leaf.status = TileContentStatus.pending;
                             this._loadExternalSet(leaf);
                         }
                     }
@@ -431,7 +435,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             this._root = ts;
             if (ts.root) {
                 this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
-                this._views[0] = new ActiveView(ts.root);
+                this._views[0] = new ActiveContext(ts.root);
             }
             this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
         }
@@ -440,6 +444,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     protected _loadExternalSet(tile: ITile3d): void {
         const content = GetTile3dContents(tile);
         if (content) {
+            tile.status = TileContentStatus.loading;
             for (const c of content) {
                 if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
                     if (this._loadings.has(c.uri)) {
@@ -448,18 +453,22 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                     const uri = c.uri;
                     const engine = this;
                     const leaf = tile;
-                    this._loadSetAsync(uri).then((ts) => {
-                        if (ts && ts.root) {
-                            engine._initializeSet(ts, leaf);
-                            if (!leaf.children) {
-                                leaf.children = [ts.root];
-                            } else {
-                                // may happen if several external set linked to one tile.
-                                leaf.children.push(ts.root);
+                    this._loadSetAsync(uri)
+                        .then((ts) => {
+                            if (ts && ts.root) {
+                                engine._initializeSet(ts, leaf);
+                                if (!leaf.children) {
+                                    leaf.children = [ts.root];
+                                } else {
+                                    // may happen if several external set linked to one tile.
+                                    leaf.children.push(ts.root);
+                                }
+                                leaf.status = TileContentStatus.ready;
                             }
-                            leaf.status = TileStatus.ready;
-                        }
-                    });
+                        })
+                        .catch((error) => {
+                            leaf.status = TileContentStatus.error;
+                        });
                 }
             }
         }
@@ -521,7 +530,10 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
     protected _initializeTile(tile: ITile3d, parent?: ITile3d): void {
         tile.parent = parent;
-        tile.status = TileStatus.idle;
+        tile.status = TileContentStatus.idle;
+        // every tile start with a average priority of 50. Priority is set from 0 to 100 with zero is the lowest priority.
+        // priority will be used by loader which load the tile using a maximum batch size
+        tile.priority = Tile3dNormalPriority;
 
         if (parent?.worldTransform || tile.transform) {
             const parentTransform = parent?.worldTransform ?? IDENTITY44;

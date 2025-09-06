@@ -8072,6 +8072,116 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
 
 /***/ }),
 
+/***/ "../core/dist/collections/concurrentQueue.js":
+/*!***************************************************!*\
+  !*** ../core/dist/collections/concurrentQueue.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActionCancelledError: () => (/* binding */ ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* binding */ ActionQueueStatus),
+/* harmony export */   ConcurrentActionQueue: () => (/* binding */ ConcurrentActionQueue)
+/* harmony export */ });
+/* harmony import */ var _priorityQueue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./priorityQueue */ "../core/dist/collections/priorityQueue.js");
+
+class ActionCancelledError extends Error {
+    constructor(msg = "Cancelled") {
+        super(msg);
+        this.name = "CancelledError";
+    }
+}
+var ActionQueueStatus;
+(function (ActionQueueStatus) {
+    ActionQueueStatus[ActionQueueStatus["fulfilled"] = 0] = "fulfilled";
+    ActionQueueStatus[ActionQueueStatus["rejected"] = 1] = "rejected";
+    ActionQueueStatus[ActionQueueStatus["cancelled"] = 2] = "cancelled";
+})(ActionQueueStatus || (ActionQueueStatus = {}));
+class ConcurrentActionQueue {
+    constructor(action, concurrency = 4, queue) {
+        this.running = 0;
+        this.queuedByData = new Map();
+        this._action = action;
+        this.queue = queue ?? new _priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue((a, b) => b.priority - a.priority);
+        this.concurrency = concurrency;
+    }
+    enqueue(data, opts) {
+        if (this.queuedByData.has(data)) {
+            return new Promise((resolve, reject) => {
+                const item = this.queuedByData.get(data);
+                item.resolve = this.chainResolve(item.resolve, resolve);
+                item.reject = this.chainReject(item.reject, reject);
+            });
+        }
+        let _resolve;
+        let _reject;
+        const promise = new Promise((res, rej) => {
+            _resolve = res;
+            _reject = rej;
+        });
+        const item = {
+            data,
+            resolve: _resolve,
+            reject: _reject,
+            onSettled: opts?.onSettled,
+            priority: opts?.priority ?? 0,
+        };
+        this.queuedByData.set(data, item);
+        this.queue.enqueue(item);
+        this.tick();
+        return promise;
+    }
+    cancelPending(data) {
+        const item = this.queuedByData.get(data);
+        if (!item)
+            return false;
+        this.queuedByData.delete(data);
+        item.reject(new ActionCancelledError());
+        item.onSettled?.({ data, status: ActionQueueStatus.cancelled, reason: "Cancelled before start" });
+        return true;
+    }
+    tick() {
+        while (this.running < this.concurrency && !this.queue.isEmpty()) {
+            const item = this.queue.dequeue();
+            this.queuedByData.delete(item.data);
+            this.start(item);
+        }
+    }
+    start(item) {
+        const controller = new AbortController();
+        this.running++;
+        this._action(item.data, controller.signal)
+            .then((v) => {
+            item.resolve(v);
+            item.onSettled?.({ data: item.data, status: ActionQueueStatus.fulfilled, value: v });
+        })
+            .catch((err) => {
+            item.reject(err);
+            item.onSettled?.({ data: item.data, status: ActionQueueStatus.rejected, reason: err });
+        })
+            .finally(() => {
+            this.running--;
+            this.tick();
+        });
+    }
+    chainResolve(a, b) {
+        return (v) => {
+            a(v);
+            b(v);
+        };
+    }
+    chainReject(a, b) {
+        return (e) => {
+            a(e);
+            b(e);
+        };
+    }
+}
+//# sourceMappingURL=concurrentQueue.js.map
+
+/***/ }),
+
 /***/ "../core/dist/collections/fifo.js":
 /*!****************************************!*\
   !*** ../core/dist/collections/fifo.js ***!
@@ -8121,7 +8231,10 @@ class Fifo {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActionCancelledError: () => (/* reexport safe */ _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__.ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__.ActionQueueStatus),
 /* harmony export */   Collection: () => (/* reexport safe */ _collection__WEBPACK_IMPORTED_MODULE_0__.Collection),
+/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__.ConcurrentActionQueue),
 /* harmony export */   Fifo: () => (/* reexport safe */ _fifo__WEBPACK_IMPORTED_MODULE_4__.Fifo),
 /* harmony export */   LinkedList: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedList),
 /* harmony export */   LinkedListNode: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedListNode),
@@ -8135,6 +8248,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stack */ "../core/dist/collections/stack.js");
 /* harmony import */ var _fifo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fifo */ "../core/dist/collections/fifo.js");
 /* harmony import */ var _priorityQueue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./priorityQueue */ "../core/dist/collections/priorityQueue.js");
+/* harmony import */ var _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./concurrentQueue */ "../core/dist/collections/concurrentQueue.js");
+
 
 
 
@@ -8406,11 +8521,11 @@ class PriorityQueue {
     peek() {
         return this._heap[0];
     }
-    push(value) {
+    enqueue(value) {
         this._heap.push(value);
         this._siftUp(this._heap.length - 1);
     }
-    pop() {
+    dequeue() {
         const n = this._heap.length;
         if (n === 0)
             return undefined;
@@ -13163,6 +13278,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.AbstractShape),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.AbstractTileProvider),
+/* harmony export */   ActionCancelledError: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.ActionQueueStatus),
 /* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Angle),
 /* harmony export */   Assert: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.Assert),
 /* harmony export */   AxialTilt: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.AxialTilt),
@@ -13192,6 +13309,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Circle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Circle),
 /* harmony export */   Collection: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.Collection),
 /* harmony export */   ColorValue: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
+/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.ConcurrentActionQueue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.DebugTouchConsole),
@@ -26544,88 +26662,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
 /* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/path.js");
-/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../engine */ "./dist/tiles/3d/engine/tile3d.stream.engine.js");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../engine */ "./dist/tiles/3d/engine/tile3d.stream.engine.js");
+/* harmony import */ var core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/collections/concurrentQueue */ "../core/dist/collections/concurrentQueue.js");
+
 
 
 
 
 class Tile3dContentLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceBlock {
-    constructor(scene, ...extensions) {
+    constructor(scene, resolver, extensions) {
         super();
         this._scene = scene;
-        this._extensions = extensions.length > 0 ? extensions : Tile3dContentLoader.DefaultExtensions;
+        this._resolver = resolver;
+        this._extensions = extensions ?? Tile3dContentLoader.DefaultExtensions;
+        this._loader = new core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_2__.ConcurrentActionQueue(this._loadTile3dAsync.bind(this), 4);
+        this._resolver = resolver;
+    }
+    async _loadTile3dAsync(tile, signal) {
+        const contents = tile.contents ?? [tile.content];
+        const toload = contents.filter((c) => !!(c && c.uri && core_utils__WEBPACK_IMPORTED_MODULE_3__.PathUtils.EndsWith(c.uri, ...this._extensions)));
+        if (toload.length) {
+            for (const c of toload) {
+                const targetUri = this._resolver?.resolve(c.uri) ?? c.uri;
+                const { rootUrl, fileName } = core_utils__WEBPACK_IMPORTED_MODULE_3__.PathUtils.SplitRootAndFile(targetUri);
+                const currentContent = c;
+                tile.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.loading;
+                currentContent.container = await _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined);
+            }
+        }
+        return tile;
     }
     added(eventData, eventState) {
         if (eventData) {
             this.notifyAdded(eventData, eventState.mask ?? -1, eventState.target, this, eventState.userInfo);
-            const pending = [];
-            const engine = eventState.currentTarget;
-            const resolver = engine?.contentOptions?.uriResolver;
             for (const tile of eventData) {
-                if (tile.status == _engine__WEBPACK_IMPORTED_MODULE_2__.TileStatus.loading || tile.status == _engine__WEBPACK_IMPORTED_MODULE_2__.TileStatus.ready) {
-                    continue;
-                }
-                const contents = tile.contents ?? [tile.content];
-                if (!contents || !contents.length) {
-                    continue;
-                }
-                const toload = contents.filter((c) => !!(c && c.uri && core_utils__WEBPACK_IMPORTED_MODULE_3__.PathUtils.EndsWith(c.uri, ...this._extensions)));
-                for (const c of toload) {
-                    if (c.container) {
-                        continue;
-                    }
-                    const targetUri = resolver?.resolve(c.uri) ?? c.uri;
-                    const { rootUrl, fileName } = core_utils__WEBPACK_IMPORTED_MODULE_3__.PathUtils.SplitRootAndFile(targetUri);
-                    const currentTile = tile;
-                    const currentContent = c;
-                    tile.status = _engine__WEBPACK_IMPORTED_MODULE_2__.TileStatus.loading;
-                    const p = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined)
-                        .then((container) => {
-                        this._onContainerLoaded(currentTile, currentContent, container);
-                        return { tile: currentTile, content: currentContent, container };
-                    })
-                        .catch((error) => {
-                        this._onContainerFailed(currentTile, currentContent, error);
-                        return { tile: currentTile, content: currentContent, error };
-                    });
-                    pending.push(p);
-                }
-                if (pending.length) {
-                    Promise.allSettled(pending).then((settled) => {
-                        const results = settled.map((s) => {
-                            if (s.status === "fulfilled") {
-                                const v = s.value;
-                                if (v.container) {
-                                    tile.status = _engine__WEBPACK_IMPORTED_MODULE_2__.TileStatus.ready;
-                                    return { tile: v.tile, content: v.content, status: "fulfilled", value: v.container };
-                                }
-                                else {
-                                    tile.status = _engine__WEBPACK_IMPORTED_MODULE_2__.TileStatus.error;
-                                    return { tile: v.tile, content: v.content, status: "rejected", reason: v.error };
-                                }
-                            }
-                            else {
-                                tile.status = _engine__WEBPACK_IMPORTED_MODULE_2__.TileStatus.error;
-                                return { tile: undefined, content: undefined, status: "rejected", reason: s.reason };
-                            }
-                        });
-                        this._onAllContainersSettled(results);
-                    });
+                if (tile.status == _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle && !tile.hasExternal) {
+                    tile.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending;
+                    this._loader.enqueue(tile, { priority: tile.priority, onSettled: this._onSettled.bind(this) });
                 }
             }
         }
     }
     removed(eventData, eventState) {
-        this.notifyRemoved(eventData, eventState.mask ?? -1, eventState.target, this, eventState.userInfo);
+        const toForward = [];
+        for (const tile of eventData) {
+            if (tile.status == _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending) {
+                this._loader.cancelPending(tile);
+                tile.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle;
+                continue;
+            }
+            toForward.push(tile);
+        }
+        this.notifyRemoved(toForward, -1, this, this);
     }
-    _onContainerLoaded(tile, content, container) {
-        content.container = container;
-        this.notifyUpdated([tile], -1, this, this);
+    _onSettled(e) {
+        switch (e.status) {
+            case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_2__.ActionQueueStatus.fulfilled: {
+                e.data.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.ready;
+                this.notifyUpdated([e.data], -1, this, this);
+                break;
+            }
+            case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_2__.ActionQueueStatus.rejected: {
+                e.data.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.error;
+                break;
+            }
+            case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_2__.ActionQueueStatus.cancelled: {
+                break;
+            }
+        }
     }
-    _onContainerFailed(tile, content, error) {
-        console.log(`failed to load ${content.uri} cause of ${error}`);
-    }
-    _onAllContainersSettled(results) { }
 }
 Tile3dContentLoader.DefaultExtensions = [".gltf", ".glb"];
 //# sourceMappingURL=tile3d.loader.js.map
@@ -26937,7 +27042,7 @@ class Map3DViewer {
                         this._streamEngine.contentOptions.uriResolver = options.resolver;
                     }
                     this._streamEngine.contentOptions.maxScreenSpaceErrorFn = _vendors__WEBPACK_IMPORTED_MODULE_3__.GoogleTile3dErrorFn;
-                    this._loader = new _tile3d_loader__WEBPACK_IMPORTED_MODULE_4__.Tile3dContentLoader(this._scene);
+                    this._loader = new _tile3d_loader__WEBPACK_IMPORTED_MODULE_4__.Tile3dContentLoader(this._scene, options.resolver);
                     this._map = new _tile3d_scene__WEBPACK_IMPORTED_MODULE_5__.Tile3dScene(options.names?.map ?? "map", this._scene, {});
                     this._streamEngine.linkTo(this._loader);
                     this._loader.linkTo(this._map);
@@ -27105,11 +27210,14 @@ TilesetCodec.Shared = new TilesetCodec();
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ActiveView: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.ActiveView),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.ActiveContext),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dNormalPriority),
 /* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dRefineType),
 /* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamEngine),
-/* harmony export */   TileStatus: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.TileStatus)
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.TileContentStatus)
 /* harmony export */ });
 /* harmony import */ var _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.stream.engine */ "./dist/tiles/3d/engine/tile3d.stream.engine.js");
 
@@ -27148,11 +27256,14 @@ class TilesetClient extends core_io__WEBPACK_IMPORTED_MODULE_0__.WebClient {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ActiveView: () => (/* binding */ ActiveView),
+/* harmony export */   ActiveContext: () => (/* binding */ ActiveContext),
 /* harmony export */   DefaultScreenSpaceError: () => (/* binding */ DefaultScreenSpaceError),
+/* harmony export */   Tile3dMaxPriority: () => (/* binding */ Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* binding */ Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* binding */ Tile3dNormalPriority),
 /* harmony export */   Tile3dRefineType: () => (/* binding */ Tile3dRefineType),
 /* harmony export */   Tile3dStreamEngine: () => (/* binding */ Tile3dStreamEngine),
-/* harmony export */   TileStatus: () => (/* binding */ TileStatus)
+/* harmony export */   TileContentStatus: () => (/* binding */ TileContentStatus)
 /* harmony export */ });
 /* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
@@ -27173,6 +27284,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+const Tile3dMinPriority = 0;
+const Tile3dNormalPriority = 30;
+const Tile3dMaxPriority = 100;
 var Tile3dRefineType;
 (function (Tile3dRefineType) {
     Tile3dRefineType[Tile3dRefineType["add"] = 0] = "add";
@@ -27180,16 +27294,16 @@ var Tile3dRefineType;
     Tile3dRefineType[Tile3dRefineType["unknown"] = 999] = "unknown";
 })(Tile3dRefineType || (Tile3dRefineType = {}));
 const DefaultScreenSpaceError = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) => (tileGeometricError * viewportHeight) / (2 * distanceToCamera * tanfov2);
-var TileStatus;
-(function (TileStatus) {
-    TileStatus[TileStatus["idle"] = 0] = "idle";
-    TileStatus[TileStatus["selected"] = 1] = "selected";
-    TileStatus[TileStatus["loading"] = 2] = "loading";
-    TileStatus[TileStatus["ready"] = 3] = "ready";
-    TileStatus[TileStatus["error"] = 4] = "error";
-    TileStatus[TileStatus["unkknown"] = 999] = "unkknown";
-})(TileStatus || (TileStatus = {}));
-class ActiveView {
+var TileContentStatus;
+(function (TileContentStatus) {
+    TileContentStatus[TileContentStatus["idle"] = 0] = "idle";
+    TileContentStatus[TileContentStatus["pending"] = 1] = "pending";
+    TileContentStatus[TileContentStatus["loading"] = 2] = "loading";
+    TileContentStatus[TileContentStatus["ready"] = 3] = "ready";
+    TileContentStatus[TileContentStatus["error"] = 4] = "error";
+    TileContentStatus[TileContentStatus["unkknown"] = 999] = "unkknown";
+})(TileContentStatus || (TileContentStatus = {}));
+class ActiveContext {
     constructor(data) {
         if (!data) {
             this.cut = new Set();
@@ -27271,10 +27385,10 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                 if (!this._root?.root) {
                     return;
                 }
-                currentView = new ActiveView(this._root?.root);
+                currentView = new ActiveContext(this._root?.root);
             }
             else {
-                currentView = new ActiveView(lastView.cut);
+                currentView = new ActiveContext(lastView.cut);
             }
             this._views[1] = lastView;
             this._views[0] = currentView;
@@ -27292,7 +27406,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                     continue;
                 }
                 if (!this._isVisible(leaf, camState, planetRadius)) {
-                    if (leaf.status == TileStatus.ready) {
+                    if (leaf.status == TileContentStatus.ready) {
                         toRemove.push(leaf);
                     }
                     continue;
@@ -27310,12 +27424,12 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
             for (const leaf of currentView.cut) {
                 mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
                 if (leaf.hasExternal || leaf.sse > mse) {
-                    currentView.refinePQ.push(leaf);
+                    currentView.refinePQ.enqueue(leaf);
                 }
             }
             if (refineBudget != 0 && !currentView.refinePQ.isEmpty()) {
                 do {
-                    const leaf = currentView.refinePQ.pop();
+                    const leaf = currentView.refinePQ.dequeue();
                     refineBudget--;
                     if (!leaf) {
                         continue;
@@ -27332,7 +27446,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                             }
                             case Tile3dRefineType.replace:
                             default: {
-                                if (!leaf.contents?.length || leaf.status == TileStatus.ready) {
+                                if (!leaf.contents?.length || leaf.status == TileContentStatus.ready) {
                                     for (const child of leaf.children) {
                                         if (this._isVisible(child, camState, planetRadius)) {
                                             toAdd.push(child);
@@ -27346,8 +27460,8 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                         }
                     }
                     else {
-                        if (leaf.status == TileStatus.idle) {
-                            leaf.status = TileStatus.loading;
+                        if (leaf.status == TileContentStatus.idle) {
+                            leaf.status = TileContentStatus.pending;
                             this._loadExternalSet(leaf);
                         }
                     }
@@ -27396,7 +27510,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
             this._root = ts;
             if (ts.root) {
                 this._initializeSet(ts);
-                this._views[0] = new ActiveView(ts.root);
+                this._views[0] = new ActiveContext(ts.root);
             }
             this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
         }
@@ -27404,6 +27518,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
     _loadExternalSet(tile) {
         const content = (0,_interfaces__WEBPACK_IMPORTED_MODULE_8__.GetTile3dContents)(tile);
         if (content) {
+            tile.status = TileContentStatus.loading;
             for (const c of content) {
                 if (c?.uri && core_utils__WEBPACK_IMPORTED_MODULE_3__.PathUtils.EndsWith(c.uri, ".json")) {
                     if (this._loadings.has(c.uri)) {
@@ -27412,7 +27527,8 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                     const uri = c.uri;
                     const engine = this;
                     const leaf = tile;
-                    this._loadSetAsync(uri).then((ts) => {
+                    this._loadSetAsync(uri)
+                        .then((ts) => {
                         if (ts && ts.root) {
                             engine._initializeSet(ts, leaf);
                             if (!leaf.children) {
@@ -27421,8 +27537,11 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                             else {
                                 leaf.children.push(ts.root);
                             }
-                            leaf.status = TileStatus.ready;
+                            leaf.status = TileContentStatus.ready;
                         }
+                    })
+                        .catch((error) => {
+                        leaf.status = TileContentStatus.error;
                     });
                 }
             }
@@ -27474,7 +27593,8 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
     }
     _initializeTile(tile, parent) {
         tile.parent = parent;
-        tile.status = TileStatus.idle;
+        tile.status = TileContentStatus.idle;
+        tile.priority = Tile3dNormalPriority;
         if (parent?.worldTransform || tile.transform) {
             const parentTransform = parent?.worldTransform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_7__.IDENTITY44;
             const localTransform = tile.transform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_7__.IDENTITY44;
@@ -27553,9 +27673,8 @@ Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ActiveView: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.ActiveView),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.ActiveContext),
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
-/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _utils__WEBPACK_IMPORTED_MODULE_5__.ConcurrentLoaderQueue),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.DefaultScreenSpaceError),
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
@@ -27567,10 +27686,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SetupCameraStateSync),
 /* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SyncActiveCameraState),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.Tile3dContentLoader),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dNormalPriority),
 /* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dRefineType),
 /* harmony export */   Tile3dScene: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.Tile3dScene),
 /* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dStreamEngine),
-/* harmony export */   TileStatus: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.TileStatus),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.TileContentStatus),
 /* harmony export */   TilesetCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_1__.TilesetCodec)
 /* harmony export */ });
 /* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./interfaces */ "./dist/tiles/3d/interfaces/index.js");
@@ -27578,8 +27700,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./babylon */ "./dist/tiles/3d/babylon/index.js");
 /* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./engine */ "./dist/tiles/3d/engine/index.js");
 /* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/3d/vendors/index.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils */ "./dist/tiles/3d/utils/index.js");
-
 
 
 
@@ -27991,192 +28111,6 @@ function IsTile3d(obj) {
 
 /***/ }),
 
-/***/ "./dist/tiles/3d/utils/index.js":
-/*!**************************************!*\
-  !*** ./dist/tiles/3d/utils/index.js ***!
-  \**************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _loader_concurrent__WEBPACK_IMPORTED_MODULE_0__.ConcurrentLoaderQueue)
-/* harmony export */ });
-/* harmony import */ var _loader_concurrent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loader.concurrent */ "./dist/tiles/3d/utils/loader.concurrent.js");
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/3d/utils/loader.concurrent.js":
-/*!**************************************************!*\
-  !*** ./dist/tiles/3d/utils/loader.concurrent.js ***!
-  \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ConcurrentLoaderQueue: () => (/* binding */ ConcurrentLoaderQueue)
-/* harmony export */ });
-class CancelledError extends Error {
-    constructor(message = "Cancelled") { super(message); this.name = "CancelledError"; }
-}
-class ConcurrentLoaderQueue {
-    constructor(loader, concurrency = 4) {
-        this.running = 0;
-        this.queue = [];
-        this.queuedByUrl = new Map();
-        this.inFlight = new Map();
-        this.settledListeners = new Set();
-        if (concurrency < 1)
-            throw new Error("concurrency must be >= 1");
-        this.loader = loader;
-        this.concurrency = concurrency;
-    }
-    on(event, listener) {
-        if (event !== "settled")
-            throw new Error("Only 'settled' supported");
-        this.settledListeners.add(listener);
-        return () => this.settledListeners.delete(listener);
-    }
-    setConcurrency(n) {
-        if (n < 1)
-            throw new Error("concurrency must be >= 1");
-        this.concurrency = n;
-        this.tick();
-    }
-    enqueue(url, opts) {
-        const existing = this.queuedByUrl.get(url);
-        if (existing) {
-            if (opts?.onSettled) {
-                const prev = existing.onSettled;
-                existing.onSettled = prev
-                    ? (e) => { try {
-                        prev(e);
-                    }
-                    finally {
-                        try {
-                            opts.onSettled(e);
-                        }
-                        catch { }
-                    } }
-                    : opts.onSettled;
-            }
-            return new Promise((resolve, reject) => {
-                existing.resolve = this.chainResolve(existing.resolve, resolve);
-                existing.reject = this.chainReject(existing.reject, reject);
-            });
-        }
-        let _resolve;
-        let _reject;
-        const p = new Promise((resolve, reject) => { _resolve = resolve; _reject = reject; });
-        const item = { url, resolve: _resolve, reject: _reject, onSettled: opts?.onSettled };
-        this.queue.push(item);
-        this.queuedByUrl.set(url, item);
-        this.tick();
-        return p;
-    }
-    cancelPending(url) {
-        const item = this.queuedByUrl.get(url);
-        if (!item)
-            return false;
-        const idx = this.queue.indexOf(item);
-        if (idx >= 0)
-            this.queue.splice(idx, 1);
-        this.queuedByUrl.delete(url);
-        const now = performance.now();
-        const evt = {
-            url,
-            status: "cancelled",
-            startedAt: now,
-            endedAt: now,
-            durationMs: 0,
-            reason: new CancelledError(`Cancelled pending: ${url}`),
-        };
-        item.reject(evt.reason);
-        this.emitSettled(evt, item.onSettled);
-        return true;
-    }
-    cancelAllPending() {
-        const items = [...this.queue];
-        this.queue = [];
-        this.queuedByUrl.clear();
-        for (const item of items) {
-            const now = performance.now();
-            const reason = new CancelledError(`Cancelled pending: ${item.url}`);
-            item.reject(reason);
-            this.emitSettled({ url: item.url, status: "cancelled", startedAt: now, endedAt: now, durationMs: 0, reason }, item.onSettled);
-        }
-    }
-    get pendingCount() { return this.queue.length; }
-    get runningCount() { return this.running; }
-    tick() {
-        while (this.running < this.concurrency && this.queue.length > 0) {
-            const item = this.queue.shift();
-            this.queuedByUrl.delete(item.url);
-            this.start(item);
-        }
-    }
-    start(item) {
-        const controller = new AbortController();
-        this.inFlight.set(item.url, { controller });
-        this.running++;
-        const startedAt = performance.now();
-        this.loader(item.url, controller.signal)
-            .then((value) => {
-            item.resolve(value);
-            const endedAt = performance.now();
-            this.emitSettled({ url: item.url, status: "fulfilled", value, startedAt, endedAt, durationMs: endedAt - startedAt }, item.onSettled);
-        })
-            .catch((reason) => {
-            item.reject(reason);
-            const endedAt = performance.now();
-            this.emitSettled({ url: item.url, status: "rejected", reason, startedAt, endedAt, durationMs: endedAt - startedAt }, item.onSettled);
-        })
-            .finally(() => {
-            this.inFlight.delete(item.url);
-            this.running--;
-            this.tick();
-        });
-    }
-    emitSettled(evt, perItem) {
-        try {
-            perItem?.(evt);
-        }
-        catch { }
-        for (const l of this.settledListeners) {
-            try {
-                l(evt);
-            }
-            catch { }
-        }
-    }
-    chainResolve(a, b) {
-        return (v) => { try {
-            a(v);
-        }
-        finally {
-            try {
-                b(v);
-            }
-            catch { }
-        } };
-    }
-    chainReject(a, b) {
-        return (e) => { try {
-            a(e);
-        }
-        finally {
-            try {
-                b(e);
-            }
-            catch { }
-        } };
-    }
-}
-//# sourceMappingURL=loader.concurrent.js.map
-
-/***/ }),
-
 /***/ "./dist/tiles/3d/vendors/google/google.uri.js":
 /*!****************************************************!*\
   !*** ./dist/tiles/3d/vendors/google/google.uri.js ***!
@@ -28258,9 +28192,8 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ActiveView: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ActiveView),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ActiveContext),
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
-/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ConcurrentLoaderQueue),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
@@ -28272,10 +28205,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
 /* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dContentLoader),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dNormalPriority),
 /* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dRefineType),
 /* harmony export */   Tile3dScene: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dScene),
 /* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamEngine),
-/* harmony export */   TileStatus: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.TileStatus),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.TileContentStatus),
 /* harmony export */   TilesetCodec: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec)
 /* harmony export */ });
 /* harmony import */ var _3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3d */ "./dist/tiles/3d/index.js");
@@ -28860,7 +28796,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractShape),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileProvider),
-/* harmony export */   ActiveView: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.ActiveView),
+/* harmony export */   ActionCancelledError: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ActionQueueStatus),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.ActiveContext),
 /* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Angle),
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.AreBoxIntersect),
 /* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Assert),
@@ -28893,7 +28831,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition),
 /* harmony export */   Collection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Collection),
 /* harmony export */   ColorValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
-/* harmony export */   ConcurrentLoaderQueue: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.ConcurrentLoaderQueue),
+/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ConcurrentActionQueue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Context2DTileMap),
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_5__.CreateQuickHull),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.CreateTileSphereFromBox),
@@ -29092,6 +29030,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.TextureLayerView),
 /* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Tile),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dContentLoader),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dNormalPriority),
 /* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dRefineType),
 /* harmony export */   Tile3dScene: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dScene),
 /* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dStreamEngine),
@@ -29099,6 +29040,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.TileBorder),
 /* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileContentProvider),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileContentStatus),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayerView),
@@ -29109,7 +29051,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TilePipelineLink),
 /* harmony export */   TileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileProvider),
-/* harmony export */   TileStatus: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileStatus),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileView),

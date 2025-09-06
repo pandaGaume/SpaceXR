@@ -490,6 +490,116 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
 
 /***/ }),
 
+/***/ "./dist/collections/concurrentQueue.js":
+/*!*********************************************!*\
+  !*** ./dist/collections/concurrentQueue.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActionCancelledError: () => (/* binding */ ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* binding */ ActionQueueStatus),
+/* harmony export */   ConcurrentActionQueue: () => (/* binding */ ConcurrentActionQueue)
+/* harmony export */ });
+/* harmony import */ var _priorityQueue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./priorityQueue */ "./dist/collections/priorityQueue.js");
+
+class ActionCancelledError extends Error {
+    constructor(msg = "Cancelled") {
+        super(msg);
+        this.name = "CancelledError";
+    }
+}
+var ActionQueueStatus;
+(function (ActionQueueStatus) {
+    ActionQueueStatus[ActionQueueStatus["fulfilled"] = 0] = "fulfilled";
+    ActionQueueStatus[ActionQueueStatus["rejected"] = 1] = "rejected";
+    ActionQueueStatus[ActionQueueStatus["cancelled"] = 2] = "cancelled";
+})(ActionQueueStatus || (ActionQueueStatus = {}));
+class ConcurrentActionQueue {
+    constructor(action, concurrency = 4, queue) {
+        this.running = 0;
+        this.queuedByData = new Map();
+        this._action = action;
+        this.queue = queue ?? new _priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue((a, b) => b.priority - a.priority);
+        this.concurrency = concurrency;
+    }
+    enqueue(data, opts) {
+        if (this.queuedByData.has(data)) {
+            return new Promise((resolve, reject) => {
+                const item = this.queuedByData.get(data);
+                item.resolve = this.chainResolve(item.resolve, resolve);
+                item.reject = this.chainReject(item.reject, reject);
+            });
+        }
+        let _resolve;
+        let _reject;
+        const promise = new Promise((res, rej) => {
+            _resolve = res;
+            _reject = rej;
+        });
+        const item = {
+            data,
+            resolve: _resolve,
+            reject: _reject,
+            onSettled: opts?.onSettled,
+            priority: opts?.priority ?? 0,
+        };
+        this.queuedByData.set(data, item);
+        this.queue.enqueue(item);
+        this.tick();
+        return promise;
+    }
+    cancelPending(data) {
+        const item = this.queuedByData.get(data);
+        if (!item)
+            return false;
+        this.queuedByData.delete(data);
+        item.reject(new ActionCancelledError());
+        item.onSettled?.({ data, status: ActionQueueStatus.cancelled, reason: "Cancelled before start" });
+        return true;
+    }
+    tick() {
+        while (this.running < this.concurrency && !this.queue.isEmpty()) {
+            const item = this.queue.dequeue();
+            this.queuedByData.delete(item.data);
+            this.start(item);
+        }
+    }
+    start(item) {
+        const controller = new AbortController();
+        this.running++;
+        this._action(item.data, controller.signal)
+            .then((v) => {
+            item.resolve(v);
+            item.onSettled?.({ data: item.data, status: ActionQueueStatus.fulfilled, value: v });
+        })
+            .catch((err) => {
+            item.reject(err);
+            item.onSettled?.({ data: item.data, status: ActionQueueStatus.rejected, reason: err });
+        })
+            .finally(() => {
+            this.running--;
+            this.tick();
+        });
+    }
+    chainResolve(a, b) {
+        return (v) => {
+            a(v);
+            b(v);
+        };
+    }
+    chainReject(a, b) {
+        return (e) => {
+            a(e);
+            b(e);
+        };
+    }
+}
+//# sourceMappingURL=concurrentQueue.js.map
+
+/***/ }),
+
 /***/ "./dist/collections/fifo.js":
 /*!**********************************!*\
   !*** ./dist/collections/fifo.js ***!
@@ -539,7 +649,10 @@ class Fifo {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActionCancelledError: () => (/* reexport safe */ _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__.ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__.ActionQueueStatus),
 /* harmony export */   Collection: () => (/* reexport safe */ _collection__WEBPACK_IMPORTED_MODULE_0__.Collection),
+/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__.ConcurrentActionQueue),
 /* harmony export */   Fifo: () => (/* reexport safe */ _fifo__WEBPACK_IMPORTED_MODULE_4__.Fifo),
 /* harmony export */   LinkedList: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedList),
 /* harmony export */   LinkedListNode: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedListNode),
@@ -553,6 +666,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stack */ "./dist/collections/stack.js");
 /* harmony import */ var _fifo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fifo */ "./dist/collections/fifo.js");
 /* harmony import */ var _priorityQueue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./priorityQueue */ "./dist/collections/priorityQueue.js");
+/* harmony import */ var _concurrentQueue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./concurrentQueue */ "./dist/collections/concurrentQueue.js");
+
 
 
 
@@ -824,11 +939,11 @@ class PriorityQueue {
     peek() {
         return this._heap[0];
     }
-    push(value) {
+    enqueue(value) {
         this._heap.push(value);
         this._siftUp(this._heap.length - 1);
     }
-    pop() {
+    dequeue() {
         const n = this._heap.length;
         if (n === 0)
             return undefined;
@@ -15078,6 +15193,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.AbstractShape),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.AbstractTileProvider),
+/* harmony export */   ActionCancelledError: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.ActionQueueStatus),
 /* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Angle),
 /* harmony export */   Assert: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.Assert),
 /* harmony export */   AxialTilt: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.AxialTilt),
@@ -15107,6 +15224,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Circle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Circle),
 /* harmony export */   Collection: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.Collection),
 /* harmony export */   ColorValue: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
+/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.ConcurrentActionQueue),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.DebugTouchConsole),

@@ -4,12 +4,14 @@ import { IPipelineMessageType, ITargetBlock, SourceBlock } from "core/tiles";
 import { IContent, ITile3d } from "../interfaces";
 import { EventState } from "core/events";
 import { PathUtils } from "core/utils";
-import { ITile3dStreamEngine, TileStatus } from "../engine";
+import { IUriResolver, TileContentStatus } from "../engine";
+import { ActionQueueStatus, ConcurrentActionQueue, IActionQueueSettledEvent } from "core/collections/concurrentQueue";
 
 /** Augmentation for the engine */
 declare module "../interfaces/content" {
     interface IContent {
         container?: BABYLON.AssetContainer;
+        error?: any;
         isLoadedInScene?: boolean; // flag to let the engine know that the container has been added to the scene.
     }
 }
@@ -18,99 +20,75 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITarget
     private static DefaultExtensions = [".gltf", ".glb"];
     private _scene: BABYLON.Scene;
     private _extensions: Array<string>;
+    private _resolver?: IUriResolver;
+    private _loader: ConcurrentActionQueue<ITile3d, ITile3d>;
 
-    public constructor(scene: BABYLON.Scene, ...extensions: Array<string>) {
+    public constructor(scene: BABYLON.Scene, resolver?: IUriResolver, extensions?: Array<string>) {
         super();
         this._scene = scene;
-        this._extensions = extensions.length > 0 ? extensions : Tile3dContentLoader.DefaultExtensions;
+        this._resolver = resolver;
+        this._extensions = extensions ?? Tile3dContentLoader.DefaultExtensions;
+        this._loader = new ConcurrentActionQueue<ITile3d, ITile3d>(this._loadTile3dAsync.bind(this), 4);
+        this._resolver = resolver;
+    }
+
+    protected async _loadTile3dAsync(tile: ITile3d, signal: AbortSignal): Promise<ITile3d> {
+        const contents = tile.contents ?? [tile.content];
+        const toload = contents.filter((c): c is IContent => !!(c && c.uri && PathUtils.EndsWith(c.uri, ...this._extensions)));
+        if (toload.length) {
+            for (const c of toload) {
+                /// Here we need the resolver because we want to avoid exposing the credentials whenever possible.
+                /// The resolver is typically used for credential injection.
+                const targetUri: string = this._resolver?.resolve(c.uri) ?? c.uri;
+                const { rootUrl, fileName } = PathUtils.SplitRootAndFile(targetUri);
+                const currentContent = c;
+                tile.status = TileContentStatus.loading;
+                currentContent.container = await BABYLON.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined);
+            }
+        }
+        return tile;
     }
 
     public added(eventData: IPipelineMessageType<ITile3d>, eventState: EventState): void {
         if (eventData) {
             // first forward the event
             this.notifyAdded(eventData, eventState.mask ?? -1, eventState.target, this, eventState.userInfo);
-
-            // the try to load the content -> forward updated event when loaded.
-            const pending: Promise<{ tile: ITile3d; content: IContent; container: BABYLON.AssetContainer } | { tile: ITile3d; content: IContent; error: unknown }>[] = [];
-            const engine = eventState.currentTarget as ITile3dStreamEngine;
-            const resolver = engine?.contentOptions?.uriResolver;
-
             for (const tile of eventData) {
-                if (tile.status == TileStatus.loading || tile.status == TileStatus.ready) {
-                    continue;
-                }
-
-                const contents = tile.contents ?? [tile.content];
-                if (!contents || !contents.length) {
-                    continue;
-                }
-
-                const toload = contents.filter((c): c is IContent => !!(c && c.uri && PathUtils.EndsWith(c.uri, ...this._extensions)));
-                for (const c of toload) {
-                    if (c.container) {
-                        // container already loaded.
-                        continue;
-                    }
-                    /// Here we need the resolver because we want to avoid exposing the credentials whenever possible.
-                    /// The resolver is typically used for credential injection.
-                    const targetUri: string = resolver?.resolve(c.uri) ?? c.uri;
-                    const { rootUrl, fileName } = PathUtils.SplitRootAndFile(targetUri);
-                    const currentTile = tile; // capture
-                    const currentContent = c;
-                    tile.status = TileStatus.loading;
-                    const p = BABYLON.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined)
-                        .then((container) => {
-                            this._onContainerLoaded(currentTile, currentContent, container);
-                            return { tile: currentTile, content: currentContent, container };
-                        })
-                        .catch((error) => {
-                            this._onContainerFailed(currentTile, currentContent, error);
-                            return { tile: currentTile, content: currentContent, error };
-                        });
-                    pending.push(p);
-                }
-                if (pending.length) {
-                    Promise.allSettled(pending).then((settled) => {
-                        // normalize results for the global callback
-                        const results = settled.map((s) => {
-                            if (s.status === "fulfilled") {
-                                const v = s.value as { tile: ITile3d; content: IContent; container?: BABYLON.AssetContainer; error?: unknown };
-                                if (v.container) {
-                                    tile.status = TileStatus.ready;
-                                    return { tile: v.tile, content: v.content, status: "fulfilled" as const, value: v.container };
-                                } else {
-                                    tile.status = TileStatus.error;
-                                    return { tile: v.tile, content: v.content, status: "rejected" as const, reason: v.error };
-                                }
-                            } else {
-                                // Should be rare because we catch above, but keep it robust
-                                tile.status = TileStatus.error;
-                                return { tile: undefined as unknown as ITile3d, content: undefined as unknown as IContent, status: "rejected" as const, reason: s.reason };
-                            }
-                        });
-                        // global “all done” event
-                        this._onAllContainersSettled(results);
-                    });
+                if (tile.status == TileContentStatus.idle && !tile.hasExternal) {
+                    tile.status = TileContentStatus.pending;
+                    this._loader.enqueue(tile, { priority: tile.priority, onSettled: this._onSettled.bind(this) });
                 }
             }
         }
     }
 
     public removed(eventData: IPipelineMessageType<ITile3d>, eventState: EventState): void {
-        this.notifyRemoved(eventData, eventState.mask ?? -1, eventState.target, this, eventState.userInfo);
+        const toForward = [];
+        for (const tile of eventData) {
+            if (tile.status == TileContentStatus.pending) {
+                this._loader.cancelPending(tile);
+                tile.status = TileContentStatus.idle;
+                continue;
+            }
+            toForward.push(tile);
+        }
+        this.notifyRemoved(toForward, -1, this, this);
     }
 
-    protected _onContainerLoaded(tile: ITile3d, content: IContent, container: BABYLON.AssetContainer): void {
-        content.container = container;
-        this.notifyUpdated([tile], -1, this, this);
+    protected _onSettled(e: IActionQueueSettledEvent<ITile3d, ITile3d>): void {
+        switch (e.status) {
+            case ActionQueueStatus.fulfilled: {
+                e.data.status = TileContentStatus.ready;
+                this.notifyUpdated([e.data], -1, this, this);
+                break;
+            }
+            case ActionQueueStatus.rejected: {
+                e.data.status = TileContentStatus.error;
+                break;
+            }
+            case ActionQueueStatus.cancelled: {
+                break;
+            }
+        }
     }
-
-    protected _onContainerFailed(tile: ITile3d, content: IContent, error: unknown): void {
-        // this is where we need to deploy a strategy depending policy.
-        console.log(`failed to load ${content.uri} cause of ${error}`);
-    }
-
-    protected _onAllContainersSettled(
-        results: Array<{ tile: ITile3d; content: IContent; status: "fulfilled" | "rejected"; value?: BABYLON.AssetContainer; reason?: unknown }>
-    ): void {}
 }

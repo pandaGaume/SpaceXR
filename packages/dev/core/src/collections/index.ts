@@ -5,3 +5,4 @@ export * from "./orderedCollection";
 export * from "./stack";
 export * from "./fifo";
 export * from "./priorityQueue";
+export * from "./concurrentQueue";

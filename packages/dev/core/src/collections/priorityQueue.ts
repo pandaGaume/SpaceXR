@@ -1,11 +1,11 @@
-import { IStack } from "./collections.interfaces";
+import { IQueue } from "./collections.interfaces";
 
 /**
  * PriorityQueue<T>
  * - Binary heap with O(log n) push/pop, O(1) peek
  * - Comparator: return < 0 if a has HIGHER priority than b
  */
-export class PriorityQueue<T> implements IStack<T> {
+export class PriorityQueue<T> implements IQueue<T> {
     private _heap: T[] = [];
     private readonly _compare: (a: T, b: T) => number;
 
@@ -29,13 +29,13 @@ export class PriorityQueue<T> implements IStack<T> {
     }
 
     /** Push an item (O(log n)) */
-    public push(value: T): void {
+    public enqueue(value: T): void {
         this._heap.push(value);
         this._siftUp(this._heap.length - 1);
     }
 
     /** Pop best item (O(log n)) */
-    public pop(): T | undefined {
+    public dequeue(): T | undefined {
         const n = this._heap.length;
         if (n === 0) return undefined;
         this._swap(0, n - 1);

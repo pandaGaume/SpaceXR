@@ -64,7 +64,7 @@ export class Map3DViewer {
                         this._streamEngine.contentOptions.uriResolver = options.resolver;
                     }
                     this._streamEngine.contentOptions.maxScreenSpaceErrorFn = GoogleTile3dErrorFn;
-                    this._loader = new Tile3dContentLoader(this._scene);
+                    this._loader = new Tile3dContentLoader(this._scene, options.resolver);
                     this._map = new Tile3dScene(options.names?.map ?? "map", this._scene, {});
                     this._streamEngine.linkTo(this._loader);
                     this._loader.linkTo(this._map);

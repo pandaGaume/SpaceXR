@@ -40,7 +40,7 @@ export interface ICollection<T> extends Iterable<T>, IValidable, IDisposable {
 
 export interface IOrderedCollection<T extends IWeighted> extends ICollection<T> {}
 
-export interface IQueue<T> {
+export interface IListBase<T> {
     /// Check if the queue is empty
     isEmpty(): boolean;
     /// Get the number of elements in the queue
@@ -51,7 +51,18 @@ export interface IQueue<T> {
     includes(item: T): boolean;
 }
 
-export interface IStack<T> extends IQueue<T> {
+export interface IQueue<T> extends IListBase<T> {
+    /// Add element to the queue (enqueue).
+    enqueue(item: T): void;
+
+    /// Remove the first element from the queue (dequeue).
+    dequeue(): T | undefined;
+
+    /// Peek at the first element without removing it.
+    peek(): T | undefined;
+}
+
+export interface IStack<T> extends IListBase<T> {
     push(item: T): void;
     /// Pop an element from the stack (removes and returns it)
     pop(): T | undefined;
@@ -62,13 +73,4 @@ export interface IStack<T> extends IQueue<T> {
 /**
  * Generic FIFO (First-In, First-Out) queue interface.
  */
-export interface IFifo<T> extends IQueue<T> {
-    /// Add element to the queue (enqueue).
-    enqueue(item: T): void;
-
-    /// Remove the first element from the queue (dequeue).
-    dequeue(): T | undefined;
-
-    /// Peek at the first element without removing it.
-    peek(): T | undefined;
-}
+export interface IFifo<T> extends IQueue<T> {}

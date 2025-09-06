@@ -1,14 +1,13 @@
 import { Nullable } from "core/types";
-import { ICameraViewState, IDisplay, IHasDisplay, ISourceBlock, SourceBlock } from "core/tiles";
-import { Cartesian3, IPlane } from "core/geometry";
+import { ICameraViewState, IDisplay, IHasDisplay, IPipelineMessageType, ISourceBlock, ITargetBlock, SourceBlock } from "core/tiles";
+import { Cartesian3 } from "core/geometry";
 import { PriorityQueue } from "core/collections";
-import { FetchResult, WebClient } from "core/io";
+import { WebClient } from "core/io";
 import { PathUtils } from "core/utils";
 
-import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, ITile3d, ITileset, SphereType } from "../interfaces";
+import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, IsITileset, ITile3d, ITileset, SphereType } from "../interfaces";
 import { EcefBoxToBjsInPlace, EcefSphereToBjsInPlace, IDENTITY44, IsSphereInFrustum, IsTileSphereBeyondHorizon, Mat44MultToRef, Mat44Type } from "../interfaces/math/math";
-import { TilesetClient } from "./tile3d.stream.client";
-import { Observable } from "core/events";
+import { EventState, Observable } from "core/events";
 import { Ellipsoid } from "core/geodesy";
 
 export const Tile3dMinPriority: number = 0;
@@ -51,13 +50,6 @@ export type ScreenSpaceErrorFn = (tileGeometricError: number, distanceToCamera: 
 export const DefaultScreenSpaceError: ScreenSpaceErrorFn = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) =>
     (tileGeometricError * viewportHeight) / (2 * distanceToCamera * tanfov2);
 
-/**
- * used to test if the object is within camera view boundaries.
- */
-interface ICullable {
-    isInFrustum(frustumPlanes: IPlane[]): boolean;
-}
-
 export interface IStreamableNode {}
 
 export enum TileContentStatus {
@@ -71,11 +63,11 @@ export enum TileContentStatus {
 
 /** Augmentation for the engine */
 declare module "../interfaces/tile3d" {
-    interface ITile3d extends IStreamableNode, ICullable {
-        status: TileContentStatus;
+    interface ITile3d extends IStreamableNode {
+        status?: TileContentStatus;
         parent?: ITile3d;
         worldTransform?: Mat44Type; // ECEF world transform
-        refineType: Tile3dRefineType; // refine type enum value
+        refineType?: Tile3dRefineType; // refine type enum value
         depth: number; // the depth into the hierarchy
         worldBoundingVolume?: IBoundingVolume; // precomputed bounding box ECEF * world transform * ECEFToRH (x,z,-y) * RH2Babylon (-x)
         lastVisibleFrame?: number; // frame index for visibility aging
@@ -101,6 +93,7 @@ export interface ITile3dStreamEngineContentOptions {
     ellipsoid?: Ellipsoid;
 
     uriResolver?: IUriResolver;
+
     /**
      * The maximum allowed screen-space error (SSE), in pixels,
      * before a object should be refined (loaded at higher LOD).
@@ -112,6 +105,7 @@ export interface ITile3dStreamEngineContentOptions {
 
 export interface ITile3dStreamEngineOptions {
     client?: WebClient<string, ITileset>;
+
     /**
      * Optional fixed hysteresis offset, in pixels, applied when coarsening LOD.
      * This avoids constant refine/coarsen flicker when SSE is near the threshold.
@@ -171,11 +165,16 @@ export class ActiveContext {
     }
 }
 
-export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay {
+export interface ITile3dContentLoader extends ISourceBlock<ITile3d> {
+    load(tile: ITile3d): void;
+    cancel(tile: ITile3d): void;
+    loadTileSetAsync(uri: string): Promise<Nullable<ITileset>>;
+}
+
+export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay, ITargetBlock<ITile3d> {
     rootReadyObservable: Observable<ITileset>;
     options: ITile3dStreamEngineOptions;
     contentOptions: ITile3dStreamEngineContentOptions;
-    root: Nullable<ITileset>;
     activeView: Nullable<ActiveContext>;
     display: Nullable<IDisplay>;
     setContext(state?: ICameraViewState): void;
@@ -195,15 +194,12 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
     private readonly _baseUri: string;
     private readonly _options: ITile3dStreamEngineOptions;
     private readonly _contentOptions: ITile3dStreamEngineContentOptions;
-    private readonly _tilesetClient: WebClient<string, ITileset>;
+    private readonly _tileContentLoader: ITile3dContentLoader;
 
     private _views: [Nullable<ActiveContext>, Nullable<ActiveContext>] = [null, null];
 
     private _root: Nullable<ITileset> = null;
     private _visited: Array<ITile3d> = [];
-
-    private readonly _tileSets = new Map<string, Nullable<ITileset>>();
-    private readonly _loadings = new Map<string, Promise<FetchResult<string, Nullable<ITileset>>>>();
 
     // display
     private readonly _display: IDisplay;
@@ -217,12 +213,19 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
     private _cartesianCache: Cartesian3[] = [Cartesian3.Zero()];
 
-    public constructor(uri: string, display: IDisplay, contentOptions?: ITile3dStreamEngineContentOptions, navOptions?: ITile3dStreamEngineOptions) {
+    public constructor(
+        uri: string,
+        display: IDisplay,
+        contentLoader: ITile3dContentLoader,
+        contentOptions?: ITile3dStreamEngineContentOptions,
+        navOptions?: ITile3dStreamEngineOptions
+    ) {
         super();
         this._uri = uri;
         this._baseUri = PathUtils.GetBaseUrl(uri);
         this._display = display;
-        this._tilesetClient = navOptions?.client ?? new TilesetClient(uri);
+        this._tileContentLoader = contentLoader;
+        this._tileContentLoader.linkTo(this);
         this._options = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
         this._contentOptions = contentOptions ?? Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS;
     }
@@ -250,10 +253,6 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         return this._views[0];
     }
 
-    public get root(): Nullable<ITileset> {
-        return this._root;
-    }
-
     public setContext(state?: ICameraViewState): void {
         this._pendingState = state ?? null;
         this._visited = [];
@@ -266,7 +265,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         try {
             // Ensure root tileset is loaded once
             if (!this._root) {
-                await this._loadRootAsync();
+                await this._initializeRootAsync();
                 // fallthrough: after load, we’ll consume latest pending state
             }
 
@@ -279,7 +278,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             let currentView: ActiveContext; // the one to build.
 
             if (!lastView || (lastView.cut.size ?? 0) == 0) {
-                if (!this._root?.root) {
+                if (!this._root) {
                     return;
                 }
                 currentView = new ActiveContext(this._root?.root);
@@ -292,8 +291,6 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
             // main stream logic
             // -----------------
-            // the tile to add
-            const toAdd: ITile3d[] = [];
             // the tile to remove
             const toRemove: ITile3d[] = [];
 
@@ -343,6 +340,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 }
             }
 
+            const toLoad = [];
             if (refineBudget != 0 && !currentView.refinePQ.isEmpty()) {
                 do {
                     const leaf = currentView.refinePQ.dequeue();
@@ -355,7 +353,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                             case Tile3dRefineType.add: {
                                 for (const child of leaf.children) {
                                     if (this._isVisible(child, camState, planetRadius)) {
-                                        toAdd.push(child);
+                                        toLoad.push(child);
                                     }
                                 }
                                 break;
@@ -365,7 +363,15 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                                 if (!leaf.contents?.length || leaf.status == TileContentStatus.ready) {
                                     for (const child of leaf.children) {
                                         if (this._isVisible(child, camState, planetRadius)) {
-                                            toAdd.push(child);
+                                            if (child.status == TileContentStatus.idle) {
+                                                /*if (child.hasExternal) {
+                                                    // TODO - change the logic, to use same toLoad
+                                                    currentView.cut.add(child);
+                                                } else {
+                                                    toLoad.push(child);
+                                                }*/
+                                                toLoad.push(child);
+                                            }
                                         }
                                     }
                                     toRemove.push(leaf);
@@ -376,10 +382,10 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                         }
                     } else {
                         // thanks to the specification, it might be a tile with external reference set
-                        if (leaf.status == TileContentStatus.idle) {
-                            leaf.status = TileContentStatus.pending;
-                            this._loadExternalSet(leaf);
-                        }
+                        //if (leaf.status == TileContentStatus.idle) {
+                        //    leaf.status = TileContentStatus.pending;
+                        //    this._loadExternalSet(leaf);
+                        //}
                     }
                 } while (refineBudget != 0 && !currentView.refinePQ.isEmpty());
             }
@@ -397,11 +403,10 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             // the remain tiles
             //const remains: ITile3d[] = Array.from(currentView.cut);
 
-            if (toAdd.length) {
-                for (const item of toAdd) {
-                    currentView.cut.add(item);
+            if (toLoad.length) {
+                for (const leaf of toLoad) {
+                    this._tileContentLoader.load(leaf);
                 }
-                this.notifyAdded(toAdd, -1, this, this);
             }
         } finally {
             this._isProcessing = false;
@@ -429,8 +434,8 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
     }
 
-    protected async _loadRootAsync(): Promise<void> {
-        const ts = await this._loadSetAsync(this._uri);
+    protected async _initializeRootAsync(): Promise<void> {
+        const ts = await this._tileContentLoader.loadTileSetAsync(this._uri);
         if (ts) {
             this._root = ts;
             if (ts.root) {
@@ -438,87 +443,6 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 this._views[0] = new ActiveContext(ts.root);
             }
             this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
-        }
-    }
-
-    protected _loadExternalSet(tile: ITile3d): void {
-        const content = GetTile3dContents(tile);
-        if (content) {
-            tile.status = TileContentStatus.loading;
-            for (const c of content) {
-                if (c?.uri && PathUtils.EndsWith(c.uri, ".json")) {
-                    if (this._loadings.has(c.uri)) {
-                        continue;
-                    }
-                    const uri = c.uri;
-                    const engine = this;
-                    const leaf = tile;
-                    this._loadSetAsync(uri)
-                        .then((ts) => {
-                            if (ts && ts.root) {
-                                engine._initializeSet(ts, leaf);
-                                if (!leaf.children) {
-                                    leaf.children = [ts.root];
-                                } else {
-                                    // may happen if several external set linked to one tile.
-                                    leaf.children.push(ts.root);
-                                }
-                                leaf.status = TileContentStatus.ready;
-                            }
-                        })
-                        .catch((error) => {
-                            leaf.status = TileContentStatus.error;
-                        });
-                }
-            }
-        }
-    }
-
-    protected async _loadSetAsync(uri: string, signal?: AbortSignal): Promise<Nullable<ITileset>> {
-        // Return from cache if present
-        const cached = this._tileSets.get(uri);
-        if (cached) {
-            return cached;
-        }
-        // In-flight de-dupe
-        let loadPromise = this._loadings.get(uri);
-        if (!loadPromise) {
-            // Single producer of the promise
-            // we resolve here to keep the credential out of cache.
-            const resolvedUri = this._internalResolveUri(uri);
-            const p = this._tilesetClient.fetchAsync(resolvedUri, { signal });
-            this._loadings.set(uri, p);
-            loadPromise = p;
-        }
-        try {
-            const result = await loadPromise;
-            // 4) Normalize outcomes
-            if (!result?.ok) {
-                // Policy: null for 404/no content, throw otherwise
-                if (result?.status === 404 || result?.status === 410 || result?.content == null) {
-                    return null;
-                }
-                throw new Error(`Tileset fetch failed (${result?.status ?? "unknown"}) for ${uri}`);
-            }
-            // Guard against empty success
-            if (!result.content) {
-                return null;
-            }
-
-            this._tileSets.set(uri, result.content);
-            return result.content;
-        } catch (err) {
-            // If aborted, swallow..
-            if ((err as DOMException)?.name === "AbortError") {
-                return null;
-            }
-            throw err;
-        } finally {
-            // Race-proof cleanup
-            const current = this._loadings.get(uri);
-            if (current === loadPromise) {
-                this._loadings.delete(uri);
-            }
         }
     }
 
@@ -595,6 +519,37 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         if (tile.children) {
             for (const t of tile.children) {
                 this._initializeTile(t, tile);
+            }
+        }
+    }
+    public updated(eventData: IPipelineMessageType<ITile3d>, eventState: EventState): void {
+        const ctx = this.activeView;
+        if (ctx) {
+            for (const t of eventData) {
+                const contents = GetTile3dContents(t);
+                if (contents) {
+                    let hasExternalOnly = true;
+                    for (const c of contents) {
+                        if (c.container) {
+                            if (IsITileset(c.container)) {
+                                this._initializeSet(c.container, t);
+                                if (!t.children) {
+                                    t.children = [c.container.root];
+                                } else {
+                                    // may happen if several external set linked to one tile.
+                                    t.children.push(c.container.root);
+                                }
+
+                                continue;
+                            }
+                            hasExternalOnly = false;
+                        }
+                    }
+                    if (!hasExternalOnly) {
+                        this.notifyUpdated([t], -1, this, this);
+                    }
+                }
+                ctx.cut.add(t);
             }
         }
     }

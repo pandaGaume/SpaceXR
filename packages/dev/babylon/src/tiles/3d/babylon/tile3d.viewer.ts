@@ -30,7 +30,6 @@ export class Map3DViewer {
 
     _display: Nullable<IDisplay> = null;
     _streamEngine: Nullable<Tile3dStreamEngine> = null;
-    _loader: Nullable<Tile3dContentLoader> = null;
     _map: Nullable<Tile3dScene> = null;
 
     _cameraSync: Nullable<BABYLON.IDisposable> = null;
@@ -59,15 +58,13 @@ export class Map3DViewer {
                 this._scene = this._createScene(this._engine);
                 if (this._scene) {
                     this._display = new CanvasDisplay(this._canvas);
-                    this._streamEngine = new Tile3dStreamEngine(options.uri, this._display);
+                    this._streamEngine = new Tile3dStreamEngine(options.uri, this._display, new Tile3dContentLoader(this._scene, options.resolver));
                     if (options.resolver) {
                         this._streamEngine.contentOptions.uriResolver = options.resolver;
                     }
                     this._streamEngine.contentOptions.maxScreenSpaceErrorFn = GoogleTile3dErrorFn;
-                    this._loader = new Tile3dContentLoader(this._scene, options.resolver);
                     this._map = new Tile3dScene(options.names?.map ?? "map", this._scene, {});
-                    this._streamEngine.linkTo(this._loader);
-                    this._loader.linkTo(this._map);
+                    this._streamEngine.linkTo(this._map);
                     this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
                     this._streamEngine.setContext(); // start the root loading.
 
@@ -142,9 +139,11 @@ export class Map3DViewer {
     }
 
     protected _createCamera(name: string, root: ITileset, scene: BABYLON.Scene, options: IViewerOptions): Nullable<BABYLON.Camera> {
-        if (this._scene && this._display && root.root.boundingVolume.box) {
-            return this._setupArcRotateCamera(root.root.boundingVolume.box, this._scene);
-            //return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
+        if (root.root.boundingVolume) {
+            if (this._scene && this._display && root.root.boundingVolume.box) {
+                return this._setupArcRotateCamera(root.root.boundingVolume.box, this._scene);
+                //return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
+            }
         }
         return null;
     }

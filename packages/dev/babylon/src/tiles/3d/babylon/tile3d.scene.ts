@@ -64,7 +64,7 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
         if (contents) {
             for (const c of contents) {
                 const container = c?.container;
-                if (container) {
+                if (container && container instanceof BABYLON.AssetContainer) {
                     if (c.isLoadedInScene) {
                         continue;
                     }
@@ -112,7 +112,7 @@ export class Tile3dScene extends BABYLON.TransformNode implements ITargetBlock<I
         if (contents) {
             for (const c of contents) {
                 const container = c?.container;
-                if (container) {
+                if (container && container instanceof BABYLON.AssetContainer) {
                     if (!c.isLoadedInScene) {
                         continue;
                     }

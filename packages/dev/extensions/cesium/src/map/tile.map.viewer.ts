@@ -3,7 +3,7 @@ import { TileMapBase } from "core/tiles";
 import { Nullable } from "core/types";
 import { ITileset } from "../tiles";
 import { Ellipsoid } from "core/geodesy";
-import { GeodeticCamera } from "../../../../babylon/src/camera/camera.Geodetic";
+import { GeodeticCamera } from "../../../../babylon/src/camera/camera.geodetic";
 
 export interface IViewerOptions {
     ellipsoid: Ellipsoid;

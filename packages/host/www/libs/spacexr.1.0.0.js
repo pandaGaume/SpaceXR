@@ -2143,6 +2143,15 @@ class Ellipsoid {
     clone(name, scale = 1.0) {
         return new Ellipsoid(name, this._a * scale, this._b * scale, this._f, this._invf);
     }
+    radiusAtLatitude(phiRad) {
+        const cos = Math.cos(phiRad);
+        const sin = Math.sin(phiRad);
+        return Math.sqrt(((this._aa * cos) ** 2 + (this._bb * sin) ** 2) / ((this._a * cos) ** 2 + (this._b * sin) ** 2));
+    }
+    radiusAtPosition(x, y, z) {
+        const denom = (x * x + y * y) / this._aa + (z * z) / this._bb;
+        return 1.0 / Math.sqrt(denom);
+    }
 }
 Ellipsoid.WGS84 = Ellipsoid.FromAAndInverseF("WGS84", 6378137.0, 298.257223563);
 Ellipsoid.GRS80 = Ellipsoid.FromAAndInverseF("GRS80", 6378137.0, 298.257222101);
@@ -7502,6 +7511,9 @@ class Range extends AbstractRange {
         if (max !== undefined) {
             this._max = Math.max(this._max ?? max, max);
         }
+    }
+    clamp(n) {
+        return Scalar.Clamp(n, this._min ?? Number.MIN_VALUE, this._max ?? Number.MAX_VALUE);
     }
     clone() {
         return new Range(this._min, this._max);

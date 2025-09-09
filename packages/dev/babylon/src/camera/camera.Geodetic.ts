@@ -14,7 +14,7 @@ export class GeodeticCamera extends BABYLON.ArcRotateCamera {
         super(name, alpha, beta, radius, target, scene);
 
         this._system = new GeodeticSystem(ellipsoid);
-        this.lowerRadiusLimit = globeRadius * 0.5;
+        this.lowerRadiusLimit = globeRadius;
         this.upperRadiusLimit = globeRadius * 10;
         this.allowUpsideDown = false;
         this.wheelPrecision = 1000;

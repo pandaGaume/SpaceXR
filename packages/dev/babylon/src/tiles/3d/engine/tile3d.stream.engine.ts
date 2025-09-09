@@ -64,7 +64,8 @@ export enum TileContentStatus {
 /** Augmentation for the engine */
 declare module "../interfaces/tile3d" {
     interface ITile3d extends IStreamableNode {
-        status?: TileContentStatus;
+        contentStatus?: TileContentStatus;
+        visible?: boolean;
         parent?: ITile3d;
         worldTransform?: Mat44Type; // ECEF world transform
         refineType?: Tile3dRefineType; // refine type enum value
@@ -304,17 +305,24 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             for (const leaf of currentView.cut) {
                 this._visited.push(leaf);
 
-                if (!leaf.geometricError === undefined || !leaf.worldBoundingVolume || !leaf.worldBoundingVolume.sphere) {
+                if (leaf.geometricError === undefined || !leaf.worldBoundingVolume?.sphere) {
                     // we can not process the tile due to a severe lack of informations
                     // Not supposed to happen because we iterate over already checked tiles.
                     continue;
                 }
 
-                if (!this._isVisible(leaf, camState, planetRadius)) {
-                    if (leaf.status == TileContentStatus.ready) {
-                        toRemove.push(leaf);
+                const visibleNow = this._isVisible(leaf, camState, planetRadius);
+                if (!visibleNow) {
+                    if (leaf.visible) {
+                        leaf.visible = visibleNow;
+                        this._freeze(leaf);
                     }
                     continue;
+                }
+                // here it's visible.
+                if (!leaf.visible) {
+                    leaf.visible = visibleNow;
+                    this._unfreeze(leaf);
                 }
 
                 const tileCenter = this._cartesianCache[0];
@@ -325,18 +333,13 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 leaf.sse = fn(leaf.geometricError, distanceToCamera, this._display.resolution.height, camState.tanFov2);
             }
 
-            // remove every unvisible tiles from the active view
-            if (toRemove.length) {
-                for (const item of toRemove) {
-                    currentView.cut.delete(item);
-                }
-            }
-
             //Build refine/coarsen queues from *visible leaves only*
             for (const leaf of currentView.cut) {
-                mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
-                if (leaf.hasExternal || leaf.sse > mse) {
-                    currentView.refinePQ.enqueue(leaf);
+                if (leaf.visible) {
+                    mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                    if (leaf.hasExternal || leaf.sse > mse) {
+                        currentView.refinePQ.enqueue(leaf);
+                    }
                 }
             }
 
@@ -353,23 +356,21 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                             case Tile3dRefineType.add: {
                                 for (const child of leaf.children) {
                                     if (this._isVisible(child, camState, planetRadius)) {
-                                        toLoad.push(child);
+                                        child.visible = true;
+                                        if (child.contentStatus == TileContentStatus.idle) {
+                                            toLoad.push(child);
+                                        }
                                     }
                                 }
                                 break;
                             }
                             case Tile3dRefineType.replace:
                             default: {
-                                if (!leaf.contents?.length || leaf.status == TileContentStatus.ready) {
+                                if (!leaf.contents?.length || leaf.contentStatus == TileContentStatus.ready) {
                                     for (const child of leaf.children) {
                                         if (this._isVisible(child, camState, planetRadius)) {
-                                            if (child.status == TileContentStatus.idle) {
-                                                /*if (child.hasExternal) {
-                                                    // TODO - change the logic, to use same toLoad
-                                                    currentView.cut.add(child);
-                                                } else {
-                                                    toLoad.push(child);
-                                                }*/
+                                            child.visible = true;
+                                            if (child.contentStatus == TileContentStatus.idle) {
                                                 toLoad.push(child);
                                             }
                                         }
@@ -397,6 +398,20 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
             }
 
             if (toRemove.length) {
+                for (const item of toRemove) {
+                    switch (item.contentStatus) {
+                        case TileContentStatus.pending: {
+                            this._tileContentLoader.cancel(item);
+                            break;
+                        }
+                        case TileContentStatus.ready: {
+                            break;
+                        }
+                    }
+                    if (item.visible) {
+                        currentView.cut.delete(item);
+                    }
+                }
                 this.notifyRemoved(toRemove, -1, this, this);
             }
 
@@ -405,7 +420,9 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
             if (toLoad.length) {
                 for (const leaf of toLoad) {
-                    this._tileContentLoader.load(leaf);
+                    if (leaf.visible) {
+                        this._tileContentLoader.load(leaf);
+                    }
                 }
             }
         } finally {
@@ -429,6 +446,9 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         }
         return IsSphereInFrustum(leaf.worldBoundingVolume.sphere, camState.frustumPlanes);
     }
+
+    protected _freeze(leaf: ITile3d): void {}
+    protected _unfreeze(leaf: ITile3d): void {}
 
     protected _internalResolveUri(uri: string): string {
         return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
@@ -454,7 +474,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
 
     protected _initializeTile(tile: ITile3d, parent?: ITile3d): void {
         tile.parent = parent;
-        tile.status = TileContentStatus.idle;
+        tile.contentStatus = TileContentStatus.idle;
         // every tile start with a average priority of 50. Priority is set from 0 to 100 with zero is the lowest priority.
         // priority will be used by loader which load the tile using a maximum batch size
         tile.priority = Tile3dNormalPriority;

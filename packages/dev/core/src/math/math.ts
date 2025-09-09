@@ -106,6 +106,10 @@ export class Range extends AbstractRange<number> {
         }
     }
 
+    public clamp(n: number): number {
+        return Scalar.Clamp(n, this._min ?? Number.MIN_VALUE, this._max ?? Number.MAX_VALUE);
+    }
+
     public clone(): Range {
         return new Range(this._min, this._max);
     }

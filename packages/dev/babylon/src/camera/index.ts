@@ -1,1 +1,1 @@
-export * from "./camera.Geodetic";
+export * from "./camera.geodetic";

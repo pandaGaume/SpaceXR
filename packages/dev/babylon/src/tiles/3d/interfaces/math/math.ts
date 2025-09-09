@@ -387,6 +387,30 @@ export function EcefToBjs(x: number, y: number, z: number): [number, number, num
 }
 
 /// <summary>
+/// Convert GLTF ECEF like (right-handed, Z-up)  to Babylon (left-handed, Y-up) in-place.
+/// Mapping here: (X, Y, Z) -> (-X, Z, -Y).
+/// </summary>
+export function EcefToBjsCartInPlace(ref: ICartesian3): void {
+    // (-x, +z, -y)
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = ref.z;
+    ref.z = -tmp;
+}
+
+/// <summary>
+/// Convert Babylon (left-handed, Y-up) Cartesian to GLTF ECEF like (right-handed, Z-up) in-place.
+/// Inverse of EcefToBjsCartInPlace (which does: (-x, +z, -y)).
+/// Mapping here: (X, Y, Z) -> (-X, -Z, +Y).
+/// </summary>
+export function BjsToEcefCartInPlace(ref: ICartesian3): void {
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = -ref.z;
+    ref.z = tmp;
+}
+
+/// <summary>
 /// Non-in-place version returning a tuple [x', y', z'].
 /// </summary>
 export function EcefToRH(x: number, y: number, z: number): [number, number, number] {

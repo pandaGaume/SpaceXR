@@ -15,7 +15,7 @@ declare module "../interfaces/content" {
     interface IContent {
         container?: BABYLON.AssetContainer | any;
         error?: any;
-        isLoadedInScene?: boolean; // flag to let the engine know that the container has been added to the scene.
+        loadedInSceneCount?: number; // flag to let the engine know that the container has been added to the scene.
     }
 }
 
@@ -38,16 +38,16 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITile3d
     }
 
     public load(tile: ITile3d): void {
-        if (tile.status == TileContentStatus.idle) {
-            tile.status = TileContentStatus.pending;
+        if (tile.contentStatus == TileContentStatus.idle) {
+            tile.contentStatus = TileContentStatus.pending;
             this._loader.enqueue(tile, { priority: tile.priority, onSettled: this._onSettled.bind(this) });
         }
     }
 
     public cancel(tile: ITile3d): void {
-        if (tile.status == TileContentStatus.pending) {
+        if (tile.contentStatus == TileContentStatus.pending) {
             this._loader.cancelPending(tile);
-            tile.status = TileContentStatus.idle;
+            tile.contentStatus = TileContentStatus.idle;
         }
     }
 
@@ -65,7 +65,7 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITile3d
         if (toload.length) {
             for (const c of toload) {
                 const currentContent = c;
-                tile.status = TileContentStatus.loading;
+                tile.contentStatus = TileContentStatus.loading;
                 if (PathUtils.EndsWith(c.uri, ".json")) {
                     currentContent.container = await this.loadTileSetAsync(c.uri);
                 } else {
@@ -83,12 +83,12 @@ export class Tile3dContentLoader extends SourceBlock<ITile3d> implements ITile3d
     protected _onSettled(e: IActionQueueSettledEvent<ITile3d, ITile3d>): void {
         switch (e.status) {
             case ActionQueueStatus.fulfilled: {
-                e.data.status = TileContentStatus.ready;
+                e.data.contentStatus = TileContentStatus.ready;
                 this.notifyUpdated([e.data], -1, this, this);
                 break;
             }
             case ActionQueueStatus.rejected: {
-                e.data.status = TileContentStatus.error;
+                e.data.contentStatus = TileContentStatus.error;
                 this.notifyUpdated([e.data], -1, this, this);
                 break;
             }

@@ -9725,6 +9725,15 @@ class Ellipsoid {
     clone(name, scale = 1.0) {
         return new Ellipsoid(name, this._a * scale, this._b * scale, this._f, this._invf);
     }
+    radiusAtLatitude(phiRad) {
+        const cos = Math.cos(phiRad);
+        const sin = Math.sin(phiRad);
+        return Math.sqrt(((this._aa * cos) ** 2 + (this._bb * sin) ** 2) / ((this._a * cos) ** 2 + (this._b * sin) ** 2));
+    }
+    radiusAtPosition(x, y, z) {
+        const denom = (x * x + y * y) / this._aa + (z * z) / this._bb;
+        return 1.0 / Math.sqrt(denom);
+    }
 }
 Ellipsoid.WGS84 = Ellipsoid.FromAAndInverseF("WGS84", 6378137.0, 298.257223563);
 Ellipsoid.GRS80 = Ellipsoid.FromAAndInverseF("GRS80", 6378137.0, 298.257222101);
@@ -15370,6 +15379,9 @@ class Range extends AbstractRange {
         if (max !== undefined) {
             this._max = Math.max(this._max ?? max, max);
         }
+    }
+    clamp(n) {
+        return Scalar.Clamp(n, this._min ?? Number.MIN_VALUE, this._max ?? Number.MAX_VALUE);
     }
     clone() {
         return new Range(this._min, this._max);
@@ -22994,9 +23006,9 @@ ValidableBase.VALID_PROPERTY_NAME = "valid";
 
 /***/ }),
 
-/***/ "./dist/camera/camera.Geodetic.js":
+/***/ "./dist/camera/camera.geodetic.js":
 /*!****************************************!*\
-  !*** ./dist/camera/camera.Geodetic.js ***!
+  !*** ./dist/camera/camera.geodetic.js ***!
   \****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -23018,7 +23030,7 @@ class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRot
         const target = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
         super(name, alpha, beta, radius, target, scene);
         this._system = new core_geodesy__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem(ellipsoid);
-        this.lowerRadiusLimit = globeRadius * 0.5;
+        this.lowerRadiusLimit = globeRadius;
         this.upperRadiusLimit = globeRadius * 10;
         this.allowUpsideDown = false;
         this.wheelPrecision = 1000;
@@ -23029,7 +23041,7 @@ class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRot
         return this._system;
     }
 }
-//# sourceMappingURL=camera.Geodetic.js.map
+//# sourceMappingURL=camera.geodetic.js.map
 
 /***/ }),
 
@@ -23041,9 +23053,9 @@ class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRot
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera_Geodetic__WEBPACK_IMPORTED_MODULE_0__.GeodeticCamera)
+/* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera_geodetic__WEBPACK_IMPORTED_MODULE_0__.GeodeticCamera)
 /* harmony export */ });
-/* harmony import */ var _camera_Geodetic__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.Geodetic */ "./dist/camera/camera.Geodetic.js");
+/* harmony import */ var _camera_geodetic__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.geodetic */ "./dist/camera/camera.geodetic.js");
 
 //# sourceMappingURL=index.js.map
 
@@ -26341,6 +26353,90 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./dist/tiles/3d/babylon/camera.planetary.js":
+/*!***************************************************!*\
+  !*** ./dist/tiles/3d/babylon/camera.planetary.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PlanetoryCamera: () => (/* binding */ PlanetoryCamera)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.system.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.interfaces.js");
+/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
+/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
+
+
+
+
+
+class PlanetoryCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera {
+    constructor(name, geoPosition, scene, ellipsoid, altitudeRange) {
+        super(name, 0, 0, 0, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero(), scene);
+        this._geo = core_geography__WEBPACK_IMPORTED_MODULE_1__.Geo3.Zero();
+        this._ecefCache = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
+        const e = ellipsoid ?? core_geodesy__WEBPACK_IMPORTED_MODULE_2__.Ellipsoid.WGS84;
+        this._system = new core_geodesy__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem(e);
+        this._altitudeRange = altitudeRange ?? new core_math__WEBPACK_IMPORTED_MODULE_4__.Range(PlanetoryCamera.DefaultAltitudeRange.min, PlanetoryCamera.DefaultAltitudeRange.max);
+        this.setPosition(geoPosition);
+        this.useBouncingBehavior = false;
+        this.allowUpsideDown = true;
+        this.lowerBetaLimit = 0.001;
+        this.upperBetaLimit = Math.PI - 0.001;
+        scene.onBeforeRenderObservable.add(() => {
+            const dir = this.position.clone().normalize();
+            const radius = this._system.ellipsoid.radiusAtPosition(dir.x, dir.y, dir.z);
+            let altitude = this.position.length() - radius;
+            let clamped = this._altitudeRange.clamp(altitude);
+            if (altitude != clamped) {
+                this.position = dir.scale(radius + clamped);
+            }
+            this.wheelPrecision = this._getWheelPrecision(clamped);
+        });
+    }
+    setPosition(p) {
+        if ((0,core_geography__WEBPACK_IMPORTED_MODULE_5__.IsLocation)(p)) {
+            this._geo.lat = p.lat;
+            this._geo.lon = p.lon;
+            this._geo.alt = this._altitudeRange.clamp(p.alt ?? 0);
+            this._system.geodeticFloatToCartesianToRef(this._geo.lat, this._geo.lon, this._geo.alt, this._ecefCache, true);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.EcefToBjsCartInPlace)(this._ecefCache);
+            super.setPosition(this._ecefCache);
+        }
+        else {
+            super.setPosition(p);
+        }
+    }
+    _getWheelPrecision(alt) {
+        if (!isFinite(alt) || alt < 0)
+            alt = 0;
+        const pMin = 1e-3;
+        const pMid = 1e-2;
+        const pMax = 1;
+        const a1 = 20_000;
+        if (alt >= a1) {
+            const m = 1.5;
+            const ratio = a1 / alt;
+            return pMin + (pMid - pMin) * Math.pow(ratio, m);
+        }
+        else {
+            const t = 1 - alt / a1;
+            const s = t * t * (3 - 2 * t);
+            return pMid + (pMax - pMid) * s;
+        }
+    }
+}
+PlanetoryCamera.DefaultAltitudeRange = new core_math__WEBPACK_IMPORTED_MODULE_4__.Range(25.0, 5_000_000.0);
+//# sourceMappingURL=camera.planetary.js.map
+
+/***/ }),
+
 /***/ "./dist/tiles/3d/babylon/index.js":
 /*!****************************************!*\
   !*** ./dist/tiles/3d/babylon/index.js ***!
@@ -26349,186 +26445,24 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tile3d_viewer__WEBPACK_IMPORTED_MODULE_4__.Map3DViewer),
-/* harmony export */   SetupAdaptiveUniversalCamera: () => (/* reexport safe */ _tile3d_camera_nav__WEBPACK_IMPORTED_MODULE_1__.SetupAdaptiveUniversalCamera),
+/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tile3d_viewer__WEBPACK_IMPORTED_MODULE_3__.Map3DViewer),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _camera_planetary__WEBPACK_IMPORTED_MODULE_4__.PlanetoryCamera),
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
 /* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState),
-/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tile3d_loader__WEBPACK_IMPORTED_MODULE_3__.Tile3dContentLoader),
-/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tile3d_scene__WEBPACK_IMPORTED_MODULE_2__.Tile3dScene)
+/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tile3d_loader__WEBPACK_IMPORTED_MODULE_2__.Tile3dContentLoader),
+/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tile3d_scene__WEBPACK_IMPORTED_MODULE_1__.Tile3dScene)
 /* harmony export */ });
 /* harmony import */ var _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
-/* harmony import */ var _tile3d_camera_nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.camera.nav */ "./dist/tiles/3d/babylon/tile3d.camera.nav.js");
-/* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/babylon/tile3d.scene.js");
-/* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
-/* harmony import */ var _tile3d_viewer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tile3d.viewer */ "./dist/tiles/3d/babylon/tile3d.viewer.js");
+/* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/babylon/tile3d.scene.js");
+/* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
+/* harmony import */ var _tile3d_viewer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.viewer */ "./dist/tiles/3d/babylon/tile3d.viewer.js");
+/* harmony import */ var _camera_planetary__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./camera.planetary */ "./dist/tiles/3d/babylon/camera.planetary.js");
 
 
 
 
 
 //# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/tiles/3d/babylon/tile3d.camera.nav.js":
-/*!****************************************************!*\
-  !*** ./dist/tiles/3d/babylon/tile3d.camera.nav.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SetupAdaptiveUniversalCamera: () => (/* binding */ SetupAdaptiveUniversalCamera)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-
-function SetupAdaptiveUniversalCamera(camera, scene, opts = {}) {
-    const anchor = opts.anchor ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
-    const minStep = opts.minStep ?? 0.05;
-    const maxStep = opts.maxStep ?? 2_000_000;
-    const stepFraction = opts.stepFraction ?? 0.0005;
-    const wheelFraction = opts.wheelFraction ?? 0.05;
-    const baseAngularSens = opts.baseAngularSensibility ?? 800;
-    const angScale = opts.angularScaleWithDistance ?? true;
-    const smoothing = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(opts.smoothing ?? 0.15, 0, 0.9);
-    let targetStep = 1;
-    let currentStep = targetStep;
-    let keysDown = new Set();
-    let isRightDown = false;
-    let isLeftDown = false;
-    let shift = false;
-    let lastPointerX = 0, lastPointerY = 0;
-    camera.attachControl(scene.getEngine().getRenderingCanvas(), true);
-    camera.keysUp = camera.keysDown = camera.keysLeft = camera.keysRight = [];
-    const distanceFn = () => {
-        if (opts.getDistance)
-            return Math.max(1e-6, opts.getDistance());
-        return _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Distance(camera.position, anchor);
-    };
-    const updateTargetStep = () => {
-        const d = Math.max(1e-6, distanceFn());
-        const step = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(d * stepFraction, minStep, maxStep);
-        targetStep = step;
-    };
-    const smoothUpdate = () => {
-        currentStep = currentStep + (targetStep - currentStep) * smoothing;
-        if (angScale) {
-            const d = Math.max(1, distanceFn());
-            const k = Math.log10(d + 10);
-            camera.angularSensibility = baseAngularSens * (1 + k);
-        }
-        else {
-            camera.angularSensibility = baseAngularSens;
-        }
-    };
-    const keySub = scene.onKeyboardObservable.add((kb) => {
-        const k = kb.event.key;
-        if (kb.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.KeyboardEventTypes.KEYDOWN) {
-            keysDown.add(k);
-            shift = kb.event.shiftKey;
-        }
-        else if (kb.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.KeyboardEventTypes.KEYUP) {
-            keysDown.delete(k);
-            shift = kb.event.shiftKey;
-        }
-    });
-    const pointerSub = scene.onPointerObservable.add((po) => {
-        if (!po.event)
-            return;
-        const ev = po.event;
-        if (po.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERDOWN) {
-            if (ev.button === 2) {
-                isRightDown = true;
-            }
-            if (ev.button === 0) {
-                isLeftDown = true;
-            }
-            lastPointerX = ev.clientX;
-            lastPointerY = ev.clientY;
-        }
-        else if (po.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERUP) {
-            if (ev.button === 2) {
-                isRightDown = false;
-            }
-            if (ev.button === 0) {
-                isLeftDown = false;
-            }
-        }
-        else if (po.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE) {
-            const dx = ev.clientX - lastPointerX;
-            const dy = ev.clientY - lastPointerY;
-            lastPointerX = ev.clientX;
-            lastPointerY = ev.clientY;
-            if (isRightDown) {
-                const yaw = -dx / camera.angularSensibility;
-                const pitch = -dy / camera.angularSensibility;
-                camera.rotation.y += yaw;
-                camera.rotation.x = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(camera.rotation.x + pitch, -Math.PI * 0.49, Math.PI * 0.49);
-            }
-            else if (isLeftDown && (ev.shiftKey || shift)) {
-                const panScale = currentStep * 0.5;
-                const right = camera.getDirection(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Axis.X);
-                const up = camera.getDirection(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Axis.Y);
-                camera.position.addInPlace(right.scale(-dx * (1 / 250) * panScale));
-                camera.position.addInPlace(up.scale(dy * (1 / 250) * panScale));
-            }
-        }
-    });
-    const wheelSub = scene.onPrePointerObservable.add((poi) => {
-        if (poi.type !== _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL)
-            return;
-        const ev = poi.event;
-        const delta = Math.sign(ev.deltaY);
-        const d = Math.max(1e-6, distanceFn());
-        const move = d * wheelFraction * delta;
-        const forward = camera.getDirection(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Axis.Z);
-        camera.position.addInPlace(forward.scale(move));
-        ev.preventDefault();
-    }, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL);
-    const beforeRender = scene.onBeforeRenderObservable.add(() => {
-        updateTargetStep();
-        smoothUpdate();
-        if (keysDown.size) {
-            const dt = scene.getEngine().getDeltaTime() / 1000;
-            const perSec = currentStep;
-            const amount = perSec * dt * 60;
-            const forward = camera.getDirection(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Axis.Z).scale(-1);
-            const right = camera.getDirection(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Axis.X);
-            const up = camera.getDirection(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Axis.Y);
-            if (keysDown.has("w") || keysDown.has("W") || keysDown.has("ArrowUp")) {
-                camera.position.addInPlace(forward.scale(amount));
-            }
-            if (keysDown.has("s") || keysDown.has("S") || keysDown.has("ArrowDown")) {
-                camera.position.addInPlace(forward.scale(-amount));
-            }
-            if (keysDown.has("a") || keysDown.has("A") || keysDown.has("ArrowLeft")) {
-                camera.position.addInPlace(right.scale(-amount));
-            }
-            if (keysDown.has("d") || keysDown.has("D") || keysDown.has("ArrowRight")) {
-                camera.position.addInPlace(right.scale(amount));
-            }
-            if (keysDown.has("q") || keysDown.has("Q")) {
-                camera.position.addInPlace(up.scale(-amount));
-            }
-            if (keysDown.has("e") || keysDown.has("E")) {
-                camera.position.addInPlace(up.scale(amount));
-            }
-        }
-    });
-    camera.inertia = 0.85;
-    camera.speed = 1;
-    camera.minZ = 0.01;
-    return {
-        dispose() {
-            scene.onKeyboardObservable.remove(keySub);
-            scene.onPointerObservable.remove(pointerSub);
-            scene.onPrePointerObservable.remove(wheelSub);
-            scene.onBeforeRenderObservable.remove(beforeRender);
-        },
-    };
-}
-//# sourceMappingURL=tile3d.camera.nav.js.map
 
 /***/ }),
 
@@ -26546,7 +26480,49 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
+function initCameraSync(camera, scene) {
+    if (scene.activeCamera !== camera) {
+        scene.activeCamera = camera;
+    }
+    if (camera.rebuildAnglesAndRadius instanceof Function) {
+        camera.rebuildAnglesAndRadius();
+    }
+    camera.computeWorldMatrix();
+    camera.getProjectionMatrix(true);
+}
+function getViewProjAndFrustumSafe(camera, scene) {
+    const engine = scene.getEngine();
+    const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
+    let view;
+    let proj;
+    if (camera.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA) {
+        if (camera instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera) {
+            const pos = camera.position;
+            const tgt = camera.target;
+            const up = camera.upVector;
+            view = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.LookAtLH(pos, tgt, up);
+            proj = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix.PerspectiveFovLH(camera.fov, aspect, camera.minZ, camera.maxZ);
+        }
+        else {
+            camera.computeWorldMatrix();
+            camera.getProjectionMatrix(false);
+            const vp = camera.getTransformationMatrix();
+            const frustumPlanes = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(vp);
+            return { viewProj: vp, frustumPlanes };
+        }
+    }
+    else {
+        camera.computeWorldMatrix();
+        const vp = camera.getTransformationMatrix();
+        const frustumPlanes = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(vp);
+        return { viewProj: vp, frustumPlanes };
+    }
+    const viewProj = view.multiply(proj);
+    const frustumPlanes = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(viewProj);
+    return { viewProj, frustumPlanes };
+}
 function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
+    initCameraSync(camera, scene);
     let viewDirty = true;
     let projDirty = true;
     let lastPos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.NaN, Number.NaN, Number.NaN);
@@ -26573,6 +26549,10 @@ function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
     const frameObs = scene.onBeforeRenderObservable.add(() => {
         if (!viewDirty && !projDirty)
             return;
+        if (camera.rebuildAnglesAndRadius instanceof Function) {
+            camera.rebuildAnglesAndRadius();
+        }
+        camera.computeWorldMatrix();
         const pos = camera.globalPosition;
         const rot = getWorldRotation();
         const fov = getFovY();
@@ -26586,21 +26566,23 @@ function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
             Math.abs(rot.y - lastRot.y) > eps ||
             Math.abs(rot.z - lastRot.z) > eps ||
             Math.abs(rot.w - lastRot.w) > eps ||
-            Number.isNaN(rot.x) ||
-            Number.isNaN(rot.y) ||
-            Number.isNaN(rot.z) ||
-            Number.isNaN(rot.w);
+            Number.isNaN(lastRot.x) ||
+            Number.isNaN(lastRot.y) ||
+            Number.isNaN(lastRot.z) ||
+            Number.isNaN(lastRot.w);
         const fovChanged = Math.abs(fov - lastFov) > eps || Number.isNaN(lastFov);
         if (posChanged || rotChanged || fovChanged) {
             lastPos.copyFrom(pos);
             lastRot.copyFrom(rot);
             lastFov = fov;
+            const { viewProj, frustumPlanes } = getViewProjAndFrustumSafe(camera, scene);
             onState({
                 worldPosition: pos.clone(),
                 worldRotation: rot.clone(),
                 fovY: fov,
                 tanFov2: fov > 0 ? Math.tan(fov * 0.5) : 0,
-                frustumPlanes: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(camera.getTransformationMatrix()),
+                frustumPlanes,
+                viewProjection: viewProj,
             });
         }
         viewDirty = false;
@@ -26630,9 +26612,8 @@ function SyncActiveCameraState(scene, onState, eps = 1e-6) {
             currentSync = null;
         }
         current = next;
-        if (current) {
+        if (current)
             currentSync = SetupCameraStateSync(current, scene, onState, eps);
-        }
     });
     return {
         dispose() {
@@ -26682,15 +26663,15 @@ class Tile3dContentLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.Source
         this._resolver = resolver;
     }
     load(tile) {
-        if (tile.status == _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle) {
-            tile.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending;
+        if (tile.contentStatus == _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle) {
+            tile.contentStatus = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending;
             this._loader.enqueue(tile, { priority: tile.priority, onSettled: this._onSettled.bind(this) });
         }
     }
     cancel(tile) {
-        if (tile.status == _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending) {
+        if (tile.contentStatus == _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending) {
             this._loader.cancelPending(tile);
-            tile.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle;
+            tile.contentStatus = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle;
         }
     }
     async loadTileSetAsync(uri) {
@@ -26704,7 +26685,7 @@ class Tile3dContentLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.Source
         if (toload.length) {
             for (const c of toload) {
                 const currentContent = c;
-                tile.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.loading;
+                tile.contentStatus = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.loading;
                 if (core_utils__WEBPACK_IMPORTED_MODULE_5__.PathUtils.EndsWith(c.uri, ".json")) {
                     currentContent.container = await this.loadTileSetAsync(c.uri);
                 }
@@ -26720,12 +26701,12 @@ class Tile3dContentLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.Source
     _onSettled(e) {
         switch (e.status) {
             case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__.ActionQueueStatus.fulfilled: {
-                e.data.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.ready;
+                e.data.contentStatus = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.ready;
                 this.notifyUpdated([e.data], -1, this, this);
                 break;
             }
             case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__.ActionQueueStatus.rejected: {
-                e.data.status = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.error;
+                e.data.contentStatus = _engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.error;
                 this.notifyUpdated([e.data], -1, this, this);
                 break;
             }
@@ -26753,14 +26734,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/tile3d.js");
-/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
-
 
 
 class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
-    constructor(name, scene, options) {
+    constructor(name, scene) {
         super(name, scene);
-        this._options = options ?? Tile3dScene.DefaultOptions;
     }
     getClassName() {
         return "Tile3dScene";
@@ -26769,7 +26747,7 @@ class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transform
         if (eventData && eventData.length) {
             for (const t of eventData) {
                 if (t) {
-                    this._addContents(t);
+                    this._addAllToScene(t);
                 }
             }
         }
@@ -26778,7 +26756,7 @@ class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transform
         if (eventData && eventData.length) {
             for (const t of eventData) {
                 if (t) {
-                    this._removeContents(t);
+                    this._removeAllFromScene(t);
                 }
             }
         }
@@ -26793,191 +26771,53 @@ class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Transform
         }
     }
     _updateContents(tile) {
-        this._addContents(tile);
+        if (tile.visible) {
+            this._addAllToScene(tile);
+        }
+        else {
+            this._removeAllFromScene(tile);
+        }
     }
-    _addContents(tile) {
+    _addAllToScene(tile) {
         const contents = (0,_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents)(tile);
         if (contents) {
             for (const c of contents) {
                 const container = c?.container;
                 if (container && container instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.AssetContainer) {
-                    if (c.isLoadedInScene) {
-                        continue;
-                    }
+                    const l = c.loadedInSceneCount ?? 0;
                     try {
-                        if (this._options.showBox) {
-                            const originalTileBox = tile.boundingVolume.box;
-                            if (originalTileBox) {
-                                const transformedTileBox = new Float64Array(originalTileBox);
-                                (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_2__.EcefBoxToBjsInPlace)(transformedTileBox);
-                                this._createMeshFromTileBox(transformedTileBox, this.getScene());
-                            }
+                        if (l == 0) {
+                            this._initializeContainer(tile, container);
                         }
-                        if (this._options.showSphere) {
-                            const originalTileSphere = tile.boundingVolume.sphere;
-                            if (originalTileSphere) {
-                                const transformedTileSphere = new Float64Array(originalTileSphere);
-                                (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_2__.EcefSphereToBjsInPlace)(transformedTileSphere);
-                                this._createMeshFromTileSphere(transformedTileSphere, this.getScene());
-                            }
-                        }
-                        for (const m of container.getNodes().filter((n) => n.parent == null)) {
-                            m.name = `tile ${tile.depth}`;
-                        }
-                        for (const mat of container.materials) {
-                            mat.useLogarithmicDepth = true;
-                        }
-                        try {
-                            container.addAllToScene();
-                        }
-                        catch { }
+                        container.addAllToScene();
                     }
                     finally {
-                        c.isLoadedInScene = true;
+                        c.loadedInSceneCount = l + 1;
                     }
                 }
             }
         }
     }
-    _removeContents(tile) {
+    _initializeContainer(tile, container) {
+        for (const m of container.getNodes().filter((n) => n.parent == null)) {
+            m.name = `tile ${tile.depth}`;
+        }
+        for (const mat of container.materials) {
+            mat.useLogarithmicDepth = true;
+        }
+    }
+    _removeAllFromScene(tile) {
         const contents = (0,_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents)(tile);
         if (contents) {
             for (const c of contents) {
                 const container = c?.container;
                 if (container && container instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.AssetContainer) {
-                    if (!c.isLoadedInScene) {
-                        continue;
-                    }
-                    try {
-                        for (const m of container.getNodes().filter((n) => n.parent == null)) {
-                            console.log(`remove ${m.name}`);
-                        }
-                        container.removeAllFromScene();
-                        c.container = undefined;
-                    }
-                    finally {
-                        c.isLoadedInScene = false;
-                    }
+                    container.removeAllFromScene();
                 }
             }
         }
-    }
-    _createMeshFromTileSphere(sphere, scene, name = "tileSphere", options) {
-        const radius = sphere[3];
-        if (!sphere || radius <= 0) {
-            throw new Error("Invalid sphere: radius must be > 0.");
-        }
-        const cx = sphere[0];
-        const cy = sphere[1];
-        const cz = sphere[2];
-        const diameter = 2 * radius;
-        const mesh = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MeshBuilder.CreateSphere(name, {
-            diameter,
-            segments: Math.max(8, options?.segments ?? 24),
-            updatable: options?.updatable ?? false,
-        }, scene);
-        mesh.position.set(cx, cy, cz);
-        const mat = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(`${name}-mat`, scene);
-        mat.diffuseColor = options?.color ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color3.FromHexString("#FF9D3D");
-        mat.alpha = options?.alpha ?? 0.25;
-        mat.backFaceCulling = !(options?.doubleSided ?? false);
-        mesh.material = mat;
-        if (options?.showEdges) {
-            new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.EdgesRenderer(mesh, 0.995, false);
-        }
-        return mesh;
-    }
-    _createMeshFromTileBox(box, scene, name = "tileBox", options) {
-        if (!box || box.length !== 12) {
-            throw new Error("TileBox must be number[12]: [C, U, V, W].");
-        }
-        const C = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[0], box[1], box[2]);
-        const U = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[3], box[4], box[5]);
-        const V = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[6], box[7], box[8]);
-        const W = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[9], box[10], box[11]);
-        const p000 = C.subtract(U).subtract(V).subtract(W);
-        const p100 = C.add(U).subtract(V).subtract(W);
-        const p010 = C.subtract(U).add(V).subtract(W);
-        const p110 = C.add(U).add(V).subtract(W);
-        const p001 = C.subtract(U).subtract(V).add(W);
-        const p101 = C.add(U).subtract(V).add(W);
-        const p011 = C.subtract(U).add(V).add(W);
-        const p111 = C.add(U).add(V).add(W);
-        const positions = [
-            p000,
-            p100,
-            p110,
-            p010,
-            p001,
-            p101,
-            p111,
-            p011,
-        ].flatMap((p) => [p.x, p.y, p.z]);
-        let indices = [
-            0, 1, 2, 0, 2, 3,
-            4, 6, 5, 4, 7, 6,
-            0, 4, 5, 0, 5, 1,
-            3, 2, 6, 3, 6, 7,
-            0, 3, 7, 0, 7, 4,
-            1, 5, 6, 1, 6, 2,
-        ];
-        const makeDoubleSided = !!options?.doubleSided;
-        if (makeDoubleSided) {
-            const flipped = [];
-            for (let i = 0; i < indices.length; i += 3) {
-                flipped.push(indices[i], indices[i + 2], indices[i + 1]);
-            }
-            indices = indices.concat(flipped);
-        }
-        const normals = [];
-        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData.ComputeNormals(positions, indices, normals);
-        const mesh = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
-        const vd = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData();
-        vd.positions = positions;
-        vd.indices = indices;
-        vd.normals = normals;
-        vd.applyToMesh(mesh, true);
-        const mat = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(`${name}-mat`, scene);
-        mat.diffuseColor = options?.color ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color3.FromHexString("#3DA5FF");
-        mat.alpha = options?.alpha ?? 0.2;
-        mat.backFaceCulling = !makeDoubleSided;
-        mesh.material = mat;
-        if (options?.showEdges) {
-            new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.EdgesRenderer(mesh, 0.999, false);
-        }
-        return mesh;
-    }
-    _createContainerBoundingBox(container, scene) {
-        if (container.meshes.length === 0) {
-            throw new Error("Container has no meshes");
-        }
-        let min = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
-        let max = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
-        for (const mesh of container.meshes) {
-            if (!mesh.getBoundingInfo)
-                continue;
-            const bounding = mesh.getBoundingInfo().boundingBox;
-            const vmin = bounding.minimumWorld;
-            const vmax = bounding.maximumWorld;
-            min = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Minimize(min, vmin);
-            max = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Maximize(max, vmax);
-        }
-        const size = max.subtract(min);
-        const center = min.add(size.scale(0.5));
-        const box = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MeshBuilder.CreateBox("containerBBox", {
-            width: size.x,
-            height: size.y,
-            depth: size.z,
-        }, scene);
-        box.position.copyFrom(center);
-        const mat = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial("bboxMat", scene);
-        mat.wireframe = true;
-        mat.emissiveColor = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Color3.Red();
-        box.material = mat;
-        return box;
     }
 }
-Tile3dScene.DefaultOptions = {};
 //# sourceMappingURL=tile3d.scene.js.map
 
 /***/ }),
@@ -27000,6 +26840,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
 /* harmony import */ var _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
 /* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../vendors */ "./dist/tiles/3d/vendors/google/google.uri.js");
+/* harmony import */ var _camera_planetary__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera.planetary */ "./dist/tiles/3d/babylon/camera.planetary.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+
+
+
 
 
 
@@ -27044,7 +26890,7 @@ class Map3DViewer {
                         this._streamEngine.contentOptions.uriResolver = options.resolver;
                     }
                     this._streamEngine.contentOptions.maxScreenSpaceErrorFn = _vendors__WEBPACK_IMPORTED_MODULE_4__.GoogleTile3dErrorFn;
-                    this._map = new _tile3d_scene__WEBPACK_IMPORTED_MODULE_5__.Tile3dScene(options.names?.map ?? "map", this._scene, {});
+                    this._map = new _tile3d_scene__WEBPACK_IMPORTED_MODULE_5__.Tile3dScene(options.names?.map ?? "map", this._scene);
                     this._streamEngine.linkTo(this._map);
                     this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
                     this._streamEngine.setContext();
@@ -27061,8 +26907,10 @@ class Map3DViewer {
             const scene = this._scene;
             this._camera = this._createCamera(this._getCameraName(), eventData, scene, this._options);
             if (this._camera) {
-                this._cameraSync = (0,_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_6__.SetupCameraStateSync)(this._camera, scene, this.onCameraStateUpdate.bind(this));
                 this._camera.attachControl(this._canvas, true);
+                this._scene.onAfterCameraRenderObservable.addOnce((c, s) => {
+                    this._cameraSync = (0,_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_6__.SetupCameraStateSync)(c, scene, this.onCameraStateUpdate.bind(this));
+                });
             }
             engine.runRenderLoop(() => {
                 scene.render();
@@ -27111,55 +26959,16 @@ class Map3DViewer {
         return this._options.names?.camera ?? "camera";
     }
     _setupArcRotateCamera(box, scene, margin = 1.5) {
-        const C = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[0], box[1], box[2]);
-        const U = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[3], box[4], box[5]);
-        const V = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[6], box[7], box[8]);
-        const W = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[9], box[10], box[11]);
-        const u = U.length();
-        const v = V.length();
-        const w = W.length();
-        const size = Math.hypot(u, v, w);
-        const camera = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera("Camera", Math.PI, Math.PI / 2, size * margin, C, scene);
+        const ellipsoid = this._options.ellipsoid ?? core_geodesy__WEBPACK_IMPORTED_MODULE_7__.Ellipsoid.WGS84;
+        const camera = new _camera_planetary__WEBPACK_IMPORTED_MODULE_8__.PlanetoryCamera("Camera", this._options.initialPosition ?? Map3DViewer.DefaultInitialPosition, scene, ellipsoid);
         camera.minZ = 0;
-        camera.maxZ = size * margin * 2;
-        camera.wheelDeltaPercentage = 0.00005;
-        camera.wheelPrecision = 0;
-        return camera;
-    }
-    _setupUniversalCameraForTilesetRoot(box, scene, canvasWidth, canvasHeight, margin = 1.5, camera) {
-        const C = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[0], box[1], box[2]);
-        const U = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[3], box[4], box[5]);
-        const V = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[6], box[7], box[8]);
-        const W = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(box[9], box[10], box[11]);
-        const u = U.length();
-        const v = V.length();
-        const w = W.length();
-        const aspect = canvasWidth / canvasHeight;
-        const fovY = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Tools.ToRadians(60);
-        const hFov = 2 * Math.atan(Math.tan(fovY / 2) * aspect);
-        const dV = v / Math.tan(fovY / 2);
-        const dH = u / Math.tan(hFov / 2);
-        let d = margin * Math.max(dV, dH);
-        d = Math.max(d, w * 1.05);
-        const forward = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, -1);
-        const up = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Up();
-        const position = C.subtract(forward.scale(d));
-        if (camera) {
-            camera.position = position;
-        }
-        else {
-            camera = camera ?? new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.UniversalCamera(this._getCameraName(), position, scene);
-        }
-        camera.setTarget(C);
-        camera.upVector = up.clone();
-        const R = Math.hypot(u, v, w);
-        camera.minZ = 10;
-        camera.maxZ = d + R * 1.1;
+        camera.maxZ = ellipsoid.semiMajorAxis * margin;
         return camera;
     }
 }
 Map3DViewer.DefaultCanvasId = "";
 Map3DViewer.CanvasKeyword = "canvas";
+Map3DViewer.DefaultInitialPosition = new core_geography__WEBPACK_IMPORTED_MODULE_9__.Geo3(37.7749, -122.4194, 10_000_000);
 //# sourceMappingURL=tile3d.viewer.js.map
 
 /***/ }),
@@ -27370,7 +27179,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
         this._isProcessing = true;
         try {
             if (!this._root) {
-                await this._loadRootAsync();
+                await this._initializeRootAsync();
             }
             const camState = this._pendingState;
             if (!camState)
@@ -27398,29 +27207,32 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
             let coarsenBudget = this._options.maxCoarsenPerFrame ?? Number.MAX_VALUE;
             for (const leaf of currentView.cut) {
                 this._visited.push(leaf);
-                if (!leaf.geometricError === undefined || !leaf.worldBoundingVolume || !leaf.worldBoundingVolume.sphere) {
+                if (leaf.geometricError === undefined || !leaf.worldBoundingVolume?.sphere) {
                     continue;
                 }
-                if (!this._isVisible(leaf, camState, planetRadius)) {
-                    if (leaf.status == TileContentStatus.ready) {
-                        toRemove.push(leaf);
+                const visibleNow = this._isVisible(leaf, camState, planetRadius);
+                if (!visibleNow) {
+                    if (leaf.visible) {
+                        leaf.visible = visibleNow;
+                        this._freeze(leaf);
                     }
                     continue;
+                }
+                if (!leaf.visible) {
+                    leaf.visible = visibleNow;
+                    this._unfreeze(leaf);
                 }
                 const tileCenter = this._cartesianCache[0];
                 tileCenter.resetFromArray(leaf.worldBoundingVolume.sphere);
                 const distanceToCamera = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Distance(camState.worldPosition, tileCenter);
                 leaf.sse = fn(leaf.geometricError, distanceToCamera, this._display.resolution.height, camState.tanFov2);
             }
-            if (toRemove.length) {
-                for (const item of toRemove) {
-                    currentView.cut.delete(item);
-                }
-            }
             for (const leaf of currentView.cut) {
-                mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
-                if (leaf.hasExternal || leaf.sse > mse) {
-                    currentView.refinePQ.enqueue(leaf);
+                if (leaf.visible) {
+                    mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                    if (leaf.hasExternal || leaf.sse > mse) {
+                        currentView.refinePQ.enqueue(leaf);
+                    }
                 }
             }
             const toLoad = [];
@@ -27436,17 +27248,21 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                             case Tile3dRefineType.add: {
                                 for (const child of leaf.children) {
                                     if (this._isVisible(child, camState, planetRadius)) {
-                                        toLoad.push(child);
+                                        child.visible = true;
+                                        if (child.contentStatus == TileContentStatus.idle) {
+                                            toLoad.push(child);
+                                        }
                                     }
                                 }
                                 break;
                             }
                             case Tile3dRefineType.replace:
                             default: {
-                                if (!leaf.contents?.length || leaf.status == TileContentStatus.ready) {
+                                if (!leaf.contents?.length || leaf.contentStatus == TileContentStatus.ready) {
                                     for (const child of leaf.children) {
                                         if (this._isVisible(child, camState, planetRadius)) {
-                                            if (child.status == TileContentStatus.idle) {
+                                            child.visible = true;
+                                            if (child.contentStatus == TileContentStatus.idle) {
                                                 toLoad.push(child);
                                             }
                                         }
@@ -27468,11 +27284,27 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
                 } while (coarsenBudget != 0 && !currentView.coarsenPQ.isEmpty());
             }
             if (toRemove.length) {
+                for (const item of toRemove) {
+                    switch (item.contentStatus) {
+                        case TileContentStatus.pending: {
+                            this._tileContentLoader.cancel(item);
+                            break;
+                        }
+                        case TileContentStatus.ready: {
+                            break;
+                        }
+                    }
+                    if (item.visible) {
+                        currentView.cut.delete(item);
+                    }
+                }
                 this.notifyRemoved(toRemove, -1, this, this);
             }
             if (toLoad.length) {
                 for (const leaf of toLoad) {
-                    this._tileContentLoader.load(leaf);
+                    if (leaf.visible) {
+                        this._tileContentLoader.load(leaf);
+                    }
                 }
             }
         }
@@ -27495,10 +27327,12 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
         }
         return (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IsSphereInFrustum)(leaf.worldBoundingVolume.sphere, camState.frustumPlanes);
     }
+    _freeze(leaf) { }
+    _unfreeze(leaf) { }
     _internalResolveUri(uri) {
         return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
     }
-    async _loadRootAsync() {
+    async _initializeRootAsync() {
         const ts = await this._tileContentLoader.loadTileSetAsync(this._uri);
         if (ts) {
             this._root = ts;
@@ -27516,7 +27350,7 @@ class Tile3dStreamEngine extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceB
     }
     _initializeTile(tile, parent) {
         tile.parent = parent;
-        tile.status = TileContentStatus.idle;
+        tile.contentStatus = TileContentStatus.idle;
         tile.priority = Tile3dNormalPriority;
         if (parent?.worldTransform || tile.transform) {
             const parentTransform = parent?.worldTransform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__.IDENTITY44;
@@ -27636,7 +27470,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsITileset: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
 /* harmony export */   IsTile3d: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
 /* harmony export */   Map3DViewer: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.Map3DViewer),
-/* harmony export */   SetupAdaptiveUniversalCamera: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SetupAdaptiveUniversalCamera),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.PlanetoryCamera),
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SetupCameraStateSync),
 /* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SyncActiveCameraState),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.Tile3dContentLoader),
@@ -27770,6 +27604,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   A: () => (/* binding */ A),
 /* harmony export */   Ainv: () => (/* binding */ Ainv),
+/* harmony export */   BjsToEcefCartInPlace: () => (/* binding */ BjsToEcefCartInPlace),
 /* harmony export */   DistanceFromPlane: () => (/* binding */ DistanceFromPlane),
 /* harmony export */   Dot3: () => (/* binding */ Dot3),
 /* harmony export */   EcefBoxToBjsInPlace: () => (/* binding */ EcefBoxToBjsInPlace),
@@ -27779,6 +27614,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EcefSphereToRYInPlace: () => (/* binding */ EcefSphereToRYInPlace),
 /* harmony export */   EcefToBjs: () => (/* binding */ EcefToBjs),
 /* harmony export */   EcefToBjsBufferInPlace: () => (/* binding */ EcefToBjsBufferInPlace),
+/* harmony export */   EcefToBjsCartInPlace: () => (/* binding */ EcefToBjsCartInPlace),
 /* harmony export */   EcefToBjsInPlace: () => (/* binding */ EcefToBjsInPlace),
 /* harmony export */   EcefToRH: () => (/* binding */ EcefToRH),
 /* harmony export */   EcefToRHBufferInPlace: () => (/* binding */ EcefToRHBufferInPlace),
@@ -27940,6 +27776,18 @@ function EcefToRHInPlace(v, offset = 0, stride = 1) {
 }
 function EcefToBjs(x, y, z) {
     return [-x, z, -y];
+}
+function EcefToBjsCartInPlace(ref) {
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = ref.z;
+    ref.z = -tmp;
+}
+function BjsToEcefCartInPlace(ref) {
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = -ref.z;
+    ref.z = tmp;
 }
 function EcefToRH(x, y, z) {
     return [x, z, -y];
@@ -28209,7 +28057,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsITileset: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
 /* harmony export */   IsTile3d: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
 /* harmony export */   Map3DViewer: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Map3DViewer),
-/* harmony export */   SetupAdaptiveUniversalCamera: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SetupAdaptiveUniversalCamera),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.PlanetoryCamera),
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
 /* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dContentLoader),
@@ -28989,6 +28837,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PathUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PathUtils),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PlaneDefinition),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.PlanetoryCamera),
 /* harmony export */   Point: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Point),
 /* harmony export */   PointerToDragController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PointerToDragController),
 /* harmony export */   Polygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Polygon),
@@ -29010,7 +28859,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RegionCode),
 /* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RoundRobin),
 /* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Scalar),
-/* harmony export */   SetupAdaptiveUniversalCamera: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.SetupAdaptiveUniversalCamera),
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.SetupCameraStateSync),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),

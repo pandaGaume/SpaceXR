@@ -60,7 +60,6 @@ export class PriorityQueue<T> implements IQueue<T> {
     }
 
     // --- internals ---
-
     private _siftUp(i: number): void {
         while (i > 0) {
             const p = (i - 1) >> 1;

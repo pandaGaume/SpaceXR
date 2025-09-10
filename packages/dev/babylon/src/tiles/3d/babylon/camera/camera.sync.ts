@@ -1,11 +1,14 @@
 import * as BABYLON from "@babylonjs/core";
 import { CameraStateListener } from "core/tiles";
+import { CameraMotionDetector } from ".";
 
-function initCameraSync(camera: BABYLON.Camera, scene: BABYLON.Scene) {
-    // Make sure the scene has an active camera
-    if (scene.activeCamera !== camera) {
-        scene.activeCamera = camera;
+declare module "core/tiles/navigation/tiles.navigation.interfaces" {
+    export interface ICameraViewState {
+        viewProjection?: BABYLON.Matrix;
     }
+}
+
+function initCameraSync(camera: BABYLON.Camera) {
     // ArcRotate-only: ensure position/target/radius ⇄ alpha/beta are coherent
     if ((camera as any).rebuildAnglesAndRadius instanceof Function) {
         (camera as any).rebuildAnglesAndRadius();
@@ -17,8 +20,8 @@ function initCameraSync(camera: BABYLON.Camera, scene: BABYLON.Scene) {
 }
 
 /** Build view-projection and frustum without touching fragile code paths on first frame. */
-function getViewProjAndFrustumSafe(camera: BABYLON.Camera, scene: BABYLON.Scene) {
-    const engine = scene.getEngine();
+function getViewProjAndFrustumSafe(camera: BABYLON.Camera) {
+    const engine = camera.getScene().getEngine();
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
 
     let view: BABYLON.Matrix;
@@ -58,9 +61,10 @@ function getViewProjAndFrustumSafe(camera: BABYLON.Camera, scene: BABYLON.Scene)
     return { viewProj, frustumPlanes };
 }
 
-export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scene, onState: CameraStateListener, eps = 1e-6): BABYLON.IDisposable {
+export function SetupCameraStateSync(camera: BABYLON.Camera | CameraMotionDetector, onState: CameraStateListener, eps = 1e-6): BABYLON.IDisposable {
+    const cam = camera instanceof BABYLON.Camera ? camera : camera.camera;
     // One-time stabilization right after creation
-    initCameraSync(camera, scene);
+    initCameraSync(cam);
 
     let viewDirty = true;
     let projDirty = true;
@@ -70,19 +74,19 @@ export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scen
     let lastRot = new BABYLON.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
     let lastFov = Number.NaN;
 
-    const vObs = camera.onViewMatrixChangedObservable.add(() => {
+    const vObs = cam.onViewMatrixChangedObservable.add(() => {
         viewDirty = true;
     });
-    const pObs = camera.onProjectionMatrixChangedObservable.add(() => {
+    const pObs = cam.onProjectionMatrixChangedObservable.add(() => {
         projDirty = true;
     });
-    const aObs = camera.onAfterCheckInputsObservable.add(() => {
+    const aObs = cam.onAfterCheckInputsObservable.add(() => {
         viewDirty = true;
     });
 
     const getWorldRotation = (): BABYLON.Quaternion => {
         // World matrix is already safe due to init + onBeforeRender cadence
-        const wm = camera.getWorldMatrix();
+        const wm = cam.getWorldMatrix();
         const rotM = new BABYLON.Matrix();
         wm.getRotationMatrixToRef(rotM);
         const q = new BABYLON.Quaternion();
@@ -90,18 +94,18 @@ export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scen
         return q;
     };
 
-    const getFovY = (): number => (camera.mode === BABYLON.Camera.PERSPECTIVE_CAMERA ? camera.fov : 0);
+    const getFovY = (): number => (cam.mode === BABYLON.Camera.PERSPECTIVE_CAMERA ? cam.fov : 0);
 
-    const frameObs = scene.onBeforeRenderObservable.add(() => {
+    const frameObs = cam.getScene().onBeforeRenderObservable.add(() => {
         if (!viewDirty && !projDirty) return;
 
         // Keep matrices coherent each frame (cheap no-ops if nothing changed)
-        if ((camera as any).rebuildAnglesAndRadius instanceof Function) {
-            (camera as any).rebuildAnglesAndRadius();
+        if ((cam as any).rebuildAnglesAndRadius instanceof Function) {
+            (cam as any).rebuildAnglesAndRadius();
         }
-        camera.computeWorldMatrix();
+        cam.computeWorldMatrix();
 
-        const pos = camera.globalPosition;
+        const pos = cam.globalPosition;
         const rot = getWorldRotation();
         const fov = getFovY();
 
@@ -131,7 +135,7 @@ export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scen
             lastFov = fov;
 
             // Build frustum safely
-            const { viewProj, frustumPlanes } = getViewProjAndFrustumSafe(camera, scene);
+            const { viewProj, frustumPlanes } = getViewProjAndFrustumSafe(cam);
 
             onState({
                 worldPosition: pos.clone(),
@@ -149,41 +153,10 @@ export function SetupCameraStateSync(camera: BABYLON.Camera, scene: BABYLON.Scen
 
     return {
         dispose() {
-            camera.onViewMatrixChangedObservable.remove(vObs);
-            camera.onProjectionMatrixChangedObservable.remove(pObs);
-            camera.onAfterCheckInputsObservable.remove(aObs);
-            scene.onBeforeRenderObservable.remove(frameObs);
+            cam.onViewMatrixChangedObservable.remove(vObs);
+            cam.onProjectionMatrixChangedObservable.remove(pObs);
+            cam.onAfterCheckInputsObservable.remove(aObs);
+            cam.getScene()?.onBeforeRenderObservable.remove(frameObs);
         },
     } as BABYLON.IDisposable;
-}
-
-export function SyncActiveCameraState(scene: BABYLON.Scene, onState: CameraStateListener, eps = 1e-6): BABYLON.IDisposable {
-    let current: BABYLON.Camera | null = scene.activeCamera ?? null;
-    let currentSync: BABYLON.IDisposable | null = null;
-
-    if (current) {
-        currentSync = SetupCameraStateSync(current, scene, onState, eps);
-    }
-
-    const camChangedObs = scene.onActiveCameraChanged.add(() => {
-        const next = scene.activeCamera ?? null;
-        if (next === current) return;
-
-        if (currentSync) {
-            currentSync.dispose();
-            currentSync = null;
-        }
-        current = next;
-        if (current) currentSync = SetupCameraStateSync(current, scene, onState, eps);
-    });
-
-    return {
-        dispose() {
-            if (currentSync) {
-                currentSync.dispose();
-                currentSync = null;
-            }
-            scene.onActiveCameraChanged.remove(camChangedObs);
-        },
-    };
 }

@@ -4,11 +4,11 @@ import { Cartesian3 } from "core/geometry";
 import { PriorityQueue } from "core/collections";
 import { WebClient } from "core/io";
 import { PathUtils } from "core/utils";
+import { EventState, Observable } from "core/events";
+import { Ellipsoid } from "core/geodesy";
 
 import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, IsITileset, ITile3d, ITileset, SphereType } from "../interfaces";
 import { EcefBoxToBjsInPlace, EcefSphereToBjsInPlace, IDENTITY44, IsSphereInFrustum, IsTileSphereBeyondHorizon, Mat44MultToRef, Mat44Type } from "../interfaces/math/math";
-import { EventState, Observable } from "core/events";
-import { Ellipsoid } from "core/geodesy";
 
 export const Tile3dMinPriority: number = 0;
 export const Tile3dNormalPriority: number = 30;
@@ -62,6 +62,8 @@ export enum TileContentStatus {
 }
 
 /** Augmentation for the engine */
+
+
 declare module "../interfaces/tile3d" {
     interface ITile3d extends IStreamableNode {
         contentStatus?: TileContentStatus;

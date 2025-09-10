@@ -23006,61 +23006,6 @@ ValidableBase.VALID_PROPERTY_NAME = "valid";
 
 /***/ }),
 
-/***/ "./dist/camera/camera.geodetic.js":
-/*!****************************************!*\
-  !*** ./dist/camera/camera.geodetic.js ***!
-  \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GeodeticCamera: () => (/* binding */ GeodeticCamera)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.system.js");
-
-
-class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera {
-    constructor(name, scene, ellipsoid) {
-        const globeRadius = ellipsoid.semiMajorAxis;
-        const alpha = 0;
-        const beta = 0;
-        const radius = globeRadius * 2.5;
-        const target = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
-        super(name, alpha, beta, radius, target, scene);
-        this._system = new core_geodesy__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem(ellipsoid);
-        this.lowerRadiusLimit = globeRadius;
-        this.upperRadiusLimit = globeRadius * 10;
-        this.allowUpsideDown = false;
-        this.wheelPrecision = 1000;
-        this.panningSensibility = 0;
-        this.inertia = 0.8;
-    }
-    get system() {
-        return this._system;
-    }
-}
-//# sourceMappingURL=camera.geodetic.js.map
-
-/***/ }),
-
-/***/ "./dist/camera/index.js":
-/*!******************************!*\
-  !*** ./dist/camera/index.js ***!
-  \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera_geodetic__WEBPACK_IMPORTED_MODULE_0__.GeodeticCamera)
-/* harmony export */ });
-/* harmony import */ var _camera_geodetic__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.geodetic */ "./dist/camera/camera.geodetic.js");
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
 /***/ "./dist/dem/dem.interfaces.js":
 /*!************************************!*\
   !*** ./dist/dem/dem.interfaces.js ***!
@@ -23975,488 +23920,6 @@ _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR__cop
 
 /***/ }),
 
-/***/ "./dist/gltf/2.0/extensions/EXT_instance_features.js":
-/*!***********************************************************!*\
-  !*** ./dist/gltf/2.0/extensions/EXT_instance_features.js ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_instance_features: () => (/* binding */ EXT_instance_features)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
-/* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/gltf/2.0/extensions/EXT_mesh_features.js");
-
-
-const NAME = "EXT_instance_features";
-class EXT_instance_features {
-    constructor(loader) {
-        this.name = NAME;
-        this._loader = loader;
-        this.enabled = this._loader.isExtensionUsed(NAME) && this._loader.isExtensionUsed(_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name);
-    }
-    dispose() {
-        this._loader = null;
-    }
-    loadNodeAsync(context, node, assign) {
-        if (node.extensions) {
-            const ext_gpu_instancing = node.extensions[_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name];
-            if (ext_gpu_instancing) {
-                return _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.LoadExtensionAsync(context, node, this.name, (extensionContext, extension) => {
-                    const promise = this._loader.loadNodeAsync(`/nodes/${node.index}`, node, assign);
-                    if (!node._primitiveBabylonMeshes) {
-                        return promise;
-                    }
-                    for (const babylonMesh of node._primitiveBabylonMeshes) {
-                        const babylonObject = babylonMesh;
-                        const gpu_instancing_context = `${context}.${_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name}`;
-                        const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
-                        for (const fid of extension.featureIds) {
-                            featureIds.push(fid);
-                            if (fid.attribute != undefined) {
-                                const n = _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_1__.EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
-                                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.ArrayItem.Get(`${gpu_instancing_context}/attributes/${n}`, this._loader.gltf.accessors, ext_gpu_instancing.attributes[n]);
-                                this._loader._loadIndicesAccessorAsync(`/accessors/${accessor.bufferView}`, accessor).then((data) => {
-                                    babylonObject.thinInstanceIds = babylonObject.thinInstanceIds ?? [];
-                                    babylonObject.thinInstanceIds.push(data);
-                                });
-                            }
-                        }
-                    }
-                    return promise;
-                });
-            }
-        }
-        return null;
-    }
-}
-_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_instance_features(loader));
-//# sourceMappingURL=EXT_instance_features.js.map
-
-/***/ }),
-
-/***/ "./dist/gltf/2.0/extensions/EXT_mesh_features.js":
-/*!*******************************************************!*\
-  !*** ./dist/gltf/2.0/extensions/EXT_mesh_features.js ***!
-  \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_mesh_features: () => (/* binding */ EXT_mesh_features),
-/* harmony export */   HasFeatureIds: () => (/* binding */ HasFeatureIds)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
-
-
-const NAME = "EXT_mesh_features";
-function HasFeatureIds(b) {
-    if (b === null || b === undefined || typeof b !== "object")
-        return false;
-    const obj = b;
-    return obj.featureIds !== undefined && Array.isArray(obj.featureIds) && obj.featureIds.length != 0;
-}
-class EXT_mesh_features {
-    static BuildKind(prefix, n) {
-        return `${prefix}${n}`;
-    }
-    constructor(loader) {
-        this.name = NAME;
-        this._loader = loader;
-        this.enabled = this._loader.isExtensionUsed(NAME);
-    }
-    dispose() {
-        this._loader = null;
-    }
-    _loadVertexDataAsync(context, primitive, babylonMesh) {
-        if (primitive.extensions) {
-            const attributes = primitive.attributes;
-            if (!attributes) {
-                throw new Error(`${context}: Attributes are missing`);
-            }
-            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Geometry(babylonMesh.name, this._loader._babylonScene);
-            const promises = new Array();
-            if (primitive.indices == undefined) {
-                babylonMesh.isUnIndexed = true;
-            }
-            else {
-                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.ArrayItem.Get(`${context}/indices`, this._loader._gltf.accessors, primitive.indices);
-                promises.push(this._loader._loadIndicesAccessorAsync(`/accessors/${accessor.index}`, accessor).then((data) => {
-                    babylonGeometry.setIndices(data);
-                }));
-            }
-            const loadAttribute = (name, kind, callback) => {
-                if (attributes[name] == undefined) {
-                    return;
-                }
-                babylonMesh._delayInfo = babylonMesh._delayInfo || [];
-                if (babylonMesh._delayInfo.indexOf(kind) === -1) {
-                    babylonMesh._delayInfo.push(kind);
-                }
-                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.ArrayItem.Get(`${context}/attributes/${name}`, this._loader._gltf.accessors, attributes[name]);
-                promises.push(this._loader._loadVertexAccessorAsync(`/accessors/${accessor.index}`, accessor, kind).then((babylonVertexBuffer) => {
-                    if (babylonVertexBuffer.getKind() === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind && !this._loader.parent.alwaysComputeBoundingBox && !babylonMesh.skeleton) {
-                        if (accessor.min && accessor.max) {
-                            const min = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[0].copyFromFloats(...accessor.min);
-                            const max = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[1].copyFromFloats(...accessor.max);
-                            if (accessor.normalized && accessor.componentType !== 5126) {
-                                let divider = 1;
-                                switch (accessor.componentType) {
-                                    case 5120:
-                                        divider = 127.0;
-                                        break;
-                                    case 5121:
-                                        divider = 255.0;
-                                        break;
-                                    case 5122:
-                                        divider = 32767.0;
-                                        break;
-                                    case 5123:
-                                        divider = 65535.0;
-                                        break;
-                                }
-                                const oneOverDivider = 1 / divider;
-                                min.scaleInPlace(oneOverDivider);
-                                max.scaleInPlace(oneOverDivider);
-                            }
-                            babylonGeometry._boundingInfo = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BoundingInfo(min, max);
-                            babylonGeometry.useBoundingInfoFromGeometry = true;
-                        }
-                    }
-                    babylonGeometry.setVerticesBuffer(babylonVertexBuffer, accessor.count);
-                }));
-                if (kind == _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesIndicesExtraKind) {
-                    babylonMesh.numBoneInfluencers = 8;
-                }
-                if (callback) {
-                    callback(accessor);
-                }
-            };
-            const attributeMappings = [
-                ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind, null],
-                ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV2Kind, null],
-                ["TEXCOORD_2", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV3Kind, null],
-                ["TEXCOORD_3", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV4Kind, null],
-                ["TEXCOORD_4", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV5Kind, null],
-                ["TEXCOORD_5", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV6Kind, null],
-                ["POSITION", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind, null],
-                ["NORMAL", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.NormalKind, null],
-                ["TANGENT", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.TangentKind, null],
-                ["JOINTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesIndicesKind, null],
-                ["WEIGHTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesWeightsKind, null],
-                ["JOINTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesIndicesExtraKind, null],
-                ["WEIGHTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesWeightsExtraKind, null],
-                [
-                    "COLOR_0",
-                    _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.ColorKind,
-                    (accessor) => {
-                        if (accessor.type === "VEC4") {
-                            babylonMesh.hasVertexAlpha = true;
-                        }
-                    },
-                ],
-            ];
-            const extension = primitive.extensions[EXT_mesh_features.name];
-            if (extension && extension.featureIds) {
-                const babylonObject = babylonMesh;
-                const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
-                for (const i of extension.featureIds) {
-                    featureIds.push(i);
-                }
-                let vfidCount = 0;
-                const implicit = [];
-                for (const fid of featureIds) {
-                    if (fid.attribute != undefined) {
-                        const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
-                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
-                        attributeMappings.push([n, fid.vertexAttributeKind, null]);
-                        vfidCount++;
-                        continue;
-                    }
-                    if (fid.texture?.texCoord != undefined) {
-                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
-                        this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
-                            fid.textureData = babylonTexture;
-                        });
-                        continue;
-                    }
-                    implicit.push(fid);
-                }
-                for (const fid of implicit) {
-                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
-                    const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
-                    babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
-                }
-            }
-            attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
-                loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
-            });
-            return Promise.all(promises).then(() => {
-                return babylonGeometry;
-            });
-        }
-        return null;
-    }
-    _buildVertexBufferForImplicitId(count, kind) {
-        const generatedIndices = Array.from({ length: count }, (_, i) => i);
-        const engine = this._loader._babylonScene.getEngine();
-        return new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer(engine, generatedIndices, kind, false, undefined, 4, false, 0, 1, 5126);
-    }
-}
-EXT_mesh_features.VerticeKindPrefix = "fid";
-EXT_mesh_features.uvKindPrefix = "uv";
-_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_mesh_features(loader));
-//# sourceMappingURL=EXT_mesh_features.js.map
-
-/***/ }),
-
-/***/ "./dist/gltf/2.0/extensions/EXT_structural_metadata.js":
-/*!*************************************************************!*\
-  !*** ./dist/gltf/2.0/extensions/EXT_structural_metadata.js ***!
-  \*************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_structural_metadata: () => (/* binding */ EXT_structural_metadata),
-/* harmony export */   IsHasStructuralMetadata: () => (/* binding */ IsHasStructuralMetadata),
-/* harmony export */   IsStructuralMetadata: () => (/* binding */ IsStructuralMetadata)
-/* harmony export */ });
-/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_1__);
-
-
-const NAME = "EXT_structural_metadata";
-function IsStructuralMetadata(b) {
-    if (b === null || b === undefined || typeof b !== "object")
-        return false;
-    const obj = b;
-    return obj.schema !== undefined;
-}
-function IsHasStructuralMetadata(b) {
-    if (b === null || b === undefined || typeof b !== "object")
-        return false;
-    const obj = b;
-    return obj.structuralMetadata !== undefined;
-}
-class EXT_structural_metadata {
-    constructor(loader) {
-        this.name = NAME;
-        this._metadata = null;
-        this._loader = loader;
-        this.enabled = this._loader.isExtensionUsed(NAME);
-    }
-    onLoading() {
-        const extensions = this._loader.gltf.extensions;
-        if (extensions && extensions[this.name]) {
-            const extension = extensions[this.name];
-            const babylonObject = this._loader.rootBabylonMesh;
-            babylonObject.structuralMetadata = {
-                schema: extension.schema,
-                propertyTables: extension.propertyTables,
-                propertyAttributes: extension.propertyAttributes,
-                propertyTextures: extension.propertyTextures,
-            };
-            this._metadata = babylonObject.structuralMetadata;
-        }
-    }
-    _loadVertexDataAsync(context, primitive, babylonMesh) {
-        if (primitive.extensions) {
-            const attributes = primitive.attributes;
-            if (!attributes) {
-                throw new Error(`${context}: Attributes are missing`);
-            }
-            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.Geometry(babylonMesh.name, this._loader._babylonScene);
-            const promises = new Array();
-            const loadAttribute = (name, kind, callback) => {
-                if (attributes[name] == undefined) {
-                    return;
-                }
-                babylonMesh._delayInfo = babylonMesh._delayInfo || [];
-                if (babylonMesh._delayInfo.indexOf(kind) === -1) {
-                    babylonMesh._delayInfo.push(kind);
-                }
-                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.ArrayItem.Get(`${context}/attributes/${name}`, this._loader._gltf.accessors, attributes[name]);
-                promises.push(this._loader._loadVertexAccessorAsync(`/accessors/${accessor.index}`, accessor, kind).then((babylonVertexBuffer) => {
-                    if (babylonVertexBuffer.getKind() === _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.PositionKind && !this._loader.parent.alwaysComputeBoundingBox && !babylonMesh.skeleton) {
-                        if (accessor.min && accessor.max) {
-                            const min = _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.TmpVectors.Vector3[0].copyFromFloats(...accessor.min);
-                            const max = _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.TmpVectors.Vector3[1].copyFromFloats(...accessor.max);
-                            if (accessor.normalized && accessor.componentType !== 5126) {
-                                let divider = 1;
-                                switch (accessor.componentType) {
-                                    case 5120:
-                                        divider = 127.0;
-                                        break;
-                                    case 5121:
-                                        divider = 255.0;
-                                        break;
-                                    case 5122:
-                                        divider = 32767.0;
-                                        break;
-                                    case 5123:
-                                        divider = 65535.0;
-                                        break;
-                                }
-                                const oneOverDivider = 1 / divider;
-                                min.scaleInPlace(oneOverDivider);
-                                max.scaleInPlace(oneOverDivider);
-                            }
-                            babylonGeometry._boundingInfo = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.BoundingInfo(min, max);
-                            babylonGeometry.useBoundingInfoFromGeometry = true;
-                        }
-                    }
-                    babylonGeometry.setVerticesBuffer(babylonVertexBuffer, accessor.count);
-                }));
-                if (kind == _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesExtraKind) {
-                    babylonMesh.numBoneInfluencers = 8;
-                }
-                if (callback) {
-                    callback(accessor);
-                }
-            };
-            const attributeMappings = [
-                ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UVKind, null],
-                ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV2Kind, null],
-                ["TEXCOORD_2", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV3Kind, null],
-                ["TEXCOORD_3", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV4Kind, null],
-                ["TEXCOORD_4", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV5Kind, null],
-                ["TEXCOORD_5", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV6Kind, null],
-                ["POSITION", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.PositionKind, null],
-                ["NORMAL", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.NormalKind, null],
-                ["TANGENT", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.TangentKind, null],
-                ["JOINTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesKind, null],
-                ["WEIGHTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesWeightsKind, null],
-                ["JOINTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesExtraKind, null],
-                ["WEIGHTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesWeightsExtraKind, null],
-                [
-                    "COLOR_0",
-                    _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.ColorKind,
-                    (accessor) => {
-                        if (accessor.type === "VEC4") {
-                            babylonMesh.hasVertexAlpha = true;
-                        }
-                    },
-                ],
-            ];
-            const extension = primitive.extensions[EXT_structural_metadata.name];
-            if (extension && this._metadata) {
-                if (extension.propertyAttributes && this._metadata.propertyAttributes) {
-                    for (const i of extension.propertyAttributes) {
-                        if (i >= 0 && i < this._metadata.propertyAttributes.length) {
-                            const ref = this._metadata.propertyAttributes[i];
-                            for (const propertyName in ref.properties) {
-                                const v = ref.properties[propertyName];
-                                attributeMappings.push([v.attribute, v.attribute, null]);
-                            }
-                        }
-                    }
-                }
-                if (extension.propertyTextures && this._metadata.propertyTextures) {
-                    for (const i of extension.propertyTextures) {
-                        if (i >= 0 && i < this._metadata.propertyTextures.length) {
-                            const ref = this._metadata.propertyTextures[i];
-                            for (const propertyName in ref.properties) {
-                                const textInfos = ref.properties[propertyName];
-                                this._loader.loadTextureInfoAsync(context, textInfos).then((babylonTexture) => {
-                                    ref.textures = ref.textures || [];
-                                    ref.textures[propertyName] = babylonTexture;
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
-                loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
-            });
-            return Promise.all(promises).then(() => {
-                return babylonGeometry;
-            });
-        }
-        return null;
-    }
-    dispose() {
-        this._loader = null;
-    }
-}
-_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_structural_metadata(loader));
-//# sourceMappingURL=EXT_structural_metadata.js.map
-
-/***/ }),
-
-/***/ "./dist/gltf/2.0/extensions/index.js":
-/*!*******************************************!*\
-  !*** ./dist/gltf/2.0/extensions/index.js ***!
-  \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__.EXT_instance_features),
-/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
-/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.EXT_structural_metadata),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
-/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.IsHasStructuralMetadata),
-/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.IsStructuralMetadata)
-/* harmony export */ });
-/* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/gltf/2.0/extensions/EXT_mesh_features.js");
-/* harmony import */ var _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_instance_features */ "./dist/gltf/2.0/extensions/EXT_instance_features.js");
-/* harmony import */ var _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EXT_structural_metadata */ "./dist/gltf/2.0/extensions/EXT_structural_metadata.js");
-
-
-
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/gltf/2.0/index.js":
-/*!********************************!*\
-  !*** ./dist/gltf/2.0/index.js ***!
-  \********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
-/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
-/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
-/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
-/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata)
-/* harmony export */ });
-/* harmony import */ var _extensions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./extensions */ "./dist/gltf/2.0/extensions/index.js");
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ "./dist/gltf/index.js":
-/*!****************************!*\
-  !*** ./dist/gltf/index.js ***!
-  \****************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
-/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
-/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
-/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
-/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata)
-/* harmony export */ });
-/* harmony import */ var _2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./2.0 */ "./dist/gltf/2.0/index.js");
-
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
 /***/ "./dist/map/display/index.js":
 /*!***********************************!*\
   !*** ./dist/map/display/index.js ***!
@@ -25108,7 +24571,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../display */ "./dist/display/display.virtual.js");
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map */ "./dist/map/map.js");
-/* harmony import */ var _tiles_3d_babylon_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/3d/babylon/tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
+/* harmony import */ var _tiles_3d_babylon_camera_camera_sync__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/3d/babylon/camera/camera.sync */ "./dist/tiles/3d/babylon/camera/camera.sync.js");
 
 
 
@@ -25125,9 +24588,8 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         let current = scene.activeCamera ?? null;
         let listener = this._onCameraState.bind(this);
         if (current) {
-            this._cameraMonitoring = (0,_tiles_3d_babylon_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SetupCameraStateSync)(current, scene, listener);
+            this._cameraMonitoring = (0,_tiles_3d_babylon_camera_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SetupCameraStateSync)(current, listener);
         }
-        this._activCameraChangeMonitor = (0,_tiles_3d_babylon_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_1__.SyncActiveCameraState)(scene, listener);
     }
     get layers() {
         return this._map.layers;
@@ -25212,7 +24674,6 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
         this._pointerController?.dispose();
         this._beforeRenderObserver?.remove();
         this._cameraMonitoring?.dispose();
-        this._activCameraChangeMonitor?.dispose();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
     }
@@ -26353,10 +25814,239 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./dist/tiles/3d/babylon/camera.planetary.js":
-/*!***************************************************!*\
-  !*** ./dist/tiles/3d/babylon/camera.planetary.js ***!
-  \***************************************************/
+/***/ "./dist/tiles/3d/babylon/camera/camera.motion.detector.js":
+/*!****************************************************************!*\
+  !*** ./dist/tiles/3d/babylon/camera/camera.motion.detector.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CameraMotionDetector: () => (/* binding */ CameraMotionDetector),
+/* harmony export */   CameraMotionState: () => (/* binding */ CameraMotionState)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _camera_state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./camera.state */ "./dist/tiles/3d/babylon/camera/camera.state.js");
+
+
+var CameraMotionState;
+(function (CameraMotionState) {
+    CameraMotionState[CameraMotionState["Moving"] = 0] = "Moving";
+    CameraMotionState[CameraMotionState["Settling"] = 1] = "Settling";
+    CameraMotionState[CameraMotionState["Stable"] = 2] = "Stable";
+})(CameraMotionState || (CameraMotionState = {}));
+class CameraMotionDetector {
+    constructor(camera, options = {}) {
+        this.camera = camera;
+        this.state = CameraMotionState.Moving;
+        this.lastT = performance.now();
+        this.lastPos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.NaN, Number.NaN, Number.NaN);
+        this.lastRot = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
+        this.lastFov = Number.NaN;
+        this.emaPos = 0;
+        this.emaRot = 0;
+        this.emaFov = 0;
+        this.belowSince = 0;
+        this.lastFiredStable = -Infinity;
+        this.sub = null;
+        this.globalFrameCounter = 0;
+        this.movingFrameCounter = 0;
+        this.onMoving = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        this.onSettling = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        this.onStable = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        this.onTick = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        this.onMovingTick = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        this.opts = {
+            settlePos_mps: options.settlePos_mps ?? 0.1,
+            settleRot_rps: options.settleRot_rps ?? (0.5 * Math.PI) / 180,
+            settleFov_rps: options.settleFov_rps ?? (0.5 * Math.PI) / 180,
+            hysteresisFactor: options.hysteresisFactor ?? 1.5,
+            dwell_ms: options.dwell_ms ?? 200,
+            emaAlpha: options.emaAlpha ?? 0.3,
+            cooldown_ms: options.cooldown_ms ?? 250,
+            forceTickEveryNFrames: options.forceTickEveryNFrames ?? 0,
+            movingTickEveryNFrames: options.movingTickEveryNFrames ?? 0,
+        };
+        this.sub = this.camera.onAfterCheckInputsObservable.add(() => this._tick());
+    }
+    _tick() {
+        const now = performance.now();
+        const dt = Math.max((now - this.lastT) / 1000, 1e-6);
+        this.lastT = now;
+        const pos = this.camera.globalPosition;
+        const rot = _camera_state__WEBPACK_IMPORTED_MODULE_1__.CameraState.GetWorldRotationToRef(this.camera, _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.Identity());
+        const fov = this.camera.fov ?? 0;
+        if (Number.isNaN(this.lastPos.x)) {
+            this.lastPos.copyFrom(pos);
+            this.lastRot.copyFrom(rot);
+            this.lastFov = fov;
+            return;
+        }
+        const vPos = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Distance(pos, this.lastPos) / dt;
+        const dq = rot.multiply(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.Inverse(this.lastRot));
+        const w = Math.min(1, Math.max(-1, dq.w));
+        const angle = 2 * Math.acos(w);
+        const vRot = angle / dt;
+        const vFov = Math.abs(fov - this.lastFov) / dt;
+        const a = this.opts.emaAlpha;
+        this.emaPos = a * vPos + (1 - a) * this.emaPos;
+        this.emaRot = a * vRot + (1 - a) * this.emaRot;
+        this.emaFov = a * vFov + (1 - a) * this.emaFov;
+        this.lastPos.copyFrom(pos);
+        this.lastRot.copyFrom(rot);
+        this.lastFov = fov;
+        const underSettle = this.emaPos <= this.opts.settlePos_mps && this.emaRot <= this.opts.settleRot_rps && this.emaFov <= this.opts.settleFov_rps;
+        const overResume = this.emaPos >= this.opts.settlePos_mps * this.opts.hysteresisFactor ||
+            this.emaRot >= this.opts.settleRot_rps * this.opts.hysteresisFactor ||
+            this.emaFov >= this.opts.settleFov_rps * this.opts.hysteresisFactor;
+        switch (this.state) {
+            case CameraMotionState.Moving: {
+                if (this.opts.movingTickEveryNFrames > 0) {
+                    this.movingFrameCounter++;
+                    if (this.movingFrameCounter >= this.opts.movingTickEveryNFrames) {
+                        this.movingFrameCounter = 0;
+                        this.onMovingTick.notifyObservers();
+                    }
+                }
+                if (underSettle) {
+                    this.state = CameraMotionState.Settling;
+                    this.belowSince = this.lastT;
+                    this.onSettling.notifyObservers();
+                }
+                break;
+            }
+            case CameraMotionState.Settling: {
+                if (overResume) {
+                    this.state = CameraMotionState.Moving;
+                    this.onMoving.notifyObservers();
+                }
+                else if (now - this.belowSince >= this.opts.dwell_ms) {
+                    this.state = CameraMotionState.Stable;
+                    if (now - this.lastFiredStable >= this.opts.cooldown_ms) {
+                        this.lastFiredStable = now;
+                        this.onStable.notifyObservers();
+                    }
+                }
+                break;
+            }
+            case CameraMotionState.Stable: {
+                if (overResume) {
+                    this.state = CameraMotionState.Moving;
+                    this.onMoving.notifyObservers();
+                }
+                break;
+            }
+        }
+        if (this.opts.forceTickEveryNFrames > 0) {
+            this.globalFrameCounter++;
+            if (this.globalFrameCounter >= this.opts.forceTickEveryNFrames) {
+                this.globalFrameCounter = 0;
+                this.onTick.notifyObservers();
+            }
+        }
+    }
+    armMoving() {
+        if (this.state !== CameraMotionState.Moving) {
+            this.state = CameraMotionState.Moving;
+            this.onMoving.notifyObservers();
+        }
+    }
+    getState() {
+        return this.state;
+    }
+    dispose() {
+        if (this.sub) {
+            this.camera.onAfterCheckInputsObservable.remove(this.sub);
+            this.sub = null;
+        }
+        this.onMoving.clear();
+        this.onSettling.clear();
+        this.onStable.clear();
+        this.onTick.clear();
+        this.onMovingTick.clear();
+    }
+}
+//# sourceMappingURL=camera.motion.detector.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/camera/camera.planetary.inputs.js":
+/*!*****************************************************************!*\
+  !*** ./dist/tiles/3d/babylon/camera/camera.planetary.inputs.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PlanetoryWheelMetersInput: () => (/* binding */ PlanetoryWheelMetersInput)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
+
+
+class PlanetoryWheelMetersInput {
+    constructor(ellipsoid, metersPerStep, clampAlt, invert = false) {
+        this.ellipsoid = ellipsoid;
+        this.metersPerStep = metersPerStep;
+        this.clampAlt = clampAlt;
+        this.invert = invert;
+    }
+    getClassName() {
+        return "PlanetoryWheelMetersInput";
+    }
+    getSimpleName() {
+        return "wheelMeters";
+    }
+    attachControl() {
+        const scene = this.camera.getScene();
+        this._obs = scene.onPointerObservable.add((pi) => {
+            if (pi.type !== _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERWHEEL)
+                return;
+            const ev = pi.event;
+            const raw = ev.deltaY ?? 0;
+            if (!raw)
+                return;
+            const pos = this.camera.position;
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_1__.BjsToEcefCartInPlace)(pos);
+            const rlen = pos.length();
+            if (!isFinite(rlen) || rlen === 0)
+                return;
+            const dir = pos.scale(1 / rlen);
+            const R = this.ellipsoid.radiusAtPosition(dir.x, dir.y, dir.z);
+            const alt = rlen - R;
+            const mag = Math.min(1, Math.abs(raw) / 120);
+            const stepMeters = this.metersPerStep(alt, raw) * mag;
+            const sgn = (raw > 0 ? 1 : -1) * (this.invert ? -1 : 1);
+            let newAlt = this.clampAlt(alt + sgn * stepMeters);
+            const newRadiusFromCenter = R + newAlt;
+            const targetIsCenter = this.camera.target.lengthSquared() < 1e-10;
+            if (targetIsCenter) {
+                this.camera.radius = newRadiusFromCenter;
+            }
+            else {
+                const newPos = dir.scale(newRadiusFromCenter);
+                (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_1__.EcefToBjsCartInPlace)(newPos);
+                this.camera.setPosition(newPos);
+            }
+            ev.preventDefault();
+        });
+    }
+    detachControl() {
+        if (this._obs)
+            this.camera.getScene().onPointerObservable.remove(this._obs);
+        this._obs = undefined;
+    }
+}
+//# sourceMappingURL=camera.planetary.inputs.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/camera/camera.planetary.js":
+/*!**********************************************************!*\
+  !*** ./dist/tiles/3d/babylon/camera/camera.planetary.js ***!
+  \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -26370,7 +26060,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.interfaces.js");
 /* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
-/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
+/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
 
 
 
@@ -26437,61 +26127,111 @@ PlanetoryCamera.DefaultAltitudeRange = new core_math__WEBPACK_IMPORTED_MODULE_4_
 
 /***/ }),
 
-/***/ "./dist/tiles/3d/babylon/index.js":
-/*!****************************************!*\
-  !*** ./dist/tiles/3d/babylon/index.js ***!
-  \****************************************/
+/***/ "./dist/tiles/3d/babylon/camera/camera.state.js":
+/*!******************************************************!*\
+  !*** ./dist/tiles/3d/babylon/camera/camera.state.js ***!
+  \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tile3d_viewer__WEBPACK_IMPORTED_MODULE_3__.Map3DViewer),
-/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _camera_planetary__WEBPACK_IMPORTED_MODULE_4__.PlanetoryCamera),
-/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
-/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState),
-/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tile3d_loader__WEBPACK_IMPORTED_MODULE_2__.Tile3dContentLoader),
-/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tile3d_scene__WEBPACK_IMPORTED_MODULE_1__.Tile3dScene)
+/* harmony export */   CameraState: () => (/* binding */ CameraState)
 /* harmony export */ });
-/* harmony import */ var _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
-/* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/babylon/tile3d.scene.js");
-/* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
-/* harmony import */ var _tile3d_viewer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.viewer */ "./dist/tiles/3d/babylon/tile3d.viewer.js");
-/* harmony import */ var _camera_planetary__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./camera.planetary */ "./dist/tiles/3d/babylon/camera.planetary.js");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-
-
-
-
-//# sourceMappingURL=index.js.map
+class CameraState {
+    constructor() {
+        this.worldPosition = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
+        this.worldRotation = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.Identity();
+        this.fovY = 0;
+        this.tanFov2 = 0;
+    }
+    static GetFovY(camera) {
+        return camera.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA ? camera.fov ?? 0 : 0;
+    }
+    static GetWorldRotationToRef(camera, ref) {
+        const wm = camera.getWorldMatrix();
+        wm.getRotationMatrixToRef(CameraState._cachedMatrix);
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.FromRotationMatrixToRef(CameraState._cachedMatrix, ref);
+        return ref;
+    }
+    static UpdateToRef(cam, state) {
+        if (cam.rebuildAnglesAndRadius instanceof Function) {
+            cam.rebuildAnglesAndRadius();
+        }
+        cam.computeWorldMatrix();
+        const pos = cam.globalPosition;
+        CameraState.GetWorldRotationToRef(cam, CameraState._cachedQuaternion);
+        const fov = CameraState.GetFovY(cam);
+        const engine = cam.getScene().getEngine();
+        const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
+        const near = cam.minZ;
+        const far = cam.maxZ;
+        const up = cam.upVector;
+        const vp = cam.getTransformationMatrix();
+        const planes = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(vp);
+        if (state.worldPosition?.copyFrom) {
+            state.worldPosition.copyFrom(pos);
+        }
+        else {
+            state.worldPosition = pos.clone();
+        }
+        if (state.worldRotation?.copyFrom) {
+            state.worldRotation.copyFrom(CameraState._cachedQuaternion);
+        }
+        else {
+            state.worldRotation = CameraState._cachedQuaternion.clone();
+        }
+        if (state.up) {
+            state.up.copyFrom?.(up) ?? (state.up = up.clone());
+        }
+        else {
+            state.up = up.clone();
+        }
+        state.fovY = fov;
+        state.tanFov2 = fov > 0 ? Math.tan(fov * 0.5) : 0;
+        state.aspect = aspect;
+        state.near = near;
+        state.far = far;
+        if (state.viewProjection) {
+            state.viewProjection.copyFrom(vp);
+        }
+        else {
+            state.viewProjection = vp.clone();
+        }
+        state.frustumPlanes = planes;
+        return state;
+    }
+}
+CameraState._cachedMatrix = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix();
+CameraState._cachedQuaternion = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion();
+//# sourceMappingURL=camera.state.js.map
 
 /***/ }),
 
-/***/ "./dist/tiles/3d/babylon/tile3d.camera.sync.js":
+/***/ "./dist/tiles/3d/babylon/camera/camera.sync.js":
 /*!*****************************************************!*\
-  !*** ./dist/tiles/3d/babylon/tile3d.camera.sync.js ***!
+  !*** ./dist/tiles/3d/babylon/camera/camera.sync.js ***!
   \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SetupCameraStateSync: () => (/* binding */ SetupCameraStateSync),
-/* harmony export */   SyncActiveCameraState: () => (/* binding */ SyncActiveCameraState)
+/* harmony export */   SetupCameraStateSync: () => (/* binding */ SetupCameraStateSync)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 
-function initCameraSync(camera, scene) {
-    if (scene.activeCamera !== camera) {
-        scene.activeCamera = camera;
-    }
+function initCameraSync(camera) {
     if (camera.rebuildAnglesAndRadius instanceof Function) {
         camera.rebuildAnglesAndRadius();
     }
     camera.computeWorldMatrix();
     camera.getProjectionMatrix(true);
 }
-function getViewProjAndFrustumSafe(camera, scene) {
-    const engine = scene.getEngine();
+function getViewProjAndFrustumSafe(camera) {
+    const engine = camera.getScene().getEngine();
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
     let view;
     let proj;
@@ -26521,39 +26261,40 @@ function getViewProjAndFrustumSafe(camera, scene) {
     const frustumPlanes = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Frustum.GetPlanes(viewProj);
     return { viewProj, frustumPlanes };
 }
-function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
-    initCameraSync(camera, scene);
+function SetupCameraStateSync(camera, onState, eps = 1e-6) {
+    const cam = camera instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera ? camera : camera.camera;
+    initCameraSync(cam);
     let viewDirty = true;
     let projDirty = true;
     let lastPos = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(Number.NaN, Number.NaN, Number.NaN);
     let lastRot = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
     let lastFov = Number.NaN;
-    const vObs = camera.onViewMatrixChangedObservable.add(() => {
+    const vObs = cam.onViewMatrixChangedObservable.add(() => {
         viewDirty = true;
     });
-    const pObs = camera.onProjectionMatrixChangedObservable.add(() => {
+    const pObs = cam.onProjectionMatrixChangedObservable.add(() => {
         projDirty = true;
     });
-    const aObs = camera.onAfterCheckInputsObservable.add(() => {
+    const aObs = cam.onAfterCheckInputsObservable.add(() => {
         viewDirty = true;
     });
     const getWorldRotation = () => {
-        const wm = camera.getWorldMatrix();
+        const wm = cam.getWorldMatrix();
         const rotM = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Matrix();
         wm.getRotationMatrixToRef(rotM);
         const q = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion();
         _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Quaternion.FromRotationMatrixToRef(rotM, q);
         return q;
     };
-    const getFovY = () => (camera.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA ? camera.fov : 0);
-    const frameObs = scene.onBeforeRenderObservable.add(() => {
+    const getFovY = () => (cam.mode === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Camera.PERSPECTIVE_CAMERA ? cam.fov : 0);
+    const frameObs = cam.getScene().onBeforeRenderObservable.add(() => {
         if (!viewDirty && !projDirty)
             return;
-        if (camera.rebuildAnglesAndRadius instanceof Function) {
-            camera.rebuildAnglesAndRadius();
+        if (cam.rebuildAnglesAndRadius instanceof Function) {
+            cam.rebuildAnglesAndRadius();
         }
-        camera.computeWorldMatrix();
-        const pos = camera.globalPosition;
+        cam.computeWorldMatrix();
+        const pos = cam.globalPosition;
         const rot = getWorldRotation();
         const fov = getFovY();
         const posChanged = Math.abs(pos.x - lastPos.x) > eps ||
@@ -26575,7 +26316,7 @@ function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
             lastPos.copyFrom(pos);
             lastRot.copyFrom(rot);
             lastFov = fov;
-            const { viewProj, frustumPlanes } = getViewProjAndFrustumSafe(camera, scene);
+            const { viewProj, frustumPlanes } = getViewProjAndFrustumSafe(cam);
             onState({
                 worldPosition: pos.clone(),
                 worldRotation: rot.clone(),
@@ -26590,42 +26331,559 @@ function SetupCameraStateSync(camera, scene, onState, eps = 1e-6) {
     });
     return {
         dispose() {
-            camera.onViewMatrixChangedObservable.remove(vObs);
-            camera.onProjectionMatrixChangedObservable.remove(pObs);
-            camera.onAfterCheckInputsObservable.remove(aObs);
-            scene.onBeforeRenderObservable.remove(frameObs);
+            cam.onViewMatrixChangedObservable.remove(vObs);
+            cam.onProjectionMatrixChangedObservable.remove(pObs);
+            cam.onAfterCheckInputsObservable.remove(aObs);
+            cam.getScene()?.onBeforeRenderObservable.remove(frameObs);
         },
     };
 }
-function SyncActiveCameraState(scene, onState, eps = 1e-6) {
-    let current = scene.activeCamera ?? null;
-    let currentSync = null;
-    if (current) {
-        currentSync = SetupCameraStateSync(current, scene, onState, eps);
+//# sourceMappingURL=camera.sync.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/camera/index.js":
+/*!***********************************************!*\
+  !*** ./dist/tiles/3d/babylon/camera/index.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CameraMotionDetector: () => (/* reexport safe */ _camera_motion_detector__WEBPACK_IMPORTED_MODULE_1__.CameraMotionDetector),
+/* harmony export */   CameraMotionState: () => (/* reexport safe */ _camera_motion_detector__WEBPACK_IMPORTED_MODULE_1__.CameraMotionState),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _camera_planetary__WEBPACK_IMPORTED_MODULE_0__.PlanetoryCamera),
+/* harmony export */   PlanetoryWheelMetersInput: () => (/* reexport safe */ _camera_planetary_inputs__WEBPACK_IMPORTED_MODULE_2__.PlanetoryWheelMetersInput),
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _camera_sync__WEBPACK_IMPORTED_MODULE_3__.SetupCameraStateSync)
+/* harmony export */ });
+/* harmony import */ var _camera_planetary__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.planetary */ "./dist/tiles/3d/babylon/camera/camera.planetary.js");
+/* harmony import */ var _camera_motion_detector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./camera.motion.detector */ "./dist/tiles/3d/babylon/camera/camera.motion.detector.js");
+/* harmony import */ var _camera_planetary_inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./camera.planetary.inputs */ "./dist/tiles/3d/babylon/camera/camera.planetary.inputs.js");
+/* harmony import */ var _camera_sync__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./camera.sync */ "./dist/tiles/3d/babylon/camera/camera.sync.js");
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_instance_features.js":
+/*!****************************************************************************!*\
+  !*** ./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_instance_features.js ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* binding */ EXT_instance_features)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
+/* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_mesh_features.js");
+
+
+const NAME = "EXT_instance_features";
+class EXT_instance_features {
+    constructor(loader) {
+        this.name = NAME;
+        this._loader = loader;
+        this.enabled = this._loader.isExtensionUsed(NAME) && this._loader.isExtensionUsed(_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name);
     }
-    const camChangedObs = scene.onActiveCameraChanged.add(() => {
-        const next = scene.activeCamera ?? null;
-        if (next === current)
-            return;
-        if (currentSync) {
-            currentSync.dispose();
-            currentSync = null;
-        }
-        current = next;
-        if (current)
-            currentSync = SetupCameraStateSync(current, scene, onState, eps);
-    });
-    return {
-        dispose() {
-            if (currentSync) {
-                currentSync.dispose();
-                currentSync = null;
+    dispose() {
+        this._loader = null;
+    }
+    loadNodeAsync(context, node, assign) {
+        if (node.extensions) {
+            const ext_gpu_instancing = node.extensions[_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name];
+            if (ext_gpu_instancing) {
+                return _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.LoadExtensionAsync(context, node, this.name, (extensionContext, extension) => {
+                    const promise = this._loader.loadNodeAsync(`/nodes/${node.index}`, node, assign);
+                    if (!node._primitiveBabylonMeshes) {
+                        return promise;
+                    }
+                    for (const babylonMesh of node._primitiveBabylonMeshes) {
+                        const babylonObject = babylonMesh;
+                        const gpu_instancing_context = `${context}.${_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_gpu_instancing.name}`;
+                        const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
+                        for (const fid of extension.featureIds) {
+                            featureIds.push(fid);
+                            if (fid.attribute != undefined) {
+                                const n = _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_1__.EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.ArrayItem.Get(`${gpu_instancing_context}/attributes/${n}`, this._loader.gltf.accessors, ext_gpu_instancing.attributes[n]);
+                                this._loader._loadIndicesAccessorAsync(`/accessors/${accessor.bufferView}`, accessor).then((data) => {
+                                    babylonObject.thinInstanceIds = babylonObject.thinInstanceIds ?? [];
+                                    babylonObject.thinInstanceIds.push(data);
+                                });
+                            }
+                        }
+                    }
+                    return promise;
+                });
             }
-            scene.onActiveCameraChanged.remove(camChangedObs);
-        },
-    };
+        }
+        return null;
+    }
 }
-//# sourceMappingURL=tile3d.camera.sync.js.map
+_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_instance_features(loader));
+//# sourceMappingURL=EXT_instance_features.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_mesh_features.js":
+/*!************************************************************************!*\
+  !*** ./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_mesh_features.js ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_mesh_features: () => (/* binding */ EXT_mesh_features),
+/* harmony export */   HasFeatureIds: () => (/* binding */ HasFeatureIds)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
+
+
+const NAME = "EXT_mesh_features";
+function HasFeatureIds(b) {
+    if (b === null || b === undefined || typeof b !== "object")
+        return false;
+    const obj = b;
+    return obj.featureIds !== undefined && Array.isArray(obj.featureIds) && obj.featureIds.length != 0;
+}
+class EXT_mesh_features {
+    static BuildKind(prefix, n) {
+        return `${prefix}${n}`;
+    }
+    constructor(loader) {
+        this.name = NAME;
+        this._loader = loader;
+        this.enabled = this._loader.isExtensionUsed(NAME);
+    }
+    dispose() {
+        this._loader = null;
+    }
+    _loadVertexDataAsync(context, primitive, babylonMesh) {
+        if (primitive.extensions) {
+            const attributes = primitive.attributes;
+            if (!attributes) {
+                throw new Error(`${context}: Attributes are missing`);
+            }
+            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Geometry(babylonMesh.name, this._loader._babylonScene);
+            const promises = new Array();
+            if (primitive.indices == undefined) {
+                babylonMesh.isUnIndexed = true;
+            }
+            else {
+                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.ArrayItem.Get(`${context}/indices`, this._loader._gltf.accessors, primitive.indices);
+                promises.push(this._loader._loadIndicesAccessorAsync(`/accessors/${accessor.index}`, accessor).then((data) => {
+                    babylonGeometry.setIndices(data);
+                }));
+            }
+            const loadAttribute = (name, kind, callback) => {
+                if (attributes[name] == undefined) {
+                    return;
+                }
+                babylonMesh._delayInfo = babylonMesh._delayInfo || [];
+                if (babylonMesh._delayInfo.indexOf(kind) === -1) {
+                    babylonMesh._delayInfo.push(kind);
+                }
+                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.ArrayItem.Get(`${context}/attributes/${name}`, this._loader._gltf.accessors, attributes[name]);
+                promises.push(this._loader._loadVertexAccessorAsync(`/accessors/${accessor.index}`, accessor, kind).then((babylonVertexBuffer) => {
+                    if (babylonVertexBuffer.getKind() === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind && !this._loader.parent.alwaysComputeBoundingBox && !babylonMesh.skeleton) {
+                        if (accessor.min && accessor.max) {
+                            const min = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[0].copyFromFloats(...accessor.min);
+                            const max = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TmpVectors.Vector3[1].copyFromFloats(...accessor.max);
+                            if (accessor.normalized && accessor.componentType !== 5126) {
+                                let divider = 1;
+                                switch (accessor.componentType) {
+                                    case 5120:
+                                        divider = 127.0;
+                                        break;
+                                    case 5121:
+                                        divider = 255.0;
+                                        break;
+                                    case 5122:
+                                        divider = 32767.0;
+                                        break;
+                                    case 5123:
+                                        divider = 65535.0;
+                                        break;
+                                }
+                                const oneOverDivider = 1 / divider;
+                                min.scaleInPlace(oneOverDivider);
+                                max.scaleInPlace(oneOverDivider);
+                            }
+                            babylonGeometry._boundingInfo = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BoundingInfo(min, max);
+                            babylonGeometry.useBoundingInfoFromGeometry = true;
+                        }
+                    }
+                    babylonGeometry.setVerticesBuffer(babylonVertexBuffer, accessor.count);
+                }));
+                if (kind == _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesIndicesExtraKind) {
+                    babylonMesh.numBoneInfluencers = 8;
+                }
+                if (callback) {
+                    callback(accessor);
+                }
+            };
+            const attributeMappings = [
+                ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind, null],
+                ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV2Kind, null],
+                ["TEXCOORD_2", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV3Kind, null],
+                ["TEXCOORD_3", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV4Kind, null],
+                ["TEXCOORD_4", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV5Kind, null],
+                ["TEXCOORD_5", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UV6Kind, null],
+                ["POSITION", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind, null],
+                ["NORMAL", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.NormalKind, null],
+                ["TANGENT", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.TangentKind, null],
+                ["JOINTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesIndicesKind, null],
+                ["WEIGHTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesWeightsKind, null],
+                ["JOINTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesIndicesExtraKind, null],
+                ["WEIGHTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.MatricesWeightsExtraKind, null],
+                [
+                    "COLOR_0",
+                    _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.ColorKind,
+                    (accessor) => {
+                        if (accessor.type === "VEC4") {
+                            babylonMesh.hasVertexAlpha = true;
+                        }
+                    },
+                ],
+            ];
+            const extension = primitive.extensions[EXT_mesh_features.name];
+            if (extension && extension.featureIds) {
+                const babylonObject = babylonMesh;
+                const featureIds = (babylonObject.featureIds = babylonObject.featureIds ?? []);
+                for (const i of extension.featureIds) {
+                    featureIds.push(i);
+                }
+                let vfidCount = 0;
+                const implicit = [];
+                for (const fid of featureIds) {
+                    if (fid.attribute != undefined) {
+                        const n = EXT_mesh_features.BuildKind("_FEATURE_ID_", fid.attribute);
+                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, fid.attribute);
+                        attributeMappings.push([n, fid.vertexAttributeKind, null]);
+                        vfidCount++;
+                        continue;
+                    }
+                    if (fid.texture?.texCoord != undefined) {
+                        fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.uvKindPrefix, fid.texture?.texCoord);
+                        this._loader.loadTextureInfoAsync(context, fid.texture).then((babylonTexture) => {
+                            fid.textureData = babylonTexture;
+                        });
+                        continue;
+                    }
+                    implicit.push(fid);
+                }
+                for (const fid of implicit) {
+                    fid.vertexAttributeKind = EXT_mesh_features.BuildKind(EXT_mesh_features.VerticeKindPrefix, vfidCount++);
+                    const buffer = this._buildVertexBufferForImplicitId(fid.featureCount, fid.vertexAttributeKind);
+                    babylonGeometry.setVerticesBuffer(buffer, fid.featureCount);
+                }
+            }
+            attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
+                loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
+            });
+            return Promise.all(promises).then(() => {
+                return babylonGeometry;
+            });
+        }
+        return null;
+    }
+    _buildVertexBufferForImplicitId(count, kind) {
+        const generatedIndices = Array.from({ length: count }, (_, i) => i);
+        const engine = this._loader._babylonScene.getEngine();
+        return new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer(engine, generatedIndices, kind, false, undefined, 4, false, 0, 1, 5126);
+    }
+}
+EXT_mesh_features.VerticeKindPrefix = "fid";
+EXT_mesh_features.uvKindPrefix = "uv";
+_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_1__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_mesh_features(loader));
+//# sourceMappingURL=EXT_mesh_features.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_structural_metadata.js":
+/*!******************************************************************************!*\
+  !*** ./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_structural_metadata.js ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_structural_metadata: () => (/* binding */ EXT_structural_metadata),
+/* harmony export */   IsHasStructuralMetadata: () => (/* binding */ IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* binding */ IsStructuralMetadata)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/loaders/glTF/2.0 */ "../../../node_modules/@babylonjs/loaders/glTF/2.0/index.js");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const NAME = "EXT_structural_metadata";
+function IsStructuralMetadata(b) {
+    if (b === null || b === undefined || typeof b !== "object")
+        return false;
+    const obj = b;
+    return obj.schema !== undefined;
+}
+function IsHasStructuralMetadata(b) {
+    if (b === null || b === undefined || typeof b !== "object")
+        return false;
+    const obj = b;
+    return obj.structuralMetadata !== undefined;
+}
+class EXT_structural_metadata {
+    constructor(loader) {
+        this.name = NAME;
+        this._metadata = null;
+        this._loader = loader;
+        this.enabled = this._loader.isExtensionUsed(NAME);
+    }
+    onLoading() {
+        const extensions = this._loader.gltf.extensions;
+        if (extensions && extensions[this.name]) {
+            const extension = extensions[this.name];
+            const babylonObject = this._loader.rootBabylonMesh;
+            babylonObject.structuralMetadata = {
+                schema: extension.schema,
+                propertyTables: extension.propertyTables,
+                propertyAttributes: extension.propertyAttributes,
+                propertyTextures: extension.propertyTextures,
+            };
+            this._metadata = babylonObject.structuralMetadata;
+        }
+    }
+    _loadVertexDataAsync(context, primitive, babylonMesh) {
+        if (primitive.extensions) {
+            const attributes = primitive.attributes;
+            if (!attributes) {
+                throw new Error(`${context}: Attributes are missing`);
+            }
+            const babylonGeometry = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.Geometry(babylonMesh.name, this._loader._babylonScene);
+            const promises = new Array();
+            const loadAttribute = (name, kind, callback) => {
+                if (attributes[name] == undefined) {
+                    return;
+                }
+                babylonMesh._delayInfo = babylonMesh._delayInfo || [];
+                if (babylonMesh._delayInfo.indexOf(kind) === -1) {
+                    babylonMesh._delayInfo.push(kind);
+                }
+                const accessor = _babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.ArrayItem.Get(`${context}/attributes/${name}`, this._loader._gltf.accessors, attributes[name]);
+                promises.push(this._loader._loadVertexAccessorAsync(`/accessors/${accessor.index}`, accessor, kind).then((babylonVertexBuffer) => {
+                    if (babylonVertexBuffer.getKind() === _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.PositionKind && !this._loader.parent.alwaysComputeBoundingBox && !babylonMesh.skeleton) {
+                        if (accessor.min && accessor.max) {
+                            const min = _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.TmpVectors.Vector3[0].copyFromFloats(...accessor.min);
+                            const max = _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.TmpVectors.Vector3[1].copyFromFloats(...accessor.max);
+                            if (accessor.normalized && accessor.componentType !== 5126) {
+                                let divider = 1;
+                                switch (accessor.componentType) {
+                                    case 5120:
+                                        divider = 127.0;
+                                        break;
+                                    case 5121:
+                                        divider = 255.0;
+                                        break;
+                                    case 5122:
+                                        divider = 32767.0;
+                                        break;
+                                    case 5123:
+                                        divider = 65535.0;
+                                        break;
+                                }
+                                const oneOverDivider = 1 / divider;
+                                min.scaleInPlace(oneOverDivider);
+                                max.scaleInPlace(oneOverDivider);
+                            }
+                            babylonGeometry._boundingInfo = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.BoundingInfo(min, max);
+                            babylonGeometry.useBoundingInfoFromGeometry = true;
+                        }
+                    }
+                    babylonGeometry.setVerticesBuffer(babylonVertexBuffer, accessor.count);
+                }));
+                if (kind == _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesExtraKind) {
+                    babylonMesh.numBoneInfluencers = 8;
+                }
+                if (callback) {
+                    callback(accessor);
+                }
+            };
+            const attributeMappings = [
+                ["TEXCOORD_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UVKind, null],
+                ["TEXCOORD_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV2Kind, null],
+                ["TEXCOORD_2", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV3Kind, null],
+                ["TEXCOORD_3", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV4Kind, null],
+                ["TEXCOORD_4", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV5Kind, null],
+                ["TEXCOORD_5", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.UV6Kind, null],
+                ["POSITION", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.PositionKind, null],
+                ["NORMAL", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.NormalKind, null],
+                ["TANGENT", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.TangentKind, null],
+                ["JOINTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesKind, null],
+                ["WEIGHTS_0", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesWeightsKind, null],
+                ["JOINTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesIndicesExtraKind, null],
+                ["WEIGHTS_1", _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.MatricesWeightsExtraKind, null],
+                [
+                    "COLOR_0",
+                    _babylonjs_core__WEBPACK_IMPORTED_MODULE_1__.VertexBuffer.ColorKind,
+                    (accessor) => {
+                        if (accessor.type === "VEC4") {
+                            babylonMesh.hasVertexAlpha = true;
+                        }
+                    },
+                ],
+            ];
+            const extension = primitive.extensions[EXT_structural_metadata.name];
+            if (extension && this._metadata) {
+                if (extension.propertyAttributes && this._metadata.propertyAttributes) {
+                    for (const i of extension.propertyAttributes) {
+                        if (i >= 0 && i < this._metadata.propertyAttributes.length) {
+                            const ref = this._metadata.propertyAttributes[i];
+                            for (const propertyName in ref.properties) {
+                                const v = ref.properties[propertyName];
+                                attributeMappings.push([v.attribute, v.attribute, null]);
+                            }
+                        }
+                    }
+                }
+                if (extension.propertyTextures && this._metadata.propertyTextures) {
+                    for (const i of extension.propertyTextures) {
+                        if (i >= 0 && i < this._metadata.propertyTextures.length) {
+                            const ref = this._metadata.propertyTextures[i];
+                            for (const propertyName in ref.properties) {
+                                const textInfos = ref.properties[propertyName];
+                                this._loader.loadTextureInfoAsync(context, textInfos).then((babylonTexture) => {
+                                    ref.textures = ref.textures || [];
+                                    ref.textures[propertyName] = babylonTexture;
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            attributeMappings.forEach(([attributeName, vertexKind, callback]) => {
+                loadAttribute(attributeName, vertexKind, callback == null ? undefined : callback);
+            });
+            return Promise.all(promises).then(() => {
+                return babylonGeometry;
+            });
+        }
+        return null;
+    }
+    dispose() {
+        this._loader = null;
+    }
+}
+_babylonjs_loaders_glTF_2_0__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader.RegisterExtension(NAME, (loader) => new EXT_structural_metadata(loader));
+//# sourceMappingURL=EXT_structural_metadata.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/gltf/2.0/extensions/index.js":
+/*!************************************************************!*\
+  !*** ./dist/tiles/3d/babylon/gltf/2.0/extensions/index.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.EXT_structural_metadata),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__.IsStructuralMetadata)
+/* harmony export */ });
+/* harmony import */ var _EXT_mesh_features__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EXT_mesh_features */ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_mesh_features.js");
+/* harmony import */ var _EXT_instance_features__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EXT_instance_features */ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_instance_features.js");
+/* harmony import */ var _EXT_structural_metadata__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EXT_structural_metadata */ "./dist/tiles/3d/babylon/gltf/2.0/extensions/EXT_structural_metadata.js");
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/gltf/2.0/index.js":
+/*!*************************************************!*\
+  !*** ./dist/tiles/3d/babylon/gltf/2.0/index.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _extensions__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata)
+/* harmony export */ });
+/* harmony import */ var _extensions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./extensions */ "./dist/tiles/3d/babylon/gltf/2.0/extensions/index.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/gltf/index.js":
+/*!*********************************************!*\
+  !*** ./dist/tiles/3d/babylon/gltf/index.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _2_0__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata)
+/* harmony export */ });
+/* harmony import */ var _2_0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./2.0 */ "./dist/tiles/3d/babylon/gltf/2.0/index.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/tiles/3d/babylon/index.js":
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/babylon/index.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CameraMotionDetector: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_3__.CameraMotionDetector),
+/* harmony export */   CameraMotionState: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_3__.CameraMotionState),
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_4__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_4__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_4__.EXT_structural_metadata),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_4__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_4__.IsHasStructuralMetadata),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_4__.IsStructuralMetadata),
+/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tile3d_viewer__WEBPACK_IMPORTED_MODULE_2__.Map3DViewer),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_3__.PlanetoryCamera),
+/* harmony export */   PlanetoryWheelMetersInput: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_3__.PlanetoryWheelMetersInput),
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_3__.SetupCameraStateSync),
+/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tile3d_loader__WEBPACK_IMPORTED_MODULE_1__.Tile3dContentLoader),
+/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tile3d_scene__WEBPACK_IMPORTED_MODULE_0__.Tile3dScene)
+/* harmony export */ });
+/* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/babylon/tile3d.scene.js");
+/* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
+/* harmony import */ var _tile3d_viewer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.viewer */ "./dist/tiles/3d/babylon/tile3d.viewer.js");
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./camera */ "./dist/tiles/3d/babylon/camera/index.js");
+/* harmony import */ var _gltf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./gltf */ "./dist/tiles/3d/babylon/gltf/index.js");
+
+
+
+
+
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -26838,9 +27096,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/map */ "../core/dist/map/canvas/map.canvas.display.js");
 /* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/babylon/tile3d.scene.js");
 /* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/babylon/tile3d.loader.js");
-/* harmony import */ var _tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile3d.camera.sync */ "./dist/tiles/3d/babylon/tile3d.camera.sync.js");
+/* harmony import */ var _camera_camera_sync__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./camera/camera.sync */ "./dist/tiles/3d/babylon/camera/camera.sync.js");
 /* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../vendors */ "./dist/tiles/3d/vendors/google/google.uri.js");
-/* harmony import */ var _camera_planetary__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera.planetary */ "./dist/tiles/3d/babylon/camera.planetary.js");
+/* harmony import */ var _camera_camera_planetary__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera/camera.planetary */ "./dist/tiles/3d/babylon/camera/camera.planetary.js");
 /* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
 
@@ -26908,8 +27166,8 @@ class Map3DViewer {
             this._camera = this._createCamera(this._getCameraName(), eventData, scene, this._options);
             if (this._camera) {
                 this._camera.attachControl(this._canvas, true);
-                this._scene.onAfterCameraRenderObservable.addOnce((c, s) => {
-                    this._cameraSync = (0,_tile3d_camera_sync__WEBPACK_IMPORTED_MODULE_6__.SetupCameraStateSync)(c, scene, this.onCameraStateUpdate.bind(this));
+                scene.onAfterCameraRenderObservable.addOnce((c, s) => {
+                    this._cameraSync = (0,_camera_camera_sync__WEBPACK_IMPORTED_MODULE_6__.SetupCameraStateSync)(c, this.onCameraStateUpdate.bind(this));
                 });
             }
             engine.runRenderLoop(() => {
@@ -26960,7 +27218,7 @@ class Map3DViewer {
     }
     _setupArcRotateCamera(box, scene, margin = 1.5) {
         const ellipsoid = this._options.ellipsoid ?? core_geodesy__WEBPACK_IMPORTED_MODULE_7__.Ellipsoid.WGS84;
-        const camera = new _camera_planetary__WEBPACK_IMPORTED_MODULE_8__.PlanetoryCamera("Camera", this._options.initialPosition ?? Map3DViewer.DefaultInitialPosition, scene, ellipsoid);
+        const camera = new _camera_camera_planetary__WEBPACK_IMPORTED_MODULE_8__.PlanetoryCamera("Camera", this._options.initialPosition ?? Map3DViewer.DefaultInitialPosition, scene, ellipsoid);
         camera.minZ = 0;
         camera.maxZ = ellipsoid.semiMajorAxis * margin;
         return camera;
@@ -27080,12 +27338,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var core_collections__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/collections */ "../core/dist/collections/priorityQueue.js");
 /* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/path.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
 /* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/boundingVolume.js");
 /* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/tile3d.js");
 /* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/tileset.js");
 /* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
-/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
 
 
 
@@ -27462,17 +27720,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ActiveContext: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.ActiveContext),
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   CameraMotionDetector: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.CameraMotionDetector),
+/* harmony export */   CameraMotionState: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.CameraMotionState),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.DefaultScreenSpaceError),
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.EXT_structural_metadata),
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
 /* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_4__.GoogleTile3dErrorFn),
 /* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_4__.GoogleTiles3dUriResolver),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.IsHasStructuralMetadata),
 /* harmony export */   IsITileset: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.IsStructuralMetadata),
 /* harmony export */   IsTile3d: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
 /* harmony export */   Map3DViewer: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.Map3DViewer),
 /* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.PlanetoryCamera),
+/* harmony export */   PlanetoryWheelMetersInput: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.PlanetoryWheelMetersInput),
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SetupCameraStateSync),
-/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.SyncActiveCameraState),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _babylon__WEBPACK_IMPORTED_MODULE_2__.Tile3dContentLoader),
 /* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dMaxPriority),
 /* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_3__.Tile3dMinPriority),
@@ -28049,17 +28315,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ActiveContext: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.ActiveContext),
 /* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   CameraMotionDetector: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.CameraMotionDetector),
+/* harmony export */   CameraMotionState: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.CameraMotionState),
 /* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.EXT_structural_metadata),
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
 /* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.GoogleTile3dErrorFn),
 /* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.GoogleTiles3dUriResolver),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.HasFeatureIds),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.IsHasStructuralMetadata),
 /* harmony export */   IsITileset: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.IsStructuralMetadata),
 /* harmony export */   IsTile3d: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
 /* harmony export */   Map3DViewer: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Map3DViewer),
 /* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.PlanetoryCamera),
+/* harmony export */   PlanetoryWheelMetersInput: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.PlanetoryWheelMetersInput),
 /* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SetupCameraStateSync),
-/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.SyncActiveCameraState),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dContentLoader),
 /* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dMaxPriority),
 /* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _3d__WEBPACK_IMPORTED_MODULE_0__.Tile3dMinPriority),
@@ -28649,312 +28923,313 @@ const webmapVertexShader = { name, shader };
   \***********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractRange),
-/* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractShape),
-/* harmony export */   AbstractTileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileProvider),
-/* harmony export */   ActionCancelledError: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ActionCancelledError),
-/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ActionQueueStatus),
-/* harmony export */   ActiveContext: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.ActiveContext),
-/* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Angle),
-/* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.AreBoxIntersect),
-/* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Assert),
-/* harmony export */   AxialTilt: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AxialTilt),
-/* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Bearing),
-/* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.BlobTileCodec),
-/* harmony export */   Bounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Bounded),
-/* harmony export */   BoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.BoundedCollection),
-/* harmony export */   Bounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Bounds),
-/* harmony export */   CacheEntry: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntry),
-/* harmony export */   CacheEntryOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntryOptions),
-/* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntryOptionsBuilder),
-/* harmony export */   CachePolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
-/* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
-/* harmony export */   CalculatorBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CalculatorBase),
-/* harmony export */   CanvasDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasDisplay),
-/* harmony export */   CanvasMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasMap),
-/* harmony export */   CanvasTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasTileCodec),
-/* harmony export */   Cartesian2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian2),
-/* harmony export */   Cartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian3),
-/* harmony export */   Cartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4),
-/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4TileCodec),
-/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4TileCodecOptions),
-/* harmony export */   CartesianMode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CartesianMode),
-/* harmony export */   CelestialNodeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CelestialNodeType),
-/* harmony export */   CelestialTracker: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CelestialTracker),
-/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CellCoordinateReference),
-/* harmony export */   Circle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Circle),
+/* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.AbstractRange),
+/* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.AbstractShape),
+/* harmony export */   AbstractTileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.AbstractTileProvider),
+/* harmony export */   ActionCancelledError: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ActionQueueStatus),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.ActiveContext),
+/* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Angle),
+/* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.AreBoxIntersect),
+/* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Assert),
+/* harmony export */   AxialTilt: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.AxialTilt),
+/* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Bearing),
+/* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.BlobTileCodec),
+/* harmony export */   Bounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Bounded),
+/* harmony export */   BoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.BoundedCollection),
+/* harmony export */   Bounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Bounds),
+/* harmony export */   CacheEntry: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CacheEntry),
+/* harmony export */   CacheEntryOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CacheEntryOptions),
+/* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CacheEntryOptionsBuilder),
+/* harmony export */   CachePolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CachePolicy),
+/* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CachePolicyBuilder),
+/* harmony export */   CalculatorBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CalculatorBase),
+/* harmony export */   CameraMotionDetector: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.CameraMotionDetector),
+/* harmony export */   CameraMotionState: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.CameraMotionState),
+/* harmony export */   CanvasDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CanvasDisplay),
+/* harmony export */   CanvasMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CanvasMap),
+/* harmony export */   CanvasTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CanvasTileCodec),
+/* harmony export */   Cartesian2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Cartesian2),
+/* harmony export */   Cartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Cartesian3),
+/* harmony export */   Cartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Cartesian4),
+/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Cartesian4TileCodec),
+/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Cartesian4TileCodecOptions),
+/* harmony export */   CartesianMode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CartesianMode),
+/* harmony export */   CelestialNodeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CelestialNodeType),
+/* harmony export */   CelestialTracker: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CelestialTracker),
+/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.CellCoordinateReference),
+/* harmony export */   Circle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Circle),
 /* harmony export */   ClipIndex: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex),
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition),
-/* harmony export */   Collection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Collection),
-/* harmony export */   ColorValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ColorValue),
-/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ConcurrentActionQueue),
-/* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Context2DTileMap),
+/* harmony export */   Collection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Collection),
+/* harmony export */   ColorValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ColorValue),
+/* harmony export */   ConcurrentActionQueue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ConcurrentActionQueue),
+/* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Context2DTileMap),
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_5__.CreateQuickHull),
-/* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.CreateTileSphereFromBox),
-/* harmony export */   Current: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Current),
-/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DebugTouchConsole),
-/* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.DefaultScreenSpaceError),
-/* harmony export */   DemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DemInfos),
-/* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DemTileWebClient),
-/* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DeserializeLocalizableString),
-/* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Display),
-/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.EXT_instance_features),
-/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.EXT_mesh_features),
-/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.EXT_structural_metadata),
+/* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.CreateTileSphereFromBox),
+/* harmony export */   Current: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Current),
+/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.DebugTouchConsole),
+/* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.DefaultScreenSpaceError),
+/* harmony export */   DemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.DemInfos),
+/* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.DemTileWebClient),
+/* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.DeserializeLocalizableString),
+/* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Display),
+/* harmony export */   EXT_instance_features: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.EXT_instance_features),
+/* harmony export */   EXT_mesh_features: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.EXT_mesh_features),
+/* harmony export */   EXT_structural_metadata: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.EXT_structural_metadata),
 /* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.ElevationGridFactory),
-/* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ElevationHelpers),
+/* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ElevationHelpers),
 /* harmony export */   ElevationLayer: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
 /* harmony export */   ElevationLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.ElevationLayerView),
-/* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Ellipsoid),
+/* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Ellipsoid),
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.EllipsoidalMapMaterial),
-/* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Envelope),
-/* harmony export */   EquatorialVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EquatorialVector),
-/* harmony export */   EventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EventArgs),
-/* harmony export */   EventEmitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EventEmitter),
-/* harmony export */   EventState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EventState),
-/* harmony export */   EvictionReason: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EvictionReason),
-/* harmony export */   Fifo: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Fifo),
-/* harmony export */   Float32Layer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32Layer),
-/* harmony export */   Float32TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodec),
-/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodecOptions),
-/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodecOptionsBuilder),
-/* harmony export */   Geo2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Geo2),
-/* harmony export */   Geo3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Geo3),
-/* harmony export */   GeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoBounded),
-/* harmony export */   GeoBoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoBoundedCollection),
-/* harmony export */   GeoLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoLine),
-/* harmony export */   GeoPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoPolygon),
-/* harmony export */   GeoPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoPolyline),
-/* harmony export */   GeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoShape),
-/* harmony export */   GeoShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoShapeType),
-/* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_7__.GeodeticCamera),
-/* harmony export */   GeodeticSystem: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeodeticSystem),
-/* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GetLocalizableStringValue),
-/* harmony export */   GetTile3dContents: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.GetTile3dContents),
-/* harmony export */   Google: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Google),
-/* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DLayerCode),
-/* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DUrlBuilder),
-/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.GoogleTile3dErrorFn),
-/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.GoogleTiles3dUriResolver),
-/* harmony export */   HSLColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HSLColor),
-/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.HasFeatureIds),
+/* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Envelope),
+/* harmony export */   EquatorialVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.EquatorialVector),
+/* harmony export */   EventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.EventArgs),
+/* harmony export */   EventEmitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.EventEmitter),
+/* harmony export */   EventState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.EventState),
+/* harmony export */   EvictionReason: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.EvictionReason),
+/* harmony export */   Fifo: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Fifo),
+/* harmony export */   Float32Layer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Float32Layer),
+/* harmony export */   Float32TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Float32TileCodec),
+/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Float32TileCodecOptions),
+/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Float32TileCodecOptionsBuilder),
+/* harmony export */   Geo2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Geo2),
+/* harmony export */   Geo3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Geo3),
+/* harmony export */   GeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoBounded),
+/* harmony export */   GeoBoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoBoundedCollection),
+/* harmony export */   GeoLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoLine),
+/* harmony export */   GeoPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoPolygon),
+/* harmony export */   GeoPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoPolyline),
+/* harmony export */   GeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoShape),
+/* harmony export */   GeoShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeoShapeType),
+/* harmony export */   GeodeticSystem: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GeodeticSystem),
+/* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GetLocalizableStringValue),
+/* harmony export */   GetTile3dContents: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.GetTile3dContents),
+/* harmony export */   Google: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Google),
+/* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GoogleMap2DLayerCode),
+/* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.GoogleMap2DUrlBuilder),
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.GoogleTiles3dUriResolver),
+/* harmony export */   HSLColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.HSLColor),
+/* harmony export */   HasFeatureIds: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.HasFeatureIds),
 /* harmony export */   HasHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HasHolographicBounds),
-/* harmony export */   HasNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HasNavigationApi),
-/* harmony export */   HasNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HasNavigationState),
-/* harmony export */   HasToString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HasToString),
+/* harmony export */   HasNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.HasNavigationApi),
+/* harmony export */   HasNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.HasNavigationState),
+/* harmony export */   HasToString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.HasToString),
 /* harmony export */   HolographicBoundsType: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HolographicBoundsType),
 /* harmony export */   HolographicDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HolographicDisplay),
-/* harmony export */   HorizonVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HorizonVector),
-/* harmony export */   ISO6391: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ISO6391),
-/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodec),
-/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptions),
-/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptionsBuilder),
-/* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageLayer),
-/* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileCodec),
-/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InpustNavigationControllerOptions),
-/* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InputController),
-/* harmony export */   InputsNavigationController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InputsNavigationController),
-/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTile),
-/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTileAddress),
-/* harmony export */   IsBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBounded),
-/* harmony export */   IsBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBounds),
-/* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDemInfos),
-/* harmony export */   IsDisposable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDisposable),
-/* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDrawableTileMapLayer),
+/* harmony export */   HorizonVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.HorizonVector),
+/* harmony export */   ISO6391: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ISO6391),
+/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ImageDataTileCodec),
+/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ImageDataTileCodecOptions),
+/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ImageLayer),
+/* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ImageTileCodec),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.InpustNavigationControllerOptions),
+/* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.InputController),
+/* harmony export */   InputsNavigationController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.InputsNavigationController),
+/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsArrayOfTile),
+/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsArrayOfTileAddress),
+/* harmony export */   IsBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsBounded),
+/* harmony export */   IsBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsBounds),
+/* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsDemInfos),
+/* harmony export */   IsDisposable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsDisposable),
+/* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsDrawableTileMapLayer),
 /* harmony export */   IsElevationLayer: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayer),
 /* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayerOptions),
-/* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsEnvelope),
-/* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsGeoBounded),
-/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.IsHasStructuralMetadata),
+/* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsEnvelope),
+/* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsGeoBounded),
+/* harmony export */   IsHasStructuralMetadata: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.IsHasStructuralMetadata),
 /* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicSphere),
-/* harmony export */   IsITileset: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.IsITileset),
-/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsKDTreeSplitter),
-/* harmony export */   IsLocalizable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsLocalizable),
-/* harmony export */   IsLocation: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsLocation),
-/* harmony export */   IsNumber: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsNumber),
-/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsPhysicalDisplay),
-/* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsSize),
-/* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsSize3),
-/* harmony export */   IsString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsString),
-/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.IsStructuralMetadata),
-/* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTargetBlock),
-/* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
-/* harmony export */   IsTile3d: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.IsTile3d),
-/* harmony export */   IsTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileAddress),
-/* harmony export */   IsTileAddress3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileAddress3),
-/* harmony export */   IsTileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileCollection),
-/* harmony export */   IsTileConstructor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileConstructor),
-/* harmony export */   IsTileDatasource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileDatasource),
-/* harmony export */   IsTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayer),
-/* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayerContainerProxy),
-/* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayerProxy),
-/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMetricsProvider),
-/* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileNavigationApi),
-/* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileNavigationState),
-/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileSystemBounds),
+/* harmony export */   IsITileset: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.IsITileset),
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsKDTreeSplitter),
+/* harmony export */   IsLocalizable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsLocalizable),
+/* harmony export */   IsLocation: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsLocation),
+/* harmony export */   IsNumber: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsNumber),
+/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsPhysicalDisplay),
+/* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsSize),
+/* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsSize3),
+/* harmony export */   IsString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsString),
+/* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.IsStructuralMetadata),
+/* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTargetBlock),
+/* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTile),
+/* harmony export */   IsTile3d: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.IsTile3d),
+/* harmony export */   IsTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileAddress),
+/* harmony export */   IsTileAddress3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileAddress3),
+/* harmony export */   IsTileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileCollection),
+/* harmony export */   IsTileConstructor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileConstructor),
+/* harmony export */   IsTileDatasource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileDatasource),
+/* harmony export */   IsTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileMapLayer),
+/* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileMapLayerContainerProxy),
+/* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileMapLayerProxy),
+/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileMetricsProvider),
+/* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileNavigationApi),
+/* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileNavigationState),
+/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTileSystemBounds),
 /* harmony export */   IsTileWithMesh: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.IsTileWithMesh),
-/* harmony export */   IsTouchCapable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTouchCapable),
-/* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.JsonTileCodec),
-/* harmony export */   JulianDate: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.JulianDate),
-/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.KdtreeSplitter),
-/* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.KeplerOrbitBase),
-/* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.KnownPlaces),
-/* harmony export */   Length: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Length),
-/* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Line),
-/* harmony export */   LinkedList: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.LinkedList),
-/* harmony export */   LinkedListNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.LinkedListNode),
-/* harmony export */   LocalString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.LocalString),
-/* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Luminosity),
-/* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MakePlaneFromPointAndNormal),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.IsTouchCapable),
+/* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.JsonTileCodec),
+/* harmony export */   JulianDate: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.JulianDate),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.KdtreeSplitter),
+/* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.KeplerOrbitBase),
+/* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.KnownPlaces),
+/* harmony export */   Length: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Length),
+/* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Line),
+/* harmony export */   LinkedList: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.LinkedList),
+/* harmony export */   LinkedListNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.LinkedListNode),
+/* harmony export */   LocalString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.LocalString),
+/* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
+/* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MakePlaneFromPointAndNormal),
 /* harmony export */   Map3D: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3D),
 /* harmony export */   Map3DOptions: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3DOptions),
-/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Map3DViewer),
+/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Map3DViewer),
 /* harmony export */   Map3dLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3dLayerView),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial),
 /* harmony export */   MapDisplay: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.MapDisplay),
 /* harmony export */   MapNode: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.MapNode),
-/* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapScale),
-/* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapZen),
-/* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
-/* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapZenNormalsDecoder),
-/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
-/* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Mass),
-/* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
-/* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MemoryCache),
-/* harmony export */   MoonState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MoonState),
-/* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MorganKeenanClass),
-/* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsAddress),
-/* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsIndex),
-/* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPool),
-/* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPoolOptions),
-/* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Observable),
-/* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Observer),
-/* harmony export */   OctreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.OctreeSplitter),
-/* harmony export */   OrderedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.OrderedCollection),
-/* harmony export */   PathUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PathUtils),
-/* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PlaneCruncher),
-/* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PlaneDefinition),
-/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.PlanetoryCamera),
-/* harmony export */   Point: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Point),
-/* harmony export */   PointerToDragController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PointerToDragController),
-/* harmony export */   Polygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Polygon),
-/* harmony export */   Polyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Polyline),
-/* harmony export */   PolylineSimplifier: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PolylineSimplifier),
-/* harmony export */   Power: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Power),
-/* harmony export */   PriorityQueue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PriorityQueue),
-/* harmony export */   Projections: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Projections),
-/* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PropertyChangedEventArgs),
-/* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PythagoreanFlatEarthCalculator),
-/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.QuadtreeSplitter),
-/* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Quantity),
-/* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.QuantityRange),
-/* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.QuickHull),
-/* harmony export */   RGBAColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RGBAColor),
-/* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RGBATileCodec),
-/* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RGBTileCodec),
-/* harmony export */   Range: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Range),
-/* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RegionCode),
-/* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RoundRobin),
-/* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Scalar),
-/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.SetupCameraStateSync),
-/* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
-/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
-/* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeType),
-/* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Side),
-/* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Size2),
-/* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Size3),
-/* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SourceBlock),
-/* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpatialTree),
-/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpatialTreeNode),
-/* harmony export */   SpectralClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpectralClass),
-/* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Speed),
-/* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SphericalCalculator),
-/* harmony export */   Stack: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Stack),
-/* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
-/* harmony export */   SyncActiveCameraState: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.SyncActiveCameraState),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
-/* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Temperature),
-/* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainGridOptions),
-/* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainGridOptionsBuilder),
-/* harmony export */   TerrainNormalizedGridBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainNormalizedGridBuilder),
-/* harmony export */   TextTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TextTileCodec),
-/* harmony export */   TextUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TextUtils),
+/* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MapScale),
+/* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MapZen),
+/* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MapZenDemUrlBuilder),
+/* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MapZenNormalsDecoder),
+/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MapzenAltitudeDecoder),
+/* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Mass),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MedianFilter),
+/* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MemoryCache),
+/* harmony export */   MoonState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MoonState),
+/* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.MorganKeenanClass),
+/* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.NeighborsIndex),
+/* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ObjectPool),
+/* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ObjectPoolOptions),
+/* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Observable),
+/* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Observer),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.OctreeSplitter),
+/* harmony export */   OrderedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.OrderedCollection),
+/* harmony export */   PathUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PathUtils),
+/* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PlaneCruncher),
+/* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PlaneDefinition),
+/* harmony export */   PlanetoryCamera: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.PlanetoryCamera),
+/* harmony export */   PlanetoryWheelMetersInput: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.PlanetoryWheelMetersInput),
+/* harmony export */   Point: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Point),
+/* harmony export */   PointerToDragController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PointerToDragController),
+/* harmony export */   Polygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Polygon),
+/* harmony export */   Polyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Polyline),
+/* harmony export */   PolylineSimplifier: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PolylineSimplifier),
+/* harmony export */   Power: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Power),
+/* harmony export */   PriorityQueue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PriorityQueue),
+/* harmony export */   Projections: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Projections),
+/* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PropertyChangedEventArgs),
+/* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.PythagoreanFlatEarthCalculator),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.QuadtreeSplitter),
+/* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Quantity),
+/* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.QuantityRange),
+/* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.QuickHull),
+/* harmony export */   RGBAColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.RGBAColor),
+/* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.RGBATileCodec),
+/* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.RGBTileCodec),
+/* harmony export */   Range: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Range),
+/* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.RegionCode),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.RoundRobin),
+/* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Scalar),
+/* harmony export */   SetupCameraStateSync: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.SetupCameraStateSync),
+/* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ShapeCollection),
+/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ShapeCollectionEventArgs),
+/* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ShapeType),
+/* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Side),
+/* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Size2),
+/* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Size3),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.SourceBlock),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.SpatialTreeNode),
+/* harmony export */   SpectralClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.SpectralClass),
+/* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Speed),
+/* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.SphericalCalculator),
+/* harmony export */   Stack: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Stack),
+/* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.StarColor),
+/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.SunTrajectoryConfig),
+/* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TargetProxy),
+/* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Temperature),
+/* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TerrainGridOptions),
+/* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TerrainGridOptionsBuilder),
+/* harmony export */   TerrainNormalizedGridBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TerrainNormalizedGridBuilder),
+/* harmony export */   TextTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TextTileCodec),
+/* harmony export */   TextUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TextUtils),
 /* harmony export */   Texture3: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.Texture3),
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.TextureLayerView),
-/* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Tile),
-/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dContentLoader),
-/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dMaxPriority),
-/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dMinPriority),
-/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dNormalPriority),
-/* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dRefineType),
-/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dScene),
-/* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.Tile3dStreamEngine),
-/* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileAddress),
+/* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Tile),
+/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dContentLoader),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dRefineType),
+/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dScene),
+/* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.Tile3dStreamEngine),
+/* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileAddress),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.TileBorder),
-/* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
-/* harmony export */   TileContentProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileContentProvider),
-/* harmony export */   TileContentStatus: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TileContentStatus),
-/* harmony export */   TileMapBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
-/* harmony export */   TileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayer),
-/* harmony export */   TileMapLayerView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayerView),
-/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapVectorLayer),
-/* harmony export */   TileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMetrics),
-/* harmony export */   TileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationApi),
-/* harmony export */   TileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState),
-/* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationStateSynchronizer),
-/* harmony export */   TilePipelineLink: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TilePipelineLink),
-/* harmony export */   TileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileProvider),
-/* harmony export */   TileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileSystemBounds),
-/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
-/* harmony export */   TileView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileView),
-/* harmony export */   TileViewBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileViewBase),
-/* harmony export */   TileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileWebClient),
+/* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileCollection),
+/* harmony export */   TileContentProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileContentProvider),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.TileContentStatus),
+/* harmony export */   TileMapBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileMapBase),
+/* harmony export */   TileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileMapLayer),
+/* harmony export */   TileMapLayerView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView),
+/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileMapVectorLayer),
+/* harmony export */   TileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileMetrics),
+/* harmony export */   TileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileNavigationApi),
+/* harmony export */   TileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileNavigationState),
+/* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileNavigationStateSynchronizer),
+/* harmony export */   TilePipelineLink: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TilePipelineLink),
+/* harmony export */   TileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileProvider),
+/* harmony export */   TileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileSystemBounds),
+/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileVectorRenderer),
+/* harmony export */   TileView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileView),
+/* harmony export */   TileViewBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileViewBase),
+/* harmony export */   TileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TileWebClient),
 /* harmony export */   TileWithElevation: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.TileWithElevation),
-/* harmony export */   TilesetCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_8__.TilesetCodec),
-/* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Timespan),
-/* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TouchGestureType),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_6__.TilesetCodec),
+/* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.TouchGestureType),
 /* harmony export */   TransformedPointerToDragController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.TransformedPointerToDragController),
 /* harmony export */   TransformedPointerToGestureController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.TransformedPointerToGestureController),
-/* harmony export */   UTM: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.UTM),
-/* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Unit),
-/* harmony export */   ValidableBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ValidableBase),
-/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
+/* harmony export */   UTM: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.UTM),
+/* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Unit),
+/* harmony export */   ValidableBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.ValidableBase),
+/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.VectorTileGeomType),
 /* harmony export */   VirtualDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay),
 /* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayInputsSource),
 /* harmony export */   VirtualDisplayOptions: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayOptions),
 /* harmony export */   VirtualDisplayUVMode: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayUVMode),
-/* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Voltage),
-/* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Volume),
+/* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Voltage),
+/* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.Volume),
 /* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.WebMapMaterial),
 /* harmony export */   WebMapTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.WebMapTexture),
-/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.WebTileUrlBuilder),
-/* harmony export */   XRGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.XRGestureType),
-/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.XmlDocumentTileCodec),
+/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.WebTileUrlBuilder),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.XRGestureType),
+/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.XmlDocumentTileCodec),
 /* harmony export */   _makeCopyRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_4__._makeCopyRawTextureFunction),
 /* harmony export */   _makeCreateRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_4__._makeCreateRawTextureFunction),
 /* harmony export */   _makeUpdateSubRawTexture2DArrayFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_4__._makeUpdateSubRawTexture2DArrayFunction),
-/* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.hasTileSelectionContext),
-/* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isArrayOfCartesianArray),
-/* harmony export */   isArrayOfFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isArrayOfFloatArray),
-/* harmony export */   isCartesian: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesian),
-/* harmony export */   isCartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesian3),
-/* harmony export */   isCartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesian4),
-/* harmony export */   isCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesianArray),
-/* harmony export */   isCircle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCircle),
-/* harmony export */   isClipable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isClipable),
-/* harmony export */   isFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isFilter),
-/* harmony export */   isFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isFloatArray),
-/* harmony export */   isGeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isGeoShape),
-/* harmony export */   isLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isLine),
-/* harmony export */   isPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isPolygon),
-/* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isPolyline),
-/* harmony export */   isShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isShape),
-/* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isValidable),
-/* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isViewProxy)
+/* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.hasTileSelectionContext),
+/* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isArrayOfCartesianArray),
+/* harmony export */   isArrayOfFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isArrayOfFloatArray),
+/* harmony export */   isCartesian: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isCartesian),
+/* harmony export */   isCartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isCartesian3),
+/* harmony export */   isCartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isCartesian4),
+/* harmony export */   isCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isCartesianArray),
+/* harmony export */   isCircle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isCircle),
+/* harmony export */   isClipable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isClipable),
+/* harmony export */   isFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isFilter),
+/* harmony export */   isFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isFloatArray),
+/* harmony export */   isGeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isGeoShape),
+/* harmony export */   isLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isLine),
+/* harmony export */   isPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isPolygon),
+/* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isPolyline),
+/* harmony export */   isShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isShape),
+/* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isValidable),
+/* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_7__.isViewProxy)
 /* harmony export */ });
 /* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials */ "./dist/materials/index.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./display */ "./dist/display/index.js");
@@ -28962,12 +29237,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./dem */ "./dist/dem/index.js");
 /* harmony import */ var _engines__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./engines */ "./dist/engines/index.js");
 /* harmony import */ var _meshes__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./meshes */ "./dist/meshes/index.js");
-/* harmony import */ var _gltf__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./gltf */ "./dist/gltf/index.js");
-/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./camera */ "./dist/camera/index.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
-/* harmony import */ var core_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/index */ "../core/dist/index.js");
-
-
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
+/* harmony import */ var core_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/index */ "../core/dist/index.js");
 
 
 

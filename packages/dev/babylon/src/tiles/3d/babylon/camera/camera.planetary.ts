@@ -2,7 +2,7 @@ import { ArcRotateCamera, Scene, Vector3 } from "@babylonjs/core";
 import { Ellipsoid, GeodeticSystem } from "core/geodesy";
 import { Geo3, IGeo3, IsLocation } from "core/geography";
 import { Range } from "core/math";
-import { EcefToBjsCartInPlace } from "../interfaces/math/math";
+import { EcefToBjsCartInPlace } from "../../interfaces/math/math";
 
 export class PlanetoryCamera extends ArcRotateCamera {
     public static DefaultAltitudeRange = new Range(25.0, 5_000_000.0);

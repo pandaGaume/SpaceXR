@@ -7,7 +7,7 @@ import { VirtualDisplay } from "../display";
 import { IInputSource, InputsNavigationController } from "core/map";
 import { IMap3D, Map3DContentType } from "./map.interfaces";
 import { Map3D } from "./map";
-import { SetupCameraStateSync, SyncActiveCameraState } from "../tiles/3d/babylon/tile3d.camera.sync";
+import { SetupCameraStateSync } from "../tiles/3d/babylon/camera/camera.sync";
 
 /// <sumary>
 /// Act as proxy for Elevation Map, and bind the rendering event of the scene
@@ -18,7 +18,6 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
     private _pointerController: Nullable<InputsNavigationController> = null;
     private _ownPointerController = false;
     private _cameraMonitoring?: IDisposable;
-    private _activCameraChangeMonitor: IDisposable;
 
     public constructor(name: string, scene?: BABYLON.Scene) {
         super(name, scene);
@@ -28,9 +27,8 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         let current: BABYLON.Camera | null = scene.activeCamera ?? null;
         let listener = this._onCameraState.bind(this);
         if (current) {
-            this._cameraMonitoring = SetupCameraStateSync(current, scene, listener);
+            this._cameraMonitoring = SetupCameraStateSync(current, listener);
         }
-        this._activCameraChangeMonitor = SyncActiveCameraState(scene, listener);
     }
 
     public get layers(): ITileMapLayerContainer<Map3DContentType> {
@@ -131,7 +129,6 @@ export class MapNode extends BABYLON.TransformNode implements ITileNavigationApi
         this._pointerController?.dispose();
         this._beforeRenderObserver?.remove();
         this._cameraMonitoring?.dispose();
-        this._activCameraChangeMonitor?.dispose();
         this._map.dispose();
         super.dispose(doNotRecurse, disposeMaterialAndTextures);
     }

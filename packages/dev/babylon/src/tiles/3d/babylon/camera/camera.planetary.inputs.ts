@@ -1,7 +1,7 @@
 import { ICameraInput, Observer, PointerEventTypes, PointerInfo } from "@babylonjs/core";
 import { Ellipsoid } from "core/geodesy";
 import { PlanetoryCamera } from "./camera.planetary";
-import { BjsToEcefCartInPlace, EcefToBjsCartInPlace } from "../interfaces/math/math";
+import { BjsToEcefCartInPlace, EcefToBjsCartInPlace } from "../../interfaces/math/math";
 
 export class PlanetoryWheelMetersInput implements ICameraInput<PlanetoryCamera> {
     public camera!: PlanetoryCamera;

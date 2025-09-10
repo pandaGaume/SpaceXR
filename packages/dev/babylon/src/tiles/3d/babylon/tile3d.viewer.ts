@@ -8,9 +8,9 @@ import { Tile3dScene } from "./tile3d.scene";
 import { Tile3dContentLoader } from "./tile3d.loader";
 import { ITileset } from "../interfaces";
 import { EventState } from "core/events";
-import { SetupCameraStateSync } from "./tile3d.camera.sync";
+import { SetupCameraStateSync } from "./camera/camera.sync";
 import { GoogleTile3dErrorFn } from "../vendors";
-import { PlanetoryCamera } from "./camera.planetary";
+import { PlanetoryCamera } from "./camera/camera.planetary";
 import { Geo3, IGeo3 } from "core/geography";
 import { Ellipsoid } from "core/geodesy";
 
@@ -102,8 +102,8 @@ export class Map3DViewer {
                 //this._cameraNav = SetupAdaptiveUniversalCamera(this._camera, scene);
                 // This attaches the camera to the canvas
                 this._camera.attachControl(this._canvas, true);
-                this._scene.onAfterCameraRenderObservable.addOnce((c, s) => {
-                    this._cameraSync = SetupCameraStateSync(c, scene, this.onCameraStateUpdate.bind(this));
+                scene.onAfterCameraRenderObservable.addOnce((c, s) => {
+                    this._cameraSync = SetupCameraStateSync(c, this.onCameraStateUpdate.bind(this));
                 });
             }
 

@@ -1,5 +1,12 @@
 import { IQueue } from "./collections.interfaces";
 
+export type Comparator<T> = (a: T, b: T) => number;
+
+export function isPriorityQueue<T>(x: unknown): x is PriorityQueue<T> {
+    // duck-typing : adapte selon ton API réelle (enqueue/dequeue/peek/size)
+    return !!x && typeof x === "object" && typeof (x as any).enqueue === "function" && typeof (x as any).dequeue === "function";
+}
+
 /**
  * PriorityQueue<T>
  * - Binary heap with O(log n) push/pop, O(1) peek
@@ -7,9 +14,9 @@ import { IQueue } from "./collections.interfaces";
  */
 export class PriorityQueue<T> implements IQueue<T> {
     private _heap: T[] = [];
-    private readonly _compare: (a: T, b: T) => number;
+    private readonly _compare: Comparator<T>;
 
-    constructor(compare: (a: T, b: T) => number) {
+    constructor(compare: Comparator<T>) {
         this._compare = compare;
     }
 

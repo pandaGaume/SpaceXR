@@ -658,7 +658,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LinkedListNode: () => (/* reexport safe */ _linkedlist__WEBPACK_IMPORTED_MODULE_1__.LinkedListNode),
 /* harmony export */   OrderedCollection: () => (/* reexport safe */ _orderedCollection__WEBPACK_IMPORTED_MODULE_2__.OrderedCollection),
 /* harmony export */   PriorityQueue: () => (/* reexport safe */ _priorityQueue__WEBPACK_IMPORTED_MODULE_5__.PriorityQueue),
-/* harmony export */   Stack: () => (/* reexport safe */ _stack__WEBPACK_IMPORTED_MODULE_3__.Stack)
+/* harmony export */   Stack: () => (/* reexport safe */ _stack__WEBPACK_IMPORTED_MODULE_3__.Stack),
+/* harmony export */   isPriorityQueue: () => (/* reexport safe */ _priorityQueue__WEBPACK_IMPORTED_MODULE_5__.isPriorityQueue)
 /* harmony export */ });
 /* harmony import */ var _collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./collection */ "./dist/collections/collection.js");
 /* harmony import */ var _linkedlist__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./linkedlist */ "./dist/collections/linkedlist.js");
@@ -923,8 +924,12 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   PriorityQueue: () => (/* binding */ PriorityQueue)
+/* harmony export */   PriorityQueue: () => (/* binding */ PriorityQueue),
+/* harmony export */   isPriorityQueue: () => (/* binding */ isPriorityQueue)
 /* harmony export */ });
+function isPriorityQueue(x) {
+    return !!x && typeof x === "object" && typeof x.enqueue === "function" && typeof x.dequeue === "function";
+}
 class PriorityQueue {
     constructor(compare) {
         this._heap = [];
@@ -14901,6 +14906,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _objectpools__WEBPACK_IMPORTED_MODULE_0__.ObjectPoolOptions),
 /* harmony export */   PathUtils: () => (/* reexport safe */ _path__WEBPACK_IMPORTED_MODULE_4__.PathUtils),
+/* harmony export */   TaskScheduler: () => (/* reexport safe */ _taskScheduler__WEBPACK_IMPORTED_MODULE_5__.TaskScheduler),
 /* harmony export */   TextUtils: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_1__.TextUtils)
 /* harmony export */ });
 /* harmony import */ var _objectpools__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objectpools */ "./dist/utils/objectpools.js");
@@ -14908,6 +14914,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./runtime */ "./dist/utils/runtime.js");
 /* harmony import */ var _debugtouch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./debugtouch */ "./dist/utils/debugtouch.js");
 /* harmony import */ var _path__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./path */ "./dist/utils/path.js");
+/* harmony import */ var _taskScheduler__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./taskScheduler */ "./dist/utils/taskScheduler.js");
+
 
 
 
@@ -15033,6 +15041,62 @@ function Assert(condition, message) {
     }
 }
 //# sourceMappingURL=runtime.js.map
+
+/***/ }),
+
+/***/ "./dist/utils/taskScheduler.js":
+/*!*************************************!*\
+  !*** ./dist/utils/taskScheduler.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TaskScheduler: () => (/* binding */ TaskScheduler)
+/* harmony export */ });
+/* harmony import */ var _collections__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../collections */ "./dist/collections/priorityQueue.js");
+
+class TaskScheduler {
+    constructor(compare, maxJobs = TaskScheduler.DefaultMaxJob, _schedule = (f) => requestAnimationFrame(f)) {
+        this.maxJobs = maxJobs;
+        this._schedule = _schedule;
+        this._inFlight = 0;
+        this._pq = (0,_collections__WEBPACK_IMPORTED_MODULE_0__.isPriorityQueue)(compare) ? compare : new _collections__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue(compare);
+    }
+    get running() {
+        return this._inFlight > 0 || !this._pq.isEmpty();
+    }
+    addAsync(task) {
+        return new Promise((resolve, reject) => {
+            if (task.signal?.aborted)
+                return reject(new DOMException("Aborted", "AbortError"));
+            const onAbort = () => reject(new DOMException("Aborted", "AbortError"));
+            task.signal?.addEventListener("abort", onAbort, { once: true });
+            this._pq.enqueue(task);
+            this._schedule(() => this._drain(resolve, reject, onAbort));
+        });
+    }
+    _drain(resolve, reject, onAbort) {
+        while (this._inFlight < this.maxJobs && !this._pq.isEmpty()) {
+            this._inFlight++;
+            const t = this._pq.dequeue();
+            Promise.resolve()
+                .then(() => t.run(t.item))
+                .then(resolve, reject)
+                .finally(() => {
+                this._inFlight--;
+                onAbort && t.signal?.removeEventListener("abort", onAbort);
+                if (this.running)
+                    this._schedule(() => this._drain(resolve, reject, onAbort));
+            });
+        }
+    }
+    clear() {
+        this._pq.clear();
+    }
+}
+TaskScheduler.DefaultMaxJob = 6;
+//# sourceMappingURL=taskScheduler.js.map
 
 /***/ }),
 
@@ -15387,6 +15451,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_9__.SunTrajectoryConfig),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.TargetProxy),
+/* harmony export */   TaskScheduler: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_11__.TaskScheduler),
 /* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions),
 /* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ _meshes_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptionsBuilder),
@@ -15438,6 +15503,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isLine: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isLine),
 /* harmony export */   isPolygon: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolygon),
 /* harmony export */   isPolyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isPolyline),
+/* harmony export */   isPriorityQueue: () => (/* reexport safe */ _collections__WEBPACK_IMPORTED_MODULE_16__.isPriorityQueue),
 /* harmony export */   isShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isShape),
 /* harmony export */   isValidable: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.isValidable),
 /* harmony export */   isViewProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.isViewProxy)

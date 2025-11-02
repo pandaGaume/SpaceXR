@@ -89,7 +89,12 @@ class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
     }
 }
 
+
 export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
+
+    public static GL_RGB8 = 0x8051;
+    public static GL_R16F = 0x822D;
+
     public static ElevationDepthsEastProperty: string = "y";
     public static ElevationDepthsSouthProperty: string = "z";
     public static ElevationDepthsSouthEastProperty: string = "w";
@@ -127,7 +132,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     public static ElevationSamplerUniformName: string = "uElevations";
 
     // the name of the shader used by the material
-    protected _shaderName: Nullable<string> = null;
+    protected _shaderName: string;
 
     // the optional holographix box where the material is used
     private _holoBounds: Nullable<IHolographicBounds> = null;
@@ -386,7 +391,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             format: Constants.TEXTUREFORMAT_RGB,
             textureType: Constants.TEXTURETYPE_UNSIGNED_BYTE,
             samplingMode: Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.RGB8,
+            internalFormat: Map3dMaterial.GL_RGB8,
             generateMipMap: false,
         };
         // this is where we leverage the Map3dTexture class to handle the layer texture
@@ -404,7 +409,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
             format: Constants.TEXTUREFORMAT_R,
             textureType: Constants.TEXTURETYPE_FLOAT, // the input is Float32Array
             samplingMode: Constants.TEXTURE_NEAREST_NEAREST,
-            internalFormat: scene.getEngine()._gl.R16F, // force internal format to save half space
+            internalFormat: Map3dMaterial.GL_R16F, // force internal format to save half space
             generateMipMap: false,
         };
         return new Texture3(scene, options);

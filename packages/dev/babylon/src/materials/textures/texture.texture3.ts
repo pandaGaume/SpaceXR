@@ -104,8 +104,9 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         this._h = height;
         // save internal format for later use on copy
         this._internalFormat = internalFormat;
-
-        this._texture = this._getEngine()!.__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
+        const engine = this._getEngine() as ThinEngine;
+ 
+        this._texture = engine.__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
         this.wrapU = wrapU ?? Constants.TEXTURE_CLAMP_ADDRESSMODE;
         this.wrapV = wrapV ?? Constants.TEXTURE_CLAMP_ADDRESSMODE;
     }
@@ -140,7 +141,7 @@ export class Texture3 extends BaseTexture implements ITexture3 {
     }
 
     public update(depth: number, data: Nullable<ArrayBufferView> | TexImageSource, xoffset?: number, yoffset?: number, width?: number, height?: number): void {
-        const engine = this._getEngine();
+        const engine = this._getEngine() as ThinEngine;
         if (engine && this._texture) {
             engine.__SpaceXR__updateSubRawTexture2DArray(
                 this._texture,
@@ -177,11 +178,18 @@ export class Texture3 extends BaseTexture implements ITexture3 {
             return true; // Enough space already
         }
 
-        const gl = this._getEngine()?._gl;
-        if (!gl) {
+        
+        const engine = this._getEngine() as ThinEngine;
+        if (!engine) {
             return false;
         }
-        const maxLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
+
+        const caps = this._getEngine()?.getCaps();
+
+        if (!caps) {
+            return false;
+        }
+        const maxLayers = caps.texture2DArrayMaxLayerCount ?? 0; // backend-agnostic
         const targetDepth = count + this.depth;
 
         let newDepth = this.depth;
@@ -197,10 +205,6 @@ export class Texture3 extends BaseTexture implements ITexture3 {
         }
         console.log(`Grow texture layers from ${this.depth} to ${newDepth}`);
 
-        const engine = this._getEngine();
-        if (!engine) {
-            return false;
-        }
         // Create a new texture with larger depth
         const newTexture = engine.__SpaceXR__createRawTexture2DArray(this._w, this._h, newDepth, oldTexture.format, oldTexture.samplingMode, oldTexture.type, this._internalFormat);
         engine.__SpaceXR__copyRawTexture2DArray(oldTexture, newTexture);

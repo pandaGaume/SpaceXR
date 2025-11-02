@@ -24778,7 +24778,6 @@ class ElevationLayout extends TileLayout {
 class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMaterial {
     constructor(name, scene, shaderName) {
         super(name, scene);
-        this._shaderName = null;
         this._holoBounds = null;
         this._clipPlanesAddedObservers = null;
         this._clipPlanesRemovedObservers = null;
@@ -24962,7 +24961,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGB,
             textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_BYTE,
             samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_BILINEAR_SAMPLINGMODE,
-            internalFormat: scene.getEngine()._gl.RGB8,
+            internalFormat: Map3dMaterial.GL_RGB8,
             generateMipMap: false,
         };
         return new _textures__WEBPACK_IMPORTED_MODULE_5__.Texture3(scene, options);
@@ -24978,7 +24977,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_R,
             textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT,
             samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_NEAREST_NEAREST,
-            internalFormat: scene.getEngine()._gl.R16F,
+            internalFormat: Map3dMaterial.GL_R16F,
             generateMipMap: false,
         };
         return new _textures__WEBPACK_IMPORTED_MODULE_5__.Texture3(scene, options);
@@ -25365,6 +25364,8 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
 }
+Map3dMaterial.GL_RGB8 = 0x8051;
+Map3dMaterial.GL_R16F = 0x822D;
 Map3dMaterial.ElevationDepthsEastProperty = "y";
 Map3dMaterial.ElevationDepthsSouthProperty = "z";
 Map3dMaterial.ElevationDepthsSouthEastProperty = "w";
@@ -25525,7 +25526,8 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
         this._w = width;
         this._h = height;
         this._internalFormat = internalFormat;
-        this._texture = this._getEngine().__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
+        const engine = this._getEngine();
+        this._texture = engine.__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
         this.wrapU = wrapU ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_CLAMP_ADDRESSMODE;
         this.wrapV = wrapV ?? _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_CLAMP_ADDRESSMODE;
     }
@@ -25578,11 +25580,15 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
         if (this.depth - this.count >= count) {
             return true;
         }
-        const gl = this._getEngine()?._gl;
-        if (!gl) {
+        const engine = this._getEngine();
+        if (!engine) {
             return false;
         }
-        const maxLayers = gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS);
+        const caps = this._getEngine()?.getCaps();
+        if (!caps) {
+            return false;
+        }
+        const maxLayers = caps.texture2DArrayMaxLayerCount ?? 0;
         const targetDepth = count + this.depth;
         let newDepth = this.depth;
         do {
@@ -25594,10 +25600,6 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
             return false;
         }
         console.log(`Grow texture layers from ${this.depth} to ${newDepth}`);
-        const engine = this._getEngine();
-        if (!engine) {
-            return false;
-        }
         const newTexture = engine.__SpaceXR__createRawTexture2DArray(this._w, this._h, newDepth, oldTexture.format, oldTexture.samplingMode, oldTexture.type, this._internalFormat);
         engine.__SpaceXR__copyRawTexture2DArray(oldTexture, newTexture);
         oldTexture.dispose();

@@ -1,4 +1,4 @@
-import { IsTileConstructor, ITile, ITileAddress2, ITileBuilder, ITileMetrics, ITileProvider, TileConstructor } from "../tiles.interfaces";
+import { IsTileConstructor, ITile, ITile2DAddress, ITileBuilder, ITileMetrics, ITileProvider, TileConstructor } from "../tiles.interfaces";
 import { EventState, Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IBounds } from "../../geometry/geometry.interfaces";
@@ -84,11 +84,11 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return Array.from(this._activTiles);
     }
 
-    public getTile(a: ITileAddress2): Nullable<ITile<T>> | undefined {
+    public getTile(a: ITile2DAddress): Nullable<ITile<T>> | undefined {
         return this._activTiles.get(a);
     }
 
-    public hasTile(a: ITileAddress2): boolean {
+    public hasTile(a: ITile2DAddress): boolean {
         return this._activTiles.has(a);
     }
 
@@ -139,7 +139,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
     /// end ISourceBlock
 
     /// begin ITargetBlock
-    public added(eventData: IPipelineMessageType<ITileAddress2>, eventState: EventState): void {
+    public added(eventData: IPipelineMessageType<ITile2DAddress>, eventState: EventState): void {
         const tiles = this._onTileAddressesAdded(eventData, eventState);
         if (tiles.length) {
             this.invalidate();
@@ -154,7 +154,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    public removed(eventData: IPipelineMessageType<ITileAddress2>, eventState: EventState): void {
+    public removed(eventData: IPipelineMessageType<ITile2DAddress>, eventState: EventState): void {
         const tiles = this._onTileAddressesRemoved(eventData, eventState);
         if (tiles.length) {
             this.invalidate();
@@ -169,12 +169,12 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    public updated(eventData: IPipelineMessageType<ITileAddress2>, eventState: EventState): void {
+    public updated(eventData: IPipelineMessageType<ITile2DAddress>, eventState: EventState): void {
         // nothing to do here, updating address is not suppose to happen
     }
     /// end ITargetBlock
 
-    protected _onTileAddressesAdded(address: Array<ITileAddress2>, eventState: EventState): Array<ITile<T>> {
+    protected _onTileAddressesAdded(address: Array<ITile2DAddress>, eventState: EventState): Array<ITile<T>> {
         const toActivate = address.length === 0 ? [...(this._activTiles ?? [])].map((t) => t.address) : address;
         const tiles = new Array<ITile<T>>();
         for (const a of toActivate ?? []) {
@@ -204,7 +204,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return tiles;
     }
 
-    protected _onTileAddressesRemoved(address: Array<ITileAddress2>, eventState: EventState): Array<ITile<T>> {
+    protected _onTileAddressesRemoved(address: Array<ITile2DAddress>, eventState: EventState): Array<ITile<T>> {
         if (this._activTiles && this._activTiles.count) {
             const tiles = new Array<ITile<T>>();
             for (const a of address ?? []) {

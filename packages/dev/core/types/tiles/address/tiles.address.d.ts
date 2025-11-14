@@ -1,5 +1,5 @@
 import { Nullable } from "../../types";
-import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
+import { ITile2DAddress, ITileMetrics } from "../tiles.interfaces";
 import { IBounds } from "../../geometry";
 export declare enum NeighborsIndex {
     NW = 0,
@@ -12,22 +12,22 @@ export declare enum NeighborsIndex {
     S = 7,
     SE = 8
 }
-export declare class TileAddress implements ITileAddress2 {
-    static Split(a: ITileAddress2, metrics: ITileMetrics): Nullable<ITileAddress2[]>;
-    static ShiftMultiple(addresses: ITileAddress2[], N: number, metrics: ITileMetrics): ITileAddress2[];
-    static Shift(a: ITileAddress2 | ITileAddress2[], N: number, metrics: ITileMetrics): Nullable<ITileAddress2 | ITileAddress2[]>;
-    static ToBounds(a: ITileAddress2, metrics: ITileMetrics): IBounds;
-    static IsEquals(a: ITileAddress2, b: ITileAddress2): boolean;
-    static IsValidAddress(a: ITileAddress2, metrics: ITileMetrics): boolean;
-    static AssertValidAddress(a: ITileAddress2, metrics: ITileMetrics): void;
+export declare class TileAddress implements ITile2DAddress {
+    static Split(a: ITile2DAddress, metrics: ITileMetrics): Nullable<ITile2DAddress[]>;
+    static ShiftMultiple(addresses: ITile2DAddress[], N: number, metrics: ITileMetrics): ITile2DAddress[];
+    static Shift(a: ITile2DAddress | ITile2DAddress[], N: number, metrics: ITileMetrics): Nullable<ITile2DAddress | ITile2DAddress[]>;
+    static ToBounds(a: ITile2DAddress, metrics: ITileMetrics): IBounds;
+    static IsEquals(a: ITile2DAddress, b: ITile2DAddress): boolean;
+    static IsValidAddress(a: ITile2DAddress, metrics: ITileMetrics): boolean;
+    static AssertValidAddress(a: ITile2DAddress, metrics: ITileMetrics): void;
     static IsValidLod(lod: number, metrics: ITileMetrics): boolean;
     static ClampLod(levelOfDetail: number, metrics: ITileMetrics): number;
     static ToParentKey(key: string): string;
     static ToChildsKey(key: string): string[];
     static ToNeighborsKey(key: string): Nullable<string>[];
-    static ToNeighborsXY(a: ITileAddress2): Nullable<ITileAddress2>[];
+    static ToNeighborsXY(a: ITile2DAddress): Nullable<ITile2DAddress>[];
     static TileXYToQuadKey(x: number, y: number, levelOfDetail: number): string;
-    static QuadKeyToTileXY(quadKey: string): ITileAddress2;
+    static QuadKeyToTileXY(quadKey: string): ITile2DAddress;
     private _k?;
     private _x?;
     private _y?;
@@ -40,6 +40,6 @@ export declare class TileAddress implements ITileAddress2 {
     get levelOfDetail(): number;
     set levelOfDetail(value: number);
     get quadkey(): string;
-    clone(): ITileAddress2;
+    clone(): ITile2DAddress;
     toString(): string;
 }

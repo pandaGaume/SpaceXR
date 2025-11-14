@@ -1,4 +1,4 @@
-import { ITile, ITileAddress2, ITileContentProvider, ITileDatasource } from "../../tiles.interfaces";
+import { ITile, ITile2DAddress, ITileContentProvider, ITileDatasource } from "../../tiles.interfaces";
 import { IVectorTileContent, TileVectorRenderer } from "../../vector";
 import { IVectorStyle } from "../../vector/tiles.vector.style.interface";
 import { ITileMapLayerOptions } from "../tiles.map.interfaces";
@@ -13,7 +13,7 @@ export class TileMapVectorLayer extends TileMapLayer<IVectorTileContent> {
 
     public constructor(
         name: string,
-        source: ITileContentProvider<IVectorTileContent> | ITileDatasource<IVectorTileContent, ITileAddress2>,
+        source: ITileContentProvider<IVectorTileContent> | ITileDatasource<IVectorTileContent, ITile2DAddress>,
         options: ITleMapVectorOptions,
         enabled: boolean = true
     ) {

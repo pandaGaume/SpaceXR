@@ -1,5 +1,5 @@
 import { IDemInfos } from "core/dem";
-import { ITileAddress2, ITileContentProvider, ITileDatasource, TileMapLayer } from "core/tiles";
+import { ITile2DAddress, ITileContentProvider, ITileDatasource, TileMapLayer } from "core/tiles";
 import { IElevationLayer, IElevationLayerOptions } from "./dem.interfaces";
 import { ICartesian3 } from "core/geometry";
 import { PropertyChangedEventArgs } from "core/events";
@@ -11,7 +11,7 @@ export class ElevationLayer extends TileMapLayer<IDemInfos> implements IElevatio
     _exageration?: number;
     _offsets?: ICartesian3;
 
-    public constructor(name: string, provider: ITileContentProvider<IDemInfos> | ITileDatasource<IDemInfos, ITileAddress2>, options?: IElevationLayerOptions, enabled?: boolean) {
+    public constructor(name: string, provider: ITileContentProvider<IDemInfos> | ITileDatasource<IDemInfos, ITile2DAddress>, options?: IElevationLayerOptions, enabled?: boolean) {
         super(name, provider, options, enabled);
     }
 

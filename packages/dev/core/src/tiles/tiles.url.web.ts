@@ -1,7 +1,7 @@
 import { IUrlBuilder } from "../io";
-import { ITileAddress2 } from "./tiles.interfaces";
+import { ITile2DAddress } from "./tiles.interfaces";
 
-export class WebTileUrlBuilder implements IUrlBuilder<ITileAddress2> {
+export class WebTileUrlBuilder implements IUrlBuilder<ITile2DAddress> {
     // options
     _host?: string;
     _port?: number;
@@ -51,7 +51,7 @@ export class WebTileUrlBuilder implements IUrlBuilder<ITileAddress2> {
         return this;
     }
 
-    public buildUrl(a: ITileAddress2, ...params: unknown[]): string {
+    public buildUrl(a: ITile2DAddress, ...params: unknown[]): string {
         const scheme = this._isSecure ? "https" : "http";
         const host = this._port ? `${this._host}:${this._port}` : `${this._host}`;
         const query = this._query ? `?${this._query}` : "";

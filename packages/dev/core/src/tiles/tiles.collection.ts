@@ -1,6 +1,6 @@
 import { IBounds } from "../geometry/geometry.interfaces";
 import { IEnvelope, IsEnvelope } from "../geography/geography.interfaces";
-import { ITile, ITileAddress2, ITileCollection } from "./tiles.interfaces";
+import { ITile, ITile2DAddress, ITileCollection } from "./tiles.interfaces";
 import { TileAddress } from "./address/tiles.address";
 import { Envelope } from "../geography/geography.envelope";
 import { Bounds } from "../geometry";
@@ -53,15 +53,21 @@ export class TileCollection<T> implements ITileCollection<T> {
         return this._rect;
     }
 
-    public has(address: ITileAddress2): boolean {
+    public has(address: ITile2DAddress): boolean {
+        if( !address.quadkey){
+            return false;
+        }
         return this.index.has(address.quadkey);
     }
 
-    public get(address: ITileAddress2): ITile<T> | undefined {
+    public get(address: ITile2DAddress): ITile<T> | undefined {
+        if( !address.quadkey){
+            return undefined;
+        }
         return this.index.get(address.quadkey);
     }
 
-    public getAll(...address: Array<ITileAddress2>): Array<ITile<T> | undefined> {
+    public getAll(...address: Array<ITile2DAddress>): Array<ITile<T> | undefined> {
         return address.map((a) => this.get(a));
     }
 
@@ -86,17 +92,19 @@ export class TileCollection<T> implements ITileCollection<T> {
         }
     }
 
-    public remove(address: ITileAddress2): void {
+    public remove(address: ITile2DAddress): void {
         if (this.has(address)) {
             const index = this._items.findIndex((t) => TileAddress.IsEquals(t.address, address));
             this._items.splice(index, 1);
             this._bounds = undefined;
             this._rect = undefined;
-            this._index?.delete(address.quadkey);
+            if( this._index && address.quadkey){
+                this._index.delete(address.quadkey);
+            }
         }
     }
 
-    public removeAll(...address: Array<ITileAddress2>): void {
+    public removeAll(...address: Array<ITile2DAddress>): void {
         for (const a of address) {
             this.remove(a);
         }

@@ -5,9 +5,7 @@ import { Observable } from "../events/events.observable";
 import { PropertyChangedEventArgs } from "../events/events.args";
 import { ITransformBlock } from "./pipeline";
 import { FetchResult } from "../io";
-export declare function IsTileAddress(b: unknown): b is ITileAddress2;
-export declare function IsTileAddress3(b: unknown): b is ITileAddress3;
-export declare function IsArrayOfTileAddress(b: unknown): b is Array<ITileAddress2>;
+export declare function IsTile2DAddress(b: unknown): b is ITile2DAddress;
 export declare enum NeighborsAddress {
     NW = 0,
     N = 1,
@@ -22,20 +20,17 @@ export declare enum NeighborsAddress {
 export interface ITileAddress {
     metadata?: Record<string, any>;
 }
-export interface ITileAddress2 extends ITileAddress, ICartesian2 {
+export interface ITile2DAddress extends ITileAddress, ICartesian2 {
     levelOfDetail: number;
     quadkey: string;
 }
-export interface ITileAddress3 extends ITileAddress, IBounded {
-    tileId: string;
-}
-export interface ITileAddressable2 {
+export interface ITile2DAddressable {
     namespace?: string;
-    address: ITileAddress2;
+    address: ITile2DAddress;
     quadkey: string;
 }
 export type TileContentType<T> = Nullable<T>;
-export interface ITile<T> extends ITileAddressable2, IGeoBounded, IBounded {
+export interface ITile<T> extends ITile2DAddressable, IGeoBounded, IBounded {
     content: TileContentType<T>;
 }
 export declare function IsTile<T>(b: unknown): b is ITile<T>;
@@ -45,13 +40,13 @@ export declare function IsTileConstructor<T>(obj: any): obj is TileConstructor<T
 export interface ITileCollection<T> extends Iterable<ITile<T>>, IGeoBounded, IBounded {
     namespace?: string;
     count: number;
-    has(address: ITileAddress2): boolean;
-    get(address: ITileAddress2): ITile<T> | undefined;
-    getAll(...tile: Array<ITileAddress2>): void;
+    has(address: ITile2DAddress): boolean;
+    get(address: ITile2DAddress): ITile<T> | undefined;
+    getAll(...tile: Array<ITile2DAddress>): void;
     add(tile: ITile<T>): void;
     addAll(...tile: Array<ITile<T>>): void;
-    remove(address: ITileAddress2): void;
-    removeAll(...address: Array<ITileAddress2>): void;
+    remove(address: ITile2DAddress): void;
+    removeAll(...address: Array<ITile2DAddress>): void;
     clear(): void;
     intersect(bounds?: IBounds | IEnvelope): IterableIterator<ITile<T>>;
 }
@@ -61,7 +56,7 @@ export interface ITileProxy<T> {
 }
 export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
-    withAddress(a: ITileAddress2): ITileBuilder<T>;
+    withAddress(a: ITile2DAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
     withMetrics(metrics: ITileMetrics | undefined): ITileBuilder<T>;
     withType(type: new (...args: any[]) => ITile<T>): ITileBuilder<T>;
@@ -116,17 +111,17 @@ export interface ITileMetricsProvider {
     metrics?: ITileMetrics;
 }
 export declare function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider;
-export interface ITileDatasource<T, A extends ITileAddress2 | ITileAddress3> extends ITileMetricsProvider {
+export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
     name: string;
     fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
-export declare function IsTileDatasource<T, A extends ITileAddress2 | ITileAddress3>(b: unknown): b is ITileDatasource<T, A>;
-export interface ITileClient<T> extends ITileDatasource<T, ITileAddress2 | ITileAddress3> {
+export declare function IsTileDatasource<T, A extends ITileAddress>(b: unknown): b is ITileDatasource<T, A>;
+export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
 }
 export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
     name: string;
-    datasource: ITileDatasource<T, ITileAddress2 | ITileAddress3>;
-    accept(address: ITileAddress2 | ITileAddress3): boolean;
+    datasource: ITileDatasource<T, ITileAddress>;
+    accept(address: ITileAddress): boolean;
     fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>;
 }
 export interface IHasNamespace {
@@ -134,10 +129,10 @@ export interface IHasNamespace {
 }
 export interface IHasActivTiles<T> {
     activTiles: Array<Nullable<ITile<T>>>;
-    getTile(a: ITileAddress2): Nullable<ITile<T>> | undefined;
-    hasTile(a: ITileAddress2): boolean;
+    getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
+    hasTile(a: ITileAddress): boolean;
 }
-export interface ITileProvider<T> extends ITransformBlock<ITileAddress2, ITile<T>>, IValidable, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
+export interface ITileProvider<T> extends ITransformBlock<ITile2DAddress, ITile<T>>, IValidable, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
     enabledObservable: Observable<ITileProvider<T>>;
     enabled: boolean;
     factory: ITileBuilder<T>;

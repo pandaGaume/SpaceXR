@@ -1,5 +1,5 @@
 import { IEnvelope, Envelope } from "../geography";
-import { ITile, ITileAddress2, ITileMetrics, TileContentType } from "./tiles.interfaces";
+import { ITile, ITile2DAddress, ITileMetrics, TileContentType } from "./tiles.interfaces";
 import { IBounds } from "../geometry/geometry.interfaces";
 import { TileAddress } from "./address/tiles.address";
 import { Bounds } from "../geometry";
@@ -58,7 +58,7 @@ export class Tile<T> extends TileAddress implements ITile<T> {
         this._ns = v;
     }
 
-    public get address(): ITileAddress2 {
+    public get address(): ITile2DAddress {
         return this;
     }
 

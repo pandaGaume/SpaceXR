@@ -1,6 +1,6 @@
 import { Nullable } from "../../types";
 import { Scalar } from "../../math/math";
-import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
+import { ITile2DAddress, ITileMetrics } from "../tiles.interfaces";
 import { Bounds, IBounds } from "../../geometry";
 
 export enum NeighborsIndex {
@@ -15,8 +15,8 @@ export enum NeighborsIndex {
     SE = 8,
 }
 
-export class TileAddress implements ITileAddress2 {
-    public static Split(a: ITileAddress2, metrics: ITileMetrics): Nullable<ITileAddress2[]> {
+export class TileAddress implements ITile2DAddress {
+    public static Split(a: ITile2DAddress, metrics: ITileMetrics): Nullable<ITile2DAddress[]> {
         if (a.levelOfDetail == metrics.maxLOD) {
             return null;
         }
@@ -32,7 +32,7 @@ export class TileAddress implements ITileAddress2 {
         ];
     }
 
-    public static ShiftMultiple(addresses: ITileAddress2[], N: number, metrics: ITileMetrics): ITileAddress2[] {
+    public static ShiftMultiple(addresses: ITile2DAddress[], N: number, metrics: ITileMetrics): ITile2DAddress[] {
         const uniqueQuadKeys = new Set<string>();
 
         // Reuse the shift function and collect results
@@ -42,11 +42,17 @@ export class TileAddress implements ITileAddress2 {
             if (Array.isArray(shifted)) {
                 // Add all child quadkeys to the set
                 shifted.forEach((child) => {
-                    uniqueQuadKeys.add(child.quadkey);
+                    const qk = child.quadkey;
+                    if (qk){
+                        uniqueQuadKeys.add(qk);
+                    }
                 });
             } else if (shifted) {
                 // Add the single parent quadkey to the set
-                uniqueQuadKeys.add(shifted.quadkey);
+                const qk = shifted.quadkey;
+                if (qk){
+                    uniqueQuadKeys.add(qk);
+                }
             }
         });
 
@@ -54,12 +60,15 @@ export class TileAddress implements ITileAddress2 {
         return Array.from(uniqueQuadKeys).map((key) => TileAddress.QuadKeyToTileXY(key));
     }
 
-    public static Shift(a: ITileAddress2 | ITileAddress2[], N: number, metrics: ITileMetrics): Nullable<ITileAddress2 | ITileAddress2[]> {
+    public static Shift(a: ITile2DAddress | ITile2DAddress[], N: number, metrics: ITileMetrics): Nullable<ITile2DAddress | ITile2DAddress[]> {
         if (Array.isArray(a)) {
             return TileAddress.ShiftMultiple(a, N, metrics);
         }
 
         let currentKey = a.quadkey;
+        if(!currentKey){
+            return null;
+        }
         let currentLod = a.levelOfDetail;
 
         if (N === 0) {
@@ -96,16 +105,16 @@ export class TileAddress implements ITileAddress2 {
         return TileAddress.QuadKeyToTileXY(currentKey);
     }
 
-    public static ToBounds(a: ITileAddress2, metrics: ITileMetrics): IBounds {
+    public static ToBounds(a: ITile2DAddress, metrics: ITileMetrics): IBounds {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
         return Bounds.FromPoints2(...points);
     }
 
-    public static IsEquals(a: ITileAddress2, b: ITileAddress2): boolean {
+    public static IsEquals(a: ITile2DAddress, b: ITile2DAddress): boolean {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
     }
 
-    public static IsValidAddress(a: ITileAddress2, metrics: ITileMetrics): boolean {
+    public static IsValidAddress(a: ITile2DAddress, metrics: ITileMetrics): boolean {
         if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
             return false;
         }
@@ -119,7 +128,7 @@ export class TileAddress implements ITileAddress2 {
         return true;
     }
 
-    public static AssertValidAddress(a: ITileAddress2, metrics: ITileMetrics): void {
+    public static AssertValidAddress(a: ITile2DAddress, metrics: ITileMetrics): void {
         if (!TileAddress.IsValidLod(a.levelOfDetail, metrics)) {
             throw new Error(`Invalid levelOfDetail ${a.levelOfDetail}`);
         }
@@ -162,7 +171,7 @@ export class TileAddress implements ITileAddress2 {
     /// with 4 being the specified tile.
     // you may use NeighborsAddress enum for the purpose of indexing the array.
     /// </summary>
-    public static ToNeighborsXY(a: ITileAddress2): Nullable<ITileAddress2>[] {
+    public static ToNeighborsXY(a: ITile2DAddress): Nullable<ITile2DAddress>[] {
         const max = Math.pow(2, a.levelOfDetail);
         const n = [
             new TileAddress(a.x - 1, a.y - 1, a.levelOfDetail),
@@ -195,7 +204,7 @@ export class TileAddress implements ITileAddress2 {
         return quadKey;
     }
 
-    public static QuadKeyToTileXY(quadKey: string): ITileAddress2 {
+    public static QuadKeyToTileXY(quadKey: string): ITile2DAddress {
         let tileX = 0;
         let tileY = 0;
         const levelOfDetail = quadKey.length;
@@ -222,7 +231,7 @@ export class TileAddress implements ITileAddress2 {
                     throw new Error("Invalid QuadKey digit sequence.");
             }
         }
-        return <ITileAddress2>{ x: tileX, y: tileY, levelOfDetail: levelOfDetail };
+        return <ITile2DAddress>{ x: tileX, y: tileY, levelOfDetail: levelOfDetail };
     }
 
     private _k?: string;
@@ -276,7 +285,7 @@ export class TileAddress implements ITileAddress2 {
         return this._k;
     }
 
-    public clone(): ITileAddress2 {
+    public clone(): ITile2DAddress {
         return new TileAddress(this.x, this.y, this.levelOfDetail);
     }
 

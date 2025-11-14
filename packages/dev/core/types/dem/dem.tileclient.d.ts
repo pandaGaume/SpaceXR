@@ -1,5 +1,5 @@
 import { Nullable } from "../types";
-import { ITileAddress2, ITileClient, ITileMetrics } from "../tiles/tiles.interfaces";
+import { ITile2DAddress, ITileClient, ITileMetrics } from "../tiles/tiles.interfaces";
 import { IDemInfos } from "./dem.interfaces";
 import { IGeoBounded } from "../geography";
 import { FetchResult } from "../io";
@@ -13,7 +13,7 @@ export declare class DemTileWebClient implements ITileClient<IDemInfos> {
     get zindex(): number;
     set zindex(v: number);
     get metrics(): ITileMetrics | undefined;
-    fetchAsync(request: ITileAddress2, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<ITileAddress2, Nullable<IDemInfos>>>;
+    fetchAsync(request: ITile2DAddress, env?: IGeoBounded, ...userArgs: unknown[]): Promise<FetchResult<ITile2DAddress, Nullable<IDemInfos>>>;
     private computeNormals;
     private getNormalsWindows;
 }

@@ -6,7 +6,7 @@ import { TileNavigationApi } from "../navigation/tiles.navigation.api";
 import { hasTileSelectionContext, ISourceBlock, ITileSelectionContext, ITileView } from "../pipeline";
 import { TileProvider } from "../providers";
 
-import { ITileAddress2 } from "../tiles.interfaces";
+import { ITile2DAddress } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { TileView } from "./tiles.map.view";
 
@@ -15,7 +15,7 @@ export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLaye
 
     private _layer: ITileMapLayer<T>;
     private _layerObserver: Nullable<Observer<PropertyChangedEventArgs<unknown, unknown>>>;
-    private _source: ISourceBlock<ITileAddress2>;
+    private _source: ISourceBlock<ITile2DAddress>;
     private _selectionContext?: ITileSelectionContext;
     private _ownSource: boolean = false;
     private _navigation: Nullable<ITileNavigationState> = null;
@@ -24,7 +24,7 @@ export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLaye
     private _display: Nullable<IDisplay> = null;
     private _displayObserver: Nullable<Observer<PropertyChangedEventArgs<IDisplay, unknown>>> = null;
 
-    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ISourceBlock<ITileAddress2>, selectionContext?: ITileSelectionContext) {
+    public constructor(layer: ITileMapLayer<T>, display: Nullable<IDisplay>, source: ISourceBlock<ITile2DAddress>, selectionContext?: ITileSelectionContext) {
         super(layer.provider);
         this._layer = layer;
         this._layerObserver = layer.propertyChangedObservable.add(this._onLayerPropertyChanged.bind(this));
@@ -107,7 +107,7 @@ export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLaye
         }
     }
 
-    public get source(): ISourceBlock<ITileAddress2> {
+    public get source(): ISourceBlock<ITile2DAddress> {
         return this._source;
     }
 

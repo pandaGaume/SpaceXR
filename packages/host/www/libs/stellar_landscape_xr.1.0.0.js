@@ -12775,7 +12775,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationController),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
-/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTileAddress),
 /* harmony export */   IsBounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounded),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounds),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_13__.IsDemInfos),
@@ -12793,8 +12792,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsString),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTile),
-/* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
-/* harmony export */   IsTileAddress3: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress3),
+/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTile2DAddress),
 /* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileCollection),
 /* harmony export */   IsTileConstructor: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileConstructor),
 /* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_10__.IsTileDatasource),
@@ -17119,11 +17117,17 @@ class TileAddress {
             const shifted = TileAddress.Shift(address, N, metrics);
             if (Array.isArray(shifted)) {
                 shifted.forEach((child) => {
-                    uniqueQuadKeys.add(child.quadkey);
+                    const qk = child.quadkey;
+                    if (qk) {
+                        uniqueQuadKeys.add(qk);
+                    }
                 });
             }
             else if (shifted) {
-                uniqueQuadKeys.add(shifted.quadkey);
+                const qk = shifted.quadkey;
+                if (qk) {
+                    uniqueQuadKeys.add(qk);
+                }
             }
         });
         return Array.from(uniqueQuadKeys).map((key) => TileAddress.QuadKeyToTileXY(key));
@@ -17133,6 +17137,9 @@ class TileAddress {
             return TileAddress.ShiftMultiple(a, N, metrics);
         }
         let currentKey = a.quadkey;
+        if (!currentKey) {
+            return null;
+        }
         let currentLod = a.levelOfDetail;
         if (N === 0) {
             return a;
@@ -18102,13 +18109,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.ImageLayer),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
-/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTileAddress),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsDrawableTileMapLayer),
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsPhysicalDisplay),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile),
-/* harmony export */   IsTileAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress),
-/* harmony export */   IsTileAddress3: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileAddress3),
+/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile2DAddress),
 /* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileCollection),
 /* harmony export */   IsTileConstructor: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileConstructor),
 /* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileDatasource),
@@ -20188,7 +20193,7 @@ class TileContentProvider {
         let c = this._buildTemporaryContent(address);
         this._cache.set(cacheKey, c);
         this._datasource.fetchAsync(address, tile).then((result) => {
-            if (result.ok) {
+            if (result.ok && address.quadkey) {
                 this._cache.set(this._buildCacheKey(address.quadkey), result.content);
                 tile.content = result.content;
                 callback?.(tile);
@@ -20403,9 +20408,15 @@ class TileCollection {
         return this._rect;
     }
     has(address) {
+        if (!address.quadkey) {
+            return false;
+        }
         return this.index.has(address.quadkey);
     }
     get(address) {
+        if (!address.quadkey) {
+            return undefined;
+        }
         return this.index.get(address.quadkey);
     }
     getAll(...address) {
@@ -20436,7 +20447,9 @@ class TileCollection {
             this._items.splice(index, 1);
             this._bounds = undefined;
             this._rect = undefined;
-            this._index?.delete(address.quadkey);
+            if (this._index && address.quadkey) {
+                this._index.delete(address.quadkey);
+            }
         }
     }
     removeAll(...address) {
@@ -20567,10 +20580,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CellCoordinateReference: () => (/* binding */ CellCoordinateReference),
 /* harmony export */   IsArrayOfTile: () => (/* binding */ IsArrayOfTile),
-/* harmony export */   IsArrayOfTileAddress: () => (/* binding */ IsArrayOfTileAddress),
 /* harmony export */   IsTile: () => (/* binding */ IsTile),
-/* harmony export */   IsTileAddress: () => (/* binding */ IsTileAddress),
-/* harmony export */   IsTileAddress3: () => (/* binding */ IsTileAddress3),
+/* harmony export */   IsTile2DAddress: () => (/* binding */ IsTile2DAddress),
 /* harmony export */   IsTileCollection: () => (/* binding */ IsTileCollection),
 /* harmony export */   IsTileConstructor: () => (/* binding */ IsTileConstructor),
 /* harmony export */   IsTileDatasource: () => (/* binding */ IsTileDatasource),
@@ -20578,27 +20589,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileSystemBounds: () => (/* binding */ IsTileSystemBounds),
 /* harmony export */   NeighborsAddress: () => (/* binding */ NeighborsAddress)
 /* harmony export */ });
-/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-
-function IsTileAddress(b) {
+function IsTile2DAddress(b) {
     if (typeof b !== "object" || b === null)
         return false;
     return b.x !== undefined && b.y !== undefined && b.levelOfDetail !== undefined;
-}
-function IsTileAddress3(b) {
-    if (typeof b !== "object" || b === null)
-        return false;
-    return b.tileId !== undefined && (0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsBounded)(b);
-}
-function IsArrayOfTileAddress(b) {
-    if (Array.isArray(b) && b.length) {
-        for (let i = 0; i != b.length; i++) {
-            if (IsTileAddress(b[i])) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 var NeighborsAddress;
 (function (NeighborsAddress) {
@@ -26925,7 +26919,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InputsNavigationController),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTile),
-/* harmony export */   IsArrayOfTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTileAddress),
 /* harmony export */   IsBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBounded),
 /* harmony export */   IsBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBounds),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDemInfos),
@@ -26951,8 +26944,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsStructuralMetadata: () => (/* reexport safe */ _gltf__WEBPACK_IMPORTED_MODULE_6__.IsStructuralMetadata),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
-/* harmony export */   IsTileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileAddress),
-/* harmony export */   IsTileAddress3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileAddress3),
+/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTile2DAddress),
 /* harmony export */   IsTileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileCollection),
 /* harmony export */   IsTileConstructor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileConstructor),
 /* harmony export */   IsTileDatasource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileDatasource),

@@ -1,12 +1,13 @@
 import { SourceBlock } from "core/tiles/pipeline/tiles.pipeline.sourceblock";
 import { Nullable } from "core/types";
 import { FetchResult, WebClient } from "core/io";
-import { ICameraState, IDisplay, ITileAddress3 } from "core/tiles";
+import { ICameraState, IDisplay} from "core/tiles";
 import { GeodeticSystem, IGeoProcessor, SphericalCalculator } from "core/geodesy";
 
 import { BoxType, ITile3d, ITileset, Mat44Type, Point3Type, RegionType, TransformPoint3, TransformVec3 } from "./interfaces";
 import { Cartesian3, ICartesian3 } from "core/geometry";
 import { Tile3dWebClient } from "./tile3d.client";
+import { ITile3DAddress } from "./tile3d.interfaces";
 
 ///<summary>
 /// Computes the screen space error (SSE) for a tile based on its geometric error,
@@ -37,7 +38,7 @@ export class Tile3dStreamingEngineOptions {
     };
 
     tilesetExtension?: string;
-    webClient?: WebClient<ITileAddress3, ITileset>;
+    webClient?: WebClient<ITile3DAddress, ITileset>;
     maximumScreenSpaceError?: number; // Maximum screen space error for tile refinement
     geo?: Tile3dGeodeticOptions;
 }
@@ -45,11 +46,11 @@ export class Tile3dStreamingEngineOptions {
 export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
     _uri: string;
     _root: Nullable<ITileset>;
-    _client: WebClient<ITileAddress3, ITileset>;
+    _client: WebClient<ITile3DAddress, ITileset>;
     _options: Tile3dStreamingEngineOptions;
 
     _actives: Array<ITile3d> = []; // Active tiles in the current context
-    _loadingPromises: Map<string, Promise<FetchResult<ITileAddress3, Nullable<ITileset>>>>;
+    _loadingPromises: Map<string, Promise<FetchResult<ITile3DAddress, Nullable<ITileset>>>>;
     _cartesianCache: Array<Point3Type> = [
         [0, 0, 0],
         [0, 0, 0],
@@ -65,7 +66,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
         this._root = null;
         this._client = options?.webClient ?? new Tile3dWebClient(uri); // uri is used for the name of the client.
         this._options = { ...Tile3dStreamingEngineOptions.Default, ...options };
-        this._loadingPromises = new Map<string, Promise<FetchResult<ITileAddress3, Nullable<ITileset>>>>();
+        this._loadingPromises = new Map<string, Promise<FetchResult<ITile3DAddress, Nullable<ITileset>>>>();
     }
 
     public setContext(

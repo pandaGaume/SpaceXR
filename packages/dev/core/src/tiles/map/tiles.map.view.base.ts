@@ -1,12 +1,12 @@
-import { ITileAddress2, ITileMetrics } from "../tiles.interfaces";
+import { ITile2DAddress, ITileMetrics } from "../tiles.interfaces";
 import { ITileSelectionContextOptions, ITileView } from "../pipeline/tiles.pipeline.interfaces";
 import { Nullable } from "../../types";
 import { ITileNavigationState } from "../navigation";
 import { IDisplay } from ".";
 import { SourceBlock } from "../pipeline/tiles.pipeline.sourceblock";
 
-export class TileViewBase extends SourceBlock<ITileAddress2> implements ITileView {
-    _activ: Map<string, ITileAddress2> = new Map<string, ITileAddress2>();
+export class TileViewBase extends SourceBlock<ITile2DAddress> implements ITileView {
+    _activ: Map<string, ITile2DAddress> = new Map<string, ITile2DAddress>();
 
     public constructor() {
         super();
@@ -20,7 +20,7 @@ export class TileViewBase extends SourceBlock<ITileAddress2> implements ITileVie
         this._doValidateContext(state, display, metrics, this._activ, options);
     }
 
-    protected _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITileAddress2>, options?: ITileSelectionContextOptions): void {
+    protected _doClearContext(state: Nullable<ITileNavigationState>, activAddresses: Map<string, ITile2DAddress>, options?: ITileSelectionContextOptions): void {
         if (state) {
             let deleted = Array.from(activAddresses.values());
             activAddresses.clear();
@@ -37,7 +37,7 @@ export class TileViewBase extends SourceBlock<ITileAddress2> implements ITileVie
         state: Nullable<ITileNavigationState>,
         display: Nullable<IDisplay>,
         metrics: ITileMetrics,
-        activAddresses: Map<string, ITileAddress2>,
+        activAddresses: Map<string, ITile2DAddress>,
         options?: ITileSelectionContextOptions
     ): void {}
 }

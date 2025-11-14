@@ -29,7 +29,7 @@ import {
     IPipelineMessageType,
     ITargetBlock,
     ITile,
-    ITileAddress2,
+    ITile2DAddress,
     ITileMapLayerView,
     ITileMetrics,
     NeighborsAddress,
@@ -67,7 +67,7 @@ class TextureLayout extends TileLayout<ITileWithGridElevation<TextureType>, Text
 
 // specialization for elevation with dem and normals
 class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
-    _neighbors: Array<Nullable<ITileAddress2>>;
+    _neighbors: Array<Nullable<ITile2DAddress>>;
 
     public constructor(
         tile: ITile<ElevationType>,
@@ -79,7 +79,7 @@ class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
         this._neighbors = TileAddress.ToNeighborsXY(tile.address);
     }
 
-    public get neighbors(): Array<Nullable<ITileAddress2>> {
+    public get neighbors(): Array<Nullable<ITile2DAddress>> {
         return this._neighbors;
     }
 

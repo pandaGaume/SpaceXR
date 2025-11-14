@@ -1,5 +1,5 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { IsTileDatasource, ITileAddress2, ITileAddress3, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { IsTileDatasource, ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy, LayerRenderFn } from "./tiles.map.interfaces";
 
 import { Assert } from "../../utils";
@@ -21,12 +21,12 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
 
     _provider: ITileContentProvider<T>;
 
-    public constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress2 | ITileAddress3>, options?: ITileMapLayerOptions<T>, enabled?: boolean) {
+    public constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress >, options?: ITileMapLayerOptions<T>, enabled?: boolean) {
         Assert(name !== undefined && name !== null && name !== "", "Invalid layer name.");
         Assert(provider !== undefined && name !== null, "Invalid provider or datasource");
 
         this._name = name;
-        this._provider = IsTileDatasource<T, ITileAddress2 | ITileAddress3>(provider) ? this._buildProvider(provider) : provider;
+        this._provider = IsTileDatasource<T, ITileAddress>(provider) ? this._buildProvider(provider) : provider;
         this._weight = options?.weight ?? -1;
         this._zoomOffset = options?.zoomOffset ?? 0;
         this._attribution = options?.attribution;
@@ -152,7 +152,7 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
 
     public dispose() {}
 
-    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress2 | ITileAddress3>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T> {
+    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T> {
         return new TileContentProvider<T>(dataSource, cache);
     }
 }

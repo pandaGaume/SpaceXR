@@ -1,8 +1,8 @@
 const { fromEvent, BehaviorSubject } = rxjs;
 const { debounceTime, distinctUntilChanged, switchMap, filter, tap } = rxjs.operators;
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoiY2xvbmdlYW5pZSIsImEiOiJjajZ3YWJ3bTQxcDk5Mnhxc29lbzMzdm54In0.-hY_qdTaIeZcZlRivs947Q";
-const GOOGLE_API_KEY = "AIzaSyB1vqO-4pZqrRez4jGvuBJ7YVwQLmW5dXE";
+const MAPBOX_TOKEN = "";
+const GOOGLE_API_KEY = "";
 
 class SearchControllerDelegate {
     onSearchResultSelected(place) {}

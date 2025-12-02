@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Babylon.js Neon Glow Ribbon</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/babylonjs.materials.min.js"></script>
+
+<body>
+    <canvas id="renderCanvas" style="width:100%; height:100%; background-color: transparent;"></canvas>
+    <script>
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true);
+
+        const createScene = () => {
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+
+            // Camera
+            const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 3, 10, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
+
+            // Light
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+            // Create ribbon path
+            const path1 = [];
+            const path2 = [];
+            for (let i = 0; i < 50; i++) {
+                path1.push(new BABYLON.Vector3(i * 0.2, Math.sin(i * 0.3), 0));
+                path2.push(new BABYLON.Vector3(i * 0.2, Math.sin(i * 0.3) + 0.2, 0));
+            }
+            const ribbon = BABYLON.MeshBuilder.CreateRibbon("ribbon", { pathArray: [path1, path2], sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+
+
+
+            // Définir les shaders dans ShadersStore
+            BABYLON.Effect.ShadersStore["customVertexShader"] = `
+                precision highp float;
+                attribute vec3 position;
+                attribute vec2 uv;
+                uniform mat4 worldViewProjection;
+                varying vec2 vUV;
+                void main(void) {
+                    vUV = uv;
+                    gl_Position = worldViewProjection * vec4(position, 1.0);
+                }
+            `;
+
+            BABYLON.Effect.ShadersStore["customFragmentShader"] = `
+                precision highp float;
+                varying vec2 vUV;
+                uniform float time;
+
+                void main(void) {
+                    float glow = sin(vUV.x * 20.0 + time) * 0.5 + 0.5;
+                    vec3 neonColor = vec3(0.0, 0.5, 1.0);
+
+                    // Distance au centre pour le fade
+                    float distToCenter = abs(vUV.y - 0.5);
+                    float edgeFade = 1.0 - smoothstep(0.0, 0.5, distToCenter);
+
+                    gl_FragColor = vec4(neonColor * glow, edgeFade);
+                }`;
+            // Créer le ShaderMaterial
+            const shaderMaterial = new BABYLON.ShaderMaterial("shader", scene, {
+                vertex: "custom",
+                fragment: "custom"
+            }, {
+                attributes: ["position", "uv"],
+                uniforms: ["worldViewProjection", "time"],
+                needAlphaBlending: true // Crucial for transparency
+            });
+
+            // Animation
+            shaderMaterial.setFloat("time", 0);
+
+            shaderMaterial.alphaMode = BABYLON.Constants.ALPHA_ADD; // ou ALPHA_COMBINE
+            shaderMaterial.alpha = 1.0; // valeur par défaut
+            shaderMaterial.backFaceCulling = false; // pour voir les deux faces
+
+            scene.onBeforeRenderObservable.add(() => {
+                shaderMaterial.setFloat("time", performance.now() * 0.002);
+            });
+
+            ribbon.material = shaderMaterial;
+
+            return scene;
+        };
+
+
+        const scene = createScene();
+        engine.runRenderLoop(() => scene.render());
+        window.addEventListener("resize", () => engine.resize());
+    </script>
+</body>
+
+</html>

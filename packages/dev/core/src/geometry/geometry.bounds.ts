@@ -5,7 +5,9 @@ export class Bounds extends Cartesian3 implements IBounds {
     public static Zero(): IBounds {
         return new Bounds(0, 0, 0, 0, 0, 0);
     }
-
+    public static Normalized(): IBounds {
+        return new Bounds(0, 0, 0, 1, 1, 1);
+    }
     public static FromSize(size: ISize3): IBounds {
         return new Bounds(0, 0, size?.width || 0, size?.height || 0, 0, size?.depth || 0);
     }

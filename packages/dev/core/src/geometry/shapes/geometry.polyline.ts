@@ -6,6 +6,32 @@ import { AbstractShape } from "./geometry.shape";
 import { IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Polyline extends AbstractShape implements IPolyline {
+
+    public static Concat(...p: Array<IPolyline>): IPolyline {
+        const points: Array<ICartesian3> = [];
+
+        for (let i = 0; i < p.length; i++) {
+            const polyPoints = p[i].points.map(pt => new Cartesian3(pt.x, pt.y, pt.z));
+
+            if (i > 0 && points.length > 0) {
+                const lastPoint = points[points.length - 1];
+                const firstNewPoint = polyPoints[0];
+
+                // Compare coordinates to avoid duplication
+                if (lastPoint.x === firstNewPoint.x &&
+                    lastPoint.y === firstNewPoint.y &&
+                    lastPoint.z === firstNewPoint.z) {
+                    // Skip the first point of the current polyline
+                    polyPoints.shift();
+                }
+            }
+
+            points.push(...polyPoints);
+        }
+
+        return new Polyline(points);
+    }
+
     public static ArraysEqual(arr1: FloatArray, arr2: FloatArray): boolean {
         if (arr1.length !== arr2.length) {
             return false;

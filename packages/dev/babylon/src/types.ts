@@ -1,6 +1,6 @@
 import * as GLTF2 from "babylonjs-gltf2interface";
 import { ICartesian3, ICartesian2, ICartesian4 } from "core/geometry";
-import { IVerticesData } from "core/meshes";
+import { IVerticesData } from "core/geometry";
 import { IHasFeatureIds } from "./gltf/2.0/extensions/EXT_mesh_features";
 import { IHasInstanceIds } from "./gltf/2.0/extensions/EXT_instance_features";
 import { IStructuralMetadata } from "./gltf/2.0/extensions/EXT_structural_metadata";

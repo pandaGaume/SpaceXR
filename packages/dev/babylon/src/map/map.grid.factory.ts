@@ -1,5 +1,5 @@
 import { VertexData } from "@babylonjs/core";
-import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/meshes";
+import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder, TerrainNormalizedGridBuilder } from "core/geometry";
 import { IsNumber } from "core/types";
 import { IElevationGridFactory } from "./map.interfaces";
 import { ISize2, IsSize } from "core/geometry";

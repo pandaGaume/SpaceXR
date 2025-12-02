@@ -1,6 +1,6 @@
 import { IDemInfos } from "core/dem";
 import { ICartesian3, ISize2, ISize3 } from "core/geometry";
-import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/meshes";
+import { IVerticesData, TerrainGridOptions, TerrainGridOptionsBuilder } from "core/geometry";
 import { ImageLayerContentType, IsTile, ITargetBlock, ITile, ITileMap } from "core/tiles";
 import { IValidable, Nullable } from "core/types";
 import { AbstractMesh, Mesh, TransformNode } from "@babylonjs/core";

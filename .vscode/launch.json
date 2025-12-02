@@ -162,6 +162,13 @@
             "name": "Launch Test Cesium Google",
             "url": "http://localhost:1338/packages/host/www/babylon/cesium/cesiumGooglePhotoViewer.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test Glow",
+            "url": "http://localhost:1338/packages/host/www/babylon/tests/glow.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/"
         }
     ]
 }

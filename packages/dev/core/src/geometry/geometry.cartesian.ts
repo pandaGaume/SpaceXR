@@ -68,6 +68,9 @@ export class Cartesian2 implements ICartesian2 {
         return new Cartesian2(Infinity, Infinity);
     }
 
+    public static Clone(other:ICartesian2|ICartesian3|ICartesian4): ICartesian3 {
+        return new Cartesian3(other.x, other.y);
+    }
     public constructor(public x: number, public y: number) {}
 
     public toString() {
@@ -83,10 +86,35 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
     }
 
+    public static CrossToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3 {
+        ref.x = a.y * b.z - a.z * b.y;
+        ref.y = a.z * b.x - a.x * b.z;
+        ref.z = a.x * b.y - a.y * b.x;
+        return ref;
+    }
+
     public static Subtract(a: ICartesian3, b: ICartesian3): ICartesian3 {
         return new Cartesian3(a.x - b.x, a.y - b.y, a.z - b.z);
     }
 
+    public static SubtractToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3 {
+        ref.x = a.x - b.x;
+        ref.y = a.y - b.y;
+        ref.z = a.z - b.z;
+        return ref;
+    }
+
+    public static Add(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        return new Cartesian3(a.x + b.x, a.y + b.y, a.z + b.z);
+    }
+
+    public static AddToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3 {
+        ref.x = a.x + b.x;
+        ref.y = a.y + b.y;
+        ref.z = a.z + b.z;
+        return ref;
+    }
+    
     public static Normalize(a: ICartesian3): ICartesian3 {
         return Cartesian3.NormalizeToRef(a, Cartesian3.Zero());
     }
@@ -277,6 +305,18 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(1.0, 1.0, 1.0);
     }
 
+    public static UnitX(): ICartesian3 {
+        return new Cartesian3(1.0, 0.0, 0.0);
+    }
+
+    public static UnitY(): ICartesian3 {
+        return new Cartesian3(0.0, 1.0, 0.0);
+    }
+
+    public static UnitZ(): ICartesian3 {
+        return new Cartesian3(0.0, 0.0, 1.0);
+    }
+
     public static Infinity(): ICartesian3 {
         return new Cartesian3(Infinity, Infinity, Infinity);
     }
@@ -289,6 +329,13 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(x, y, z);
     }
 
+    public static FromArrayToRef(array: Float32Array | Array<number>, offset: number = 0, stride: number = 3, ref:ICartesian3): ICartesian3 {
+        let i = 0;
+        ref.x = array[offset + i];
+        ref.y = i < stride ? array[offset + ++i] : 0;
+        ref.z = i < stride ? array[offset + ++i] : 0;
+        return ref;
+    }
     public static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number> {
         ref = ref ?? new Float32Array(values.length * 3);
         let i = 0;
@@ -305,9 +352,16 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return Scalar.WithinEpsilon(a.x, b.x, epsilon) && Scalar.WithinEpsilon(a.y, b.y, epsilon) && Scalar.WithinEpsilon(a.z, b.z, epsilon);
     }
 
+
+    public static Clone(other:ICartesian3|ICartesian4): ICartesian3 {
+        return new Cartesian3(other.x, other.y, other.z);
+    }
+
+
     public constructor(x: number, y: number, public z: number = 0.0) {
         super(x, y);
     }
+
 
     public toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;
@@ -317,6 +371,10 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
 export class Cartesian4 extends Cartesian3 implements ICartesian4 {
     public static Zero() {
         return new Cartesian4(0, 0, 0);
+    }
+    
+    public static Clone(other:ICartesian4): ICartesian3 {
+        return new Cartesian4(other.x, other.y, other.z,other.w);
     }
     public constructor(x: number, y: number, z: number, public w: number = 1.0) {
         super(x, y, z);

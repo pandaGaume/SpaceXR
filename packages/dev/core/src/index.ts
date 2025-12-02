@@ -6,7 +6,6 @@ export * from "./geography/index";
 export * from "./geometry/index";
 export * from "./map/index";
 export * from "./math/index";
-export * from "./meshes/index";
 export * from "./space/index";
 export * from "./tiles/index";
 export * from "./utils/index";

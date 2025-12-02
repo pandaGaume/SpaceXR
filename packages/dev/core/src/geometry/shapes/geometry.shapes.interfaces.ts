@@ -53,7 +53,9 @@ export function isLine(shape: IShape): shape is ILine {
     return shape.type === ShapeType.Line;
 }
 
-export interface IPolyline extends IShape, IClipable<IPolyline> {}
+export interface IPolyline extends IShape, IClipable<IPolyline> {
+    points: Array<ICartesian3>;
+}
 
 export function isPolyline(shape: IShape): shape is IPolyline {
     if (typeof shape !== "object" || shape === null) return false;

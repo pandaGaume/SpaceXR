@@ -6,7 +6,7 @@ export class RibbonOptions {
     public path : Array<ICartesian3> = []
     public width : number | Array<number> = [1,1]; // left, right.
     public up: ICartesian3 = Cartesian3.UnitZ();  
-    public closePath : boolean = false;
+    public close : boolean = false;
 }
 
 export class RibbonBuilder {
@@ -46,7 +46,7 @@ export class RibbonBuilder {
         if(!this._o) {
             this._o = new RibbonOptions();
         }
-        this._o.closePath = closePath;
+        this._o.close = closePath;
         return this;
     }
 
@@ -87,8 +87,8 @@ export class RibbonBuilder {
             normals.push(up.x, up.y, up.z,up.x, up.y, up.z);
             if(a0 && a1) {
                 // we may build the quad 
-                let i = positions.length / 3 - 4;
-                indices.push(i, i+1, i+2,i, i+2, i+3);
+                let k = positions.length / 3 - 4;
+                indices.push(k, k+1, k+2,k, k+2, k+3);
             }
             a0 = b0;
             a1 = b1;
@@ -116,7 +116,7 @@ export class RibbonBuilder {
         }
         lateralVectors.push(blateral!);
 
-        if(this._o?.closePath) {
+        if(this._o?.close) {
             const medianLateral = this._getMedianLateralVector(lateralVectors[lateralVectors.length - 1], lateralVectors[0], temp)
             lateralVectors[lateralVectors.length - 1] = medianLateral;
             lateralVectors[0] = medianLateral;

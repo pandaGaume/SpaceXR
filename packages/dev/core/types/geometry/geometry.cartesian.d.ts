@@ -14,6 +14,7 @@ export declare class Cartesian2 implements ICartesian2 {
     static Zero(): ICartesian2;
     static One(): ICartesian2;
     static Infinity(): ICartesian2;
+    static Clone(other: ICartesian2 | ICartesian3 | ICartesian4): ICartesian3;
     constructor(x: number, y: number);
     toString(): string;
 }
@@ -21,7 +22,11 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     z: number;
     static Dot(a: ICartesian3, b: ICartesian3): number;
     static Cross(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static CrossToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
     static Subtract(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static SubtractToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
+    static Add(a: ICartesian3, b: ICartesian3): ICartesian3;
+    static AddToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
     static Normalize(a: ICartesian3): ICartesian3;
     static NormalizeInPlace(a: ICartesian3): ICartesian3;
     static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3;
@@ -47,16 +52,22 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static Centroid(values: Array<ICartesian3> | Float32Array | Array<number>, ref?: ICartesian3): ICartesian3;
     static Zero(): ICartesian3;
     static One(): ICartesian3;
+    static UnitX(): ICartesian3;
+    static UnitY(): ICartesian3;
+    static UnitZ(): ICartesian3;
     static Infinity(): ICartesian3;
     static FromArray(array: Float32Array | Array<number>, offset?: number, stride?: number): ICartesian3;
+    static FromArrayToRef(array: Float32Array | Array<number>, offset: number | undefined, stride: number | undefined, ref: ICartesian3): ICartesian3;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
+    static Clone(other: ICartesian3 | ICartesian4): ICartesian3;
     constructor(x: number, y: number, z?: number);
     toString(): string;
 }
 export declare class Cartesian4 extends Cartesian3 implements ICartesian4 {
     w: number;
     static Zero(): Cartesian4;
+    static Clone(other: ICartesian4): ICartesian3;
     constructor(x: number, y: number, z: number, w?: number);
     toString(): string;
 }

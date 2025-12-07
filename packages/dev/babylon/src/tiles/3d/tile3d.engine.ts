@@ -117,7 +117,7 @@ export class Tile3dStreamingEngine extends SourceBlock<ITile3d> {
             if (region) {
                 const system = this._options.geo?.system ?? GeodeticSystem.Default;
                 const calculator = this._options.geo?.calculator ?? new SphericalCalculator(system.ellipsoid);
-                box = this._getRegionToBoxRef(region, system, this._boxCache[1], calculator);
+                box = tile.boundingVolume.box = this._getRegionToBoxRef(region, system, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], calculator);
             } else {
                 return;
             }

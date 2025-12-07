@@ -4487,7 +4487,7 @@ class RibbonOptions {
         this.path = [];
         this.width = [1, 1];
         this.up = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.UnitZ();
-        this.closePath = false;
+        this.close = false;
     }
 }
 class RibbonBuilder {
@@ -4520,7 +4520,7 @@ class RibbonBuilder {
         if (!this._o) {
             this._o = new RibbonOptions();
         }
-        this._o.closePath = closePath;
+        this._o.close = closePath;
         return this;
     }
     reset() {
@@ -4550,8 +4550,8 @@ class RibbonBuilder {
             positions.push(b0.x, b0.y, b0.z, b1.x, b1.y, b1.z);
             normals.push(up.x, up.y, up.z, up.x, up.y, up.z);
             if (a0 && a1) {
-                let i = positions.length / 3 - 4;
-                indices.push(i, i + 1, i + 2, i, i + 2, i + 3);
+                let k = positions.length / 3 - 4;
+                indices.push(k, k + 1, k + 2, k, k + 2, k + 3);
             }
             a0 = b0;
             a1 = b1;
@@ -4577,7 +4577,7 @@ class RibbonBuilder {
             alateral = blateral;
         }
         lateralVectors.push(blateral);
-        if (this._o?.closePath) {
+        if (this._o?.close) {
             const medianLateral = this._getMedianLateralVector(lateralVectors[lateralVectors.length - 1], lateralVectors[0], temp);
             lateralVectors[lateralVectors.length - 1] = medianLateral;
             lateralVectors[0] = medianLateral;

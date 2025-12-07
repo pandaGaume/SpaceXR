@@ -27,10 +27,10 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static SubtractToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
     static Add(a: ICartesian3, b: ICartesian3): ICartesian3;
     static AddToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
-    static Normalize(a: ICartesian3): ICartesian3;
-    static NormalizeInPlace(a: ICartesian3): ICartesian3;
+    static Normalize(a: ICartesian3, magnitude?: number): ICartesian3;
+    static NormalizeInPlace(a: ICartesian3, magnitude?: number): ICartesian3;
     static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3;
-    static NormalizeToRef(a: ICartesian3, ref: ICartesian3): ICartesian3;
+    static NormalizeToRef(a: ICartesian3, ref: ICartesian3, magnitude?: number): ICartesian3;
     static AreCoincident(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     static AreCollinear(a: ICartesian3, b: ICartesian3, c: ICartesian3, epsilon?: number): boolean;
     static IsWithinTheBounds(a: ICartesian3, b: ICartesian3, p: ICartesian3): boolean;
@@ -60,6 +60,7 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static FromArrayToRef(array: Float32Array | Array<number>, offset: number | undefined, stride: number | undefined, ref: ICartesian3): ICartesian3;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
+    static EqualsWithinEpsilon(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     static Clone(other: ICartesian3 | ICartesian4): ICartesian3;
     constructor(x: number, y: number, z?: number);
     toString(): string;

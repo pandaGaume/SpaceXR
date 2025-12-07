@@ -3215,17 +3215,17 @@ class Cartesian3 extends Cartesian2 {
         ref.z = a.z + b.z;
         return ref;
     }
-    static Normalize(a) {
-        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero());
+    static Normalize(a, magnitude) {
+        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero(), magnitude);
     }
-    static NormalizeInPlace(a) {
-        return Cartesian3.NormalizeToRef(a, a);
+    static NormalizeInPlace(a, magnitude) {
+        return Cartesian3.NormalizeToRef(a, a, magnitude);
     }
     static Normal(v0, v1, v2) {
         return Cartesian3.NormalizeInPlace(Cartesian3.Cross(Cartesian3.Subtract(v1, v0), Cartesian3.Subtract(v2, v0)));
     }
-    static NormalizeToRef(a, ref) {
-        const length = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    static NormalizeToRef(a, ref, magnitude) {
+        const length = magnitude ?? Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
         ref.x = a.x / length;
         ref.y = a.y / length;
         ref.z = a.z / length;
@@ -3394,8 +3394,14 @@ class Cartesian3 extends Cartesian2 {
         return ref;
     }
     static Equals(a, b, epsilon) {
+        if (epsilon) {
+            return Cartesian3.EqualsWithinEpsilon(a, b, epsilon);
+        }
+        return b.x == a.x && b.y == a.y && b.z == a.z;
+    }
+    static EqualsWithinEpsilon(a, b, epsilon) {
         epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON;
-        return _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.x, b.x, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.y, b.y, epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(a.z, b.z, epsilon);
+        return _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(Math.abs(b.x - a.x), epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(Math.abs(b.y - a.y), epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(Math.abs(b.z - a.z), epsilon);
     }
     static Clone(other) {
         return new Cartesian3(other.x, other.y, other.z);
@@ -7326,9 +7332,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Scalar: () => (/* binding */ Scalar)
 /* harmony export */ });
 class Scalar {
-    static WithinEpsilon(a, b, epsilon = Scalar.EPSILON) {
-        const num = a - b;
-        return -epsilon <= num && num <= epsilon;
+    static WithinEpsilon(a, epsilon = Scalar.EPSILON) {
+        return -epsilon <= a && a <= epsilon;
     }
     static Sign(value) {
         return value > 0 ? 1 : -1;

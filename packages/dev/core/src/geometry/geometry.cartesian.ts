@@ -115,20 +115,20 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return ref;
     }
     
-    public static Normalize(a: ICartesian3): ICartesian3 {
-        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero());
+    public static Normalize(a: ICartesian3, magnitude?: number): ICartesian3 {
+        return Cartesian3.NormalizeToRef(a, Cartesian3.Zero(), magnitude);
     }
 
-    public static NormalizeInPlace(a: ICartesian3): ICartesian3 {
-        return Cartesian3.NormalizeToRef(a, a);
+    public static NormalizeInPlace(a: ICartesian3, magnitude?: number): ICartesian3 {
+        return Cartesian3.NormalizeToRef(a, a, magnitude);
     }
 
     public static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3 {
         return Cartesian3.NormalizeInPlace(Cartesian3.Cross(Cartesian3.Subtract(v1, v0), Cartesian3.Subtract(v2, v0)));
     }
 
-    public static NormalizeToRef(a: ICartesian3, ref: ICartesian3): ICartesian3 {
-        const length = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    public static NormalizeToRef(a: ICartesian3, ref: ICartesian3, magnitude?: number): ICartesian3 {
+        const length = magnitude ?? Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
         ref.x = a.x / length;
         ref.y = a.y / length;
         ref.z = a.z / length;
@@ -348,10 +348,16 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
     }
 
     public static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
-        epsilon = epsilon ?? Scalar.EPSILON;
-        return Scalar.WithinEpsilon(a.x, b.x, epsilon) && Scalar.WithinEpsilon(a.y, b.y, epsilon) && Scalar.WithinEpsilon(a.z, b.z, epsilon);
+        if(epsilon){
+            return Cartesian3.EqualsWithinEpsilon(a,b,epsilon)
+        }       
+        return b.x ==a.x && b.y==a.y && b.z==a.z;
     }
 
+    public static EqualsWithinEpsilon(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
+        epsilon = epsilon ?? Scalar.EPSILON;
+        return Scalar.WithinEpsilon(Math.abs(b.x-a.x), epsilon) && Scalar.WithinEpsilon(Math.abs(b.y-a.y), epsilon) && Scalar.WithinEpsilon(Math.abs(b.z-a.z), epsilon);
+    }
 
     public static Clone(other:ICartesian3|ICartesian4): ICartesian3 {
         return new Cartesian3(other.x, other.y, other.z);

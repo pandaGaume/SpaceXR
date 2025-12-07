@@ -50,3 +50,34 @@ export interface ITileset {
      */
     extensionsRequired?: [string, ...string[]];
 }
+
+export function IsITileset(obj: any): obj is ITileset {
+    if (typeof obj !== "object" || obj === null) return false;
+
+    // required
+    if (typeof obj.geometricError !== "number") return false;
+    if (!obj.asset || typeof obj.asset !== "object") return false;
+    if (!obj.root || typeof obj.root !== "object") return false;
+
+    // optional
+    if (obj.properties && typeof obj.properties !== "object") return false;
+    if (obj.schema && typeof obj.schema !== "object") return false;
+    if (obj.schemaUri && typeof obj.schemaUri !== "string") return false;
+    if (obj.statistics && typeof obj.statistics !== "object") return false;
+
+    if (obj.groups) {
+        if (!Array.isArray(obj.groups) || obj.groups.length < 1) return false;
+    }
+    if (obj.metadata && typeof obj.metadata !== "object") return false;
+
+    if (obj.extensionsUsed) {
+        if (!Array.isArray(obj.extensionsUsed) || obj.extensionsUsed.length < 1) return false;
+        if (!obj.extensionsUsed.every((e: any) => typeof e === "string")) return false;
+    }
+    if (obj.extensionsRequired) {
+        if (!Array.isArray(obj.extensionsRequired) || obj.extensionsRequired.length < 1) return false;
+        if (!obj.extensionsRequired.every((e: any) => typeof e === "string")) return false;
+    }
+
+    return true;
+}

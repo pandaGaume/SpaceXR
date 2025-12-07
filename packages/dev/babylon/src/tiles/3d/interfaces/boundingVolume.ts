@@ -36,9 +36,7 @@ export interface IBoundingVolume {
     sphere?: SphereType;
 }
 
-export type IBoxType = [number, number, number, number, number, number, number, number, number, number, number, number];
-
-export function AreBoxIntersect(a: IBoxType, b: IBoxType): boolean {
+export function AreBoxIntersect(a: BoxType, b: BoxType): boolean {
     for (let i = 0; i < 3; ++i) {
         const ai = 3 + i * 3;
         const aj = ai + 1;
@@ -60,4 +58,49 @@ export function AreBoxIntersect(a: IBoxType, b: IBoxType): boolean {
     }
 
     return true;
+}
+
+/**
+ * Create a tight bounding sphere from a 3D Tiles oriented box.
+ * Works in any coordinate system (ECEF, local, Babylon LH…) as long as
+ * the box and desired sphere are in the same space.
+ */
+export function CreateTileSphereFromBox(box: BoxType): SphereType {
+    if (!box || box.length !== 12) {
+        throw new Error("ITileBox must be number[12]: [C(3), U(3), V(3), W(3)].");
+    }
+
+    const Cx = box[0],
+        Cy = box[1],
+        Cz = box[2];
+    const Ux = box[3],
+        Uy = box[4],
+        Uz = box[5];
+    const Vx = box[6],
+        Vy = box[7],
+        Vz = box[8];
+    const Wx = box[9],
+        Wy = box[10],
+        Wz = box[11];
+
+    // Corner offsets relative to C: ±U ±V ±W
+    const offsets: Array<[number, number, number]> = [
+        [-Ux - Vx - Wx, -Uy - Vy - Wy, -Uz - Vz - Wz],
+        [Ux - Vx - Wx, Uy - Vy - Wy, Uz - Vz - Wz],
+        [-Ux + Vx - Wx, -Uy + Vy - Wy, -Uz + Vz - Wz],
+        [Ux + Vx - Wx, Uy + Vy - Wy, Uz + Vz - Wz],
+        [-Ux - Vx + Wx, -Uy - Vy + Wy, -Uz - Vz + Wz],
+        [Ux - Vx + Wx, Uy - Vy + Wy, Uz - Vz + Wz],
+        [-Ux + Vx + Wx, -Uy + Vy + Wy, -Uz + Vz + Wz],
+        [Ux + Vx + Wx, Uy + Vy + Wy, Uz + Vz + Wz],
+    ];
+
+    // Max distance from center among the 8 corners
+    let maxRSq = 0;
+    for (const [dx, dy, dz] of offsets) {
+        const r2 = dx * dx + dy * dy + dz * dz;
+        if (r2 > maxRSq) maxRSq = r2;
+    }
+
+    return [Cx, Cy, Cz, Math.sqrt(maxRSq)];
 }

@@ -18,6 +18,10 @@ export class SourceBlock<T> implements ISourceBlock<T> {
         this._links = [];
     }
 
+    public get links(): Array<ITilePipelineLink<T>> | undefined {
+        return this._links;
+    }
+
     public get addedObservable(): Observable<IPipelineMessageType<T>> {
         this._addedObservable = this._addedObservable || new Observable<IPipelineMessageType<T>>();
         return this._addedObservable!;
@@ -49,5 +53,24 @@ export class SourceBlock<T> implements ISourceBlock<T> {
             return l;
         }
         return undefined;
+    }
+
+    public notifyAdded(eventData: IPipelineMessageType<T>, mask: number = -1, target?: any, currentTarget?: any, userInfo?: any): boolean {
+        if (this._addedObservable?.hasObservers()) {
+            return this._addedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
+    }
+    public notifyRemoved(eventData: IPipelineMessageType<T>, mask: number = -1, target?: any, currentTarget?: any, userInfo?: any): boolean {
+        if (this._removedObservable?.hasObservers()) {
+            return this._removedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
+    }
+    public notifyUpdated(eventData: IPipelineMessageType<T>, mask: number = -1, target?: any, currentTarget?: any, userInfo?: any): boolean {
+        if (this._updatedObservable?.hasObservers()) {
+            return this._updatedObservable.notifyObservers(eventData, mask, target, currentTarget, userInfo);
+        }
+        return false;
     }
 }

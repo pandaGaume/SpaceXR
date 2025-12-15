@@ -10,7 +10,7 @@ export class Scalar {
     public static PI = Math.PI;
     public static PI_2 = Math.PI / 2;
     public static PI_4 = Math.PI / 4;
-    
+
     public static WithinEpsilon(a: number, epsilon: number = Scalar.EPSILON) {
         return -epsilon <= a && a <= epsilon;
     }
@@ -104,6 +104,10 @@ export class Range extends AbstractRange<number> {
         if (max !== undefined) {
             this._max = Math.max(this._max ?? max, max);
         }
+    }
+
+    public clamp(n: number): number {
+        return Scalar.Clamp(n, this._min ?? Number.MIN_VALUE, this._max ?? Number.MAX_VALUE);
     }
 
     public clone(): Range {

@@ -2,7 +2,7 @@ import { IGeo2, IsLocation, Bearing } from "../../geography";
 import { PropertyChangedEventArgs, Observable } from "../../events";
 import { ITileSystemBounds, IsTileSystemBounds } from "../tiles.interfaces";
 import { ICloneable, IDisposable, IValidable, Nullable } from "../../types";
-import { ICartesian3 } from "../../geometry";
+import { ICartesian3, IPlane, IQuaternion } from "../../geometry";
 
 export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
@@ -13,54 +13,40 @@ export function HasNavigationState(obj: unknown): obj is IHasNavigationState {
     return (<IHasNavigationState>obj).navigationState !== undefined;
 }
 
+
+/**
+ * Options required to turn an ICameraState into a perspective frustum.
+ */
+export interface IFrustumValues {
+    /** Viewport aspect ratio (width/height). Default: 16/9. */
+    aspect?: number;
+    /** Near plane distance (> 0). Default: 0.1. */
+    near?: number;
+    /** Far plane distance (> near). Default: 10_000. */
+    far?: number;
+    /** World up vector. Default: {0,1,0}. */
+    up?: ICartesian3;
+}
+
 /// <summary>
-/// Represents the state of the camera, including its position, the target it is looking at,
-/// and the field of view (FOV). This information is essential in certain scenarios where
-/// the Level of Detail (LOD) of the tiles must be computed. The LOD depends on the
-/// camera's position and target, which define the perspective and distance to the tiles,
-/// as well as the field of view, which affects how much of the scene is visible at once.
+/// Represents the camera view (pose + optics) used to derive frustum and SSE.
+/// Distances are expressed in local scene units; geometric errors are in meters.
+/// The renderer uses `metersToLocalScale` to compare them coherently.
 /// </summary>
-export interface ICameraState {
+export interface ICameraViewState extends IFrustumValues {
     /// <summary>
     /// An observable that notifies subscribers of changes to properties in the camera state.
-    /// This enables reactive updates when properties like `position`, `traget`, or `fov` are modified.
     /// </summary>
-    propertyChangedObservable: Observable<PropertyChangedEventArgs<ICameraState, unknown>>;
+    propertyChangedObservable?: Observable<PropertyChangedEventArgs<ICameraViewState, unknown>>;
 
-    /// <summary>
-    /// The position of the camera in a 3D Cartesian coordinate system.
-    /// This is crucial for determining the camera's proximity to tiles, which
-    /// influences the required resolution or detail level of each tile.
-    /// </summary>
-    position: ICartesian3;
-
-    /// <summary>
-    /// The target point in the 3D space that the camera is focused on.
-    /// Knowing the target helps define the direction of the camera's view,
-    /// which is necessary for calculating which tiles are in the field of view
-    /// and require higher or lower detail levels.
-    /// </summary>
-    target: ICartesian3;
-
-    /// <summary>
-    /// The field of view (FOV) of the camera, typically measured in degrees.
-    /// The FOV determines the angle of the visible area and affects how much of
-    /// the scene can be seen at a given distance. A wider FOV may require less
-    /// detailed tiles further away, while a narrower FOV may demand higher detail
-    /// for tiles closer to the target.
-    /// </summary>
-    fov: number;
-
-    /// <summary>
-    /// The tangent of half the field of view, which is used in calculations related to
-    /// screen space error and Level of Detail (LOD). This value is derived from the FOV
-    /// and is essential for determining how much detail is needed based on the camera's
-    /// perspective. It helps in calculating the screen space error, which is a measure of
-    /// how much detail is required for tiles based on their distance from the camera and
-    /// the camera's field of view.
-    /// </summary>
-    tanfov2: number;
+    worldPosition: ICartesian3; // position in world space
+    worldRotation: IQuaternion; // orientation in world space
+    fovY: number; // perspective FOV in radians (0 if ortho)
+    tanFov2: number; // Math.tan(fovY / 2)
+    frustumPlanes?: Array<IPlane>; // frustum plane. Should be lazzy initialisation.
 }
+
+export type CameraStateListener = (state: ICameraViewState) => void;
 
 /// <summary>
 /// Represents the navigation state of a tile-based system, encompassing essential properties
@@ -111,13 +97,6 @@ export interface ITileNavigationState extends IValidable, ICloneable<ITileNaviga
     /// smooth transitions between zoom levels and finer control over tile rendering.
     /// </summary>
     scale: number;
-
-    /// <summary>
-    /// Optional property representing the camera state. When provided, it includes parameters like
-    /// position, target, and field of view (FOV), which are critical for calculating the Level of
-    /// Detail (LOD) dynamically based on the camera's perspective and proximity to tiles.
-    /// </summary>
-    camera?: ICameraState;
 
     /// <summary>
     /// Copies the properties from the provided state into the current state. This is used for

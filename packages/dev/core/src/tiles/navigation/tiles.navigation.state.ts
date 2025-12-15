@@ -1,5 +1,5 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
-import { ICameraState, ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileSystemBounds } from "../tiles.interfaces";
@@ -34,7 +34,6 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
     _cartesianCache: ICartesian2 = Cartesian2.Zero();
     _lod: number;
     _scale: number;
-    _camera?: ICameraState;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
 
@@ -138,22 +137,6 @@ export class TileNavigationState extends ValidableBase implements ITileNavigatio
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
                 const e = new PropertyChangedEventArgs(this, old, this._azimuth, TileNavigationState.AZIMUTH_PROPERTY_NAME);
-                this._propertyChangedObservable.notifyObservers(e, -1, this, this);
-            }
-        }
-    }
-
-    public get camera(): ICameraState | undefined {
-        return this._camera;
-    }
-
-    public set camera(c: ICameraState) {
-        if (this._camera !== c) {
-            const old = this._camera;
-            this._camera = c;
-            this.invalidate();
-            if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new PropertyChangedEventArgs(this, old, this._camera, TileNavigationState.CAMERA_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }

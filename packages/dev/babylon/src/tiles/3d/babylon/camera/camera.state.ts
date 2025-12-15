@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 
-import { ICartesian3, IQuaternion, IPlane } from "core/geometry";
+import { ICartesian3, IPlane, IQuaternion } from "core/geometry";
 import { ICameraViewState } from "core/tiles";
 
 export class CameraState implements ICameraViewState {

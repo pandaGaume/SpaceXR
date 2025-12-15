@@ -72,7 +72,7 @@ export class Map3DViewer {
                     this._map = new Tile3dScene(options.names?.map ?? "map", this._scene);
                     this._streamEngine.linkTo(this._map);
                     this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
-                    this._streamEngine.setContext(); // start the root loading.
+                    this._streamEngine.setContextAsync(); // start the root loading.
 
                     /*this._scene.useRightHandedSystem = true;
                     BABYLON.SceneLoader.OnPluginActivatedObservable.add((p) => {
@@ -157,7 +157,7 @@ export class Map3DViewer {
     }
 
     protected onCameraStateUpdate(state: ICameraViewState): void {
-        this._streamEngine?.setContext(state);
+        this._streamEngine?.setContextAsync(state)
     }
 
     protected _getCameraName(): string {

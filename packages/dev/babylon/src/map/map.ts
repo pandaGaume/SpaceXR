@@ -11,8 +11,6 @@ import { TextUtils } from "core/utils";
 import { Map3dMaterial } from "../materials";
 import { IsHolographicBounds } from "../display";
 import { ElevationLayerView } from "./map.layer.dem";
-import { Tile3dLayerView } from "./map.layer.object";
-import { ObjectLayer } from "../tiles/3d/tile3d.layer";
 
 export class Map3DOptions {
     public static DefaultGridSize: number = 32;
@@ -111,9 +109,6 @@ export class Map3D extends TileMapBase<Map3DContentType> implements IMap3D, IEle
         }
         if (layer instanceof ImageLayer) {
             return new TextureLayerView(this, layer, this.display, this.view);
-        }
-        if (layer instanceof ObjectLayer) {
-            return new Tile3dLayerView(this, layer, this.display, this.view);
         }
         return null;
     }

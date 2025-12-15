@@ -192,4 +192,18 @@ export class Ellipsoid {
     public clone(name: string, scale = 1.0): Ellipsoid {
         return new Ellipsoid(name, this._a * scale, this._b * scale, this._f, this._invf);
     }
+
+
+    public radiusAtLatitude(phiRad: number): number {
+        const cos = Math.cos(phiRad);
+        const sin = Math.sin(phiRad);
+        return Math.sqrt(((this._aa * cos) ** 2 + (this._bb * sin) ** 2) / ((this._a * cos) ** 2 + (this._b * sin) ** 2));
+    }
+
+    /* (x,y,y) MUST be a normalized vector */
+    public radiusAtPosition(x: number, y: number, z: number): number {
+        // radius to ellipsoid surface along this direction
+        const denom = (x * x + y * y) / this._aa + (z * z) / this._bb;
+        return 1.0 / Math.sqrt(denom);
+    }
 }

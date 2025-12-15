@@ -5,19 +5,30 @@ import { ICartesian2, ICartesian3, IPlane } from "./geometry.interfaces";
 import { PolylineSimplifier } from "./geometry.simplify";
 
 export class PlaneDefinition implements IPlane {
-    private _point: ICartesian3;
+    public static MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3, hull: Array<ICartesian3>): PlaneDefinition {
+        // Normalize the normal
+        const len = Math.hypot(normal.x, normal.y, normal.z);
+        const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
+
+        // Compute scalar d
+        const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
+
+        return new PlaneDefinition(d, n, hull);
+    }
+
+    private _d: number;
     private _normal: ICartesian3;
 
     private _hull: Array<ICartesian3> = [];
 
-    public constructor(p: ICartesian3, n: ICartesian3, hull: Array<ICartesian3>) {
-        this._point = p;
+    public constructor(d: number, n: ICartesian3, hull: Array<ICartesian3>) {
+        this._d = d;
         this._normal = n;
         this._hull = hull;
     }
 
-    public get point(): ICartesian3 {
-        return this._point;
+    public get d(): number {
+        return this._d;
     }
 
     public get normal(): ICartesian3 {
@@ -90,7 +101,7 @@ export class PlaneCruncher {
                 return this._transformPoint(point, inv);
             });
 
-            const p = new PlaneDefinition(g.center, g.normal, convertedHull);
+            const p = PlaneDefinition.MakePlaneFromPointAndNormal(g.center, g.normal, convertedHull);
             planes.push(p);
         }
 
@@ -274,7 +285,7 @@ export class PlaneCruncher {
         return inv;
     }
 
-    private _transformPoint(point: ICartesian3, transformationMatrix: number[][]): ICartesian3 {
+    private _transformPoint(point: ICartesian3, transformationMatrix: number[][]): Cartesian3 {
         const pointHomogeneous = [point.x, point.y, point.z, 1];
         const transformedPointHomogeneous = [0, 0, 0, 0];
 
@@ -284,10 +295,10 @@ export class PlaneCruncher {
             }
         }
 
-        return {
-            x: transformedPointHomogeneous[0] / transformedPointHomogeneous[3],
-            y: transformedPointHomogeneous[1] / transformedPointHomogeneous[3],
-            z: transformedPointHomogeneous[2] / transformedPointHomogeneous[3],
-        };
+        return new Cartesian3(
+            transformedPointHomogeneous[0] / transformedPointHomogeneous[3],
+            transformedPointHomogeneous[1] / transformedPointHomogeneous[3],
+            transformedPointHomogeneous[2] / transformedPointHomogeneous[3]
+        );
     }
 }

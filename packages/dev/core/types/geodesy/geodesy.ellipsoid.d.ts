@@ -41,4 +41,6 @@ export declare class Ellipsoid {
     get semiLatusRectum(): number;
     isEquals(other: Ellipsoid): boolean;
     clone(name: string, scale?: number): Ellipsoid;
+    radiusAtLatitude(phiRad: number): number;
+    radiusAtPosition(x: number, y: number, z: number): number;
 }

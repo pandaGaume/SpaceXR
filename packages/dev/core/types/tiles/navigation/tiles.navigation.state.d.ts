@@ -1,5 +1,5 @@
 import { PropertyChangedEventArgs, Observable, Observer, EventState } from "../../events";
-import { ICameraState, ITileNavigationState } from "./tiles.navigation.interfaces";
+import { ITileNavigationState } from "./tiles.navigation.interfaces";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 import { ITileSystemBounds } from "../tiles.interfaces";
@@ -22,7 +22,6 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     _cartesianCache: ICartesian2;
     _lod: number;
     _scale: number;
-    _camera?: ICameraState;
     _boundsObserver?: Nullable<Observer<PropertyChangedEventArgs<ITileSystemBounds, unknown>>>;
     _sync: Nullable<TileNavigationStateSynchronizer>;
     constructor(center?: IGeo2 | Array<number>, lod?: number, azimuth?: number, bounds?: ITileSystemBounds);
@@ -36,8 +35,6 @@ export declare class TileNavigationState extends ValidableBase implements ITileN
     set zoom(lodf: number);
     get azimuth(): Bearing;
     set azimuth(r: Bearing);
-    get camera(): ICameraState | undefined;
-    set camera(c: ICameraState);
     get bounds(): ITileSystemBounds;
     set bounds(bounds: ITileSystemBounds);
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<ITileNavigationState, unknown>>;

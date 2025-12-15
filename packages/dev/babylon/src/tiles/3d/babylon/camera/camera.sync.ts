@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
-import { CameraStateListener } from "core/tiles";
 import { CameraMotionDetector } from ".";
+import { CameraStateListener } from "core/tiles";
 
 declare module "core/tiles/navigation/tiles.navigation.interfaces" {
     export interface ICameraViewState {

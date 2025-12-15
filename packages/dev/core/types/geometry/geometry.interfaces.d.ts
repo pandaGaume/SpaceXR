@@ -23,6 +23,8 @@ export declare function isCartesian3(b: unknown): b is ICartesian3;
 export declare function isCartesianArray(b: unknown): b is CartesianArray;
 export declare function isArrayOfCartesianArray(input: any): input is Array<CartesianArray>;
 export declare function isCartesian4(b: unknown): b is ICartesian4;
+export interface IQuaternion extends ICartesian4 {
+}
 export interface ISize2 {
     height: number;
     width: number;
@@ -44,14 +46,19 @@ export interface IBoundingSphere {
     center: ICartesian3;
     radius: number;
 }
-export interface IBounds extends ISize3, ICartesian3, ICloneable<IBounds> {
+export interface IBoundingBox {
+    minimum: ICartesian3;
+    maximum: ICartesian3;
+    center: ICartesian3;
+    extendSize: ICartesian3;
+}
+export interface IBounds extends IBoundingBox, ISize3, ICartesian3, ICloneable<IBounds> {
     ymax: number;
     xmax: number;
     zmax: number;
     xmin: number;
     ymin: number;
     zmin: number;
-    center: ICartesian3;
     intersects(other?: IBounds): boolean;
     intersection(other?: IBounds, ref?: IBounds): IBounds | undefined;
     unionInPlace(other?: IBounds): IBounds;
@@ -68,6 +75,7 @@ export interface IBounded {
 }
 export declare function IsBounded(b: unknown): b is IBounded;
 export interface IPlane {
-    point: ICartesian3;
+    d: number;
     normal: ICartesian3;
 }
+export declare function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3, hull: Array<ICartesian3>): IPlane;

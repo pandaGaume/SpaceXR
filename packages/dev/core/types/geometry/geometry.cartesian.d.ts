@@ -57,7 +57,7 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static UnitZ(): ICartesian3;
     static Infinity(): ICartesian3;
     static FromArray(array: Float32Array | Array<number>, offset?: number, stride?: number): ICartesian3;
-    static FromArrayToRef(array: Float32Array | Array<number>, offset: number | undefined, stride: number | undefined, ref: ICartesian3): ICartesian3;
+    static FromArrayToRef(array: Float32Array | Array<number>, ref: ICartesian3, offset?: number, stride?: number): ICartesian3;
     static Flatten(values: Array<ICartesian3>, ref?: Float32Array | Array<number>): Float32Array | Array<number>;
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     static EqualsWithinEpsilon(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;

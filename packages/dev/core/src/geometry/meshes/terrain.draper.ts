@@ -82,9 +82,9 @@ export class TerrainNormalizedDraper {
             const i2 = heightmap.indices[i++];
 
             const vertices = [
-                Cartesian3.FromArrayToRef(heightmap.positions, i0 * 3, 3, va),
-                Cartesian3.FromArrayToRef(heightmap.positions, i1 * 3, 3, vb),
-                Cartesian3.FromArrayToRef(heightmap.positions, i2 * 3, 3, vc),
+                Cartesian3.FromArrayToRef(heightmap.positions, va,i0 * 3, 3),
+                Cartesian3.FromArrayToRef(heightmap.positions, vb,i1 * 3, 3),
+                Cartesian3.FromArrayToRef(heightmap.positions, vc,i2 * 3, 3),
             ];
 
             // For each edge of the triangle
@@ -168,9 +168,9 @@ export class TerrainNormalizedDraper {
             const i1 = heightmap.indices[i++];
             const i2 = heightmap.indices[i++];
 
-            const a = Cartesian3.FromArrayToRef(heightmap.positions, i0 * 3, 3, va);
-            const b = Cartesian3.FromArrayToRef(heightmap.positions, i1 * 3, 3, vb);
-            const c = Cartesian3.FromArrayToRef(heightmap.positions, i2 * 3, 3, vc);
+            const a = Cartesian3.FromArrayToRef(heightmap.positions, va, i0 * 3, 3);
+            const b = Cartesian3.FromArrayToRef(heightmap.positions, vb, i1 * 3, 3);
+            const c = Cartesian3.FromArrayToRef(heightmap.positions, vc, i2 * 3, 3);
 
             if (this._pointInTriangleXY(p, a, b, c)) {
                 // compute barycentric coords in XY

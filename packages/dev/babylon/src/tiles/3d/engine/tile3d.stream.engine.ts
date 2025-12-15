@@ -1,5 +1,5 @@
 import { Nullable } from "core/types";
-import { ICameraViewState, IDisplay, IHasDisplay, IPipelineMessageType, ISourceBlock, ITargetBlock, SourceBlock } from "core/tiles";
+import { ICameraViewState, IDisplay, IHasDisplay, IPipelineMessageType, ISourceBlock, ITargetBlock,SourceBlock } from "core/tiles";
 import { Cartesian3 } from "core/geometry";
 import { PriorityQueue } from "core/collections";
 import { WebClient } from "core/io";
@@ -9,6 +9,7 @@ import { Ellipsoid } from "core/geodesy";
 
 import { BoxType, CreateTileSphereFromBox, GetTile3dContents, IBoundingVolume, IsITileset, ITile3d, ITileset, SphereType } from "../interfaces";
 import { EcefBoxToBjsInPlace, EcefSphereToBjsInPlace, IDENTITY44, IsSphereInFrustum, IsTileSphereBeyondHorizon, Mat44MultToRef, Mat44Type } from "../interfaces/math/math";
+
 
 export const Tile3dMinPriority: number = 0;
 export const Tile3dNormalPriority: number = 30;
@@ -61,9 +62,7 @@ export enum TileContentStatus {
     unkknown = 999,
 }
 
-/** Augmentation for the engine */
-
-
+/** Begin Augmentation for the engine */
 declare module "../interfaces/tile3d" {
     interface ITile3d extends IStreamableNode {
         contentStatus?: TileContentStatus;
@@ -81,10 +80,11 @@ declare module "../interfaces/tile3d" {
     }
 }
 
-/** Augmentation for the engine */
+
 declare module "../interfaces/tileset" {
     interface ITileset extends IStreamableNode {}
 }
+/** End Augmentation for the engine */
 
 export interface IUriResolver {
     resolve(uri: string): string;
@@ -93,10 +93,11 @@ export interface IUriResolver {
 export type MaxScreenSpaceErrorFn = (level: number) => number;
 
 export interface ITile3dStreamEngineContentOptions {
+    /* reference ellipsoid */
     ellipsoid?: Ellipsoid;
 
+    /* use to resolve the content uri */
     uriResolver?: IUriResolver;
-
     /**
      * The maximum allowed screen-space error (SSE), in pixels,
      * before a object should be refined (loaded at higher LOD).
@@ -107,6 +108,7 @@ export interface ITile3dStreamEngineContentOptions {
 }
 
 export interface ITile3dStreamEngineOptions {
+    /* web client used to load the tileset */
     client?: WebClient<string, ITileset>;
 
     /**
@@ -138,10 +140,14 @@ export interface ITile3dStreamEngineOptions {
      */
     screenSpaceError?: ScreenSpaceErrorFn;
 
+    /* used to limit the bandwith of change */
     maxRefinePerFrame?: number;
     maxCoarsenPerFrame?: number;
 }
 
+/**
+ * Current context of the engine.
+ */
 export class ActiveContext {
     cut: Set<ITile3d>; // current render leaves
     parents: Set<ITile3d>; // ancestors of cut (for coarsen checks)
@@ -180,7 +186,7 @@ export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay,
     contentOptions: ITile3dStreamEngineContentOptions;
     activeView: Nullable<ActiveContext>;
     display: Nullable<IDisplay>;
-    setContext(state?: ICameraViewState): void;
+    setContextAsync(state?: ICameraViewState): Promise<void>;
 }
 
 export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dStreamEngine {
@@ -256,25 +262,33 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
         return this._views[0];
     }
 
-    public setContext(state?: ICameraViewState): void {
+    public async setContextAsync(state?: ICameraViewState): Promise<void> {
+        // update the state
         this._pendingState = state ?? null;
-        this._visited = [];
-        void this._process();
-    }
-
-    protected async _process(): Promise<void> {
-        if (this._isProcessing) return;
-        this._isProcessing = true;
-        try {
-            // Ensure root tileset is loaded once
-            if (!this._root) {
-                await this._initializeRootAsync();
-                // fallthrough: after load, we’ll consume latest pending state
+        if( state){       
+            // avoid re-entry
+            if (this._isProcessing) return;
+            this._isProcessing = true;
+            try {
+                // placeholder for initialization (first load)
+                if (!this._root) {
+                    await this._initializeRootAsync();
+                    // fallthrough: after load, we’ll consume latest pending state
+                }
+                do {
+                    this._visited = [];
+                    if( this._pendingState){
+                        this._process(this._pendingState);
+                    }
+                 } while(this._pendingState); // continue with the last context.
+            } finally {
+                this._isProcessing = false;
             }
+        }
+    }
+        
 
-            const camState = this._pendingState;
-            if (!camState) return; // nothing to do
-            this._pendingState = null;
+    protected async _process(camState : ICameraViewState): Promise<void> {
 
             // build the current view
             var lastView = this._views[0]; // the view from last frame
@@ -328,7 +342,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                 }
 
                 const tileCenter = this._cartesianCache[0];
-                tileCenter.resetFromArray(leaf.worldBoundingVolume.sphere);
+                Cartesian3.FromArrayToRef(leaf.worldBoundingVolume.sphere, tileCenter);
 
                 // we compute the distance from the camera, using the center of the bounding volume
                 const distanceToCamera = Cartesian3.Distance(camState.worldPosition, tileCenter);
@@ -427,16 +441,7 @@ export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dS
                     }
                 }
             }
-        } finally {
-            this._isProcessing = false;
-
-            // If state changed during async work, process again
-            if (this._pendingState) {
-                const again = this._pendingState;
-                this._pendingState = null; // avoid infinite loop; _process will set if new input arrives
-                if (again) this.setContext(again);
-            }
-        }
+       
     }
 
     protected _isVisible(leaf: ITile3d, camState: ICameraViewState, radius: number): boolean {

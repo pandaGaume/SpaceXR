@@ -2,13 +2,11 @@ import { Cartesian3 } from "./geometry.cartesian";
 import { IBounds, ICartesian3, ISize3, IBounded, ICartesian2, IsBounds } from "./geometry.interfaces";
 
 export class Bounds extends Cartesian3 implements IBounds {
-    public static Zero(): IBounds {
+    public static Zero(): Bounds {
         return new Bounds(0, 0, 0, 0, 0, 0);
     }
-    public static Normalized(): IBounds {
-        return new Bounds(0, 0, 0, 1, 1, 1);
-    }
-    public static FromSize(size: ISize3): IBounds {
+
+    public static FromSize(size: ISize3): Bounds {
         return new Bounds(0, 0, size?.width || 0, size?.height || 0, 0, size?.depth || 0);
     }
 
@@ -30,7 +28,7 @@ export class Bounds extends Cartesian3 implements IBounds {
         return rect;
     }
 
-    public static FromPoints2(...params: Array<ICartesian2>): IBounds {
+    public static FromPoints2(...params: Array<ICartesian2>): Bounds {
         let i = 0;
         let xmin = params[i].x;
         let xmax = params[i].x;
@@ -48,7 +46,7 @@ export class Bounds extends Cartesian3 implements IBounds {
         return new Bounds(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
-    public static FromPoints3(...params: Array<ICartesian3>): IBounds {
+    public static FromPoints3(...params: Array<ICartesian3>): Bounds {
         let i = 0;
         let xmin = params[i].x;
         let xmax = params[i].x;
@@ -112,6 +110,15 @@ export class Bounds extends Cartesian3 implements IBounds {
     }
     public get center(): ICartesian3 {
         return new Cartesian3(this.x + this.width / 2, this.y + this.height / 2, this.z + this.depth / 2);
+    }
+    public get minimum(): ICartesian3 {
+        return this;
+    }
+    public get maximum(): ICartesian3 {
+        return new Cartesian3(this.x + this.width, this.y + this.height, this.z + this.depth);
+    }
+    public get extendSize(): ICartesian3 {
+        return new Cartesian3(this.width, this.height, this.depth);
     }
 
     public intersects(other?: IBounds): boolean {

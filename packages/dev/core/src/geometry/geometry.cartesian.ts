@@ -329,7 +329,7 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(x, y, z);
     }
 
-    public static FromArrayToRef(array: Float32Array | Array<number>, offset: number = 0, stride: number = 3, ref:ICartesian3): ICartesian3 {
+    public static FromArrayToRef(array: Float32Array | Array<number>, ref:ICartesian3, offset: number = 0, stride: number = 3): ICartesian3 {
         let i = 0;
         ref.x = array[offset + i];
         ref.y = i < stride ? array[offset + ++i] : 0;
@@ -367,7 +367,6 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
     public constructor(x: number, y: number, public z: number = 0.0) {
         super(x, y);
     }
-
 
     public toString() {
         return `x:${this.x}, y:${this.y}, z:${this.z}`;

@@ -1,29 +1,28 @@
 import { ICameraInput, Observer, PointerEventTypes, PointerInfo } from "@babylonjs/core";
-import { Ellipsoid } from "core/geodesy";
 import { PlanetoryCamera } from "./camera.planetary";
 import { BjsToEcefCartInPlace, EcefToBjsCartInPlace } from "../../interfaces/math/math";
 
 export class PlanetoryWheelMetersInput implements ICameraInput<PlanetoryCamera> {
-    public camera!: PlanetoryCamera;
 
-    constructor(
-        private ellipsoid: Ellipsoid,
+    private _obs?: Observer<PointerInfo>;
+
+    public constructor(
+        public camera: PlanetoryCamera,
         private metersPerStep: (alt: number, rawDelta: number) => number,
         private clampAlt: (alt: number) => number,
         private invert = false
     ) {}
 
-    private _obs?: Observer<PointerInfo>;
 
-    getClassName() {
+    public getClassName() {
         return "PlanetoryWheelMetersInput";
     }
 
-    getSimpleName() {
+    public getSimpleName() {
         return "wheelMeters";
     }
 
-    attachControl(): void {
+    public attachControl(noPreventDefault?: boolean): void {
         const scene = this.camera.getScene();
         this._obs = scene.onPointerObservable.add((pi) => {
             if (pi.type !== PointerEventTypes.POINTERWHEEL) return;
@@ -40,7 +39,7 @@ export class PlanetoryWheelMetersInput implements ICameraInput<PlanetoryCamera> 
             const dir = pos.scale(1 / rlen);
 
             // Surface radius along current ray + current altitude
-            const R = this.ellipsoid.radiusAtPosition(dir.x, dir.y, dir.z);
+            const R = this.camera.ellipsoid.radiusAtPosition(dir.x, dir.y, dir.z);
             const alt = rlen - R;
 
             // Normalize wheel magnitude (~1 per notch; trackpads yield fractions)
@@ -68,7 +67,7 @@ export class PlanetoryWheelMetersInput implements ICameraInput<PlanetoryCamera> 
         });
     }
 
-    detachControl(): void {
+    public detachControl(): void {
         if (this._obs) this.camera.getScene().onPointerObservable.remove(this._obs);
         this._obs = undefined;
     }

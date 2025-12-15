@@ -12,7 +12,7 @@ export class PlanetoryCamera extends ArcRotateCamera {
     private _geo: IGeo3 = Geo3.Zero();
     private _ecefCache: Vector3 = Vector3.Zero();
 
-    constructor(name: string, geoPosition: IGeo3, scene: Scene, ellipsoid?: Ellipsoid, altitudeRange?: Range) {
+    public constructor(name: string, geoPosition: IGeo3, scene: Scene, ellipsoid?: Ellipsoid, altitudeRange?: Range) {
         super(name, 0, 0, 0, Vector3.Zero(), scene);
 
         const e = ellipsoid ?? Ellipsoid.WGS84;
@@ -45,9 +45,10 @@ export class PlanetoryCamera extends ArcRotateCamera {
         });
     }
 
+    public get ellipsoid(): Ellipsoid { return this._system.ellipsoid;}
+
     public override setPosition(p: Vector3): void;
     public override setPosition(p: IGeo3): void;
-
     public setPosition(p: Vector3 | IGeo3): void {
         if (IsLocation(p)) {
             this._geo.lat = p.lat;

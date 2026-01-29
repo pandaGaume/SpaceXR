@@ -144,4 +144,80 @@ export class GeodeticSystem {
     public geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): ICartesian3 {
         return this.geodeticFloatToCartesianToRef(geo.lat, geo.lon, geo.alt || 0, target);
     }
+    
+    public cartesianToGeodetic(from:ICartesian3, target: IGeo3): boolean {
+        const x = from.x;
+        const y = from.y;
+        const z = from.z;
+        const ww = x * x + y * y;
+        const m = ww * this._ellipsoid._invaa;
+        const n = z * z * this._ellipsoid._p1meedaa;
+        const mpn = m + n;
+        const p = Ellipsoid.inv6 * (mpn - this._ellipsoid._ll4);
+        const G = m * n * this._ellipsoid._ll;
+        const H = 2 * p * p * p + G;
+
+        if (H < this._ellipsoid._hmin) {
+            target.lat = 0;
+            target.lon = 0;
+            target.alt = 0;
+            target.hasAltitude = true;
+            return false;
+        }
+
+        const C = Math.pow(H + G + 2 * Math.sqrt(H * G), Ellipsoid.inv3) * Ellipsoid.invcbrt2;
+
+        const i = -this._ellipsoid._ll - 0.5 * mpn;
+        const P = p * p;
+        const beta = Ellipsoid.inv3 * i - C - P / C;
+        const k = this._ellipsoid._ll * (this._ellipsoid._ll - mpn);
+
+        // left part of t
+        const t1 = beta * beta - k;
+        const t2 = Math.sqrt(t1);
+        const t3 = t2 - 0.5 * (beta + i);
+        const t4 = Math.sqrt(t3);
+
+        // right part of t
+        let t5 = 0.5 * (beta - i);
+        t5 = Math.abs(t5); // numeric turbulence fix near +-45.3 deg
+        const t6 = Math.sqrt(t5);
+        const t7 = (m < n) ? t6 : -t6;
+
+        const t = t4 + t7;
+
+        // Newton-Raphson correction
+        const j = this._ellipsoid._l * (m - n);
+        const g = 2 * j;
+        const tt = t * t;
+        const ttt = tt * t;
+        const tttt = tt * tt;
+        const F = tttt + 2 * i * tt + g * t + k;
+        const dFdt = 4 * ttt + 4 * i * t + g;
+        const dt = -F / dFdt;
+
+        // latitude in degrees
+        const u = t + dt + this._ellipsoid._l;
+        const v = t + dt - this._ellipsoid._l;
+        const w = Math.sqrt(ww);
+        const zu = z * u;
+        const wv = w * v;
+        const lat = Math.atan2(zu, wv) * Ellipsoid.r2d;
+
+        // altitude
+        const invuv = 1 / (u * v);
+        const dw = w - wv * invuv;
+        const dz = z - zu * this._ellipsoid._p1mee * invuv;
+        const da = Math.sqrt(dw * dw + dz * dz);
+        const alt = (u < 1) ? -da : da;
+
+        // longitude in degrees
+        const lon = Math.atan2(y, x) * Ellipsoid.r2d;
+
+        target.lat = lat;
+        target.lon = lon;
+        target.alt = alt;
+        target.hasAltitude = true;
+        return true;
+    }
 }

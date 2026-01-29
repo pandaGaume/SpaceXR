@@ -1,4 +1,4 @@
-import { ArcRotateCamera, Scene, Vector3 } from "@babylonjs/core";
+import { ArcRotateCamera, FreeCamera, FreeCameraGamepadInput, Scene, Vector3 } from "@babylonjs/core";
 import { Ellipsoid, GeodeticSystem } from "core/geodesy";
 import { Geo3, IGeo3, IsLocation } from "core/geography";
 import { Range } from "core/math";
@@ -25,8 +25,9 @@ export class PlanetoryCamera extends ArcRotateCamera {
 
         // Let ArcRotate cross poles; avoid exact singularities with tight beta limits
         this.allowUpsideDown = true;
-        this.lowerBetaLimit = 0.001;
-        this.upperBetaLimit = Math.PI - 0.001;
+        const betaLimit = 0.001;
+        this.lowerBetaLimit = betaLimit;
+        this.upperBetaLimit = Math.PI - betaLimit;
 
         // Per-frame maintenance
         scene.onBeforeRenderObservable.add(() => {

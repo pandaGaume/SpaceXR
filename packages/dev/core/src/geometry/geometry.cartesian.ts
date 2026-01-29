@@ -114,6 +114,13 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         ref.z = a.z + b.z;
         return ref;
     }
+
+    public static AddInPlace(a: ICartesian3, b: ICartesian3): ICartesian3 {
+        a.x += b.x;
+        a.y += b.y;
+        a.z += b.z;
+        return a;
+    }
     
     public static Normalize(a: ICartesian3, magnitude?: number): ICartesian3 {
         return Cartesian3.NormalizeToRef(a, Cartesian3.Zero(), magnitude);

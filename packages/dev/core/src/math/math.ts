@@ -29,6 +29,16 @@ export class Scalar {
         return Math.min(max, Math.max(min, value));
     }
 
+    public static Smoothstep(t: number): number {
+        const x = Scalar.Clamp(t, 0, 1);
+        return x * x * (3 - 2 * x);
+    }
+
+    
+    public static Lerp(a: number, b: number, t: number): number {
+        return a + (b - a) * t;
+    }
+
     public static GetRandomInt(min: number, max: number): number {
         min = Math.ceil(min);
         max = Math.floor(max);

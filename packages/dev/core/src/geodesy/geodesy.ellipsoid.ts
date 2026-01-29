@@ -20,6 +20,14 @@ export class Ellipsoid {
     /** The Clarke1880 ellipsoid. Unit is meter*/
     public static readonly Clarke1880: Ellipsoid = Ellipsoid.FromAAndInverseF("Clarke1880", 6378249.145, 293.465);
 
+
+    public static readonly inv3 = 1.0 / 3; // 1/3
+    public static readonly inv6 = 1.0 / 6; // 1/6
+    public static readonly invcbrt2 = 1.0 / Math.pow(2, Ellipsoid.inv3); // 1/(2^(1/3))
+    public static readonly d2r = Math.PI / 180; // PI/180
+    public static readonly r2d = 180.0 / Math.PI; // 180/PI
+
+
     /**
      * Build an Ellipsoid from the semi major axis measurement and the inverse flattening.
      *

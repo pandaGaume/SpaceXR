@@ -64,3 +64,8 @@ export function IsString(value: unknown): value is string {
 export function HasToString(value: unknown): value is { toString(): string } {
     return value !== null && typeof value === "object" && typeof (value as { toString: unknown }).toString === "function";
 }
+
+export type ReadonlyDeep<T> =
+  T extends (...args: any[]) => any ? T :
+  T extends object ? { readonly [K in keyof T]: ReadonlyDeep<T[K]> } :
+  T;

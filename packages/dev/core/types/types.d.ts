@@ -27,3 +27,6 @@ export declare function IsString(value: unknown): value is string;
 export declare function HasToString(value: unknown): value is {
     toString(): string;
 };
+export type ReadonlyDeep<T> = T extends (...args: any[]) => any ? T : T extends object ? {
+    readonly [K in keyof T]: ReadonlyDeep<T[K]>;
+} : T;

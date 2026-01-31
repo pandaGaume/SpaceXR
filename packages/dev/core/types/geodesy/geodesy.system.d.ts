@@ -24,4 +24,5 @@ export declare class GeodeticSystem {
     get cartesianMode(): CartesianMode;
     geodeticFloatToCartesianToRef(lat: number, lon: number, alt: number, target: ICartesian3, deg?: boolean): ICartesian3;
     geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): ICartesian3;
+    cartesianToGeodetic(from: ICartesian3, target: IGeo3): boolean;
 }

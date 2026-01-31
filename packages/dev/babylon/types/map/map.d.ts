@@ -1,6 +1,7 @@
 import { IDisplay, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase } from "core/tiles";
 import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
-import { Mesh, Scene, TransformNode } from "@babylonjs/core";
+import { Scene, TransformNode } from "@babylonjs/core";
+import { Mesh } from "@babylonjs/core/Meshes";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { ICartesian3, ISize2 } from "core/geometry";

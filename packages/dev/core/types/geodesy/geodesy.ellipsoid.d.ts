@@ -6,6 +6,11 @@ export declare class Ellipsoid {
     static readonly WGS72: Ellipsoid;
     static readonly Clarke1858: Ellipsoid;
     static readonly Clarke1880: Ellipsoid;
+    static readonly inv3: number;
+    static readonly inv6: number;
+    static readonly invcbrt2: number;
+    static readonly d2r: number;
+    static readonly r2d: number;
     static FromAAndInverseF(name: string, semiMajor: number, inverseFlattening: number): Ellipsoid;
     static FromAAndF(name: string, semiMajor: number, flattening: number): Ellipsoid;
     _name: string;

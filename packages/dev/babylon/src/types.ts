@@ -1,7 +1,5 @@
-import * as GLTF2 from "babylonjs-gltf2interface";
 import { ICartesian3, ICartesian2, ICartesian4 } from "core/geometry";
 import { IVerticesData } from "core/geometry";
-import { IHasFeatureIds, IHasInstanceIds, IStructuralMetadata} from "./tiles/3d/babylon/gltf";
 
 /// classic augmentation
 declare module "@babylonjs/core" {
@@ -11,9 +9,10 @@ declare module "@babylonjs/core" {
     export interface Vector4 extends ICartesian4 {}
 
     // gltf extensions
-    export interface Mesh extends IHasFeatureIds, IHasInstanceIds, IStructuralMetadata {}
+    // export interface Mesh extends IHasFeatureIds, IHasInstanceIds, IStructuralMetadata {}
 }
 
+/*
 declare module "@babylonjs/loaders/glTF/2.0" {
     interface IProperty extends GLTF2.IProperty {}
 
@@ -21,3 +20,4 @@ declare module "@babylonjs/loaders/glTF/2.0" {
     interface IEXTInstanceFeatures extends IHasFeatureIds {}
     interface IEXTStructuralMetadata extends IStructuralMetadata {}
 }
+*/

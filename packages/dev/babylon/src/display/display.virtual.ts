@@ -1,4 +1,5 @@
-import { Matrix, Mesh, Nullable, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
+import { Matrix, Nullable, Scene, TransformNode, Vector2, Vector3, VertexBuffer, VertexData } from "@babylonjs/core";
+import { Mesh } from "@babylonjs/core/Meshes";
 
 import { Cartesian3, ICartesian3, ISize2, ISize3, Size2, Size3 } from "core/geometry";
 
@@ -6,6 +7,7 @@ import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";
 import { Length, Quantity, Unit } from "core/math";
 import { IDisplay, IPhysicalDisplay } from "core/tiles";
+
 
 export enum VirtualDisplayUVMode {
     KEEP = 0,

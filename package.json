@@ -1,7 +1,10 @@
 {
     "devDependencies": {
-        "@babylonjs/core": "^8.34.0",
-        "@babylonjs/loaders": "^6.49.0",
+        "@babylonjs/core": "^8.49.3",
+        "@babylonjs/gui": "^8.49.3",
+        "@babylonjs/inspector": "^8.49.3",
+        "@babylonjs/loaders": "^8.49.3",
+        "@babylonjs/materials": "^8.49.3",
         "@types/jest": "^29.5.1",
         "@types/node": "^18.15.10",
         "@types/webxr": "^0.5.22",
@@ -26,9 +29,10 @@
         "publish:all:dev": "npm run --prefix ./packages/dev/core publish:core:dev && npm run --prefix ./packages/dev/extensions/mapbox publish:vector:dev && npm run --prefix ./packages/dev/babylon publish:babylon:dev && echo All packages published successfully!"
     },
     "dependencies": {
-        "@babylonjs/gui": "^6.29.1",
         "@mapbox/vector-tile": "^2.0.2",
+        "fflate": "^0.8.2",
         "pbf": "^4.0.1",
-        "quickhull3d": "^2.1.0"
+        "quickhull3d": "^2.1.0",
+        "xmlbuilder2": "^4.0.3"
     }
 }

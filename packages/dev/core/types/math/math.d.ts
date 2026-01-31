@@ -11,6 +11,8 @@ export declare class Scalar {
     static WithinEpsilon(a: number, epsilon?: number): boolean;
     static Sign(value: number): 1 | -1;
     static Clamp(value: number, min: number, max: number): number;
+    static Smoothstep(t: number): number;
+    static Lerp(a: number, b: number, t: number): number;
     static GetRandomInt(min: number, max: number): number;
     static ToHex(i: number): string;
 }

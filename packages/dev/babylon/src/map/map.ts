@@ -1,6 +1,7 @@
 import { AbstractTileMetrics, IDisplay, ImageLayer, ITileMapLayer, ITileMapLayerView, ITileNavigationState, TileMapBase, TileNavigationState, TileView } from "core/tiles";
 import { IElevationGridFactory, IElevationOptions, IMap3D, IMap3DMaterial, Map3DContentType } from "./map.interfaces";
-import { Material, Mesh, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { Material, Scene, TransformNode, VertexData } from "@babylonjs/core";
+import { Mesh } from "@babylonjs/core/Meshes";
 import { Nullable } from "core/types";
 import { EventState, PropertyChangedEventArgs } from "core/events";
 import { TextureLayerView } from "./map.layer.texture";

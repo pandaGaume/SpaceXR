@@ -27,6 +27,7 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static SubtractToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
     static Add(a: ICartesian3, b: ICartesian3): ICartesian3;
     static AddToRef(a: ICartesian3, b: ICartesian3, ref: ICartesian3): ICartesian3;
+    static AddInPlace(a: ICartesian3, b: ICartesian3): ICartesian3;
     static Normalize(a: ICartesian3, magnitude?: number): ICartesian3;
     static NormalizeInPlace(a: ICartesian3, magnitude?: number): ICartesian3;
     static Normal(v0: ICartesian3, v1: ICartesian3, v2: ICartesian3): ICartesian3;

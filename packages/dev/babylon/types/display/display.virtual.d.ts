@@ -1,4 +1,5 @@
-import { Matrix, Mesh, Nullable, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { Matrix, Nullable, Scene, TransformNode, Vector2, Vector3, VertexData } from "@babylonjs/core";
+import { Mesh } from "@babylonjs/core/Meshes";
 import { ICartesian3, ISize2, ISize3 } from "core/geometry";
 import { VirtualDisplayInputsSource } from "./display.inputs.scene";
 import { Observable, PropertyChangedEventArgs } from "core/events";

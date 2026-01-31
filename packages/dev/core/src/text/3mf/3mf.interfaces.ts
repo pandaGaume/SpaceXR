@@ -1,6 +1,7 @@
 
-import { FloatArray, IndicesArray, Nullable } from "../types";
-import { Range} from "../math"
+import { FloatArray, IndicesArray, Nullable } from "../../types";
+import { Range} from "../../math"
+import { IQName } from "../xml/xml.interfaces";
 
 export enum ST_Unit {
     micron,
@@ -17,9 +18,9 @@ export type ST_UriReference = string;
 
 export interface I3MFMetadata {
   name: string;        // e.g. "Title", "Designer", "License", or any custom key
-  value: string;
   preserve?: boolean;  // A non-zero value indicates the  producer wants the consumer to preserve this value when it saves a modified version of this
-  type?: string;       // optional, e.g. "xs:string"
+  type?: IQName;       // optional, e.g. "xs:string"
+  value: any;
 }
 
 export interface IHasMetadataGroup {
@@ -76,12 +77,28 @@ export interface I3MFObject extends I3FNode, IHasMetadataGroup {
     components? : Array<I3MFComponent>; 
 }
 
+export interface I3MFBaseMaterial extends I3FNode{
+
+}
+
+export interface I3MFArrayOf<T> {
+  childs?: Nullable<Array<T>>;
+}
+
+export interface I3MFResources extends I3FNode, I3MFArrayOf<I3MFObject | I3MFBaseMaterial> {
+  id:ST_RessourceId;
+}
+
+export interface I3MFBuild extends I3FNode, I3MFArrayOf<I3MFBuildItem> {
+
+}
+
 export interface I3MFModel extends I3FNode{
     unit:ST_Unit;
     requiredExtensions?:Nullable<string>;
     recommendedExtensions?:Nullable<string>;
     metadata?:Nullable<Array<I3MFMetadata>>; 
-    ressources: Array<I3MFObject>;
-    builds: Array<I3MFBuildItem>;
+    resources?: Nullable<I3MFResources>;
+    build?: Nullable<I3MFBuild>;
 }
 

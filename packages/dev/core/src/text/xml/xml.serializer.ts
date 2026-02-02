@@ -1,5 +1,4 @@
-import { XMLBuilderCB } from "xmlbuilder2/lib/interfaces";
-import { getXmlFieldMeta, getXmlName, IQName, toQualifiedString, Xml_Name, xmlNameToParts } from "./xml.interfaces";
+import { getXmlFieldMeta, getXmlName, IQName, IXMLBuilder, toQualifiedString, Xml_Name, xmlNameToParts } from "./xml.interfaces";
 
 
 type Primitive = string | number | boolean | bigint | Date;
@@ -7,6 +6,12 @@ type Primitive = string | number | boolean | bigint | Date;
 function _isDate(x: any): x is Date {
   return x instanceof Date;
 }
+
+
+function _isString(x: any): x is string {
+  return typeof x === "string";
+}
+
 
 function _isPrimitive(x: any): x is Primitive {
   return (
@@ -18,15 +23,23 @@ function _isPrimitive(x: any): x is Primitive {
   );
 }
 
+function _isPrimitiveButString(x: any): x is Primitive {
+  return (
+    typeof x === "number" ||
+    typeof x === "boolean" ||
+    typeof x === "bigint" ||
+    _isDate(x)
+  );
+}
+
 export class XmlSerializer {
     
-    _builder:XMLBuilderCB;
+    _builder:IXMLBuilder;
     _ns:Map<string,string> = new Map<string,string>();
     _prefixCount:number = 0;
 
 
-    constructor(builder:XMLBuilderCB){
-        if( !builder ) throw new Error("builder must be defined");
+    constructor(builder:IXMLBuilder){
         this._builder = builder;
     }
 
@@ -37,26 +50,26 @@ export class XmlSerializer {
         return this;
     }
     
-    write(root:object, name?: Xml_Name) {
-        this._builder.dec();
-        
+    serialize(root:object, name?: Xml_Name) {
         name = name ?? getXmlName(root);
         if( !name ) throw new Error("can not find name for given object");
         let currentName:IQName = xmlNameToParts(name);
         if( currentName.ns ){
             // ensure we register the root namespace as default if not already set...
-            this._assignNamespace(currentName.ns,"");
+            this._assignNamespace(currentName.ns,"xmlns");
         }
         this._gatherNamespaces(root,new WeakSet<object>());
-        const doc = this._builder.ele(currentName.ns??null, currentName.name);
+
+        const doc = this._builder.ele(null, currentName.name);
         for(const pair of this._ns){
-            doc.att(null,`xmlns:${pair[1]}`,pair[0]);
+            doc.att("xmlns",pair[1],pair[0]);
         }
         this._writeObjectContent(doc, root as Record<string,unknown>, new WeakSet<object>().add(root)) ;
-    }
+        this._builder.end();
+   }
 
 
-    private _writeObject(builder:XMLBuilderCB, source:object, visited:WeakSet<object>) : void
+    private _writeObject(builder:IXMLBuilder, source:Record<string,unknown>, visited:WeakSet<object>) : void
     {
        if( visited.has(source) ){
             return;
@@ -83,16 +96,18 @@ export class XmlSerializer {
         const tmp = toQualifiedString(currentName.name, prefix);
         builder.ele(null,tmp);
         this._writeObjectContent(builder,source as Record<string,unknown>,visited);
+        this._builder.end();
     }
 
     private _getPrefix(qn:IQName):string | undefined {
         if( qn.ns){
-            return this._ns.get(qn.ns);
+            const p = this._ns.get(qn.ns);
+            if( p !== "xmlns" ) return p ;
         }
         return undefined;
     }
 
-    private _writeObjectContent(builder:XMLBuilderCB, source:Record<string,unknown>, visited:WeakSet<object>) : void
+    private _writeObjectContent(builder:IXMLBuilder, source:Record<string,unknown>, visited:WeakSet<object>) : void
     {
        // gather meta and build index
         const metas = getXmlFieldMeta(source) ?? [];
@@ -129,7 +144,15 @@ export class XmlSerializer {
                 }
                 continue;
             }
-            this._writeObject(builder,source, visited);
+            const value:any = source[prop];
+            if (_isPrimitiveButString(value)){
+                continue;
+            }
+            if( _isString(value)){
+                this._builder.text(value);
+                continue;
+            }
+            this._writeObject(builder,value, visited);
         }
     }
 
@@ -154,8 +177,7 @@ export class XmlSerializer {
 
         const qname = getXmlName(tag);
         if( qname) {
-            this._assignNamespace(tag);
-            return;
+            this._assignNamespace(qname);
         }
 
         // gather meta and build index
@@ -198,9 +220,15 @@ export class XmlSerializer {
 
     private _assignNamespace(qn:Xml_Name, prefix?:string){
         const nqn = xmlNameToParts(qn);
-        if(nqn?.ns){
+        if(nqn?.ns ){
             if(!this._ns.get(nqn.ns)){
                 this._ns.set(nqn.ns, prefix ?? this._buildNsPrefix(nqn.ns));
+            }
+            return;
+        } 
+        if( prefix === "xmlns" ){
+            if(!this._ns.get(nqn.name)){
+                this._ns.set(nqn.name, prefix ?? this._buildNsPrefix(nqn.name));
             }
         }
     }

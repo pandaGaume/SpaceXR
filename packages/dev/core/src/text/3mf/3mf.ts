@@ -24,7 +24,7 @@ export class TMFModel implements I3MFModel {
     build?:  Nullable<I3MFBuild>;
 }
 
-@XmlName("meta")
+@XmlName({ns:TDModelNS, name:"meta"})
 export class TFMeta implements I3MFMetadata {
 
     @XmlAttr({name:"name"})

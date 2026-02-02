@@ -1,7 +1,16 @@
+import { Nullable } from "../../types";
 
 export interface IQName {
     ns?:string; 
     name:string;
+}
+
+export interface IXMLBuilder{
+  dec(version:string, encoding?:string, standalone?:boolean):IXMLBuilder;
+  att(ns:Nullable<string>, n:string, v:string): IXMLBuilder;
+  ele(ns:Nullable<string>, n:string): IXMLBuilder;
+  text(txt:string): IXMLBuilder;
+  end(): IXMLBuilder;
 }
 
 export function isQName(x: unknown): x is { name: string } {
@@ -60,17 +69,39 @@ export function getXmlName(obj: any): Xml_Name | undefined {
 }
 
 
-export function xmlNameToParts(qn:Xml_Name):IQName{
-      if(isQName(qn) ){
-          return qn;
-      } else {
-          const parts = qn?.split(':')??[];
-          if( parts.length == 2){
-            return { ns:parts[0], name :parts[1]};
-          }
-          return { name:parts[0]} ;
-      }
+function looksLikeXmlNCName(s: string): boolean {
+  // Approximation ASCII de NCName: pas de ":" et demarre par lettre ou underscore
+  // Puis lettres/chiffres/underscore/point/tiret.
+  return /^[A-Za-z_][A-Za-z0-9._-]*$/.test(s);
 }
+
+export function xmlNameToParts(qn: Xml_Name): IQName {
+  if (isQName(qn)) return qn;
+
+  const s = (qn ?? "").trim();
+  if (!s) return { name: "" };
+
+  const i = s.indexOf(":");
+  if (i === -1) {
+    return { name: s };
+  }
+
+  // Un QName XML ne doit contenir qu un seul ":".
+  // Si il y en a plusieurs, on considere que ce n est pas un QName.
+  if (s.indexOf(":", i + 1) !== -1) {
+    return { name: s };
+  }
+
+  const prefix = s.slice(0, i);
+  const local = s.slice(i + 1);
+
+  if (looksLikeXmlNCName(prefix) && looksLikeXmlNCName(local)) {
+    return { ns: prefix, name: local };
+  }
+
+  return { name: s };
+}
+
 
 export function toQualifiedString(name:string, prefix?:string){
   return prefix ? `${prefix}:${name}` : name;

@@ -21,6 +21,14 @@
             "webRoot": "${workspaceFolder}/packages/dev/core/",
             "sourceMaps": true
         },
+                {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Test xml on chrome",
+            "url": "http://localhost:1338/packages/host/www/core/testXml.html",
+            "webRoot": "${workspaceFolder}/packages/dev/core/",
+            "sourceMaps": true
+        },
         {
             "type": "chrome",
             "request": "launch",

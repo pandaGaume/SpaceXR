@@ -8844,7 +8844,7 @@ __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "type" })
 ], TFMeta.prototype, "type", void 0);
 TFMeta = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)("meta")
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "meta" })
 ], TFMeta);
 
 let T3MFResources = class T3MFResources {
@@ -8903,19 +8903,23 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.DeserializeLocalizableString),
+/* harmony export */   DomXmlWriter: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.DomXmlWriter),
 /* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.GetLocalizableStringValue),
 /* harmony export */   ISO6391: () => (/* reexport safe */ _iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.IsLocalizable),
 /* harmony export */   LocalString: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.LocalString),
 /* harmony export */   ST_ObjectType: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ST_ObjectType),
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ST_Unit),
+/* harmony export */   StringXmlWriter: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.StringXmlWriter),
 /* harmony export */   T3MBuild: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MBuild),
 /* harmony export */   T3MFResources: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFResources),
 /* harmony export */   TDModelNS: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TDModelNS),
 /* harmony export */   TFMeta: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TFMeta),
 /* harmony export */   TMFModel: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TMFModel),
+/* harmony export */   TokenType: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.TokenType),
 /* harmony export */   TriangleSetsNS: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TriangleSetsNS),
 /* harmony export */   XmlAttr: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlAttr),
+/* harmony export */   XmlBuilder: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlBuilder),
 /* harmony export */   XmlElem: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlElem),
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlName),
@@ -9785,7 +9789,11 @@ LocalString.DefaultCode = "en";
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DomXmlWriter: () => (/* reexport safe */ _xml_builder_dom__WEBPACK_IMPORTED_MODULE_4__.DomXmlWriter),
+/* harmony export */   StringXmlWriter: () => (/* reexport safe */ _xml_builder_string__WEBPACK_IMPORTED_MODULE_3__.StringXmlWriter),
+/* harmony export */   TokenType: () => (/* reexport safe */ _xml_builder__WEBPACK_IMPORTED_MODULE_2__.TokenType),
 /* harmony export */   XmlAttr: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr),
+/* harmony export */   XmlBuilder: () => (/* reexport safe */ _xml_builder__WEBPACK_IMPORTED_MODULE_2__.XmlBuilder),
 /* harmony export */   XmlElem: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlElem),
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName),
@@ -9798,9 +9806,328 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml.interfaces */ "./dist/text/xml/xml.interfaces.js");
 /* harmony import */ var _xml_serializer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./xml.serializer */ "./dist/text/xml/xml.serializer.js");
+/* harmony import */ var _xml_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./xml.builder */ "./dist/text/xml/xml.builder.js");
+/* harmony import */ var _xml_builder_string__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./xml.builder.string */ "./dist/text/xml/xml.builder.string.js");
+/* harmony import */ var _xml_builder_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./xml.builder.dom */ "./dist/text/xml/xml.builder.dom.js");
+
+
+
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ "./dist/text/xml/xml.builder.dom.js":
+/*!******************************************!*\
+  !*** ./dist/text/xml/xml.builder.dom.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DomXmlWriter: () => (/* binding */ DomXmlWriter)
+/* harmony export */ });
+class DomXmlWriter {
+    constructor(el) {
+        this.count = 0;
+        this._buf = [];
+        this._scheduled = false;
+        this._el = el;
+    }
+    write(...data) {
+        if (data.length === 0)
+            return this;
+        const s = data.join("");
+        this._buf.push(s);
+        this.count += s.length;
+        if (!this._scheduled) {
+            this._scheduled = true;
+            requestAnimationFrame(() => this._flush());
+        }
+        return this;
+    }
+    _flush() {
+        this._scheduled = false;
+        const s = this._buf.join("");
+        this._buf.length = 0;
+        this._el.appendChild(document.createTextNode(s));
+        const anyEl = this._el;
+        if (typeof anyEl.scrollTop === "number") {
+            anyEl.scrollTop = anyEl.scrollHeight;
+        }
+    }
+    clear() {
+        this._buf.length = 0;
+        this._scheduled = false;
+        this._el.textContent = "";
+        this.count = 0;
+    }
+}
+//# sourceMappingURL=xml.builder.dom.js.map
+
+/***/ }),
+
+/***/ "./dist/text/xml/xml.builder.js":
+/*!**************************************!*\
+  !*** ./dist/text/xml/xml.builder.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TokenType: () => (/* binding */ TokenType),
+/* harmony export */   XmlBuilder: () => (/* binding */ XmlBuilder)
+/* harmony export */ });
+class XmlSyntax {
+}
+XmlSyntax.OpenTag = "<";
+XmlSyntax.CloseTag = ">";
+XmlSyntax.Slash = "/";
+XmlSyntax.Question = "?";
+XmlSyntax.Quote = '"';
+XmlSyntax.Equal = "=";
+XmlSyntax.Space = " ";
+XmlSyntax.Semicolon = ":";
+XmlSyntax.Dec = "<?xml";
+XmlSyntax.Xml = "xml";
+XmlSyntax.Xmlns = "xmlns";
+XmlSyntax.Xsi = "xsi";
+XmlSyntax.VersionKeyword = "version";
+XmlSyntax.EncodingKeyword = "encoding";
+XmlSyntax.StandaloneKeyword = "standalone";
+var TokenType;
+(function (TokenType) {
+    TokenType[TokenType["Declaration"] = 0] = "Declaration";
+    TokenType[TokenType["Tag"] = 1] = "Tag";
+    TokenType[TokenType["Attribute"] = 2] = "Attribute";
+    TokenType[TokenType["Text"] = 3] = "Text";
+})(TokenType || (TokenType = {}));
+class XmlBuilder {
+    constructor(w) {
+        this._ctxStack = [];
+        this._d = 0;
+        this._w = w;
+    }
+    dec(version, encoding, standalone) {
+        this._w.write(XmlSyntax.Dec);
+        this._writeAttStr(XmlSyntax.VersionKeyword, version);
+        if (encoding) {
+            this._writeAttStr(XmlSyntax.EncodingKeyword, encoding);
+        }
+        if (standalone !== undefined) {
+            this._writeAttStr(XmlSyntax.StandaloneKeyword, standalone.toString());
+        }
+        this._w.write(XmlSyntax.Question, XmlSyntax.CloseTag);
+        return this;
+    }
+    att(ns, n, v) {
+        const ctx = this.peekContext();
+        if (!ctx)
+            throw new Error("att() without open element");
+        if (ctx.closed)
+            throw new Error(`att() after start tag closed for <${ctx.name}>`);
+        if (this._isXmlnsDecl(ns, n)) {
+            if (n === XmlSyntax.Xmlns) {
+                ctx.defaultNs = v;
+                this._registerNamespace(ctx, "", v);
+                this._writeAttStr(XmlSyntax.Xmlns, v);
+            }
+            else {
+                if (!ns) {
+                    const prefix = n.slice(6);
+                    this._registerNamespace(ctx, prefix, v);
+                    this._writeAttStr(n, v);
+                }
+                else {
+                    this._registerNamespace(ctx, n, v);
+                    this._writeAttStr(`${ns}:${n}`, v);
+                }
+            }
+            ctx.lastToken = TokenType.Attribute;
+            return this;
+        }
+        let qn = n;
+        if (ns) {
+            const p = this._ensurePrefixDeclared(ctx, ns);
+            qn = `${p}:${n}`;
+        }
+        ctx.lastToken = TokenType.Attribute;
+        this._writeAttStr(qn, v);
+        return this;
+    }
+    ele(ns, n) {
+        let ctx = this.peekContext();
+        if (ctx) {
+            if (!ctx.closed) {
+                this._w.write(XmlSyntax.CloseTag);
+                ctx.closed = true;
+            }
+        }
+        let qns = n;
+        if (ns) {
+            const p = this._lookupPrefix(ns) ?? ns;
+            qns = `${p}:${n}`;
+        }
+        ctx = this.pushContext(qns, ++this._d);
+        this._w.write(XmlSyntax.OpenTag, qns);
+        return this;
+    }
+    text(txt) {
+        const ctx = this.peekContext();
+        if (!ctx)
+            throw new Error("text() without open element");
+        if (!ctx.closed) {
+            this._w.write(XmlSyntax.CloseTag);
+            ctx.closed = true;
+        }
+        ctx.lastToken = TokenType.Text;
+        this._w.write(this._escText(txt));
+        return this;
+    }
+    end() {
+        let ctx = this.popContext();
+        if (ctx) {
+            this._d--;
+            if (!ctx.closed) {
+                this._w.write(XmlSyntax.Slash, XmlSyntax.CloseTag);
+            }
+            else {
+                this._w.write(XmlSyntax.OpenTag, XmlSyntax.Slash, ctx.name, XmlSyntax.CloseTag);
+            }
+        }
+        return this;
+    }
+    pushContext(name, depth) {
+        const ctx = new XmlBuilder.Context(name, depth);
+        this._ctxStack.push(ctx);
+        return ctx;
+    }
+    popContext() {
+        return this._ctxStack.pop();
+    }
+    peekContext() {
+        return this._ctxStack[this._ctxStack.length - 1];
+    }
+    get contextDepth() {
+        return this._ctxStack.length;
+    }
+    _writeAttStr(name, value) {
+        this._w.write(XmlSyntax.Space, name, XmlSyntax.Equal, XmlSyntax.Quote, this._escAttr(value), XmlSyntax.Quote);
+    }
+    _lookupPrefix(ns) {
+        let i = this._ctxStack.length - 1;
+        if (i >= 0) {
+            do {
+                let ctx = this._ctxStack[i--];
+                const p = ctx.ns2prefix?.get(ns);
+                if (p) {
+                    return p;
+                }
+            } while (i >= 0);
+        }
+        return undefined;
+    }
+    _escText(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    _escAttr(s) {
+        return this._escText(s).replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+    }
+    _isXmlnsDecl(ns, n) {
+        if (ns) {
+            return ns === XmlSyntax.Xmlns;
+        }
+        const l = n.length;
+        const s = XmlSyntax.Xmlns.length;
+        if (l >= s) {
+            return n.startsWith(XmlSyntax.Xmlns) && (n.length == s || n[s] == XmlSyntax.Semicolon);
+        }
+        return false;
+    }
+    _registerNamespace(ctx, prefix, uri) {
+        if (prefix === XmlSyntax.Xml || prefix === XmlSyntax.Xmlns) {
+            throw new Error(`reserved prefix '${prefix}'`);
+        }
+        const existingUri = ctx.prefix2ns.get(prefix);
+        if (existingUri && existingUri !== uri) {
+            throw new Error(`prefix '${prefix}' already bound to a different namespace`);
+        }
+        const existingPrefix = ctx.ns2prefix.get(uri);
+        if (!existingPrefix) {
+            ctx.ns2prefix.set(uri, prefix);
+        }
+        ctx.prefix2ns.set(prefix, uri);
+    }
+    _allocPrefix(ctx) {
+        let i = 1;
+        while (true) {
+            const p = `ns${i++}`;
+            if (!ctx.prefix2ns.has(p))
+                return p;
+        }
+    }
+    _ensurePrefixDeclared(ctx, uri) {
+        const existing = this._lookupPrefix(uri);
+        if (existing)
+            return existing;
+        if (ctx.closed) {
+            throw new Error(`can not declare namespace after start tag closed for <${ctx.name}>`);
+        }
+        const prefix = this._allocPrefix(ctx);
+        this._writeAttStr(`${XmlSyntax.Xmlns}:${prefix}`, uri);
+        this._registerNamespace(ctx, prefix, uri);
+        return prefix;
+    }
+}
+XmlBuilder.Context = class {
+    constructor(name, depth) {
+        this.name = "";
+        this.closed = false;
+        this.lastToken = null;
+        this.ns2prefix = new Map();
+        this.prefix2ns = new Map();
+        this.defaultNs = null;
+        this.name = name;
+        this.depth = depth;
+    }
+};
+//# sourceMappingURL=xml.builder.js.map
+
+/***/ }),
+
+/***/ "./dist/text/xml/xml.builder.string.js":
+/*!*********************************************!*\
+  !*** ./dist/text/xml/xml.builder.string.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StringXmlWriter: () => (/* binding */ StringXmlWriter)
+/* harmony export */ });
+class StringXmlWriter {
+    constructor() {
+        this.count = 0;
+        this._chunks = [];
+    }
+    write(...data) {
+        if (data.length === 0)
+            return this;
+        const s = data.join("");
+        this._chunks.push(s);
+        this.count += s.length;
+        return this;
+    }
+    toString() {
+        return this._chunks.join("");
+    }
+    clear() {
+        this._chunks = [];
+        this.count = 0;
+    }
+}
+//# sourceMappingURL=xml.builder.string.js.map
 
 /***/ }),
 
@@ -9852,17 +10179,28 @@ function getXmlName(obj) {
     const n = obj?.constructor?.[XML_CLASS_NAME];
     return n ? n : undefined;
 }
+function looksLikeXmlNCName(s) {
+    return /^[A-Za-z_][A-Za-z0-9._-]*$/.test(s);
+}
 function xmlNameToParts(qn) {
-    if (isQName(qn)) {
+    if (isQName(qn))
         return qn;
+    const s = (qn ?? "").trim();
+    if (!s)
+        return { name: "" };
+    const i = s.indexOf(":");
+    if (i === -1) {
+        return { name: s };
     }
-    else {
-        const parts = qn?.split(':') ?? [];
-        if (parts.length == 2) {
-            return { ns: parts[0], name: parts[1] };
-        }
-        return { name: parts[0] };
+    if (s.indexOf(":", i + 1) !== -1) {
+        return { name: s };
     }
+    const prefix = s.slice(0, i);
+    const local = s.slice(i + 1);
+    if (looksLikeXmlNCName(prefix) && looksLikeXmlNCName(local)) {
+        return { ns: prefix, name: local };
+    }
+    return { name: s };
 }
 function toQualifiedString(name, prefix) {
     return prefix ? `${prefix}:${name}` : name;
@@ -9886,9 +10224,18 @@ __webpack_require__.r(__webpack_exports__);
 function _isDate(x) {
     return x instanceof Date;
 }
+function _isString(x) {
+    return typeof x === "string";
+}
 function _isPrimitive(x) {
     return (typeof x === "string" ||
         typeof x === "number" ||
+        typeof x === "boolean" ||
+        typeof x === "bigint" ||
+        _isDate(x));
+}
+function _isPrimitiveButString(x) {
+    return (typeof x === "number" ||
         typeof x === "boolean" ||
         typeof x === "bigint" ||
         _isDate(x));
@@ -9897,8 +10244,6 @@ class XmlSerializer {
     constructor(builder) {
         this._ns = new Map();
         this._prefixCount = 0;
-        if (!builder)
-            throw new Error("builder must be defined");
         this._builder = builder;
     }
     withNamespace(...ns) {
@@ -9907,21 +10252,21 @@ class XmlSerializer {
         }
         return this;
     }
-    write(root, name) {
-        this._builder.dec();
+    serialize(root, name) {
         name = name ?? (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.getXmlName)(root);
         if (!name)
             throw new Error("can not find name for given object");
         let currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.xmlNameToParts)(name);
         if (currentName.ns) {
-            this._assignNamespace(currentName.ns, "");
+            this._assignNamespace(currentName.ns, "xmlns");
         }
         this._gatherNamespaces(root, new WeakSet());
-        const doc = this._builder.ele(currentName.ns ?? null, currentName.name);
+        const doc = this._builder.ele(null, currentName.name);
         for (const pair of this._ns) {
-            doc.att(null, `xmlns:${pair[1]}`, pair[0]);
+            doc.att("xmlns", pair[1], pair[0]);
         }
         this._writeObjectContent(doc, root, new WeakSet().add(root));
+        this._builder.end();
     }
     _writeObject(builder, source, visited) {
         if (visited.has(source)) {
@@ -9946,10 +10291,13 @@ class XmlSerializer {
         const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.toQualifiedString)(currentName.name, prefix);
         builder.ele(null, tmp);
         this._writeObjectContent(builder, source, visited);
+        this._builder.end();
     }
     _getPrefix(qn) {
         if (qn.ns) {
-            return this._ns.get(qn.ns);
+            const p = this._ns.get(qn.ns);
+            if (p !== "xmlns")
+                return p;
         }
         return undefined;
     }
@@ -9985,7 +10333,15 @@ class XmlSerializer {
                 }
                 continue;
             }
-            this._writeObject(builder, source, visited);
+            const value = source[prop];
+            if (_isPrimitiveButString(value)) {
+                continue;
+            }
+            if (_isString(value)) {
+                this._builder.text(value);
+                continue;
+            }
+            this._writeObject(builder, value, visited);
         }
     }
     _gatherNamespaces(tag, visited) {
@@ -10004,8 +10360,7 @@ class XmlSerializer {
         }
         const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.getXmlName)(tag);
         if (qname) {
-            this._assignNamespace(tag);
-            return;
+            this._assignNamespace(qname);
         }
         const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.getXmlFieldMeta)(tag) ?? [];
         const metaByProp = new Map();
@@ -10041,6 +10396,12 @@ class XmlSerializer {
         if (nqn?.ns) {
             if (!this._ns.get(nqn.ns)) {
                 this._ns.set(nqn.ns, prefix ?? this._buildNsPrefix(nqn.ns));
+            }
+            return;
+        }
+        if (prefix === "xmlns") {
+            if (!this._ns.get(nqn.name)) {
+                this._ns.set(nqn.name, prefix ?? this._buildNsPrefix(nqn.name));
             }
         }
     }
@@ -15477,6 +15838,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemTileWebClient),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.DeserializeLocalizableString),
 /* harmony export */   Display: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Display),
+/* harmony export */   DomXmlWriter: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.DomXmlWriter),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid),
@@ -15615,6 +15977,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.StarColor),
+/* harmony export */   StringXmlWriter: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.StringXmlWriter),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.SunTrajectoryConfig),
 /* harmony export */   T3MBuild: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MBuild),
 /* harmony export */   T3MFResources: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFResources),
@@ -15647,6 +16010,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileViewBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileViewBase),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileWebClient),
 /* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
+/* harmony export */   TokenType: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.TokenType),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchGestureType),
 /* harmony export */   TriangleSetsNS: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.TriangleSetsNS),
 /* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Unit),
@@ -15657,6 +16021,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.WebTileUrlBuilder),
 /* harmony export */   XRGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.XRGestureType),
 /* harmony export */   XmlAttr: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlAttr),
+/* harmony export */   XmlBuilder: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.XmlDocumentTileCodec),
 /* harmony export */   XmlElem: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlElem),
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlIgnore),

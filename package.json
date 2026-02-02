@@ -32,7 +32,6 @@
         "@mapbox/vector-tile": "^2.0.2",
         "fflate": "^0.8.2",
         "pbf": "^4.0.1",
-        "quickhull3d": "^2.1.0",
-        "xmlbuilder2": "^4.0.3"
+        "quickhull3d": "^2.1.0"
     }
 }

@@ -79,10 +79,14 @@ export class XmlSerializer {
         if( Array.isArray(source))
         {
             for(const item of source){
-                if (_isPrimitive(item)){
+                if (_isPrimitiveButString(item)){
                     continue;
                 }
-                 this._writeObject(builder, item, visited);
+                if( _isString(item)){
+                    this._builder.text(item);
+                    continue;
+                }
+                this._writeObject(builder, item, visited);
             }
             return;
         }
@@ -101,7 +105,7 @@ export class XmlSerializer {
 
     private _getPrefix(qn:IQName):string | undefined {
         if( qn.ns){
-            const p = this._ns.get(qn.ns);
+            const p = this._ns.get(qn.ns.toLowerCase());
             if( p !== "xmlns" ) return p ;
         }
         return undefined;
@@ -127,12 +131,13 @@ export class XmlSerializer {
                 if (ignored) continue;
 
                 for(const m of propMetas) {
-                    if(m.name) {
+                    const name = m.name ?? m.prop.toLowerCase(); // if the name is not defined, we assume it's the lower case version of name of the property.
+                    if(name) {
                         switch( m.kind){
                             case "attr":{
                                 const vStr = source[m.prop]?.toString();
                                 if(vStr){
-                                    let currentName = xmlNameToParts(m.name) ;
+                                    let currentName = xmlNameToParts(name) ;
                                     let prefix= this._getPrefix(currentName) ;
                                     const tmp = toQualifiedString(currentName.name, prefix);
                                     builder.att(null,tmp,vStr);
@@ -221,14 +226,16 @@ export class XmlSerializer {
     private _assignNamespace(qn:Xml_Name, prefix?:string){
         const nqn = xmlNameToParts(qn);
         if(nqn?.ns ){
-            if(!this._ns.get(nqn.ns)){
-                this._ns.set(nqn.ns, prefix ?? this._buildNsPrefix(nqn.ns));
+            const ns = nqn.ns.toLowerCase();
+            if(!this._ns.get(ns)){
+                this._ns.set(ns, prefix ?? this._buildNsPrefix(ns));
             }
             return;
         } 
         if( prefix === "xmlns" ){
-            if(!this._ns.get(nqn.name)){
-                this._ns.set(nqn.name, prefix ?? this._buildNsPrefix(nqn.name));
+            const ns = nqn.name.toLowerCase();
+            if(!this._ns.get(ns)){
+                this._ns.set(ns, prefix ?? this._buildNsPrefix(ns));
             }
         }
     }

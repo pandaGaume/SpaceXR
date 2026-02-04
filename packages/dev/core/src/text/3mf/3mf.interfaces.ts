@@ -1,104 +1,155 @@
-
-import { FloatArray, IndicesArray, Nullable } from "../../types";
-import { Range} from "../../math"
+import { Nullable } from "../../types";
 import { IQName } from "../xml/xml.interfaces";
 
 export enum ST_Unit {
-    micron,
-    millimeter,
-    centimeter,
-    inch,
-    foot,
-    meter
+  micron = "micron",
+  millimeter = "millimeter",
+  centimeter = "centimeter",
+  inch = "inch",
+  foot = "foot",
+  meter = "meter"
 }
-export type ST_RessourceId = string;
-export type ST_RessourceIndex = number;
-export type ST_Matrix3D = [number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number]
+
+export type ST_ColorValue = string;
 export type ST_UriReference = string;
 
-export interface I3MFMetadata {
-  name: string;        // e.g. "Title", "Designer", "License", or any custom key
-  preserve?: boolean;  // A non-zero value indicates the  producer wants the consumer to preserve this value when it saves a modified version of this
-  type?: IQName;       // optional, e.g. "xs:string"
-  value: any;
-}
+export type ST_Number = number;
 
-export interface IHasMetadataGroup {
-    metadatagroup?:Nullable<Array<I3MFMetadata>>; 
-}
-
-export interface I3FNode{
-}
-
-export interface I3MFComponent extends I3FNode{
-  objectId: number;
-  transform?: ST_Matrix3D;
-}
-
-export interface I3MFBuildItem extends I3FNode, IHasMetadataGroup{
-  objectId: ST_RessourceId;
-  transform?: ST_Matrix3D;
-  partnumber?:string;
-}
-
-export interface I3MFTriangleSet extends I3FNode{
-  id: string;   // unique within the mesh
-  name: string;         // human readable
-  triangles: IndicesArray | Range ; // triangle indices (t), 
-}
-
-export interface I3MFMesh extends I3FNode {
-  // vertices: [x0,y0,z0, x1,y1,z1, ...]
-  vertices: FloatArray;
-  // triangles: [i0,j0,k0, i1,j1,k1, ...]
-  triangles: IndicesArray;
-  properties?:Array<Nullable<[ST_RessourceIndex,ST_RessourceIndex,ST_RessourceIndex,ST_RessourceId]>>
-  // A mesh node MAY contain a trianglesets node that contains information how triangles are grouped and organized
-  triangleSets?:Array<I3MFTriangleSet>
-}
+export type ST_ResourceID = number;
+export type ST_ResourceIndex = number;
 
 export enum ST_ObjectType {
-    model,
-    solidsupport,
-    support,
-    surface,
-    other
+  model = "model",
+  solidsupport = "solidsupport",
+  support = "support",
+  surface = "surface",
+  other = "other"
 }
 
-export interface I3MFObject extends I3FNode, IHasMetadataGroup {
-    id: number;
-    type: ST_ObjectType;
-    thumbnail: ST_UriReference;
-    partNumber:string;
-    name:string;
-    pid: ST_RessourceId;
-    pindex: ST_RessourceIndex;
-    mesh:I3MFMesh;
-    components? : Array<I3MFComponent>; 
+/*
+  In the XSD, ST_Matrix3D is a whitespace separated list of numbers.
+  The official 3MF core spec uses a 3x4 matrix (12 numbers).
+*/
+export type ST_Matrix3D = [
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number
+];
+
+export class Matrix3D {
+  constructor(public values: ST_Matrix3D) {}
+
+  toString(): string {
+    return this.values.join(" ");
+  }
+
+  static fromString(value: string): Matrix3D {
+    const parts = value.trim().split(/\s+/).map(Number);
+    if (parts.length !== 12 || parts.some((n) => Number.isNaN(n))) {
+      throw new Error("Invalid ST_Matrix3D, expected 12 numbers");
+    }
+    return new Matrix3D(parts as ST_Matrix3D);
+  }
 }
 
-export interface I3MFBaseMaterial extends I3FNode{
-
+export interface I3MFMetadata {
+  name: IQName;
+  preserve?: boolean;
+  type?: string;
+  value: string;
 }
 
-export interface I3MFArrayOf<T> {
-  childs?: Nullable<Array<T>>;
+export interface I3MFMetadataGroup {
+  metadata: Array<I3MFMetadata>;
 }
 
-export interface I3MFResources extends I3FNode, I3MFArrayOf<I3MFObject | I3MFBaseMaterial> {
-  id:ST_RessourceId;
+export interface I3MFVertex {
+  x: ST_Number;
+  y: ST_Number;
+  z: ST_Number;
 }
 
-export interface I3MFBuild extends I3FNode, I3MFArrayOf<I3MFBuildItem> {
+export interface I3MFTriangle {
+  v1: ST_ResourceIndex;
+  v2: ST_ResourceIndex;
+  v3: ST_ResourceIndex;
 
+  p1?: ST_ResourceIndex;
+  p2?: ST_ResourceIndex;
+  p3?: ST_ResourceIndex;
+  pid?: ST_ResourceID; // Overrides the OBJECT LEVEL pid for the riangle.
 }
 
-export interface I3MFModel extends I3FNode{
-    unit:ST_Unit;
-    requiredExtensions?:Nullable<string>;
-    recommendedExtensions?:Nullable<string>;
-    metadata?:Nullable<Array<I3MFMetadata>>; 
-    resources?: Nullable<I3MFResources>;
-    build?: Nullable<I3MFBuild>;
+export interface I3MFVertices {
+  vertex: Array<I3MFVertex>;
 }
 
+export interface I3MFTriangles {
+  triangle: Array<I3MFTriangle>;
+}
+
+export interface I3MFMesh {
+  vertices: I3MFVertices;
+  triangles: I3MFTriangles;
+}
+
+export interface I3MFComponent {
+  objectid: ST_ResourceID;
+  transform?: Matrix3D;
+}
+
+export interface I3MFComponents {
+  component: Array<I3MFComponent>;
+}
+
+export interface I3MFObject {
+  id: ST_ResourceID;
+
+  type?: ST_ObjectType;
+  thumbnail?: ST_UriReference;
+  partnumber?: string;
+  name?: string;
+
+  pid?: ST_ResourceID; // Reference to the property group element with the matching id attribute value (e.g. <basematerials>). It is REQUIRED if pindex is specified.
+  pindex?: ST_ResourceIndex;
+  
+  metadatagroup?: I3MFMetadataGroup;
+
+  content?: I3MFMesh | I3MFComponents ;
+}
+
+export interface I3MFBase {
+  name: string;
+  displaycolor: ST_ColorValue;
+}
+
+export interface I3MFBaseMaterials {
+  id: ST_ResourceID;
+  base: Array<I3MFBase>;
+}
+
+export interface I3MFResources {
+  object: Array<I3MFObject>;
+  basematerials?: Array<I3MFBaseMaterials>;
+}
+
+export interface I3MFItem {
+  objectid: ST_ResourceID;
+  transform?: Matrix3D;
+  partnumber?: string;
+  metadatagroup?: I3MFMetadataGroup;
+}
+
+export interface I3MFBuild {
+  item?: Nullable<Array<I3MFItem>>;
+}
+
+export interface I3MFModel {
+  unit?: ST_Unit;
+  requiredextensions?: string;
+  recommendedextensions?: string;
+
+  metadata?: Nullable<Array<I3MFMetadata>>;
+  resources?: Nullable<I3MFResources>;
+  build?: Nullable<I3MFBuild>;
+}

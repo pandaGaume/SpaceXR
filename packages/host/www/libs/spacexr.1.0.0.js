@@ -8758,26 +8758,42 @@ StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Matrix3D: () => (/* binding */ Matrix3D),
 /* harmony export */   ST_ObjectType: () => (/* binding */ ST_ObjectType),
 /* harmony export */   ST_Unit: () => (/* binding */ ST_Unit)
 /* harmony export */ });
 var ST_Unit;
 (function (ST_Unit) {
-    ST_Unit[ST_Unit["micron"] = 0] = "micron";
-    ST_Unit[ST_Unit["millimeter"] = 1] = "millimeter";
-    ST_Unit[ST_Unit["centimeter"] = 2] = "centimeter";
-    ST_Unit[ST_Unit["inch"] = 3] = "inch";
-    ST_Unit[ST_Unit["foot"] = 4] = "foot";
-    ST_Unit[ST_Unit["meter"] = 5] = "meter";
+    ST_Unit["micron"] = "micron";
+    ST_Unit["millimeter"] = "millimeter";
+    ST_Unit["centimeter"] = "centimeter";
+    ST_Unit["inch"] = "inch";
+    ST_Unit["foot"] = "foot";
+    ST_Unit["meter"] = "meter";
 })(ST_Unit || (ST_Unit = {}));
 var ST_ObjectType;
 (function (ST_ObjectType) {
-    ST_ObjectType[ST_ObjectType["model"] = 0] = "model";
-    ST_ObjectType[ST_ObjectType["solidsupport"] = 1] = "solidsupport";
-    ST_ObjectType[ST_ObjectType["support"] = 2] = "support";
-    ST_ObjectType[ST_ObjectType["surface"] = 3] = "surface";
-    ST_ObjectType[ST_ObjectType["other"] = 4] = "other";
+    ST_ObjectType["model"] = "model";
+    ST_ObjectType["solidsupport"] = "solidsupport";
+    ST_ObjectType["support"] = "support";
+    ST_ObjectType["surface"] = "surface";
+    ST_ObjectType["other"] = "other";
 })(ST_ObjectType || (ST_ObjectType = {}));
+class Matrix3D {
+    constructor(values) {
+        this.values = values;
+    }
+    toString() {
+        return this.values.join(" ");
+    }
+    static fromString(value) {
+        const parts = value.trim().split(/\s+/).map(Number);
+        if (parts.length !== 12 || parts.some((n) => Number.isNaN(n))) {
+            throw new Error("Invalid ST_Matrix3D, expected 12 numbers");
+        }
+        return new Matrix3D(parts);
+    }
+}
 //# sourceMappingURL=3mf.interfaces.js.map
 
 /***/ }),
@@ -8790,11 +8806,23 @@ var ST_ObjectType;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   T3MBuild: () => (/* binding */ T3MBuild),
+/* harmony export */   T3MFBase: () => (/* binding */ T3MFBase),
+/* harmony export */   T3MFBaseMaterials: () => (/* binding */ T3MFBaseMaterials),
+/* harmony export */   T3MFBuild: () => (/* binding */ T3MFBuild),
+/* harmony export */   T3MFComponent: () => (/* binding */ T3MFComponent),
+/* harmony export */   T3MFComponents: () => (/* binding */ T3MFComponents),
+/* harmony export */   T3MFItem: () => (/* binding */ T3MFItem),
+/* harmony export */   T3MFMesh: () => (/* binding */ T3MFMesh),
+/* harmony export */   T3MFMeta: () => (/* binding */ T3MFMeta),
+/* harmony export */   T3MFMetadataGroup: () => (/* binding */ T3MFMetadataGroup),
+/* harmony export */   T3MFModel: () => (/* binding */ T3MFModel),
+/* harmony export */   T3MFObject: () => (/* binding */ T3MFObject),
 /* harmony export */   T3MFResources: () => (/* binding */ T3MFResources),
+/* harmony export */   T3MFTriangle: () => (/* binding */ T3MFTriangle),
+/* harmony export */   T3MFTriangles: () => (/* binding */ T3MFTriangles),
+/* harmony export */   T3MFVertex: () => (/* binding */ T3MFVertex),
+/* harmony export */   T3MFVertices: () => (/* binding */ T3MFVertices),
 /* harmony export */   TDModelNS: () => (/* binding */ TDModelNS),
-/* harmony export */   TFMeta: () => (/* binding */ TFMeta),
-/* harmony export */   TMFModel: () => (/* binding */ TMFModel),
 /* harmony export */   TriangleSetsNS: () => (/* binding */ TriangleSetsNS)
 /* harmony export */ });
 /* harmony import */ var _xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.interfaces */ "./dist/text/xml/xml.interfaces.js");
@@ -8809,61 +8837,263 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 
 const TDModelNS = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02";
 const TriangleSetsNS = "http://schemas.microsoft.com/3dmanufacturing/trianglesets/2021/07";
-let TMFModel = class TMFModel {
+let T3MFModel = class T3MFModel {
     constructor() {
         this.unit = _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_Unit.millimeter;
+        this.metadata = null;
+        this.resources = null;
+        this.build = null;
     }
 };
-TMFModel.KnownMeta = ["Title", "Designer", "Description", "Copyright", "LicenseTerms", "Rating", "CreationDate", "ModificationDate", "Application"];
+T3MFModel.KnownMeta = [
+    "Title",
+    "Designer",
+    "Description",
+    "Copyright",
+    "LicenseTerms",
+    "Rating",
+    "CreationDate",
+    "ModificationDate",
+    "Application"
+];
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "unit" })
-], TMFModel.prototype, "unit", void 0);
+], T3MFModel.prototype, "unit", void 0);
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "requiredextensions" })
-], TMFModel.prototype, "requiredExtensions", void 0);
+], T3MFModel.prototype, "requiredextensions", void 0);
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "recommendedextensions" })
-], TMFModel.prototype, "recommendedExtensions", void 0);
-TMFModel = __decorate([
+], T3MFModel.prototype, "recommendedextensions", void 0);
+T3MFModel = __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "model" })
-], TMFModel);
+], T3MFModel);
 
-let TFMeta = class TFMeta {
-    constructor(name, value) {
+let T3MFMeta = class T3MFMeta {
+    constructor(name, value, preserve, type) {
         this.name = name;
         this.value = value;
+        this.preserve = preserve;
+        this.type = type;
     }
 };
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "name" })
-], TFMeta.prototype, "name", void 0);
+], T3MFMeta.prototype, "name", void 0);
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "preserve" })
-], TFMeta.prototype, "preserve", void 0);
+], T3MFMeta.prototype, "preserve", void 0);
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "type" })
-], TFMeta.prototype, "type", void 0);
-TFMeta = __decorate([
+], T3MFMeta.prototype, "type", void 0);
+T3MFMeta = __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "meta" })
-], TFMeta);
+], T3MFMeta);
+
+let T3MFMetadataGroup = class T3MFMetadataGroup {
+    constructor() {
+        this.metadata = [];
+    }
+};
+T3MFMetadataGroup = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "metadatagroup" })
+], T3MFMetadataGroup);
 
 let T3MFResources = class T3MFResources {
+};
+T3MFResources = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "resources" })
+], T3MFResources);
+
+let T3MFObject = class T3MFObject {
     constructor(id) {
         this.id = id;
     }
 };
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "id" })
-], T3MFResources.prototype, "id", void 0);
-T3MFResources = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)("ressources")
-], T3MFResources);
+], T3MFObject.prototype, "id", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "type" })
+], T3MFObject.prototype, "type", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "thumbnail" })
+], T3MFObject.prototype, "thumbnail", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "partnumber" })
+], T3MFObject.prototype, "partnumber", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "name" })
+], T3MFObject.prototype, "name", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "pid" })
+], T3MFObject.prototype, "pid", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "pindex" })
+], T3MFObject.prototype, "pindex", void 0);
+T3MFObject = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "object" })
+], T3MFObject);
 
-let T3MBuild = class T3MBuild {
+let T3MFMesh = class T3MFMesh {
+    constructor(vertices, triangles) {
+        this.vertices = vertices ?? new T3MFVertices();
+        this.triangles = triangles ?? new T3MFTriangles();
+    }
 };
-T3MBuild = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)("build")
-], T3MBuild);
+T3MFMesh = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "mesh" })
+], T3MFMesh);
+
+let T3MFVertices = class T3MFVertices {
+    constructor() {
+        this.vertex = [];
+    }
+};
+T3MFVertices = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "vertices" })
+], T3MFVertices);
+
+let T3MFVertex = class T3MFVertex {
+    constructor(x = 0, y = 0, z = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+};
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "x" })
+], T3MFVertex.prototype, "x", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "y" })
+], T3MFVertex.prototype, "y", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "z" })
+], T3MFVertex.prototype, "z", void 0);
+T3MFVertex = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "vertex" })
+], T3MFVertex);
+
+let T3MFTriangles = class T3MFTriangles {
+    constructor() {
+        this.triangle = [];
+    }
+};
+T3MFTriangles = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "triangles" })
+], T3MFTriangles);
+
+let T3MFTriangle = class T3MFTriangle {
+    constructor(v1, v2, v3) {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.v3 = v3;
+    }
+};
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "v1" })
+], T3MFTriangle.prototype, "v1", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "v2" })
+], T3MFTriangle.prototype, "v2", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "v3" })
+], T3MFTriangle.prototype, "v3", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "p1" })
+], T3MFTriangle.prototype, "p1", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "p2" })
+], T3MFTriangle.prototype, "p2", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "p3" })
+], T3MFTriangle.prototype, "p3", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "pid" })
+], T3MFTriangle.prototype, "pid", void 0);
+T3MFTriangle = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "triangle" })
+], T3MFTriangle);
+
+let T3MFComponents = class T3MFComponents {
+    constructor() {
+        this.component = [];
+    }
+};
+T3MFComponents = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "components" })
+], T3MFComponents);
+
+let T3MFComponent = class T3MFComponent {
+    constructor(objectid, transform) {
+        this.objectid = objectid;
+        this.transform = transform;
+    }
+};
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "objectid" })
+], T3MFComponent.prototype, "objectid", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform" })
+], T3MFComponent.prototype, "transform", void 0);
+T3MFComponent = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "component" })
+], T3MFComponent);
+
+let T3MFBaseMaterials = class T3MFBaseMaterials {
+    constructor(id) {
+        this.base = [];
+        this.id = id;
+    }
+};
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "id" })
+], T3MFBaseMaterials.prototype, "id", void 0);
+T3MFBaseMaterials = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "basematerials" })
+], T3MFBaseMaterials);
+
+let T3MFBase = class T3MFBase {
+    constructor(name, displaycolor) {
+        this.name = name;
+        this.displaycolor = displaycolor;
+    }
+};
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "name" })
+], T3MFBase.prototype, "name", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "displaycolor" })
+], T3MFBase.prototype, "displaycolor", void 0);
+T3MFBase = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "base" })
+], T3MFBase);
+
+let T3MFBuild = class T3MFBuild {
+};
+T3MFBuild = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "build" })
+], T3MFBuild);
+
+let T3MFItem = class T3MFItem {
+    constructor(objectid, transform, partnumber) {
+        this.objectid = objectid;
+        this.transform = transform;
+        this.partnumber = partnumber;
+    }
+};
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "objectid" })
+], T3MFItem.prototype, "objectid", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform" })
+], T3MFItem.prototype, "transform", void 0);
+__decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "partnumber" })
+], T3MFItem.prototype, "partnumber", void 0);
+T3MFItem = __decorate([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "item" })
+], T3MFItem);
 
 //# sourceMappingURL=3mf.js.map
 
@@ -8877,13 +9107,26 @@ T3MBuild = __decorate([
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Matrix3D: () => (/* reexport safe */ _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.Matrix3D),
 /* harmony export */   ST_ObjectType: () => (/* reexport safe */ _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_ObjectType),
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_Unit),
-/* harmony export */   T3MBuild: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MBuild),
+/* harmony export */   T3MFBase: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFBase),
+/* harmony export */   T3MFBaseMaterials: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFBaseMaterials),
+/* harmony export */   T3MFBuild: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFBuild),
+/* harmony export */   T3MFComponent: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFComponent),
+/* harmony export */   T3MFComponents: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFComponents),
+/* harmony export */   T3MFItem: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFItem),
+/* harmony export */   T3MFMesh: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFMesh),
+/* harmony export */   T3MFMeta: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFMeta),
+/* harmony export */   T3MFMetadataGroup: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFMetadataGroup),
+/* harmony export */   T3MFModel: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFModel),
+/* harmony export */   T3MFObject: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFObject),
 /* harmony export */   T3MFResources: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFResources),
+/* harmony export */   T3MFTriangle: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFTriangle),
+/* harmony export */   T3MFTriangles: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFTriangles),
+/* harmony export */   T3MFVertex: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFVertex),
+/* harmony export */   T3MFVertices: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.T3MFVertices),
 /* harmony export */   TDModelNS: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.TDModelNS),
-/* harmony export */   TFMeta: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.TFMeta),
-/* harmony export */   TMFModel: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.TMFModel),
 /* harmony export */   TriangleSetsNS: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.TriangleSetsNS)
 /* harmony export */ });
 /* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/text/3mf/3mf.interfaces.js");
@@ -8908,14 +9151,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ISO6391: () => (/* reexport safe */ _iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.IsLocalizable),
 /* harmony export */   LocalString: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.LocalString),
+/* harmony export */   Matrix3D: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.Matrix3D),
 /* harmony export */   ST_ObjectType: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ST_ObjectType),
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ST_Unit),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.StringXmlWriter),
-/* harmony export */   T3MBuild: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MBuild),
+/* harmony export */   T3MFBase: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFBase),
+/* harmony export */   T3MFBaseMaterials: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFBaseMaterials),
+/* harmony export */   T3MFBuild: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFBuild),
+/* harmony export */   T3MFComponent: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFComponent),
+/* harmony export */   T3MFComponents: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFComponents),
+/* harmony export */   T3MFItem: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFItem),
+/* harmony export */   T3MFMesh: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFMesh),
+/* harmony export */   T3MFMeta: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFMeta),
+/* harmony export */   T3MFMetadataGroup: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFMetadataGroup),
+/* harmony export */   T3MFModel: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFModel),
+/* harmony export */   T3MFObject: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFObject),
 /* harmony export */   T3MFResources: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFResources),
+/* harmony export */   T3MFTriangle: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFTriangle),
+/* harmony export */   T3MFTriangles: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFTriangles),
+/* harmony export */   T3MFVertex: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFVertex),
+/* harmony export */   T3MFVertices: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.T3MFVertices),
 /* harmony export */   TDModelNS: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TDModelNS),
-/* harmony export */   TFMeta: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TFMeta),
-/* harmony export */   TMFModel: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TMFModel),
 /* harmony export */   TokenType: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.TokenType),
 /* harmony export */   TriangleSetsNS: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.TriangleSetsNS),
 /* harmony export */   XmlAttr: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlAttr),
@@ -9959,10 +10215,7 @@ class XmlBuilder {
     ele(ns, n) {
         let ctx = this.peekContext();
         if (ctx) {
-            if (!ctx.closed) {
-                this._w.write(XmlSyntax.CloseTag);
-                ctx.closed = true;
-            }
+            this._closeOpenTagIfNeeded(ctx);
         }
         let qns = n;
         if (ns) {
@@ -9977,10 +10230,7 @@ class XmlBuilder {
         const ctx = this.peekContext();
         if (!ctx)
             throw new Error("text() without open element");
-        if (!ctx.closed) {
-            this._w.write(XmlSyntax.CloseTag);
-            ctx.closed = true;
-        }
+        this._closeOpenTagIfNeeded(ctx);
         ctx.lastToken = TokenType.Text;
         this._w.write(this._escText(txt));
         return this;
@@ -10078,6 +10328,12 @@ class XmlBuilder {
         this._writeAttStr(`${XmlSyntax.Xmlns}:${prefix}`, uri);
         this._registerNamespace(ctx, prefix, uri);
         return prefix;
+    }
+    _closeOpenTagIfNeeded(ctx) {
+        if (!ctx.closed) {
+            this._w.write(XmlSyntax.CloseTag);
+            ctx.closed = true;
+        }
     }
 }
 XmlBuilder.Context = class {
@@ -10275,7 +10531,11 @@ class XmlSerializer {
         visited.add(source);
         if (Array.isArray(source)) {
             for (const item of source) {
-                if (_isPrimitive(item)) {
+                if (_isPrimitiveButString(item)) {
+                    continue;
+                }
+                if (_isString(item)) {
+                    this._builder.text(item);
                     continue;
                 }
                 this._writeObject(builder, item, visited);
@@ -10295,7 +10555,7 @@ class XmlSerializer {
     }
     _getPrefix(qn) {
         if (qn.ns) {
-            const p = this._ns.get(qn.ns);
+            const p = this._ns.get(qn.ns.toLowerCase());
             if (p !== "xmlns")
                 return p;
         }
@@ -10316,12 +10576,13 @@ class XmlSerializer {
                 if (ignored)
                     continue;
                 for (const m of propMetas) {
-                    if (m.name) {
+                    const name = m.name ?? m.prop.toLowerCase();
+                    if (name) {
                         switch (m.kind) {
                             case "attr": {
                                 const vStr = source[m.prop]?.toString();
                                 if (vStr) {
-                                    let currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.xmlNameToParts)(m.name);
+                                    let currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.xmlNameToParts)(name);
                                     let prefix = this._getPrefix(currentName);
                                     const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.toQualifiedString)(currentName.name, prefix);
                                     builder.att(null, tmp, vStr);
@@ -10394,14 +10655,16 @@ class XmlSerializer {
     _assignNamespace(qn, prefix) {
         const nqn = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.xmlNameToParts)(qn);
         if (nqn?.ns) {
-            if (!this._ns.get(nqn.ns)) {
-                this._ns.set(nqn.ns, prefix ?? this._buildNsPrefix(nqn.ns));
+            const ns = nqn.ns.toLowerCase();
+            if (!this._ns.get(ns)) {
+                this._ns.set(ns, prefix ?? this._buildNsPrefix(ns));
             }
             return;
         }
         if (prefix === "xmlns") {
-            if (!this._ns.get(nqn.name)) {
-                this._ns.set(nqn.name, prefix ?? this._buildNsPrefix(nqn.name));
+            const ns = nqn.name.toLowerCase();
+            if (!this._ns.get(ns)) {
+                this._ns.set(ns, prefix ?? this._buildNsPrefix(ns));
             }
         }
     }
@@ -15926,6 +16189,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
 /* harmony export */   Mass: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Mass),
+/* harmony export */   Matrix3D: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.Matrix3D),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_11__.MemoryCache),
 /* harmony export */   MoonState: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.MoonState),
@@ -15979,11 +16243,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.StarColor),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.StringXmlWriter),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.SunTrajectoryConfig),
-/* harmony export */   T3MBuild: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MBuild),
+/* harmony export */   T3MFBase: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFBase),
+/* harmony export */   T3MFBaseMaterials: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFBaseMaterials),
+/* harmony export */   T3MFBuild: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFBuild),
+/* harmony export */   T3MFComponent: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFComponent),
+/* harmony export */   T3MFComponents: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFComponents),
+/* harmony export */   T3MFItem: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFItem),
+/* harmony export */   T3MFMesh: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFMesh),
+/* harmony export */   T3MFMeta: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFMeta),
+/* harmony export */   T3MFMetadataGroup: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFMetadataGroup),
+/* harmony export */   T3MFModel: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFModel),
+/* harmony export */   T3MFObject: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFObject),
 /* harmony export */   T3MFResources: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFResources),
+/* harmony export */   T3MFTriangle: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFTriangle),
+/* harmony export */   T3MFTriangles: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFTriangles),
+/* harmony export */   T3MFVertex: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFVertex),
+/* harmony export */   T3MFVertices: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.T3MFVertices),
 /* harmony export */   TDModelNS: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.TDModelNS),
-/* harmony export */   TFMeta: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.TFMeta),
-/* harmony export */   TMFModel: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.TMFModel),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.TerrainGridOptions),

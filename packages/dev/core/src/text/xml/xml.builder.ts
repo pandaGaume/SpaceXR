@@ -123,10 +123,7 @@ export class XmlBuilder implements IXMLBuilder{
     public ele(ns:Nullable<string>, n:string): IXMLBuilder{
         let ctx = this.peekContext();
         if(ctx){
-            if(!ctx.closed){
-                this._w.write(XmlSyntax.CloseTag);
-                ctx.closed = true;
-            }
+            this._closeOpenTagIfNeeded(ctx);
         }
         let qns = n;
         if(ns){
@@ -141,10 +138,7 @@ export class XmlBuilder implements IXMLBuilder{
     public text(txt: string): IXMLBuilder {
         const ctx = this.peekContext();
         if (!ctx) throw new Error("text() without open element");
-        if (!ctx.closed) {
-            this._w.write(XmlSyntax.CloseTag);
-            ctx.closed = true;
-        }
+        this._closeOpenTagIfNeeded(ctx);
         ctx.lastToken = TokenType.Text;
         this._w.write(this._escText(txt));
         return this;
@@ -238,7 +232,7 @@ export class XmlBuilder implements IXMLBuilder{
         ctx.prefix2ns.set(prefix, uri);
     }
 
-        private _allocPrefix(ctx: InstanceType<typeof XmlBuilder.Context>): string {
+    private _allocPrefix(ctx: InstanceType<typeof XmlBuilder.Context>): string {
         let i = 1;
         while (true) {
             const p = `ns${i++}`;
@@ -261,6 +255,13 @@ export class XmlBuilder implements IXMLBuilder{
         this._registerNamespace(ctx, prefix, uri);
 
         return prefix;
+    }
+
+    private _closeOpenTagIfNeeded(ctx:InstanceType<typeof XmlBuilder.Context>) {
+        if (!ctx.closed) {
+            this._w.write(XmlSyntax.CloseTag);
+            ctx.closed = true;
+        }
     }
 
 }

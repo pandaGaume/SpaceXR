@@ -109,6 +109,14 @@
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },
+                {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch 3MF test  on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/tests/test3mf.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
         {
             "type": "chrome",
             "request": "launch",

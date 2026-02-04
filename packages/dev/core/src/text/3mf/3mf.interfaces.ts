@@ -1,5 +1,5 @@
 import { Nullable } from "../../types";
-import { IQName } from "../xml/xml.interfaces";
+import { Matrix3D } from "./3mf.matrix";
 
 export enum ST_Unit {
   micron = "micron",
@@ -26,34 +26,10 @@ export enum ST_ObjectType {
   other = "other"
 }
 
-/*
-  In the XSD, ST_Matrix3D is a whitespace separated list of numbers.
-  The official 3MF core spec uses a 3x4 matrix (12 numbers).
-*/
-export type ST_Matrix3D = [
-  number, number, number, number,
-  number, number, number, number,
-  number, number, number, number
-];
 
-export class Matrix3D {
-  constructor(public values: ST_Matrix3D) {}
-
-  toString(): string {
-    return this.values.join(" ");
-  }
-
-  static fromString(value: string): Matrix3D {
-    const parts = value.trim().split(/\s+/).map(Number);
-    if (parts.length !== 12 || parts.some((n) => Number.isNaN(n))) {
-      throw new Error("Invalid ST_Matrix3D, expected 12 numbers");
-    }
-    return new Matrix3D(parts as ST_Matrix3D);
-  }
-}
 
 export interface I3MFMetadata {
-  name: IQName;
+  name: string;
   preserve?: boolean;
   type?: string;
   value: string;
@@ -103,7 +79,7 @@ export interface I3MFComponents {
 }
 
 export interface I3MFObject {
-  id: ST_ResourceID;
+  id?: ST_ResourceID;
 
   type?: ST_ObjectType;
   thumbnail?: ST_UriReference;
@@ -141,7 +117,7 @@ export interface I3MFItem {
 }
 
 export interface I3MFBuild {
-  item?: Nullable<Array<I3MFItem>>;
+  item: Array<I3MFItem>;
 }
 
 export interface I3MFModel {

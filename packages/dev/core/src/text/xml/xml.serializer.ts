@@ -125,6 +125,11 @@ export class XmlSerializer {
 
         // We decide per property, using metadata if present
         for (const prop of Object.keys(source)) {
+            const value:any = source[prop];
+            if( value === null || value === undefined) {
+                continue;
+            }
+
             const propMetas = metaByProp.get(prop);
             if(propMetas){
                 const ignored = propMetas.some((m) => m.ignore === true || m.kind === "none");
@@ -149,7 +154,6 @@ export class XmlSerializer {
                 }
                 continue;
             }
-            const value:any = source[prop];
             if (_isPrimitiveButString(value)){
                 continue;
             }
@@ -201,7 +205,11 @@ export class XmlSerializer {
 
         for (const prop of Object.keys(tag)) {
 
-            const propMetas = metaByProp.get(prop);
+            const value= tag[prop];
+            if( value === null || value === undefined) {
+                continue;
+            }
+           const propMetas = metaByProp.get(prop);
             if(propMetas){
                 const ignored = propMetas.some((m) => m.ignore === true || m.kind === "none");
                 if (ignored) continue;
@@ -212,7 +220,8 @@ export class XmlSerializer {
                     }
                 }
             }
-            toVisit.push(tag[prop]);
+            toVisit.push(value);
+
         }
 
         for(const v of toVisit){

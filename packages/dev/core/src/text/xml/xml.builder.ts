@@ -4,6 +4,7 @@ import { IXMLBuilder } from "./xml.interfaces";
 export interface IXmlWriter{
     write(... data:string[]):IXmlWriter;
     count:number;
+    clear():void;
 }
 
 class XmlSyntax {

@@ -1,5 +1,5 @@
 import { Nullable } from "../../types";
-import { IQName, XmlAttr, XmlName } from "../xml/xml.interfaces";
+import { XmlAttr, XmlName } from "../xml/xml.interfaces";
 
 import {
   I3MFBase,
@@ -18,7 +18,6 @@ import {
   I3MFTriangles,
   I3MFVertex,
   I3MFVertices,
-  Matrix3D,
   ST_ColorValue,
   ST_Number,
   ST_ObjectType,
@@ -27,6 +26,7 @@ import {
   ST_UriReference,
   ST_Unit
 } from "./3mf.interfaces";
+import { Matrix3D } from "./3mf.matrix";
 
 export const TDModelNS = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02";
 export const TriangleSetsNS = "http://schemas.microsoft.com/3dmanufacturing/trianglesets/2021/07";
@@ -62,7 +62,7 @@ export class ThreeMFModel implements I3MFModel {
 @XmlName({ ns: TDModelNS, name: "meta" })
 export class ThreeMFMeta implements I3MFMetadata {
   @XmlAttr({ name: "name" })
-  name: IQName;
+  name: string;
 
   @XmlAttr({ name: "preserve" })
   preserve?: boolean;
@@ -72,7 +72,7 @@ export class ThreeMFMeta implements I3MFMetadata {
 
   value: string;
 
-  public constructor(name: IQName, value: string, preserve?: boolean, type?: string) {
+  public constructor(name: string, value: string, preserve?: boolean, type?: string) {
     this.name = name;
     this.value = value;
     this.preserve = preserve;
@@ -94,7 +94,7 @@ export class ThreeMFResources implements I3MFResources {
 @XmlName({ ns: TDModelNS, name: "object" })
 export class ThreeMFObject implements I3MFObject {
   @XmlAttr({ name: "id" })
-  id: ST_ResourceID;
+  id?: ST_ResourceID;
 
   @XmlAttr({ name: "type" })
   type?: ST_ObjectType;
@@ -118,8 +118,9 @@ export class ThreeMFObject implements I3MFObject {
 
   content?: I3MFMesh | I3MFComponents;
 
-  public constructor(id: ST_ResourceID) {
+  public constructor(id?: ST_ResourceID, type=ST_ObjectType.model) {
     this.id = id;
+    this.type = type;
   }
 }
 
@@ -239,7 +240,7 @@ export class ThreeMFBase implements I3MFBase {
 
 @XmlName({ ns: TDModelNS, name: "build" })
 export class ThreeMFBuild implements I3MFBuild {
-  item?: Nullable<Array<I3MFItem>>;
+  item: Array<I3MFItem>= [];
 }
 
 @XmlName({ ns: TDModelNS, name: "item" })

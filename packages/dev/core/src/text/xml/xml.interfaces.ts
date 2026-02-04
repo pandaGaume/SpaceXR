@@ -103,6 +103,6 @@ export function xmlNameToParts(qn: Xml_Name): IQName {
 }
 
 
-export function toQualifiedString(name:string, prefix?:string){
+export function toQualifiedString(name:string, prefix?:string) : string{
   return prefix ? `${prefix}:${name}` : name;
 }

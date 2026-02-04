@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3MF export Test</title>
+
+    <!-- BabylonJS -->
+    <script src="../../libs/babylon.js"></script>
+    <script src="../../libs/spacexr.1.0.0.js"></script>
+
+    <style>
+      :root {
+        --bg: #0c0c0c;
+        --fg: #d6d6d6;
+        --muted: #9aa0a6;
+        --border: #2b2b2b;
+        --accent: #00d084;
+        --font: Consolas, "Cascadia Mono", "Courier New", monospace;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #111;
+        color: var(--fg);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .title {
+        margin: 0 0 12px 0;
+        font-size: 18px;
+        color: var(--fg);
+      }
+
+      .console {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        height: 420px;
+        overflow: auto;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+        font-family: var(--font);
+        font-size: 14px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .line {
+        display: block;
+      }
+
+      .line .ts {
+        color: var(--muted);
+        margin-right: 10px;
+      }
+
+      .line .prompt {
+        color: var(--accent);
+        margin-right: 8px;
+      }
+
+      .controls {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      input {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #0f0f0f;
+        color: var(--fg);
+        font-family: var(--font);
+        font-size: 14px;
+        outline: none;
+      }
+
+      button {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #1a1a1a;
+        color: var(--fg);
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #222;
+      }
+
+      .hint {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1 class="title">Ouput Console</h1>
+
+      <div id="console" class="console" aria-label="console output"></div>
+
+      <div class="controls">
+        <input id="cmd" type="text" placeholder="Type here, press Enter..." autocomplete="off" />
+        <button id="runBtn" type="button">Run</button>
+        <button id="clearBtn" type="button">Clear</button>
+        <button id="exportBtn" type="button">Export</button>
+      </div>
+
+      <div class="hint">
+        buildText() is called on load and when you click Run. Edit buildText() to return whatever you want.
+      </div>
+      <!-- Canvas BabylonJS -->
+      <h1 class="title">3D Console</h1>
+      <canvas id="renderCanvas" style="width:100%; height:400px; border:1px solid #333;"></canvas>
+   </div>
+
+ 
+    <script>
+      /***********************
+       * 1) Babylonjs Scene
+       ***********************/
+      let bjs = {};
+
+      window.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("renderCanvas");
+
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0.066, 0.066, 0.066, 1); // #111 in normalized RGB
+``
+
+        const camera = new BABYLON.FreeCamera("cam", new BABYLON.Vector3(0, 5, -100), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+        camera.attachControl(canvas, true);
+
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
+
+        const sphere = BABYLON.MeshBuilder.CreateSphere("mySphere", {
+          diameter: 20,
+          segments: 32
+        }, scene);
+
+        bjs = { engine, scene, camera, light, sphere };
+
+        engine.runRenderLoop(() => scene.render());
+      });
+
+      /**********************************************************
+       * 2) Get vertices data
+       **********************************************************/
+      function exportVerticesData(mesh) {
+        return {
+          positions: mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind) || null,
+          indices: mesh.getIndices() || null
+        };
+      }
+
+      // Babylon to 3dmf conversion
+      function babylonTo3mf(v) {
+        const tmp = v.y;
+        v.y = -v.z;
+        v.z = tmp; 
+        return v;
+      }
+
+      /**********************************************************
+       * 3) build textual content based on vertice data
+       **********************************************************/
+      function buildText() {
+        if (!bjs.sphere) return "Scene not ready yet...";
+
+        const id = 1;
+        const meshBuilder = new SPACEXR.ThreeMFMeshObjectBuilder(id,SPACEXR.ST_ObjectType.model)
+        .withPostProcessHandlers(babylonTo3mf)
+        .withData(exportVerticesData(bjs.sphere));
+        
+        const builder = new SPACEXR.ThreeMFModelBuilder()
+        .withMetaData("Title",bjs.sphere.name.toString())
+        .withMesh(meshBuilder)
+        .withBuild(id,SPACEXR.Matrix3D.Translate(0,0,10));
+
+        const w = new SPACEXR.StringXmlWriter(); // where to serialize
+        const b = new SPACEXR.XmlBuilder(w).dec("1.0", "UTF-8"); // xml logic
+        const serializer = new SPACEXR.XmlSerializer(b); // serializer
+        serializer.serialize(builder.build());
+        return w.toString();
+      }
+
+      /**********************************************************
+       * 4) custom console
+       **********************************************************/
+      function nowTime() {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        const ss = String(d.getSeconds()).padStart(2, "0");
+        return `${hh}:${mm}:${ss}`;
+      }
+
+      function writeLine(text, { prompt = ">" } = {}) {
+        const consoleEl = document.getElementById("console");
+        const line = document.createElement("div");
+        line.className = "line";
+        line.innerHTML =
+          `<span class="ts">[${nowTime()}]</span>` +
+          `<span class="prompt">${prompt}</span>` +
+          `<span class="msg"></span>`;
+
+        line.querySelector(".msg").textContent = text;
+
+        consoleEl.appendChild(line);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+
+      function clearConsole() {
+        document.getElementById("console").textContent = "";
+      }
+
+      async function pickSaveFileFor3mf() {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: "model.3mf",
+          types: [
+            {
+              description: "3MF",
+              accept: {
+                "application/vnd.ms-package.3dmanufacturing-3dmodel+xml": [".3mf"],
+              },
+            },
+          ],
+        });
+        return handle;
+      }
+
+      async function exportFile() {
+          const handle = await pickSaveFileFor3mf()
+      }
+
+      function run() {
+        const input = document.getElementById("cmd");
+        const cmd = input.value.trim();
+
+        if (cmd) {
+          writeLine(cmd, { prompt: "C:\\>" });
+          input.value = "";
+        }
+
+        const out = buildText();
+        writeLine(out, { prompt: "" });
+      }
+
+      document.getElementById("runBtn").addEventListener("click", run);
+      document.getElementById("clearBtn").addEventListener("click", clearConsole);
+      document.getElementById("exportBtn").addEventListener("click", exportFile);
+      document.getElementById("cmd").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") run();
+      });
+
+      writeLine("Console ready.", { prompt: "" });
+      run();
+      document.getElementById("cmd").focus();
+    </script>
+  </body>
+</html>

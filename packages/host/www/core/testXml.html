@@ -121,27 +121,6 @@
     </div>
 
     <script>
-      function buildText0() {
-        const NS_EX = "urn:example";
-        const NS_XSI = "http://www.w3.org/2001/XMLSchema-instance";
-
-        const w= new SPACEXR.StringXmlWriter();
-        const b = new SPACEXR.XmlBuilder(w);
-        b.dec("1.0", "UTF-8");
-        b.ele(null, "root")
-            // declare namespaces on the root element
-            .att("xmlns", "ex", NS_EX)
-            .att(null, "xmlns:xsi", NS_XSI)
-            // now use them by passing the URI as first arg
-            .ele(NS_EX, "innerSingle").end()            
-            .ele(NS_EX, "inner")
-            .att(NS_XSI, "type", "ex:MyType")
-            .text("\nhello world")
-           .text("\nhello world\n")
-            .end()
-            .end();
-        return w.toString();
-      }
 
       function buildText() {
 

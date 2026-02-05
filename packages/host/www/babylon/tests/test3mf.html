@@ -7,6 +7,7 @@
 
     <!-- BabylonJS -->
     <script src="../../libs/babylon.js"></script>
+    <script src="../../libs/babylon.glTF2FileLoader.min.js"></script>
     <script src="../../libs/spacexr.1.0.0.js"></script>
 
     <style>
@@ -148,16 +149,20 @@
 
         const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
 
-        const sphere = BABYLON.MeshBuilder.CreateSphere("mySphere", {
-          diameter: 20,
-          segments: 32
-        }, scene);
 
-        bjs = { engine, scene, camera, light, sphere };
+        bjs = { engine, scene, camera, light };
+
+        const mesh = createMesh(scene);
 
         engine.runRenderLoop(() => scene.render());
       });
 
+
+       function createMesh(scene){
+          BABYLON.SceneLoader.ImportMesh(null, "../../models/", "duck.glb", scene, function (meshes) {
+            bjs.mesh = meshes[1];
+          });
+       }  
       /**********************************************************
        * 2) Get vertices data
        **********************************************************/
@@ -180,23 +185,34 @@
        * 3) build textual content based on vertice data
        **********************************************************/
       function buildText() {
-        if (!bjs.sphere) return "Scene not ready yet...";
-
-        const id = 1;
-        const meshBuilder = new SPACEXR.ThreeMFMeshObjectBuilder(id,SPACEXR.ST_ObjectType.model)
-        .withPostProcessHandlers(babylonTo3mf)
-        .withData(exportVerticesData(bjs.sphere));
+        if (!bjs.mesh) return "Scene not ready yet...";
         
-        const builder = new SPACEXR.ThreeMFModelBuilder()
-        .withMetaData("Title",bjs.sphere.name.toString())
-        .withMesh(meshBuilder)
-        .withBuild(id,SPACEXR.Matrix3D.Translate(0,0,10));
+        const builder = buildModelBuilder(bjs.mesh)
 
         const w = new SPACEXR.StringXmlWriter(); // where to serialize
         const b = new SPACEXR.XmlBuilder(w).dec("1.0", "UTF-8"); // xml logic
         const serializer = new SPACEXR.XmlSerializer(b); // serializer
         serializer.serialize(builder.build());
         return w.toString();
+      }
+
+      function buildModelBuilder (source){
+        const id = 1;
+        const meshBuilder = new SPACEXR.ThreeMFMeshObjectBuilder(id,SPACEXR.ST_ObjectType.model)
+        .withPostProcessHandlers(babylonTo3mf)
+        .withData(exportVerticesData(source));
+        
+        const builder = new SPACEXR.ThreeMFModelBuilder()
+        .withMetaData("Title",bjs.mesh.name.toString())
+        .withMesh(meshBuilder)
+        .withBuild(id,SPACEXR.Matrix3D.Translate(0,0,10));
+        return builder;
+      }
+      
+      async function exportToFile(handle,source){
+          const builder = buildModelBuilder(source);
+          const exporter = new SPACEXR.ThreeMFDocumentWriter().withModel(builder);
+          await exporter.writeToFileAsync(handle);
       }
 
       /**********************************************************
@@ -245,7 +261,10 @@
       }
 
       async function exportFile() {
-          const handle = await pickSaveFileFor3mf()
+        if (bjs.mesh){
+          const handle = await pickSaveFileFor3mf();
+          await exportToFile(handle, bjs.mesh);
+        }
       }
 
       function run() {

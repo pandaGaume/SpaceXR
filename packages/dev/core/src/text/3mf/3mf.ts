@@ -1,5 +1,5 @@
 import { Nullable } from "../../types";
-import { XmlAttr, XmlName } from "../xml/xml.interfaces";
+import { XmlAttr, XmlName, XmlNumber } from "../xml/xml.interfaces";
 
 import {
   I3MFBase,
@@ -140,15 +140,21 @@ export class ThreeMFVertices implements I3MFVertices {
   vertex: Array<I3MFVertex> = [];
 }
 
+const EPS = 1e-9;      // below this, treat as zero
+const DECIMALS = 5;    // or whatever "reasonable" means for your pipeline
+
 @XmlName({ ns: TDModelNS, name: "vertex" })
 export class ThreeMFVertex implements I3MFVertex {
   @XmlAttr({ name: "x" })
+  @XmlNumber( {decimals:DECIMALS, eps:EPS})
   x: ST_Number;
 
   @XmlAttr({ name: "y" })
+  @XmlNumber( {decimals:DECIMALS, eps:EPS})
   y: ST_Number;
 
   @XmlAttr({ name: "z" })
+  @XmlNumber( {decimals:DECIMALS, eps:EPS})
   z: ST_Number;
 
   public constructor(x: ST_Number = 0, y: ST_Number = 0, z: ST_Number = 0) {

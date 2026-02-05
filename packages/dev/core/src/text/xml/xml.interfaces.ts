@@ -19,13 +19,15 @@ export function isQName(x: unknown): x is { name: string } {
 
 export type Xml_Name = string | IQName;
 
-type FieldKind = "attr" | "elem" | "none";
+type FieldKind = "attr" | "elem" | "number" | "none" ;
 
 type FieldMeta = {
   kind: FieldKind;
   prop: string;
   name?:Xml_Name;
   ignore?:boolean;
+  decimals?:number, 
+  eps?:number
 };
 
 const XML_CLASS_META = Symbol("__xml:meta$__");
@@ -51,6 +53,10 @@ export function XmlIgnore() {
 // tell the serializer to serialize the property as attribute
 export function XmlAttr(opts?:{name:Xml_Name} ) {
   return (target: any, prop: string) => addMeta(target, { kind: "attr", prop, ...opts });
+}
+
+export function XmlNumber(opts?:{decimals:number, eps:number}){
+  return (target: any, prop: string) => addMeta(target, { kind: "number", prop, ...opts });
 }
 
 // tell the serializer to serialize the property as element - this is the default behavior but shoud be 

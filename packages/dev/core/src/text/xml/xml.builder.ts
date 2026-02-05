@@ -239,9 +239,9 @@ export class XmlBuilder implements IXMLBuilder{
             const p = `ns${i++}`;
             if (!ctx.prefix2ns.has(p)) return p;
         }
-        }
+    }
 
-        private _ensurePrefixDeclared(ctx: InstanceType<typeof XmlBuilder.Context>, uri: string): string {
+    private _ensurePrefixDeclared(ctx: InstanceType<typeof XmlBuilder.Context>, uri: string): string {
         const existing = this._lookupPrefix(uri);
         if (existing) return existing;
 

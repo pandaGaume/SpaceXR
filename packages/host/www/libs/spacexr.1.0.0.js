@@ -11609,9 +11609,7 @@ ThreeMFModelBuilder.knownMetaSet = new Set(_3mf__WEBPACK_IMPORTED_MODULE_1__.Thr
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   OrderedFileSink: () => (/* binding */ OrderedFileSink),
-/* harmony export */   ThreeMFContentTypesBuilder: () => (/* binding */ ThreeMFContentTypesBuilder),
 /* harmony export */   ThreeMFDocumentWriter: () => (/* binding */ ThreeMFDocumentWriter),
-/* harmony export */   ThreeMFRelationshipsBuilder: () => (/* binding */ ThreeMFRelationshipsBuilder),
 /* harmony export */   createZipToFile: () => (/* binding */ createZipToFile),
 /* harmony export */   makeByteSinkFromFflateEntry: () => (/* binding */ makeByteSinkFromFflateEntry)
 /* harmony export */ });
@@ -11657,64 +11655,56 @@ async function createZipToFile(fileHandle) {
             throw err;
         fileSink.push(chunk, final);
     });
-    return { zip, fileSink };
+    return zip;
 }
 function makeByteSinkFromFflateEntry(entry) {
     return {
         push: (chunk, final) => entry.push(chunk, final),
     };
 }
-class ThreeMFContentTypesBuilder {
-    constructor() {
-        this._cts = new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFContentTypes();
-    }
-    build() {
-        return this._cts;
-    }
-}
-class ThreeMFRelationshipsBuilder {
-    constructor() {
-        this._rs = new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFRelationships();
-    }
-    build() {
-        return this._rs;
-    }
-}
 class ThreeMFDocumentWriter {
-    withContentTypes(types) {
-        if (types instanceof ThreeMFContentTypesBuilder) {
-            types = types.build();
+    withContentType(type) {
+        if (!this._cts) {
+            this._cts = new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFContentTypes();
         }
-        this._cts = types;
+        const arr = this._cts.items;
+        if (!arr.some(x => x.ext === type.ext && x.ct === type.ct))
+            arr.push(type);
         return this;
     }
-    withRelationships(r) {
-        if (r instanceof ThreeMFRelationshipsBuilder) {
-            r = r.build();
+    withRelationship(rel) {
+        if (!this._rs) {
+            this._rs = new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFRelationships();
         }
-        this._rs = r;
+        const arr = this._rs.items;
+        if (!arr.some(x => x.id === rel.id))
+            arr.push(rel);
+        this.withContentType(new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFContentType("rels", _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.KnownThreeMFContentType.Relationships));
         return this;
     }
-    with3DModel(m) {
+    withModel(m) {
         if (m instanceof _3mf_builder__WEBPACK_IMPORTED_MODULE_2__.ThreeMFModelBuilder) {
             m = m.build();
         }
         this._m = m;
+        this.withContentType(new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFContentType("model", _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.KnownThreeMFContentType.Model));
         return this;
     }
-    writeTo(target) {
-        if (!this._cts) {
-            throw new Error("Invalid state: you Must provide a valid content types definition.");
-        }
-        if (!this._rs) {
-            throw new Error("Invalid state: you Must provide a valid relationships definition.");
-        }
+    async writeToFileAsync(fileHandle) {
+        this.writeToZip(await createZipToFile(fileHandle));
+    }
+    writeToZip(target) {
         if (!this._m) {
             throw new Error("Invalid state: you Must provide at least a model.");
         }
+        const path = `${_3mf_opc__WEBPACK_IMPORTED_MODULE_1__.Object3dDirName}${_3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ModelFileName}`;
+        if (!this._rs) {
+            const absolutePath = `/${path}`;
+            this.withRelationship(new _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFRelationship(`rel${0}`, _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ThreeMFRelationshipTypes.ThreeDModel, absolutePath));
+        }
         this._serializeEntry(target, _3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ContentTypeFileName, this._cts);
         this._serializeEntry(target, `${_3mf_opc__WEBPACK_IMPORTED_MODULE_1__.RelationshipDirName}${_3mf_opc__WEBPACK_IMPORTED_MODULE_1__.RelationshipFileName}`, this._rs);
-        this._serializeEntry(target, `${_3mf_opc__WEBPACK_IMPORTED_MODULE_1__.Object3dDirName}${_3mf_opc__WEBPACK_IMPORTED_MODULE_1__.ModelFileName}`, this._m);
+        this._serializeEntry(target, path, this._m);
         target.end();
     }
     _serializeEntry(target, name, object) {
@@ -11924,6 +11914,8 @@ ThreeMFVertices = __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "vertices" })
 ], ThreeMFVertices);
 
+const EPS = 1e-9;
+const DECIMALS = 5;
 let ThreeMFVertex = class ThreeMFVertex {
     constructor(x = 0, y = 0, z = 0) {
         this.x = x;
@@ -11932,13 +11924,16 @@ let ThreeMFVertex = class ThreeMFVertex {
     }
 };
 __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "x" })
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "x" }),
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNumber)({ decimals: DECIMALS, eps: EPS })
 ], ThreeMFVertex.prototype, "x", void 0);
 __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "y" })
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "y" }),
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNumber)({ decimals: DECIMALS, eps: EPS })
 ], ThreeMFVertex.prototype, "y", void 0);
 __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "z" })
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "z" }),
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNumber)({ decimals: DECIMALS, eps: EPS })
 ], ThreeMFVertex.prototype, "z", void 0);
 ThreeMFVertex = __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: TDModelNS, name: "vertex" })
@@ -12112,6 +12107,7 @@ Matrix3D.Identity = new Matrix3D([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ContentTypeFileName: () => (/* binding */ ContentTypeFileName),
+/* harmony export */   KnownThreeMFContentType: () => (/* binding */ KnownThreeMFContentType),
 /* harmony export */   ModelFileName: () => (/* binding */ ModelFileName),
 /* harmony export */   Object3dDirName: () => (/* binding */ Object3dDirName),
 /* harmony export */   RelationshipDirName: () => (/* binding */ RelationshipDirName),
@@ -12121,6 +12117,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFContentType: () => (/* binding */ ThreeMFContentType),
 /* harmony export */   ThreeMFContentTypes: () => (/* binding */ ThreeMFContentTypes),
 /* harmony export */   ThreeMFRelationship: () => (/* binding */ ThreeMFRelationship),
+/* harmony export */   ThreeMFRelationshipTypes: () => (/* binding */ ThreeMFRelationshipTypes),
 /* harmony export */   ThreeMFRelationships: () => (/* binding */ ThreeMFRelationships)
 /* harmony export */ });
 /* harmony import */ var _xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml/xml.interfaces */ "./dist/text/xml/xml.interfaces.js");
@@ -12133,11 +12130,28 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 
 const TDContentTypesNS = "http://schemas.openxmlformats.org/package/2006/content-types";
 const TDRelationshipsNS = "http://schemas.openxmlformats.org/package/2006/relationships";
-const RelationshipDirName = "./_rels/";
-const Object3dDirName = "./3D/";
+var KnownThreeMFContentType;
+(function (KnownThreeMFContentType) {
+    KnownThreeMFContentType["Relationships"] = "application/vnd.openxmlformats-package.relationships+xml";
+    KnownThreeMFContentType["Model"] = "application/vnd.ms-package.3dmanufacturing-3dmodel+xml";
+    KnownThreeMFContentType["Materials"] = "application/vnd.ms-package.3dmanufacturing-material+xml";
+    KnownThreeMFContentType["Colors"] = "application/vnd.ms-package.3dmanufacturing-colors+xml";
+    KnownThreeMFContentType["Texture"] = "application/vnd.ms-package.3dmanufacturing-texture+xml";
+    KnownThreeMFContentType["Texture2D"] = "application/vnd.ms-package.3dmanufacturing-texture2d+xml";
+    KnownThreeMFContentType["Production"] = "application/vnd.ms-package.3dmanufacturing-production+xml";
+    KnownThreeMFContentType["Slice"] = "application/vnd.ms-package.3dmanufacturing-slice+xml";
+    KnownThreeMFContentType["BeamLattice"] = "application/vnd.ms-package.3dmanufacturing-beamlattice+xml";
+    KnownThreeMFContentType["SecureContent"] = "application/vnd.ms-package.3dmanufacturing-securecontent+xml";
+    KnownThreeMFContentType["Png"] = "image/png";
+    KnownThreeMFContentType["Jpeg"] = "image/jpeg";
+    KnownThreeMFContentType["Tiff"] = "image/tiff";
+    KnownThreeMFContentType["Xml"] = "application/xml";
+})(KnownThreeMFContentType || (KnownThreeMFContentType = {}));
+const RelationshipDirName = "_rels/";
+const Object3dDirName = "3D/";
 const ModelFileName = `3dmodel.model`;
-const RelationshipFileName = `.rel`;
-const ContentTypeFileName = "[ContentType].xml";
+const RelationshipFileName = `.rels`;
+const ContentTypeFileName = "[Content_Types].xml";
 let ThreeMFContentTypes = class ThreeMFContentTypes {
     constructor() {
         this.items = [];
@@ -12147,6 +12161,24 @@ ThreeMFContentTypes = __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName)({ ns: TDContentTypesNS, name: "Types" })
 ], ThreeMFContentTypes);
 
+class ThreeMFRelationshipTypes {
+    static isKnown(type) {
+        return ThreeMFRelationshipTypes.Known.has(type);
+    }
+    static isThreeDModel(type) {
+        return type === ThreeMFRelationshipTypes.ThreeDModel;
+    }
+}
+ThreeMFRelationshipTypes.ThreeDModel = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+ThreeMFRelationshipTypes.Thumbnail = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
+ThreeMFRelationshipTypes.PrintTicket = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
+ThreeMFRelationshipTypes.MustPreserve = "http://schemas.openxmlformats.org/package/2006/relationships/mustpreserve";
+ThreeMFRelationshipTypes.Known = new Set([
+    ThreeMFRelationshipTypes.ThreeDModel,
+    ThreeMFRelationshipTypes.Thumbnail,
+    ThreeMFRelationshipTypes.PrintTicket,
+    ThreeMFRelationshipTypes.MustPreserve,
+]);
 let ThreeMFContentType = class ThreeMFContentType {
     constructor(ext, ct) {
         this.ext = ext;
@@ -12154,7 +12186,7 @@ let ThreeMFContentType = class ThreeMFContentType {
     }
 };
 __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: { ns: TDContentTypesNS, name: "Extensions" } })
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: { ns: TDContentTypesNS, name: "Extension" } })
 ], ThreeMFContentType.prototype, "ext", void 0);
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: { ns: TDContentTypesNS, name: "ContentType" } })
@@ -12173,8 +12205,10 @@ ThreeMFRelationships = __decorate([
 ], ThreeMFRelationships);
 
 let ThreeMFRelationship = class ThreeMFRelationship {
-    constructor(id) {
+    constructor(id, type, target) {
         this.id = id;
+        this.type = type;
+        this.target = target;
     }
 };
 __decorate([
@@ -12203,6 +12237,7 @@ ThreeMFRelationship = __decorate([
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ContentTypeFileName),
+/* harmony export */   KnownThreeMFContentType: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.KnownThreeMFContentType),
 /* harmony export */   Matrix3D: () => (/* reexport safe */ _3mf_matrix__WEBPACK_IMPORTED_MODULE_4__.Matrix3D),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ModelFileName),
 /* harmony export */   Object3dDirName: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.Object3dDirName),
@@ -12221,7 +12256,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFComponents: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFComponents),
 /* harmony export */   ThreeMFContentType: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ThreeMFContentType),
 /* harmony export */   ThreeMFContentTypes: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ThreeMFContentTypes),
-/* harmony export */   ThreeMFContentTypesBuilder: () => (/* reexport safe */ _3mf_builder_opc__WEBPACK_IMPORTED_MODULE_5__.ThreeMFContentTypesBuilder),
 /* harmony export */   ThreeMFDocumentWriter: () => (/* reexport safe */ _3mf_builder_opc__WEBPACK_IMPORTED_MODULE_5__.ThreeMFDocumentWriter),
 /* harmony export */   ThreeMFItem: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFItem),
 /* harmony export */   ThreeMFMesh: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFMesh),
@@ -12232,8 +12266,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFModelBuilder: () => (/* reexport safe */ _3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMFModelBuilder),
 /* harmony export */   ThreeMFObject: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFObject),
 /* harmony export */   ThreeMFRelationship: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ThreeMFRelationship),
+/* harmony export */   ThreeMFRelationshipTypes: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ThreeMFRelationshipTypes),
 /* harmony export */   ThreeMFRelationships: () => (/* reexport safe */ _3mf_opc__WEBPACK_IMPORTED_MODULE_2__.ThreeMFRelationships),
-/* harmony export */   ThreeMFRelationshipsBuilder: () => (/* reexport safe */ _3mf_builder_opc__WEBPACK_IMPORTED_MODULE_5__.ThreeMFRelationshipsBuilder),
 /* harmony export */   ThreeMFResources: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFResources),
 /* harmony export */   ThreeMFTriangle: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFTriangle),
 /* harmony export */   ThreeMFTriangles: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_1__.ThreeMFTriangles),
@@ -12273,6 +12307,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.GetLocalizableStringValue),
 /* harmony export */   ISO6391: () => (/* reexport safe */ _iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.IsLocalizable),
+/* harmony export */   KnownThreeMFContentType: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.KnownThreeMFContentType),
 /* harmony export */   LocalString: () => (/* reexport safe */ _localizable__WEBPACK_IMPORTED_MODULE_1__.LocalString),
 /* harmony export */   Matrix3D: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.Matrix3D),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ModelFileName),
@@ -12293,7 +12328,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFComponents: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFComponents),
 /* harmony export */   ThreeMFContentType: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFContentType),
 /* harmony export */   ThreeMFContentTypes: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFContentTypes),
-/* harmony export */   ThreeMFContentTypesBuilder: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFContentTypesBuilder),
 /* harmony export */   ThreeMFDocumentWriter: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFDocumentWriter),
 /* harmony export */   ThreeMFItem: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFItem),
 /* harmony export */   ThreeMFMesh: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFMesh),
@@ -12304,8 +12338,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFModelBuilder: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFModelBuilder),
 /* harmony export */   ThreeMFObject: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFObject),
 /* harmony export */   ThreeMFRelationship: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFRelationship),
+/* harmony export */   ThreeMFRelationshipTypes: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFRelationshipTypes),
 /* harmony export */   ThreeMFRelationships: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFRelationships),
-/* harmony export */   ThreeMFRelationshipsBuilder: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFRelationshipsBuilder),
 /* harmony export */   ThreeMFResources: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFResources),
 /* harmony export */   ThreeMFTriangle: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFTriangle),
 /* harmony export */   ThreeMFTriangles: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMFTriangles),
@@ -12319,6 +12353,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlElem: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlElem),
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlName),
+/* harmony export */   XmlNumber: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlNumber),
 /* harmony export */   XmlSerializer: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.XmlSerializer),
 /* harmony export */   createZipToFile: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.createZipToFile),
 /* harmony export */   getXmlFieldMeta: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_2__.getXmlFieldMeta),
@@ -13196,6 +13231,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlElem: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlElem),
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName),
+/* harmony export */   XmlNumber: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNumber),
 /* harmony export */   XmlSerializer: () => (/* reexport safe */ _xml_serializer__WEBPACK_IMPORTED_MODULE_1__.XmlSerializer),
 /* harmony export */   getXmlFieldMeta: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.getXmlFieldMeta),
 /* harmony export */   getXmlName: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.getXmlName),
@@ -13600,6 +13636,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlElem: () => (/* binding */ XmlElem),
 /* harmony export */   XmlIgnore: () => (/* binding */ XmlIgnore),
 /* harmony export */   XmlName: () => (/* binding */ XmlName),
+/* harmony export */   XmlNumber: () => (/* binding */ XmlNumber),
 /* harmony export */   getXmlFieldMeta: () => (/* binding */ getXmlFieldMeta),
 /* harmony export */   getXmlName: () => (/* binding */ getXmlName),
 /* harmony export */   isQName: () => (/* binding */ isQName),
@@ -13625,6 +13662,9 @@ function XmlIgnore() {
 }
 function XmlAttr(opts) {
     return (target, prop) => addMeta(target, { kind: "attr", prop, ...opts });
+}
+function XmlNumber(opts) {
+    return (target, prop) => addMeta(target, { kind: "number", prop, ...opts });
 }
 function XmlElem(opts) {
     return (target, prop) => addMeta(target, { kind: "elem", prop, ...opts });
@@ -13683,6 +13723,9 @@ function _isDate(x) {
 }
 function _isString(x) {
     return typeof x === "string";
+}
+function _isNumber(x) {
+    return typeof x === "number";
 }
 function _isPrimitive(x) {
     return (typeof x === "string" ||
@@ -13785,7 +13828,12 @@ class XmlSerializer {
                     if (name) {
                         switch (m.kind) {
                             case "attr": {
-                                const vStr = source[m.prop]?.toString();
+                                let vStr = null;
+                                if (propMetas.length > 1 && _isNumber(value)) {
+                                    const mn = propMetas.find((m) => m.kind === "number");
+                                    vStr = this._fmt(value, mn?.decimals ?? XmlSerializer.DECIMALS, mn?.eps ?? XmlSerializer.EPS);
+                                }
+                                vStr = vStr ?? value.toString();
                                 if (vStr) {
                                     let currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.xmlNameToParts)(name);
                                     let prefix = this._getPrefix(currentName);
@@ -13808,6 +13856,14 @@ class XmlSerializer {
             }
             this._writeObject(builder, value, visited);
         }
+    }
+    _fmt(n, decimals, eps) {
+        if (!Number.isFinite(n))
+            throw new Error("Non-finite number in geometry");
+        if (Math.abs(n) < eps)
+            n = 0;
+        const rounded = Number(n.toFixed(decimals));
+        return (Object.is(rounded, -0) ? 0 : rounded).toString();
     }
     _gatherNamespaces(tag, visited) {
         if (visited.has(tag)) {
@@ -13891,6 +13947,8 @@ class XmlSerializer {
         return value;
     }
 }
+XmlSerializer.EPS = 1e-12;
+XmlSerializer.DECIMALS = 6;
 //# sourceMappingURL=xml.serializer.js.map
 
 /***/ }),
@@ -19387,6 +19445,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.KdtreeSplitter),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.KnownPlaces),
+/* harmony export */   KnownThreeMFContentType: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.KnownThreeMFContentType),
 /* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
 /* harmony export */   Line: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Line),
 /* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.LocalString),
@@ -19474,7 +19533,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFComponents: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFComponents),
 /* harmony export */   ThreeMFContentType: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFContentType),
 /* harmony export */   ThreeMFContentTypes: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFContentTypes),
-/* harmony export */   ThreeMFContentTypesBuilder: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFContentTypesBuilder),
 /* harmony export */   ThreeMFDocumentWriter: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFDocumentWriter),
 /* harmony export */   ThreeMFItem: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFItem),
 /* harmony export */   ThreeMFMesh: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFMesh),
@@ -19485,8 +19543,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMFModelBuilder: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFModelBuilder),
 /* harmony export */   ThreeMFObject: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFObject),
 /* harmony export */   ThreeMFRelationship: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFRelationship),
+/* harmony export */   ThreeMFRelationshipTypes: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFRelationshipTypes),
 /* harmony export */   ThreeMFRelationships: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFRelationships),
-/* harmony export */   ThreeMFRelationshipsBuilder: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFRelationshipsBuilder),
 /* harmony export */   ThreeMFResources: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFResources),
 /* harmony export */   ThreeMFTriangle: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFTriangle),
 /* harmony export */   ThreeMFTriangles: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ThreeMFTriangles),
@@ -19528,6 +19586,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlElem: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlElem),
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlName),
+/* harmony export */   XmlNumber: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlNumber),
 /* harmony export */   XmlSerializer: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.XmlSerializer),
 /* harmony export */   createZipToFile: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.createZipToFile),
 /* harmony export */   getXmlFieldMeta: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.getXmlFieldMeta),

@@ -12,6 +12,9 @@ function _isString(x: any): x is string {
   return typeof x === "string";
 }
 
+function _isNumber(x: any): x is number {
+  return typeof x === "number";
+}
 
 function _isPrimitive(x: any): x is Primitive {
   return (
@@ -33,6 +36,10 @@ function _isPrimitiveButString(x: any): x is Primitive {
 }
 
 export class XmlSerializer {
+
+    static EPS = 1e-12;      // below this, treat as zero
+    static DECIMALS = 6;     // or 5, or whatever "reasonable" means for your pipeline
+
     
     _builder:IXMLBuilder;
     _ns:Map<string,string> = new Map<string,string>();
@@ -140,7 +147,14 @@ export class XmlSerializer {
                     if(name) {
                         switch( m.kind){
                             case "attr":{
-                                const vStr = source[m.prop]?.toString();
+                                let vStr:string | null = null ;
+                                if(  propMetas.length > 1 && _isNumber(value)) {
+                                    const mn = propMetas.find((m)=>m.kind === "number");
+                                    vStr = this._fmt(value, mn?.decimals??XmlSerializer.DECIMALS, mn?.eps??XmlSerializer.EPS);
+                                }
+                                    
+                                vStr = vStr?? value.toString();
+                                
                                 if(vStr){
                                     let currentName = xmlNameToParts(name) ;
                                     let prefix= this._getPrefix(currentName) ;
@@ -163,6 +177,20 @@ export class XmlSerializer {
             }
             this._writeObject(builder,value, visited);
         }
+    }
+
+    private  _fmt(n: number, decimals: number , eps: number ): string {
+        if (!Number.isFinite(n)) throw new Error("Non-finite number in geometry");
+
+        // clamp tiny values to 0 to kill 1e-19 and also -0
+        if (Math.abs(n) < eps) n = 0;
+
+        // round to fixed decimals
+        // then convert back to number to strip trailing zeros and avoid "47.000000"
+        const rounded = Number(n.toFixed(decimals));
+
+        // also avoid "-0"
+        return (Object.is(rounded, -0) ? 0 : rounded).toString();
     }
 
     // this is the first browse of the hierarchy to collect the namespaces and assign placeholder.( ns0, ns1,...)

@@ -118,6 +118,7 @@
         <button id="runBtn" type="button">Run</button>
         <button id="clearBtn" type="button">Clear</button>
         <button id="exportBtn" type="button">Export</button>
+        <button id="dowloadBtn" type="button">Download</button>
       </div>
 
       <div class="hint">
@@ -159,28 +160,63 @@
 
 
        function createMesh(scene){
-          BABYLON.SceneLoader.ImportMesh(null, "../../models/", "duck.glb", scene, function (meshes) {
-            bjs.mesh = meshes[1];
+          BABYLON.SceneLoader.ImportMesh(null, "../../models/", "2CylinderEngine.glb", scene, function (meshes) {
+          //BABYLON.SceneLoader.ImportMesh(null, "../../models/", "duck.glb", scene, function (meshes) {
+            bjs.mesh = meshes;
           });
        }  
 
       /**********************************************************
        * 3) build textual content based on vertice data
        **********************************************************/
-      function buildText() {
+      async function buildText() {
         if (!bjs.mesh) return "Scene not ready yet...";
         
-        const doc = new SPACEXR.ThreeMfSerializer().toDocument([bjs.mesh]);
-         
+        const serializer = new SPACEXR.ThreeMfSerializer();
+        const res = await serializer.serializeToMemoryAsync(bjs.mesh);
+        return `done, size:${res?.length??0}`;
+
         //return JSON.stringify(doc.model);
-        const w = new SPACEXR.StringXmlWriter(); // where to serialize
+        /*const w = new SPACEXR.StringXmlWriter(); // where to serialize
         const b = new SPACEXR.XmlBuilder(w).dec("1.0", "UTF-8"); // xml logic
         const serializer = new SPACEXR.XmlSerializer(b); // serializer
         serializer.serialize(doc.model);
-        return w.toString();
+        return w.toString();*/
       }
       
       async function exportToFile(handle,source){
+         const serializer = new SPACEXR.ThreeMfSerializer();
+         const res = await serializer.serializeToMemoryAsync(source);
+        const writable = await handle.createWritable();
+          try {
+            // Option 1: ecrire un Blob
+            const blob = new Blob([res], { type: "model/3mf" });
+            await writable.write(blob);
+            await writable.close();
+          } catch (e) {
+            await writable.abort();
+            throw e;
+          }
+      }
+
+      async function downloadFileImpl(source, filename = "export.3mf") {
+          const serializer = new SPACEXR.ThreeMfSerializer();
+          const res = await serializer.serializeToMemoryAsync(source); // Uint8Array
+
+          const blob = new Blob([res], { type: "model/3mf" });
+          const url = URL.createObjectURL(blob);
+
+          try {
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.rel = "noopener";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          } finally {
+            URL.revokeObjectURL(url);
+          }
       }
 
       /**********************************************************
@@ -235,7 +271,13 @@
         }
       }
 
-      function run() {
+      async function downloadFile() {
+        if (bjs.mesh){
+          await downloadFileImpl(bjs.mesh);
+        }
+      }
+
+      async function run() {
         const input = document.getElementById("cmd");
         const cmd = input.value.trim();
 
@@ -244,13 +286,14 @@
           input.value = "";
         }
 
-        const out = buildText();
+        const out = await buildText();
         writeLine(out, { prompt: "" });
       }
 
       document.getElementById("runBtn").addEventListener("click", run);
       document.getElementById("clearBtn").addEventListener("click", clearConsole);
       document.getElementById("exportBtn").addEventListener("click", exportFile);
+      document.getElementById("dowloadBtn").addEventListener("click", downloadFile);
       document.getElementById("cmd").addEventListener("keydown", (e) => {
         if (e.key === "Enter") run();
       });

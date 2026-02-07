@@ -14,7 +14,7 @@ import { ThreeMfSerializerGlobalConfiguration } from "./3mfSerializer.configurat
 import { XmlBuilder } from "./core/xml/xml.builder";
 import { XmlSerializer } from "./core/xml/xml.serializer";
 import { type ByteSink, Utf8XmlWriterToBytes } from "./core/xml/xml.builder.bytes";
-import type { I3mfObject, I3mfVertex } from "./core/model/3mf.interfaces";
+import type { I3mfObject } from "./core/model/3mf.interfaces";
 import type { I3mfVertexData } from "./core/model/3mf.types";
 
 /**
@@ -106,7 +106,7 @@ export class ThreeMfSerializer {
                 target.add(entry);
                 const sink = makeByteSinkFromFflateEntry(entry);
                 const w = new Utf8XmlWriterToBytes(sink);
-                const b = new XmlBuilder(w).dec("1.0", "UTF-8", true);
+                const b = new XmlBuilder(w).dec("1.0", "UTF-8");
                 const s = new XmlSerializer(b);
                 s.serialize(object);
                 w.finish();
@@ -165,7 +165,6 @@ export class ThreeMfSerializer {
                         if (data) {
                             const submeshName = `${objectName}_${k}`;
                             const object = new ThreeMfMeshBuilder(idFactory.next())
-                                .withPostProcessHandlers(this._handleBjsTo3mfVertexTransform)
                                 .withData(data)
                                 .withName(submeshName)
                                 .build();
@@ -181,7 +180,7 @@ export class ThreeMfSerializer {
                     positions: babylonMesh.getVerticesData(ThreeMfSerializer._PositionKind) || [],
                     indices: babylonMesh.getIndices() || [],
                 };
-                const object = new ThreeMfMeshBuilder(idFactory.next()).withPostProcessHandlers(this._handleBjsTo3mfVertexTransform).withData(data).withName(objectName).build();
+                const object = new ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
                 modelBuilder.withMesh(object);
                 // lets add a build to ref the object
                 modelBuilder.withBuild(object.id,buildTransform);
@@ -291,14 +290,6 @@ export class ThreeMfSerializer {
             }
         }
         return m;
-    }
-
-    private _handleBjsTo3mfVertexTransform(v: I3mfVertex): I3mfVertex {
-        // basycally a Math.PI / 2 rot arround X
-        const tmp = v.y;
-        v.y = -v.z;
-        v.z = tmp;
-        return v;
     }
 
     private static readonly _R_BJS_TO_3MF = Matrix.RotationX(Math.PI / 2);

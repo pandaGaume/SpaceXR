@@ -18162,7 +18162,7 @@ class ThreeMfSerializer {
                 target.add(entry);
                 const sink = makeByteSinkFromFflateEntry(entry);
                 const w = new _core_xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_1__.Utf8XmlWriterToBytes(sink);
-                const b = new _core_xml_xml_builder__WEBPACK_IMPORTED_MODULE_2__.XmlBuilder(w).dec("1.0", "UTF-8", true);
+                const b = new _core_xml_xml_builder__WEBPACK_IMPORTED_MODULE_2__.XmlBuilder(w).dec("1.0", "UTF-8");
                 const s = new _core_xml_xml_serializer__WEBPACK_IMPORTED_MODULE_3__.XmlSerializer(b);
                 s.serialize(object);
                 w.finish();
@@ -18200,7 +18200,6 @@ class ThreeMfSerializer {
                         if (data) {
                             const submeshName = `${objectName}_${k}`;
                             const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfMeshBuilder(idFactory.next())
-                                .withPostProcessHandlers(this._handleBjsTo3mfVertexTransform)
                                 .withData(data)
                                 .withName(submeshName)
                                 .build();
@@ -18216,7 +18215,7 @@ class ThreeMfSerializer {
                     positions: babylonMesh.getVerticesData(ThreeMfSerializer._PositionKind) || [],
                     indices: babylonMesh.getIndices() || [],
                 };
-                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfMeshBuilder(idFactory.next()).withPostProcessHandlers(this._handleBjsTo3mfVertexTransform).withData(data).withName(objectName).build();
+                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
                 modelBuilder.withMesh(object);
                 modelBuilder.withBuild(object.id, buildTransform);
                 index.set(babylonMesh, object);
@@ -18301,12 +18300,6 @@ class ThreeMfSerializer {
             }
         }
         return m;
-    }
-    _handleBjsTo3mfVertexTransform(v) {
-        const tmp = v.y;
-        v.y = -v.z;
-        v.z = tmp;
-        return v;
     }
     _handleBjsTo3mfMatrixTransformToRef(tBjs, ref) {
         const tmp = ThreeMfSerializer._R_BJS_TO_3MF.multiplyToRef(tBjs, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero()).transpose();

@@ -85,7 +85,7 @@ export class XmlBuilder implements IXmlBuilder {
             this._writeAttStr(XmlSyntax.EncodingKeyword, encoding);
         }
         if (standalone !== undefined) {
-            this._writeAttStr(XmlSyntax.StandaloneKeyword, standalone.toString());
+            this._writeAttStr(XmlSyntax.StandaloneKeyword, standalone?"yes":"no");
         }
         this._w.write(XmlSyntax.Question, XmlSyntax.CloseTag);
         return this;

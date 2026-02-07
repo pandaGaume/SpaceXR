@@ -6,4 +6,5 @@ export * from "./dem";
 export * from "./engines";
 export * from "./meshes";
 export * from "./camera";
+export * from "./serializers";
 export * from "core/index"; // this tells the packager to include the core package in the output

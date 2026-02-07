@@ -8,7 +8,7 @@
     <!-- BabylonJS -->
     <script src="../../libs/babylon.js"></script>
     <script src="../../libs/babylon.glTF2FileLoader.min.js"></script>
-    <script src="../../libs/spacexr.1.0.0.js"></script>
+    <script src="../../libs/stellar_landscape_xr.1.0.0.js"></script>
 
     <style>
       :root {
@@ -163,23 +163,6 @@
             bjs.mesh = meshes[1];
           });
        }  
-      /**********************************************************
-       * 2) Get vertices data
-       **********************************************************/
-      function exportVerticesData(mesh) {
-        return {
-          positions: mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind) || null,
-          indices: mesh.getIndices() || null
-        };
-      }
-
-      // Babylon to 3dmf conversion
-      function babylonTo3mf(v) {
-        const tmp = v.y;
-        v.y = -v.z;
-        v.z = tmp; 
-        return v;
-      }
 
       /**********************************************************
        * 3) build textual content based on vertice data
@@ -187,32 +170,17 @@
       function buildText() {
         if (!bjs.mesh) return "Scene not ready yet...";
         
-        const builder = buildModelBuilder(bjs.mesh)
-
+        const doc = new SPACEXR.ThreeMfSerializer().toDocument([bjs.mesh]);
+         
+        //return JSON.stringify(doc.model);
         const w = new SPACEXR.StringXmlWriter(); // where to serialize
         const b = new SPACEXR.XmlBuilder(w).dec("1.0", "UTF-8"); // xml logic
         const serializer = new SPACEXR.XmlSerializer(b); // serializer
-        serializer.serialize(builder.build());
+        serializer.serialize(doc.model);
         return w.toString();
-      }
-
-      function buildModelBuilder (source){
-        const id = 1;
-        const meshBuilder = new SPACEXR.ThreeMFMeshObjectBuilder(id,SPACEXR.ST_ObjectType.model)
-        .withPostProcessHandlers(babylonTo3mf)
-        .withData(exportVerticesData(source));
-        
-        const builder = new SPACEXR.ThreeMFModelBuilder()
-        .withMetaData("Title",bjs.mesh.name.toString())
-        .withMesh(meshBuilder)
-        .withBuild(id,SPACEXR.Matrix3D.Translate(0,0,10));
-        return builder;
       }
       
       async function exportToFile(handle,source){
-          const builder = buildModelBuilder(source);
-          const exporter = new SPACEXR.ThreeMFDocumentWriter().withModel(builder);
-          await exporter.writeToFileAsync(handle);
       }
 
       /**********************************************************

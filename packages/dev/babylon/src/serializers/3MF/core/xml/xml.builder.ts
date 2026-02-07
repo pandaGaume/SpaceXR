@@ -1,24 +1,33 @@
-import { Nullable } from "../../types";
-import { IXMLBuilder } from "./xml.interfaces";
+/* eslint-disable babylonjs/available */
+import type { IXmlBuilder } from "./xml.interfaces";
 
-export interface IXmlWriter{
-    write(... data:string[]):IXmlWriter;
-    count:number;
-    clear():void;
+/**
+ */
+export interface IXmlWriter {
+    /**
+     * @param data
+     * @returns
+     */
+    write(...data: string[]): IXmlWriter;
+    /** */
+    count: number;
+    /** */
+    clear(): void;
 }
 
+/** */
 class XmlSyntax {
-    public static OpenTag:string = "<";
-    public static CloseTag:string = ">";
-    public static Slash:string = "/";
-    public static Question:string = "?";
-    public static Quote:string = '"';
-    public static Equal:string = "=";
-    public static Space:string = " ";
-    public static Semicolon:string = ":";
+    public static OpenTag: string = "<";
+    public static CloseTag: string = ">";
+    public static Slash: string = "/";
+    public static Question: string = "?";
+    public static Quote: string = '"';
+    public static Equal: string = "=";
+    public static Space: string = " ";
+    public static Semicolon: string = ":";
 
-    public static Dec = "<?xml";   
-    public static Xml = "xml";    
+    public static Dec = "<?xml";
+    public static Xml = "xml";
     public static Xmlns = "xmlns";
     public static Xsi = "xsi";
 
@@ -31,13 +40,13 @@ export enum TokenType {
     Declaration,
     Tag,
     Attribute,
-    Text
+    Text,
 }
 
-export class XmlBuilder implements IXMLBuilder{
-
+/** */
+export class XmlBuilder implements IXmlBuilder {
+    /** */
     static Context = class {
-        
         name: string = "";
         closed: boolean = false;
         lastToken: TokenType | null = null;
@@ -58,31 +67,38 @@ export class XmlBuilder implements IXMLBuilder{
         }
     };
 
-    _w:IXmlWriter;
-    protected _ctxStack: Array<InstanceType<typeof XmlBuilder.Context>> = []
-    _d:number = 0;
+    /** */
+    private _w: IXmlWriter;
+    /** */
+    private _ctxStack: Array<InstanceType<typeof XmlBuilder.Context>> = [];
+    /** */
+    private _d: number = 0;
 
-    public constructor (w:IXmlWriter){
+    public constructor(w: IXmlWriter) {
         this._w = w;
     }
 
-    public dec(version:string, encoding?:string, standalone?:boolean ):IXMLBuilder{
+    public dec(version: string, encoding?: string, standalone?: boolean): IXmlBuilder {
         this._w.write(XmlSyntax.Dec);
         this._writeAttStr(XmlSyntax.VersionKeyword, version);
-        if( encoding){
+        if (encoding) {
             this._writeAttStr(XmlSyntax.EncodingKeyword, encoding);
         }
-        if( standalone !== undefined){
-            this._writeAttStr(XmlSyntax.StandaloneKeyword,standalone.toString());
+        if (standalone !== undefined) {
+            this._writeAttStr(XmlSyntax.StandaloneKeyword, standalone.toString());
         }
-        this._w.write(XmlSyntax.Question,XmlSyntax.CloseTag);
+        this._w.write(XmlSyntax.Question, XmlSyntax.CloseTag);
         return this;
     }
 
-    public att(ns: Nullable<string>, n: string, v: string): IXMLBuilder {
-        const ctx = this.peekContext();
-        if (!ctx) throw new Error("att() without open element");
-        if (ctx.closed) throw new Error(`att() after start tag closed for <${ctx.name}>`);
+    public att(ns: string | null, n: string, v: string): IXmlBuilder {
+        const ctx = this._peekContext();
+        if (!ctx) {
+            throw new Error("att() without open element");
+        }
+        if (ctx.closed) {
+            throw new Error(`att() after start tag closed for <${ctx.name}>`);
+        }
 
         // explicit namespace declaration: xmlns or xmlns:prefix
         if (this._isXmlnsDecl(ns, n)) {
@@ -93,7 +109,7 @@ export class XmlBuilder implements IXMLBuilder{
                 this._registerNamespace(ctx, "", v);
                 this._writeAttStr(XmlSyntax.Xmlns, v);
             } else {
-                if( !ns){
+                if (!ns) {
                     const prefix = n.slice(6); // "xmlns:"
                     this._registerNamespace(ctx, prefix, v);
                     this._writeAttStr(n, v);
@@ -120,60 +136,60 @@ export class XmlBuilder implements IXMLBuilder{
         return this;
     }
 
-
-    public ele(ns:Nullable<string>, n:string): IXMLBuilder{
-        let ctx = this.peekContext();
-        if(ctx){
+    public ele(ns: string | null, n: string): IXmlBuilder {
+        let ctx = this._peekContext();
+        if (ctx) {
             this._closeOpenTagIfNeeded(ctx);
         }
         let qns = n;
-        if(ns){
+        if (ns) {
             const p = this._lookupPrefix(ns) ?? ns;
             qns = `${p}:${n}`;
         }
-        ctx = this.pushContext(qns,++this._d);
-        this._w.write(XmlSyntax.OpenTag,qns);
+        ctx = this._pushContext(qns, ++this._d);
+        this._w.write(XmlSyntax.OpenTag, qns);
         return this;
     }
 
-    public text(txt: string): IXMLBuilder {
-        const ctx = this.peekContext();
-        if (!ctx) throw new Error("text() without open element");
+    public text(txt: string): IXmlBuilder {
+        const ctx = this._peekContext();
+        if (!ctx) {
+            throw new Error("text() without open element");
+        }
         this._closeOpenTagIfNeeded(ctx);
         ctx.lastToken = TokenType.Text;
         this._w.write(this._escText(txt));
         return this;
     }
 
-    public end(): IXMLBuilder{
-        let ctx = this.popContext();
-        if(ctx){
+    public end(): IXmlBuilder {
+        const ctx = this._popContext();
+        if (ctx) {
             this._d--;
-            if(!ctx.closed){
-                this._w.write(XmlSyntax.Slash,XmlSyntax.CloseTag);
+            if (!ctx.closed) {
+                this._w.write(XmlSyntax.Slash, XmlSyntax.CloseTag);
             } else {
-                this._w.write(XmlSyntax.OpenTag,XmlSyntax.Slash, ctx.name, XmlSyntax.CloseTag);
+                this._w.write(XmlSyntax.OpenTag, XmlSyntax.Slash, ctx.name, XmlSyntax.CloseTag);
             }
         }
         return this;
     }
 
-
-    protected pushContext(name:string, depth: number): InstanceType<typeof XmlBuilder.Context> {
-        const ctx = new XmlBuilder.Context(name,depth);
+    protected _pushContext(name: string, depth: number): InstanceType<typeof XmlBuilder.Context> {
+        const ctx = new XmlBuilder.Context(name, depth);
         this._ctxStack.push(ctx);
         return ctx;
     }
 
-    protected popContext(): InstanceType<typeof XmlBuilder.Context> | undefined {
+    protected _popContext(): InstanceType<typeof XmlBuilder.Context> | undefined {
         return this._ctxStack.pop();
     }
 
-    protected peekContext(): InstanceType<typeof XmlBuilder.Context> | undefined  {
+    protected _peekContext(): InstanceType<typeof XmlBuilder.Context> | undefined {
         return this._ctxStack[this._ctxStack.length - 1];
     }
 
-    protected get contextDepth(): number {
+    protected get _contextDepth(): number {
         return this._ctxStack.length;
     }
 
@@ -181,16 +197,16 @@ export class XmlBuilder implements IXMLBuilder{
         this._w.write(XmlSyntax.Space, name, XmlSyntax.Equal, XmlSyntax.Quote, this._escAttr(value), XmlSyntax.Quote);
     }
 
-    private _lookupPrefix(ns:string) : string | undefined{
+    private _lookupPrefix(ns: string): string | undefined {
         let i = this._ctxStack.length - 1;
-        if( i >=0){
+        if (i >= 0) {
             do {
-                let ctx = this._ctxStack[i--];
-                const p = ctx.ns2prefix?.get(ns) ;
-                if( p){
+                const ctx = this._ctxStack[i--];
+                const p = ctx.ns2prefix?.get(ns);
+                if (p) {
                     return p;
                 }
-            } while(i>=0);
+            } while (i >= 0);
         }
         return undefined;
     }
@@ -203,17 +219,17 @@ export class XmlBuilder implements IXMLBuilder{
         return this._escText(s).replace(/"/g, "&quot;").replace(/'/g, "&apos;");
     }
 
-    private _isXmlnsDecl(ns: Nullable<string>, n: string): boolean {
-        if( ns){
-            return ns === XmlSyntax.Xmlns ; 
+    private _isXmlnsDecl(ns: string | null, n: string): boolean {
+        if (ns) {
+            return ns === XmlSyntax.Xmlns;
         }
         const l = n.length;
         const s = XmlSyntax.Xmlns.length;
-        if( l >= s){
-            return n.startsWith(XmlSyntax.Xmlns) && (n.length == s || n[s]==XmlSyntax.Semicolon );
+        if (l >= s) {
+            return n.startsWith(XmlSyntax.Xmlns) && (n.length == s || n[s] == XmlSyntax.Semicolon);
         }
         return false;
-     }
+    }
 
     private _registerNamespace(ctx: InstanceType<typeof XmlBuilder.Context>, prefix: string, uri: string) {
         if (prefix === XmlSyntax.Xml || prefix === XmlSyntax.Xmlns) {
@@ -237,13 +253,17 @@ export class XmlBuilder implements IXMLBuilder{
         let i = 1;
         while (true) {
             const p = `ns${i++}`;
-            if (!ctx.prefix2ns.has(p)) return p;
+            if (!ctx.prefix2ns.has(p)) {
+                return p;
+            }
         }
     }
 
     private _ensurePrefixDeclared(ctx: InstanceType<typeof XmlBuilder.Context>, uri: string): string {
         const existing = this._lookupPrefix(uri);
-        if (existing) return existing;
+        if (existing) {
+            return existing;
+        }
 
         if (ctx.closed) {
             throw new Error(`can not declare namespace after start tag closed for <${ctx.name}>`);
@@ -258,11 +278,10 @@ export class XmlBuilder implements IXMLBuilder{
         return prefix;
     }
 
-    private _closeOpenTagIfNeeded(ctx:InstanceType<typeof XmlBuilder.Context>) {
+    private _closeOpenTagIfNeeded(ctx: InstanceType<typeof XmlBuilder.Context>) {
         if (!ctx.closed) {
             this._w.write(XmlSyntax.CloseTag);
             ctx.closed = true;
         }
     }
-
 }

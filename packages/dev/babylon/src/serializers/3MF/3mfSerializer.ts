@@ -295,11 +295,14 @@ export class ThreeMfSerializer {
     private static readonly _R_BJS_TO_3MF = Matrix.RotationX(Math.PI / 2);
 
     private _handleBjsTo3mfMatrixTransformToRef(tBjs: Matrix, ref: Matrix3d): Matrix3d {
-        const tmp = ThreeMfSerializer._R_BJS_TO_3MF.multiplyToRef(tBjs, Matrix.Zero()).transpose();
+        const tmp = tBjs.multiplyToRef(ThreeMfSerializer._R_BJS_TO_3MF, Matrix.Zero());
         const a = tmp.m;
         // a is still Babylon storage, but now the semantic rows/cols match 3MF expectation.
         // 3MF order: m00 m01 m02 m10 m11 m12 m20 m21 m22 m30 m31 m32
-        ref.values = [a[0], a[4], a[8], a[1], a[5], a[9], a[2], a[6], a[10], a[3], a[7], a[11]];
+        ref.values = [a[0], a[1], a[2], 
+                      a[4], a[5], a[6], 
+                      a[8], a[9], a[10], 
+                      a[12], a[13], a[14]];
         return ref;
     }
 

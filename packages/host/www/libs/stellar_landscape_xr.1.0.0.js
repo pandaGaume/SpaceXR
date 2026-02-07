@@ -18302,9 +18302,12 @@ class ThreeMfSerializer {
         return m;
     }
     _handleBjsTo3mfMatrixTransformToRef(tBjs, ref) {
-        const tmp = ThreeMfSerializer._R_BJS_TO_3MF.multiplyToRef(tBjs, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero()).transpose();
+        const tmp = tBjs.multiplyToRef(ThreeMfSerializer._R_BJS_TO_3MF, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
         const a = tmp.m;
-        ref.values = [a[0], a[4], a[8], a[1], a[5], a[9], a[2], a[6], a[10], a[3], a[7], a[11]];
+        ref.values = [a[0], a[1], a[2],
+            a[4], a[5], a[6],
+            a[8], a[9], a[10],
+            a[12], a[13], a[14]];
         return ref;
     }
     async _ensureZipLibReadyAsync() {
@@ -19420,7 +19423,7 @@ class XmlBuilder {
             this._writeAttStr(XmlSyntax.EncodingKeyword, encoding);
         }
         if (standalone !== undefined) {
-            this._writeAttStr(XmlSyntax.StandaloneKeyword, standalone.toString());
+            this._writeAttStr(XmlSyntax.StandaloneKeyword, standalone ? "yes" : "no");
         }
         this._w.write(XmlSyntax.Question, XmlSyntax.CloseTag);
         return this;

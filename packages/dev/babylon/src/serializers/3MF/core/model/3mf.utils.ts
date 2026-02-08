@@ -65,3 +65,4 @@ export class IncrementalIdFactory implements IResourceIdFactory {
         return this;
     }
 }
+

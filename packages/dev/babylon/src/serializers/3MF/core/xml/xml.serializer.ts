@@ -1,5 +1,5 @@
 import { type IQualifiedName, XmlNameToParts, type IXmlBuilder, type XmlName, GetXmlName, ToQualifiedString, GetXmlFieldMeta } from "./xml.interfaces";
-import { type IXmlSerializerFormatOptions, FormatNumberXml } from "./xml.serializer.format";
+import { NumberFormatter, resolveFormatOptions, type IXmlSerializerFormatOptions } from "./xml.serializer.format";
 
 type Primitive = string | number | boolean | bigint | Date;
 
@@ -26,23 +26,16 @@ function IsPrimitiveButString(x: any): x is Primitive {
 /**
  */
 export class XmlSerializer {
-    /**
-     *  below this, treat as zero
-     */
-    static EPS = 1e-12;
-    /**
-     * or 5, or whatever "reasonable" means for your pipeline
-     */
-    static DECIMALS = 6;
-
     /** */
-    private _format?: IXmlSerializerFormatOptions;
+    private _format: IXmlSerializerFormatOptions;
     /** */
     private _builder: IXmlBuilder;
     /** */
     private _ns: Map<string, string> = new Map<string, string>();
     /** */
     private _prefixCount: number = 0;
+
+    private _nFmt?:NumberFormatter ; 
 
     /**
      *
@@ -51,10 +44,8 @@ export class XmlSerializer {
      */
     public constructor(builder: IXmlBuilder, format?: IXmlSerializerFormatOptions) {
         this._builder = builder;
-        this._format = format;
-        if (!this._format) {
-            return;
-        }
+        this._format = resolveFormatOptions(format);
+        this._nFmt = new NumberFormatter(this._format);
     }
 
     /**
@@ -175,15 +166,15 @@ export class XmlSerializer {
                         switch (m.kind) {
                             case "attr": {
                                 let vStr: string | null = null;
-                                if (IsNumber(value)) {
-                                    if (this._format?.number) {
-                                        vStr = FormatNumberXml(value, this._format?.number);
-                                    }
-                                    vStr = this._fmt(value, XmlSerializer.DECIMALS, XmlSerializer.EPS);
+                                if (IsNumber(value) && this._nFmt ) {
+                                    vStr = this._nFmt.toString(value);
                                 }
-
+                                if( m.formatter ) {
+                                    // TODO : cache the created formatter to avoid to many allocation.
+                                    const f = new m.formatter(this._format);
+                                    vStr = f.toString(value);
+                                }
                                 vStr = vStr ?? value.toString();
-
                                 if (vStr) {
                                     const currentName = XmlNameToParts(name);
                                     const prefix = this._getPrefix(currentName);
@@ -206,24 +197,6 @@ export class XmlSerializer {
             }
             this._writeObject(builder, value, visited);
         }
-    }
-
-    private _fmt(n: number, decimals: number, eps: number): string {
-        if (!Number.isFinite(n)) {
-            throw new Error("Non-finite number.");
-        }
-
-        // clamp tiny values to 0 to kill 1e-19 and also -0
-        if (Math.abs(n) < eps) {
-            n = 0;
-        }
-
-        // round to fixed decimals
-        // then convert back to number to strip trailing zeros and avoid "47.000000"
-        const rounded = Number(n.toFixed(decimals));
-
-        // also avoid "-0"
-        return (Object.is(rounded, -0) ? 0 : rounded).toString();
     }
 
     // this is the first browse of the hierarchy to collect the namespaces and assign placeholder.( ns0, ns1,...)

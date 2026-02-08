@@ -18098,18 +18098,15 @@ ThreeMfSerializerGlobalConfiguration.FFLATEUrl = "https://unpkg.com/fflate@0.8.2
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ThreeMfSerializer: () => (/* binding */ ThreeMfSerializer)
+/* harmony export */   BjsThreeMfSerializer: () => (/* binding */ BjsThreeMfSerializer)
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core/Misc/tools */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./core/model/3mf.utils */ "./dist/serializers/3MF/core/model/3mf.utils.js");
-/* harmony import */ var _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./core/model/3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
-/* harmony import */ var _core_model_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./core/model/3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
-/* harmony import */ var _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./core/model/3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
-/* harmony import */ var _3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./3mfSerializer.configuration */ "./dist/serializers/3MF/3mfSerializer.configuration.js");
-/* harmony import */ var _core_xml_xml_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./core/xml/xml.builder */ "./dist/serializers/3MF/core/xml/xml.builder.js");
-/* harmony import */ var _core_xml_xml_serializer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./core/xml/xml.serializer */ "./dist/serializers/3MF/core/xml/xml.serializer.js");
-/* harmony import */ var _core_xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core/xml/xml.builder.bytes */ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js");
+/* harmony import */ var _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./core/model/3mf.utils */ "./dist/serializers/3MF/core/model/3mf.utils.js");
+/* harmony import */ var _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./core/model/3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
+/* harmony import */ var _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./core/model/3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
+/* harmony import */ var _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core/model/3mf.serializer */ "./dist/serializers/3MF/core/model/3mf.serializer.js");
+/* harmony import */ var _3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./3mfSerializer.configuration */ "./dist/serializers/3MF/3mfSerializer.configuration.js");
 
 
 
@@ -18117,71 +18114,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-class ThreeMfSerializer {
+class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_1__.AbstractThreeMfSerializer {
     constructor(opts = {}) {
-        this._o = { ...ThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS, ...opts };
+        super(opts);
     }
-    get options() {
-        return this._o;
-    }
-    async serializeToMemoryAsync(meshes) {
-        const chunks = new Array();
-        let size = 0;
-        const sink = function (err, chunk, _final) {
-            chunks.push(chunk);
-            size += chunk.length;
-        };
-        await this.serializeAsync(meshes, sink);
-        if (size) {
-            const buffer = new Uint8Array(size);
-            let off = 0;
-            for (const c of chunks) {
-                buffer.set(c, off);
-                off += c.length;
-            }
-            return buffer;
-        }
-        return undefined;
-    }
-    async serializeAsync(meshes, sink) {
-        const lib = await this._ensureZipLibReadyAsync();
-        if (lib) {
-            const zip = lib.Zip;
-            const zipDeflate = lib.ZipDeflate;
-            if (!zip || !zipDeflate) {
-                throw new Error("fflate Zip / ZipDeflate not available");
-            }
-            const makeByteSinkFromFflateEntry = function (entry) {
-                return { push: (chunk, final) => entry.push(chunk, final) };
-            };
-            const serializeEntry = function (target, name, object) {
-                const entry = new zipDeflate(name, { level: 6 });
-                target.add(entry);
-                const sink = makeByteSinkFromFflateEntry(entry);
-                const w = new _core_xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_1__.Utf8XmlWriterToBytes(sink);
-                const b = new _core_xml_xml_builder__WEBPACK_IMPORTED_MODULE_2__.XmlBuilder(w).dec("1.0", "UTF-8");
-                const s = new _core_xml_xml_serializer__WEBPACK_IMPORTED_MODULE_3__.XmlSerializer(b);
-                s.serialize(object);
-                w.finish();
-            };
-            const doc = this.toDocument(meshes);
-            if (doc) {
-                const target = new zip(sink);
-                serializeEntry(target, _core_model_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.ContentTypeFileName, doc.contentTypes);
-                serializeEntry(target, `${_core_model_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.RelationshipDirName}${_core_model_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.RelationshipFileName}`, doc.relationships);
-                serializeEntry(target, `${_core_model_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.Object3dDirName}${_core_model_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.ModelFileName}`, doc.model);
-                target.end();
-            }
-        }
-    }
-    toDocument(meshes) {
-        const idFactory = new _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_5__.IncrementalIdFactory();
-        const modelBuilder = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfModelBuilder();
+    toModel(meshes) {
+        const idFactory = new _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_2__.IncrementalIdFactory();
+        const modelBuilder = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMfModelBuilder();
         const index = new Map();
-        const instances = this._o.exportInstances ? [] : null;
+        const instances = this.options.exportInstances ? [] : null;
         for (let j = 0; j < meshes.length; j++) {
             if (meshes[j].isAnInstance) {
                 instances?.push(meshes[j]);
@@ -18190,8 +18131,8 @@ class ThreeMfSerializer {
             const babylonMesh = meshes[j];
             const objectName = babylonMesh.name || `mesh${j}`;
             const worldTransform = babylonMesh.getWorldMatrix();
-            const buildTransform = this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_7__.Matrix3d.Zero());
-            if (this._o.exportSubmeshes) {
+            const buildTransform = this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__.Matrix3d.Zero());
+            if (this.options.exportSubmeshes) {
                 const subMeshes = babylonMesh.subMeshes;
                 if (subMeshes && subMeshes.length > 0) {
                     for (let k = 0; k < subMeshes.length; k++) {
@@ -18199,7 +18140,7 @@ class ThreeMfSerializer {
                         const data = this._extractSubMesh(babylonMesh, subMesh);
                         if (data) {
                             const submeshName = `${objectName}_${k}`;
-                            const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfMeshBuilder(idFactory.next())
+                            const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMfMeshBuilder(idFactory.next())
                                 .withData(data)
                                 .withName(submeshName)
                                 .build();
@@ -18212,10 +18153,10 @@ class ThreeMfSerializer {
             }
             else {
                 const data = {
-                    positions: babylonMesh.getVerticesData(ThreeMfSerializer._PositionKind) || [],
+                    positions: babylonMesh.getVerticesData(BjsThreeMfSerializer._PositionKind) || [],
                     indices: babylonMesh.getIndices() || [],
                 };
-                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
+                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
                 modelBuilder.withMesh(object);
                 modelBuilder.withBuild(object.id, buildTransform);
                 index.set(babylonMesh, object);
@@ -18229,12 +18170,12 @@ class ThreeMfSerializer {
                         const mesh = _instances[j];
                         const worldTransform = mesh.getWorldMatrix();
                         const subMeshes = _babylonMesh.subMeshes;
-                        if (this._o.exportSubmeshes && subMeshes && subMeshes.length > 0) {
+                        if (this.options.exportSubmeshes && subMeshes && subMeshes.length > 0) {
                             for (let k = 0; k < subMeshes.length; k++) {
                                 const subMesh = subMeshes[k];
                                 const objectRef = index.get(subMesh);
                                 if (objectRef) {
-                                    modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_7__.Matrix3d.Zero()));
+                                    modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__.Matrix3d.Zero()));
                                     continue;
                                 }
                             }
@@ -18242,22 +18183,34 @@ class ThreeMfSerializer {
                         }
                         const objectRef = index.get(_babylonMesh);
                         if (objectRef) {
-                            modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_7__.Matrix3d.Zero()));
+                            modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__.Matrix3d.Zero()));
                             continue;
                         }
                     }
                 }
             }
         }
-        const docBuilder = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_6__.ThreeMfDocumentBuilder().withModel(modelBuilder);
-        return docBuilder.build();
+        return modelBuilder.build();
+    }
+    async ensureZipLibReadyAsync() {
+        if (this._fflateReadyPromise) {
+            return await this._fflateReadyPromise;
+        }
+        this._fflateReadyPromise = (async () => {
+            const g = globalThis;
+            if (!g.fflate) {
+                await _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Tools.LoadScriptAsync(_3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_5__.ThreeMfSerializerGlobalConfiguration.FFLATEUrl);
+            }
+            return g.fflate;
+        })();
+        return await this._fflateReadyPromise;
     }
     _extractSubMesh(mesh, sm) {
         const allInd = mesh.getIndices();
         if (!allInd) {
             return undefined;
         }
-        const allPos = mesh.getVerticesData(ThreeMfSerializer._PositionKind);
+        const allPos = mesh.getVerticesData(BjsThreeMfSerializer._PositionKind);
         if (!allPos) {
             return undefined;
         }
@@ -18302,7 +18255,7 @@ class ThreeMfSerializer {
         return m;
     }
     _handleBjsTo3mfMatrixTransformToRef(tBjs, ref) {
-        const tmp = tBjs.multiplyToRef(ThreeMfSerializer._R_BJS_TO_3MF, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
+        const tmp = tBjs.multiplyToRef(BjsThreeMfSerializer._R_BJS_TO_3MF, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
         const a = tmp.m;
         ref.values = [a[0], a[1], a[2],
             a[4], a[5], a[6],
@@ -18310,26 +18263,9 @@ class ThreeMfSerializer {
             a[12], a[13], a[14]];
         return ref;
     }
-    async _ensureZipLibReadyAsync() {
-        if (this._fflateReadyPromise) {
-            return await this._fflateReadyPromise;
-        }
-        this._fflateReadyPromise = (async () => {
-            const g = globalThis;
-            if (!g.fflate) {
-                await _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Tools.LoadScriptAsync(_3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_8__.ThreeMfSerializerGlobalConfiguration.FFLATEUrl);
-            }
-            return g.fflate;
-        })();
-        return await this._fflateReadyPromise;
-    }
 }
-ThreeMfSerializer._PositionKind = "position";
-ThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS = {
-    exportInstances: false,
-    exportSubmeshes: false,
-};
-ThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.RotationX(Math.PI / 2);
+BjsThreeMfSerializer._PositionKind = "position";
+BjsThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.RotationX(Math.PI / 2);
 //# sourceMappingURL=3mfSerializer.js.map
 
 /***/ }),
@@ -18343,14 +18279,17 @@ ThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_M
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ContentTypeFileName),
-/* harmony export */   FormatNumberXml: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.FormatNumberXml),
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerNumberOptions),
 /* harmony export */   GetXmlFieldMeta: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta),
 /* harmony export */   GetXmlName: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.GetXmlName),
 /* harmony export */   IsQualifiedName: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.IsQualifiedName),
 /* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.Known3mfRelationshipTypes),
 /* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.KnownI3mfContentType),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.MatrixFormatter),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ModelFileName),
+/* harmony export */   NumberFormatter: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.NumberFormatter),
 /* harmony export */   Object3dDirName: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.Object3dDirName),
 /* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.OpenXmlContentTypesNamespace),
 /* harmony export */   OpenXmlRelationshipsNamespace: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.OpenXmlRelationshipsNamespace),
@@ -18398,7 +18337,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.XmlName),
 /* harmony export */   XmlNameToParts: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts),
-/* harmony export */   XmlSerializer: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.XmlSerializer)
+/* harmony export */   XmlSerializer: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.XmlSerializer),
+/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.resolveNumberOptions)
 /* harmony export */ });
 /* harmony import */ var _xml__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml */ "./dist/serializers/3MF/core/xml/index.js");
 /* harmony import */ var _model__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./model */ "./dist/serializers/3MF/core/model/index.js");
@@ -18710,12 +18651,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
 /* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
+/* harmony import */ var _3mf_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 let ThreeMfModel = class ThreeMfModel {
@@ -18906,7 +18849,7 @@ __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "objectid" })
 ], ThreeMfComponent.prototype, "objectid", void 0);
 __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform" })
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform", formatter: _3mf_math__WEBPACK_IMPORTED_MODULE_2__.MatrixFormatter })
 ], ThreeMfComponent.prototype, "transform", void 0);
 ThreeMfComponent = __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "component" })
@@ -18961,7 +18904,7 @@ __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "objectid" })
 ], ThreeMfItem.prototype, "objectid", void 0);
 __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform" })
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform", formatter: _3mf_math__WEBPACK_IMPORTED_MODULE_2__.MatrixFormatter })
 ], ThreeMfItem.prototype, "transform", void 0);
 __decorate([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "partnumber" })
@@ -18983,23 +18926,29 @@ ThreeMfItem = __decorate([
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Matrix3d: () => (/* binding */ Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* binding */ MatrixFormatter),
 /* harmony export */   RgbaToHex: () => (/* binding */ RgbaToHex)
 /* harmony export */ });
+/* harmony import */ var _xml__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml */ "./dist/serializers/3MF/core/xml/xml.serializer.format.js");
+
 class Matrix3d {
-    static Identity() {
-        return new Matrix3d([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
-    }
     static Zero() {
         return new Matrix3d([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    }
-    static Translate(tx, ty, tz) {
-        return new Matrix3d([1, 0, 0, 0, 1, 0, 0, 0, 1, tx, ty, tz]);
     }
     constructor(values) {
         this.values = values;
     }
     toString() {
         return this.values.join(" ");
+    }
+}
+class MatrixFormatter {
+    constructor(o) {
+        this.o = o;
+        this._f = new _xml__WEBPACK_IMPORTED_MODULE_0__.NumberFormatter(o);
+    }
+    toString(x) {
+        return x.values.map(v => this._f.toString(v)).join(" ");
     }
 }
 function RgbaToHex(c) {
@@ -19173,6 +19122,98 @@ class ThreeMfDocument {
 
 /***/ }),
 
+/***/ "./dist/serializers/3MF/core/model/3mf.serializer.js":
+/*!***********************************************************!*\
+  !*** ./dist/serializers/3MF/core/model/3mf.serializer.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractThreeMfSerializer: () => (/* binding */ AbstractThreeMfSerializer),
+/* harmony export */   ThreeMf: () => (/* binding */ ThreeMf)
+/* harmony export */ });
+/* harmony import */ var _3mf_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
+/* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
+/* harmony import */ var _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.builder */ "./dist/serializers/3MF/core/xml/xml.builder.js");
+/* harmony import */ var _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../xml/xml.serializer */ "./dist/serializers/3MF/core/xml/xml.serializer.js");
+/* harmony import */ var _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml/xml.builder.bytes */ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js");
+
+
+
+
+
+class AbstractThreeMfSerializer {
+    constructor(opts = {}) {
+        this._o = { ...AbstractThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS, ...opts };
+    }
+    get options() {
+        return this._o;
+    }
+    async serializeAsync(sink, ...meshes) {
+        const lib = await this.ensureZipLibReadyAsync();
+        if (lib) {
+            const zip = lib.Zip;
+            const zipDeflate = lib.ZipDeflate;
+            if (!zip || !zipDeflate) {
+                throw new Error("fflate Zip / ZipDeflate not available");
+            }
+            const makeByteSinkFromFflateEntry = function (entry) {
+                return { push: (chunk, final) => entry.push(chunk, final) };
+            };
+            const serializeEntry = function (target, name, object) {
+                const entry = new zipDeflate(name, { level: 6 });
+                target.add(entry);
+                const sink = makeByteSinkFromFflateEntry(entry);
+                const w = new _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__.Utf8XmlWriterToBytes(sink);
+                const b = new _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__.XmlBuilder(w).dec("1.0", "UTF-8");
+                const s = new _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__.XmlSerializer(b);
+                s.serialize(object);
+                w.finish();
+            };
+            const doc = this.toDocument(meshes);
+            if (doc) {
+                const target = new zip(sink);
+                serializeEntry(target, _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ContentTypeFileName, doc.contentTypes);
+                serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipFileName}`, doc.relationships);
+                serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.Object3dDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ModelFileName}`, doc.model);
+                target.end();
+            }
+        }
+    }
+    toDocument(meshes) {
+        return new _3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfDocumentBuilder().withModel(this.toModel(meshes)).build();
+    }
+}
+AbstractThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS = {
+    exportInstances: false,
+    exportSubmeshes: false,
+};
+class ThreeMf {
+    static async SerializeToMemoryAsync(s, ...meshes) {
+        const chunks = new Array();
+        let size = 0;
+        const sink = function (err, chunk, _final) {
+            chunks.push(chunk);
+            size += chunk.length;
+        };
+        await s.serializeAsync(sink, ...meshes);
+        if (size) {
+            const buffer = new Uint8Array(size);
+            let off = 0;
+            for (const c of chunks) {
+                buffer.set(c, off);
+                off += c.length;
+            }
+            return buffer;
+        }
+        return undefined;
+    }
+}
+//# sourceMappingURL=3mf.serializer.js.map
+
+/***/ }),
+
 /***/ "./dist/serializers/3MF/core/model/3mf.utils.js":
 /*!******************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.utils.js ***!
@@ -19219,6 +19260,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.Known3mfRelationshipTypes),
 /* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.KnownI3mfContentType),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _3mf_math__WEBPACK_IMPORTED_MODULE_5__.Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _3mf_math__WEBPACK_IMPORTED_MODULE_5__.MatrixFormatter),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.ModelFileName),
 /* harmony export */   Object3dDirName: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.Object3dDirName),
 /* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlContentTypesNamespace),
@@ -19283,10 +19325,12 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   FormatNumberXml: () => (/* reexport safe */ _xml_serializer_format__WEBPACK_IMPORTED_MODULE_2__.FormatNumberXml),
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _xml_serializer_format__WEBPACK_IMPORTED_MODULE_2__.DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _xml_serializer_format__WEBPACK_IMPORTED_MODULE_2__.DefaultXmlSerializerNumberOptions),
 /* harmony export */   GetXmlFieldMeta: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta),
 /* harmony export */   GetXmlName: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName),
 /* harmony export */   IsQualifiedName: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsQualifiedName),
+/* harmony export */   NumberFormatter: () => (/* reexport safe */ _xml_serializer_format__WEBPACK_IMPORTED_MODULE_2__.NumberFormatter),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _xml_builder_string__WEBPACK_IMPORTED_MODULE_4__.StringXmlWriter),
 /* harmony export */   ToQualifiedString: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.ToQualifiedString),
 /* harmony export */   TokenType: () => (/* reexport safe */ _xml_builder__WEBPACK_IMPORTED_MODULE_3__.TokenType),
@@ -19297,7 +19341,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName),
 /* harmony export */   XmlNameToParts: () => (/* reexport safe */ _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts),
-/* harmony export */   XmlSerializer: () => (/* reexport safe */ _xml_serializer__WEBPACK_IMPORTED_MODULE_1__.XmlSerializer)
+/* harmony export */   XmlSerializer: () => (/* reexport safe */ _xml_serializer__WEBPACK_IMPORTED_MODULE_1__.XmlSerializer),
+/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _xml_serializer_format__WEBPACK_IMPORTED_MODULE_2__.resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _xml_serializer_format__WEBPACK_IMPORTED_MODULE_2__.resolveNumberOptions)
 /* harmony export */ });
 /* harmony import */ var _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
 /* harmony import */ var _xml_serializer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./xml.serializer */ "./dist/serializers/3MF/core/xml/xml.serializer.js");
@@ -19732,57 +19778,96 @@ function ToQualifiedString(name, prefix) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   FormatNumberXml: () => (/* binding */ FormatNumberXml)
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* binding */ DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* binding */ DefaultXmlSerializerNumberOptions),
+/* harmony export */   NumberFormatter: () => (/* binding */ NumberFormatter),
+/* harmony export */   resolveFormatOptions: () => (/* binding */ resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* binding */ resolveNumberOptions)
 /* harmony export */ });
-function FormatNumberXml(x, opts) {
-    if (!Number.isFinite(x)) {
-        throw new Error(`Cannot format non-finite number: ${x}`);
-    }
-    if (!Number.isFinite(opts.eps) || opts.eps <= 0) {
-        throw new Error("opts.eps must be a finite, positive number");
-    }
-    const maxDecimalsCap = _ClampInt(opts.maxDecimalsCap ?? 15, 0, 20);
-    const trimTrailingZeros = opts.trimTrailingZeros ?? true;
-    const snapNearZero = opts.snapNearZero ?? true;
-    const zeroThreshold = opts.zeroThreshold ?? opts.eps;
-    const inv = 1 / opts.eps;
-    let q = Math.round(x * inv) / inv;
-    if (Object.is(q, -0)) {
-        q = 0;
-    }
-    if (snapNearZero && Math.abs(q) <= zeroThreshold) {
-        q = 0;
-    }
-    let decimals;
-    if (opts.fixedDecimals !== undefined) {
-        decimals = _ClampInt(opts.fixedDecimals, 0, maxDecimalsCap);
-    }
-    else {
-        decimals = _ClampInt(Math.ceil(-Math.log10(opts.eps)), 0, maxDecimalsCap);
-    }
-    if (opts.allowScientific) {
-    }
-    if (decimals === 0) {
-        return String(Math.trunc(q));
-    }
-    let s = q.toFixed(decimals);
-    if (trimTrailingZeros && opts.fixedDecimals === undefined) {
-        s = s
-            .replace(/(\.\d*?[1-9])0+$/, "$1")
-            .replace(/\.0+$/, "")
-            .replace(/\.$/, "");
-    }
-    if (/[eE]/.test(s)) {
-        throw new Error(`Scientific notation not allowed in XML output: ${s}`);
-    }
-    return s;
+const DefaultXmlSerializerNumberOptions = Object.freeze({
+    eps: 1e-6,
+    maxDecimalsCap: 15,
+    trimTrailingZeros: true,
+    allowScientific: false,
+    snapNearZero: true,
+});
+const DefaultXmlSerializerFormatOptions = Object.freeze({
+    number: DefaultXmlSerializerNumberOptions,
+});
+function resolveNumberOptions(opts) {
+    const eps = opts?.eps ?? DefaultXmlSerializerNumberOptions.eps;
+    return {
+        eps,
+        maxDecimalsCap: opts?.maxDecimalsCap ?? DefaultXmlSerializerNumberOptions.maxDecimalsCap,
+        trimTrailingZeros: opts?.trimTrailingZeros ?? DefaultXmlSerializerNumberOptions.trimTrailingZeros,
+        fixedDecimals: opts?.fixedDecimals,
+        allowScientific: opts?.allowScientific ?? DefaultXmlSerializerNumberOptions.allowScientific,
+        snapNearZero: opts?.snapNearZero ?? DefaultXmlSerializerNumberOptions.snapNearZero,
+        zeroThreshold: opts?.zeroThreshold ?? eps,
+        perAttributeEps: opts?.perAttributeEps,
+    };
 }
-function _ClampInt(n, min, max) {
-    if (!Number.isFinite(n)) {
-        return min;
+function resolveFormatOptions(opts) {
+    return {
+        number: resolveNumberOptions(opts?.number),
+    };
+}
+class NumberFormatter {
+    constructor(o) {
+        this.o = o;
+        this._o = o.number;
+        if (!Number.isFinite(this._o.eps) || this._o.eps <= 0) {
+            throw new Error("opts.eps must be a finite, positive number");
+        }
     }
-    n = Math.trunc(n);
-    return Math.max(min, Math.min(max, n));
+    toString(x) {
+        if (!Number.isFinite(x)) {
+            throw new Error(`Cannot format non-finite number: ${x}`);
+        }
+        const opts = this._o;
+        const maxDecimalsCap = this._clampInt(opts.maxDecimalsCap ?? 15, 0, 20);
+        const trimTrailingZeros = opts.trimTrailingZeros ?? true;
+        const snapNearZero = opts.snapNearZero ?? true;
+        const zeroThreshold = opts.zeroThreshold ?? opts.eps;
+        const inv = 1 / opts.eps;
+        let q = Math.round(x * inv) / inv;
+        if (Object.is(q, -0)) {
+            q = 0;
+        }
+        if (snapNearZero && Math.abs(q) <= zeroThreshold) {
+            q = 0;
+        }
+        let decimals;
+        if (opts.fixedDecimals !== undefined) {
+            decimals = this._clampInt(opts.fixedDecimals, 0, maxDecimalsCap);
+        }
+        else {
+            decimals = this._clampInt(Math.ceil(-Math.log10(opts.eps)), 0, maxDecimalsCap);
+        }
+        if (opts.allowScientific) {
+        }
+        if (decimals === 0) {
+            return String(Math.trunc(q));
+        }
+        let s = q.toFixed(decimals);
+        if (trimTrailingZeros && opts.fixedDecimals === undefined) {
+            s = s
+                .replace(/(\.\d*?[1-9])0+$/, "$1")
+                .replace(/\.0+$/, "")
+                .replace(/\.$/, "");
+        }
+        if (/[eE]/.test(s)) {
+            throw new Error(`Scientific notation not allowed in XML output: ${s}`);
+        }
+        return s;
+    }
+    _clampInt(n, min, max) {
+        if (!Number.isFinite(n)) {
+            return min;
+        }
+        n = Math.trunc(n);
+        return Math.max(min, Math.min(max, n));
+    }
 }
 //# sourceMappingURL=xml.serializer.format.js.map
 
@@ -19798,8 +19883,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   XmlSerializer: () => (/* binding */ XmlSerializer)
 /* harmony export */ });
-/* harmony import */ var _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
-/* harmony import */ var _xml_serializer_format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./xml.serializer.format */ "./dist/serializers/3MF/core/xml/xml.serializer.format.js");
+/* harmony import */ var _xml_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
+/* harmony import */ var _xml_serializer_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml.serializer.format */ "./dist/serializers/3MF/core/xml/xml.serializer.format.js");
 
 
 function IsDate(x) {
@@ -19822,10 +19907,8 @@ class XmlSerializer {
         this._ns = new Map();
         this._prefixCount = 0;
         this._builder = builder;
-        this._format = format;
-        if (!this._format) {
-            return;
-        }
+        this._format = (0,_xml_serializer_format__WEBPACK_IMPORTED_MODULE_0__.resolveFormatOptions)(format);
+        this._nFmt = new _xml_serializer_format__WEBPACK_IMPORTED_MODULE_0__.NumberFormatter(this._format);
     }
     withNamespace(...ns) {
         for (const s of ns) {
@@ -19834,11 +19917,11 @@ class XmlSerializer {
         return this;
     }
     serialize(root, name) {
-        name = name ?? (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName)(root);
+        name = name ?? (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlName)(root);
         if (!name) {
             throw new Error("can not find name for given object");
         }
-        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(name);
+        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(name);
         if (currentName.ns) {
             this._assignNamespace(currentName.ns, "xmlns");
         }
@@ -19868,13 +19951,13 @@ class XmlSerializer {
             }
             return;
         }
-        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName)(source);
+        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlName)(source);
         if (!qname) {
             return;
         }
-        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(qname);
+        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(qname);
         const prefix = this._getPrefix(currentName);
-        const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.ToQualifiedString)(currentName.name, prefix);
+        const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.ToQualifiedString)(currentName.name, prefix);
         builder.ele(null, tmp);
         this._writeObjectContent(builder, source, visited);
         this._builder.end();
@@ -19889,7 +19972,7 @@ class XmlSerializer {
         return undefined;
     }
     _writeObjectContent(builder, source, visited) {
-        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta)(source) ?? [];
+        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlFieldMeta)(source) ?? [];
         const metaByProp = new Map();
         for (const m of metas) {
             const arr = metaByProp.get(m.prop) ?? [];
@@ -19920,17 +20003,18 @@ class XmlSerializer {
                         switch (m.kind) {
                             case "attr": {
                                 let vStr = null;
-                                if (IsNumber(value)) {
-                                    if (this._format?.number) {
-                                        vStr = (0,_xml_serializer_format__WEBPACK_IMPORTED_MODULE_1__.FormatNumberXml)(value, this._format?.number);
-                                    }
-                                    vStr = this._fmt(value, XmlSerializer.DECIMALS, XmlSerializer.EPS);
+                                if (IsNumber(value) && this._nFmt) {
+                                    vStr = this._nFmt.toString(value);
+                                }
+                                if (m.formatter) {
+                                    const f = new m.formatter(this._format);
+                                    vStr = f.toString(value);
                                 }
                                 vStr = vStr ?? value.toString();
                                 if (vStr) {
-                                    const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(name);
+                                    const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(name);
                                     const prefix = this._getPrefix(currentName);
-                                    const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.ToQualifiedString)(currentName.name, prefix);
+                                    const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.ToQualifiedString)(currentName.name, prefix);
                                     builder.att(null, tmp, vStr);
                                 }
                                 break;
@@ -19950,16 +20034,6 @@ class XmlSerializer {
             this._writeObject(builder, value, visited);
         }
     }
-    _fmt(n, decimals, eps) {
-        if (!Number.isFinite(n)) {
-            throw new Error("Non-finite number.");
-        }
-        if (Math.abs(n) < eps) {
-            n = 0;
-        }
-        const rounded = Number(n.toFixed(decimals));
-        return (Object.is(rounded, -0) ? 0 : rounded).toString();
-    }
     _gatherNamespaces(tag, visited) {
         if (visited.has(tag)) {
             return;
@@ -19974,11 +20048,11 @@ class XmlSerializer {
             }
             return;
         }
-        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName)(tag);
+        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlName)(tag);
         if (qname) {
             this._assignNamespace(qname);
         }
-        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta)(tag) ?? [];
+        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlFieldMeta)(tag) ?? [];
         const metaByProp = new Map();
         for (const m of metas) {
             const arr = metaByProp.get(m.prop) ?? [];
@@ -20013,7 +20087,7 @@ class XmlSerializer {
         }
     }
     _assignNamespace(qn, prefix) {
-        const nqn = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(qn);
+        const nqn = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(qn);
         if (nqn?.ns) {
             const ns = nqn.ns.toLowerCase();
             if (!this._ns.get(ns)) {
@@ -20043,8 +20117,6 @@ class XmlSerializer {
         return value;
     }
 }
-XmlSerializer.EPS = 1e-12;
-XmlSerializer.DECIMALS = 6;
 //# sourceMappingURL=xml.serializer.js.map
 
 /***/ }),
@@ -20057,15 +20129,19 @@ XmlSerializer.DECIMALS = 6;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _3mfSerializer__WEBPACK_IMPORTED_MODULE_1__.BjsThreeMfSerializer),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ContentTypeFileName),
-/* harmony export */   FormatNumberXml: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.FormatNumberXml),
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerNumberOptions),
 /* harmony export */   GetXmlFieldMeta: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta),
 /* harmony export */   GetXmlName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.GetXmlName),
 /* harmony export */   IsQualifiedName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.IsQualifiedName),
 /* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.Known3mfRelationshipTypes),
 /* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.KnownI3mfContentType),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.MatrixFormatter),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ModelFileName),
+/* harmony export */   NumberFormatter: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.NumberFormatter),
 /* harmony export */   Object3dDirName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.Object3dDirName),
 /* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.OpenXmlContentTypesNamespace),
 /* harmony export */   OpenXmlRelationshipsNamespace: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.OpenXmlRelationshipsNamespace),
@@ -20099,7 +20175,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMfRelationship: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfRelationship),
 /* harmony export */   ThreeMfRelationships: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfRelationships),
 /* harmony export */   ThreeMfResources: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfResources),
-/* harmony export */   ThreeMfSerializer: () => (/* reexport safe */ _3mfSerializer__WEBPACK_IMPORTED_MODULE_1__.ThreeMfSerializer),
 /* harmony export */   ThreeMfTriangle: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfTriangle),
 /* harmony export */   ThreeMfTriangles: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfTriangles),
 /* harmony export */   ThreeMfVertex: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfVertex),
@@ -20114,7 +20189,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.XmlName),
 /* harmony export */   XmlNameToParts: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts),
-/* harmony export */   XmlSerializer: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.XmlSerializer)
+/* harmony export */   XmlSerializer: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.XmlSerializer),
+/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.resolveNumberOptions)
 /* harmony export */ });
 /* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./core */ "./dist/serializers/3MF/core/index.js");
 /* harmony import */ var _3mfSerializer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./3mfSerializer */ "./dist/serializers/3MF/3mfSerializer.js");
@@ -20132,15 +20209,19 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.BjsThreeMfSerializer),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ContentTypeFileName),
-/* harmony export */   FormatNumberXml: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.FormatNumberXml),
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerNumberOptions),
 /* harmony export */   GetXmlFieldMeta: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta),
 /* harmony export */   GetXmlName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.GetXmlName),
 /* harmony export */   IsQualifiedName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.IsQualifiedName),
 /* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.Known3mfRelationshipTypes),
 /* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.KnownI3mfContentType),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.MatrixFormatter),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ModelFileName),
+/* harmony export */   NumberFormatter: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.NumberFormatter),
 /* harmony export */   Object3dDirName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.Object3dDirName),
 /* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.OpenXmlContentTypesNamespace),
 /* harmony export */   OpenXmlRelationshipsNamespace: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.OpenXmlRelationshipsNamespace),
@@ -20174,7 +20255,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMfRelationship: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfRelationship),
 /* harmony export */   ThreeMfRelationships: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfRelationships),
 /* harmony export */   ThreeMfResources: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfResources),
-/* harmony export */   ThreeMfSerializer: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfSerializer),
 /* harmony export */   ThreeMfTriangle: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfTriangle),
 /* harmony export */   ThreeMfTriangles: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfTriangles),
 /* harmony export */   ThreeMfVertex: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfVertex),
@@ -20189,7 +20269,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlIgnore: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.XmlIgnore),
 /* harmony export */   XmlName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.XmlName),
 /* harmony export */   XmlNameToParts: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts),
-/* harmony export */   XmlSerializer: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.XmlSerializer)
+/* harmony export */   XmlSerializer: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.XmlSerializer),
+/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.resolveNumberOptions)
 /* harmony export */ });
 /* harmony import */ var _3MF__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3MF */ "./dist/serializers/3MF/index.js");
 
@@ -20818,6 +20900,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Assert),
 /* harmony export */   AxialTilt: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AxialTilt),
 /* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bearing),
+/* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.BjsThreeMfSerializer),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BlobTileCodec),
 /* harmony export */   Bounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bounded),
 /* harmony export */   BoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BoundedCollection),
@@ -20849,6 +20932,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_5__.CreateQuickHull),
 /* harmony export */   Current: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DebugTouchConsole),
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.DefaultXmlSerializerNumberOptions),
 /* harmony export */   DemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DeserializeLocalizableString),
@@ -20870,7 +20955,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Float32TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodec),
 /* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodecOptions),
 /* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodecOptionsBuilder),
-/* harmony export */   FormatNumberXml: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.FormatNumberXml),
 /* harmony export */   Geo2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Geo2),
 /* harmony export */   Geo3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Geo3),
 /* harmony export */   GeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoBounded),
@@ -20968,6 +21052,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
 /* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mass),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.MatrixFormatter),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MemoryCache),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ModelFileName),
@@ -20975,6 +21060,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MorganKeenanClass),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsIndex),
+/* harmony export */   NumberFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.NumberFormatter),
 /* harmony export */   Object3dDirName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Object3dDirName),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ObjectPoolOptions),
@@ -21062,7 +21148,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMfRelationship: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfRelationship),
 /* harmony export */   ThreeMfRelationships: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfRelationships),
 /* harmony export */   ThreeMfResources: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfResources),
-/* harmony export */   ThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfSerializer),
 /* harmony export */   ThreeMfTriangle: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfTriangle),
 /* harmony export */   ThreeMfTriangles: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfTriangles),
 /* harmony export */   ThreeMfVertex: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfVertex),
@@ -21136,7 +21221,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isPolyline),
 /* harmony export */   isShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isShape),
 /* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isValidable),
-/* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isViewProxy)
+/* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isViewProxy),
+/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.resolveNumberOptions)
 /* harmony export */ });
 /* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials */ "./dist/materials/index.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./display */ "./dist/display/index.js");

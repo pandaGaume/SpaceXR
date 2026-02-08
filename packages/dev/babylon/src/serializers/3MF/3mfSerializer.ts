@@ -6,143 +6,39 @@ import { Tools } from "@babylonjs/core/Misc/tools";
 
 // 3MF
 import { IncrementalIdFactory } from "./core/model/3mf.utils";
-import { ThreeMfDocumentBuilder, ThreeMfMeshBuilder, ThreeMfModelBuilder } from "./core/model/3mf.builder";
-import { ContentTypeFileName, ModelFileName, Object3dDirName, RelationshipDirName, RelationshipFileName, type I3mfDocument } from "./core/model/3mf.opc.interfaces";
+import { ThreeMfMeshBuilder, ThreeMfModelBuilder } from "./core/model/3mf.builder";
 import { Matrix3d } from "./core/model/3mf.math";
 
-import { ThreeMfSerializerGlobalConfiguration } from "./3mfSerializer.configuration";
-import { XmlBuilder } from "./core/xml/xml.builder";
-import { XmlSerializer } from "./core/xml/xml.serializer";
-import { type ByteSink, Utf8XmlWriterToBytes } from "./core/xml/xml.builder.bytes";
-import type { I3mfObject } from "./core/model/3mf.interfaces";
+import type { I3mfModel, I3mfObject } from "./core/model/3mf.interfaces";
 import type { I3mfVertexData } from "./core/model/3mf.types";
+import { AbstractThreeMfSerializer, IThreeMfSerializerOptions } from "./core/model/3mf.serializer";
+import { ThreeMfSerializerGlobalConfiguration } from "./3mfSerializer.configuration";
 
 /**
  *
  */
-export interface IThreeMfSerializerOptions {
-    /**  */
-    exportInstances?: boolean;
-    /**  */
-    exportSubmeshes?: boolean;
-}
+export class BjsThreeMfSerializer extends AbstractThreeMfSerializer<Mesh | InstancedMesh> {
 
-/**
- *
- */
-export class ThreeMfSerializer {
     private static _PositionKind = "position";
 
-    /**
-     *
-     */
-    static DEFAULT_3MF_EXPORTER_OPTIONS: IThreeMfSerializerOptions = {
-        exportInstances: false,
-        exportSubmeshes: false,
-    };
+    private _fflateReadyPromise?: Promise<any>;
 
-    private _o: IThreeMfSerializerOptions;
     /**
      *
      * @param opts
      */
     public constructor(opts: Partial<IThreeMfSerializerOptions> = {}) {
-        this._o = { ...ThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS, ...opts };
+        super(opts);
     }
 
-    /**
-     *
-     */
-    public get options(): Readonly<IThreeMfSerializerOptions> {
-        return this._o;
-    }
-
-    /**
-     *
-     * @param meshes
-     * @returns
-     */
-    public async serializeToMemoryAsync(meshes: Array<Mesh | InstancedMesh>): Promise<Uint8Array | undefined> {
-        const chunks = new Array<Uint8Array>();
-        let size = 0;
-        const sink = function (err: any, chunk: Uint8Array, _final: boolean) {
-            chunks.push(chunk);
-            size += chunk.length;
-        };
-        await this.serializeAsync(meshes, sink);
-        if (size) {
-            const buffer = new Uint8Array(size);
-            let off = 0;
-            for (const c of chunks) {
-                buffer.set(c, off);
-                off += c.length;
-            }
-            return buffer;
-        }
-        return undefined;
-    }
-
-    /**
-     * Generic 3MF binary serializer.
-     * @param meshes the meshes to serialize.
-     * @param sink we use sink to acumulate chunk of data into a target. This let's the opportunity to stream the output without storing huge amount of memory.
-     */
-    public async serializeAsync(meshes: Array<Mesh | InstancedMesh>, sink: (err: any, chunk: Uint8Array, final: boolean) => void): Promise<void> {
-        const lib = await this._ensureZipLibReadyAsync();
-        if (lib) {
-            const zip = lib.Zip;
-            const zipDeflate = lib.ZipDeflate;
-
-            if (!zip || !zipDeflate) {
-                throw new Error("fflate Zip / ZipDeflate not available");
-            }
-
-            const makeByteSinkFromFflateEntry = function (entry: any): ByteSink {
-                return { push: (chunk: any, final: any) => entry.push(chunk, final) };
-            };
-
-            const serializeEntry = function (target: any, name: string, object: any) {
-                const entry = new zipDeflate(name, { level: 6 });
-                target.add(entry);
-                const sink = makeByteSinkFromFflateEntry(entry);
-                const w = new Utf8XmlWriterToBytes(sink);
-                const b = new XmlBuilder(w).dec("1.0", "UTF-8");
-                const s = new XmlSerializer(b);
-                s.serialize(object);
-                w.finish();
-            };
-
-            const doc = this.toDocument(meshes);
-            if (doc) {
-                const target = new zip(sink);
-
-                // save the root content type
-                serializeEntry(target, ContentTypeFileName, doc.contentTypes);
-
-                // save the relationships
-                serializeEntry(target, `${RelationshipDirName}${RelationshipFileName}`, doc.relationships);
-
-                // save the model
-                serializeEntry(target, `${Object3dDirName}${ModelFileName}`, doc.model);
-
-                target.end();
-            }
-        }
-    }
-
-    /**
-     *
-     * @param meshes
-     * @returns
-     */
-    public toDocument(meshes: Array<Mesh | InstancedMesh>): I3mfDocument | undefined {
+    public override toModel(meshes: Array<Mesh | InstancedMesh>): I3mfModel  {
         const idFactory = new IncrementalIdFactory();
 
         const modelBuilder = new ThreeMfModelBuilder();
         const index = new Map<Mesh | SubMesh, I3mfObject>();
 
         // first pass to build every model from mesh - keep it simple
-        const instances: Array<InstancedMesh> | null = this._o.exportInstances ? [] : null;
+        const instances: Array<InstancedMesh> | null = this.options.exportInstances ? [] : null;
 
         for (let j = 0; j < meshes.length; j++) {
             if (meshes[j].isAnInstance) {
@@ -155,7 +51,7 @@ export class ThreeMfSerializer {
             const buildTransform = this._handleBjsTo3mfMatrixTransformToRef(worldTransform, Matrix3d.Zero())
 
              // into 3MF Submeshes are important because they may carry color information...
-            if (this._o.exportSubmeshes ) {
+            if (this.options.exportSubmeshes ) {
                 const subMeshes = babylonMesh.subMeshes;
 
                 if (subMeshes && subMeshes.length > 0) {
@@ -177,7 +73,7 @@ export class ThreeMfSerializer {
                 }
             } else {
                 const data = {
-                    positions: babylonMesh.getVerticesData(ThreeMfSerializer._PositionKind) || [],
+                    positions: babylonMesh.getVerticesData(BjsThreeMfSerializer._PositionKind) || [],
                     indices: babylonMesh.getIndices() || [],
                 };
                 const object = new ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
@@ -203,7 +99,7 @@ export class ThreeMfSerializer {
 
                         // process sub meshes
                         const subMeshes = _babylonMesh.subMeshes;
-                        if (this._o.exportSubmeshes && subMeshes && subMeshes.length > 0) {
+                        if (this.options.exportSubmeshes && subMeshes && subMeshes.length > 0) {
                             for (let k = 0; k < subMeshes.length; k++) {
                                 const subMesh = subMeshes[k];
 
@@ -230,9 +126,26 @@ export class ThreeMfSerializer {
             }
         }
 
-        const docBuilder = new ThreeMfDocumentBuilder().withModel(modelBuilder);
+        return modelBuilder.build();
+    }
 
-        return docBuilder.build();
+    public override async ensureZipLibReadyAsync(): Promise<any> {
+        if (this._fflateReadyPromise) {
+            return await this._fflateReadyPromise;
+        }
+
+        this._fflateReadyPromise = (async () => {
+            // globalThis is the glogal object whatever the environment : ie windows
+            const g = globalThis as any;
+
+            if (!g.fflate) {
+                await Tools.LoadScriptAsync(ThreeMfSerializerGlobalConfiguration.FFLATEUrl);
+            }
+
+            return g.fflate;
+        })();
+
+        return await this._fflateReadyPromise;
     }
 
     private _extractSubMesh(mesh: Mesh, sm: SubMesh): I3mfVertexData | undefined {
@@ -241,7 +154,7 @@ export class ThreeMfSerializer {
             return undefined;
         }
 
-        const allPos = mesh.getVerticesData(ThreeMfSerializer._PositionKind);
+        const allPos = mesh.getVerticesData(BjsThreeMfSerializer._PositionKind);
         if (!allPos) {
             return undefined;
         }
@@ -294,8 +207,45 @@ export class ThreeMfSerializer {
 
     private static readonly _R_BJS_TO_3MF = Matrix.RotationX(Math.PI / 2);
 
+    /**
+     * Converts a Babylon.js 4x4 matrix into a 3MF 3x4 transform matrix and writes the result into ref.
+     *
+     * Babylon.js conventions:
+     * Babylon.js exposes matrices with logical row/column indexing (M(row, column)),
+     * but stores the 16 coefficients in a contiguous Float32Array using row-major order.
+     * In other words, tmp.m is laid out as:
+     * [ M00, M01, M02, M03,
+     *   M10, M11, M12, M13,
+     *   M20, M21, M22, M23,
+     *   M30, M31, M32, M33 ]
+     *
+     * Babylon operations (multiply, TransformCoordinates, etc.) are consistent with this storage.
+     *
+     * 3MF expectation:
+     * 3MF expects an affine transform as a 3x4 matrix (12 values) ordered as:
+     * m00 m01 m02  m10 m11 m12  m20 m21 m22  m30 m31 m32
+     * (the 4th column M03, M13, M23, M33 is not part of the 3x4 representation).
+     *
+     * How it works:
+     * 1) First compose the Babylon transform with the basis change matrix _R_BJS_TO_3MF:
+     *    tmp = tBjs * _R_BJS_TO_3MF
+     * 2) Then read tmp.m (Babylon row-major storage) and extract the 12 required coefficients in 3MF order:
+     *    row 0: a[0],  a[1],  a[2]
+     *    row 1: a[4],  a[5],  a[6]
+     *    row 2: a[8],  a[9],  a[10]
+     *    row 3: a[12], a[13], a[14]
+     *
+     * Interop note:
+     * Do not transpose here. This code relies on Babylon's row-major memory layout and only reorders
+     * values to match the 3MF 3x4 format. Transposition/reinterpretation is only needed when interfacing
+     * with systems that assume column-major storage.
+     *
+     * @param tBjs Babylon.js 4x4 matrix (logical M(row, column), row-major storage in tBjs.m).
+     * @param ref Output 3MF matrix (3x4). ref.values receives 12 numbers in 3MF order.
+     * @returns ref, for chaining.
+     */
     private _handleBjsTo3mfMatrixTransformToRef(tBjs: Matrix, ref: Matrix3d): Matrix3d {
-        const tmp = tBjs.multiplyToRef(ThreeMfSerializer._R_BJS_TO_3MF, Matrix.Zero());
+        const tmp = tBjs.multiplyToRef(BjsThreeMfSerializer._R_BJS_TO_3MF, Matrix.Zero());
         const a = tmp.m;
         // a is still Babylon storage, but now the semantic rows/cols match 3MF expectation.
         // 3MF order: m00 m01 m02 m10 m11 m12 m20 m21 m22 m30 m31 m32
@@ -304,26 +254,5 @@ export class ThreeMfSerializer {
                       a[8], a[9], a[10], 
                       a[12], a[13], a[14]];
         return ref;
-    }
-
-    private _fflateReadyPromise?: Promise<any>;
-
-    private async _ensureZipLibReadyAsync(): Promise<any> {
-        if (this._fflateReadyPromise) {
-            return await this._fflateReadyPromise;
-        }
-
-        this._fflateReadyPromise = (async () => {
-            // globalThis is the glogal object whatever the environment : ie windows
-            const g = globalThis as any;
-
-            if (!g.fflate) {
-                await Tools.LoadScriptAsync(ThreeMfSerializerGlobalConfiguration.FFLATEUrl);
-            }
-
-            return g.fflate;
-        })();
-
-        return await this._fflateReadyPromise;
     }
 }

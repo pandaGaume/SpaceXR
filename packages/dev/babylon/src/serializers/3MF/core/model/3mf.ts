@@ -23,7 +23,7 @@ import type {
     ST_UriReference,
 } from "./3mf.interfaces";
 import { ST_Unit, ThreeDimModelNamespace, ST_ObjectType } from "./3mf.interfaces";
-import type { Matrix3d } from "./3mf.math";
+import { MatrixFormatter, type Matrix3d } from "./3mf.math";
 
 /**
  *
@@ -336,6 +336,7 @@ export class ThreeMfComponents implements I3mfComponents {
     component: Array<I3mfComponent> = [];
 }
 
+
 /**
  *
  */
@@ -350,7 +351,7 @@ export class ThreeMfComponent implements I3mfComponent {
     /**
      *
      */
-    @XmlAttr({ name: "transform" })
+    @XmlAttr({ name: "transform", formatter : MatrixFormatter })
     transform?: Matrix3d;
 
     public constructor(objectid: ST_ResourceID, transform?: Matrix3d) {
@@ -428,7 +429,7 @@ export class ThreeMfItem implements I3mfItem {
     /**
      *
      */
-    @XmlAttr({ name: "transform" })
+    @XmlAttr({ name: "transform", formatter : MatrixFormatter })
     transform?: Matrix3d;
 
     /**

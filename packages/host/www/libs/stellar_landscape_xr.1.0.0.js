@@ -18103,8 +18103,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core/Misc/tools */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./core/model/3mf.utils */ "./dist/serializers/3MF/core/model/3mf.utils.js");
-/* harmony import */ var _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./core/model/3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
-/* harmony import */ var _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./core/model/3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
+/* harmony import */ var _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./core/model/3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
+/* harmony import */ var _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./core/model/3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
+/* harmony import */ var _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./core/model/3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
 /* harmony import */ var _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core/model/3mf.serializer */ "./dist/serializers/3MF/core/model/3mf.serializer.js");
 /* harmony import */ var _3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./3mfSerializer.configuration */ "./dist/serializers/3MF/3mfSerializer.configuration.js");
 
@@ -18114,13 +18115,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_1__.AbstractThreeMfSerializer {
     constructor(opts = {}) {
-        super(opts);
+        super({ ...BjsThreeMfSerializer.DefaultOptions, ...opts });
     }
-    toModel(meshes) {
+    toModel(builder, meshes) {
         const idFactory = new _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_2__.IncrementalIdFactory();
-        const modelBuilder = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMfModelBuilder();
+        const modelBuilder = builder;
         const index = new Map();
         const instances = this.options.exportInstances ? [] : null;
         for (let j = 0; j < meshes.length; j++) {
@@ -18131,7 +18133,7 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
             const babylonMesh = meshes[j];
             const objectName = babylonMesh.name || `mesh${j}`;
             const worldTransform = babylonMesh.getWorldMatrix();
-            const buildTransform = this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__.Matrix3d.Zero());
+            const buildTransform = this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__.Matrix3d.Zero());
             if (this.options.exportSubmeshes) {
                 const subMeshes = babylonMesh.subMeshes;
                 if (subMeshes && subMeshes.length > 0) {
@@ -18140,7 +18142,7 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
                         const data = this._extractSubMesh(babylonMesh, subMesh);
                         if (data) {
                             const submeshName = `${objectName}_${k}`;
-                            const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMfMeshBuilder(idFactory.next())
+                            const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfMeshBuilder(idFactory.next())
                                 .withData(data)
                                 .withName(submeshName)
                                 .build();
@@ -18156,7 +18158,7 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
                     positions: babylonMesh.getVerticesData(BjsThreeMfSerializer._PositionKind) || [],
                     indices: babylonMesh.getIndices() || [],
                 };
-                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_3__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
+                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
                 modelBuilder.withMesh(object);
                 modelBuilder.withBuild(object.id, buildTransform);
                 index.set(babylonMesh, object);
@@ -18165,27 +18167,28 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
         if (instances && instances.length) {
             const grouped = this._groupBy(instances, (i) => i.sourceMesh);
             for (const [_babylonMesh, _instances] of Array.from(grouped.entries())) {
-                if (_instances && _instances.length) {
-                    for (let j = 0; j < _instances.length; j++) {
-                        const mesh = _instances[j];
-                        const worldTransform = mesh.getWorldMatrix();
-                        const subMeshes = _babylonMesh.subMeshes;
-                        if (this.options.exportSubmeshes && subMeshes && subMeshes.length > 0) {
-                            for (let k = 0; k < subMeshes.length; k++) {
-                                const subMesh = subMeshes[k];
-                                const objectRef = index.get(subMesh);
-                                if (objectRef) {
-                                    modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__.Matrix3d.Zero()));
-                                    continue;
-                                }
+                if (!_instances || !_instances.length) {
+                    continue;
+                }
+                for (let j = 0; j < _instances.length; j++) {
+                    const mesh = _instances[j];
+                    const worldTransform = mesh.getWorldMatrix();
+                    const subMeshes = _babylonMesh.subMeshes;
+                    if (this.options.exportSubmeshes && subMeshes && subMeshes.length > 0) {
+                        for (let k = 0; k < subMeshes.length; k++) {
+                            const subMesh = subMeshes[k];
+                            const objectRef = index.get(subMesh);
+                            if (objectRef) {
+                                modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__.Matrix3d.Zero()));
+                                continue;
                             }
-                            continue;
                         }
-                        const objectRef = index.get(_babylonMesh);
-                        if (objectRef) {
-                            modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_4__.Matrix3d.Zero()));
-                            continue;
-                        }
+                        continue;
+                    }
+                    const objectRef = index.get(_babylonMesh);
+                    if (objectRef) {
+                        modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__.Matrix3d.Zero()));
+                        continue;
                     }
                 }
             }
@@ -18257,13 +18260,16 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
     _handleBjsTo3mfMatrixTransformToRef(tBjs, ref) {
         const tmp = tBjs.multiplyToRef(BjsThreeMfSerializer._R_BJS_TO_3MF, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
         const a = tmp.m;
-        ref.values = [a[0], a[1], a[2],
+        ref.values = [
+            a[0], a[1], a[2],
             a[4], a[5], a[6],
             a[8], a[9], a[10],
-            a[12], a[13], a[14]];
+            a[12], a[13], a[14],
+        ];
         return ref;
     }
 }
+BjsThreeMfSerializer.DefaultOptions = { unit: _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_6__.ST_Unit.meter, exportInstances: false, exportSubmeshes: false };
 BjsThreeMfSerializer._PositionKind = "position";
 BjsThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.RotationX(Math.PI / 2);
 //# sourceMappingURL=3mfSerializer.js.map
@@ -19137,6 +19143,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _3mf_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
 /* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
+/* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
 /* harmony import */ var _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.builder */ "./dist/serializers/3MF/core/xml/xml.builder.js");
 /* harmony import */ var _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../xml/xml.serializer */ "./dist/serializers/3MF/core/xml/xml.serializer.js");
 /* harmony import */ var _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml/xml.builder.bytes */ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js");
@@ -19145,52 +19152,52 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 class AbstractThreeMfSerializer {
-    constructor(opts = {}) {
-        this._o = { ...AbstractThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS, ...opts };
+    constructor(opts) {
+        this._o = opts;
     }
     get options() {
         return this._o;
     }
     async serializeAsync(sink, ...meshes) {
         const lib = await this.ensureZipLibReadyAsync();
-        if (lib) {
-            const zip = lib.Zip;
-            const zipDeflate = lib.ZipDeflate;
-            if (!zip || !zipDeflate) {
-                throw new Error("fflate Zip / ZipDeflate not available");
-            }
-            const makeByteSinkFromFflateEntry = function (entry) {
-                return { push: (chunk, final) => entry.push(chunk, final) };
-            };
-            const serializeEntry = function (target, name, object) {
-                const entry = new zipDeflate(name, { level: 6 });
-                target.add(entry);
-                const sink = makeByteSinkFromFflateEntry(entry);
-                const w = new _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__.Utf8XmlWriterToBytes(sink);
-                const b = new _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__.XmlBuilder(w).dec("1.0", "UTF-8");
-                const s = new _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__.XmlSerializer(b);
-                s.serialize(object);
-                w.finish();
-            };
-            const doc = this.toDocument(meshes);
-            if (doc) {
-                const target = new zip(sink);
-                serializeEntry(target, _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ContentTypeFileName, doc.contentTypes);
-                serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipFileName}`, doc.relationships);
-                serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.Object3dDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ModelFileName}`, doc.model);
-                target.end();
-            }
+        if (!lib) {
+            return;
         }
+        const zip = lib.Zip;
+        const zipDeflate = lib.ZipDeflate;
+        if (!zip || !zipDeflate) {
+            throw new Error("fflate Zip / ZipDeflate not available");
+        }
+        const makeByteSinkFromFflateEntry = function (entry) {
+            return { push: (chunk, final) => entry.push(chunk, final) };
+        };
+        const serializeEntry = function (target, name, object) {
+            const entry = new zipDeflate(name, { level: 6 });
+            target.add(entry);
+            const sink = makeByteSinkFromFflateEntry(entry);
+            const w = new _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__.Utf8XmlWriterToBytes(sink);
+            const b = new _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__.XmlBuilder(w).dec("1.0", "UTF-8");
+            const s = new _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__.XmlSerializer(b);
+            s.serialize(object);
+            w.finish();
+        };
+        const doc = this.toDocument(meshes);
+        if (!doc) {
+            return;
+        }
+        const target = new zip(sink);
+        serializeEntry(target, _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ContentTypeFileName, doc.contentTypes);
+        serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipFileName}`, doc.relationships);
+        serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.Object3dDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ModelFileName}`, doc.model);
+        target.end();
     }
     toDocument(meshes) {
-        return new _3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfDocumentBuilder().withModel(this.toModel(meshes)).build();
+        const b = new _3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfModelBuilder().withUnit(this._o?.unit ?? _3mf_interfaces__WEBPACK_IMPORTED_MODULE_5__.ST_Unit.millimeter);
+        return new _3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfDocumentBuilder().withModel(this.toModel(b, meshes)).build();
     }
 }
-AbstractThreeMfSerializer.DEFAULT_3MF_EXPORTER_OPTIONS = {
-    exportInstances: false,
-    exportSubmeshes: false,
-};
 class ThreeMf {
     static async SerializeToMemoryAsync(s, ...meshes) {
         const chunks = new Array();
@@ -19200,16 +19207,16 @@ class ThreeMf {
             size += chunk.length;
         };
         await s.serializeAsync(sink, ...meshes);
-        if (size) {
-            const buffer = new Uint8Array(size);
-            let off = 0;
-            for (const c of chunks) {
-                buffer.set(c, off);
-                off += c.length;
-            }
-            return buffer;
+        if (!size) {
+            return undefined;
         }
-        return undefined;
+        const buffer = new Uint8Array(size);
+        let off = 0;
+        for (const c of chunks) {
+            buffer.set(c, off);
+            off += c.length;
+        }
+        return buffer;
     }
 }
 //# sourceMappingURL=3mf.serializer.js.map

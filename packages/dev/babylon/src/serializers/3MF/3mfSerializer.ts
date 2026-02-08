@@ -351,7 +351,7 @@ export class BjsThreeMfSerializer extends AbstractThreeMfSerializer<Mesh | Insta
      * - This is commonly used to convert between Y-up and Z-up conventions.
      * - Verify this matches your pipeline (Babylon is typically left-handed Y-up).
      */
-    private static readonly _R_BJS_TO_3MF = Matrix.RotationX(Math.PI / 2);
+    private static readonly _R_BJS_TO_3MF = Matrix.RotationX(Math.PI / 2).multiply(Matrix.Scaling(1, -1, 1));
 
     /**
      * Converts a Babylon.js 4x4 matrix into a 3MF 3x4 transform matrix and writes the result into ref.

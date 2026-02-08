@@ -18271,7 +18271,7 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
 }
 BjsThreeMfSerializer.DefaultOptions = { unit: _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_6__.ST_Unit.meter, exportInstances: false, exportSubmeshes: false };
 BjsThreeMfSerializer._PositionKind = "position";
-BjsThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.RotationX(Math.PI / 2);
+BjsThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.RotationX(Math.PI / 2).multiply(_babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Scaling(1, -1, 1));
 //# sourceMappingURL=3mfSerializer.js.map
 
 /***/ }),

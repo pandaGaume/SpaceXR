@@ -172,21 +172,13 @@
       async function buildText() {
         if (!bjs.mesh) return "Scene not ready yet...";
         
-        const serializer = new SPACEXR.ThreeMfSerializer();
-        const res = await serializer.serializeToMemoryAsync(bjs.mesh);
+        const res = await SPACEXR.ThreeMf.SerializeToMemoryAsync(new SPACEXR.BjsThreeMfSerializer(), ...bjs.mesh);
         return `done, size:${res?.length??0}`;
-
-        //return JSON.stringify(doc.model);
-        /*const w = new SPACEXR.StringXmlWriter(); // where to serialize
-        const b = new SPACEXR.XmlBuilder(w).dec("1.0", "UTF-8"); // xml logic
-        const serializer = new SPACEXR.XmlSerializer(b); // serializer
-        serializer.serialize(doc.model);
-        return w.toString();*/
       }
       
       async function exportToFile(handle,source){
-         const serializer = new SPACEXR.ThreeMfSerializer();
-         const res = await serializer.serializeToMemoryAsync(source);
+        const res = await SPACEXR.ThreeMf.SerializeToMemoryAsync(new SPACEXR.BjsThreeMfSerializer(), ...source);
+        
         const writable = await handle.createWritable();
           try {
             // Option 1: ecrire un Blob
@@ -200,8 +192,8 @@
       }
 
       async function downloadFileImpl(source, filename = "export.3mf") {
-          const serializer = new SPACEXR.ThreeMfSerializer();
-          const res = await serializer.serializeToMemoryAsync(source); // Uint8Array
+        
+          const res = await SPACEXR.ThreeMf.SerializeToMemoryAsync(new SPACEXR.BjsThreeMfSerializer(), ...source);
 
           const blob = new Blob([res], { type: "model/3mf" });
           const url = URL.createObjectURL(blob);

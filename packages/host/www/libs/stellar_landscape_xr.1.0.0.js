@@ -18278,6 +18278,7 @@ BjsThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTE
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.AbstractThreeMfSerializer),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ContentTypeFileName),
 /* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerFormatOptions),
 /* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerNumberOptions),
@@ -18300,6 +18301,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ST_Unit),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _xml__WEBPACK_IMPORTED_MODULE_0__.StringXmlWriter),
 /* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ThreeDimModelNamespace),
+/* harmony export */   ThreeMf: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ThreeMf),
 /* harmony export */   ThreeMfBase: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ThreeMfBase),
 /* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ThreeMfBaseMaterials),
 /* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _model__WEBPACK_IMPORTED_MODULE_1__.ThreeMfBuild),
@@ -19256,6 +19258,7 @@ class IncrementalIdFactory {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _3mf_serializer__WEBPACK_IMPORTED_MODULE_6__.AbstractThreeMfSerializer),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.ContentTypeFileName),
 /* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.Known3mfRelationshipTypes),
 /* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.KnownI3mfContentType),
@@ -19271,6 +19274,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ST_ObjectType: () => (/* reexport safe */ _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_ObjectType),
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_Unit),
 /* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace),
+/* harmony export */   ThreeMf: () => (/* reexport safe */ _3mf_serializer__WEBPACK_IMPORTED_MODULE_6__.ThreeMf),
 /* harmony export */   ThreeMfBase: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMfBase),
 /* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMfBaseMaterials),
 /* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _3mf__WEBPACK_IMPORTED_MODULE_3__.ThreeMfBuild),
@@ -19306,6 +19310,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _3mf__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./3mf */ "./dist/serializers/3MF/core/model/3mf.js");
 /* harmony import */ var _3mf_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
 /* harmony import */ var _3mf_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
+/* harmony import */ var _3mf_serializer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./3mf.serializer */ "./dist/serializers/3MF/core/model/3mf.serializer.js");
+
 
 
 
@@ -20129,6 +20135,7 @@ class XmlSerializer {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.AbstractThreeMfSerializer),
 /* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _3mfSerializer__WEBPACK_IMPORTED_MODULE_1__.BjsThreeMfSerializer),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ContentTypeFileName),
 /* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerFormatOptions),
@@ -20152,6 +20159,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ST_Unit),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.StringXmlWriter),
 /* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace),
+/* harmony export */   ThreeMf: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMf),
 /* harmony export */   ThreeMfBase: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBase),
 /* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBaseMaterials),
 /* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _core__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBuild),
@@ -20209,6 +20217,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.AbstractThreeMfSerializer),
 /* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.BjsThreeMfSerializer),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ContentTypeFileName),
 /* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.DefaultXmlSerializerFormatOptions),
@@ -20232,6 +20241,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ST_Unit),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.StringXmlWriter),
 /* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace),
+/* harmony export */   ThreeMf: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMf),
 /* harmony export */   ThreeMfBase: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBase),
 /* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBaseMaterials),
 /* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _3MF__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBuild),
@@ -20894,6 +20904,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractShape),
+/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.AbstractThreeMfSerializer),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileMetrics),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileProvider),
 /* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
@@ -21125,6 +21136,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Texture3: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.Texture3),
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.TextureLayerView),
 /* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeDimModelNamespace),
+/* harmony export */   ThreeMf: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMf),
 /* harmony export */   ThreeMfBase: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfBase),
 /* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfBaseMaterials),
 /* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfBuild),

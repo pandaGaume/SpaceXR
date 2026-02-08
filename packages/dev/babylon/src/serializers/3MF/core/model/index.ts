@@ -5,3 +5,4 @@ export * from "./3mf";
 export * from "./3mf.builder";
 export * from "./3mf.types";
 export * from "./3mf.math";
+export * from "./3mf.serializer";

@@ -125,23 +125,23 @@ export abstract class AbstractThreeMfSerializer<T> implements I3mfSerializer<T> 
 }
 
 export class ThreeMf {
-        public static async SerializeToMemoryAsync<A>(s:I3mfSerializer<A>, ... meshes :Array<A>) : Promise<Uint8Array|undefined>{
-            const chunks = new Array<Uint8Array>();
-            let size = 0;
-            const sink = function (err: any, chunk: Uint8Array, _final: boolean) {
-                chunks.push(chunk);
-                size += chunk.length;
-            };
-            await s.serializeAsync(sink, ...meshes);
-            if (size) {
-                const buffer = new Uint8Array(size);
-                let off = 0;
-                for (const c of chunks) {
-                    buffer.set(c, off);
-                    off += c.length;
-                }
-                return buffer;
+    public static async SerializeToMemoryAsync<A>(s:I3mfSerializer<A>, ... meshes :Array<A>) : Promise<Uint8Array|undefined>{
+        const chunks = new Array<Uint8Array>();
+        let size = 0;
+        const sink = function (err: any, chunk: Uint8Array, _final: boolean) {
+            chunks.push(chunk);
+            size += chunk.length;
+        };
+        await s.serializeAsync(sink, ...meshes);
+        if (size) {
+            const buffer = new Uint8Array(size);
+            let off = 0;
+            for (const c of chunks) {
+                buffer.set(c, off);
+                off += c.length;
             }
-            return undefined;
+            return buffer;
         }
+        return undefined;
+    }
 }

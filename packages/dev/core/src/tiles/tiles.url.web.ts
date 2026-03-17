@@ -12,6 +12,7 @@ export class WebTileUrlBuilder implements IUrlBuilder<ITile2DAddress> {
 
     _subdomains?: string[];
     _i?: number; // cached round robin value
+    _tmsY?: boolean; // when true, flip Y for TMS convention: y_tms = (2^z - 1) - y_xyz
 
     public constructor() {}
 
@@ -51,6 +52,16 @@ export class WebTileUrlBuilder implements IUrlBuilder<ITile2DAddress> {
         return this;
     }
 
+    /**
+     * Enable TMS Y-axis convention. TMS tiles have Y=0 at the bottom (south),
+     * while XYZ/slippy-map tiles have Y=0 at the top (north).
+     * When enabled, the Y coordinate is flipped: y_tms = (2^z - 1) - y_xyz
+     */
+    public withTMSY(v: boolean = true): WebTileUrlBuilder {
+        this._tmsY = v;
+        return this;
+    }
+
     public buildUrl(a: ITile2DAddress, ...params: unknown[]): string {
         const scheme = this._isSecure ? "https" : "http";
         const host = this._port ? `${this._host}:${this._port}` : `${this._host}`;
@@ -60,8 +71,9 @@ export class WebTileUrlBuilder implements IUrlBuilder<ITile2DAddress> {
             template = template.replaceAll("{extension}", this._extension);
         }
 
+        const y = this._tmsY ? (1 << a.levelOfDetail) - 1 - a.y : a.y;
         let str = template.replaceAll("{x}", a.x.toString());
-        str = str.replaceAll("{y}", a.y.toString());
+        str = str.replaceAll("{y}", y.toString());
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
         if (this._subdomains) {
             let i = this._i ?? 0;

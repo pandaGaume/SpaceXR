@@ -79,7 +79,10 @@ export function hasTileSelectionContext(b: unknown): b is ITileSelectionContext 
 ///   and 'Removed' TileAddresses, allowing other components of the system to react and update accordingly. This feature is vital for ensuring that the system remains dynamic
 ///   and responsive to changes, such as user navigation or zoom adjustments.
 /// </summary>
-export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITile2DAddress>, ITileSelectionContext {}
+export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITile2DAddress>, ITileSelectionContext {
+    /** Clear cached tile addresses, forcing re-emission on the next setContext call */
+    clearContext(): void;
+}
 
 export interface IHasView {
     view: ITileView;

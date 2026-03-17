@@ -3,11 +3,11 @@ var SPACEXR;
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "../core/dist/cache/cache.js":
+/***/ "../core/dist/cache/cache.js"
 /*!***********************************!*\
   !*** ../core/dist/cache/cache.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -211,6 +211,7 @@ class MemoryCache {
     updateTimer() {
         if (this._head) {
             const delay = this._head.expiration - Date.now();
+            //console.log("timeout after clear", Math.round(delay / 1000), "seconds, remains", this._count, "tile(s)");
             if (this._timer) {
                 clearTimeout(this._timer);
             }
@@ -220,6 +221,7 @@ class MemoryCache {
             this._timer = undefined;
         }
     }
+    // LINKED LIST
     sortList(e) {
         if (e) {
             const head = this._head;
@@ -227,10 +229,12 @@ class MemoryCache {
                 if (!e._next && !e._prev) {
                     this.insertLast(e);
                 }
+                // then sort e as bubble up or down
                 const value = e.expiration;
                 let n = e._prev;
                 if (n && n.expiration > value) {
                     this.removeNode(e);
+                    // up
                     do {
                         n = n._prev;
                     } while (n && n.expiration > value);
@@ -244,6 +248,7 @@ class MemoryCache {
                 n = e._next;
                 if (n && n.expiration < value) {
                     this.removeNode(e);
+                    // down
                     do {
                         n = n._next;
                     } while (n && n.expiration < value);
@@ -258,6 +263,7 @@ class MemoryCache {
             finally {
                 if (this._head && this._head !== head) {
                     const delay = this._head.expiration - Date.now();
+                    // we change the trigger.
                     if (this._timer) {
                         clearTimeout(this._timer);
                     }
@@ -331,13 +337,13 @@ class MemoryCache {
 }
 //# sourceMappingURL=cache.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/cache/index.js":
+/***/ "../core/dist/cache/index.js"
 /*!***********************************!*\
   !*** ../core/dist/cache/index.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -353,25 +359,25 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/collections/collection.js":
+/***/ "../core/dist/collections/collection.js"
 /*!**********************************************!*\
   !*** ../core/dist/collections/collection.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Collection: () => (/* binding */ Collection)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../types */ "../core/dist/types.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../validable */ "../core/dist/validable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../types */ "../core/dist/types.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../validable */ "../core/dist/validable.js");
 
 
 
-class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+class Collection extends _validable__WEBPACK_IMPORTED_MODULE_2__.ValidableBase {
     static Empty() {
         return new Collection();
     }
@@ -381,13 +387,13 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
     }
     get addedObservable() {
         if (!this._addedObservable) {
-            this._addedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._addedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         }
         return this._addedObservable;
     }
     get removedObservable() {
         if (!this._removedObservable) {
-            this._removedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._removedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         }
         return this._removedObservable;
     }
@@ -458,7 +464,7 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
             return false;
         }
         return (this._items.every((l) => {
-            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(l)) {
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_1__.isValidable)(l)) {
                 return l.isValid;
             }
             return true;
@@ -466,7 +472,7 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
     }
     _doValidate() {
         for (const i of this._items) {
-            if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isValidable)(i)) {
+            if ((0,_types__WEBPACK_IMPORTED_MODULE_1__.isValidable)(i)) {
                 i.validate();
             }
         }
@@ -488,13 +494,13 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
 }
 //# sourceMappingURL=collection.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/collections/orderedCollection.js":
+/***/ "../core/dist/collections/orderedCollection.js"
 /*!*****************************************************!*\
   !*** ../core/dist/collections/orderedCollection.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -521,11 +527,14 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
             return [];
         }
         for (const item of items) {
+            // Find the correct position to insert the new item
             let index = this._items.findIndex((item) => (item.weight ?? 0) > (item.weight ?? 0));
             if (index === -1) {
+                // If the item is heavier than all items in the array, add it to the end
                 this._items.push(item);
             }
             else {
+                // Otherwise, insert it in the correct position
                 this._items.splice(index, 0, item);
             }
         }
@@ -552,27 +561,54 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
 }
 //# sourceMappingURL=orderedCollection.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/dem/dem.helpers.js":
+/***/ "../core/dist/dem/dem.helpers.js"
 /*!***************************************!*\
   !*** ../core/dist/dem/dem.helpers.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ElevationHelpers: () => (/* binding */ ElevationHelpers)
 /* harmony export */ });
 class ElevationHelpers {
+    /**
+     * Performs cubic interpolation between four values.
+     * @param v0 The value at position -1.
+     * @param v1 The value at position 0.
+     * @param v2 The value at position +1.
+     * @param v3 The value at position +2.
+     * @param t The interpolation factor (0.0 to 1.0).
+     * @returns The interpolated value.
+     */
     static _cubicInterpolate(v0, v1, v2, v3, t) {
         return v1 + 0.5 * t * (v2 - v0 + t * (2 * v0 - 5 * v1 + 4 * v2 - v3 + t * (3 * (v1 - v2) + v3 - v0)));
     }
+    /**
+     * Safely retrieves an elevation value, clamping indices to valid ranges.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param xi The x-coordinate to retrieve.
+     * @param yi The y-coordinate to retrieve.
+     * @returns The elevation value at the clamped (xi, yi).
+     */
     static getSafeElevation(elevations, w, h, xi, yi) {
         const clampedX = Math.min(Math.max(0, xi), w - 1);
         const clampedY = Math.min(Math.max(0, yi), h - 1);
         return elevations[clampedX + clampedY * w];
     }
+    /**
+     * Computes the elevation at a normalized position using bilinear interpolation.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param xNorm Normalized x-coordinate (0.0 to 1.0).
+     * @param yNorm Normalized y-coordinate (0.0 to 1.0).
+     * @returns The interpolated elevation value.
+     */
     static GetElevationBilinear(elevations, w, h, xNorm, yNorm) {
         const x = xNorm * (w - 1);
         const y = yNorm * (h - 1);
@@ -590,6 +626,15 @@ class ElevationHelpers {
         const r2 = q12 * (1 - dx) + q22 * dx;
         return r1 * (1 - dy) + r2 * dy;
     }
+    /**
+     * Computes the elevation at a normalized position using cubic interpolation.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param xNorm Normalized x-coordinate (0.0 to 1.0).
+     * @param yNorm Normalized y-coordinate (0.0 to 1.0).
+     * @returns The interpolated elevation value.
+     */
     static GetElevationCubic(elevations, w, h, xNorm, yNorm) {
         const x = xNorm * (w - 1);
         const y = yNorm * (h - 1);
@@ -597,6 +642,7 @@ class ElevationHelpers {
         const y0 = Math.floor(y);
         const dx = x - x0;
         const dy = y - y0;
+        // Fetch 4x4 grid of elevations around (x, y)
         const values = [];
         for (let j = -1; j <= 2; j++) {
             const row = [];
@@ -605,21 +651,47 @@ class ElevationHelpers {
             }
             values.push(row);
         }
+        // Perform cubic interpolation row by row
         const interpolatedRows = values.map((row) => ElevationHelpers._cubicInterpolate(row[0], row[1], row[2], row[3], dx));
+        // Perform cubic interpolation across the resulting column
         return ElevationHelpers._cubicInterpolate(interpolatedRows[0], interpolatedRows[1], interpolatedRows[2], interpolatedRows[3], dy);
     }
+    /**
+     * Retrieves the last column of the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @returns A new ElevationBuffer containing the last column values.
+     */
     static GetLastColumn(elevations, w, h) {
+        // Use the constructor of the array type
         const lastColumn = new elevations.constructor(h);
         for (let i = 0, w1 = w - 1; i < h; i++, w1 += w) {
             lastColumn[i] = elevations[w1];
         }
         return lastColumn;
     }
+    /**
+     * Retrieves the last row of the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @returns A new ElevationBuffer containing the last row values.
+     */
     static GetLastRow(elevations, w, h) {
         const startIndex = (h - 1) * w;
         return new elevations.constructor(elevations.buffer, elevations.byteOffset + startIndex * elevations.BYTES_PER_ELEMENT, w);
     }
+    /**
+     * Retrieves the first column of the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param duplicateFirst Whether to duplicate the last value.
+     * @returns A new ElevationBuffer containing the first column values.
+     */
     static GetFirstColumn(elevations, w, h, duplicateFirst = false) {
+        // Use the constructor of the array type
         const firstColumn = new elevations.constructor(h + (duplicateFirst ? 1 : 0));
         for (let i = 0; i < h; i++) {
             firstColumn[i] = elevations[i * w];
@@ -629,9 +701,24 @@ class ElevationHelpers {
         }
         return firstColumn;
     }
+    /**
+     * Retrieves the first row of the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @returns A new ElevationBuffer containing the first row values.
+     */
     static GetFirstRow(elevations, w) {
         return new elevations.constructor(elevations.buffer, elevations.byteOffset, w);
     }
+    /**
+     * Retrieves the elevation value at a specific (x, y) position.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @returns A new ElevationBuffer containing the elevation value.
+     */
     static GetElevationAt(elevations, w, h, x, y) {
         if (x < 0 || x >= w || y < 0 || y >= h) {
             throw new Error("Coordinates out of bounds");
@@ -641,6 +728,14 @@ class ElevationHelpers {
         target[0] = elevations[index];
         return target;
     }
+    /**
+     * Retrieves a specific column from the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param colIndex The index of the column to retrieve.
+     * @returns A new ElevationBuffer containing the column values.
+     */
     static GetColumn(elevations, w, h, colIndex) {
         const column = new elevations.constructor(h);
         for (let i = 0; i < h; i++) {
@@ -648,6 +743,13 @@ class ElevationHelpers {
         }
         return column;
     }
+    /**
+     * Retrieves a specific row from the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param rowIndex The index of the row to retrieve.
+     * @returns A new ElevationBuffer containing the row values.
+     */
     static GetRow(elevations, w, rowIndex) {
         const startIndex = rowIndex * w;
         const endIndex = startIndex + w;
@@ -656,6 +758,17 @@ class ElevationHelpers {
         }
         return new elevations.constructor(elevations.buffer, elevations.byteOffset + startIndex * elevations.BYTES_PER_ELEMENT, w);
     }
+    /**
+     * Retrieves a rectangular area from the elevation grid.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param startX The starting x-coordinate of the area.
+     * @param startY The starting y-coordinate of the area.
+     * @param areaWidth The width of the area.
+     * @param areaHeight The height of the area.
+     * @returns A new ElevationBuffer containing the values in the specified area.
+     */
     static GetArea(elevations, w, h, startX, startY, areaWidth, areaHeight) {
         if (startX < 0 || startY < 0 || startX + areaWidth > w || startY + areaHeight > h) {
             throw new Error("Specified area is out of bounds.");
@@ -668,6 +781,13 @@ class ElevationHelpers {
         }
         return area;
     }
+    /**
+     * Compares two elevation arrays element by element within a specified epsilon tolerance.
+     * @param array1 The first elevation array.
+     * @param array2 The second elevation array.
+     * @param epsilon The tolerance value for comparison.
+     * @returns `true` if all elements are within the epsilon tolerance; otherwise, `false`.
+     */
     static CompareElevations(array1, array2, epsilon) {
         if (array1.length !== array2.length) {
             return false;
@@ -679,6 +799,18 @@ class ElevationHelpers {
         }
         return true;
     }
+    /**
+     * Computes an array of elevation values along a line between two normalized points.
+     * @param elevations The elevation data as a 1D ElevationBuffer.
+     * @param w The width of the elevation grid.
+     * @param h The height of the elevation grid.
+     * @param x1Norm Normalized x-coordinate of the starting point (0.0 to 1.0).
+     * @param y1Norm Normalized y-coordinate of the starting point (0.0 to 1.0).
+     * @param x2Norm Normalized x-coordinate of the ending point (0.0 to 1.0).
+     * @param y2Norm Normalized y-coordinate of the ending point (0.0 to 1.0).
+     * @param steps The number of steps to divide the line.
+     * @returns A ElevationBuffer containing the elevation values at each step.
+     */
     static GetElevationsBetween(elevations, w, h, x1Norm, y1Norm, x2Norm, y2Norm, steps) {
         const result = new elevations.constructor(steps);
         const dxNorm = (x2Norm - x1Norm) / (steps - 1);
@@ -690,6 +822,28 @@ class ElevationHelpers {
         }
         return result;
     }
+    /**
+     * Normalizes the elevation data to a specified range.
+     * Each value in the elevation buffer is linearly scaled between `minRange` and `maxRange`.
+     *
+     * @template T - The type of the ElevationBuffer (e.g., Float32Array, Int16Array).
+     * @param elevations - The elevation data as a 1D ElevationBuffer.
+     * @param minRange - The minimum value of the normalized range (default is 0).
+     * @param maxRange - The maximum value of the normalized range (default is 1).
+     * @returns A new ElevationBuffer of the same type, containing normalized elevation values.
+     * @throws Will throw an error if all values in the elevation buffer are identical, as normalization is not possible.
+     *
+     * @example
+     * const elevations = new Float32Array([10, 20, 30, 40, 50]);
+     *
+     * // Normalize to [0, 1]
+     * const normalized = ElevationHelpers.Normalize(elevations, 0, 1);
+     * console.log(normalized); // Float32Array [ 0, 0.25, 0.5, 0.75, 1 ]
+     *
+     * // Normalize to [-1, 1]
+     * const normalizedToNegative = ElevationHelpers.Normalize(elevations, -1, 1);
+     * console.log(normalizedToNegative); // Float32Array [ -1, -0.5, 0, 0.5, 1 ]
+     */
     static Normalize(elevations, minRange = 0, maxRange = 1) {
         const minValue = Math.min(...elevations);
         const maxValue = Math.max(...elevations);
@@ -706,13 +860,13 @@ class ElevationHelpers {
 }
 //# sourceMappingURL=dem.helpers.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/dem/dem.infos.js":
+/***/ "../core/dist/dem/dem.infos.js"
 /*!*************************************!*\
   !*** ../core/dist/dem/dem.infos.js ***!
   \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -797,13 +951,13 @@ class DemInfos {
 }
 //# sourceMappingURL=dem.infos.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/dem/dem.interfaces.js":
+/***/ "../core/dist/dem/dem.interfaces.js"
 /*!******************************************!*\
   !*** ../core/dist/dem/dem.interfaces.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -816,20 +970,20 @@ function IsDemInfos(b) {
 }
 //# sourceMappingURL=dem.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/dem/dem.tileclient.js":
+/***/ "../core/dist/dem/dem.tileclient.js"
 /*!******************************************!*\
   !*** ../core/dist/dem/dem.tileclient.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   DemTileWebClient: () => (/* binding */ DemTileWebClient)
 /* harmony export */ });
-/* harmony import */ var _dem_infos__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dem.infos */ "../core/dist/dem/dem.infos.js");
-/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../io */ "../core/dist/io/webClient.js");
+/* harmony import */ var _dem_infos__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dem.infos */ "../core/dist/dem/dem.infos.js");
+/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../io */ "../core/dist/io/webClient.js");
 
 
 class DemTileWebClient {
@@ -860,6 +1014,7 @@ class DemTileWebClient {
         const results = await Promise.allSettled(requests);
         let elevations = null;
         let normals = null;
+        // elevations
         if (results[0].status == "fulfilled") {
             elevations = results[0].value.content;
         }
@@ -867,8 +1022,9 @@ class DemTileWebClient {
             throw new Error(results[0].reason);
         }
         if (elevations == null) {
-            return new _io__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, null, userArgs);
+            return new _io__WEBPACK_IMPORTED_MODULE_1__.FetchResult(request, null, userArgs);
         }
+        // normals
         if (results.length > 1) {
             if (results[1].status == "fulfilled") {
                 normals = results[1].value.content;
@@ -878,10 +1034,39 @@ class DemTileWebClient {
             const s = this.metrics.tileSize;
             normals = this.computeNormals(elevations, s, s);
         }
-        const result = new _io__WEBPACK_IMPORTED_MODULE_0__.FetchResult(request, new _dem_infos__WEBPACK_IMPORTED_MODULE_1__.DemInfos(elevations, normals), userArgs);
+        const result = new _io__WEBPACK_IMPORTED_MODULE_1__.FetchResult(request, new _dem_infos__WEBPACK_IMPORTED_MODULE_0__.DemInfos(elevations, normals), userArgs);
         result.ok = true;
         return result;
     }
+    /**
+     * We uses a technique called "normal encoding" to represent normal vectors in its images.
+     * This technique involves encoding normal vectors using the three color channels of the image (red, green, and blue).
+     * To achieve this, each component of the normalized normal vector (x, y, z) is transformed into an 8-bit value in the range [0, 255] using an affine transformation.
+     * Note: An affine transformation is a geometric transformation that preserves parallelism of lines and distance ratios.
+     *
+     * Specifically, the value of each color channel is calculated using the following formulas:
+     *       R = (x + 1) / 2 * 255
+     *       G = (y + 1) / 2 * 255
+     *       B = z * 127 + 128
+     *
+     * The z component is transformed into a value in the range [0, 255] using translation and scaling.
+     * The x component is scaled and shifted to be in the range [0, 1] before being multiplied by 255 and rounded to the nearest integer.
+     * The y component is treated similarly.
+     * Using this technique, normal vectors can be represented in the image with a precision of 1/255 in each direction.
+     *
+     * To calculate the normal vector (x, y, z) from the color channel values R, G, B,
+     * it is necessary to perform the inverse operations of the transformations applied during encoding.
+     * Specifically, to retrieve the values of x, y, and z from the values of R, G, and B, the following formulas are used:
+     *      x = (2 * R / 255) - 1
+     *      y = (2 * G / 255) - 1
+     *      z = (B - 128) / 127
+     *
+     * These formulas are derived by performing the inverse operations of those used to encode the normal vector.
+     * The value of z is decoded first using translation and scaling, and then the values of x and y
+     * are decoded by reversing the affine transformation applied to each component.
+     * Note that the precision of the decoded x, y, and z values is limited by the precision of the encoded R, G, and B values, which is 8 bits per color channel.
+     * This means that the obtained values of x, y, and z may be approximated with a precision of 1/255.
+     */
     computeNormals(positions, w, h) {
         const normals = new Uint8ClampedArray(w * h * 3);
         const indices = [0, 3, 6, 15, 24, 21, 18, 9];
@@ -957,13 +1142,13 @@ class DemTileWebClient {
 }
 //# sourceMappingURL=dem.tileclient.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/dem/index.js":
+/***/ "../core/dist/dem/index.js"
 /*!*********************************!*\
   !*** ../core/dist/dem/index.js ***!
   \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -982,13 +1167,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/events/events.args.js":
+/***/ "../core/dist/events/events.args.js"
 /*!******************************************!*\
   !*** ../core/dist/events/events.args.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1025,13 +1210,13 @@ class PropertyChangedEventArgs extends EventArgs {
 }
 //# sourceMappingURL=events.args.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/events/events.emitter.js":
+/***/ "../core/dist/events/events.emitter.js"
 /*!*********************************************!*\
   !*** ../core/dist/events/events.emitter.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1128,13 +1313,13 @@ class EventEmitter {
 EventEmitter.defaultMaxListeners = 100;
 //# sourceMappingURL=events.emitter.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/events/events.observable.js":
+/***/ "../core/dist/events/events.observable.js"
 /*!************************************************!*\
   !*** ../core/dist/events/events.observable.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1142,10 +1327,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Observable: () => (/* binding */ Observable),
 /* harmony export */   Observer: () => (/* binding */ Observer)
 /* harmony export */ });
+/**
+ * A class serves as a medium between the observable and its observers
+ */
 class EventState {
+    /**
+     * Create a new EventState
+     * @param mask defines the mask associated with this state
+     * @param skipNextObservers defines a flag which will instruct the observable to skip following observers when set to true
+     * @param target defines the original target of the state
+     * @param currentTarget defines the current target of the state
+     */
     constructor(mask, skipNextObservers = false, target, currentTarget) {
         this.initialize(mask, skipNextObservers, target, currentTarget);
     }
+    /**
+     * Initialize the current event state
+     * @param mask defines the mask associated with this state
+     * @param skipNextObservers defines a flag which will instruct the observable to skip following observers when set to true
+     * @param target defines the original target of the state
+     * @param currentTarget defines the current target of the state
+     * @returns the current event state
+     */
     initialize(mask, skipNextObservers = false, target, currentTarget) {
         this.mask = mask;
         this.skipNextObservers = skipNextObservers;
@@ -1154,20 +1357,59 @@ class EventState {
         return this;
     }
 }
+/**
+ * Represent an Observer registered to a given Observable object.
+ */
 class Observer {
-    constructor(source, callback, mask, scope = null) {
+    /**
+     * Creates a new observer
+     * @param callback defines the callback to call when the observer is notified
+     * @param mask defines the mask of the observer (used to filter notifications)
+     * @param scope defines the current scope used to restore the JS context
+     */
+    constructor(source, 
+    /**
+     * Defines the callback to call when the observer is notified
+     */
+    callback, 
+    /**
+     * Defines the mask of the observer (used to filter notifications)
+     */
+    mask, 
+    /**
+     * Defines the current scope used to restore the JS context
+     */
+    scope = null) {
         this.source = source;
         this.callback = callback;
         this.mask = mask;
         this.scope = scope;
+        /** @internal */
         this._willBeUnregistered = false;
+        /**
+         * Gets or sets a property defining that the observer as to be unregistered after the next notification
+         */
         this.unregisterOnNextCall = false;
     }
     disconnect() {
         this.source?.remove(this);
     }
 }
+/**
+ * The Observable class is a simple implementation of the Observable pattern.
+ *
+ * There's one slight particularity though: a given Observable can notify its observer using a particular mask value, only the Observers registered with this mask value will be notified.
+ * This enable a more fine grained execution without having to rely on multiple different Observable objects.
+ * For instance you may have a given Observable that have four different types of notifications: Move (mask = 0x01), Stop (mask = 0x02), Turn Right (mask = 0X04), Turn Left (mask = 0X08).
+ * A given observer can register itself with only Move and Stop (mask = 0x03), then it will only be notified when one of these two occurs and will never be for Turn Left/Right.
+ */
 class Observable {
+    /**
+     * Create an observable from a Promise.
+     * @param promise a promise to observe for fulfillment.
+     * @param onErrorObservable an observable to notify if a promise was rejected.
+     * @returns the new Observable
+     */
     static FromPromise(promise, onErrorObservable) {
         const observable = new Observable();
         promise
@@ -1184,9 +1426,16 @@ class Observable {
         });
         return observable;
     }
+    /**
+     * Gets the list of observers
+     */
     get observers() {
         return this._observers;
     }
+    /**
+     * Creates a new observable
+     * @param onObserverAdded defines a callback to call when a new observer is added
+     */
     constructor(onObserverAdded) {
         this._observers = new Array();
         this._eventState = new EventState(0);
@@ -1194,6 +1443,15 @@ class Observable {
             this._onObserverAdded = onObserverAdded;
         }
     }
+    /**
+     * Create a new Observer with the specified callback
+     * @param callback the callback that will be executed for that Observer
+     * @param mask the mask used to filter observers
+     * @param insertFirst if true the callback will be inserted at the first position, hence executed before the others ones. If false (default behavior) the callback will be inserted at the last position, executed after all the others already present.
+     * @param scope optional scope for the callback to be called from
+     * @param unregisterOnFirstCall defines if the observer as to be unregistered after the next notification
+     * @returns the new observer created for the callback
+     */
     add(callback, mask = -1, insertFirst = false, scope = null, unregisterOnFirstCall = false) {
         if (!callback) {
             return null;
@@ -1211,9 +1469,19 @@ class Observable {
         }
         return observer;
     }
+    /**
+     * Create a new Observer with the specified callback and unregisters after the next notification
+     * @param callback the callback that will be executed for that Observer
+     * @returns the new observer created for the callback
+     */
     addOnce(callback) {
         return this.add(callback, undefined, undefined, undefined, true);
     }
+    /**
+     * Remove an Observer from the Observable object
+     * @param observer the instance of the Observer to remove
+     * @returns false if it doesn't belong to this Observable
+     */
     remove(observer) {
         if (!observer) {
             return false;
@@ -1225,6 +1493,12 @@ class Observable {
         }
         return false;
     }
+    /**
+     * Remove a callback from the Observable object
+     * @param callback the callback to remove
+     * @param scope optional scope. If used only the callbacks with this scope will be removed
+     * @returns false if it doesn't belong to this Observable
+     */
     removeCallback(callback, scope) {
         for (let index = 0; index < this._observers.length; index++) {
             const observer = this._observers[index];
@@ -1238,6 +1512,9 @@ class Observable {
         }
         return false;
     }
+    /**
+     * @internal
+     */
     _deferUnregister(observer) {
         observer.unregisterOnNextCall = false;
         observer._willBeUnregistered = true;
@@ -1245,6 +1522,8 @@ class Observable {
             this._remove(observer);
         }, 0);
     }
+    // This should only be called when not iterating over _observers to avoid callback skipping.
+    // Removes an observer from the _observer Array.
     _remove(observer) {
         if (!observer) {
             return false;
@@ -1256,14 +1535,32 @@ class Observable {
         }
         return false;
     }
+    /**
+     * Moves the observable to the top of the observer list making it get called first when notified
+     * @param observer the observer to move
+     */
     makeObserverTopPriority(observer) {
         this._remove(observer);
         this._observers.unshift(observer);
     }
+    /**
+     * Moves the observable to the bottom of the observer list making it get called last when notified
+     * @param observer the observer to move
+     */
     makeObserverBottomPriority(observer) {
         this._remove(observer);
         this._observers.push(observer);
     }
+    /**
+     * Notify all Observers by calling their respective callback with the given data
+     * Will return true if all observers were executed, false if an observer set skipNextObservers to true, then prevent the subsequent ones to execute
+     * @param eventData defines the data to send to all observers
+     * @param mask defines the mask of the current notification (observers with incompatible mask (ie mask & observer.mask === 0) will not be notified)
+     * @param target defines the original target of the state
+     * @param currentTarget defines the current target of the state
+     * @param userInfo defines any user info to send to observers
+     * @returns false if the complete observer chain was not processed (because one observer set the skipNextObservers to true)
+     */
     notifyObservers(eventData, mask = -1, target, currentTarget, userInfo) {
         if (!this._observers.length) {
             return true;
@@ -1296,6 +1593,12 @@ class Observable {
         }
         return true;
     }
+    /**
+     * Notify a specific observer
+     * @param observer defines the observer to notify
+     * @param eventData defines the data to be sent to each callback
+     * @param mask is used to filter observers defaults to -1
+     */
     notifyObserver(observer, eventData, mask = -1) {
         if (observer._willBeUnregistered) {
             return;
@@ -1308,18 +1611,34 @@ class Observable {
             this._deferUnregister(observer);
         }
     }
+    /**
+     * Gets a boolean indicating if the observable has at least one observer
+     * @returns true is the Observable has at least one Observer registered
+     */
     hasObservers() {
         return this._observers.length > 0;
     }
+    /**
+     * Clear the list of observers
+     */
     clear() {
         this._observers = new Array();
         this._onObserverAdded = null;
     }
+    /**
+     * Clone the current observable
+     * @returns a new observable
+     */
     clone() {
         const result = new Observable();
         result._observers = this._observers.slice(0);
         return result;
     }
+    /**
+     * Does this observable handles observer registered with a given mask
+     * @param mask defines the mask to be tested
+     * @returns whether or not one observer registered with the given mask is handled
+     **/
     hasSpecificMask(mask = -1) {
         for (const obs of this._observers) {
             if (obs.mask & mask || obs.mask === mask) {
@@ -1331,13 +1650,13 @@ class Observable {
 }
 //# sourceMappingURL=events.observable.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/events/index.js":
+/***/ "../core/dist/events/index.js"
 /*!************************************!*\
   !*** ../core/dist/events/index.js ***!
   \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1357,25 +1676,37 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/calculators/geodesy.calculator.flat.js":
+/***/ "../core/dist/geodesy/calculators/geodesy.calculator.flat.js"
 /*!*******************************************************************!*\
   !*** ../core/dist/geodesy/calculators/geodesy.calculator.flat.js ***!
   \*******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* binding */ PythagoreanFlatEarthCalculator)
 /* harmony export */ });
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math */ "../core/dist/math/math.js");
-/* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+/// <summary>
+/// give the distance between two points using the Pythagorean flat-Earth approximation
+/// The Pythagorean flat-Earth approximation assumes that meridians are parallel, that the parallels of latitude
+/// are negligibly different from great circles, and that great circles are negligibly different from
+/// straight lines. Close to the poles, the parallels of latitude are not only shorter than great circles,
+/// but indispensably curved. Taking this into account leads to the use of polar coordinates and the planar law
+/// of cosines for computing short distances near the poles. The Polar Coordinate Flat-Earth Formulas computationally
+/// only a little more expensive than the Pythagorean Theorem and will give smaller maximum errors for higher latitudes and
+/// greater distances. The maximum errors, which depend upon azimuth in addition to separation distance, are equal
+/// at 80 degrees latitude when the separation is 33 km (20 mi), 82 degrees at 18 km (11 mi), 84 degrees at 9 km (5.4 mi).
+/// But even at 88 degrees the polar error can be as large as 20 meters (66 ft) when the distance between the points is 20 km (12 mi).
 
 
 
-class PythagoreanFlatEarthCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__.CalculatorBase {
+/// </summary>
+class PythagoreanFlatEarthCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.CalculatorBase {
     constructor(e) {
         super(e);
     }
@@ -1405,12 +1736,16 @@ class PythagoreanFlatEarthCalculator extends _geodesy_calculators__WEBPACK_IMPOR
             lat2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
             lon2 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
         }
+        // Calculate differences in coordinates
         const dLon = lon2 - lon1;
         const dLat = lat2 - lat1;
+        // Calculate azimuth
         let azimuth = Math.atan2(dLon, dLat);
+        // Normalize to 0-360 degrees
         if (azimuth < 0) {
             azimuth += _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.PI_2;
         }
+        // Convert to degrees if required
         if (deg) {
             azimuth *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
         }
@@ -1418,42 +1753,44 @@ class PythagoreanFlatEarthCalculator extends _geodesy_calculators__WEBPACK_IMPOR
     }
     getLocationAtDistanceAzimuth(lat1, lon1, dist, az, deg) {
         const unit2deg = 1 / (((2 * Math.PI) / 360) * this._ellipsoid.semiMajorAxis);
+        // Convert azimuth to radians
         if (deg) {
             az *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
             lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
             lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
         }
+        // Calculate new latitude and longitude in degrees
         let newLat = lat1 + dist * Math.cos(az) * unit2deg;
         let newLon = lon1 + (dist * Math.sin(az) * unit2deg) / Math.cos(lat1);
         if (deg) {
             newLat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
             newLon *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
         }
-        return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(newLat, newLon);
+        return new _geography__WEBPACK_IMPORTED_MODULE_0__.Geo2(newLat, newLon);
     }
 }
 PythagoreanFlatEarthCalculator.Shared = new PythagoreanFlatEarthCalculator();
 //# sourceMappingURL=geodesy.calculator.flat.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/calculators/geodesy.calculator.spherical.js":
+/***/ "../core/dist/geodesy/calculators/geodesy.calculator.spherical.js"
 /*!************************************************************************!*\
   !*** ../core/dist/geodesy/calculators/geodesy.calculator.spherical.js ***!
   \************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SphericalCalculator: () => (/* binding */ SphericalCalculator)
 /* harmony export */ });
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math */ "../core/dist/math/math.js");
-/* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
+/* harmony import */ var _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geodesy.calculators */ "../core/dist/geodesy/geodesy.calculators.js");
 
 
 
-class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_0__.CalculatorBase {
+class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_2__.CalculatorBase {
     constructor(e) {
         super(e);
     }
@@ -1473,8 +1810,10 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
         const sdlon = Math.sin(dLon);
         const a = sdLat * sdLat + Math.cos(lata) * Math.cos(latb) * sdlon * sdlon;
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        let distance = this._ellipsoid.semiMajorAxis * c;
+        let distance = this._ellipsoid.semiMajorAxis * c; // Distance in ellipsoid units
         if (alta !== undefined && altb !== undefined) {
+            /// calculates the straight-line distance considering the altitude difference. This is done using the Pythagorean theorem,
+            /// treating the Haversine distance and altitude difference as perpendicular sides of a right triangle.
             const altDifference = altb - alta;
             distance = Math.sqrt(distance * distance + altDifference * altDifference);
         }
@@ -1502,7 +1841,7 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
     }
     getLocationAtDistanceAzimuth(lat, lon, dist, az, deg) {
         if (dist == 0) {
-            return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat, lon);
+            return new _geography__WEBPACK_IMPORTED_MODULE_0__.Geo2(lat, lon);
         }
         if (deg) {
             lat *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
@@ -1521,19 +1860,19 @@ class SphericalCalculator extends _geodesy_calculators__WEBPACK_IMPORTED_MODULE_
             lat1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
             lon1 *= _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.RAD2DEG;
         }
-        return new _geography__WEBPACK_IMPORTED_MODULE_2__.Geo2(lat1, lon1);
+        return new _geography__WEBPACK_IMPORTED_MODULE_0__.Geo2(lat1, lon1);
     }
 }
 SphericalCalculator.Shared = new SphericalCalculator();
 //# sourceMappingURL=geodesy.calculator.spherical.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/calculators/index.js":
+/***/ "../core/dist/geodesy/calculators/index.js"
 /*!*************************************************!*\
   !*** ../core/dist/geodesy/calculators/index.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1546,13 +1885,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/geodesy.calculators.js":
+/***/ "../core/dist/geodesy/geodesy.calculators.js"
 /*!***************************************************!*\
   !*** ../core/dist/geodesy/geodesy.calculators.js ***!
   \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1571,29 +1910,55 @@ class CalculatorBase {
 CalculatorBase.Shared = null;
 //# sourceMappingURL=geodesy.calculators.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/geodesy.ellipsoid.js":
+/***/ "../core/dist/geodesy/geodesy.ellipsoid.js"
 /*!*************************************************!*\
   !*** ../core/dist/geodesy/geodesy.ellipsoid.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Ellipsoid: () => (/* binding */ Ellipsoid)
 /* harmony export */ });
 class Ellipsoid {
+    /**
+     * Build an Ellipsoid from the semi major axis measurement and the inverse flattening.
+     *
+     * @param {string} name - the name of the ellipsoid
+     * @params {number} semiMajor - the semi major value, usually denoted a
+     * @param  {number} inverseFlattening - the inverse of the ellipsoid flattening
+     * @returns {Ellipsoid} - the new Ellipsoid.
+     */
     static FromAAndInverseF(name, semiMajor, inverseFlattening) {
         const f = 1.0 / inverseFlattening;
         const b = (1.0 - f) * semiMajor;
         return new Ellipsoid(name, semiMajor, b, f, inverseFlattening);
     }
+    /**
+     * Build an Ellipsoid from the semi major axis measurement and the flattening.
+     *
+     * @param {string} name - the name of the ellipsoid
+     * @params {number} semiMajor - the semi major value, usually denoted a
+     * @param  {number} flattening - the ellipsoid flattening
+     * @returns {Ellipsoid} - the new Ellipsoid.
+     */
     static FromAAndF(name, semiMajor, flattening) {
         const inverseF = 1.0 / flattening;
         const b = (1.0 - flattening) * semiMajor;
         return new Ellipsoid(name, semiMajor, b, flattening, inverseF);
     }
+    /**
+     * Construct a new Ellipsoid.  This is private to ensure the values are
+     * consistent (flattening = 1.0 / inverseFlattening).  Use the methods
+     * FromAAndInverseF() and FromAAndF() to create new instances.
+     * @param {string} name
+     * @param {number} semiMajor
+     * @param {number} semiMinor
+     * @param {number} flattening
+     * @param {number} inverseFlattening
+     */
     constructor(name, semiMajor, semiMinor, flattening, inverseFlattening) {
         this._name = name;
         this._a = semiMajor;
@@ -1619,36 +1984,76 @@ class Ellipsoid {
     get name() {
         return this._name;
     }
+    /**
+     * Get semi major axis (meters).
+     */
     get semiMajorAxis() {
         return this._a;
     }
+    /**
+     * Get semi minor axis (meters).
+     */
     get semiMinorAxis() {
         return this._b;
     }
+    /**
+     * Get flattening.
+     */
     get flattening() {
         return this._f;
     }
+    /**
+     * Get inverse flattening.
+     */
     get inverseFlattening() {
         return this._invf;
     }
+    /**
+     * Get linear eccentricity.
+     */
     get linearEccentricity() {
         return this._c;
     }
+    /**
+     * Get eccentricity.
+     */
     get eccentricity() {
         return this._e;
     }
+    /**
+     * Get square of eccentricity.
+     */
     get sqrEccentricity() {
         return this._ee;
     }
+    /**
+     * Get precalulated value of 1 - sqrEccentricity.
+     */
     get oneMinusSqrEccentricity() {
         return this._p1mee;
     }
+    /**
+     * Get Semi-latus rectum.
+     */
     get semiLatusRectum() {
         return this._p1mee * this._a;
     }
+    /**
+     *
+     * @param other test the equality with another ellipsoid
+     * @returns true if the semiMajorAxis and semiMinorAxis are equals. false otherwise.
+     */
     isEquals(other) {
         return other && other._a == this._a && other._b == this._b;
     }
+    /**
+     * Clone this ellipsoid, providing an optional scale to do so.
+     * This optional scale is very usefull when want to work with ECEF within the limitation
+     * of dedicated platform floating point resolution.
+     * @param name
+     * @param scale
+     * @returns
+     */
     clone(name, scale = 1.0) {
         return new Ellipsoid(name, this._a * scale, this._b * scale, this._f, this._invf);
     }
@@ -1657,32 +2062,41 @@ class Ellipsoid {
         const sin = Math.sin(phiRad);
         return Math.sqrt(((this._aa * cos) ** 2 + (this._bb * sin) ** 2) / ((this._a * cos) ** 2 + (this._b * sin) ** 2));
     }
+    /* (x,y,y) MUST be a normalized vector */
     radiusAtPosition(x, y, z) {
+        // radius to ellipsoid surface along this direction
         const denom = (x * x + y * y) / this._aa + (z * z) / this._bb;
         return 1.0 / Math.sqrt(denom);
     }
 }
+/** The WGS84 ellipsoid. Unit is meter*/
 Ellipsoid.WGS84 = Ellipsoid.FromAAndInverseF("WGS84", 6378137.0, 298.257223563);
+/** The GRS80 ellipsoid. Unit is meter*/
 Ellipsoid.GRS80 = Ellipsoid.FromAAndInverseF("GRS80", 6378137.0, 298.257222101);
+/** The GRS67 ellipsoid. Unit is meter*/
 Ellipsoid.GRS67 = Ellipsoid.FromAAndInverseF("GRS67", 6378160.0, 298.25);
+/** The ANS ellipsoid. Unit is meter*/
 Ellipsoid.ANS = Ellipsoid.FromAAndInverseF("ANS", 6378160.0, 298.25);
+/** The WGS72 ellipsoid. Unit is meter*/
 Ellipsoid.WGS72 = Ellipsoid.FromAAndInverseF("WGS72", 6378135.0, 298.26);
+/** The Clarke1858 ellipsoid. Unit is meter*/
 Ellipsoid.Clarke1858 = Ellipsoid.FromAAndInverseF("Clarke1858", 6378293.645, 294.26);
+/** The Clarke1880 ellipsoid. Unit is meter*/
 Ellipsoid.Clarke1880 = Ellipsoid.FromAAndInverseF("Clarke1880", 6378249.145, 293.465);
-Ellipsoid.inv3 = 1.0 / 3;
-Ellipsoid.inv6 = 1.0 / 6;
-Ellipsoid.invcbrt2 = 1.0 / Math.pow(2, Ellipsoid.inv3);
-Ellipsoid.d2r = Math.PI / 180;
-Ellipsoid.r2d = 180.0 / Math.PI;
+Ellipsoid.inv3 = 1.0 / 3; // 1/3
+Ellipsoid.inv6 = 1.0 / 6; // 1/6
+Ellipsoid.invcbrt2 = 1.0 / Math.pow(2, Ellipsoid.inv3); // 1/(2^(1/3))
+Ellipsoid.d2r = Math.PI / 180; // PI/180
+Ellipsoid.r2d = 180.0 / Math.PI; // 180/PI
 //# sourceMappingURL=geodesy.ellipsoid.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/geodesy.scale.js":
+/***/ "../core/dist/geodesy/geodesy.scale.js"
 /*!*********************************************!*\
   !*** ../core/dist/geodesy/geodesy.scale.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1691,11 +2105,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.cartesian.js");
 
 class MapScale {
-    static GetScale(displaySize, resolution, metrics, lat, LOD) {
+    ///<summary>
+    /// Get the scale, according fixing level of detail and current physical map metrics
+    ///</summary>
+    static GetScale(displaySize, // The physical size of the display in meters
+    resolution, // The number of pixels on the display (width or height in pixels)
+    metrics, lat, LOD // Level of detail (zoom level)
+    ) {
         const worldSize = resolution * metrics.groundResolution(lat, LOD);
         return displaySize / worldSize;
     }
-    static GetScale3(displaySize, resolution, metrics, lat, LOD) {
+    ///<summary>
+    /// Get the X,Y,Z scales, according fixing level of detail and current physical map metrics
+    ///</summary>
+    static GetScale3(displaySize, // The physical size of the display in meters
+    resolution, // The number of pixels on the display (width or height in pixels)
+    metrics, lat, // Latitude
+    LOD // Level of detail (zoom level)
+    ) {
         const groundRes = metrics.groundResolution(lat, LOD);
         const x = displaySize.width / (resolution.width * groundRes);
         const y = displaySize.height / (resolution.height * groundRes);
@@ -1705,7 +2132,17 @@ class MapScale {
         }
         return new _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x, y, z);
     }
-    static GetLOD(scale, displaySize, resolution, lat, ellipsoidSemiMajorAxis, tileSize) {
+    ///<summary>
+    /// Get the level of detail, according fixing scale and current physical map metrics
+    ///</summary>
+    static GetLOD(scale, // The scale value
+    displaySize, // The physical size of the display in meters
+    resolution, // The number of pixels on the display (width or height in pixels)
+    lat, // Latitude (in radians)
+    ellipsoidSemiMajorAxis, // The semi-major axis of the ellipsoid (meters)
+    tileSize // The size of a tile (pixels)
+    ) {
+        // Compute the LOD based on the reverse calculation
         const constantFactor = (resolution * Math.cos(lat) * 2 * Math.PI * ellipsoidSemiMajorAxis) / (displaySize * tileSize);
         const LOD = Math.log2(scale * constantFactor);
         return LOD;
@@ -1713,13 +2150,13 @@ class MapScale {
 }
 //# sourceMappingURL=geodesy.scale.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/geodesy.system.js":
+/***/ "../core/dist/geodesy/geodesy.system.js"
 /*!**********************************************!*\
   !*** ../core/dist/geodesy/geodesy.system.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1727,8 +2164,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeodeticSystem: () => (/* binding */ GeodeticSystem)
 /* harmony export */ });
 /* harmony import */ var _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
-/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/events.observable */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.cartesian.js");
 
 
@@ -1741,9 +2178,19 @@ var CartesianMode;
     CartesianMode[CartesianMode["NED"] = 2] = "NED";
 })(CartesianMode || (CartesianMode = {}));
 class GeodeticSystem {
+    /**
+     * Given lat, lon and alt, return an array of 16, which is the enu transformation matrix (4x4)
+     * @param lat the reference latitude
+     * @param lon the reference longitude
+     * @param alt the reference altitude, default is zero
+     * @param ellipsoid the reference ellipsoid, default is Ellipsoid.WGS84
+     * @param rowOrder the matrix order returned. true is row order, false is column order. default is true, so row order.
+     * @returns
+     */
     static GetENUTransformMatrixFromFloat(lat, lon, alt = 0, ellipsoid = _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84, rowOrder = true) {
-        const lambda = lat * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
-        const phi = lon * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        const lambda = lat * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
+        const phi = lon * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
+        // compute ref as ECEF
         const sin_lambda = Math.sin(lambda);
         const N = ellipsoid.semiMajorAxis / Math.sqrt(1 - ellipsoid.sqrEccentricity * sin_lambda * sin_lambda);
         const cos_lambda = Math.cos(lambda);
@@ -1753,6 +2200,7 @@ class GeodeticSystem {
         const x = tmp * cos_phi;
         const y = tmp * sin_phi;
         const z = (alt + ellipsoid.oneMinusSqrEccentricity * N) * sin_lambda;
+        // then transformation matrix.
         const om0 = -sin_phi;
         const om1 = -sin_lambda * cos_phi;
         const om2 = cos_lambda * cos_phi;
@@ -1800,7 +2248,7 @@ class GeodeticSystem {
         return this._enuTransform;
     }
     get ENUObservable() {
-        this._enuObservable = this._enuObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_2__.Observable();
+        this._enuObservable = this._enuObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
         return this._enuObservable;
     }
     get cartesianMode() {
@@ -1808,8 +2256,9 @@ class GeodeticSystem {
     }
     geodeticFloatToCartesianToRef(lat, lon, alt, target, deg = true) {
         target = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
-        let lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD : lat;
-        let phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD : lon;
+        let lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lat;
+        let phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lon;
+        // firs pass is to ECEF
         const sin_lambda = Math.sin(lambda);
         const cos_lambda = Math.cos(lambda);
         const cos_phi = Math.cos(phi);
@@ -1819,6 +2268,7 @@ class GeodeticSystem {
         let x = tmp * cos_phi;
         let y = tmp * sin_phi;
         let z = (alt + this._ellipsoid._p1mee * N) * sin_lambda;
+        // then to ENU if the transformation is set
         if (this.ENUTransform) {
             const m = this.ENUTransform;
             const rx = x * m[0] + y * m[4] + z * m[8] + m[12];
@@ -1859,15 +2309,18 @@ class GeodeticSystem {
         const P = p * p;
         const beta = _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.inv3 * i - C - P / C;
         const k = this._ellipsoid._ll * (this._ellipsoid._ll - mpn);
+        // left part of t
         const t1 = beta * beta - k;
         const t2 = Math.sqrt(t1);
         const t3 = t2 - 0.5 * (beta + i);
         const t4 = Math.sqrt(t3);
+        // right part of t
         let t5 = 0.5 * (beta - i);
-        t5 = Math.abs(t5);
+        t5 = Math.abs(t5); // numeric turbulence fix near +-45.3 deg
         const t6 = Math.sqrt(t5);
         const t7 = (m < n) ? t6 : -t6;
         const t = t4 + t7;
+        // Newton-Raphson correction
         const j = this._ellipsoid._l * (m - n);
         const g = 2 * j;
         const tt = t * t;
@@ -1876,17 +2329,20 @@ class GeodeticSystem {
         const F = tttt + 2 * i * tt + g * t + k;
         const dFdt = 4 * ttt + 4 * i * t + g;
         const dt = -F / dFdt;
+        // latitude in degrees
         const u = t + dt + this._ellipsoid._l;
         const v = t + dt - this._ellipsoid._l;
         const w = Math.sqrt(ww);
         const zu = z * u;
         const wv = w * v;
         const lat = Math.atan2(zu, wv) * _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.r2d;
+        // altitude
         const invuv = 1 / (u * v);
         const dw = w - wv * invuv;
         const dz = z - zu * this._ellipsoid._p1mee * invuv;
         const da = Math.sqrt(dw * dw + dz * dz);
         const alt = (u < 1) ? -da : da;
+        // longitude in degrees
         const lon = Math.atan2(y, x) * _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.r2d;
         target.lat = lat;
         target.lon = lon;
@@ -1898,13 +2354,13 @@ class GeodeticSystem {
 GeodeticSystem.Default = new GeodeticSystem(_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84);
 //# sourceMappingURL=geodesy.system.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geodesy/index.js":
+/***/ "../core/dist/geodesy/index.js"
 /*!*************************************!*\
   !*** ../core/dist/geodesy/index.js ***!
   \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1929,13 +2385,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.bearing.js":
+/***/ "../core/dist/geography/geography.bearing.js"
 /*!***************************************************!*\
   !*** ../core/dist/geography/geography.bearing.js ***!
   \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -1945,7 +2401,16 @@ class Bearing {
     static Zero() {
         return new Bearing(0);
     }
+    /**
+     * Keep an azimuth angle within the range of 0 to 360 degrees
+     * @param a the azimuth value
+     * @returns the clampled value.
+     */
     static ClampAzimuth(a) {
+        // the modulo operator (%) is used to get the remainder when the azimuth is divided by 360.
+        // Adding 360 to the result ensures that negative values are shifted into the positive range.
+        // Finally, taking the modulo 360 of the sum ensures that values greater than 360 are wrapped
+        // back to the range of 0 to 360.
         return ((a % 360) + 360) % 360;
     }
     constructor(value) {
@@ -1989,13 +2454,13 @@ class Bearing {
 }
 //# sourceMappingURL=geography.bearing.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.envelope.collection.js":
+/***/ "../core/dist/geography/geography.envelope.collection.js"
 /*!***************************************************************!*\
   !*** ../core/dist/geography/geography.envelope.collection.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2047,23 +2512,24 @@ class GeoBoundedCollection extends _geography_envelope__WEBPACK_IMPORTED_MODULE_
 }
 //# sourceMappingURL=geography.envelope.collection.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.envelope.js":
+/***/ "../core/dist/geography/geography.envelope.js"
 /*!****************************************************!*\
   !*** ../core/dist/geography/geography.envelope.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Envelope: () => (/* binding */ Envelope),
 /* harmony export */   GeoBounded: () => (/* binding */ GeoBounded)
 /* harmony export */ });
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
 /* harmony import */ var _geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
-/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.position */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _geometry_geometry_size__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry/geometry.size */ "../core/dist/geometry/geometry.size.js");
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 
 
@@ -2079,8 +2545,16 @@ class Envelope {
         return lat >= a[1] && lat <= a[3] && (lon === undefined || (lon >= a[0] && lon <= a[2])) && (alt === undefined || (alt >= a[4] && alt <= a[5]));
     }
     static Zero() {
-        return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3.Zero());
+        return new Envelope(_geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3.Zero(), _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3.Zero());
     }
+    /// <summary>
+    /// Split the envelope in 4 equal parts
+    ///  +----+----+
+    ///  | 0  | 1  |
+    ///  +----+----+
+    ///  | 2  | 3  |
+    ///  +----+----+
+    /// </summary>
     static Split2(a) {
         if (a) {
             if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(a)) {
@@ -2088,14 +2562,27 @@ class Envelope {
             }
             const center = a.center;
             return [
-                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon)),
-                new Envelope(center, new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east)),
-                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west), center),
-                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east)),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, a.west), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.north, center.lon)),
+                new Envelope(center, new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.north, a.east)),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.south, a.west), center),
+                new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.south, center.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, a.east)),
             ];
         }
         return [];
     }
+    /// <summary>
+    /// Split the envelope in 8 equal parts (3D)
+    ///  +----+----+
+    ///  | 0  | 1  |
+    ///  +----+----+ bottom
+    ///  | 2  | 3  |
+    ///  +----+----+
+    ///  +----+----+
+    ///  | 4  | 5  |
+    ///  +----+----+ top
+    ///  | 6  | 7  |
+    ///  +----+----+
+    /// </summary>
     static Split3(a) {
         if (a) {
             if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsGeoBounded)(a)) {
@@ -2104,14 +2591,14 @@ class Envelope {
             if (a.hasAltitude) {
                 const center = a.center;
                 return [
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon, center.alt)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east, center.alt)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west, a.bottom), center),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east, center.alt)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, center.lon, a.top)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.north, a.east, a.top)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, center.lon, a.top)),
-                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(a.south, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(center.lat, a.east, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, a.west, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.north, center.lon, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.north, a.east, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.south, a.west, a.bottom), center),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.south, center.lon, a.bottom), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, a.east, center.alt)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.north, center.lon, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.north, a.east, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.south, a.west, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, center.lon, a.top)),
+                    new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(a.south, center.lon, center.alt), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(center.lat, a.east, a.top)),
                 ];
             }
         }
@@ -2120,10 +2607,10 @@ class Envelope {
     static FromPoints(...array) {
         const a = array[0];
         const hasAlt = a.alt !== undefined && a.alt !== undefined;
-        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
-        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
+        const lat0 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(a.lat, Envelope.MinLatitude, Envelope.MaxLatitude);
+        const lon0 = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(a.lon, Envelope.MinLongitude, Envelope.MaxLongitude);
         const alt0 = hasAlt ? a.alt : undefined;
-        const env = new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0), new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat0, lon0, alt0));
+        const env = new Envelope(new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(lat0, lon0, alt0), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(lat0, lon0, alt0));
         for (let i = 1; i < array.length; i++) {
             env.addInPlace(array[i]);
         }
@@ -2173,16 +2660,16 @@ class Envelope {
         return this._max.alt;
     }
     get nw() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.north, this.west);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(this.north, this.west);
     }
     get sw() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.south, this.west);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(this.south, this.west);
     }
     get ne() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.north, this.east);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(this.north, this.east);
     }
     get se() {
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(this.south, this.east);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(this.south, this.east);
     }
     equals(other) {
         return (other !== undefined &&
@@ -2203,7 +2690,7 @@ class Envelope {
         const lon = this._min.lon + (this._max.lon - this._min.lon) / 2;
         const lat = this._min.lat + (this._max.lat - this._min.lat) / 2;
         const alt = this.hasAltitude ? this._min.alt + (this._max.alt - this._min.alt) / 2 : undefined;
-        return new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo3(lat, lon, alt);
+        return new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo3(lat, lon, alt);
     }
     get size() {
         const w = this._max.lon - this._min.lon;
@@ -2241,6 +2728,11 @@ class Envelope {
         }
         return this;
     }
+    /// An Envelope or  An array of six numbers that define a bounding geographic region in EPSG:4979 coordinates
+    /// with the order [west, south, east, north, minimum height, maximum height].
+    /// Longitudes and latitudes are in decimal. The range for latitudes is [-90,+90].
+    /// The range for longitudes is [-180,180].
+    /// The heights are in meters above (or below) the WGS84 ellipsoid.
     intersects(bounds) {
         if (bounds === undefined)
             return false;
@@ -2274,9 +2766,10 @@ class Envelope {
         if ((0,_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsLocation)(other)) {
             return this.containsFloat(other.lat, other.lon, other.alt);
         }
-        return (this.containsFloat(other.south, other.west) &&
-            this.containsFloat(other.north, other.east) &&
-            (!this.hasAltitude ||
+        // Check if all corners of the `other` envelope are within the current envelope
+        return (this.containsFloat(other.south, other.west) && // South-West corner
+            this.containsFloat(other.north, other.east) && // North-East corner
+            (!this.hasAltitude || // Skip altitude check if not applicable
                 (other.bottom !== undefined &&
                     other.top !== undefined &&
                     this.containsFloat(other.bottom, undefined, other.bottom) &&
@@ -2343,13 +2836,13 @@ class GeoBounded {
 }
 //# sourceMappingURL=geography.envelope.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.interfaces.js":
+/***/ "../core/dist/geography/geography.interfaces.js"
 /*!******************************************************!*\
   !*** ../core/dist/geography/geography.interfaces.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2374,13 +2867,13 @@ function IsGeoBounded(b) {
 }
 //# sourceMappingURL=geography.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.knownPlaces.js":
+/***/ "../core/dist/geography/geography.knownPlaces.js"
 /*!*******************************************************!*\
   !*** ../core/dist/geography/geography.knownPlaces.js ***!
   \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2399,7 +2892,9 @@ class KnownPlaces {
         for (const [category, locations] of Object.entries(places)) {
             const optgroup = document.createElement("optgroup");
             optgroup.label = category;
+            // Convert the object into an array of entries
             const entries = Object.entries(locations);
+            // Sort the entries alphabetically by the key
             const sortedEntries = entries.sort((a, b) => a[0].localeCompare(b[0]));
             for (const [name, coords] of sortedEntries) {
                 const option = document.createElement("option");
@@ -2418,65 +2913,65 @@ class KnownPlaces {
     }
 }
 KnownPlaces.Mountains = {
-    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925),
-    K2: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.8808, 76.5155),
-    Kangchenjunga: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.7025, 88.1475),
-    Lhotse: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9617, 86.9333),
-    Makalu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.8897, 87.0889),
-    ChoOyu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.0942, 86.6608),
-    Dhaulagiri: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.6967, 83.4872),
-    Manaslu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5494, 84.5599),
-    NangaParbat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.237, 74.5892),
-    Annapurna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5961, 83.8203),
-    Matterhorn: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.9763, 7.6586),
-    MontBlanc: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.8326, 6.8652),
-    Denali: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.0695, -151.0074),
-    Aconcagua: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-32.6532, -70.0109),
-    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.0674, 37.3556),
-    Elbrus: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(43.3499, 42.4375),
-    PuncakJaya: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-4.0751, 137.1889),
-    Roraima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(5.125, -60.75),
+    Everest: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9881, 86.925), // Mount Everest, Himalayas
+    K2: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.8808, 76.5155), // K2, Karakoram
+    Kangchenjunga: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.7025, 88.1475), // Kangchenjunga, Himalayas
+    Lhotse: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.9617, 86.9333), // Lhotse, Himalayas
+    Makalu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(27.8897, 87.0889), // Makalu, Himalayas
+    ChoOyu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.0942, 86.6608), // Cho Oyu, Himalayas
+    Dhaulagiri: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.6967, 83.4872), // Dhaulagiri, Himalayas
+    Manaslu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5494, 84.5599), // Manaslu, Himalayas
+    NangaParbat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.237, 74.5892), // Nanga Parbat, Himalayas
+    Annapurna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(28.5961, 83.8203), // Annapurna, Himalayas
+    Matterhorn: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.9763, 7.6586), // Matterhorn, Alps
+    MontBlanc: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(45.8326, 6.8652), // Mont Blanc, Alps
+    Denali: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.0695, -151.0074), // Denali, Alaska
+    Aconcagua: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-32.6532, -70.0109), // Aconcagua, Andes
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.0674, 37.3556), // Kilimanjaro, Africa
+    Elbrus: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(43.3499, 42.4375), // Mount Elbrus, Caucasus
+    PuncakJaya: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-4.0751, 137.1889), // Puncak Jaya, Indonesia
+    Roraima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(5.125, -60.75), // Mount Roraima, Guiana Highlands
 };
 KnownPlaces.Volcanoes = {
-    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.102, 105.423),
-    Vesuvius: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(40.821, 14.426),
-    Etna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.751, 14.993),
-    MaunaLoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.475, -155.608),
-    Kilauea: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.421, -155.287),
-    Fuji: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.3606, 138.7274),
-    StHelens: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.1912, -122.1944),
-    Pinatubo: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(15.142, 120.35),
-    Rainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.853, -121.76),
-    Cotopaxi: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.679, -78.438),
-    Popocatepetl: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.023, -98.622),
-    Eyjafjallajokull: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.633, -19.621),
-    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.404, 25.396),
-    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.067, 37.355),
-    Arenal: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(10.463, -84.703),
-    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.588),
-    Tambora: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-8.25, 118.0),
-    Sakurajima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(31.593, 130.657),
+    Krakatoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-6.102, 105.423), // Krakatoa, Indonesia
+    Vesuvius: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(40.821, 14.426), // Mount Vesuvius, Italy
+    Etna: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.751, 14.993), // Mount Etna, Italy
+    MaunaLoa: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.475, -155.608), // Mauna Loa, Hawaii
+    Kilauea: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.421, -155.287), // Kilauea, Hawaii
+    Fuji: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(35.3606, 138.7274), // Mount Fuji, Japan
+    StHelens: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.1912, -122.1944), // Mount St. Helens, USA
+    Pinatubo: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(15.142, 120.35), // Mount Pinatubo, Philippines
+    Rainier: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(46.853, -121.76), // Mount Rainier, USA
+    Cotopaxi: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.679, -78.438), // Cotopaxi, Ecuador
+    Popocatepetl: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(19.023, -98.622), // Popocatépetl, Mexico
+    Eyjafjallajokull: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(63.633, -19.621), // Eyjafjallajökull, Iceland
+    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.404, 25.396), // Santorini, Greece
+    Kilimanjaro: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-3.067, 37.355), // Mount Kilimanjaro, Tanzania
+    Arenal: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(10.463, -84.703), // Arenal Volcano, Costa Rica
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.588), // Yellowstone Caldera, USA
+    Tambora: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-8.25, 118.0), // Mount Tambora, Indonesia
+    Sakurajima: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(31.593, 130.657), // Sakurajima, Japan
 };
 KnownPlaces.SightsAndParks = {
-    GrandCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.1069, -112.1129),
-    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.5885),
-    GreatBarrierReef: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-18.2871, 147.6992),
-    Yosemite: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.8651, -119.5383),
-    Serengeti: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-2.3333, 34.8333),
-    MachuPicchu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-13.1631, -72.545),
-    Banff: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(51.1784, -115.5708),
-    Galapagos: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.9538, -90.9656),
-    TorresDelPaine: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-51.1667, -73.2425),
-    PlitviceLakes: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.8803, 15.6161),
-    VictoriaFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-17.9243, 25.8573),
-    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.3932, 25.4615),
-    Petra: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(30.3285, 35.4444),
-    IguazuFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-25.6953, -54.4367),
-    Kruger: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-23.9884, 31.5547),
-    BryceCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.593, -112.1871),
-    CliffsOfMoher: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(52.9715, -9.4265),
-    AngkorWat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(13.4125, 103.8669),
-    HaLongBay: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.9101, 107.1839),
+    GrandCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.1069, -112.1129), // Grand Canyon, USA
+    Yellowstone: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.428, -110.5885), // Yellowstone National Park, USA
+    GreatBarrierReef: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-18.2871, 147.6992), // Great Barrier Reef, Australia
+    Yosemite: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.8651, -119.5383), // Yosemite National Park, USA
+    Serengeti: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-2.3333, 34.8333), // Serengeti National Park, Tanzania
+    MachuPicchu: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-13.1631, -72.545), // Machu Picchu, Peru
+    Banff: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(51.1784, -115.5708), // Banff National Park, Canada
+    Galapagos: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-0.9538, -90.9656), // Galapagos Islands, Ecuador
+    TorresDelPaine: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-51.1667, -73.2425), // Torres del Paine National Park, Chile
+    PlitviceLakes: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(44.8803, 15.6161), // Plitvice Lakes National Park, Croatia
+    VictoriaFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-17.9243, 25.8573), // Victoria Falls, Zimbabwe/Zambia
+    Santorini: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(36.3932, 25.4615), // Santorini, Greece
+    Petra: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(30.3285, 35.4444), // Petra, Jordan
+    IguazuFalls: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-25.6953, -54.4367), // Iguazu Falls, Argentina/Brazil
+    Kruger: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(-23.9884, 31.5547), // Kruger National Park, South Africa
+    BryceCanyon: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(37.593, -112.1871), // Bryce Canyon National Park, USA
+    CliffsOfMoher: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(52.9715, -9.4265), // Cliffs of Moher, Ireland
+    AngkorWat: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(13.4125, 103.8669), // Angkor Wat, Cambodia
+    HaLongBay: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(20.9101, 107.1839), // Ha Long Bay, Vietnam
 };
 KnownPlaces.WorldWonders = {
     CliffsOfMoher: new _geography_position__WEBPACK_IMPORTED_MODULE_0__.Geo2(52.9715, -9.4265),
@@ -2503,13 +2998,13 @@ KnownPlaces.Waterfalls = {
 };
 //# sourceMappingURL=geography.knownPlaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.position.js":
+/***/ "../core/dist/geography/geography.position.js"
 /*!****************************************************!*\
   !*** ../core/dist/geography/geography.position.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2521,7 +3016,9 @@ class Geo2 {
         return new Geo2(coordinates[1], coordinates[0]);
     }
     static Parse(value) {
+        // Remove the brackets and split the string by comma
         const parts = value.replace(/[\[\]]/g, "").split(",");
+        // Parse the latitude and longitude
         const lat = parseFloat(parts[0]);
         const lon = parseFloat(parts[1]);
         return new Geo2(lat, lon);
@@ -2573,9 +3070,12 @@ class Geo3 extends Geo2 {
         return `[${value.lat},${value.lon}]`;
     }
     static Parse(value) {
+        // Remove the brackets and split the string by comma
         const parts = value.replace(/[\[\]]/g, "").split(",");
+        // Parse the latitude and longitude
         const lat = parseFloat(parts[0]);
         const lon = parseFloat(parts[1]);
+        // Check if altitude is provided
         if (parts.length > 2) {
             const alt = parseFloat(parts[2]);
             return new Geo3(lat, lon, alt);
@@ -2610,34 +3110,48 @@ class Geo3 extends Geo2 {
 }
 //# sourceMappingURL=geography.position.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/geography.projections.js":
+/***/ "../core/dist/geography/geography.projections.js"
 /*!*******************************************************!*\
   !*** ../core/dist/geography/geography.projections.js ***!
   \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Projections: () => (/* binding */ Projections)
 /* harmony export */ });
-/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
-/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry/geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
 
 
 
 class Projections {
+    /**
+     * Convert lat/lon to WebMercator x/y
+     * @param lat the latitude
+     * @param lon the longitude
+     * @returns the cartesian2 values
+     */
     static LatLonToWebMercator(lat, lon, ellipsoid) {
-        return Projections.LatLonToWebMercatorToRef(lat, lon, _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero(), ellipsoid);
+        return Projections.LatLonToWebMercatorToRef(lat, lon, _geometry_geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero(), ellipsoid);
     }
+    /**
+     * Convert lat/lon to WebMercator x/y using object ref to store the result
+     * @param lat the latitude
+     * @param lon the longitude
+     * @param ref the object to store the result
+     * @returns the cartesian2 values
+     */
     static LatLonToWebMercatorToRef(lat, lon, ref, ellipsoid) {
-        ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
-        ref.x = lon * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD * ellipsoid.semiMajorAxis;
-        lat = _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.Clamp(lat, Projections.WebMercatorMinLatitude, Projections.WebMercatorMaxLatitude);
-        let rad = lat * _math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD;
-        ref.y = ellipsoid.semiMajorAxis * Math.log(Math.tan(_math_math__WEBPACK_IMPORTED_MODULE_2__.Scalar.PI_4 + rad / 2));
+        ellipsoid = ellipsoid || _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84;
+        ref.x = lon * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD * ellipsoid.semiMajorAxis;
+        // limit latitude to 85.05 degrees
+        lat = _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(lat, Projections.WebMercatorMinLatitude, Projections.WebMercatorMaxLatitude);
+        let rad = lat * _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
+        ref.y = ellipsoid.semiMajorAxis * Math.log(Math.tan(_math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.PI_4 + rad / 2));
         return ref;
     }
 }
@@ -2645,13 +3159,13 @@ Projections.WebMercatorMaxLatitude = 85.05112878;
 Projections.WebMercatorMinLatitude = -Projections.WebMercatorMaxLatitude;
 //# sourceMappingURL=geography.projections.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/index.js":
+/***/ "../core/dist/geography/index.js"
 /*!***************************************!*\
   !*** ../core/dist/geography/index.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2693,27 +3207,27 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/shapes/geography.line.js":
+/***/ "../core/dist/geography/shapes/geography.line.js"
 /*!*******************************************************!*\
   !*** ../core/dist/geography/shapes/geography.line.js ***!
   \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GeoLine: () => (/* binding */ GeoLine)
 /* harmony export */ });
-/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography.envelope */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _geography_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.shape */ "../core/dist/geography/shapes/geography.shape.js");
-/* harmony import */ var _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.shapes.interfaces */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
+/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography.envelope */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.shape */ "../core/dist/geography/shapes/geography.shape.js");
+/* harmony import */ var _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.shapes.interfaces */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
 
 
 
-class GeoLine extends _geography_shape__WEBPACK_IMPORTED_MODULE_0__.GeoShape {
+class GeoLine extends _geography_shape__WEBPACK_IMPORTED_MODULE_1__.GeoShape {
     constructor(a, b) {
-        super(_geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__.GeoShapeType.Line);
+        super(_geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_2__.GeoShapeType.Line);
         this._alice = a;
         this._bob = b;
     }
@@ -2736,35 +3250,35 @@ class GeoLine extends _geography_shape__WEBPACK_IMPORTED_MODULE_0__.GeoShape {
         }
     }
     _buildEnvelope() {
-        return _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope.FromPoints(this._alice, this._bob);
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(this._alice, this._bob);
     }
 }
 //# sourceMappingURL=geography.line.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/shapes/geography.polygon.js":
+/***/ "../core/dist/geography/shapes/geography.polygon.js"
 /*!**********************************************************!*\
   !*** ../core/dist/geography/shapes/geography.polygon.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GeoPolygon: () => (/* binding */ GeoPolygon)
 /* harmony export */ });
+/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geodesy */ "../core/dist/geodesy/calculators/geodesy.calculator.spherical.js");
 /* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geodesy */ "../core/dist/geodesy/geodesy.calculators.js");
-/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geodesy */ "../core/dist/geodesy/calculators/geodesy.calculator.spherical.js");
-/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography.position */ "../core/dist/geography/geography.position.js");
-/* harmony import */ var _geography_polyline__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.polyline */ "../core/dist/geography/shapes/geography.polyline.js");
+/* harmony import */ var _geography_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography.position */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _geography_polyline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geography.polyline */ "../core/dist/geography/shapes/geography.polyline.js");
 /* harmony import */ var _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography.shapes.interfaces */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
 
 
 
 
-class GeoPolygon extends _geography_polyline__WEBPACK_IMPORTED_MODULE_0__.GeoPolyline {
+class GeoPolygon extends _geography_polyline__WEBPACK_IMPORTED_MODULE_3__.GeoPolyline {
     static FromCircle(center, radius, step, p) {
-        const processor = p ?? _geodesy__WEBPACK_IMPORTED_MODULE_1__.CalculatorBase.Shared ?? _geodesy__WEBPACK_IMPORTED_MODULE_2__.SphericalCalculator.Shared;
+        const processor = p ?? _geodesy__WEBPACK_IMPORTED_MODULE_1__.CalculatorBase.Shared ?? _geodesy__WEBPACK_IMPORTED_MODULE_0__.SphericalCalculator.Shared;
         const points = [];
         const angle = 360 / step;
         const r = radius;
@@ -2778,14 +3292,14 @@ class GeoPolygon extends _geography_polyline__WEBPACK_IMPORTED_MODULE_0__.GeoPol
     static FromRectangle(center, width, height, p) {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
-        p = p ?? _geodesy__WEBPACK_IMPORTED_MODULE_1__.CalculatorBase.Shared ?? _geodesy__WEBPACK_IMPORTED_MODULE_2__.SphericalCalculator.Shared;
+        p = p ?? _geodesy__WEBPACK_IMPORTED_MODULE_1__.CalculatorBase.Shared ?? _geodesy__WEBPACK_IMPORTED_MODULE_0__.SphericalCalculator.Shared;
         const lat = center.lat;
         const lon = center.lon;
         const N = p.getLocationAtDistanceAzimuth(lat, lon, halfHeight, 0);
         const E = p.getLocationAtDistanceAzimuth(lat, lon, halfWidth, 90);
         const S = p.getLocationAtDistanceAzimuth(lat, lon, halfHeight, 180);
         const W = p.getLocationAtDistanceAzimuth(lat, lon, halfWidth, 270);
-        return new GeoPolygon([new _geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2(N.lat, W.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2(N.lat, E.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2(S.lat, E.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_3__.Geo2(S.lat, W.lon)]);
+        return new GeoPolygon([new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(N.lat, W.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(N.lat, E.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(S.lat, E.lon), new _geography_position__WEBPACK_IMPORTED_MODULE_2__.Geo2(S.lat, W.lon)]);
     }
     constructor(p) {
         super(p, _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__.GeoShapeType.Polygon);
@@ -2793,45 +3307,45 @@ class GeoPolygon extends _geography_polyline__WEBPACK_IMPORTED_MODULE_0__.GeoPol
 }
 //# sourceMappingURL=geography.polygon.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/shapes/geography.polyline.js":
+/***/ "../core/dist/geography/shapes/geography.polyline.js"
 /*!***********************************************************!*\
   !*** ../core/dist/geography/shapes/geography.polyline.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GeoPolyline: () => (/* binding */ GeoPolyline)
 /* harmony export */ });
-/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography.envelope */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _geography_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geography.shape */ "../core/dist/geography/shapes/geography.shape.js");
-/* harmony import */ var _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.shapes.interfaces */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
+/* harmony import */ var _geography_envelope__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography.envelope */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _geography_shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geography.shape */ "../core/dist/geography/shapes/geography.shape.js");
+/* harmony import */ var _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geography.shapes.interfaces */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
 
 
 
-class GeoPolyline extends _geography_shape__WEBPACK_IMPORTED_MODULE_0__.GeoShape {
+class GeoPolyline extends _geography_shape__WEBPACK_IMPORTED_MODULE_1__.GeoShape {
     constructor(p, type) {
-        super(type ?? _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__.GeoShapeType.Polyline);
+        super(type ?? _geography_shapes_interfaces__WEBPACK_IMPORTED_MODULE_2__.GeoShapeType.Polyline);
         this._points = p;
     }
     get points() {
         return this._points;
     }
     _buildEnvelope() {
-        return _geography_envelope__WEBPACK_IMPORTED_MODULE_2__.Envelope.FromPoints(...this._points);
+        return _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(...this._points);
     }
 }
 //# sourceMappingURL=geography.polyline.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/shapes/geography.shape.js":
+/***/ "../core/dist/geography/shapes/geography.shape.js"
 /*!********************************************************!*\
   !*** ../core/dist/geography/shapes/geography.shape.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2850,19 +3364,20 @@ class GeoShape extends _geography_envelope__WEBPACK_IMPORTED_MODULE_0__.GeoBound
 }
 //# sourceMappingURL=geography.shape.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/shapes/geography.shapes.interfaces.js":
+/***/ "../core/dist/geography/shapes/geography.shapes.interfaces.js"
 /*!********************************************************************!*\
   !*** ../core/dist/geography/shapes/geography.shapes.interfaces.js ***!
   \********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GeoShapeType: () => (/* binding */ GeoShapeType),
 /* harmony export */   isGeoShape: () => (/* binding */ isGeoShape)
 /* harmony export */ });
+// we start at 100 to avoid conflicts with geometries
 var GeoShapeType;
 (function (GeoShapeType) {
     GeoShapeType[GeoShapeType["Unknown"] = 100] = "Unknown";
@@ -2876,13 +3391,13 @@ function isGeoShape(value) {
 }
 //# sourceMappingURL=geography.shapes.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geography/shapes/index.js":
+/***/ "../core/dist/geography/shapes/index.js"
 /*!**********************************************!*\
   !*** ../core/dist/geography/shapes/index.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2905,13 +3420,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.bounds.collection.js":
+/***/ "../core/dist/geometry/geometry.bounds.collection.js"
 /*!***********************************************************!*\
   !*** ../core/dist/geometry/geometry.bounds.collection.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2960,13 +3475,13 @@ class BoundedCollection extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bo
 }
 //# sourceMappingURL=geometry.bounds.collection.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.bounds.js":
+/***/ "../core/dist/geometry/geometry.bounds.js"
 /*!************************************************!*\
   !*** ../core/dist/geometry/geometry.bounds.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -3179,13 +3694,13 @@ class Bounded {
 }
 //# sourceMappingURL=geometry.bounds.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.cartesian.js":
+/***/ "../core/dist/geometry/geometry.cartesian.js"
 /*!***************************************************!*\
   !*** ../core/dist/geometry/geometry.cartesian.js ***!
   \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -3193,9 +3708,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Cartesian3: () => (/* binding */ Cartesian3),
 /* harmony export */   Cartesian4: () => (/* binding */ Cartesian4)
 /* harmony export */ });
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.units.js");
-/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
-/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
 
 
 class Cartesian2 {
@@ -3209,18 +3724,23 @@ class Cartesian2 {
         return ref;
     }
     static ComputeCode(point, clipArea) {
-        let code = _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionCode.INSIDE;
+        // initialized as being inside
+        let code = _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.INSIDE;
         if (point.x < clipArea.xmin) {
-            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionCode.LEFT;
+            // to the left of rectangle
+            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.LEFT;
         }
         else if (point.x > clipArea.xmax) {
-            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionCode.RIGHT;
+            // to the right of rectangle
+            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.RIGHT;
         }
         if (point.y < clipArea.ymin) {
-            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionCode.BOTTOM;
+            // below the rectangle
+            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.BOTTOM;
         }
         else if (point.y > clipArea.ymax) {
-            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionCode.TOP;
+            // above the rectangle
+            code |= _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.TOP;
         }
         return code;
     }
@@ -3315,35 +3835,48 @@ class Cartesian3 extends Cartesian2 {
         ref.z = a.z / length;
         return ref;
     }
+    /// <summary>
+    ///   Check if two points are coincident
+    /// </summary>
     static AreCoincident(a, b, epsilon) {
         const length = Cartesian3.Magnitude(Cartesian3.Subtract(a, b));
-        return length <= (epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON);
+        return length <= (epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON);
     }
+    /// <summary>
+    ///   Check if three points are collinear
+    /// </summary>
     static AreCollinear(a, b, c, epsilon) {
         const length = Cartesian3.Magnitude(Cartesian3.Cross(Cartesian3.Subtract(b, a), Cartesian3.Subtract(c, a)));
-        return length <= (epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON);
+        return length <= (epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON);
     }
     static IsWithinTheBounds(a, b, p) {
+        // Check for collinearity
         if (!Cartesian3.AreCollinear(a, b, p)) {
             return false;
         }
+        // Compute vectors
         const ab = Cartesian3.Subtract(b, a);
         const ap = Cartesian3.Subtract(p, a);
         const bp = Cartesian3.Subtract(p, b);
+        // Check if the dot product of AB and AP is non-negative (p is not behind a)
         if (Cartesian3.Dot(ab, ap) < 0) {
             return false;
         }
+        // Check if the dot product of AB and BP is non-positive (p is not beyond b)
         if (Cartesian3.Dot(ab, bp) > 0) {
             return false;
         }
         return true;
     }
+    /// <summary>
+    ///   Check if four points are coplanar
+    /// </summary>
     static AreCoplanar(a, b, c, d, epsilon) {
         var n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
         var n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
         var m1 = Cartesian3.Magnitude(n1);
         var m2 = Cartesian3.Magnitude(n2);
-        const EPSILON = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON;
+        const EPSILON = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON;
         return (m1 <= EPSILON ||
             m2 <= EPSILON ||
             Cartesian3.AreCollinear(Cartesian3.Zero(), Cartesian3.MultiplyByFloatInPlace(n1, 1.0 / m1), Cartesian3.MultiplyByFloatInPlace(n2, 1.0 / m2)));
@@ -3414,7 +3947,7 @@ class Cartesian3 extends Cartesian2 {
         let y = 0;
         let z = 0;
         let count = values.length;
-        if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.isCartesianArray)(values)) {
+        if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.isCartesianArray)(values)) {
             for (let i = 0; i < values.length; i++) {
                 x += values[i].x;
                 y += values[i].y;
@@ -3484,8 +4017,8 @@ class Cartesian3 extends Cartesian2 {
         return b.x == a.x && b.y == a.y && b.z == a.z;
     }
     static EqualsWithinEpsilon(a, b, epsilon) {
-        epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.EPSILON;
-        return _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(Math.abs(b.x - a.x), epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(Math.abs(b.y - a.y), epsilon) && _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.WithinEpsilon(Math.abs(b.z - a.z), epsilon);
+        epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON;
+        return _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.WithinEpsilon(Math.abs(b.x - a.x), epsilon) && _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.WithinEpsilon(Math.abs(b.y - a.y), epsilon) && _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.WithinEpsilon(Math.abs(b.z - a.z), epsilon);
     }
     static Clone(other) {
         return new Cartesian3(other.x, other.y, other.z);
@@ -3515,22 +4048,38 @@ class Cartesian4 extends Cartesian3 {
 }
 //# sourceMappingURL=geometry.cartesian.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.convex.quickhull.js":
+/***/ "../core/dist/geometry/geometry.convex.quickhull.js"
 /*!**********************************************************!*\
   !*** ../core/dist/geometry/geometry.convex.quickhull.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   QuickHull: () => (/* binding */ QuickHull)
 /* harmony export */ });
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "../core/dist/utils/runtime.js");
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ "../core/dist/utils/runtime.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/**
+ * From Java implementation of Oskar Sigvardsson
+ */
 
 
+/// <summary>
+///   Struct representing a single face.
+///
+///   Vertex0, Vertex1 and Vertex2 are the vertices in CCW order. They
+///   acutal points are stored in the points array, these are just
+///   indexes into that array.
+///
+///   Opposite0, Opposite1 and Opposite2 are the keys to the faces which
+///   share an edge with this face. Opposite0 is the face opposite
+///   Vertex0 (so it has an edge with Vertex2 and Vertex1), etc.
+///
+///   Normal is (unsurprisingly) the normal of the triangle.
+/// </summary>
 class Face {
     constructor(v0, v1, v2, o0, o1, o2, normal) {
         this.Vertex0 = v0;
@@ -3551,6 +4100,14 @@ class Face {
             this.Normal == other.Normal);
     }
 }
+/// <summary>
+///   Struct representing a mapping between a point and a face. These
+///   are used in the openSet array.
+///
+///   Point is the index of the point in the points array, Face is the
+///   key of the face in the Key dictionary, Distance is the distance
+///   from the face to the point.
+/// </summary>
 class PointFace {
     constructor(p, f, d) {
         this.Point = p;
@@ -3558,6 +4115,15 @@ class PointFace {
         this.Distance = d;
     }
 }
+/// <summary>
+///   Struct representing a single edge in the horizon.
+///
+///   Edge0 and Edge1 are the vertexes of edge in CCW order, Face is the
+///   face on the other side of the horizon.
+///
+///   TODO Edge1 isn't actually needed, you can just index the next item
+///   in the horizon array.
+/// </summary>
 class HorizonEdge {
     constructor(Face = 0, Edge0 = 0, Edge1 = 0) {
         this.Face = Face;
@@ -3565,9 +4131,63 @@ class HorizonEdge {
         this.Edge1 = Edge1;
     }
 }
+/// <summary>
+///   An implementation of the quickhull algorithm for generating 3d convex
+///   hulls.
+///
+///   The algorithm works like this: you start with an initial "seed" hull,
+///   that is just a simple tetrahedron made up of four points in the point
+///   cloud. This seed hull is then grown until it all the points in the
+///   point cloud is inside of it, at which point it will be the convex hull
+///   for the entire set.
+///
+///   All of the points in the point cloud is divided into two parts, the
+///   "open set" and the "closed set". The open set consists of all the
+///   points outside of the tetrahedron, and the closed set is all of the
+///   points inside the tetrahedron. After each iteration of the algorithm,
+///   the closed set gets bigger and the open set get smaller. When the open
+///   set is empty, the algorithm is finished.
+///
+///   Each point in the open set is assigned to a face that it lies outside
+///   of. To grow the hull, the point in the open set which is farthest from
+///   it's face is chosen. All faces which are facing that point (I call
+///   them "lit faces" in the code, because if you imagine the point as a
+///   point light, it's the set of points which would be lit by that point
+///   light) are removed, and a "horizon" of edges is found from where the
+///   faces were removed. From this horizon, new faces are constructed in a
+///   "cone" like fashion connecting the point to the edges.
+///
+///   To keep track of the faces, I use a struct for each face which
+///   contains the three vertices of the face in CCW order, as well as the
+///   three triangles which share an edge. I was considering doing a
+///   half-edge structure to store the mesh, but it's not needed. Using a
+///   struct for each face and neighbors simplify the algorithm and makes it
+///   easy to export it as a mesh.
+///
+///   The most subtle part of the algorithm is finding the horizon. In order
+///   to properly construct the cone so that all neighbors are kept
+///   consistent, you can do a depth-first search from the first lit face.
+///   If the depth-first search always proceeeds in a counter-clockwise
+///   fashion, it guarantees that the horizon will be found in a
+///   counter-clockwise order, which makes it easy to construct the cone of
+///   new faces.
+///
+///   A note: the code uses a right-handed coordinate system, where the
+///   cross-product uses the right-hand rule and the faces are in CCW order.
+///   At the end of the algorithm, the hull is exported in a 3d-friendly
+///   fashion, with a left-handed mesh.
+/// </summary>
 class QuickHull {
     constructor() {
+        /// <summary>
+        ///   The "tail" of the openSet, the last index of a vertex that has
+        ///   been assigned to a face.
+        /// </summary>
         this.openSetTail = -1;
+        /// <summary>
+        ///   When adding a new face to the faces Dictionary, use this for the
+        ///   key and then increment it.
+        /// </summary>
         this.faceCount = 0;
         this.faces = new Map();
         this.litFaces = new Set();
@@ -3575,6 +4195,12 @@ class QuickHull {
         this.openSet = new Array();
         this.hullVerts = new Map();
     }
+    /// <summary>
+    ///   Generate a convex hull from points in points array, and store the
+    ///   mesh in 3d-friendly format in verts and tris. If splitVerts is
+    ///   true, the the verts will be split, if false, the same vert will be
+    ///   used for more than one triangle.
+    /// </summary>
     generateHull(points, splitVerts = false) {
         if (points.length < 4) {
             throw new Error("Need at least 4 points to generate a convex hull");
@@ -3585,8 +4211,13 @@ class QuickHull {
             this._growHull(points);
         }
         const exported = this._exportMeshData(points, splitVerts);
+        //this._verifyMesh(points, exported.vertices, exported.faces);
         return exported;
     }
+    /// <summary>
+    ///   Make sure all the buffers and variables needed for the algorithm
+    ///   are initialized.
+    /// </summary>
     _initialize(points, splitVerts) {
         this.faceCount = 0;
         this.openSetTail = -1;
@@ -3598,7 +4229,14 @@ class QuickHull {
             this.hullVerts.clear();
         }
     }
+    /// <summary>
+    ///   Create initial seed hull.
+    /// </summary>
     _generateInitialHull(points) {
+        // Find points suitable for use as the seed hull. Some varieties of
+        // this algorithm pick extreme points here, but I'm not convinced
+        // you gain all that much from that. Currently what it does is just
+        // find the first four points that are not coplanar.
         const b = this._findInitialHullIndices(points);
         const b0 = b[0];
         const b1 = b[1];
@@ -3608,42 +4246,64 @@ class QuickHull {
         var v1 = points[b1];
         var v2 = points[b2];
         var v3 = points[b3];
-        var above = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Subtract(v3, v1), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Cross(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Subtract(v1, v0), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Subtract(v2, v0))) > 0.0;
+        var above = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(v3, v1), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Cross(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(v1, v0), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(v2, v0))) > 0.0;
+        // Create the faces of the seed hull. You need to draw a diagram
+        // here, otherwise it's impossible to know what's going on :)
+        // Basically: there are two different possible start-tetrahedrons,
+        // depending on whether the fourth point is above or below the base
+        // triangle. If you draw a tetrahedron with these coordinates (in a
+        // right-handed coordinate-system):
+        //   b0 = (0,0,0)
+        //   b1 = (1,0,0)
+        //   b2 = (0,1,0)
+        //   b3 = (0,0,1)
+        // you can see the first case (set b3 = (0,0,-1) for the second
+        // case). The faces are added with the proper references to the
+        // faces opposite each vertex
         this.faceCount = 0;
         if (above) {
-            this.faces.set(this.faceCount++, new Face(b0, b2, b1, 3, 1, 2, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b0], points[b2], points[b1])));
-            this.faces.set(this.faceCount++, new Face(b0, b1, b3, 3, 2, 0, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b0], points[b1], points[b3])));
-            this.faces.set(this.faceCount++, new Face(b0, b3, b2, 3, 0, 1, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b0], points[b3], points[b2])));
-            this.faces.set(this.faceCount++, new Face(b1, b2, b3, 2, 1, 0, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b1], points[b2], points[b3])));
+            this.faces.set(this.faceCount++, new Face(b0, b2, b1, 3, 1, 2, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b0], points[b2], points[b1])));
+            this.faces.set(this.faceCount++, new Face(b0, b1, b3, 3, 2, 0, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b0], points[b1], points[b3])));
+            this.faces.set(this.faceCount++, new Face(b0, b3, b2, 3, 0, 1, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b0], points[b3], points[b2])));
+            this.faces.set(this.faceCount++, new Face(b1, b2, b3, 2, 1, 0, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b1], points[b2], points[b3])));
         }
         else {
-            this.faces.set(this.faceCount++, new Face(b0, b1, b2, 3, 2, 1, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b0], points[b1], points[b2])));
-            this.faces.set(this.faceCount++, new Face(b0, b3, b1, 3, 0, 2, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b0], points[b3], points[b1])));
-            this.faces.set(this.faceCount++, new Face(b0, b2, b3, 3, 1, 0, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b0], points[b2], points[b3])));
-            this.faces.set(this.faceCount++, new Face(b1, b3, b2, 2, 0, 1, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[b1], points[b3], points[b2])));
+            this.faces.set(this.faceCount++, new Face(b0, b1, b2, 3, 2, 1, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b0], points[b1], points[b2])));
+            this.faces.set(this.faceCount++, new Face(b0, b3, b1, 3, 0, 2, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b0], points[b3], points[b1])));
+            this.faces.set(this.faceCount++, new Face(b0, b2, b3, 3, 1, 0, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b0], points[b2], points[b3])));
+            this.faces.set(this.faceCount++, new Face(b1, b3, b2, 2, 0, 1, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[b1], points[b3], points[b2])));
         }
         this._verifyFaces(points);
+        // Create the openSet. Add all points except the points of the seed
+        // hull.
         for (let i = 0; i < points.length; i++) {
             if (i == b0 || i == b1 || i == b2 || i == b3)
                 continue;
             this.openSet.push(new PointFace(i, QuickHull.UNASSIGNED, 0.0));
         }
+        // Add the seed hull verts to the tail of the list.
         this.openSet.push(new PointFace(b0, QuickHull.INSIDE, Number.NaN));
         this.openSet.push(new PointFace(b1, QuickHull.INSIDE, Number.NaN));
         this.openSet.push(new PointFace(b2, QuickHull.INSIDE, Number.NaN));
         this.openSet.push(new PointFace(b3, QuickHull.INSIDE, Number.NaN));
+        // Set the openSetTail value. Last item in the array is
+        // openSet.Count - 1, but four of the points (the verts of the seed
+        // hull) are part of the closed set, so move openSetTail to just
+        // before those.
         this.openSetTail = this.openSet.length - 5;
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet.length == points.length);
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet.length == points.length);
+        // Assign all points of the open set. This does basically the same
+        // thing as ReassignPoints()
         for (let i = 0; i <= this.openSetTail; i++) {
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[i].Face == QuickHull.UNASSIGNED);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[this.openSetTail].Face == QuickHull.UNASSIGNED);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[this.openSetTail + 1].Face == QuickHull.INSIDE);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[i].Face == QuickHull.UNASSIGNED);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[this.openSetTail].Face == QuickHull.UNASSIGNED);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[this.openSetTail + 1].Face == QuickHull.INSIDE);
             var assigned = false;
             var fp = this.openSet[i];
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.size == 4);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.size == this.faceCount);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.size == 4);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.size == this.faceCount);
             for (let j = 0; j < 4; j++) {
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.has(j));
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.has(j));
                 var face = this.faces.get(j);
                 var dist = this._pointFaceDistance(points[fp.Point], points[face.Vertex0], face);
                 if (dist > 0) {
@@ -3655,8 +4315,13 @@ class QuickHull {
                 }
             }
             if (!assigned) {
+                // Point is inside
                 fp.Face = QuickHull.INSIDE;
                 fp.Distance = Number.NaN;
+                // Point is inside seed hull: swap point with tail, and move
+                // openSetTail back. We also have to decrement i, because
+                // there's a new item at openSet[i], and we need to process
+                // it next iteration
                 this.openSet[i] = this.openSet[this.openSetTail];
                 this.openSet[this.openSetTail] = fp;
                 this.openSetTail -= 1;
@@ -3665,21 +4330,25 @@ class QuickHull {
         }
         this._verifyOpenSet(points);
     }
+    /// <summary>
+    ///   Find four points in the point cloud that are not coplanar for the
+    ///   seed hull
+    /// </summary>
     _findInitialHullIndices(points) {
         var count = points.length;
         for (let i0 = 0; i0 < count - 3; i0++) {
             for (let i1 = i0 + 1; i1 < count - 2; i1++) {
                 var p0 = points[i0];
                 var p1 = points[i1];
-                if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.AreCoincident(p0, p1, QuickHull.EPSILON))
+                if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.AreCoincident(p0, p1, QuickHull.EPSILON))
                     continue;
                 for (let i2 = i1 + 1; i2 < count - 1; i2++) {
                     var p2 = points[i2];
-                    if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.AreCollinear(p0, p1, p2, QuickHull.EPSILON))
+                    if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.AreCollinear(p0, p1, p2, QuickHull.EPSILON))
                         continue;
                     for (let i3 = i2 + 1; i3 < count - 0; i3++) {
                         var p3 = points[i3];
-                        if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.AreCoplanar(p0, p1, p2, p3, QuickHull.EPSILON))
+                        if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.AreCoplanar(p0, p1, p2, p3, QuickHull.EPSILON))
                             continue;
                         return [i0, i1, i2, i3];
                     }
@@ -3688,9 +4357,15 @@ class QuickHull {
         }
         throw new Error("Can't generate hull, points are coplanar");
     }
+    /// <summary>
+    ///   Grow the hull. This method takes the current hull, and expands it
+    ///   to encompass the point in openSet with the point furthest away
+    ///   from its face.
+    /// </summary>
     _growHull(points) {
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSetTail >= 0);
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[0].Face != QuickHull.INSIDE);
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSetTail >= 0);
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[0].Face != QuickHull.INSIDE);
+        // Find farthest point and first lit face.
         var farthestPoint = 0;
         var dist = this.openSet[0].Distance;
         for (let i = 1; i <= this.openSetTail; i++) {
@@ -3699,18 +4374,44 @@ class QuickHull {
                 dist = this.openSet[i].Distance;
             }
         }
+        // Use lit face to find horizon and the rest of the lit
+        // faces.
         this._findHorizon(points, points[this.openSet[farthestPoint].Point], this.openSet[farthestPoint].Face, this.faces.get(this.openSet[farthestPoint].Face));
         this._verifyHorizon();
+        // Construct new cone from horizon
         this._constructCone(points, this.openSet[farthestPoint].Point);
         this._verifyFaces(points);
+        // Reassign points
         this._reassignPoints(points);
     }
+    /// <summary>
+    ///   Start the search for the horizon.
+    ///
+    ///   The search is a DFS search that searches neighboring triangles in
+    ///   a counter-clockwise fashion. When it find a neighbor which is not
+    ///   lit, that edge will be a line on the horizon. If the search always
+    ///   proceeds counter-clockwise, the edges of the horizon will be found
+    ///   in counter-clockwise order.
+    ///
+    ///   The heart of the search can be found in the recursive
+    ///   SearchHorizon() method, but the the first iteration of the search
+    ///   is special, because it has to visit three neighbors (all the
+    ///   neighbors of the initial triangle), while the rest of the search
+    ///   only has to visit two (because one of them has already been
+    ///   visited, the one you came from).
+    /// </summary>
     _findHorizon(points, point, fi, face) {
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face != null && face != undefined);
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face != null && face != undefined);
+        // TODO should I use epsilon in the PointFaceDistance comparisons?
         this.litFaces.clear();
         this.horizon = [];
         this.litFaces.add(fi);
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._pointFaceDistance(point, points[face.Vertex0], face) > 0.0);
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._pointFaceDistance(point, points[face.Vertex0], face) > 0.0);
+        // For the rest of the recursive search calls, we first check if the
+        // triangle has already been visited and is part of litFaces.
+        // However, in this first call we can skip that because we know it
+        // can't possibly have been visited yet, since the only thing in
+        // litFaces is the current triangle.
         {
             var oppositeFace = this.faces.get(face.Opposite0);
             var dist = this._pointFaceDistance(point, points[oppositeFace.Vertex0], oppositeFace);
@@ -3742,12 +4443,19 @@ class QuickHull {
             }
         }
     }
+    /// <summary>
+    ///   Recursively search to find the horizon or lit set.
+    /// </summary>
     _searchHorizon(points, point, prevFaceIndex, faceCount, face) {
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(prevFaceIndex >= 0);
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.litFaces.has(prevFaceIndex));
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(!this.litFaces.has(faceCount));
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.get(faceCount)?.Equals(face));
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(prevFaceIndex >= 0);
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.litFaces.has(prevFaceIndex));
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(!this.litFaces.has(faceCount));
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.get(faceCount)?.Equals(face));
         this.litFaces.add(faceCount);
+        // Use prevFaceIndex to determine what the next face to search will
+        // be, and what edges we need to cross to get there. It's important
+        // that the search proceeds in counter-clockwise order from the
+        // previous face.
         let nextFaceIndex0;
         let nextFaceIndex1;
         let edge0;
@@ -3768,7 +4476,7 @@ class QuickHull {
             edge2 = face.Vertex2;
         }
         else {
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(prevFaceIndex == face.Opposite2);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(prevFaceIndex == face.Opposite2);
             nextFaceIndex0 = face.Opposite0;
             nextFaceIndex1 = face.Opposite1;
             edge0 = face.Vertex1;
@@ -3796,38 +4504,72 @@ class QuickHull {
             }
         }
     }
+    /// <summary>
+    ///   Remove all lit faces and construct new faces from the horizon in a
+    ///   "cone-like" fashion.
+    ///
+    ///   This is a relatively straight-forward procedure, given that the
+    ///   horizon is handed to it in already sorted counter-clockwise. The
+    ///   neighbors of the new faces are easy to find: they're the previous
+    ///   and next faces to be constructed in the cone, as well as the face
+    ///   on the other side of the horizon. We also have to update the face
+    ///   on the other side of the horizon to reflect it's new neighbor from
+    ///   the cone.
+    /// </summary>
     _constructCone(points, farthestPoint) {
         for (let fi of this.litFaces) {
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.has(fi));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.has(fi));
             this.faces.delete(fi);
         }
         const firstNewFace = this.faceCount;
         for (let i = 0; i < this.horizon.length; i++) {
+            // Vertices of the new face, the farthest point as well as the
+            // edge on the horizon. Horizon edge is CCW, so the triangle
+            // should be as well.
             const v0 = farthestPoint;
             const v1 = this.horizon[i].Edge0;
             const v2 = this.horizon[i].Edge1;
+            // Opposite faces of the triangle. First, the edge on the other
+            // side of the horizon, then the next/prev faces on the new cone
             const o0 = this.horizon[i].Face;
             const o1 = i == this.horizon.length - 1 ? firstNewFace : firstNewFace + i + 1;
             const o2 = i == 0 ? firstNewFace + this.horizon.length - 1 : firstNewFace + i - 1;
             let fi = this.faceCount++;
-            this.faces.set(fi, new Face(v0, v1, v2, o0, o1, o2, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[v0], points[v1], points[v2])));
+            this.faces.set(fi, new Face(v0, v1, v2, o0, o1, o2, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[v0], points[v1], points[v2])));
             var horizonFace = this.faces.get(this.horizon[i].Face);
             if (horizonFace.Vertex0 == v1) {
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(v2 == horizonFace.Vertex2);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(v2 == horizonFace.Vertex2);
                 horizonFace.Opposite1 = fi;
             }
             else if (horizonFace.Vertex1 == v1) {
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(v2 == horizonFace.Vertex0);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(v2 == horizonFace.Vertex0);
                 horizonFace.Opposite2 = fi;
             }
             else {
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(v1 == horizonFace.Vertex2);
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(v2 == horizonFace.Vertex1);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(v1 == horizonFace.Vertex2);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(v2 == horizonFace.Vertex1);
                 horizonFace.Opposite0 = fi;
             }
             this.faces.set(this.horizon[i].Face, horizonFace);
         }
     }
+    /// <summary>
+    ///   Reassign points based on the new faces added by ConstructCone().
+    ///
+    ///   Only points that were previous assigned to a removed face need to
+    ///   be updated, so check litFaces while looping through the open set.
+    ///
+    ///   There is a potential optimization here: there's no reason to loop
+    ///   through the entire openSet here. If each face had it's own
+    ///   openSet, we could just loop through the openSets in the removed
+    ///   faces. That would make the loop here shorter.
+    ///
+    ///   However, to do that, we would have to juggle A LOT more List<T>'s,
+    ///   and we would need an object pool to manage them all without
+    ///   generating a whole bunch of garbage. I don't think it's worth
+    ///   doing that to make this loop shorter, a straight for-loop through
+    ///   a list is pretty darn fast. Still, it might be worth trying
+    /// </summary>
     _reassignPoints(points) {
         for (let i = 0; i <= this.openSetTail; i++) {
             var fp = this.openSet[i];
@@ -3845,6 +4587,11 @@ class QuickHull {
                     }
                 }
                 if (!assigned) {
+                    // If point hasn't been assigned, then it's inside the
+                    // convex hull. Swap it with openSetTail, and decrement
+                    // openSetTail. We also have to decrement i, because
+                    // there's now a new thing in openSet[i], so we need i
+                    // to remain the same the next iteration of the loop.
                     fp.Face = QuickHull.INSIDE;
                     fp.Distance = Number.NaN;
                     this.openSet[i] = this.openSet[this.openSetTail];
@@ -3855,6 +4602,13 @@ class QuickHull {
             }
         }
     }
+    /// <summary>
+    ///   Final step in algorithm, export the faces of the convex hull in a
+    ///   mesh-friendly format.
+    ///
+    ///   TODO normals calculation for non-split vertices. Right now it just
+    ///   leaves the normal array empty.
+    /// </summary>
     _exportMeshData(points, splitVerts) {
         const verts = new Array();
         const tris = new Array();
@@ -3907,64 +4661,120 @@ class QuickHull {
         }
         return { vertices: verts, faces: tris, normals: normals };
     }
+    /// <summary>
+    ///   Signed distance from face to point (a positive number means that
+    ///   the point is above the face)
+    /// </summary>
     _pointFaceDistance(point, pointOnFace, face) {
-        return _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(face.Normal, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Subtract(point, pointOnFace));
+        return _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(face.Normal, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(point, pointOnFace));
     }
+    /// <summary>
+    ///   Method used for debugging, verifies that the openSet is in a
+    ///   sensible state. Conditionally compiled if DEBUG_QUICKHULL if
+    ///   defined.
+    /// </summary>
     _verifyOpenSet(points) {
         for (let i = 0; i < this.openSet.length; i++) {
             if (i > this.openSetTail) {
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[i].Face == QuickHull.INSIDE);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[i].Face == QuickHull.INSIDE);
             }
             else {
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[i].Face != QuickHull.INSIDE);
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.openSet[i].Face != QuickHull.UNASSIGNED);
-                (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._pointFaceDistance(points[this.openSet[i].Point], points[this.faces.get(this.openSet[i].Face).Vertex0], this.faces.get(this.openSet[i].Face)) > 0.0);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[i].Face != QuickHull.INSIDE);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.openSet[i].Face != QuickHull.UNASSIGNED);
+                (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._pointFaceDistance(points[this.openSet[i].Point], points[this.faces.get(this.openSet[i].Face).Vertex0], this.faces.get(this.openSet[i].Face)) > 0.0);
             }
         }
     }
+    /// <summary>
+    ///   Method used for debugging, verifies that the horizon is in a
+    ///   sensible state. Conditionally compiled if DEBUG_QUICKHULL if
+    ///   defined.
+    /// </summary>
     _verifyHorizon() {
         for (let i = 0; i < this.horizon.length; i++) {
             const prev = i == 0 ? this.horizon.length - 1 : i - 1;
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.horizon[prev].Edge1 == this.horizon[i].Edge0);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._hasEdge(this.faces.get(this.horizon[i].Face), this.horizon[i].Edge1, this.horizon[i].Edge0));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.horizon[prev].Edge1 == this.horizon[i].Edge0);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._hasEdge(this.faces.get(this.horizon[i].Face), this.horizon[i].Edge1, this.horizon[i].Edge0));
         }
     }
+    /// <summary>
+    ///   Method used for debugging, verifies that the faces array is in a
+    ///   sensible state. Conditionally compiled if DEBUG_QUICKHULL if
+    ///   defined.
+    /// </summary>
     _verifyFaces(points) {
         for (var [fi, face] of this.faces) {
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.has(face.Opposite0));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.has(face.Opposite1));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this.faces.has(face.Opposite2));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face.Opposite0 != fi);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face.Opposite1 != fi);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face.Opposite2 != fi);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face.Vertex0 != face.Vertex1);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face.Vertex0 != face.Vertex2);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(face.Vertex1 != face.Vertex2);
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._hasEdge(this.faces.get(face.Opposite0), face.Vertex2, face.Vertex1));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._hasEdge(this.faces.get(face.Opposite1), face.Vertex0, face.Vertex2));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._hasEdge(this.faces.get(face.Opposite2), face.Vertex1, face.Vertex0));
-            const tmp = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Subtract(face.Normal, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(points[face.Vertex0], points[face.Vertex1], points[face.Vertex2]));
-            (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(tmp) < QuickHull.EPSILON);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.has(face.Opposite0));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.has(face.Opposite1));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this.faces.has(face.Opposite2));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face.Opposite0 != fi);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face.Opposite1 != fi);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face.Opposite2 != fi);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face.Vertex0 != face.Vertex1);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face.Vertex0 != face.Vertex2);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(face.Vertex1 != face.Vertex2);
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._hasEdge(this.faces.get(face.Opposite0), face.Vertex2, face.Vertex1));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._hasEdge(this.faces.get(face.Opposite1), face.Vertex0, face.Vertex2));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._hasEdge(this.faces.get(face.Opposite2), face.Vertex1, face.Vertex0));
+            const tmp = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(face.Normal, _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(points[face.Vertex0], points[face.Vertex1], points[face.Vertex2]));
+            (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Magnitude(tmp) < QuickHull.EPSILON);
         }
     }
+    /// <summary>
+    ///   Method used for debugging, verifies that the final mesh is
+    ///   actually a convex hull of all the points. Conditionally compiled
+    ///   if DEBUG_QUICKHULL if defined.
+    /// </summary>
+    /*    private _verifyMesh(points: Array<ICartesian3>, verts: Array<ICartesian3>, tris: Array<number>): void {
+        Assert(tris.length % 3 == 0);
+
+        for (let i = 0; i < points.length; i++) {
+            for (let j = 0; j < tris.length; j += 3) {
+                var t0 = verts[tris[j]];
+                var t1 = verts[tris[j + 1]];
+                var t2 = verts[tris[j + 2]];
+
+                Assert(Cartesian3.Dot(Cartesian3.Subtract(points[i], t0), Cartesian3.Cross(Cartesian3.Subtract(t1, t0), Cartesian3.Subtract(t2, t0))) <= QuickHull.EPSILON);
+            }
+        }
+    }*/
+    /// <summary>
+    ///   Does face f have a face with vertexes e0 and e1? Used only for
+    ///   debugging.
+    /// </summary>
     _hasEdge(f, e0, e1) {
         if (f == undefined)
             return false;
         return (f.Vertex0 == e0 && f.Vertex1 == e1) || (f.Vertex1 == e0 && f.Vertex2 == e1) || (f.Vertex2 == e0 && f.Vertex0 == e1);
     }
 }
+/// <summary>
+///   Constant representing a point that has yet to be assigned to a
+///   face. It's only used immediately after constructing the seed hull.
+/// </summary>
 QuickHull.UNASSIGNED = -2;
+/// <summary>
+///   Constant representing a point that is inside the convex hull, and
+///   thus is behind all faces. In the openSet array, all points with
+///   INSIDE are at the end of the array, with indexes larger
+///   openSetTail.
+/// </summary>
 QuickHull.INSIDE = -1;
+/// <summary>
+///   Epsilon value. If the coordinates of the point space are
+///   exceptionally close to each other, this value might need to be
+///   adjusted.
+/// </summary>
 QuickHull.EPSILON = 0.0001;
 //# sourceMappingURL=geometry.convex.quickhull.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.interfaces.js":
+/***/ "../core/dist/geometry/geometry.interfaces.js"
 /*!****************************************************!*\
   !*** ../core/dist/geometry/geometry.interfaces.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -3981,6 +4791,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isCartesian4: () => (/* binding */ isCartesian4),
 /* harmony export */   isCartesianArray: () => (/* binding */ isCartesianArray)
 /* harmony export */ });
+// Defining region codes
 var RegionCode;
 (function (RegionCode) {
     RegionCode[RegionCode["INSIDE"] = 0] = "INSIDE";
@@ -4044,36 +4855,40 @@ function IsBounded(b) {
     return b.boundingBox !== undefined || b.boundingSphere !== undefined;
 }
 function MakePlaneFromPointAndNormal(point, normal, hull) {
+    // Normalize the normal
     const len = Math.hypot(normal.x, normal.y, normal.z);
     const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
+    // Compute scalar d
     const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
     return { d: d, normal: n };
 }
 //# sourceMappingURL=geometry.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.plane.cruncher.js":
+/***/ "../core/dist/geometry/geometry.plane.cruncher.js"
 /*!********************************************************!*\
   !*** ../core/dist/geometry/geometry.plane.cruncher.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PlaneCruncher: () => (/* binding */ PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* binding */ PlaneDefinition)
 /* harmony export */ });
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "../core/dist/utils/runtime.js");
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ "../core/dist/utils/runtime.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry_simplify__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.simplify */ "../core/dist/geometry/geometry.simplify.js");
 
 
 
 class PlaneDefinition {
     static MakePlaneFromPointAndNormal(point, normal, hull) {
+        // Normalize the normal
         const len = Math.hypot(normal.x, normal.y, normal.z);
         const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
+        // Compute scalar d
         const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
         return new PlaneDefinition(d, n, hull);
     }
@@ -4096,7 +4911,7 @@ class PlaneDefinition {
 class NormalGroup {
     constructor(normal) {
         this.indices = new Set();
-        this.center = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Zero();
+        this.center = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
         this.normal = normal;
     }
 }
@@ -4119,7 +4934,7 @@ class PlaneCruncher {
         return this;
     }
     crunch() {
-        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(this._positions !== null && this._indices !== null, "Positions and indices must be set before crunching.");
+        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._positions !== null && this._indices !== null, "Positions and indices must be set before crunching.");
         this._buildGroups(this._tolerance ?? PlaneCruncher.DEFAULT_TOLERANCE);
         const planes = [];
         for (let g of this._groups) {
@@ -4127,13 +4942,15 @@ class PlaneCruncher {
             const r = this._createRotationMatrix(g.normal);
             const m = this._multiplyMatrices(r, t);
             const inv = this._invertMatrix(m);
+            // transform to project onto XY plane
             const transformed = Array.from(g.indices).map((i) => {
-                let p = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.FromArray(this._positions, i * 3);
+                let p = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(this._positions, i * 3);
                 p = this._transformPoint(p, m);
                 return { x: p.x, y: p.y };
             });
             const hull = this._grahamScan(transformed);
             const simplified = _geometry_simplify__WEBPACK_IMPORTED_MODULE_2__.PolylineSimplifier.Shared.simplify(hull);
+            // transform back
             const convertedHull = simplified.map((p) => {
                 const point = { x: p.x, y: p.y, z: 0 };
                 return this._transformPoint(point, inv);
@@ -4150,13 +4967,17 @@ class PlaneCruncher {
             const i1 = this._indices[i];
             const i2 = this._indices[i + 1];
             const i3 = this._indices[i + 2];
-            const p1 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.FromArray(this._positions, i1 * 3);
-            const p2 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.FromArray(this._positions, i2 * 3);
-            const p3 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.FromArray(this._positions, i3 * 3);
-            const normal = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normal(p1, p2, p3);
+            const p1 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(this._positions, i1 * 3);
+            const p2 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(this._positions, i2 * 3);
+            const p3 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(this._positions, i3 * 3);
+            const normal = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normal(p1, p2, p3);
             let group = this._groups.find((g) => {
-                if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Equals(g.normal, normal, epsilon)) {
+                if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Equals(g.normal, normal, epsilon)) {
+                    //const [first] = g.indices;
+                    //const p4 = Cartesian3.FromArray(this._positions!, first * 3);
+                    //if (Cartesian3.AreCoplanar(p1, p2, p3, p4, epsilon)) {
                     return true;
+                    //}
                 }
                 return false;
             });
@@ -4168,31 +4989,35 @@ class PlaneCruncher {
             group.indices.add(i2);
             group.indices.add(i3);
         }
+        // compute the centroid
         for (let g of this._groups) {
-            g.center = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Centroid(Array.from(g.indices).map((i) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.FromArray(this._positions, i * 3)), g.center);
+            g.center = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Centroid(Array.from(g.indices).map((i) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(this._positions, i * 3)), g.center);
         }
     }
     _grahamScan(points) {
         if (points.length < 3) {
             throw new Error("At least three points are required");
         }
+        // Trouver le point avec la coordonnée y la plus basse (et la coordonnée x la plus basse en cas d'égalité)
         let startPoint = points[0];
         for (const point of points) {
             if (point.y < startPoint.y || (point.y === startPoint.y && point.x < startPoint.x)) {
                 startPoint = point;
             }
         }
+        // Trier les points par l'angle polaire par rapport à startPoint
         const sortedPoints = points.slice().sort((a, b) => {
             const angleA = Math.atan2(a.y - startPoint.y, a.x - startPoint.x);
             const angleB = Math.atan2(b.y - startPoint.y, b.x - startPoint.x);
             return angleA - angleB;
         });
+        // Initialiser le hull avec les deux premiers points
         const hull = [sortedPoints[0], sortedPoints[1]];
         for (let i = 2; i < sortedPoints.length; i++) {
             while (hull.length >= 2) {
                 const top = hull[hull.length - 1];
                 const nextToTop = hull[hull.length - 2];
-                const cross = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Dot(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Subtract(top, nextToTop), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Subtract(sortedPoints[i], top));
+                const cross = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Dot(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Subtract(top, nextToTop), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Subtract(sortedPoints[i], top));
                 if (cross > 0) {
                     break;
                 }
@@ -4211,7 +5036,8 @@ class PlaneCruncher {
         ];
     }
     _createRotationMatrix(n) {
-        const normalizedN = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(n);
+        const normalizedN = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Normalize(n);
+        // Si le vecteur normal est déjà aligné avec l'axe Z
         if (Math.abs(normalizedN.x) < 1e-6 && Math.abs(normalizedN.y) < 1e-6 && Math.abs(normalizedN.z - 1) < 1e-6) {
             return [
                 [1, 0, 0, 0],
@@ -4249,7 +5075,9 @@ class PlaneCruncher {
         return result;
     }
     _invertMatrix(matrix) {
-        const m = JSON.parse(JSON.stringify(matrix));
+        // Assuming matrix is 4x4, implement Gauss-Jordan elimination or use a library for matrix inversion.
+        // This is a simplified example assuming the matrix is invertible and is a 4x4 matrix.
+        const m = JSON.parse(JSON.stringify(matrix)); // Deep copy to avoid mutating the original matrix
         const inv = [
             [1, 0, 0, 0],
             [0, 1, 0, 0],
@@ -4292,19 +5120,19 @@ class PlaneCruncher {
                 transformedPointHomogeneous[i] += transformationMatrix[i][j] * pointHomogeneous[j];
             }
         }
-        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(transformedPointHomogeneous[0] / transformedPointHomogeneous[3], transformedPointHomogeneous[1] / transformedPointHomogeneous[3], transformedPointHomogeneous[2] / transformedPointHomogeneous[3]);
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(transformedPointHomogeneous[0] / transformedPointHomogeneous[3], transformedPointHomogeneous[1] / transformedPointHomogeneous[3], transformedPointHomogeneous[2] / transformedPointHomogeneous[3]);
     }
 }
 PlaneCruncher.DEFAULT_TOLERANCE = 0.0001;
 //# sourceMappingURL=geometry.plane.cruncher.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.simplify.js":
+/***/ "../core/dist/geometry/geometry.simplify.js"
 /*!**************************************************!*\
   !*** ../core/dist/geometry/geometry.simplify.js ***!
   \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4386,13 +5214,13 @@ PolylineSimplifier.DEFAULT_TOLERANCE = 1;
 PolylineSimplifier.Shared = new PolylineSimplifier();
 //# sourceMappingURL=geometry.simplify.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/geometry.size.js":
+/***/ "../core/dist/geometry/geometry.size.js"
 /*!**********************************************!*\
   !*** ../core/dist/geometry/geometry.size.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4469,13 +5297,13 @@ class Size3 extends Size2 {
 }
 //# sourceMappingURL=geometry.size.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/index.js":
+/***/ "../core/dist/geometry/index.js"
 /*!**************************************!*\
   !*** ../core/dist/geometry/index.js ***!
   \**************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4544,13 +5372,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/meshes/index.js":
+/***/ "../core/dist/geometry/meshes/index.js"
 /*!*********************************************!*\
   !*** ../core/dist/geometry/meshes/index.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4567,13 +5395,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/meshes/ribbon.js":
+/***/ "../core/dist/geometry/meshes/ribbon.js"
 /*!**********************************************!*\
   !*** ../core/dist/geometry/meshes/ribbon.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4585,7 +5413,7 @@ __webpack_require__.r(__webpack_exports__);
 class RibbonOptions {
     constructor() {
         this.path = [];
-        this.width = [1, 1];
+        this.width = [1, 1]; // left, right.
         this.up = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.UnitZ();
         this.close = false;
     }
@@ -4650,6 +5478,7 @@ class RibbonBuilder {
             positions.push(b0.x, b0.y, b0.z, b1.x, b1.y, b1.z);
             normals.push(up.x, up.y, up.z, up.x, up.y, up.z);
             if (a0 && a1) {
+                // we may build the quad 
                 let k = positions.length / 3 - 4;
                 indices.push(k, k + 1, k + 2, k, k + 2, k + 3);
             }
@@ -4687,20 +5516,20 @@ class RibbonBuilder {
     _getMedianLateralVector(a, b, temp) {
         const medianLateral = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.AddToRef(b, a, temp));
         const dot = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(medianLateral, b);
-        const scale = 1 / Math.max(dot, 1e-3);
+        const scale = 1 / Math.max(dot, 1e-3); // clamp to avoid infinite scale
         _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.MultiplyByFloatInPlace(medianLateral, scale);
         return medianLateral;
     }
 }
 //# sourceMappingURL=ribbon.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/meshes/terrain.grid.js":
+/***/ "../core/dist/geometry/meshes/terrain.grid.js"
 /*!****************************************************!*\
   !*** ../core/dist/geometry/meshes/terrain.grid.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4785,6 +5614,7 @@ class TerrainNormalizedGridBuilder {
         this.withOptions(options);
     }
     withOptions(options) {
+        // merge options and default.
         this._o = { ...TerrainGridOptions.Shared, ...options };
         return this;
     }
@@ -4804,6 +5634,8 @@ class TerrainNormalizedGridBuilder {
         const dy = 1 / (h - 1);
         const x0 = -0.5 + ox * dx;
         const y0 = 0.5 + oy * dy;
+        // positions origin center of the grid with cartesian coordinate.
+        // uvs origin upper left with v vertical and u horizontal.
         for (let row = 0; row < h; row++) {
             let v = row == h - 1 ? 1 : row * dy;
             const y = (y0 - v) * sy;
@@ -4827,6 +5659,7 @@ class TerrainNormalizedGridBuilder {
                 }
             }
         }
+        // indices
         const isWEven = w % 2 == 0;
         for (let row = 0; row < h - 1; row++) {
             const indice = isWEven ? row % 2 : 0;
@@ -4854,6 +5687,7 @@ class TerrainNormalizedGridBuilder {
                 }
             }
         }
+        // populate the data
         data.indices = indices;
         data.positions = positions;
         data.uvs = uvs;
@@ -4863,29 +5697,29 @@ class TerrainNormalizedGridBuilder {
 }
 //# sourceMappingURL=terrain.grid.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.circle.js":
+/***/ "../core/dist/geometry/shapes/geometry.circle.js"
 /*!*******************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.circle.js ***!
   \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Circle: () => (/* binding */ Circle)
 /* harmony export */ });
-/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
-/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
+/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
+/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
 
 
 
 
-class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
+class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_2__.AbstractShape {
     constructor(c, radius) {
-        super(_geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__.ShapeType.Circle);
+        super(_geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_3__.ShapeType.Circle);
         this._center = c;
         this._radius = radius;
     }
@@ -4893,7 +5727,7 @@ class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape 
         return this._center;
     }
     set center(v) {
-        if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Equals(v, this._center) == false) {
+        if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Equals(v, this._center) == false) {
             this._center = v;
             this.invalidateBounds();
         }
@@ -4911,7 +5745,7 @@ class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape 
         const r = this._radius;
         const x = this._center.x;
         const y = this._center.y;
-        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_3__.Bounds(x - r, y - r, r * 2, r * 2);
+        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(x - r, y - r, r * 2, r * 2);
     }
     _getPoints() {
         return [this._center];
@@ -4919,34 +5753,34 @@ class Circle extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape 
 }
 //# sourceMappingURL=geometry.circle.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.line.js":
+/***/ "../core/dist/geometry/shapes/geometry.line.js"
 /*!*****************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.line.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Line: () => (/* binding */ Line)
 /* harmony export */ });
-/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
 /* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.point */ "../core/dist/geometry/shapes/geometry.point.js");
-/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
-/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry_point__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geometry.point */ "../core/dist/geometry/shapes/geometry.point.js");
+/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
+/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
 
 
 
 
 
 
-class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
+class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_4__.AbstractShape {
     static Zero() { return new Line(_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero(), _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero()); }
     constructor(a, b) {
-        super(_geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_2__.ShapeType.Line);
+        super(_geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_5__.ShapeType.Line);
         this._alice = a;
         this._bob = b;
     }
@@ -4969,43 +5803,59 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         }
     }
     clip(clipArea) {
+        // Compute region codes for P1, P2
         let code1 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.ComputeCode(this._alice, clipArea);
         let code2 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.ComputeCode(this._bob, clipArea);
         if (code1 == 0 && code2 == 0) {
+            // If both endpoints lie within rectangle
             return this;
         }
         if (code1 & code2) {
+            // If both endpoints are outside rectangle,
+            // in same region
             return undefined;
         }
         let a = new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(this._alice.x, this._alice.y, this._alice.z);
         let b = new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(this._bob.x, this._bob.y, this._bob.z);
         do {
+            // Some segment of line lies within the
+            // rectangle
             let code_out = code1 != 0 ? code1 : code2;
             let x = 0, y = 0;
             const x1 = a.x;
             const y1 = a.y;
             const x2 = b.x;
             const y2 = b.y;
-            if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.TOP) {
+            // Find intersection point;
+            // using formulas y = y1 + slope * (x - x1),
+            // x = x1 + (1 / slope) * (y - y1)
+            if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.TOP) {
                 const y_max = clipArea.ymax;
+                // point is above the clip rectangle
                 x = x1 + ((x2 - x1) * (y_max - y1)) / (y2 - y1);
                 y = y_max;
             }
-            else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.BOTTOM) {
+            else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.BOTTOM) {
+                // point is below the rectangle
                 const y_min = clipArea.ymin;
                 x = x1 + ((x2 - x1) * (y_min - y1)) / (y2 - y1);
                 y = y_min;
             }
-            else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.RIGHT) {
+            else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.RIGHT) {
+                // point is to the right of rectangle
                 const x_max = clipArea.xmax;
                 y = y1 + ((y2 - y1) * (x_max - x1)) / (x2 - x1);
                 x = x_max;
             }
-            else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.LEFT) {
+            else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.RegionCode.LEFT) {
+                // point is to the left of rectangle
                 const x_min = clipArea.xmin;
                 y = y1 + ((y2 - y1) * (x_min - x1)) / (x2 - x1);
                 x = x_min;
             }
+            // Now intersection point x, y is found
+            // We replace point outside rectangle
+            // by intersection point
             if (code_out == code1) {
                 a.x = x;
                 a.y = y;
@@ -5019,43 +5869,67 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         } while (code1 != 0 || code2 != 0);
         return new Line(a, b);
     }
+    /**
+     * Robust 3D segment/segment intersection test.
+     *
+     * Handles:
+     *  - Skew segments (no intersection)
+     *  - Proper intersection at a single point
+     *  - Parallel non-collinear segments (no intersection)
+     *  - Collinear segments with overlapping part (returns overlapping segment or point)
+     *
+     * Note:
+     *  - The math is done in full 3D, not just a 2D projection.
+     *  - Epsilon is used for all "almost zero" tests.
+     */
     intersect(other, epsilon = 1e-9) {
         const a0 = this._alice;
         const a1 = this._bob;
         const b0 = other._alice;
         const b1 = other._bob;
+        // Direction vectors of the segments
         const u = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(a1, a0);
         const v = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(b1, b0);
         const w0 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(a0, b0);
-        const a = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(u, u);
-        const c = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(v, v);
+        const a = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(u, u); // |u|^2
+        const c = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(v, v); // |v|^2
+        // Handle degenerate segments (points)
         const aDegenerate = a < epsilon * epsilon;
         const cDegenerate = c < epsilon * epsilon;
         if (aDegenerate && cDegenerate) {
+            // Both segments are actually single points
             if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.AreCoincident(a0, b0, epsilon)) {
-                return new _geometry_point__WEBPACK_IMPORTED_MODULE_4__.Point(a0.x, a0.y, a0.z);
+                return new _geometry_point__WEBPACK_IMPORTED_MODULE_3__.Point(a0.x, a0.y, a0.z);
             }
             return undefined;
         }
         if (aDegenerate) {
-            return other.containsPoint(a0, epsilon) ? new _geometry_point__WEBPACK_IMPORTED_MODULE_4__.Point(a0.x, a0.y, a0.z) : undefined;
+            // A is a point, B is a true segment
+            return other.containsPoint(a0, epsilon) ? new _geometry_point__WEBPACK_IMPORTED_MODULE_3__.Point(a0.x, a0.y, a0.z) : undefined;
         }
         if (cDegenerate) {
-            return this.containsPoint(b0, epsilon) ? new _geometry_point__WEBPACK_IMPORTED_MODULE_4__.Point(b0.x, b0.y, b0.z) : undefined;
+            // B is a point, A is a true segment
+            return this.containsPoint(b0, epsilon) ? new _geometry_point__WEBPACK_IMPORTED_MODULE_3__.Point(b0.x, b0.y, b0.z) : undefined;
         }
         const b = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(u, v);
         const d = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(u, w0);
         const e = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(v, w0);
         const denom = a * c - b * b;
+        // If denom is almost zero, the lines are parallel (maybe collinear)
         if (Math.abs(denom) < epsilon) {
+            // Check if they are collinear:
+            // w0 must be parallel to u (or v)
             const crossUW0 = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Cross(u, w0);
             const crossLen = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Magnitude(crossUW0);
             if (crossLen > epsilon * Math.sqrt(a) * 2) {
+                // Parallel but not collinear
                 return undefined;
             }
+            // Collinear case:
+            // Project B endpoints onto A to get scalar parameters and intersect the 1D intervals.
             const s0 = 0.0;
             const s1 = 1.0;
-            const uLen2 = a;
+            const uLen2 = a; // |u|^2
             const sB0 = this._projectParamOnSegment(a0, u, uLen2, b0);
             const sB1 = this._projectParamOnSegment(a0, u, uLen2, b1);
             const sMinA = Math.min(s0, s1);
@@ -5065,48 +5939,65 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
             const sOverlapMin = Math.max(sMinA, sMinB);
             const sOverlapMax = Math.min(sMaxA, sMaxB);
             if (sOverlapMax < sOverlapMin - epsilon) {
+                // No overlap
                 return undefined;
             }
+            // Overlap exists. It can be a single point or a segment.
             const clamp = (x) => Math.max(0, Math.min(1, x));
             const sStart = clamp(sOverlapMin);
             const sEnd = clamp(sOverlapMax);
             const pStart = this._addScaled(a0, u, sStart);
             const pEnd = this._addScaled(a0, u, sEnd);
             if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Distance(pStart, pEnd) <= epsilon) {
-                return new _geometry_point__WEBPACK_IMPORTED_MODULE_4__.Point(pStart);
+                // The overlapping part is effectively a single point
+                return new _geometry_point__WEBPACK_IMPORTED_MODULE_3__.Point(pStart);
             }
             else {
                 return new Line(pStart, pEnd);
             }
         }
+        // Non-parallel case: compute closest points on the two infinite lines
         const s = (b * e - c * d) / denom;
         const t = (a * e - b * d) / denom;
+        // If we want intersection of segments (not infinite lines), s and t must be in [0,1]
         if (s < -epsilon || s > 1 + epsilon || t < -epsilon || t > 1 + epsilon) {
             return undefined;
         }
+        // Clamp to [0,1] to be robust to tiny numerical drift
         const sClamped = Math.max(0, Math.min(1, s));
         const tClamped = Math.max(0, Math.min(1, t));
         const pOnA = this._addScaled(a0, u, sClamped);
         const pOnB = this._addScaled(b0, v, tClamped);
         const dist = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Distance(pOnA, pOnB);
         if (dist > epsilon) {
+            // The closest points are not the same -> skew segments
             return undefined;
         }
+        // Unique intersection point (average of the two closest points)
         const mid = new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(0.5 * (pOnA.x + pOnB.x), 0.5 * (pOnA.y + pOnB.y), 0.5 * (pOnA.z + pOnB.z));
-        return new _geometry_point__WEBPACK_IMPORTED_MODULE_4__.Point(mid);
+        return new _geometry_point__WEBPACK_IMPORTED_MODULE_3__.Point(mid);
     }
     containsPoint(p, epsilon = 1e-9) {
+        // First, check if they are collinear
         if (!_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.AreCollinear(this._alice, this._bob, p, epsilon)) {
             return false;
         }
+        // Then check if p lies between s0 and s1
         return _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.IsWithinTheBounds(this._alice, this._bob, p);
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__.Bounds.FromPoints2(this._alice, this._bob);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromPoints2(this._alice, this._bob);
     }
     _getPoints() {
         return [this._alice, this._bob];
     }
+    /**
+     * Projects point p onto segment starting at a0 with direction u (not normalized),
+     * and returns the scalar parameter s such that:
+     *    proj(p) = a0 + s * u
+     *
+     * This is done in 3D, but the result is just one scalar.
+     */
     _projectParamOnSegment(a0, u, uLen2, p) {
         const w = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Subtract(p, a0);
         if (uLen2 === 0) {
@@ -5115,6 +6006,9 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
         const s = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Dot(w, u) / uLen2;
         return s;
     }
+    /**
+     * Returns a0 + s * u as a new Cartesian3.
+     */
     _addScaled(a0, u, s) {
         const out = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
         _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.MultiplyByFloatToRef(u, s, out);
@@ -5123,56 +6017,56 @@ class Line extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
 }
 //# sourceMappingURL=geometry.line.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.point.js":
+/***/ "../core/dist/geometry/shapes/geometry.point.js"
 /*!******************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.point.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Point: () => (/* binding */ Point)
 /* harmony export */ });
-/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
-/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
+/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
+/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
 
 
 
 
 
-class Point extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
+class Point extends _geometry_shape__WEBPACK_IMPORTED_MODULE_3__.AbstractShape {
     constructor(a, b, c) {
-        super(_geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_1__.ShapeType.Point);
+        super(_geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__.ShapeType.Point);
         if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.isCartesian)(a)) {
             this._position = a;
         }
         else {
-            this._position = new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3(a, b ?? 0, c ?? 0);
+            this._position = new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(a, b ?? 0, c ?? 0);
         }
     }
     get position() {
         return this._position;
     }
     set position(v) {
-        if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Equals(v, this._position) == false) {
+        if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Equals(v, this._position) == false) {
             this._position = v;
             this.invalidateBounds();
         }
     }
     clip(clipArea) {
-        let code = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.ComputeCode(this._position, clipArea);
+        let code = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.ComputeCode(this._position, clipArea);
         if (code == 0) {
             return this;
         }
         return undefined;
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_4__.Bounds.FromPoints2(this._position);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromPoints2(this._position);
     }
     _getPoints() {
         return [this._position];
@@ -5180,29 +6074,29 @@ class Point extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
 }
 //# sourceMappingURL=geometry.point.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.polygon.js":
+/***/ "../core/dist/geometry/shapes/geometry.polygon.js"
 /*!********************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.polygon.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Polygon: () => (/* binding */ Polygon)
 /* harmony export */ });
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./geometry.polyline */ "../core/dist/geometry/shapes/geometry.polyline.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry_polyline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geometry.polyline */ "../core/dist/geometry/shapes/geometry.polyline.js");
 /* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
 
 
 
 
 
-class Cartesian3WithInfos extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3 {
+class Cartesian3WithInfos extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3 {
     constructor(x, y, z, __wayCode__$t1967, subject, subjectIndex, clipIndex = 0) {
         super(x, y, z);
         this.__wayCode__$t1967 = __wayCode__$t1967;
@@ -5214,25 +6108,25 @@ class Cartesian3WithInfos extends _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0
 function isIntersection(p) {
     return p.__wayCode__$t1967 !== undefined;
 }
-class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
+class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_3__.Polyline {
     static IsClockWise(points) {
         let sum = 0;
         const n = points.length;
         for (let i = 0; i < points.length - 1; i++) {
             const a = points[i];
-            const b = points[(i + 1) % n];
+            const b = points[(i + 1) % n]; // %n ensure the last point is connected to the first one
             sum += (b.x - a.x) * (b.y + a.y);
         }
         return sum < 0;
     }
     static FromFloats(points, stride = 3, assertClose = true, assertClockWize = true) {
-        if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isArrayOfFloatArray)(points)) {
+        if ((0,_types__WEBPACK_IMPORTED_MODULE_0__.isArrayOfFloatArray)(points)) {
             const records = [];
             for (let i = 0; i < points.length; i++) {
                 const tmp = points[i];
                 const p = [];
                 for (let j = 0; j < tmp.length; j += stride) {
-                    p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
+                    p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
                 }
                 records.push(p);
             }
@@ -5240,12 +6134,12 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
         }
         const p = [];
         for (let i = 0; i < points.length; i += stride) {
-            p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
+            p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
         }
         return new Polygon(p, assertClose, assertClockWize);
     }
     static FromPoints(points, assertClose = true, assertClockWize = true) {
-        if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.isArrayOfCartesianArray)(points)) {
+        if ((0,_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.isArrayOfCartesianArray)(points)) {
             const p = new Polygon(points[0], assertClose, assertClockWize);
             for (let i = 1; i < points.length; i++) {
                 p.addHole(points[i], assertClose, assertClockWize);
@@ -5256,9 +6150,11 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
     }
     constructor(p, assertClose = true, assertClockWize = true) {
         super(p, _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__.ShapeType.Polygon);
-        if (assertClose && !_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Equals(p[0], p[p.length - 1])) {
+        // force the polygon to be closed.
+        if (assertClose && !_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Equals(p[0], p[p.length - 1])) {
             p.push(p[0]);
         }
+        // force the polygon to be clockwize
         if (assertClockWize && !Polygon.IsClockWise(p)) {
             p.reverse();
         }
@@ -5268,9 +6164,11 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
     }
     addHole(hole, assertClose = true, assertAntiClockWize = true) {
         if ((hole?.length ?? 0) > 2) {
-            if (assertClose && !_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Equals(hole[0], hole[hole.length - 1])) {
+            // force the polygon to be closed.
+            if (assertClose && !_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Equals(hole[0], hole[hole.length - 1])) {
                 hole.push(hole[0]);
             }
+            // force the polygon to be anticlockwise
             if (assertAntiClockWize && Polygon.IsClockWise(hole)) {
                 hole.reverse();
             }
@@ -5278,6 +6176,10 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
             this._holes.push(hole);
         }
     }
+    /// <summary>
+    /// Clip the polygon with the given area. This is a bit more complex than the polyline clip
+    /// because we eventually close polygons bounds with the bounds itselfs, then may obtains several polygons.
+    /// </summary>
     clip(clipArea) {
         if (clipArea.containsBounds(this.boundingBox)) {
             return this;
@@ -5286,25 +6188,35 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
     }
     _clipPolygon(clipArea) {
         if (clipArea.intersects(this.boundingBox)) {
+            // 1 - Identify Intersection Points: Find all points where the subject polygon intersects with the clipping polygon.
+            // These points should be inserted into both the subject and clipping polygons at their respective positions.
+            // Each point in both polygons should be classified as either entering, exiting, or neither with respect to the other polygon.
+            // the clip area as list of points
             const polygonArea = Array.from(clipArea.points()).map((p) => this._buildPoint(p.x, p.y, 0));
-            polygonArea.push(polygonArea[0]);
+            polygonArea.push(polygonArea[0]); // close the polygon.
+            // the polygons to clip
             const toClips = [this._points];
             if (this._holes) {
                 toClips.push(...this._holes);
             }
+            // keep trace of every entering intersection point
             const entering = [];
+            // loop over each polygon to clip.
+            // Remember that , the outer polygon is clockwise, the holes are anticlockwise
             for (const subject of toClips) {
                 const points = [];
-                const codes = subject.map((p) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.ComputeCode(p, clipArea));
+                const codes = subject.map((p) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.ComputeCode(p, clipArea));
                 let a = subject[0];
                 let codea = codes[0];
                 let inside = codea == 0;
                 for (let i = 1; i < codes.length; i++) {
                     const b = subject[i];
                     const codeb = codes[i];
+                    // keep this algorithm for lisibility
                     if (inside) {
                         points.push(this._buildPoint(a.x, a.y, a.z));
                         if (codeb != 0) {
+                            // We EXIT THE bounds
                             const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, new Cartesian3WithInfos(0, 0, 0, false, points, points.length));
                             points.push(intersection);
                             intersection.clipIndex = this._InsertIntersectionIntoClipPolygon(polygonArea, intersection);
@@ -5312,8 +6224,9 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
                         }
                     }
                     else {
-                        points.push(a);
+                        points.push(a); // we keep the original point while it will NOT be part of the new clipped polygon
                         if (codeb == 0) {
+                            // We ENTER THE bounds
                             const intersection = this._computeIntersectionToRef(clipArea, a, b, codea, new Cartesian3WithInfos(0, 0, 0, true, points, points.length));
                             entering.push(intersection);
                             points.push(intersection);
@@ -5324,23 +6237,29 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
                     a = b;
                     codea = codeb;
                 }
+                // add last points
                 if (inside) {
                     points.push(this._buildPoint(a.x, a.y, a.z));
                 }
             }
+            // 2 - Trace Output Polygons: Starting from an entering intersection point, trace along the subject polygon until another
+            // intersection point is reached, then switch to the clipping polygon and continue tracing until the starting point is reached.
+            // This forms one output polygon. Repeat this process starting from the next unvisited entering intersection point until all entering points have been visited.
             const polygons = [];
             if (entering.length != 0) {
                 do {
                     const polygon = [];
+                    // we pop the first entering point
                     const first = entering.splice(0, 1)[0];
                     let i = first.subjectIndex;
                     let subject = first.subject;
                     do {
                         const current = subject[i++];
-                        i == subject.length && (i = 1);
+                        i == subject.length && (i = 1); // loop, avoiding the first point
                         if (isIntersection(current)) {
                             polygon.push(this._buildPoint(current.x, current.y, current.z));
                             if (!current.__wayCode__$t1967) {
+                                // we switch to the clip area
                                 i = current.clipIndex + 1;
                                 subject = polygonArea;
                                 continue;
@@ -5349,11 +6268,14 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
                                 continue;
                             }
                             if (current === first) {
+                                // we found ONE polygon
                                 polygons.push(polygon);
                                 break;
                             }
+                            // we switch to the subject
                             i = current.subjectIndex + 1;
                             subject = current.subject;
+                            // we remove the current point from the entering list
                             entering.splice(entering.findIndex((p) => p === current), 1);
                             continue;
                         }
@@ -5369,8 +6291,10 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
         let a = clipPolygon[0];
         for (let i = 1; i < clipPolygon.length; i++) {
             const b = clipPolygon[i];
-            if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.IsWithinTheBounds(a, b, intersection)) {
+            if (_geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.IsWithinTheBounds(a, b, intersection)) {
+                // insert the point between a and b
                 clipPolygon.splice(i, 0, intersection);
+                // update the clip index of the next points - add + 1
                 for (let j = i + 1; j < clipPolygon.length; j++) {
                     const c = clipPolygon[j];
                     if (isIntersection(c)) {
@@ -5386,41 +6310,43 @@ class Polygon extends _geometry_polyline__WEBPACK_IMPORTED_MODULE_1__.Polyline {
 }
 //# sourceMappingURL=geometry.polygon.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.polyline.js":
+/***/ "../core/dist/geometry/shapes/geometry.polyline.js"
 /*!*********************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.polyline.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Polyline: () => (/* binding */ Polyline)
 /* harmony export */ });
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
-/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
+/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry.cartesian */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
-/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
+/* harmony import */ var _geometry_shape__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geometry.shape */ "../core/dist/geometry/shapes/geometry.shape.js");
+/* harmony import */ var _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./geometry.shapes.interfaces */ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js");
 
 
 
 
 
 
-class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShape {
+class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_4__.AbstractShape {
     static Concat(...p) {
         const points = [];
         for (let i = 0; i < p.length; i++) {
-            const polyPoints = p[i].points.map(pt => new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(pt.x, pt.y, pt.z));
+            const polyPoints = p[i].points.map(pt => new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(pt.x, pt.y, pt.z));
             if (i > 0 && points.length > 0) {
                 const lastPoint = points[points.length - 1];
                 const firstNewPoint = polyPoints[0];
+                // Compare coordinates to avoid duplication
                 if (lastPoint.x === firstNewPoint.x &&
                     lastPoint.y === firstNewPoint.y &&
                     lastPoint.z === firstNewPoint.z) {
+                    // Skip the first point of the current polyline
                     polyPoints.shift();
                 }
             }
@@ -5440,13 +6366,13 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return true;
     }
     static FromFloats(points, stride = 3) {
-        if ((0,_types__WEBPACK_IMPORTED_MODULE_2__.isArrayOfFloatArray)(points)) {
+        if ((0,_types__WEBPACK_IMPORTED_MODULE_0__.isArrayOfFloatArray)(points)) {
             const multipolyline = [];
             for (let i = 0; i < points.length; i++) {
                 const tmp = points[i];
                 const p = [];
                 for (let j = 0; j < tmp.length; j += stride) {
-                    p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
+                    p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(tmp[j], tmp[j + 1], stride > 2 ? tmp[j + 2] : 0));
                 }
                 multipolyline.push(new Polyline(p));
             }
@@ -5454,7 +6380,7 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         }
         const p = [];
         for (let i = 0; i < points.length; i += stride) {
-            p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
+            p.push(new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(points[i], points[i + 1], stride > 2 ? points[i + 2] : 0));
         }
         return new Polyline(p);
     }
@@ -5465,7 +6391,7 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return new Polyline(points);
     }
     constructor(p, type) {
-        super(type ?? _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_4__.ShapeType.Polyline);
+        super(type ?? _geometry_shapes_interfaces__WEBPACK_IMPORTED_MODULE_5__.ShapeType.Polyline);
         this._points = p;
     }
     get points() {
@@ -5481,13 +6407,14 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         if (clipArea.intersects(this.boundingBox)) {
             const polylines = [];
             let points = [];
-            const codes = this._points.map((p) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.ComputeCode(p, clipArea));
+            const codes = this._points.map((p) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.ComputeCode(p, clipArea));
             let a = this._points[0];
             let codea = codes[0];
             let inside = codea == 0;
             for (let i = 1; i < codes.length; i++) {
                 const b = this._points[i];
                 const codeb = codes[i];
+                // keep this algorithm for lisibility
                 if (inside) {
                     points.push(this._buildPoint(a.x, a.y, a.z));
                     if (codeb != 0) {
@@ -5508,9 +6435,11 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
                 a = b;
                 codea = codeb;
             }
+            // add last points
             if (inside) {
                 points.push(this._buildPoint(a.x, a.y, a.z));
             }
+            // add last polyline
             if (points.length) {
                 polylines.push(new Polyline(points));
             }
@@ -5519,26 +6448,31 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return undefined;
     }
     _computeIntersectionToRef(clipArea, a, b, code_out, ref) {
+        // compute intersection point
         const x1 = a.x;
         const y1 = a.y;
         const x2 = b.x;
         const y2 = b.y;
         if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.TOP) {
             const y_max = clipArea.ymax;
+            // point is above the clip rectangle
             ref.x = x1 + ((x2 - x1) * (y_max - y1)) / (y2 - y1);
             ref.y = y_max;
         }
         else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.BOTTOM) {
+            // point is below the rectangle
             const y_min = clipArea.ymin;
             ref.x = x1 + ((x2 - x1) * (y_min - y1)) / (y2 - y1);
             ref.y = y_min;
         }
         else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.RIGHT) {
+            // point is to the right of rectangle
             const x_max = clipArea.xmax;
             ref.y = y1 + ((y2 - y1) * (x_max - x1)) / (x2 - x1);
             ref.x = x_max;
         }
         else if (code_out & _geometry_interfaces__WEBPACK_IMPORTED_MODULE_3__.RegionCode.LEFT) {
+            // point is to the left of rectangle
             const x_min = clipArea.xmin;
             ref.y = y1 + ((y2 - y1) * (x_min - x1)) / (x2 - x1);
             ref.x = x_min;
@@ -5546,10 +6480,10 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
         return ref;
     }
     _buildPoint(x, y, z) {
-        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3(x ?? 0, y ?? 0, z ?? 0);
+        return new _geometry_cartesian__WEBPACK_IMPORTED_MODULE_2__.Cartesian3(x ?? 0, y ?? 0, z ?? 0);
     }
     _buildBounds() {
-        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_5__.Bounds.FromPoints2(...this._points);
+        return _geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds.FromPoints2(...this._points);
     }
     _getPoints() {
         return this._points;
@@ -5557,13 +6491,13 @@ class Polyline extends _geometry_shape__WEBPACK_IMPORTED_MODULE_0__.AbstractShap
 }
 //# sourceMappingURL=geometry.polyline.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.shape.js":
+/***/ "../core/dist/geometry/shapes/geometry.shape.js"
 /*!******************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.shape.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -5596,13 +6530,13 @@ class AbstractShape extends _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounde
 }
 //# sourceMappingURL=geometry.shape.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js":
+/***/ "../core/dist/geometry/shapes/geometry.shapes.interfaces.js"
 /*!******************************************************************!*\
   !*** ../core/dist/geometry/shapes/geometry.shapes.interfaces.js ***!
   \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -5651,13 +6585,13 @@ function isPolygon(shape) {
 }
 //# sourceMappingURL=geometry.shapes.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/geometry/shapes/index.js":
+/***/ "../core/dist/geometry/shapes/index.js"
 /*!*********************************************!*\
   !*** ../core/dist/geometry/shapes/index.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -5691,13 +6625,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/index.js":
+/***/ "../core/dist/index.js"
 /*!*****************************!*\
   !*** ../core/dist/index.js ***!
   \*****************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -5826,10 +6760,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
+/* harmony export */   Mars: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Mars),
+/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MarsUrlBuilder),
 /* harmony export */   Mass: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Mass),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_11__.MemoryCache),
+/* harmony export */   Mercury: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Mercury),
+/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MercuryUrlBuilder),
+/* harmony export */   Moon: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Moon),
 /* harmony export */   MoonState: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.MoonState),
+/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MoonUrlBuilder),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.MorganKeenanClass),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsIndex),
@@ -5869,6 +6809,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size3),
+/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.SolarSystemBodies),
 /* harmony export */   SourceBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.SourceBlock),
 /* harmony export */   SpatialTree: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.SpatialTree),
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.SpatialTreeNode),
@@ -5963,13 +6904,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/io/webClient.js":
+/***/ "../core/dist/io/webClient.js"
 /*!************************************!*\
   !*** ../core/dist/io/webClient.js ***!
   \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -5980,8 +6921,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   WebClientOptions: () => (/* binding */ WebClientOptions),
 /* harmony export */   WebClientOptionsBuilder: () => (/* binding */ WebClientOptionsBuilder)
 /* harmony export */ });
-/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../types */ "../core/dist/types.js");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math */ "../core/dist/math/math.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../types */ "../core/dist/types.js");
 
 
 class FetchError extends Error {
@@ -6003,16 +6944,17 @@ class FetchResult {
 }
 class DefaultUrlBuilder {
     buildUrl(request, ...params) {
-        if ((0,_types__WEBPACK_IMPORTED_MODULE_0__.IsString)(request)) {
+        if ((0,_types__WEBPACK_IMPORTED_MODULE_1__.IsString)(request)) {
             return request;
         }
-        if ((0,_types__WEBPACK_IMPORTED_MODULE_0__.HasToString)(request)) {
+        if ((0,_types__WEBPACK_IMPORTED_MODULE_1__.HasToString)(request)) {
             return request.toString();
         }
         throw new Error("Request must be a string or an object with a toString method.");
     }
 }
 class WebClientOptions {
+    // Factory function to get properly typed default options
     static getDefault() {
         return new WebClientOptions({
             maxRetry: 3,
@@ -6084,9 +7026,10 @@ class WebClient {
                     throw new FetchError(`Exceeded maximum retries for URL: ${url}`, ...userArgs);
                 }
             }
-            const jitter = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.GetRandomInt(0, this._options.initialDelay ?? 1000);
-            await new Promise((resolve) => setTimeout(resolve, Math.min(delay + jitter, 30000)));
-            delay *= 2;
+            // Retry with exponential backoff + jitter
+            const jitter = _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.GetRandomInt(0, this._options.initialDelay ?? 1000);
+            await new Promise((resolve) => setTimeout(resolve, Math.min(delay + jitter, 30000))); // Cap max delay
+            delay *= 2; // Exponential backoff
             retryCount++;
         } while (retryCount < maxRetry);
         throw new FetchError(`Exceeded maximum retries for URL: ${url}`, ...userArgs);
@@ -6094,13 +7037,13 @@ class WebClient {
 }
 //# sourceMappingURL=webClient.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/canvas/index.js":
+/***/ "../core/dist/map/canvas/index.js"
 /*!****************************************!*\
   !*** ../core/dist/map/canvas/index.js ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -6116,13 +7059,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/canvas/map.canvas.display.js":
+/***/ "../core/dist/map/canvas/map.canvas.display.js"
 /*!*****************************************************!*\
   !*** ../core/dist/map/canvas/map.canvas.display.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -6137,13 +7080,22 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
         canvas.height = height;
         return canvas;
     }
+    /**
+     * Check what size that element is being displayed (clientWidth & clientHeight properties) and then adjust
+     * its drawingbuffer size (width & height properties) to match.
+     * Let's call this function just before we render so it will always adjust the canvas to our desired size just before drawing.
+     * @returns
+     */
     static ResizeToDisplaySize(canvas, scale = 1) {
+        // Lookup the size the browser is displaying the canvas in CSS pixels.
         const displayWidth = canvas.clientWidth;
         const displayHeight = canvas.clientHeight;
+        // Set actual size in memory (scaled to account for extra pixel density).
         const ratio = window.devicePixelRatio;
         const w = displayWidth * ratio * scale;
         const h = displayHeight * ratio * scale;
         if (canvas.width != w || canvas.height != h) {
+            // Make the canvas the same size
             canvas.width = w;
             canvas.height = h;
             return true;
@@ -6154,15 +7106,19 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
         const f = resizeToFitClient == undefined || resizeToFitClient == true;
         scale = scale ?? 1.0;
         if (f) {
+            // the canvas width and height are the buffer size of the canvas. default values are width:300, height:150.
+            // the canvas clientWidth and clientHeight are the size of the canvas in the browser window.
+            // so we need to adapt the buffer size to the client size.
             CanvasDisplay.ResizeToDisplaySize(canvas, scale);
         }
-        super(canvas);
+        super(canvas); // canvas has width and height properties.
         this.canvas = canvas;
         this._resizeToFitClient = f;
         this._scale = scale;
-        const canvasAsElement = canvas;
+        const canvasAsElement = canvas; // trick to avoid the requestPointerLock(...) bug in the canvas element.
         this._resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
+                // Check if the resized element is our canvas
                 if (entry.target === canvasAsElement) {
                     if (this._resizeToFitClient) {
                         CanvasDisplay.ResizeToDisplaySize(canvas, this._scale);
@@ -6183,35 +7139,59 @@ class CanvasDisplay extends _tiles__WEBPACK_IMPORTED_MODULE_0__.Display {
 }
 //# sourceMappingURL=map.canvas.display.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/canvas/map.canvas.js":
+/***/ "../core/dist/map/canvas/map.canvas.js"
 /*!*********************************************!*\
   !*** ../core/dist/map/canvas/map.canvas.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CanvasMap: () => (/* binding */ CanvasMap)
 /* harmony export */ });
-/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.canvas.display */ "../core/dist/map/canvas/map.canvas.display.js");
-/* harmony import */ var _map_context2d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.context2d */ "../core/dist/map/canvas/map.context2d.js");
-/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.controller.js");
-/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
+/* harmony import */ var _map_canvas_display__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.canvas.display */ "../core/dist/map/canvas/map.canvas.display.js");
+/* harmony import */ var _map_context2d__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.context2d */ "../core/dist/map/canvas/map.context2d.js");
+/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
+/* harmony import */ var _inputs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../inputs */ "../core/dist/map/inputs/map.inputs.controller.js");
 
 
 
-class CanvasMap extends _map_context2d__WEBPACK_IMPORTED_MODULE_0__.Context2DTileMap {
+/// <summary>
+/// Base class for a tile map using a canvas context like for rendering. The flow is the following:
+/// - the map is updated by the pipeline, then the map is invalidated
+/// - the map is asked for rendering, so validated: If the map is invalid, so the validable data flow is triggered and the map draw is called.
+/// So this map is not automatically redrawed, it is only redrawed when asked for validation.
+/// This is a design choice, because we want to be able to control the rendering flow. This is usefull for example when we want to render the map into a rendering pipleline, 2D or 3D
+/// One way is using RequestAnimationFrame to trigger the rendering.
+///  function updateFrame() {
+///    // Update the animation frame
+///    map.validate();
+///
+///    // Recursively request another frame update
+///    requestAnimationFrame(updateFrame);
+///  }
+///  // Start the animation
+///  requestAnimationFrame(updateFrame);
+///
+/// Additionaly, we may also use the Map in 3D rendering pipeline which obey to the same rule. The map May be a texture of a 3D object.
+///
+/// For pure HTML rendering, we may use the Map in a canvas 2D rendering pipeline and revalidate systematically after each operations, such as navigation, zoom, etc.
+/// </summary>
+class CanvasMap extends _map_context2d__WEBPACK_IMPORTED_MODULE_1__.Context2DTileMap {
     constructor(display, options, nav) {
         if (display instanceof HTMLCanvasElement) {
-            display = new _map_canvas_display__WEBPACK_IMPORTED_MODULE_1__.CanvasDisplay(display);
+            display = new _map_canvas_display__WEBPACK_IMPORTED_MODULE_0__.CanvasDisplay(display);
         }
         super(display, nav);
         this._context = display.getContext();
-        this._inputController = options?.inputController ?? new _inputs__WEBPACK_IMPORTED_MODULE_2__.InputController(display.canvas);
-        this._navigationManager = options?.navigationManager ?? new _inputs__WEBPACK_IMPORTED_MODULE_3__.InputsNavigationController(this._inputController, this);
+        this._inputController = options?.inputController ?? new _inputs__WEBPACK_IMPORTED_MODULE_3__.InputController(display.canvas);
+        this._navigationManager = options?.navigationManager ?? new _inputs__WEBPACK_IMPORTED_MODULE_2__.InputsNavigationController(this._inputController, this);
     }
+    /// <summary>
+    /// This method is called when the map is validated.
+    /// </summary>
     _doValidate() {
         super._doValidate();
         const ctx = this._getContext2D();
@@ -6225,30 +7205,34 @@ class CanvasMap extends _map_context2d__WEBPACK_IMPORTED_MODULE_0__.Context2DTil
 }
 //# sourceMappingURL=map.canvas.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/canvas/map.context2d.js":
+/***/ "../core/dist/map/canvas/map.context2d.js"
 /*!************************************************!*\
   !*** ../core/dist/map/canvas/map.context2d.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Context2DTileMap: () => (/* binding */ Context2DTileMap)
 /* harmony export */ });
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math */ "../core/dist/math/math.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../tiles */ "../core/dist/tiles/tiles.metrics.js");
 
 
 
-class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
+// intermediary class to hold drawing process. This is usefull when the context is coming from other source than the class itself.
+class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_2__.TileMapBase {
     constructor(display, nav) {
         super(display, nav);
     }
+    /// <summary>
+    /// Draw the map on the canvas.
+    /// </summary>
     draw(ctx, xoffset = 0, yoffset = 0) {
         const navigation = this.navigationState;
         if (!navigation) {
@@ -6271,19 +7255,25 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
             const w = display.resolution.width;
             const h = display.resolution.height;
             const scale = this.navigationState?.scale ?? 1.0;
+            // we clear the canvas
             ctx.clearRect(x, y, w, h);
+            // we move the reference to the center of target bounds
             ctx.translate(x + w / 2, y + h / 2);
+            // we rotate the canvas according the navigation azimuth
             if (this.navigationState?.azimuth?.value) {
+                // convert azimuth to canvas rotation, which is clockwize, and cartesian
                 const angle = this.navigationState.azimuth.value * _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.DEG2RAD;
                 ctx.rotate(angle);
             }
+            // we scale the canvas according the navigation scale
             ctx.scale(scale, scale);
             for (const view of this._layerViews) {
+                // we access the layer to get renders functions
                 const layer = view.layer;
                 if (!layer.enabled) {
                     continue;
                 }
-                const render = (0,_tiles__WEBPACK_IMPORTED_MODULE_2__.IsDrawableTileMapLayer)(layer) ? layer.drawFn?.bind(layer.drawTarget ?? layer) : undefined;
+                const render = (0,_tiles__WEBPACK_IMPORTED_MODULE_3__.IsDrawableTileMapLayer)(layer) ? layer.drawFn?.bind(layer.drawTarget ?? layer) : undefined;
                 if (!render) {
                     continue;
                 }
@@ -6291,15 +7281,15 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
                 const lat = navigation.center.lat;
                 const lon = navigation.center.lon;
                 const metrics = layer.metrics;
-                const center = metrics?.getLatLonToPointXY(lat, lon, currentLod) ?? _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
-                const size = metrics?.tileSize ?? _tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
+                const center = metrics?.getLatLonToPointXY(lat, lon, currentLod) ?? _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
+                const size = metrics?.tileSize ?? _tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize; // default tile size is 256 pixels
                 const tiles = view.activTiles;
                 for (const tile of tiles) {
                     const b = tile?.boundingBox;
                     if (!b || !tile.content) {
                         continue;
                     }
-                    const dlod = currentLod - tile.address.levelOfDetail;
+                    const dlod = currentLod - tile.address.levelOfDetail; // delta lod
                     const lodScaling = dlod == 0 ? 1 : dlod < 0 ? 1 << dlod : 1 / (1 << dlod);
                     const x = b.x * lodScaling - center.x;
                     const y = b.y * lodScaling - center.y;
@@ -6323,13 +7313,13 @@ class Context2DTileMap extends _tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
 }
 //# sourceMappingURL=map.context2d.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/index.js":
+/***/ "../core/dist/map/index.js"
 /*!*********************************!*\
   !*** ../core/dist/map/index.js ***!
   \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -6350,13 +7340,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/index.js":
+/***/ "../core/dist/map/inputs/index.js"
 /*!****************************************!*\
   !*** ../core/dist/map/inputs/index.js ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -6381,13 +7371,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/map.inputs.controller.drag.js":
+/***/ "../core/dist/map/inputs/map.inputs.controller.drag.js"
 /*!*************************************************************!*\
   !*** ../core/dist/map/inputs/map.inputs.controller.drag.js ***!
   \*************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -6524,24 +7514,31 @@ class PointerToDragController {
 }
 //# sourceMappingURL=map.inputs.controller.drag.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/map.inputs.controller.js":
+/***/ "../core/dist/map/inputs/map.inputs.controller.js"
 /*!********************************************************!*\
   !*** ../core/dist/map/inputs/map.inputs.controller.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   InputController: () => (/* binding */ InputController)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.controller.drag */ "../core/dist/map/inputs/map.inputs.controller.drag.js");
-/* harmony import */ var _map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.controller.touch */ "../core/dist/map/inputs/map.inputs.controller.touch.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.inputs.controller.drag */ "../core/dist/map/inputs/map.inputs.controller.drag.js");
+/* harmony import */ var _map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.controller.touch */ "../core/dist/map/inputs/map.inputs.controller.touch.js");
 
 
 
+/// <summary>
+/// InputControllerBase is a DOM-to-PointerSource controller that emits pointer-related
+/// observables based on native DOM PointerEvents.
+/// It automatically attaches event listeners lazily as consumers access each observable.
+/// It also prevents the default browser context menu via `contextmenu` events.
+/// Note: The `contextmenu` event is a `MouseEvent`, not a `PointerEvent`, and is handled accordingly.
+/// </summary>
 class InputController {
     constructor(src) {
         this._onContextMenu = (ev) => {
@@ -6582,27 +7579,27 @@ class InputController {
             this._onPointerLostCaptureObservable?.notifyObservers(ev);
         };
         this.source = src;
-        this._dragController = new _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_0__.PointerToDragController(this);
+        this._dragController = new _map_inputs_controller_drag__WEBPACK_IMPORTED_MODULE_1__.PointerToDragController(this);
     }
     get onDragObservable() {
         return this._dragController.onDragObservable;
     }
     get onTouchObservable() {
         if (!this._touchController) {
-            this._touchController = new _map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_1__.PointerToGestureController(this);
+            this._touchController = new _map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__.PointerToGestureController(this);
         }
         return this._touchController.onTouchObservable;
     }
     get onWheelObservable() {
         if (!this._onWheelObservable) {
-            this._onWheelObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onWheelObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("wheel", this._onWheel);
         }
         return this._onWheelObservable;
     }
     get onPointerOverObservable() {
         if (!this._onPointerOverObservable) {
-            this._onPointerOverObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerOverObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointerover", (ev) => {
                 this._onPointerOverObservable?.notifyObservers(ev);
             });
@@ -6611,63 +7608,63 @@ class InputController {
     }
     get onPointerEnterObservable() {
         if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerEnterObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointerenter", this._onPointerEnter);
         }
         return this._onPointerEnterObservable;
     }
     get onPointerOutObservable() {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerOutObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointerout", this._onPointerOut);
         }
         return this._onPointerOutObservable;
     }
     get onPointerLeaveObservable() {
         if (!this._onPointerLeaveObservable) {
-            this._onPointerLeaveObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerLeaveObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointerleave", this._onPointerLeave);
         }
         return this._onPointerLeaveObservable;
     }
     get onPointerMoveObservable() {
         if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerMoveObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointermove", this._onPointerMove);
         }
         return this._onPointerMoveObservable;
     }
     get onPointerDownObservable() {
         if (!this._onPointerDownObservable) {
-            this._onPointerDownObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerDownObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointerdown", this._onPointerDown);
         }
         return this._onPointerDownObservable;
     }
     get onPointerUpObservable() {
         if (!this._onPointerUpObservable) {
-            this._onPointerUpObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerUpObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointerup", this._onPointerUp);
         }
         return this._onPointerUpObservable;
     }
     get onPointerCancelObservable() {
         if (!this._onPointerCancelObservable) {
-            this._onPointerCancelObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerCancelObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("pointercancel", this._onPointerCancel);
         }
         return this._onPointerCancelObservable;
     }
     get onPointerGotCaptureObservable() {
         if (!this._onPointerGotCaptureObservable) {
-            this._onPointerGotCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerGotCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("gotpointercapture", this._onPointerGotCapture);
         }
         return this._onPointerGotCaptureObservable;
     }
     get onPointerLostCaptureObservable() {
         if (!this._onPointerLostCaptureObservable) {
-            this._onPointerLostCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onPointerLostCaptureObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
             this._src?.addEventListener("lostpointercapture", this._onPointerLostCapture);
         }
         return this._onPointerLostCaptureObservable;
@@ -6767,13 +7764,13 @@ class InputController {
 }
 //# sourceMappingURL=map.inputs.controller.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/map.inputs.controller.navigation.js":
+/***/ "../core/dist/map/inputs/map.inputs.controller.navigation.js"
 /*!*******************************************************************!*\
   !*** ../core/dist/map/inputs/map.inputs.controller.navigation.js ***!
   \*******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -6810,6 +7807,8 @@ class InputsNavigationController {
                             if (event.deltaX || event.deltaY) {
                                 const translateFactor = this._options.translateFactor ?? InpustNavigationControllerOptions?.DEFAULT_TRANSLATE_FACTOR;
                                 const invertY = this._options.invertY ?? InpustNavigationControllerOptions?.DEFAULT_INVERT_Y;
+                                // translate the center of the map according the drag displacement
+                                // then we have to negate the drag displacement.
                                 this._target.translateUnitsMap(-event.deltaX * translateFactor, (invertY ? event.deltaY : -event.deltaY) * translateFactor);
                             }
                             break;
@@ -6817,6 +7816,7 @@ class InputsNavigationController {
                         case 2: {
                             if (event.deltaX) {
                                 const rotateFactor = this._options.rotateFactor ?? InpustNavigationControllerOptions?.DEFAULT_ROTATE_FACTOR;
+                                // rotate the map according the drag displacement
                                 this._target.rotateMap(Math.sign(event.deltaX) * Math.hypot(event.deltaX, event.deltaY) * rotateFactor);
                             }
                             break;
@@ -6836,6 +7836,8 @@ class InputsNavigationController {
                 case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
                     const translateFactor = this._options.translateFactor ?? InpustNavigationControllerOptions?.DEFAULT_TRANSLATE_FACTOR;
                     const invertY = this._options.invertY ?? InpustNavigationControllerOptions?.DEFAULT_INVERT_Y;
+                    // translate the center of the map according the drag displacement
+                    // then we have to negate the drag displacement.
                     this._target.translateUnitsMap(-event.deltaX * translateFactor, (invertY ? event.deltaY : -event.deltaY) * translateFactor);
                     break;
                 }
@@ -6874,31 +7876,31 @@ class InputsNavigationController {
 }
 //# sourceMappingURL=map.inputs.controller.navigation.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/map.inputs.controller.touch.js":
+/***/ "../core/dist/map/inputs/map.inputs.controller.touch.js"
 /*!**************************************************************!*\
   !*** ../core/dist/map/inputs/map.inputs.controller.touch.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PointerToGestureController: () => (/* binding */ PointerToGestureController)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
+/* harmony import */ var _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.inputs.interfaces.touch */ "../core/dist/map/inputs/map.inputs.interfaces.touch.js");
 
 
 
 const GestureDetectionSettings = {
-    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate]: { threshold: 0.5 },
-    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch]: { threshold: 1 },
-    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag]: { threshold: 1 },
-    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Tap]: { threshold: 0 },
-    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.LongPress]: { threshold: 0 },
-    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Swipe]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Rotate]: { threshold: 0.5 }, // degrees
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Pinch]: { threshold: 1 }, // pixels
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Drag]: { threshold: 1 }, // pixels
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Tap]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.LongPress]: { threshold: 0 },
+    [_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Swipe]: { threshold: 0 },
 };
 class PointerToGestureController {
     constructor(source) {
@@ -6907,7 +7909,7 @@ class PointerToGestureController {
         this._startAngle = 0;
         this._startCenter = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
         this._moveCount = 0;
-        this._firstMoveCountThreshold = 5;
+        this._firstMoveCountThreshold = 5; // Number of moves to consider before fixing gesture type
         this._onStart = (e) => {
             if (e.pointerType !== "touch") {
                 return;
@@ -6933,6 +7935,11 @@ class PointerToGestureController {
                 this._moveCount = 0;
             }
         };
+        ///<summary>
+        /// Handles pointer move events and generates touch gestures.
+        /// It supports single touch drag and two-finger pinch/drag gestures.
+        /// @param e The pointer event.
+        ///</summary>
         this._onMove = (e) => {
             if (e.pointerType !== "touch") {
                 return;
@@ -6944,7 +7951,7 @@ class PointerToGestureController {
                 switch (this._pointers.size) {
                     case 1: {
                         const gesture = {
-                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
+                            type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Drag,
                             timestamp: performance.now(),
                             duration: performance.now() - state.startTime,
                             points: [{ x: state.x, y: state.y }],
@@ -6952,6 +7959,8 @@ class PointerToGestureController {
                             deltaY: state.y - state.lastY,
                         };
                         this.onTouchObservable.notifyObservers(gesture);
+                        // reset start position to current position
+                        // this allows to compute deltaX and deltaY as relative to the last position
                         state.lastX = state.x;
                         state.lastY = state.y;
                         break;
@@ -6959,7 +7968,7 @@ class PointerToGestureController {
                     case 2: {
                         this._moveCount++;
                         if (this._moveCount < this._firstMoveCountThreshold) {
-                            return;
+                            return; // Wait for enough moves to determine gesture type
                         }
                         const [a, b] = Array.from(this._pointers.values());
                         const center = this._midpoint(a, b);
@@ -6971,9 +7980,9 @@ class PointerToGestureController {
                         const types = this._detectActiveTypes(deltaAngle, deltaDistance, deltaCenter);
                         for (const type of types) {
                             switch (type) {
-                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate: {
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Rotate: {
                                     const gesture = {
-                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate,
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Rotate,
                                         timestamp: performance.now(),
                                         duration: 0,
                                         points: [
@@ -6987,9 +7996,9 @@ class PointerToGestureController {
                                     this.onTouchObservable.notifyObservers(gesture);
                                     break;
                                 }
-                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch: {
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Pinch: {
                                     const gesture = {
-                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch,
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Pinch,
                                         timestamp: performance.now(),
                                         duration: 0,
                                         points: [
@@ -7003,9 +8012,9 @@ class PointerToGestureController {
                                     this.onTouchObservable.notifyObservers(gesture);
                                     break;
                                 }
-                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag: {
+                                case _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Drag: {
                                     const gesture = {
-                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag,
+                                        type: _map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Drag,
                                         timestamp: performance.now(),
                                         duration: 0,
                                         points: [
@@ -7041,7 +8050,8 @@ class PointerToGestureController {
     }
     get onTouchObservable() {
         if (!this._onTouchObservable) {
-            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._onTouchObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
+            // lazzy attach
             this._attachSource(this._source);
         }
         return this._onTouchObservable;
@@ -7083,7 +8093,7 @@ class PointerToGestureController {
     _angle(a, b) {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
-        return Math.atan2(dy, dx) * (180 / Math.PI);
+        return Math.atan2(dy, dx) * (180 / Math.PI); // Convert to degrees
     }
     _midpoint(a, b) {
         return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
@@ -7093,32 +8103,50 @@ class PointerToGestureController {
         const angleDeg = Math.abs(angleRad * 57.2958);
         const pinchScore = Math.abs(distDelta);
         const dragScore = Math.abs(centerDelta);
-        if (angleDeg > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate].threshold) {
-            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Rotate);
+        if (angleDeg > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Rotate].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Rotate);
         }
-        if (pinchScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch].threshold) {
-            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Pinch);
+        if (pinchScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Pinch].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Pinch);
         }
-        if (dragScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag].threshold) {
-            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_0__.TouchGestureType.Drag);
+        if (dragScore > GestureDetectionSettings[_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Drag].threshold) {
+            result.push(_map_inputs_interfaces_touch__WEBPACK_IMPORTED_MODULE_2__.TouchGestureType.Drag);
         }
         return result;
     }
 }
 //# sourceMappingURL=map.inputs.controller.touch.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/map.inputs.interfaces.hands.js":
+/***/ "../core/dist/map/inputs/map.inputs.interfaces.hands.js"
 /*!**************************************************************!*\
   !*** ../core/dist/map/inputs/map.inputs.interfaces.hands.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   XRGestureType: () => (/* binding */ XRGestureType)
 /* harmony export */ });
+/*
+export interface IXRHandTarget {
+    /// <summary>
+    /// Called when the hand is first detected.
+    /// </summary>
+    onXRHandStart(inputSource: XRInputSource, frame: XRFrame): void;
+
+    /// <summary>
+    /// Called every frame with updated joint data from the XRHand.
+    /// </summary>
+    onXRHandUpdate(inputSource: XRInputSource, frame: XRFrame): void;
+
+    /// <summary>
+    /// Called when the hand is no longer tracked.
+    /// </summary>
+    onXRHandEnd(inputSource: XRInputSource, frame: XRFrame): void;
+}
+*/
 var XRGestureType;
 (function (XRGestureType) {
     XRGestureType[XRGestureType["Grab"] = 100] = "Grab";
@@ -7130,25 +8158,31 @@ var XRGestureType;
 })(XRGestureType || (XRGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.hands.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/map/inputs/map.inputs.interfaces.touch.js":
+/***/ "../core/dist/map/inputs/map.inputs.interfaces.touch.js"
 /*!**************************************************************!*\
   !*** ../core/dist/map/inputs/map.inputs.interfaces.touch.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsTouchCapable: () => (/* binding */ IsTouchCapable),
 /* harmony export */   TouchGestureType: () => (/* binding */ TouchGestureType)
 /* harmony export */ });
+/// <summary>
+/// Returns true if the current device supports touch input (multi-touch or single-touch).
+/// </summary>
 function IsTouchCapable() {
     const hasTouchEvents = "ontouchstart" in window;
     const hasTouchConstructor = typeof window !== "undefined" && "DocumentTouch" in window && document instanceof window.DocumentTouch;
     const hasTouchPoints = navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
     return hasTouchEvents || hasTouchConstructor || hasTouchPoints;
 }
+/// <summary>
+/// Enumeration of known touch gesture types.
+/// </summary>
 var TouchGestureType;
 (function (TouchGestureType) {
     TouchGestureType[TouchGestureType["Tap"] = 0] = "Tap";
@@ -7160,13 +8194,13 @@ var TouchGestureType;
 })(TouchGestureType || (TouchGestureType = {}));
 //# sourceMappingURL=map.inputs.interfaces.touch.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/math/index.js":
+/***/ "../core/dist/math/index.js"
 /*!**********************************!*\
   !*** ../core/dist/math/index.js ***!
   \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -7198,13 +8232,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/math/math.color.js":
+/***/ "../core/dist/math/math.color.js"
 /*!***************************************!*\
   !*** ../core/dist/math/math.color.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -7243,12 +8277,14 @@ class RGBAColor {
         return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
     }
     static Parse(str) {
+        // Web RGB color code (hex triplet)
         if (str[0] == "#") {
             var a = RGBAColor.h2r(str);
             if (a) {
                 return new RGBAColor(a[0], a[1], a[2]);
             }
         }
+        // CSS color name
         return new RGBAColor(RGBAColor.CSSMap.get(str) || RGBAColor.White());
     }
     constructor(r, g = 0, b = 0, a = 255) {
@@ -7308,7 +8344,7 @@ class RGBAColor {
         let h, s;
         const l = (max + min) / 2;
         if (max == min) {
-            h = s = 0;
+            h = s = 0; // achromatic
         }
         else {
             const d = max - min;
@@ -7324,6 +8360,7 @@ class RGBAColor {
                     h = (r - g) / d + 4;
                     break;
                 default:
+                    // to avoid compilation issue.
                     h = 0;
                     break;
             }
@@ -7351,6 +8388,7 @@ class RGBAColor {
         return `rgb(${this.r},${this.g},${this.b})`;
     }
 }
+// css color module level 3
 RGBAColor.aliceblue = new RGBAColor(240, 248, 255);
 RGBAColor.antiquewhite = new RGBAColor(250, 235, 215);
 RGBAColor.aqua = new RGBAColor(0, 255, 255);
@@ -7683,13 +8721,13 @@ class HSLColor {
 }
 //# sourceMappingURL=math.color.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/math/math.js":
+/***/ "../core/dist/math/math.js"
 /*!*********************************!*\
   !*** ../core/dist/math/math.js ***!
   \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -7799,13 +8837,13 @@ class Range extends AbstractRange {
 }
 //# sourceMappingURL=math.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/math/math.units.js":
+/***/ "../core/dist/math/math.units.js"
 /*!***************************************!*\
   !*** ../core/dist/math/math.units.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -7979,6 +9017,7 @@ Timespan.Units = {
     Yr: new Unit("year", "y", 86400 * 365.25),
     Cy: new Unit("century", "c", 86400 * 36525),
 };
+// tslint:disable: no-use-before-declare
 class KConverter {
     accept(unit) {
         return unit === Temperature.Units.c || unit === Temperature.Units.f;
@@ -8179,13 +9218,13 @@ class Speed extends Quantity {
 Speed.Units = {};
 //# sourceMappingURL=math.units.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/Mechanics/index.js":
+/***/ "../core/dist/space/Mechanics/index.js"
 /*!*********************************************!*\
   !*** ../core/dist/space/Mechanics/index.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8203,13 +9242,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/Mechanics/space.celestialTracker.js":
+/***/ "../core/dist/space/Mechanics/space.celestialTracker.js"
 /*!**************************************************************!*\
   !*** ../core/dist/space/Mechanics/space.celestialTracker.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8228,6 +9267,12 @@ class HorizonVector {
         this.altitude = altitude;
     }
 }
+/// Right Ascension (RA): Analogous to longitude on Earth, Right Ascension measures the east-west position of a celestial object.
+/// It is expressed in terms of hours, minutes, and seconds, where 24 hours equals a full 360-degree circle.
+/// RA is measured eastward along the celestial equator from the vernal equinox.
+/// Declination (Dec): Similar to latitude on Earth, Declination measures the north-south position of a celestial object.
+/// It is expressed in degrees, where positive values indicate north of the celestial equator and negative values indicate south.
+/// The range of declination is from +90 degrees at the celestial north pole to -90 degrees at the celestial south pole.
 class EquatorialVector {
     constructor(rightAscension, declination) {
         this.rightAscension = rightAscension;
@@ -8275,6 +9320,8 @@ JulianDate.DayMs = 1000 * 60 * 60 * 24;
 JulianDate.J1970 = 2440588;
 JulianDate.J2000 = 2451545;
 JulianDate.J0 = 0.0009;
+/// CelestialTracker is a collection of functions to calculate the position of the sun and the moon in the sky of the earth
+/// based on js lib suncalc.js by Vladimir Agafonkin. https://github.com/mourner/suncalc
 class CelestialTracker {
     static _ApproxTransit(Ht, lw, n) {
         return JulianDate.J0 + (Ht + lw) / (2 * Math.PI) + n;
@@ -8288,6 +9335,7 @@ class CelestialTracker {
     static _ObserverAngle(height) {
         return (-2.076 * Math.sqrt(height)) / 60;
     }
+    // returns set time for the given sun altitude
     static _GetSetJ(h, lw, phi, dec, n, M, L) {
         var w = CelestialTracker._HourAngle(h, phi, dec), a = CelestialTracker._ApproxTransit(w, lw, n);
         return CelestialTracker._SolarTransitJ(a, M, L);
@@ -8320,6 +9368,8 @@ class CelestialTracker {
         const L = CelestialTracker.EclipticLongitude(M);
         return new EquatorialVector(CelestialTracker.RightAscension(L, 0), CelestialTracker.Declination(L, 0));
     }
+    // calculates sun times for a given date, latitude/longitude, and, optionally,
+    // the observer height (in meters) relative to the horizon
     static GetSunTimes(date, lat, lng, height) {
         height = height || 0;
         const lw = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * -lng;
@@ -8355,20 +9405,25 @@ class CelestialTracker {
         const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
         return new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), CelestialTracker.Altitude(H, phi, c.declination));
     }
+    // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
     static _MoonCoords(d) {
-        const L = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (218.316 + 13.176396 * d);
-        const M = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (134.963 + 13.064993 * d);
-        const F = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (93.272 + 13.22935 * d);
-        const l = L + _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 6.289 * Math.sin(M);
-        const b = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 5.128 * Math.sin(F);
-        const dt = 385001 - 20905 * Math.cos(M);
+        // geocentric ecliptic coordinates of the moon
+        const L = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (218.316 + 13.176396 * d); // ecliptic longitude
+        const M = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (134.963 + 13.064993 * d); // mean anomaly
+        const F = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (93.272 + 13.22935 * d); // mean distance
+        const l = L + _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 6.289 * Math.sin(M); // longitude
+        const b = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 5.128 * Math.sin(F); // latitude
+        const dt = 385001 - 20905 * Math.cos(M); // distance to the moon in km
         const v = new EquatorialVector(CelestialTracker.RightAscension(l, b), CelestialTracker.Declination(l, b));
         v.distance = dt;
         return v;
     }
     static _AstroRefraction(h) {
         if (h < 0)
-            h = 0;
+            // the following formula works for positive altitudes only.
+            h = 0; // if h = -0.08901179 a div/0 would occur.
+        // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+        // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
         return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
     }
     static GetMoonPosition(date, lat, lon) {
@@ -8378,8 +9433,9 @@ class CelestialTracker {
         const c = CelestialTracker._MoonCoords(d);
         const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
         let h = CelestialTracker.Altitude(H, phi, c.declination);
+        // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
         const pa = Math.atan2(Math.sin(H), Math.tan(phi) * Math.cos(c.declination) - Math.sin(c.declination) * Math.cos(H));
-        h = h + CelestialTracker._AstroRefraction(h);
+        h = h + CelestialTracker._AstroRefraction(h); // altitude correction for refraction
         const v = new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), h);
         v.distance = c.distance;
         v.parallacticAngle = pa;
@@ -8400,16 +9456,20 @@ CelestialTracker.SunTrajectories = [
     new SunTrajectoryConfig(-18, "nightEnd", "night"),
     new SunTrajectoryConfig(6, "goldenHourEnd", "goldenHour"),
 ];
+// calculations for illumination parameters of the moon,
+// based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
+// Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
 CelestialTracker.GetMoonIllumination = function (date) {
     const d = JulianDate.FromDate(date).toDays();
     const s = CelestialTracker.SunCoords(d);
     const m = CelestialTracker._MoonCoords(d);
-    const sdist = 149598000;
+    const sdist = 149598000; // distance from Earth to Sun in km
     const phi = Math.acos(Math.sin(s.declination) * Math.sin(m.declination) + Math.cos(s.declination) * Math.cos(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
     const inc = Math.atan2(sdist * Math.sin(phi), m.distance - sdist * Math.cos(phi));
     const angle = Math.atan2(Math.cos(s.declination) * Math.sin(s.rightAscension - m.rightAscension), Math.sin(s.declination) * Math.cos(m.declination) - Math.cos(s.declination) * Math.sin(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
     return new MoonState(1 + Math.cos(inc), 0.5 + (0.5 * inc * (angle < 0 ? -1 : 1)) / Math.PI, angle);
 };
+// calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
     var t = new Date(date);
     if (inUTC)
@@ -8419,6 +9479,7 @@ CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
     const hc = 0.133 * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
     let h0 = CelestialTracker.GetMoonPosition(t, lat, lng).altitude - hc;
     let rise, set, ye;
+    // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
     for (var i = 1; i <= 24; i += 2) {
         const h1 = CelestialTracker.GetMoonPosition(CelestialTracker._HoursLater(t, i), lat, lng).altitude - hc;
         const h2 = CelestialTracker.GetMoonPosition(CelestialTracker._HoursLater(t, i + 1), lat, lng).altitude - hc;
@@ -8466,13 +9527,13 @@ CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
 };
 //# sourceMappingURL=space.celestialTracker.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/Mechanics/space.kepler.js":
+/***/ "../core/dist/space/Mechanics/space.kepler.js"
 /*!****************************************************!*\
   !*** ../core/dist/space/Mechanics/space.kepler.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8528,13 +9589,21 @@ class KeplerOrbitBase {
     get meanAngularSpeed() {
         return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Speed(360.0 / this._period.value);
     }
+    /**
+     * Kepler's equation cannot be solved algebraically. It can be treated by an iteration methods.
+     * One of them is Newton's method, finding roots of f(E) = E - e*sin(E) - M(t)
+     * @param meanAnomaly
+     * @param decimalPrecision
+     */
     getEccentricAnomaly(meanAnomaly, decimalPrecision) {
         const dp = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
         const K = Math.PI / 180.0;
         let m = meanAnomaly / 360.0;
         m = 2.0 * Math.PI * (m - Math.floor(m));
         let E = this._eccentricity < 0.8 ? m : Math.PI;
+        // initialize
         let F = E - this._eccentricity * Math.sin(m) - m;
+        // iterations limits.
         const maxIteration = KeplerOrbitBase.DefaultIterationLimit;
         const delta = Math.pow(10, -dp);
         let i = 0;
@@ -8547,16 +9616,16 @@ class KeplerOrbitBase {
     }
 }
 KeplerOrbitBase.DefaultDecimalPrecision = 5;
-KeplerOrbitBase.DefaultIterationLimit = 30;
+KeplerOrbitBase.DefaultIterationLimit = 30; // be conservative...
 //# sourceMappingURL=space.kepler.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/index.js":
+/***/ "../core/dist/space/index.js"
 /*!***********************************!*\
   !*** ../core/dist/space/index.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8570,6 +9639,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.KeplerOrbitBase),
 /* harmony export */   MoonState: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.MoonState),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.MorganKeenanClass),
+/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ _space_bodies__WEBPACK_IMPORTED_MODULE_5__.SolarSystemBodies),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.SpectralClass),
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor),
 /* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.SunTrajectoryConfig)
@@ -8579,6 +9649,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.spectralClass */ "../core/dist/space/space.spectralClass.js");
 /* harmony import */ var _space_starColor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./space.starColor */ "../core/dist/space/space.starColor.js");
 /* harmony import */ var _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Mechanics/index */ "../core/dist/space/Mechanics/index.js");
+/* harmony import */ var _space_bodies__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./space.bodies */ "../core/dist/space/space.bodies.js");
+
 
 
 
@@ -8586,13 +9658,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/space.axialTilt.js":
+/***/ "../core/dist/space/space.axialTilt.js"
 /*!*********************************************!*\
   !*** ../core/dist/space/space.axialTilt.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8619,13 +9691,82 @@ AxialTilt.defaultAngleUnit = _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle
 AxialTilt.defaultPeriodUnit = _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.s;
 //# sourceMappingURL=space.axialTilt.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/space.interfaces.js":
+/***/ "../core/dist/space/space.bodies.js"
+/*!******************************************!*\
+  !*** ../core/dist/space/space.bodies.js ***!
+  \******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SolarSystemBodies: () => (/* binding */ SolarSystemBodies)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "../core/dist/space/space.interfaces.js");
+
+
+const SolarSystemBodies = {
+    Earth: {
+        name: "Earth",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84,
+        meanRadiusKm: 6371,
+        surfaceGravity: 9.807,
+    },
+    Moon: {
+        name: "Moon",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.MOON,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Moon", 1738100, Infinity),
+        meanRadiusKm: 1737.4,
+        surfaceGravity: 1.622,
+    },
+    Mars: {
+        name: "Mars",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mars", 3396190, 169.89),
+        meanRadiusKm: 3389.5,
+        surfaceGravity: 3.721,
+    },
+    Mercury: {
+        name: "Mercury",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mercury", 2439700, Infinity),
+        meanRadiusKm: 2439.7,
+        surfaceGravity: 3.7,
+    },
+    Ceres: {
+        name: "Ceres",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.ASTEROIDE,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Ceres", 476200, Infinity),
+        meanRadiusKm: 476.2,
+        surfaceGravity: 0.28,
+    },
+    Vesta: {
+        name: "Vesta",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.ASTEROIDE,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Vesta", 262700, Infinity),
+        meanRadiusKm: 262.7,
+        surfaceGravity: 0.25,
+    },
+    Titan: {
+        name: "Titan",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.MOON,
+        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Titan", 2574730, Infinity),
+        meanRadiusKm: 2574.7,
+        surfaceGravity: 1.352,
+    },
+};
+//# sourceMappingURL=space.bodies.js.map
+
+/***/ },
+
+/***/ "../core/dist/space/space.interfaces.js"
 /*!**********************************************!*\
   !*** ../core/dist/space/space.interfaces.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8651,13 +9792,13 @@ var CelestialNodeType;
 })(CelestialNodeType || (CelestialNodeType = {}));
 //# sourceMappingURL=space.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/space.spectralClass.js":
+/***/ "../core/dist/space/space.spectralClass.js"
 /*!*************************************************!*\
   !*** ../core/dist/space/space.spectralClass.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8697,6 +9838,18 @@ class MorganKeenanClass {
 }
 MorganKeenanClass.pattern = /^(O|B|A|F|G|K|M)([0-9](.[0-9])?)((Ia\+|I|II|III|IV|V|sd|D))?$/;
 MorganKeenanClass.LuminosityNames = ["Ia+", "I", "II", "III", "IV", "V", "sd", "D"];
+/* Most stars are currently classified under the Morgan–Keenan (MK) system using the letters O, B, A, F, G, K, and M,
+ * a sequence from the hottest (O type) to the coolest (M type). Each letter class is then subdivided using a numeric
+ * digit with 0 being hottest and 9 being coolest (e.g. A8, A9, F0, F1 form a sequence from hotter to cooler).
+ * The sequence has been expanded with classes for other stars and star-like objects that do not fit in the classical
+ * system, such as class D for white dwarfs and class C for carbon stars.
+ * In the MK system, a luminosity class is added to the spectral class using Roman numerals. This is based on the width
+ * of certain absorption lines in the star"s spectrum, which vary with the density of the atmosphere and so distinguish
+ * giant stars from dwarfs. Luminosity class 0 or Ia+ stars for hypergiants, class I stars for supergiants, class II for
+ * bright giants, class III for regular giants, class IV for sub-giants, class V for main-sequence stars, class sd for
+ * sub-dwarfs, and class D for white dwarfs. The full spectral class for the Sun is then G2V, indicating a main-sequence
+ * star with a temperature around 5,800 K.
+ */
 class SpectralClass {
     static ClassFromTemperature(temperature) {
         const temp = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(temperature, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k);
@@ -8743,13 +9896,13 @@ SpectralClass.HarwardClassification = [SpectralClass.O, SpectralClass.B, Spectra
 SpectralClass.TemperatureRange = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(2400, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(60000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k));
 //# sourceMappingURL=space.spectralClass.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/space/space.starColor.js":
+/***/ "../core/dist/space/space.starColor.js"
 /*!*********************************************!*\
   !*** ../core/dist/space/space.starColor.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -8757,8 +9910,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StarColor: () => (/* binding */ StarColor)
 /* harmony export */ });
 /* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.spectralClass */ "../core/dist/space/space.spectralClass.js");
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math.units */ "../core/dist/math/math.units.js");
-/* harmony import */ var _math_math_color__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math.color */ "../core/dist/math/math.color.js");
+/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math.units */ "../core/dist/math/math.units.js");
+/* harmony import */ var _math_math_color__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math.color */ "../core/dist/math/math.color.js");
 
 
 
@@ -8770,8 +9923,50 @@ class ColorValue {
         this.color = color;
     }
 }
+/*
+ * • The upshot is this: the color of a star depends on its surface temperature.  But a blue star doesn’t emit only blue light,
+ *   nor does a red star emit only red light.  They emit visible light of all colors to some degree.  It’s just that their
+ *   spectrum peaks at a particular color.
+ * • So why are there blue stars, yellow stars, red stars, but no green stars?  As it turns out, there are green stars, that is,
+ *   stars that radiate much of their light in the green part of the spectrum.  But the total combination of the full range of
+ *   colors of a “green” star appears white to our eyes.  If you pass the color from a whitish star through a prism, you’ll see
+ *   all the colors, including green, spread out in a continuum.
+ * • Astronomers came to understand that bluer stars are intrinsically brighter because they are more massive than
+ *   white or red stars, and more massive stars burn much faster and hotter than less massive stars.  The bluish type-O stars,
+ *   for example, are only 30-50 times more massive than yellow-white stars like our sun.  But O stars burn a million times
+ *   brighter, so they have far shorter lifetimes.
+ *   O and B stars only last a few million years before they die in spectacular supernova explosions, while cooler and less
+ *   massive K and M stars burn steadily for billions of years.
+ * • Some 88% of stars in the universe seem to be the cooler type K and M.  Only 1 in 3,000,000 stars are type O.
+ *   Even middle-weights like our type-G Sun comprise only 8% of all known stars.
+ *   This relationship between star mass, luminosity, and color holds only for stars burning hydrogen in the core during the
+ *   prime of their lives. For example, young and middle-aged M-type stars are small, faint and long-lived.  But as stars age
+ *   and start burning heavier elements in the core, bluish O and B stars, for example, evolve briefly into immensely bright
+ *   M-type red stars known as red supergiants. We’ll explain this in later issues.  If it sounds complicated, fear not.
+ *   Even astronomy majors wrestle over this for some time before they understand how stars live and evolve.
+ *
+ * thanks to http://oneminuteastronomer.com/708/star-colors-explained/
+ * ---------------------------------------------------------------------
+ * Stars radiate light a little like glowing coals in a campfire.  Just as a glowing red-hot coal is cooler than a white-hot coal,
+ * for example, so a red star is cooler than a white star, and a white star is cooler than a blue star. This was a major scientific
+ * discovery… simply by measuring the color of light coming from a star, and applying a little physics, it was possible to estimate
+ * a star’s surface temperature.
+ * Like most scientists, astronomers love to classify things.  In the late 19th century, Harvard astronomers developed a system to
+ * classify stars not according to color, but by the strength by which hydrogen gas absorbed light at particular wavelengths.
+ * The star classes were labeled A to N in order of decreasing hydrogen absorption strength.  After a time, the classes
+ * were simplified to O, B, A, F, G, K, and M.  This is the Harvard spectral classification, which is still used today.
+ * So what does this have to do with star color?
+ * • As astronomers and physicists learned more about atomic structure and the spectra of light from stars,
+ *   they discovered the Harvard classification system really described the temperature of a star’s atmosphere.
+ *   They discovered the type-O stars are hotter than type-B stars, and type-B stars are hotter than type-A stars, and so on.
+ *   But hot stars are blue, and medium-hot stars are white, and cool stars are red.
+ * • Here’s a summary of the dominant color and temperatures of the main classes of stars, along with examples of stars that
+ *   belong to each class
+ * according http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
+ */
 class StarColor {
     static _buildIndex(ColorTable) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const o = {};
         for (const l of _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__.MorganKeenanClass.LuminosityNames) {
             o[l] = Array.from(StarColor._SelectByLuminosity(l, ColorTable)).sort((a, b) => a.kelvin - b.kelvin);
@@ -8786,7 +9981,7 @@ class StarColor {
                 const sc = _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__.SpectralClass.HarwardClassificationIndex[c.major];
                 const { min, delta } = sc.effectiveTemperature;
                 const { r, g, b } = p.value;
-                yield { mk: c, sclass: sc, kelvin: min.value + delta.value * t, color: new _math_math_color__WEBPACK_IMPORTED_MODULE_1__.RGBAColor(r, g, b) };
+                yield { mk: c, sclass: sc, kelvin: min.value + delta.value * t, color: new _math_math_color__WEBPACK_IMPORTED_MODULE_2__.RGBAColor(r, g, b) };
             }
         }
     }
@@ -8801,6 +9996,8 @@ class StarColor {
         }
         return low;
     }
+    /* use to find the range of matrix items wheres temperature lies.
+       return an array of one or two matrix item */
     static _lookupIndexes(luminosity, temperature) {
         const l = StarColor.Matrix[luminosity];
         if (!l || !l.length)
@@ -8818,10 +10015,10 @@ class StarColor {
         return res;
     }
     static lookupRgb(luminosity, temperature) {
-        const kelvin = new _math_math_units__WEBPACK_IMPORTED_MODULE_2__.Temperature(temperature, _math_math_units__WEBPACK_IMPORTED_MODULE_2__.Temperature.Units.k);
+        const kelvin = new _math_math_units__WEBPACK_IMPORTED_MODULE_1__.Temperature(temperature, _math_math_units__WEBPACK_IMPORTED_MODULE_1__.Temperature.Units.k);
         const i = this._lookupIndexes(luminosity, kelvin.value);
         if (!i || !i.length)
-            return new _math_math_color__WEBPACK_IMPORTED_MODULE_1__.RGBAColor(0, 0, 0);
+            return new _math_math_color__WEBPACK_IMPORTED_MODULE_2__.RGBAColor(0, 0, 0);
         if (i.length == 1) {
             return i[0].color;
         }
@@ -9017,16 +10214,17 @@ StarColor.ColorTable = [
     { key: "M6V", value: { x: 0.4271, y: 0.4123, r: 255, g: 195, b: 112, color: "#ffc370" } },
     { key: "M8V", value: { x: 0.4276, y: 0.4176, r: 255, g: 198, b: 109, color: "#ffc66d" } },
 ];
+/* this is where we prepare the static matrix (Space.StarColorFactory.Matrix) to efficient color lookup. */
 StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
 //# sourceMappingURL=space.starColor.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/text/index.js":
+/***/ "../core/dist/text/index.js"
 /*!**********************************!*\
   !*** ../core/dist/text/index.js ***!
   \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -9042,13 +10240,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/text/iso6391.js":
+/***/ "../core/dist/text/iso6391.js"
 /*!************************************!*\
   !*** ../core/dist/text/iso6391.js ***!
   \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -9815,13 +11013,13 @@ class ISO6391 {
 ISO6391._map = new Map(Object.entries(LANGUAGES_LIST));
 //# sourceMappingURL=iso6391.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/text/localizable.js":
+/***/ "../core/dist/text/localizable.js"
 /*!****************************************!*\
   !*** ../core/dist/text/localizable.js ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -9881,13 +11079,13 @@ class LocalString {
 LocalString.DefaultCode = "en";
 //# sourceMappingURL=localizable.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/address/index.js":
+/***/ "../core/dist/tiles/address/index.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/address/index.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -9898,21 +11096,21 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/address/tiles.address.js":
+/***/ "../core/dist/tiles/address/tiles.address.js"
 /*!***************************************************!*\
   !*** ../core/dist/tiles/address/tiles.address.js ***!
   \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   NeighborsIndex: () => (/* binding */ NeighborsIndex),
 /* harmony export */   TileAddress: () => (/* binding */ TileAddress)
 /* harmony export */ });
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../math/math */ "../core/dist/math/math.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "../core/dist/math/math.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
 
 
 var NeighborsIndex;
@@ -9944,9 +11142,11 @@ class TileAddress {
     }
     static ShiftMultiple(addresses, N, metrics) {
         const uniqueQuadKeys = new Set();
+        // Reuse the shift function and collect results
         addresses.forEach((address) => {
             const shifted = TileAddress.Shift(address, N, metrics);
             if (Array.isArray(shifted)) {
+                // Add all child quadkeys to the set
                 shifted.forEach((child) => {
                     const qk = child.quadkey;
                     if (qk) {
@@ -9955,12 +11155,14 @@ class TileAddress {
                 });
             }
             else if (shifted) {
+                // Add the single parent quadkey to the set
                 const qk = shifted.quadkey;
                 if (qk) {
                     uniqueQuadKeys.add(qk);
                 }
             }
         });
+        // Convert unique quadkeys back to ITileAddress objects
         return Array.from(uniqueQuadKeys).map((key) => TileAddress.QuadKeyToTileXY(key));
     }
     static Shift(a, N, metrics) {
@@ -9973,28 +11175,34 @@ class TileAddress {
         }
         let currentLod = a.levelOfDetail;
         if (N === 0) {
-            return a;
+            return a; // Return the original address if N is 0
         }
         if (N > 0) {
+            // Cap at maxLOD
             const maxShift = metrics.maxLOD - currentLod;
             const effectiveShift = Math.min(N, maxShift);
+            // Generate child tiles up to the effectiveShift level
             let keys = [currentKey];
             for (let level = 0; level < effectiveShift; level++) {
                 keys = keys.flatMap((key) => TileAddress.ToChildsKey(key));
             }
+            // Convert quadkeys back to ITileAddress
             return keys.map((key) => TileAddress.QuadKeyToTileXY(key));
         }
+        // Cap at minLOD
         const maxShift = currentLod - metrics.minLOD;
         const effectiveShift = Math.min(Math.abs(N), maxShift);
+        // Move up to parent tile |effectiveShift| levels
         for (let level = 0; level < effectiveShift; level++) {
             currentKey = TileAddress.ToParentKey(currentKey);
             currentLod--;
         }
+        // Convert the final parent key back to ITileAddress
         return TileAddress.QuadKeyToTileXY(currentKey);
     }
     static ToBounds(a, metrics) {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds.FromPoints2(...points);
+        return _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds.FromPoints2(...points);
     }
     static IsEquals(a, b) {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
@@ -10028,7 +11236,7 @@ class TileAddress {
         return lod >= metrics.minLOD && lod <= metrics.maxLOD;
     }
     static ClampLod(levelOfDetail, metrics) {
-        return _math_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
+        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.Clamp(levelOfDetail, metrics.minLOD, metrics.maxLOD);
     }
     static ToParentKey(key) {
         return key && key.length > 1 ? key.substring(0, key.length - 1) : key;
@@ -10040,6 +11248,15 @@ class TileAddress {
     static ToNeighborsKey(key) {
         return TileAddress.ToNeighborsXY(TileAddress.QuadKeyToTileXY(key)).map((a) => (a ? TileAddress.TileXYToQuadKey(a.x, a.y, a.levelOfDetail) : null));
     }
+    /// <summary>
+    /// Returns the tile addresses of the neighbors of the specified tile.
+    // layout of the returned array is as follows:
+    /// 0, 1, 2
+    /// 3, 4, 5
+    /// 6, 7, 8
+    /// with 4 being the specified tile.
+    // you may use NeighborsAddress enum for the purpose of indexing the array.
+    /// </summary>
     static ToNeighborsXY(a) {
         const max = Math.pow(2, a.levelOfDetail);
         const n = [
@@ -10143,13 +11360,13 @@ class TileAddress {
 }
 //# sourceMappingURL=tiles.address.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/index.js":
+/***/ "../core/dist/tiles/codecs/index.js"
 /*!******************************************!*\
   !*** ../core/dist/tiles/codecs/index.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10186,13 +11403,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/tiles.codecs.canvas.js":
+/***/ "../core/dist/tiles/codecs/tiles.codecs.canvas.js"
 /*!********************************************************!*\
   !*** ../core/dist/tiles/codecs/tiles.codecs.canvas.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10226,13 +11443,13 @@ class CanvasTileCodec {
 }
 //# sourceMappingURL=tiles.codecs.canvas.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js":
+/***/ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js"
 /*!***********************************************************!*\
   !*** ../core/dist/tiles/codecs/tiles.codecs.cartesian.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10263,8 +11480,10 @@ class Cartesian4TileCodec {
             const stride = imgData.width * pixelSize;
             const values = this._buildArray(size);
             let i = 0;
+            // loop the rows
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
+                // then columns
                 for (let column = 0; column != imgData.width; column++) {
                     i = this.pixelDecoder.decode(pixels, offset + column * pixelSize, values, i);
                 }
@@ -10285,13 +11504,13 @@ class Cartesian4TileCodec {
 }
 //# sourceMappingURL=tiles.codecs.cartesian.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/tiles.codecs.filter.js":
+/***/ "../core/dist/tiles/codecs/tiles.codecs.filter.js"
 /*!********************************************************!*\
   !*** ../core/dist/tiles/codecs/tiles.codecs.filter.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10308,10 +11527,11 @@ class MedianFilter {
     apply(values, x, y, width, height) {
         const edge = Math.floor(this._windowSize / 2);
         const result = new Float32Array(values.length);
-        values.copyWithin(0, 0);
+        values.copyWithin(0, 0); // Copy original values to result to maintain untouched values
         for (let i = 0; i < height; i++) {
             for (let j = 0; j < width; j++) {
                 const window = [];
+                // Dynamically adjust window edges based on pixel position
                 for (let wi = Math.max(-edge, -i); wi <= Math.min(edge, height - 1 - i); wi++) {
                     for (let wj = Math.max(-edge, -j); wj <= Math.min(edge, width - 1 - j); wj++) {
                         const index = (i + wi) * width + (j + wj);
@@ -10322,6 +11542,7 @@ class MedianFilter {
                 const median = window[Math.floor(window.length / 2)];
                 const currentIndex = i * width + j;
                 const currentValue = values[currentIndex];
+                // Replace the current value only if it deviates from the median by more than the threshold
                 if (Math.abs(currentValue - median) > this._threshold) {
                     result[currentIndex] = median;
                 }
@@ -10336,13 +11557,13 @@ class MedianFilter {
 MedianFilter.Shared = new MedianFilter();
 //# sourceMappingURL=tiles.codecs.filter.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/tiles.codecs.image.js":
+/***/ "../core/dist/tiles/codecs/tiles.codecs.image.js"
 /*!*******************************************************!*\
   !*** ../core/dist/tiles/codecs/tiles.codecs.image.js ***!
   \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10366,12 +11587,15 @@ class ImageTileCodec {
                 try {
                     const img = new Image();
                     const blobURL = URL.createObjectURL(blob);
+                    // this frees up memory, which is usually handled automatically when you close the
+                    // page or navigate away from it
                     img.onload = function (ev) {
                         const e = ev.target;
                         if (e && e instanceof HTMLImageElement) {
                             URL.revokeObjectURL(e.src);
                             e.onload = null;
                         }
+                        // then call the resolve part of the promise.
                         resolve(img);
                     };
                     img.onerror = reject;
@@ -10450,12 +11674,13 @@ class RGBTileCodec {
             const pixels = imgData.data;
             const size = imgData.width * imgData.height;
             const n = pixels.length / size;
+            // canvas always returning RGBA data
             if (n == 4) {
                 const a = new Uint8ClampedArray(size * 3);
                 for (let i = 0, j = 0; i < pixels.length; i += 4, j += 3) {
-                    a[j] = pixels[i];
-                    a[j + 1] = pixels[i + 1];
-                    a[j + 2] = pixels[i + 2];
+                    a[j] = pixels[i]; // R
+                    a[j + 1] = pixels[i + 1]; // G
+                    a[j + 2] = pixels[i + 2]; // B
                 }
                 return a;
             }
@@ -10501,8 +11726,10 @@ class Float32TileCodec {
             const stride = imgData.width * pixelSize;
             const values = new Float32Array(size);
             let i = 0;
+            // loop the rows
             for (let row = 0; row != imgData.height; row++) {
                 const offset = stride * row;
+                // then columns
                 for (let column = 0; column != imgData.width; column++) {
                     i = this.pixelDecoder.decode(pixels, offset + column * pixelSize, values, i);
                 }
@@ -10517,13 +11744,13 @@ class Float32TileCodec {
 }
 //# sourceMappingURL=tiles.codecs.image.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js":
+/***/ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js"
 /*!************************************************************!*\
   !*** ../core/dist/tiles/codecs/tiles.codecs.interfaces.js ***!
   \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10534,13 +11761,13 @@ function isFilter(f) {
 }
 //# sourceMappingURL=tiles.codecs.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/codecs/tiles.codecs.js":
+/***/ "../core/dist/tiles/codecs/tiles.codecs.js"
 /*!*************************************************!*\
   !*** ../core/dist/tiles/codecs/tiles.codecs.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10592,13 +11819,13 @@ class XmlDocumentTileCodec {
 XmlDocumentTileCodec.Shared = new XmlDocumentTileCodec();
 //# sourceMappingURL=tiles.codecs.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/display/index.js":
+/***/ "../core/dist/tiles/display/index.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/display/index.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10608,21 +11835,21 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/display/tiles.display.js":
+/***/ "../core/dist/tiles/display/tiles.display.js"
 /*!***************************************************!*\
   !*** ../core/dist/tiles/display/tiles.display.js ***!
   \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Display: () => (/* binding */ Display)
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.size.js");
 
 
 class Display {
@@ -10633,7 +11860,8 @@ class Display {
         return this._propertyChangedObservable;
     }
     constructor(resolution) {
-        this._resolution = _geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.FromSize(resolution);
+        // make a copy
+        this._resolution = _geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(resolution);
     }
     get resolution() {
         return this._resolution;
@@ -10642,8 +11870,8 @@ class Display {
         if (this._resolution.width != width || this._resolution.height != height || this._resolution.depth != thickness) {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const old = this._resolution;
-                this._resolution = new _geometry__WEBPACK_IMPORTED_MODULE_1__.Size3(width, height, thickness ?? this._resolution.depth);
-                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, this._resolution, "resolution"));
+                this._resolution = new _geometry__WEBPACK_IMPORTED_MODULE_2__.Size3(width, height, thickness ?? this._resolution.depth);
+                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._resolution, "resolution"));
                 return;
             }
             this._resolution.width = width;
@@ -10659,13 +11887,13 @@ class Display {
 }
 //# sourceMappingURL=tiles.display.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/geography/index.js":
+/***/ "../core/dist/tiles/geography/index.js"
 /*!*********************************************!*\
   !*** ../core/dist/tiles/geography/index.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10679,13 +11907,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js":
+/***/ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js"
 /*!****************************************************************!*\
   !*** ../core/dist/tiles/geography/tiles.geography.EPSG3857.js ***!
   \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10773,27 +12001,27 @@ class EPSG3857 extends _tiles_metrics__WEBPACK_IMPORTED_MODULE_0__.AbstractTileM
 EPSG3857.Shared = new EPSG3857();
 //# sourceMappingURL=tiles.geography.EPSG3857.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/geography/tiles.geography.collection.js":
+/***/ "../core/dist/tiles/geography/tiles.geography.collection.js"
 /*!******************************************************************!*\
   !*** ../core/dist/tiles/geography/tiles.geography.collection.js ***!
   \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ShapeCollection: () => (/* binding */ ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* binding */ ShapeCollectionEventArgs)
 /* harmony export */ });
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/shapes/geography.shapes.interfaces.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.collection.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry_shapes_geometry_polygon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geometry/shapes/geometry.polygon */ "../core/dist/geometry/shapes/geometry.polygon.js");
-/* harmony import */ var _geometry_shapes_geometry_polyline__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../geometry/shapes/geometry.polyline */ "../core/dist/geometry/shapes/geometry.polyline.js");
-/* harmony import */ var _geometry_shapes_geometry_line__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../geometry/shapes/geometry.line */ "../core/dist/geometry/shapes/geometry.line.js");
-/* harmony import */ var _geometry_geometry_simplify__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.simplify */ "../core/dist/geometry/geometry.simplify.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _geometry_shapes_geometry_polygon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geometry/shapes/geometry.polygon */ "../core/dist/geometry/shapes/geometry.polygon.js");
+/* harmony import */ var _geometry_shapes_geometry_polyline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geometry/shapes/geometry.polyline */ "../core/dist/geometry/shapes/geometry.polyline.js");
+/* harmony import */ var _geometry_shapes_geometry_line__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../geometry/shapes/geometry.line */ "../core/dist/geometry/shapes/geometry.line.js");
+/* harmony import */ var _geometry_geometry_simplify__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../geometry/geometry.simplify */ "../core/dist/geometry/geometry.simplify.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
 
 
 
@@ -10807,24 +12035,31 @@ class ShapeCollectionEventArgs {
         this.IShapes = IShapes;
     }
 }
+/// <summary>
+/// A collection of shapes that can be added to a map. The collection is organized by level of detail.
+/// taking as input GeoShapes and transforming them into IShapes using the tile metrics. Note that the whole
+/// shape is transformed once and then simplified using a PolylineSimplifier.
+/// ShapeCollection will be used by VectorTileProvider to build VectorTileContent, windowing the shapes to the tiles and
+/// offseting the coordinates to the tile bounds.
+/// </summary>
 class ShapeCollection {
     constructor(metrics, simplifier) {
         this._metrics = metrics;
         this._shapes = new Array(metrics.maxLOD - metrics.minLOD + 1);
-        this._simplifier = simplifier ?? new _geometry_geometry_simplify__WEBPACK_IMPORTED_MODULE_0__.PolylineSimplifier(ShapeCollection.DefaultSimplifyTolerance, ShapeCollection.DefaultSimplifyHighQuality);
+        this._simplifier = simplifier ?? new _geometry_geometry_simplify__WEBPACK_IMPORTED_MODULE_6__.PolylineSimplifier(ShapeCollection.DefaultSimplifyTolerance, ShapeCollection.DefaultSimplifyHighQuality);
     }
     get metrics() {
         return this._metrics;
     }
     get addedObservable() {
         if (this._addedObservable === undefined) {
-            this._addedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._addedObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
         }
         return this._addedObservable;
     }
     get removedObservable() {
         if (this._removedObservable === undefined) {
-            this._removedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+            this._removedObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
         }
         return this._removedObservable;
     }
@@ -10852,13 +12087,13 @@ class ShapeCollection {
     }
     _buildShape(shape, lod, metrics) {
         switch (shape.type) {
-            case _geography__WEBPACK_IMPORTED_MODULE_3__.GeoShapeType.Polygon: {
+            case _geography__WEBPACK_IMPORTED_MODULE_0__.GeoShapeType.Polygon: {
                 return this._buildPolygon(shape, lod, metrics);
             }
-            case _geography__WEBPACK_IMPORTED_MODULE_3__.GeoShapeType.Line: {
+            case _geography__WEBPACK_IMPORTED_MODULE_0__.GeoShapeType.Line: {
                 return this._buildLine(shape, lod, metrics);
             }
-            case _geography__WEBPACK_IMPORTED_MODULE_3__.GeoShapeType.Polyline: {
+            case _geography__WEBPACK_IMPORTED_MODULE_0__.GeoShapeType.Polyline: {
                 return this._buildPolyline(shape, lod, metrics);
             }
             default: {
@@ -10868,22 +12103,23 @@ class ShapeCollection {
     }
     _buildPolygon(shape, lod, metrics) {
         const points = this._transform(shape.points, lod, metrics);
-        return _geometry_shapes_geometry_polygon__WEBPACK_IMPORTED_MODULE_4__.Polygon.FromPoints(points);
+        return _geometry_shapes_geometry_polygon__WEBPACK_IMPORTED_MODULE_3__.Polygon.FromPoints(points);
     }
     _buildLine(shape, lod, metrics) {
-        const a = _geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Zero();
-        const b = _geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Zero();
+        const a = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
+        const b = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
         metrics.getLatLonToPointXYToRef(shape.start.lat, shape.start.lon, lod, a);
         metrics.getLatLonToPointXYToRef(shape.end.lat, shape.end.lon, lod, b);
-        return this._filter(a, b) ? new _geometry_shapes_geometry_line__WEBPACK_IMPORTED_MODULE_6__.Line(a, b) : null;
+        return this._filter(a, b) ? new _geometry_shapes_geometry_line__WEBPACK_IMPORTED_MODULE_5__.Line(a, b) : null;
     }
     _buildPolyline(shape, lod, metrics) {
         const points = this._transform(shape.points, lod, metrics);
-        return this._filter(...points) ? _geometry_shapes_geometry_polyline__WEBPACK_IMPORTED_MODULE_7__.Polyline.FromPoints(points) : null;
+        return this._filter(...points) ? _geometry_shapes_geometry_polyline__WEBPACK_IMPORTED_MODULE_4__.Polyline.FromPoints(points) : null;
     }
+    // transform geo points to cartesian points using tile metrics (web mercator projection within Level Of Detail)
     _transform(geo, lod, metrics) {
         const result = geo.map((p) => {
-            const ref = _geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Zero();
+            const ref = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
             metrics.getLatLonToPointXYToRef(p.lat, p.lon, lod, ref);
             return ref;
         });
@@ -10892,12 +12128,13 @@ class ShapeCollection {
         }
         return result;
     }
+    // filter out points that are nearly ONE point
     _filter(...args) {
         if (args.length < 2)
             return true;
         const p1 = args[0];
         const p2 = args[1];
-        return _geometry__WEBPACK_IMPORTED_MODULE_5__.Cartesian3.Equals(p1, p2, ShapeCollection.Epsilon) == false;
+        return _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Equals(p1, p2, ShapeCollection.Epsilon) == false;
     }
 }
 ShapeCollection.DefaultSimplifyTolerance = 2;
@@ -10905,13 +12142,13 @@ ShapeCollection.DefaultSimplifyHighQuality = false;
 ShapeCollection.Epsilon = 1;
 //# sourceMappingURL=tiles.geography.collection.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/index.js":
+/***/ "../core/dist/tiles/index.js"
 /*!***********************************!*\
   !*** ../core/dist/tiles/index.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -10959,7 +12196,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
+/* harmony export */   Mars: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Mars),
+/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MarsUrlBuilder),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
+/* harmony export */   Mercury: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Mercury),
+/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MercuryUrlBuilder),
+/* harmony export */   Moon: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Moon),
+/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MoonUrlBuilder),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.NeighborsIndex),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
@@ -11030,13 +12273,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/index.js":
+/***/ "../core/dist/tiles/map/index.js"
 /*!***************************************!*\
   !*** ../core/dist/tiles/map/index.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11070,13 +12313,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/tiles.map.interfaces.js":
+/***/ "../core/dist/tiles/map/tiles.map.interfaces.js"
 /*!******************************************************!*\
   !*** ../core/dist/tiles/map/tiles.map.interfaces.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11115,26 +12358,26 @@ function IsPhysicalDisplay(b) {
 }
 //# sourceMappingURL=tiles.map.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/tiles.map.js":
+/***/ "../core/dist/tiles/map/tiles.map.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/map/tiles.map.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapBase: () => (/* binding */ TileMapBase)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
-/* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
-/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../collections/orderedCollection */ "../core/dist/collections/orderedCollection.js");
-/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.map.layerView */ "../core/dist/tiles/map/tiles.map.layerView.js");
-/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
-/* harmony import */ var _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navigation/tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navigation */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
+/* harmony import */ var _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../collections/orderedCollection */ "../core/dist/collections/orderedCollection.js");
+/* harmony import */ var _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.map.layerView */ "../core/dist/tiles/map/tiles.map.layerView.js");
+/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
+/* harmony import */ var _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../navigation/tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
 
 
 
@@ -11142,7 +12385,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_3__.ValidableBase {
+    /// <summary>
+    /// Create a new tile map.
+    /// <param name="name">The map name.</param>
+    /// <param name="display">The map display.</param>
+    /// <param name="pipeline">The underlying pipeline. May be a Pipeline object or a PipelineBuilder. If Ommitedn pipeline is created unsing _buildDefaultPipeline() function which may be ovverided.</param>
+    /// <param name="nav">The optional navigation api. May be a NavigationAPI object or a ITileMetrics object. In the second case, it will build a new TileNavigation(metrics).
+    //  </param>
+    /// </summary>
     constructor(display, nav, container) {
         super();
         this._display = null;
@@ -11152,8 +12403,8 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layerAddedObserver = this._layers.addedObservable.add(this._onLayerAdded.bind(this));
         this._layerRemovedObserver = this._layers.removedObservable.add(this._onLayerRemoved.bind(this));
         this.display = display ?? null;
-        this.navigationState = nav ?? this._buildNavigationState() ?? new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
-        this._view = this._buildView() ?? new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        this.navigationState = nav ?? this._buildNavigationState() ?? new _navigation__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState();
+        this._view = this._buildView() ?? new _tiles_map_view__WEBPACK_IMPORTED_MODULE_6__.TileView();
         this._layerViews = this._buildLayerViewContainer(this._layers) ?? this._buildLayerViewContainerInternal(this._layers);
         this._layerViewAddedObserver = this._layerViews.addedObservable.add(this._onLayerViewAdded.bind(this));
         this._layerViewRemovedObserver = this._layerViews.removedObservable.add(this._onLayerViewRemoved.bind(this));
@@ -11166,7 +12417,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         return this._propertyChangedObservable;
     }
     get display() {
@@ -11193,6 +12444,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         this._layerViewAddedObserver?.disconnect();
         this._layerViewRemovedObserver?.disconnect();
     }
+    // navigation proxy
     setViewMap(center, zoom, rotation) {
         this._api?.setViewMap(center, zoom, rotation);
         for (const v of this._layerViews) {
@@ -11277,6 +12529,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             }
         }
     }
+    // end navigation proxy
     _onNavigationValidationChanged(event, state) {
         if (event && state.target === this._navigation) {
             this.invalidate();
@@ -11316,7 +12569,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             this.invalidate();
             this._onDisplayBinded(display);
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_4__.PropertyChangedEventArgs(this, old, this._display, TileMapBase.DISPLAY_PROPERTY_NAME), -1, this, this);
+                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._display, TileMapBase.DISPLAY_PROPERTY_NAME), -1, this, this);
             }
         }
     }
@@ -11334,7 +12587,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             }
             this._navigation = nav;
             if (this._navigation) {
-                this._api = new _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_5__.TileNavigationApi(this._navigation);
+                this._api = new _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_7__.TileNavigationApi(this._navigation);
                 this._navigationPropertyObserver = this._navigation.propertyChangedObservable?.add(this._onNavigationPropertyChanged.bind(this));
                 this._navigationValidableObserver = this._navigation.validationObservable?.add(this._onNavigationValidationChanged.bind(this));
                 this._updateLayerNavigations(this._layerViews);
@@ -11342,7 +12595,7 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
             this.invalidate();
             this._onNavigationBinded(nav);
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_4__.PropertyChangedEventArgs(this, old, this._navigation, TileMapBase.NAVIGATION_PROPERTY_NAME), -1, this, this);
+                this._propertyChangedObservable.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._navigation, TileMapBase.NAVIGATION_PROPERTY_NAME), -1, this, this);
             }
         }
     }
@@ -11356,56 +12609,63 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase 
         return this._buildLayerViewInternal(layer);
     }
     _onDisplayUnbinded(display) {
+        /* nothing to do here - overrided by subclasses */
     }
     _onDisplayBinded(display) {
+        /* nothing to do here - overrided by subclasses */
     }
     _onNavigationUnbinded(nav) {
+        /* nothing to do here - overrided by subclasses */
     }
     _onNavigationBinded(nav) {
+        /* nothing to do here - overrided by subclasses */
     }
     _onNavigationUpdated(nav) {
+        /* nothing to do here - overrided by subclasses */
     }
     _onDisplayResized(display) {
+        /* nothing to do here - overrided by subclasses */
     }
     _onDisplayTranslated(display) {
+        /* nothing to do here - overrided by subclasses */
     }
     _buildNavigationState() {
-        return new _navigation__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState();
+        return new _navigation__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState();
     }
     _buildView() {
-        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_2__.TileView();
+        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_6__.TileView();
     }
     _buildLayerContainerInternal() {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection();
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_4__.OrderedCollection();
     }
     _buildLayerViewContainerInternal(layers) {
-        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_6__.OrderedCollection(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
+        return new _collections_orderedCollection__WEBPACK_IMPORTED_MODULE_4__.OrderedCollection(...Array.from(this._layers).map((l) => this._buildLayerView(l) ?? this._buildLayerViewInternal(l)));
     }
     _buildLayerViewInternal(layer) {
-        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_7__.TileMapLayerView(layer, this._display, this._view);
+        return new _tiles_map_layerView__WEBPACK_IMPORTED_MODULE_5__.TileMapLayerView(layer, this._display, this._view);
     }
 }
 TileMapBase.DISPLAY_PROPERTY_NAME = "display";
 TileMapBase.NAVIGATION_PROPERTY_NAME = "nav";
 //# sourceMappingURL=tiles.map.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/tiles.map.layer.js":
+/***/ "../core/dist/tiles/map/tiles.map.layer.js"
 /*!*************************************************!*\
   !*** ../core/dist/tiles/map/tiles.map.layer.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapLayer: () => (/* binding */ TileMapLayer)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.map.interfaces */ "../core/dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils */ "../core/dist/utils/runtime.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.map.interfaces */ "../core/dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils */ "../core/dist/utils/runtime.js");
 /* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../providers */ "../core/dist/tiles/providers/tiles.provider.content.js");
 
 
@@ -11414,16 +12674,16 @@ __webpack_require__.r(__webpack_exports__);
 
 class TileMapLayer {
     constructor(name, provider, options, enabled) {
-        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(name !== undefined && name !== null && name !== "", "Invalid layer name.");
-        (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(provider !== undefined && name !== null, "Invalid provider or datasource");
+        (0,_utils__WEBPACK_IMPORTED_MODULE_4__.Assert)(name !== undefined && name !== null && name !== "", "Invalid layer name.");
+        (0,_utils__WEBPACK_IMPORTED_MODULE_4__.Assert)(provider !== undefined && name !== null, "Invalid provider or datasource");
         this._name = name;
-        this._provider = (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileDatasource)(provider) ? this._buildProvider(provider) : provider;
+        this._provider = (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsTileDatasource)(provider) ? this._buildProvider(provider) : provider;
         this._weight = options?.weight ?? -1;
         this._zoomOffset = options?.zoomOffset ?? 0;
         this._attribution = options?.attribution;
         this._draw = options?.drawFn;
         this._drawTarget = options?.drawTarget ?? this;
-        this._enabled = enabled ?? true;
+        this._enabled = enabled ?? true; // default is enabled
     }
     get metrics() {
         return this._provider.metrics;
@@ -11439,13 +12699,13 @@ class TileMapLayer {
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         }
         return this._propertyChangedObservable;
     }
     get weightChangedObservable() {
         if (!this._weightChangedObservable) {
-            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         }
         return this._weightChangedObservable;
     }
@@ -11460,7 +12720,7 @@ class TileMapLayer {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const oldValue = this._weight;
                 this._weight = zindex;
-                const args = new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, oldValue, this._weight, "weight");
+                const args = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, this._weight, "weight");
                 this._propertyChangedObservable.notifyObservers(args, -1, this, this);
                 return;
             }
@@ -11478,7 +12738,7 @@ class TileMapLayer {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const oldValue = this._zoomOffset;
                 this._zoomOffset = zoomOffset;
-                const args = new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, oldValue, this._zoomOffset, "zoomOffset");
+                const args = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, this._zoomOffset, "zoomOffset");
                 this._propertyChangedObservable.notifyObservers(args, -1, this, this);
                 return;
             }
@@ -11493,7 +12753,7 @@ class TileMapLayer {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const oldValue = this._attribution;
                 this._attribution = attribution;
-                const args = new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, oldValue, this._attribution, "attribution");
+                const args = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, this._attribution, "attribution");
                 this._propertyChangedObservable.notifyObservers(args, -1, this, this);
                 return;
             }
@@ -11508,7 +12768,7 @@ class TileMapLayer {
             if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
                 const oldValue = this._enabled;
                 this._enabled = enabled;
-                const args = new _events__WEBPACK_IMPORTED_MODULE_3__.PropertyChangedEventArgs(this, oldValue, this._enabled, "enabled");
+                const args = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldValue, this._enabled, "enabled");
                 this._propertyChangedObservable.notifyObservers(args, -1, this, this);
                 return;
             }
@@ -11517,7 +12777,7 @@ class TileMapLayer {
     }
     addTo(map) {
         if (map) {
-            if ((0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy)(map)) {
+            if ((0,_tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_3__.IsTileMapLayerContainerProxy)(map)) {
                 map = map.layers;
             }
             map?.add(this);
@@ -11531,25 +12791,25 @@ class TileMapLayer {
 }
 //# sourceMappingURL=tiles.map.layer.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/tiles.map.layerView.js":
+/***/ "../core/dist/tiles/map/tiles.map.layerView.js"
 /*!*****************************************************!*\
   !*** ../core/dist/tiles/map/tiles.map.layerView.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapLayerView: () => (/* binding */ TileMapLayerView)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
-/* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navigation */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../types */ "../core/dist/types.js");
+/* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navigation */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../navigation/tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
-/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../providers */ "../core/dist/tiles/providers/tiles.provider.js");
-/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
+/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../providers */ "../core/dist/tiles/providers/tiles.provider.js");
+/* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
 
 
 
@@ -11557,7 +12817,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvider {
+class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_5__.TileProvider {
     constructor(layer, display, source, selectionContext) {
         super(layer.provider);
         this._ownSource = false;
@@ -11573,7 +12833,7 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvi
         this._source = source ?? this._buildSource();
         this._source?.linkTo(this);
         if (!selectionContext) {
-            if ((0,_pipeline__WEBPACK_IMPORTED_MODULE_1__.hasTileSelectionContext)(this._source)) {
+            if ((0,_pipeline__WEBPACK_IMPORTED_MODULE_4__.hasTileSelectionContext)(this._source)) {
                 selectionContext = this._source;
             }
         }
@@ -11584,7 +12844,7 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvi
     }
     get weightChangedObservable() {
         if (!this._weightChangedObservable) {
-            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_2__.Observable();
+            this._weightChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         }
         return this._weightChangedObservable;
     }
@@ -11641,7 +12901,7 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvi
         super.dispose();
         this._navigation?.dispose();
         this._source?.unlinkFrom(this);
-        if (this._ownSource && (0,_types__WEBPACK_IMPORTED_MODULE_4__.IsDisposable)(this._source)) {
+        if (this._ownSource && (0,_types__WEBPACK_IMPORTED_MODULE_1__.IsDisposable)(this._source)) {
             this._source?.dispose();
         }
         this._layerObserver?.disconnect();
@@ -11650,12 +12910,14 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvi
     }
     _buildSource() {
         this._ownSource = true;
-        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_5__.TileView();
+        return new _tiles_map_view__WEBPACK_IMPORTED_MODULE_6__.TileView();
     }
     _buildNavigation() {
-        return new _navigation__WEBPACK_IMPORTED_MODULE_6__.TileNavigationState(undefined, undefined, undefined, this.metrics);
+        return new _navigation__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState(undefined, undefined, undefined, this.metrics);
     }
     _onLayerPropertyChanged(eventData, eventState) {
+        // we survey the weight property of the layer to update the current view and messaging the map container that it need
+        // to sort the layers again.
         switch (eventData.propertyName) {
             case "weight": {
                 if (this._weightChangedObservable && this._weightChangedObservable.hasObservers()) {
@@ -11684,13 +12946,13 @@ class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_0__.TileProvi
 }
 //# sourceMappingURL=tiles.map.layerView.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/tiles.map.view.base.js":
+/***/ "../core/dist/tiles/map/tiles.map.view.base.js"
 /*!*****************************************************!*\
   !*** ../core/dist/tiles/map/tiles.map.view.base.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11725,26 +12987,26 @@ class TileViewBase extends _pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTE
 }
 //# sourceMappingURL=tiles.map.view.base.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/tiles.map.view.js":
+/***/ "../core/dist/tiles/map/tiles.map.view.js"
 /*!************************************************!*\
   !*** ../core/dist/tiles/map/tiles.map.view.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileView: () => (/* binding */ TileView)
 /* harmony export */ });
-/* harmony import */ var _address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../address */ "../core/dist/tiles/address/tiles.address.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
-/* harmony import */ var _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.map.view.base */ "../core/dist/tiles/map/tiles.map.view.base.js");
+/* harmony import */ var _address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.map.view.base */ "../core/dist/tiles/map/tiles.map.view.base.js");
 
 
 
-class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileViewBase {
+class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_3__.TileViewBase {
     constructor(offset = 0) {
         super();
         this._offset = 0;
@@ -11757,19 +13019,22 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         if (state && display) {
             const offset = this._offset + (options?.zoomOffset ?? 0);
             const target = state.lod + offset;
-            const lod = _address__WEBPACK_IMPORTED_MODULE_1__.TileAddress.ClampLod(target, metrics);
+            const lod = _address__WEBPACK_IMPORTED_MODULE_0__.TileAddress.ClampLod(target, metrics);
+            // TODO : we might adapt the scale depending the diff between lod and state.lod
             if (target != lod) {
                 return;
             }
             let scale = state.scale;
-            const nwTileXY = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
-            const seTileXY = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
+            const nwTileXY = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+            const seTileXY = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
             const pixelCenterXY = metrics.getLatLonToPointXY(state.center.lat, state.center.lon, lod);
             const r = offset == 0 ? 1.0 : offset > 0 ? Math.pow(2, offset) : 1.0 / Math.pow(2, -offset);
             let w = (display?.resolution.width ?? 0) * r;
             let h = (display?.resolution.height ?? 0) * r;
             let rect = this._getRectangle(pixelCenterXY, w, h, scale, state.azimuth);
+            // if azimuth is set, then we need to keep reference of the original rectangle to optimize the tile selection.
             let testRect = state.azimuth?.value ? this._getRectangle(pixelCenterXY, w, h, scale) : null;
+            // compute the bounds of tile xy
             metrics.getPointXYToTileXYToRef(rect.xmin, rect.ymin, nwTileXY);
             metrics.getPointXYToTileXYToRef(rect.xmax, rect.ymax, seTileXY);
             const maxIndex = metrics.mapSize(lod) / metrics.tileSize - 1;
@@ -11779,9 +13044,11 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
             const y1 = Math.min(maxIndex, seTileXY.y);
             const remains = new Array();
             const added = new Array();
-            const tmp = new _address__WEBPACK_IMPORTED_MODULE_1__.TileAddress(0, 0, lod);
+            const tmp = new _address__WEBPACK_IMPORTED_MODULE_0__.TileAddress(0, 0, lod);
             for (tmp.y = y0; tmp.y <= y1; tmp.y++) {
                 for (tmp.x = x0; tmp.x <= x1; tmp.x++) {
+                    // if the azimuth is set, we test each address against the test rectangle, if it does not intersect, we skip the address.
+                    // this save a huge amount of data to be processed.
                     if (testRect) {
                         const tileRect = this._getTileRectangle(tmp, metrics, pixelCenterXY, state.azimuth);
                         if (testRect.intersects(tileRect) == false) {
@@ -11817,12 +13084,13 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         }
     }
     _getRectangle(center, w, h, scale, azimuth) {
-        w = (w / scale) * 1.5;
+        w = (w / scale) * 1.5; // add border for caching
         h = (h / scale) * 1.5;
         const x0 = center.x - w / 2;
         const y0 = center.y - h / 2;
-        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds(x0, y0, w, h);
-        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
+        const bounds = new _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds(x0, y0, w, h);
+        // bounds.points is returning a new set of points, so we need to rotate them if azimuth is non zero.
+        return azimuth?.value ? _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...bounds.points())) : bounds;
     }
     _getTileRectangle(a, metrics, center, azimuth) {
         const points = [
@@ -11831,7 +13099,7 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
             metrics.getTileXYToPointXY(a.x + 1, a.y + 1),
             metrics.getTileXYToPointXY(a.x, a.y + 1),
         ];
-        return _geometry__WEBPACK_IMPORTED_MODULE_3__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...points));
+        return _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds.FromPoints2(...this._rotatePointsArround(center, azimuth, ...points));
     }
     *_rotatePointsArround(center, azimuth, ...points) {
         for (const p of points) {
@@ -11839,7 +13107,7 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
         }
     }
     _rotatePointArround(x, y, center, azimuth, target) {
-        const r = target || _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
+        const r = target || _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
         const translatedX = x - center.x;
         const translatedY = y - center.y;
         const cos = azimuth?.cos ?? 1;
@@ -11851,13 +13119,13 @@ class TileView extends _tiles_map_view_base__WEBPACK_IMPORTED_MODULE_0__.TileVie
 }
 //# sourceMappingURL=tiles.map.view.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/typed/index.js":
+/***/ "../core/dist/tiles/map/typed/index.js"
 /*!*********************************************!*\
   !*** ../core/dist/tiles/map/typed/index.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11873,13 +13141,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/typed/tiles.map.layer.float32.js":
+/***/ "../core/dist/tiles/map/typed/tiles.map.layer.float32.js"
 /*!***************************************************************!*\
   !*** ../core/dist/tiles/map/typed/tiles.map.layer.float32.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11894,13 +13162,13 @@ class Float32Layer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.TileMap
 }
 //# sourceMappingURL=tiles.map.layer.float32.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/typed/tiles.map.layer.image.js":
+/***/ "../core/dist/tiles/map/typed/tiles.map.layer.image.js"
 /*!*************************************************************!*\
   !*** ../core/dist/tiles/map/typed/tiles.map.layer.image.js ***!
   \*************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11919,30 +13187,30 @@ class ImageLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.TileMapLa
 }
 //# sourceMappingURL=tiles.map.layer.image.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/map/typed/tiles.map.layer.vector.js":
+/***/ "../core/dist/tiles/map/typed/tiles.map.layer.vector.js"
 /*!**************************************************************!*\
   !*** ../core/dist/tiles/map/typed/tiles.map.layer.vector.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileMapVectorLayer: () => (/* binding */ TileMapVectorLayer)
 /* harmony export */ });
-/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../vector */ "../core/dist/tiles/vector/tiles.vector.renderer.js");
-/* harmony import */ var _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.map.layer */ "../core/dist/tiles/map/tiles.map.layer.js");
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../vector */ "../core/dist/tiles/vector/tiles.vector.renderer.js");
+/* harmony import */ var _tiles_map_layer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.map.layer */ "../core/dist/tiles/map/tiles.map.layer.js");
 
 
-class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.TileMapLayer {
+class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_1__.TileMapLayer {
     constructor(name, source, options, enabled = true) {
         super(name, source, options, enabled);
-        if (options.style instanceof _vector__WEBPACK_IMPORTED_MODULE_1__.TileVectorRenderer) {
+        if (options.style instanceof _vector__WEBPACK_IMPORTED_MODULE_0__.TileVectorRenderer) {
             this._renderer = options.style;
         }
         else {
-            this._renderer = new _vector__WEBPACK_IMPORTED_MODULE_1__.TileVectorRenderer(options.style);
+            this._renderer = new _vector__WEBPACK_IMPORTED_MODULE_0__.TileVectorRenderer(options.style);
         }
         this._draw = this._draw ?? this._renderTile.bind(this);
     }
@@ -11958,13 +13226,13 @@ class TileMapVectorLayer extends _tiles_map_layer__WEBPACK_IMPORTED_MODULE_0__.T
 }
 //# sourceMappingURL=tiles.map.layer.vector.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/navigation/index.js":
+/***/ "../core/dist/tiles/navigation/index.js"
 /*!**********************************************!*\
   !*** ../core/dist/tiles/navigation/index.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -11986,23 +13254,23 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/navigation/tiles.navigation.api.js":
+/***/ "../core/dist/tiles/navigation/tiles.navigation.api.js"
 /*!*************************************************************!*\
   !*** ../core/dist/tiles/navigation/tiles.navigation.api.js ***!
   \*************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileNavigationApi: () => (/* binding */ TileNavigationApi)
 /* harmony export */ });
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.interfaces.js");
 /* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
 /* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.bearing.js");
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.interfaces.js");
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
 
 
 
@@ -12010,7 +13278,7 @@ class TileNavigationApi {
     constructor(navigation, metrics) {
         this._cartesianCache = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian2.Zero();
         this._navigation = navigation;
-        this._metrics = metrics ?? _geography__WEBPACK_IMPORTED_MODULE_1__.EPSG3857.Shared;
+        this._metrics = metrics ?? _geography__WEBPACK_IMPORTED_MODULE_4__.EPSG3857.Shared;
     }
     get navigationState() {
         return this._navigation;
@@ -12091,7 +13359,7 @@ class TileNavigationApi {
                 dlat = lat.length > 0 ? lat[0] : 0;
                 dlon = lat.length > 1 ? lat[1] : 0;
             }
-            else if ((0,_geography__WEBPACK_IMPORTED_MODULE_4__.IsLocation)(lat)) {
+            else if ((0,_geography__WEBPACK_IMPORTED_MODULE_1__.IsLocation)(lat)) {
                 dlat = lat.lat;
                 dlon = lat.lon;
             }
@@ -12124,13 +13392,13 @@ class TileNavigationApi {
 }
 //# sourceMappingURL=tiles.navigation.api.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/navigation/tiles.navigation.interfaces.js":
+/***/ "../core/dist/tiles/navigation/tiles.navigation.interfaces.js"
 /*!********************************************************************!*\
   !*** ../core/dist/tiles/navigation/tiles.navigation.interfaces.js ***!
   \********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12177,26 +13445,26 @@ function HasNavigationApi(obj) {
 }
 //# sourceMappingURL=tiles.navigation.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/navigation/tiles.navigation.state.js":
+/***/ "../core/dist/tiles/navigation/tiles.navigation.state.js"
 /*!***************************************************************!*\
   !*** ../core/dist/tiles/navigation/tiles.navigation.state.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileNavigationState: () => (/* binding */ TileNavigationState)
 /* harmony export */ });
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.interfaces.js");
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.bearing.js");
-/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.system */ "../core/dist/tiles/tiles.system.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.interfaces.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../geography */ "../core/dist/geography/geography.bearing.js");
+/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../tiles.system */ "../core/dist/tiles/tiles.system.js");
 /* harmony import */ var _tiles_navigation_state_sync__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./tiles.navigation.state.sync */ "../core/dist/tiles/navigation/tiles.navigation.state.sync.js");
 
 
@@ -12204,19 +13472,21 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_2__.ValidableBase {
     static GetLodScale(lod) {
-        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000;
+        let lodOffset = (lod * 1000 - Math.round(lod) * 1000) / 1000; // Trick to avoid floating point error.
+        // scale corresponding to the decimal part
         let scale = lodOffset < 0 ? 1 + lodOffset / 2 : 1 + lodOffset;
         return scale;
     }
     constructor(center, lod, azimuth, bounds) {
         super();
-        this._cartesianCache = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian2.Zero();
+        // internal
+        this._cartesianCache = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         this._lodf = lod ?? 0;
-        this._center = center ? ((0,_geography__WEBPACK_IMPORTED_MODULE_2__.IsLocation)(center) ? new _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2(center?.lat ?? 0, center?.lon ?? 0) : new _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2(center[0] ?? 0, center[1] ?? 0)) : _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero();
-        this._azimuth = new _geography__WEBPACK_IMPORTED_MODULE_4__.Bearing(azimuth ?? 0);
-        this._bounds = bounds ?? new _tiles_system__WEBPACK_IMPORTED_MODULE_5__.TileSystemBounds();
+        this._center = center ? ((0,_geography__WEBPACK_IMPORTED_MODULE_4__.IsLocation)(center) ? new _geography__WEBPACK_IMPORTED_MODULE_5__.Geo2(center?.lat ?? 0, center?.lon ?? 0) : new _geography__WEBPACK_IMPORTED_MODULE_5__.Geo2(center[0] ?? 0, center[1] ?? 0)) : _geography__WEBPACK_IMPORTED_MODULE_5__.Geo2.Zero();
+        this._azimuth = new _geography__WEBPACK_IMPORTED_MODULE_6__.Bearing(azimuth ?? 0);
+        this._bounds = bounds ?? new _tiles_system__WEBPACK_IMPORTED_MODULE_7__.TileSystemBounds();
         this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
         this._lod = Math.round(this._lodf);
         this._scale = TileNavigationState.GetLodScale(this._lodf);
@@ -12243,7 +13513,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
         return this._center;
     }
     set center(center) {
-        center = center ?? _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero();
+        center = center ?? _geography__WEBPACK_IMPORTED_MODULE_5__.Geo2.Zero();
         const lat = Math.min(Math.max(center.lat, this._bounds.minLatitude), this._bounds.maxLatitude);
         const lon = Math.min(Math.max(center.lon, this._bounds.minLongitude), this._bounds.maxLongitude);
         if (this._center.lat != lat || this._center.lon != lon) {
@@ -12251,7 +13521,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
                 const old = this._center.clone();
                 this._center.lat = lat;
                 this._center.lon = lon;
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._center.clone(), TileNavigationState.CENTER_PROPERTY_NAME);
+                const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._center.clone(), TileNavigationState.CENTER_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
                 this.invalidate();
                 return;
@@ -12275,7 +13545,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
                 const oldLod = this._lod;
                 this._lod = lod;
                 if (this._propertyChangedObservable && this._propertyChangedObservable.hasObservers()) {
-                    event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, oldLod, this._lod, TileNavigationState.LOD_PROPERTY_NAME);
+                    event = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, oldLod, this._lod, TileNavigationState.LOD_PROPERTY_NAME);
                 }
             }
             this._scale = TileNavigationState.GetLodScale(this._lodf);
@@ -12284,7 +13554,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
                 if (event) {
                     this._propertyChangedObservable.notifyObservers(event, -1, this, this);
                 }
-                event = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
+                event = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._lodf, TileNavigationState.ZOOM_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(event, -1, this, this);
             }
         }
@@ -12298,7 +13568,7 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
             this._azimuth = r;
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._azimuth, TileNavigationState.AZIMUTH_PROPERTY_NAME);
+                const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._azimuth, TileNavigationState.AZIMUTH_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
@@ -12314,19 +13584,22 @@ class TileNavigationState extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valida
             this._boundsObserver = this._bounds.propertyChangedObservable.add(this._boundsPropertyChanged.bind(this));
             this.invalidate();
             if (this._propertyChangedObservable?.hasObservers()) {
-                const e = new _events__WEBPACK_IMPORTED_MODULE_6__.PropertyChangedEventArgs(this, old, this._bounds, TileNavigationState.BOUNDS_PROPERTY_NAME);
+                const e = new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, this._bounds, TileNavigationState.BOUNDS_PROPERTY_NAME);
                 this._propertyChangedObservable.notifyObservers(e, -1, this, this);
             }
         }
     }
+    /// <summary>
+    /// An observable that notifies subscribers of changes to properties in the state.
+    /// </summary>
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable)
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
+            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
         return this._propertyChangedObservable;
     }
     copy(other) {
         this.center = other.center;
-        this.azimuth = new _geography__WEBPACK_IMPORTED_MODULE_4__.Bearing(other.azimuth.value);
+        this.azimuth = new _geography__WEBPACK_IMPORTED_MODULE_6__.Bearing(other.azimuth.value);
         this.zoom = other.zoom;
         return this;
     }
@@ -12354,18 +13627,19 @@ TileNavigationState.BOUNDS_PROPERTY_NAME = "bounds";
 TileNavigationState.CAMERA_PROPERTY_NAME = "camera";
 //# sourceMappingURL=tiles.navigation.state.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/navigation/tiles.navigation.state.sync.js":
+/***/ "../core/dist/tiles/navigation/tiles.navigation.state.sync.js"
 /*!********************************************************************!*\
   !*** ../core/dist/tiles/navigation/tiles.navigation.state.sync.js ***!
   \********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* binding */ TileNavigationStateSynchronizer)
 /* harmony export */ });
+/// Synchronizes the state of a target ITileNavigationState with a source ITileNavigationState.
 class TileNavigationStateSynchronizer {
     constructor(source, target, enabled = true) {
         this._source = source;
@@ -12403,13 +13677,13 @@ class TileNavigationStateSynchronizer {
 }
 //# sourceMappingURL=tiles.navigation.state.sync.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/pipeline/index.js":
+/***/ "../core/dist/tiles/pipeline/index.js"
 /*!********************************************!*\
   !*** ../core/dist/tiles/pipeline/index.js ***!
   \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12430,13 +13704,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js":
+/***/ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js"
 /*!****************************************************************!*\
   !*** ../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js ***!
   \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12461,18 +13735,24 @@ function isViewProxy(b) {
 }
 //# sourceMappingURL=tiles.pipeline.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/pipeline/tiles.pipeline.link.js":
+/***/ "../core/dist/tiles/pipeline/tiles.pipeline.link.js"
 /*!**********************************************************!*\
   !*** ../core/dist/tiles/pipeline/tiles.pipeline.link.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TilePipelineLink: () => (/* binding */ TilePipelineLink)
 /* harmony export */ });
+/// <summary>
+/// In order to keep the system modular and flexible, the Tile Pipeline is designed to be a chain of components, each with a specific role and responsibility.
+/// To avoid complexity using several different interfaces, the pipeline will leverage the Observable pattern only. The overhead of using the Observable pattern is not significant
+/// because of the low number of events that will be generated by the system.
+/// This class is encompass the pattern into a link object which is listenning from observable events from a source and forward them to a target.
+/// </summary>
 class TilePipelineLink {
     constructor(source, target, options) {
         this._source = source;
@@ -12533,13 +13813,13 @@ class TilePipelineLink {
 }
 //# sourceMappingURL=tiles.pipeline.link.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js":
+/***/ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js"
 /*!*****************************************************************!*\
   !*** ../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js ***!
   \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12551,9 +13831,11 @@ __webpack_require__.r(__webpack_exports__);
 
 class SourceBlock {
     constructor() {
+        // internal pipeline links
         this._links = [];
     }
     dispose() {
+        // dispose the links
         for (const l of this._links) {
             l.dispose();
         }
@@ -12575,6 +13857,7 @@ class SourceBlock {
         return this._updatedObservable;
     }
     linkTo(target, options) {
+        // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             const link = new _tiles_pipeline_link__WEBPACK_IMPORTED_MODULE_1__.TilePipelineLink(this, target, options);
             this._links.push(link);
@@ -12610,13 +13893,13 @@ class SourceBlock {
 }
 //# sourceMappingURL=tiles.pipeline.sourceblock.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js":
+/***/ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js"
 /*!******************************************************************!*\
   !*** ../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js ***!
   \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12640,13 +13923,13 @@ class TargetProxy {
 }
 //# sourceMappingURL=tiles.pipeline.target.proxy.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/providers/index.js":
+/***/ "../core/dist/tiles/providers/index.js"
 /*!*********************************************!*\
   !*** ../core/dist/tiles/providers/index.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12662,35 +13945,36 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/providers/tiles.provider.abstract.js":
+/***/ "../core/dist/tiles/providers/tiles.provider.abstract.js"
 /*!***************************************************************!*\
   !*** ../core/dist/tiles/providers/tiles.provider.abstract.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractTileProvider: () => (/* binding */ AbstractTileProvider)
 /* harmony export */ });
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../events/events.observable */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events/events.observable */ "../core/dist/events/events.observable.js");
 /* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.collection */ "../core/dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_builder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.builder */ "../core/dist/tiles/tiles.builder.js");
+/* harmony import */ var _tiles_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.builder */ "../core/dist/tiles/tiles.builder.js");
 /* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.link.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
 
 
 
 
 
 
-class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.ValidableBase {
+class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_5__.ValidableBase {
     constructor(factory, enabled = true) {
         super();
+        // internal pipeline links
         this._links = [];
-        if (factory && (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsTileConstructor)(factory)) {
+        if (factory && (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileConstructor)(factory)) {
             this._factory = this._buildFactory(factory) ?? this._buildFactoryInternal(factory);
         }
         else {
@@ -12707,7 +13991,7 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
         return this._activTiles?.boundingBox;
     }
     get enabledObservable() {
-        this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
+        this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
         return this._enabledObservable;
     }
     get enabled() {
@@ -12742,27 +14026,31 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
     hasTile(a) {
         return this._activTiles.has(a);
     }
+    /// begin ISourceBlock
     get updatedObservable() {
-        this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
+        this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
         return this._updateObservable;
     }
     get addedObservable() {
-        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
+        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
         return this._addedObservable;
     }
     get removedObservable() {
-        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.Observable();
+        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
         return this._removedObservable;
     }
     linkTo(target, options, ...args) {
+        // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
+            // avoid linking twice to the same target
             const link = new _pipeline__WEBPACK_IMPORTED_MODULE_4__.TilePipelineLink(this, target, options);
             this._links.push(link);
             this._onLinked(link);
         }
     }
     _onLinked(link) {
-        link.forwardAdded(Array.from(this._activTiles), new _events_events_observable__WEBPACK_IMPORTED_MODULE_3__.EventState(-1, false, this, this));
+        // we are forwarding the activ tile to the newly linked target.
+        link.forwardAdded(Array.from(this._activTiles), new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.EventState(-1, false, this, this));
     }
     unlinkFrom(target) {
         const i = this._links.findIndex((l) => l.target === target);
@@ -12775,6 +14063,8 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
         return undefined;
     }
     _onUnlinked(link) { }
+    /// end ISourceBlock
+    /// begin ITargetBlock
     added(eventData, eventState) {
         const tiles = this._onTileAddressesAdded(eventData, eventState);
         if (tiles.length) {
@@ -12806,7 +14096,9 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
         }
     }
     updated(eventData, eventState) {
+        // nothing to do here, updating address is not suppose to happen
     }
+    /// end ITargetBlock
     _onTileAddressesAdded(address, eventState) {
         const toActivate = address.length === 0 ? [...(this._activTiles ?? [])].map((t) => t.address) : address;
         const tiles = new Array();
@@ -12820,8 +14112,13 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
             try {
                 let tile = factory.build();
                 if (tile) {
+                    // fetch content, possibiliy generate alterative content
+                    // if underlying async operation are performed, then the callback will be messaged when the content
+                    // is available.
                     tile = this._fetchContent(tile, this._callback);
+                    // add to collection
                     this._activTiles?.add(tile);
+                    // push to result
                     tiles.push(tile);
                 }
             }
@@ -12874,19 +14171,19 @@ class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_0__.Valid
     }
     _onTileUpdated(tiles) { }
     _buildFactoryInternal(type) {
-        const b = new _tiles_builder__WEBPACK_IMPORTED_MODULE_5__.TileBuilder();
+        const b = new _tiles_builder__WEBPACK_IMPORTED_MODULE_3__.TileBuilder();
         return type ? b.withType(type) : b;
     }
 }
 //# sourceMappingURL=tiles.provider.abstract.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/providers/tiles.provider.content.js":
+/***/ "../core/dist/tiles/providers/tiles.provider.content.js"
 /*!**************************************************************!*\
   !*** ../core/dist/tiles/providers/tiles.provider.content.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12931,12 +14228,16 @@ class TileContentProvider {
     fetchContent(tile, callback) {
         const address = tile.address;
         const cacheKey = this._buildCacheKey(address.quadkey);
+        // first have a look in cache
         if (this._cache.contains(cacheKey)) {
             tile.content = this._cache.get(cacheKey);
             return tile;
         }
+        // then try to build a temporary content using alternative method
         let c = this._buildTemporaryContent(address);
+        // store the content, either null or not. This flag the address as beeing processed.
         this._cache.set(cacheKey, c);
+        // then try to get it from the datasource
         this._datasource.fetchAsync(address, tile).then((result) => {
             if (result.ok && address.quadkey) {
                 this._cache.set(this._buildCacheKey(address.quadkey), result.content);
@@ -12955,9 +14256,14 @@ class TileContentProvider {
         return tile;
     }
     _buildTemporaryContent(address) {
+        // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
+        // in oder to avoid empty tile to be displayed during pan and zoom operation.
         return null;
     }
     _buildAlternativContent(address) {
+        // TODO : implement a strategy to build an alternativ content
+        // this could be used when the datasource is not available or when the lookup operation has failed
+        // or when the content is unavailable on purpose such as a 404 error for sea based tile
         return null;
     }
     _buildPrefix() {
@@ -12973,13 +14279,13 @@ class TileContentProvider {
 }
 //# sourceMappingURL=tiles.provider.content.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/providers/tiles.provider.js":
+/***/ "../core/dist/tiles/providers/tiles.provider.js"
 /*!******************************************************!*\
   !*** ../core/dist/tiles/providers/tiles.provider.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12990,7 +14296,7 @@ __webpack_require__.r(__webpack_exports__);
 class TileProvider extends _tiles_provider_abstract__WEBPACK_IMPORTED_MODULE_0__.AbstractTileProvider {
     constructor(provider, factory, enabled = true) {
         super(factory, enabled);
-        this.factory.withMetrics(provider.metrics).withNamespace(provider.name);
+        this.factory.withMetrics(provider.metrics).withNamespace(provider.name); // ensure the factory has the right metrics and namespace to build bounds.
         this._contentProvider = provider;
     }
     _fetchContent(tile, callback) {
@@ -12999,13 +14305,13 @@ class TileProvider extends _tiles_provider_abstract__WEBPACK_IMPORTED_MODULE_0__
 }
 //# sourceMappingURL=tiles.provider.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.builder.js":
+/***/ "../core/dist/tiles/tiles.builder.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/tiles.builder.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -13055,23 +14361,23 @@ class TileBuilder {
 }
 //# sourceMappingURL=tiles.builder.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.client.js":
+/***/ "../core/dist/tiles/tiles.client.js"
 /*!******************************************!*\
   !*** ../core/dist/tiles/tiles.client.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileWebClient: () => (/* binding */ TileWebClient)
 /* harmony export */ });
-/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
-/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../io */ "../core/dist/io/webClient.js");
+/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../io */ "../core/dist/io/webClient.js");
 
 
-class TileWebClient extends _io__WEBPACK_IMPORTED_MODULE_0__.WebClient {
+class TileWebClient extends _io__WEBPACK_IMPORTED_MODULE_1__.WebClient {
     constructor(name, urlFactory, codec, metrics, options) {
         super(name, codec, urlFactory, options);
         this._metrics = metrics;
@@ -13088,30 +14394,31 @@ class TileWebClient extends _io__WEBPACK_IMPORTED_MODULE_0__.WebClient {
     }
     async fetchAsync(request, env, ...userArgs) {
         if (!request) {
-            throw new _io__WEBPACK_IMPORTED_MODULE_0__.FetchError(`invalid request parameter.`);
+            throw new _io__WEBPACK_IMPORTED_MODULE_1__.FetchError(`invalid request parameter.`);
         }
-        if (_address_tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress.IsValidAddress(request, this._metrics) === false) {
-            return _io__WEBPACK_IMPORTED_MODULE_0__.FetchResult.Null(request, userArgs);
+        if (_address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress.IsValidAddress(request, this._metrics) === false) {
+            // Do NOT fetch url if address is invalid - return null content
+            return _io__WEBPACK_IMPORTED_MODULE_1__.FetchResult.Null(request, userArgs);
         }
         return super.fetchAsync(request, env, ...userArgs);
     }
 }
 //# sourceMappingURL=tiles.client.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.collection.js":
+/***/ "../core/dist/tiles/tiles.collection.js"
 /*!**********************************************!*\
   !*** ../core/dist/tiles/tiles.collection.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileCollection: () => (/* binding */ TileCollection)
 /* harmony export */ });
-/* harmony import */ var _geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography/geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
-/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography/geography.interfaces */ "../core/dist/geography/geography.interfaces.js");
+/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var _geography_geography_envelope__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/geography.envelope */ "../core/dist/geography/geography.envelope.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
 
@@ -13188,7 +14495,7 @@ class TileCollection {
     }
     remove(address) {
         if (this.has(address)) {
-            const index = this._items.findIndex((t) => _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress.IsEquals(t.address, address));
+            const index = this._items.findIndex((t) => _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress.IsEquals(t.address, address));
             this._items.splice(index, 1);
             this._bounds = undefined;
             this._rect = undefined;
@@ -13212,8 +14519,10 @@ class TileCollection {
             return this[Symbol.iterator]();
         let pointer = 0;
         let items = this._items;
-        if ((0,_geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsEnvelope)(bounds)) {
+        if ((0,_geography_geography_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsEnvelope)(bounds)) {
+            // this is an envelope
             if (this.geoBounds?.intersects(bounds)) {
+                // with a valid intersection with the collection
                 return {
                     next() {
                         while (pointer < items.length) {
@@ -13238,7 +14547,9 @@ class TileCollection {
             }
         }
         else {
+            // this is a rectangle
             if (this.boundingBox?.intersects(bounds)) {
+                // with a valid intersection with the collection
                 return {
                     next() {
                         while (pointer < items.length) {
@@ -13262,6 +14573,8 @@ class TileCollection {
                 };
             }
         }
+        // reach this point means there is no intersection with the collection
+        // so we return an empty iterator
         return {
             next() {
                 return {
@@ -13313,13 +14626,13 @@ class TileCollection {
 }
 //# sourceMappingURL=tiles.collection.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.interfaces.js":
+/***/ "../core/dist/tiles/tiles.interfaces.js"
 /*!**********************************************!*\
   !*** ../core/dist/tiles/tiles.interfaces.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -13366,6 +14679,7 @@ function IsArrayOfTile(b) {
     }
     return false;
 }
+// Type guard function
 function IsTileConstructor(obj) {
     return typeof obj === "function" && !!obj.prototype && "value" in obj.prototype;
 }
@@ -13413,25 +14727,25 @@ function IsTileDatasource(b) {
 }
 //# sourceMappingURL=tiles.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.js":
+/***/ "../core/dist/tiles/tiles.js"
 /*!***********************************!*\
   !*** ../core/dist/tiles/tiles.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Tile: () => (/* binding */ Tile)
 /* harmony export */ });
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.envelope.js");
-/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.envelope.js");
+/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
 
 
 
-class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress {
+class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress {
     static BuildEnvelope(t, metrics) {
         if (metrics) {
             if (metrics.geoBoundsFactory) {
@@ -13443,7 +14757,7 @@ class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddre
             const a = t.address;
             const nw = metrics.getTileXYToLatLon(a.x, a.y, a.levelOfDetail);
             const se = metrics.getTileXYToLatLon(a.x + 1, a.y + 1, a.levelOfDetail);
-            return _geography__WEBPACK_IMPORTED_MODULE_1__.Envelope.FromPoints(nw, se);
+            return _geography__WEBPACK_IMPORTED_MODULE_0__.Envelope.FromPoints(nw, se);
         }
         return undefined;
     }
@@ -13499,29 +14813,29 @@ class Tile extends _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddre
 }
 //# sourceMappingURL=tiles.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.metrics.js":
+/***/ "../core/dist/tiles/tiles.metrics.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/tiles.metrics.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractTileMetrics: () => (/* binding */ AbstractTileMetrics)
 /* harmony export */ });
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.system */ "../core/dist/tiles/tiles.system.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.args.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.system */ "../core/dist/tiles/tiles.system.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.position.js");
 
 
 
 
 
-class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.TileSystemBounds {
+class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_1__.TileSystemBounds {
     constructor(options) {
         super(options);
         this._tileSize = AbstractTileMetrics.DefaultTileSize;
@@ -13531,7 +14845,7 @@ class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.Til
     }
     mapSize(levelOfDetail) {
         const result = this.tileSize * Math.pow(2, levelOfDetail);
-        return result >>> 0;
+        return result >>> 0; // Convert to unsigned 32-bit integer
     }
     get tileSize() {
         return this._tileSize;
@@ -13540,7 +14854,7 @@ class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.Til
         if (this._tileSize !== v) {
             const old = this._tileSize;
             this._tileSize = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "tileSize"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "tileSize"), -1, this, this);
         }
     }
     get cellSize() {
@@ -13550,7 +14864,7 @@ class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.Til
         if (this._cellSize !== v) {
             const old = this._cellSize;
             this._cellSize = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "cellSize"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "cellSize"), -1, this, this);
         }
     }
     get cellCoordinateReference() {
@@ -13560,7 +14874,7 @@ class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.Til
         if (this._cellCoordinateReference !== v) {
             const old = this._cellCoordinateReference;
             this._cellCoordinateReference = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "cellCoordinateReference"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "cellCoordinateReference"), -1, this, this);
         }
     }
     get overlap() {
@@ -13570,7 +14884,7 @@ class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.Til
         if (this._overlap !== v) {
             const old = this._overlap;
             this._overlap = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "overlap"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "overlap"), -1, this, this);
         }
     }
     mapScale(latitude, levelOfDetail, pixelPerUnit) {
@@ -13582,57 +14896,57 @@ class AbstractTileMetrics extends _tiles_system__WEBPACK_IMPORTED_MODULE_0__.Til
         return 1 / (d * pixelPerUnit);
     }
     getLatLonToTileXY(latitude, longitude, levelOfDetail) {
-        const c = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
+        const c = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         this.getLatLonToTileXYToRef(latitude, longitude, levelOfDetail, c);
         return c;
     }
     getTileXYToLatLon(x, y, levelOfDetail) {
-        const g = _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero();
+        const g = _geography__WEBPACK_IMPORTED_MODULE_4__.Geo2.Zero();
         this.getTileXYToLatLonToRef(x, y, levelOfDetail, g);
         return g;
     }
     getLatLonToPointXY(latitude, longitude, levelOfDetail) {
-        const c = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
+        const c = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         this.getLatLonToPointXYToRef(latitude, longitude, levelOfDetail, c);
         return c;
     }
     getPointXYToLatLon(x, y, levelOfDetail) {
-        const g = _geography__WEBPACK_IMPORTED_MODULE_3__.Geo2.Zero();
+        const g = _geography__WEBPACK_IMPORTED_MODULE_4__.Geo2.Zero();
         this.getPointXYToLatLonToRef(x, y, levelOfDetail, g);
         return g;
     }
     getTileXYToPointXY(x, y) {
-        const c = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
+        const c = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         this.getTileXYToPointXYToRef(x, y, c);
         return c;
     }
     getPointXYToTileXY(x, y) {
-        const c = _geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian2.Zero();
+        const c = _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian2.Zero();
         this.getPointXYToTileXYToRef(x, y, c);
         return c;
     }
 }
 AbstractTileMetrics.DefaultTileSize = 256;
 AbstractTileMetrics.DefaultCellSize = 1;
-AbstractTileMetrics.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_4__.CellCoordinateReference.CENTER;
+AbstractTileMetrics.DefaultCoordinateReference = _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.CellCoordinateReference.CENTER;
 AbstractTileMetrics.DefaultOverlap = 0;
 //# sourceMappingURL=tiles.metrics.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.system.js":
+/***/ "../core/dist/tiles/tiles.system.js"
 /*!******************************************!*\
   !*** ../core/dist/tiles/tiles.system.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileSystemBounds: () => (/* binding */ TileSystemBounds)
 /* harmony export */ });
-/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.projections.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.args.js");
+/* harmony import */ var _geography__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geography */ "../core/dist/geography/geography.projections.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.args.js");
 
 
 class TileSystemBounds {
@@ -13669,7 +14983,7 @@ class TileSystemBounds {
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
+            this._propertyChangedObservable = new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
         }
         return this._propertyChangedObservable;
     }
@@ -13713,7 +15027,7 @@ class TileSystemBounds {
         if (this._minLOD !== v) {
             const old = this._minLOD;
             this._minLOD = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "minLOD"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "minLOD"), -1, this, this);
         }
     }
     get maxLOD() {
@@ -13723,7 +15037,7 @@ class TileSystemBounds {
         if (this._maxLOD !== v) {
             const old = this._maxLOD;
             this._maxLOD = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "maxLOD"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "maxLOD"), -1, this, this);
         }
     }
     get minLatitude() {
@@ -13733,7 +15047,7 @@ class TileSystemBounds {
         if (this._minLatitude !== v) {
             const old = this._minLatitude;
             this._minLatitude = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "minLatitude"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "minLatitude"), -1, this, this);
         }
     }
     get maxLatitude() {
@@ -13743,7 +15057,7 @@ class TileSystemBounds {
         if (this._maxLatitude !== v) {
             const old = this._maxLatitude;
             this._maxLatitude = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "maxLatitude"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "maxLatitude"), -1, this, this);
         }
     }
     get minLongitude() {
@@ -13753,7 +15067,7 @@ class TileSystemBounds {
         if (this._minLongitude !== v) {
             const old = this._minLongitude;
             this._minLongitude = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "minLongitude"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "minLongitude"), -1, this, this);
         }
     }
     get maxLongitude() {
@@ -13763,27 +15077,27 @@ class TileSystemBounds {
         if (this._maxLongitude !== v) {
             const old = this._maxLongitude;
             this._maxLongitude = v;
-            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_1__.PropertyChangedEventArgs(this, old, v, "maxLongitude"), -1, this, this);
+            this._propertyChangedObservable?.notifyObservers(new _events__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs(this, old, v, "maxLongitude"), -1, this, this);
         }
     }
 }
 TileSystemBounds.DefaultLOD = 0;
 TileSystemBounds.DefaultMinLOD = 0;
 TileSystemBounds.DefaultMaxLOD = 23;
-TileSystemBounds.DefaultMinLatitude = _geography__WEBPACK_IMPORTED_MODULE_2__.Projections.WebMercatorMinLatitude;
-TileSystemBounds.DefaultMaxLatitude = _geography__WEBPACK_IMPORTED_MODULE_2__.Projections.WebMercatorMaxLatitude;
+TileSystemBounds.DefaultMinLatitude = _geography__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMinLatitude;
+TileSystemBounds.DefaultMaxLatitude = _geography__WEBPACK_IMPORTED_MODULE_0__.Projections.WebMercatorMaxLatitude;
 TileSystemBounds.DefaultMinLongitude = -180;
 TileSystemBounds.DefaultMaxLongitude = 180;
 TileSystemBounds.Shared = new TileSystemBounds();
 //# sourceMappingURL=tiles.system.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/tiles.url.web.js":
+/***/ "../core/dist/tiles/tiles.url.web.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/tiles.url.web.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -13815,6 +15129,13 @@ class WebTileUrlBuilder {
         this._extension = v;
         return this;
     }
+    /**
+     * The subdomains can be used for tile servers to distribute the load among multiple servers.
+     * Typically, a DNS round-robin configuration is set up to resolve the domain name for the tile server
+     * to multiple IP addresses that correspond to different servers. When a client requests a tile,
+     * the DNS resolver returns one of the IP addresses in a round-robin fashion, so each server receives
+     * a roughly equal share of the load.
+     */
     withSubDomains(subdomains) {
         this._subdomains = subdomains;
         return this;
@@ -13844,13 +15165,13 @@ class WebTileUrlBuilder {
 }
 //# sourceMappingURL=tiles.url.web.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vector/index.js":
+/***/ "../core/dist/tiles/vector/index.js"
 /*!******************************************!*\
   !*** ../core/dist/tiles/vector/index.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -13863,13 +15184,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vector/tiles.vector.interfaces.js":
+/***/ "../core/dist/tiles/vector/tiles.vector.interfaces.js"
 /*!************************************************************!*\
   !*** ../core/dist/tiles/vector/tiles.vector.interfaces.js ***!
   \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -13884,21 +15205,21 @@ var VectorTileGeomType;
 })(VectorTileGeomType || (VectorTileGeomType = {}));
 //# sourceMappingURL=tiles.vector.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vector/tiles.vector.renderer.js":
+/***/ "../core/dist/tiles/vector/tiles.vector.renderer.js"
 /*!**********************************************************!*\
   !*** ../core/dist/tiles/vector/tiles.vector.renderer.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TileVectorRenderer: () => (/* binding */ TileVectorRenderer)
 /* harmony export */ });
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.simplify.js");
-/* harmony import */ var _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vector.interfaces */ "../core/dist/tiles/vector/tiles.vector.interfaces.js");
-/* harmony import */ var _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vector.style.interface */ "../core/dist/tiles/vector/tiles.vector.style.interface.js");
+/* harmony import */ var _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vector.interfaces */ "../core/dist/tiles/vector/tiles.vector.interfaces.js");
+/* harmony import */ var _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vector.style.interface */ "../core/dist/tiles/vector/tiles.vector.style.interface.js");
 
 
 
@@ -13915,14 +15236,17 @@ class TileVectorRenderer {
             style = style ?? this._style;
             if (style) {
                 if (style !== this._style) {
+                    // set the cache
                     this._style = style;
                     this._orderedStyleLayers = this._prepareOrderedLayers(style);
                 }
                 if (this._orderedStyleLayers) {
                     for (const key of this._orderedStyleLayers) {
+                        // retreive the corresponding layer
                         const styleLayer = style.layers[key];
                         const name = styleLayer.sourceLayer;
                         const layer = tile.layers[name];
+                        // draw the layer
                         if (layer && this._acceptLayer(name, layer, styleLayer)) {
                             this._drawLayer(ctx, name, layer, w, h, styleLayer);
                         }
@@ -13961,8 +15285,10 @@ class TileVectorRenderer {
         const scaley = h / extent;
         ctx.save();
         try {
+            // set the style
             switch (styleLayer.type) {
-                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.LayerStyleTypes.Fill: {
+                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_2__.LayerStyleTypes.Fill: {
+                    // set the root fill style properties
                     const paint = styleLayer.paint;
                     if (!paint) {
                         break;
@@ -13982,12 +15308,14 @@ class TileVectorRenderer {
                     const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
                     ctx.globalAlpha = opacity;
                     const translate = this._evaluate(paint.translate);
+                    // loop over features
                     for (let i = 0; i < layer.length; i++) {
                         const feature = layer.feature(i);
                         if (feature && this._acceptFeature(feature, styleLayer)) {
                             switch (feature.type) {
-                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.POLYGON: {
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.POLYGON: {
                                     const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
+                                    // fill polygon
                                     ctx.beginPath();
                                     this._drawPath(ctx, transformed[0]);
                                     if (transformed.length > 1) {
@@ -13996,6 +15324,7 @@ class TileVectorRenderer {
                                         }
                                     }
                                     ctx.fill();
+                                    // draw outline
                                     if (outlineColor) {
                                         ctx.stroke();
                                     }
@@ -14008,7 +15337,8 @@ class TileVectorRenderer {
                     }
                     break;
                 }
-                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.LayerStyleTypes.Line: {
+                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_2__.LayerStyleTypes.Line: {
+                    // set the root fill style properties
                     const paint = styleLayer.paint;
                     if (!paint) {
                         break;
@@ -14027,13 +15357,15 @@ class TileVectorRenderer {
                         ctx.setLineDash(dasharray);
                     }
                     const translate = this._evaluate(paint.translate);
+                    // loop over features
                     for (let i = 0; i < layer.length; i++) {
                         const feature = layer.feature(i);
                         if (feature && this._acceptFeature(feature, styleLayer)) {
                             switch (feature.type) {
-                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.POLYGON:
-                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.LINESTRING: {
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.POLYGON:
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.LINESTRING: {
                                     const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
+                                    // draw outline
                                     for (const line of transformed) {
                                         ctx.beginPath();
                                         this._drawPath(ctx, line);
@@ -14048,7 +15380,7 @@ class TileVectorRenderer {
                     }
                     break;
                 }
-                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.LayerStyleTypes.Circle: {
+                case _tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_2__.LayerStyleTypes.Circle: {
                     const paint = styleLayer.paint;
                     if (!paint) {
                         break;
@@ -14063,16 +15395,18 @@ class TileVectorRenderer {
                     }
                     const opacity = this._evaluate(paint.opacity) ?? TileVectorRenderer.DefaultOpacity;
                     ctx.globalAlpha = opacity;
+                    // set the outline style properties
                     if (outlineColor) {
                         ctx.strokeStyle = outlineColor;
                         ctx.lineWidth = TileVectorRenderer.DefaultLineWith;
                     }
                     const translate = this._evaluate(paint.translate);
+                    // loop over features
                     for (let i = 0; i < layer.length; i++) {
                         const feature = layer.feature(i);
                         if (feature && this._acceptFeature(feature, styleLayer)) {
                             switch (feature.type) {
-                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_2__.VectorTileGeomType.POINT: {
+                                case _tiles_vector_interfaces__WEBPACK_IMPORTED_MODULE_1__.VectorTileGeomType.POINT: {
                                     const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
                                     for (const point of transformed) {
                                         ctx.beginPath();
@@ -14102,7 +15436,8 @@ class TileVectorRenderer {
         }
     }
     _evaluate(p) {
-        if ((0,_tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_1__.IsExpressionSpecification)(p)) {
+        if ((0,_tiles_vector_style_interface__WEBPACK_IMPORTED_MODULE_2__.IsExpressionSpecification)(p)) {
+            // evaluate the expression
             return this._evaluateExpression(p);
         }
         return p;
@@ -14153,13 +15488,13 @@ TileVectorRenderer.DefaultLineWith = 1.0;
 TileVectorRenderer.DefaultColor = "white";
 //# sourceMappingURL=tiles.vector.renderer.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vector/tiles.vector.style.interface.js":
+/***/ "../core/dist/tiles/vector/tiles.vector.style.interface.js"
 /*!*****************************************************************!*\
   !*** ../core/dist/tiles/vector/tiles.vector.style.interface.js ***!
   \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14186,13 +15521,13 @@ function IsLineLayerStyle(value) {
 }
 //# sourceMappingURL=tiles.vector.style.interface.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vendors/index.js":
+/***/ "../core/dist/tiles/vendors/index.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/vendors/index.js ***!
   \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14202,21 +15537,33 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
-/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder)
+/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
+/* harmony export */   Mars: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_3__.Mars),
+/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_3__.MarsUrlBuilder),
+/* harmony export */   Mercury: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_4__.Mercury),
+/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_4__.MercuryUrlBuilder),
+/* harmony export */   Moon: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_2__.Moon),
+/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_2__.MoonUrlBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapzen */ "../core/dist/tiles/vendors/tiles.vendors.mapzen.js");
 /* harmony import */ var _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vendors.google */ "../core/dist/tiles/vendors/tiles.vendors.google.js");
+/* harmony import */ var _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vendors.moon */ "../core/dist/tiles/vendors/tiles.vendors.moon.js");
+/* harmony import */ var _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.vendors.mars */ "../core/dist/tiles/vendors/tiles.vendors.mars.js");
+/* harmony import */ var _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.vendors.mercury */ "../core/dist/tiles/vendors/tiles.vendors.mercury.js");
+
+
+
 
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vendors/tiles.vendors.google.js":
+/***/ "../core/dist/tiles/vendors/tiles.vendors.google.js"
 /*!**********************************************************!*\
   !*** ../core/dist/tiles/vendors/tiles.vendors.google.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14224,10 +15571,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GoogleMap2DLayerCode: () => (/* binding */ GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* binding */ GoogleMap2DUrlBuilder)
 /* harmony export */ });
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
 
 
 
@@ -14239,7 +15586,7 @@ var GoogleMap2DLayerCode;
     GoogleMap2DLayerCode["hybrid"] = "h";
     GoogleMap2DLayerCode["terrain"] = "p";
 })(GoogleMap2DLayerCode || (GoogleMap2DLayerCode = {}));
-class GoogleMap2DUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+class GoogleMap2DUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
     constructor(...types) {
         super();
         this.withSubDomains(["mt0", "mt1", "mt2", "mt3"])
@@ -14254,34 +15601,34 @@ GoogleMap2DUrlBuilder.Hybrid = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.sa
 GoogleMap2DUrlBuilder.Terrain = new GoogleMap2DUrlBuilder(GoogleMap2DLayerCode.terrain);
 class Google {
     static Client2d(urlBuilder, options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_2d`, urlBuilder, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Google.KEY}_2d`, urlBuilder, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Google.Metrics, options);
     }
     static StreetClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_street2d`, GoogleMap2DUrlBuilder.Street, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Google.KEY}_street2d`, GoogleMap2DUrlBuilder.Street, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Google.Metrics, options);
     }
     static SatelliteClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_sat2d`, GoogleMap2DUrlBuilder.Satellite, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Google.KEY}_sat2d`, GoogleMap2DUrlBuilder.Satellite, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Google.Metrics, options);
     }
     static HybridClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_hybrid2d`, GoogleMap2DUrlBuilder.Hybrid, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Google.KEY}_hybrid2d`, GoogleMap2DUrlBuilder.Hybrid, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Google.Metrics, options);
     }
     static TerrainClient2d(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_1__.TileWebClient(`${Google.KEY}_terrain2d`, GoogleMap2DUrlBuilder.Terrain, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Google.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Google.KEY}_terrain2d`, GoogleMap2DUrlBuilder.Terrain, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Google.Metrics, options);
     }
 }
 Google.KEY = "google";
 Google.MaxLevelOfDetail = 20;
-Google.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_3__.EPSG3857({ maxLOD: Google.MaxLevelOfDetail });
+Google.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Google.MaxLevelOfDetail });
 Google.Attribution = "Imagery © Google";
 //# sourceMappingURL=tiles.vendors.google.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tiles/vendors/tiles.vendors.mapzen.js":
+/***/ "../core/dist/tiles/vendors/tiles.vendors.mapzen.js"
 /*!**********************************************************!*\
   !*** ../core/dist/tiles/vendors/tiles.vendors.mapzen.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14290,14 +15637,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenNormalsDecoder: () => (/* binding */ MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* binding */ MapzenAltitudeDecoder)
 /* harmony export */ });
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
-/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../codecs/tiles.codecs.cartesian */ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js");
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
+/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../codecs/tiles.codecs.cartesian */ "../core/dist/tiles/codecs/tiles.codecs.cartesian.js");
 
 
 
@@ -14306,7 +15653,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class MapZenDemUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_0__.WebTileUrlBuilder {
+class MapZenDemUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_1__.WebTileUrlBuilder {
     constructor(format, extension = "png") {
         super();
         this.withHost("s3.amazonaws.com").withPath(`elevation-tiles-prod/${format}/{z}/{x}/{y}.{extension}`).withSecure(true).withExtension(extension);
@@ -14328,7 +15675,7 @@ class MapZenNormalsDecoder {
     decode(pixels, offset, target, targetOffset) {
         let v = target[targetOffset];
         if (!v) {
-            v = target[targetOffset] = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian4.Zero();
+            v = target[targetOffset] = _geometry__WEBPACK_IMPORTED_MODULE_6__.Cartesian4.Zero();
         }
         v.x = pixels[offset++];
         v.y = pixels[offset++];
@@ -14340,38 +15687,178 @@ class MapZenNormalsDecoder {
 MapZenNormalsDecoder.Shared = new MapZenNormalsDecoder();
 class MapZen {
     static ElevationsImagesClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${MapZen.KEY}_terrarium`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static ElevationsClient(options) {
-        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_4__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.Float32TileCodec(MapzenAltitudeDecoder.Shared, o), MapZen.Metrics, options);
+        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_5__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${MapZen.KEY}_terrarium_float`, MapZenDemUrlBuilder.Terrarium, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(MapzenAltitudeDecoder.Shared, o), MapZen.Metrics, options);
     }
     static NormalsImagesClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.ImageTileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), MapZen.Metrics, options);
     }
     static NormalsUint8ArrayClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_3__.RGBTileCodec(), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${MapZen.KEY}_normal`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.RGBTileCodec(), MapZen.Metrics, options);
     }
     static NormalsCartesian4Client(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_2__.TileWebClient(`${MapZen.KEY}_normal_Cartesian4`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_5__.Cartesian4TileCodec(MapZenNormalsDecoder.Shared), MapZen.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${MapZen.KEY}_normal_Cartesian4`, MapZenDemUrlBuilder.Normal, new _codecs_tiles_codecs_cartesian__WEBPACK_IMPORTED_MODULE_7__.Cartesian4TileCodec(MapZenNormalsDecoder.Shared), MapZen.Metrics, options);
     }
     static DemClient(optionsElevations, optionsNormals) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_6__.DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsUint8ArrayClient(optionsNormals));
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_4__.DemTileWebClient(`${MapZen.KEY}_dem`, MapZen.ElevationsClient(optionsElevations), MapZen.NormalsUint8ArrayClient(optionsNormals));
     }
 }
 MapZen.KEY = "mapzen";
+// in theory, mapzen is going to zoom 15, but we experiencing too many elevation error.
 MapZen.MaxLevelOfDetail = 15;
-MapZen.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_7__.EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
+MapZen.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_3__.EPSG3857({ maxLOD: MapZen.MaxLevelOfDetail });
 MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 //# sourceMappingURL=tiles.vendors.mapzen.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tree/index.js":
+/***/ "../core/dist/tiles/vendors/tiles.vendors.mars.js"
+/*!********************************************************!*\
+  !*** ../core/dist/tiles/vendors/tiles.vendors.mars.js ***!
+  \********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Mars: () => (/* binding */ Mars),
+/* harmony export */   MarsUrlBuilder: () => (/* binding */ MarsUrlBuilder)
+/* harmony export */ });
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+
+
+
+
+
+class MarsUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
+    constructor(host, path) {
+        super();
+        this.withSecure(true).withHost(host).withPath(path).withExtension("png");
+    }
+}
+MarsUrlBuilder.Basemap = new MarsUrlBuilder("cartocdn-gusc.global.ssl.fastly.net", "opmbuilder/api/v1/map/named/opm-mars-basemap-v0-2/all/{z}/{x}/{y}.{extension}");
+MarsUrlBuilder.MOLAColor = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.{extension}");
+MarsUrlBuilder.MOLAGray = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-gray/{z}/{x}/{y}.{extension}");
+MarsUrlBuilder.Surface = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/celestia_mars-shaded-16k_global/{z}/{x}/{y}.{extension}");
+class Mars {
+    static BasemapClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_basemap`, MarsUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+    }
+    static MOLAColorClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_mola_color`, MarsUrlBuilder.MOLAColor, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+    }
+    static MOLAGrayClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_mola_gray`, MarsUrlBuilder.MOLAGray, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+    }
+    static SurfaceClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_surface`, MarsUrlBuilder.Surface, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+    }
+}
+Mars.KEY = "mars";
+Mars.MaxLevelOfDetail = 7;
+Mars.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Mars.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_4__.SolarSystemBodies.Mars.ellipsoid);
+Mars.Attribution = "OpenPlanetary / USGS / NASA";
+//# sourceMappingURL=tiles.vendors.mars.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/vendors/tiles.vendors.mercury.js"
+/*!***********************************************************!*\
+  !*** ../core/dist/tiles/vendors/tiles.vendors.mercury.js ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Mercury: () => (/* binding */ Mercury),
+/* harmony export */   MercuryUrlBuilder: () => (/* binding */ MercuryUrlBuilder)
+/* harmony export */ });
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+
+
+
+
+
+class MercuryUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
+    constructor(host, path) {
+        super();
+        this.withSecure(true).withHost(host).withPath(path).withExtension("jpg");
+    }
+}
+MercuryUrlBuilder.Basemap = new MercuryUrlBuilder("trek.nasa.gov", "tiles/Mercury/EQ/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm/{z}/{y}/{x}.{extension}");
+class Mercury {
+    static BasemapClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mercury.KEY}_basemap`, MercuryUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mercury.Metrics, options);
+    }
+}
+Mercury.KEY = "mercury";
+Mercury.MaxLevelOfDetail = 7;
+Mercury.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Mercury.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_4__.SolarSystemBodies.Mercury.ellipsoid);
+Mercury.Attribution = "NASA / USGS / MESSENGER";
+//# sourceMappingURL=tiles.vendors.mercury.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/vendors/tiles.vendors.moon.js"
+/*!********************************************************!*\
+  !*** ../core/dist/tiles/vendors/tiles.vendors.moon.js ***!
+  \********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Moon: () => (/* binding */ Moon),
+/* harmony export */   MoonUrlBuilder: () => (/* binding */ MoonUrlBuilder)
+/* harmony export */ });
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+
+
+
+
+
+class MoonUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
+    constructor(host, path) {
+        super();
+        this.withSecure(true).withHost(host).withPath(path).withExtension("png");
+    }
+}
+MoonUrlBuilder.Basemap = new MoonUrlBuilder("cartocdn-gusc.global.ssl.fastly.net", "opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.{extension}");
+MoonUrlBuilder.HillshadeAlbedo = new MoonUrlBuilder("s3.amazonaws.com", "opmbuilder/301_moon/tiles/w/hillshaded-albedo/{z}/{x}/{y}.{extension}");
+class Moon {
+    static BasemapClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_basemap`, MoonUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Moon.Metrics, options);
+    }
+    static HillshadeClient(options) {
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_hillshade`, MoonUrlBuilder.HillshadeAlbedo, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Moon.Metrics, options);
+    }
+}
+Moon.KEY = "moon";
+Moon.MaxLevelOfDetail = 7;
+Moon.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Moon.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_4__.SolarSystemBodies.Moon.ellipsoid);
+Moon.Attribution = "OpenPlanetary / USGS / NASA";
+//# sourceMappingURL=tiles.vendors.moon.js.map
+
+/***/ },
+
+/***/ "../core/dist/tree/index.js"
 /*!**********************************!*\
   !*** ../core/dist/tree/index.js ***!
   \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14393,13 +15880,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tree/tree.spatial.interfaces.js":
+/***/ "../core/dist/tree/tree.spatial.interfaces.js"
 /*!****************************************************!*\
   !*** ../core/dist/tree/tree.spatial.interfaces.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14409,34 +15896,35 @@ __webpack_require__.r(__webpack_exports__);
 function IsKDTreeSplitter(splitter) {
     return splitter.splitAxisSelector !== undefined;
 }
+// Round-robin for ND
 function RoundRobin(depth, dimension) {
     return depth % dimension;
 }
 //# sourceMappingURL=tree.spatial.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tree/tree.spatial.js":
+/***/ "../core/dist/tree/tree.spatial.js"
 /*!*****************************************!*\
   !*** ../core/dist/tree/tree.spatial.js ***!
   \*****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SpatialTree: () => (/* binding */ SpatialTree)
 /* harmony export */ });
-/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
-/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.splitters */ "../core/dist/tree/tree.spatial.splitters.js");
+/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
+/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.splitters */ "../core/dist/tree/tree.spatial.splitters.js");
 
 
 class SpatialTree {
-    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_0__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
+    constructor(maxDepth = SpatialTree.DefaultMaxDepth, maxItemPerNode = SpatialTree.DefaultMaxItemPerNode, subdivision = new _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_1__.QuadtreeSplitter(), lookupThreshold = SpatialTree.DefaultLookupThreshold) {
         this._splitter = subdivision;
         this._maxDepth = maxDepth;
         this._maxItemPerNode = maxItemPerNode;
         this._lookupThresold = lookupThreshold;
-        this._root = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode();
+        this._root = new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode();
         this._context = this._buildContext();
     }
     get root() {
@@ -14467,7 +15955,7 @@ class SpatialTree {
         this._root.lookupToRef(this._context, bounds, ref);
     }
     _buildNode(bounds, depth) {
-        return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__.SpatialTreeNode(bounds, depth);
+        return new _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode(bounds, depth);
     }
     _buildContext() {
         return { tree: this, lookupThreshold: this._lookupThresold };
@@ -14478,21 +15966,21 @@ SpatialTree.DefaultMaxItemPerNode = 32;
 SpatialTree.DefaultLookupThreshold = 512;
 //# sourceMappingURL=tree.spatial.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tree/tree.spatial.node.js":
+/***/ "../core/dist/tree/tree.spatial.node.js"
 /*!**********************************************!*\
   !*** ../core/dist/tree/tree.spatial.node.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SpatialTreeNode: () => (/* binding */ SpatialTreeNode)
 /* harmony export */ });
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.collection.js");
-/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.collection.js");
+/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
 
 
 class SpatialTreeNode {
@@ -14533,7 +16021,12 @@ class SpatialTreeNode {
             return;
         }
         if (this.items) {
-            const threshold = context.tree.lookupThreshold ?? _tree_spatial__WEBPACK_IMPORTED_MODULE_1__.SpatialTree.DefaultLookupThreshold;
+            // extract the data to ref
+            // the bounds may be inside the node, but the items may be located into a small portion of it
+            // so we may check for the items box.
+            // this is not optimal when there is a small number of items so we may find a threshold
+            // to do this check.
+            const threshold = context.tree.lookupThreshold ?? _tree_spatial__WEBPACK_IMPORTED_MODULE_2__.SpatialTree.DefaultLookupThreshold;
             if (this.items.length < threshold) {
                 const contentBounds = this.items.boundingBox;
                 if (lookupBox.intersects(contentBounds) == false) {
@@ -14566,6 +16059,7 @@ class SpatialTreeNode {
                 indicesToRemove.push(i);
             }
         }
+        // Bulk remove by filtering
         for (let i = indicesToRemove.length - 1; i >= 0; i--) {
             data.splice(indicesToRemove[i], 1);
         }
@@ -14581,6 +16075,7 @@ class SpatialTreeNode {
             return;
         }
         if (this.children?.length) {
+            // send the data to childrens
             for (const c of this.children) {
                 c.add(context, accepted);
                 if (accepted.length == 0) {
@@ -14589,11 +16084,15 @@ class SpatialTreeNode {
             }
             return;
         }
+        // we do not have children
+        // the first reason is we reach the bottom
         if (this.depth == context.tree.maxDepth) {
-            this.items = this.items ?? new _geometry__WEBPACK_IMPORTED_MODULE_2__.BoundedCollection();
+            // the only way is to fill the items
+            this.items = this.items ?? new _geometry__WEBPACK_IMPORTED_MODULE_1__.BoundedCollection();
             this.items.push(...accepted);
             return;
         }
+        // do we have enought place to store the data ??
         if (this.items && this.items.length + accepted.length > context.tree.maxItemPerNode) {
             this.subdivide(context.tree);
             accepted.push(...this.items.data);
@@ -14629,13 +16128,13 @@ class SpatialTreeNode {
 }
 //# sourceMappingURL=tree.spatial.node.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/tree/tree.spatial.splitters.js":
+/***/ "../core/dist/tree/tree.spatial.splitters.js"
 /*!***************************************************!*\
   !*** ../core/dist/tree/tree.spatial.splitters.js ***!
   \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14643,9 +16142,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   OctreeSplitter: () => (/* binding */ OctreeSplitter),
 /* harmony export */   QuadtreeSplitter: () => (/* binding */ QuadtreeSplitter)
 /* harmony export */ });
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "../core/dist/tree/tree.spatial.interfaces.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tree.spatial.interfaces */ "../core/dist/tree/tree.spatial.interfaces.js");
 
 
 class QuadtreeSplitter {
@@ -14657,10 +16156,10 @@ class QuadtreeSplitter {
             const midX = xmin + halfWidth;
             const midY = ymin + halfHeight;
             return [
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, midY, halfWidth, halfHeight, zmin, 0),
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, 0),
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, 0), // Top-left
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, 0), // Bottom-right
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, zmin, 0), // Top-right
             ];
         }
         return [];
@@ -14677,14 +16176,14 @@ class OctreeSplitter {
             const halfDepth = depth / 2;
             const midZ = zmin + halfDepth;
             return [
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth),
-                new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth),
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, zmin, halfDepth), // Bottom-left-front
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, zmin, halfDepth), // Top-left-front
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, zmin, halfDepth), // Bottom-right-front
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, zmin, halfDepth), // Top-right-front
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, halfWidth, halfHeight, midZ, halfDepth), // Bottom-left-back
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, midY, halfWidth, halfHeight, midZ, halfDepth), // Top-left-back
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, ymin, halfWidth, halfHeight, midZ, halfDepth), // Bottom-right-back
+                new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(midX, midY, halfWidth, halfHeight, midZ, halfDepth), // Top-right-back
             ];
         }
         return [];
@@ -14704,38 +16203,38 @@ class KdtreeSplitter {
             const midY = ymin + halfHeight;
             const halfDepth = depth / 2;
             const midZ = zmin + halfDepth;
-            const axe = this.splitAxisSelector ? this.splitAxisSelector(node.depth, this.dimension ?? 3) : (0,_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_1__.RoundRobin)(node.depth, this.dimension ?? 3);
+            const axe = this.splitAxisSelector ? this.splitAxisSelector(node.depth, this.dimension ?? 3) : (0,_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_2__.RoundRobin)(node.depth, this.dimension ?? 3);
             switch (axe) {
-                case 0:
-                    let center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
+                case 0: // X-axis
+                    let center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - xmin;
                         return [
-                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, size, height, zmin, depth),
-                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(splitPlane, ymin, size, height, zmin, depth),
+                            new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, size, height, zmin, depth), // Left
+                            new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(splitPlane, ymin, size, height, zmin, depth), // Right
                         ];
                     }
                     break;
-                case 1:
-                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
+                case 1: // Y-axis
+                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - ymin;
                         return [
-                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, width, size, zmin, depth),
-                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, splitPlane, width, size, zmin, depth),
+                            new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, width, size, zmin, depth), // bottom
+                            new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, splitPlane, width, size, zmin, depth), // top
                         ];
                     }
                     break;
-                case 2:
-                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
+                case 2: // Z-axis
+                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - zmin;
                         return [
-                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, width, height, zmin, size),
-                            new _geometry__WEBPACK_IMPORTED_MODULE_0__.Bounds(xmin, ymin, width, height, splitPlane, size),
+                            new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, width, height, zmin, size), // lower
+                            new _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds(xmin, ymin, width, height, splitPlane, size), // upper
                         ];
                     }
                     break;
@@ -14746,13 +16245,13 @@ class KdtreeSplitter {
 }
 //# sourceMappingURL=tree.spatial.splitters.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/types.js":
+/***/ "../core/dist/types.js"
 /*!*****************************!*\
   !*** ../core/dist/types.js ***!
   \*****************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14766,8 +16265,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 function isFloatArray(input) {
     if (Array.isArray(input)) {
+        // Check if the input is a number array
         return input.every((item) => typeof item === "number");
     }
+    // Check if the input is a Float32Array
     return input instanceof Float32Array;
 }
 function isArrayOfFloatArray(input) {
@@ -14797,13 +16298,13 @@ function HasToString(value) {
 }
 //# sourceMappingURL=types.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/utils/debugtouch.js":
+/***/ "../core/dist/utils/debugtouch.js"
 /*!****************************************!*\
   !*** ../core/dist/utils/debugtouch.js ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14942,13 +16443,13 @@ class DebugTouchConsole {
 }
 //# sourceMappingURL=debugtouch.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/utils/index.js":
+/***/ "../core/dist/utils/index.js"
 /*!***********************************!*\
   !*** ../core/dist/utils/index.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -14971,13 +16472,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/utils/objectpools.js":
+/***/ "../core/dist/utils/objectpools.js"
 /*!*****************************************!*\
   !*** ../core/dist/utils/objectpools.js ***!
   \*****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15014,13 +16515,13 @@ class ObjectPool {
 }
 //# sourceMappingURL=objectpools.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/utils/path.js":
+/***/ "../core/dist/utils/path.js"
 /*!**********************************!*\
   !*** ../core/dist/utils/path.js ***!
   \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15047,23 +16548,28 @@ class PathUtils {
     }
     static IsRelativeUrl(u) {
         try {
+            // If it can be parsed without a base, it's absolute
             new URL(u);
             return false;
         }
         catch {
+            // If parsing fails, it's relative
             return true;
         }
     }
     static GetBaseUrl(absoluteUrl) {
         const url = new URL(absoluteUrl);
+        // Remove the last segment (the file name)
         url.pathname = url.pathname.replace(/\/[^/]*$/, "/");
         return url.toString();
     }
+    // Utility: normalize/resolve a possibly relative URI against a base URL.
     static ResolveUri(baseUrl, uri) {
         try {
             return new URL(uri, baseUrl).toString();
         }
         catch {
+            // Fallback: naive join
             const sep = baseUrl.endsWith("/") ? "" : "/";
             return baseUrl + sep + uri;
         }
@@ -15071,13 +16577,13 @@ class PathUtils {
 }
 //# sourceMappingURL=path.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/utils/runtime.js":
+/***/ "../core/dist/utils/runtime.js"
 /*!*************************************!*\
   !*** ../core/dist/utils/runtime.js ***!
   \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15090,13 +16596,13 @@ function Assert(condition, message) {
 }
 //# sourceMappingURL=runtime.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/utils/text.js":
+/***/ "../core/dist/utils/text.js"
 /*!**********************************!*\
   !*** ../core/dist/utils/text.js ***!
   \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15114,13 +16620,13 @@ class TextUtils {
 TextUtils.DEFAULT_SEPARATOR = ".";
 //# sourceMappingURL=text.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "../core/dist/validable.js":
+/***/ "../core/dist/validable.js"
 /*!*********************************!*\
   !*** ../core/dist/validable.js ***!
   \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15177,28 +16683,34 @@ class ValidableBase {
         this._validationObservable?.clear();
     }
     _beforeInvalidate() {
+        /* nothing to do here, may be override by subclass */
     }
     _doInvalidate() {
+        /* nothing to do here, may be override by subclass */
     }
     _afterInvalidate() {
+        /* nothing to do here, may be override by subclass */
     }
     _beforeValidate() {
+        /* nothing to do here, may be override by subclass */
     }
     _doValidate() {
+        /* nothing to do here, may be override by subclass */
     }
     _afterValidate() {
+        /* nothing to do here, may be override by subclass */
     }
 }
 ValidableBase.VALID_PROPERTY_NAME = "valid";
 //# sourceMappingURL=validable.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/camera/camera.Geodetic.js":
+/***/ "./dist/camera/camera.Geodetic.js"
 /*!****************************************!*\
   !*** ./dist/camera/camera.Geodetic.js ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15211,9 +16723,9 @@ __webpack_require__.r(__webpack_exports__);
 
 class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera {
     constructor(name, scene, ellipsoid) {
-        const globeRadius = ellipsoid.semiMajorAxis;
-        const alpha = 0;
-        const beta = 0;
+        const globeRadius = ellipsoid.semiMajorAxis; // in meter
+        const alpha = 0; // heading (longitude)
+        const beta = 0; // pitch (latitude)
         const radius = globeRadius * 2.5;
         const target = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
         super(name, alpha, beta, radius, target, scene);
@@ -15231,13 +16743,13 @@ class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRot
 }
 //# sourceMappingURL=camera.Geodetic.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/camera/index.js":
+/***/ "./dist/camera/index.js"
 /*!******************************!*\
   !*** ./dist/camera/index.js ***!
   \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15247,13 +16759,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/dem/dem.interfaces.js":
+/***/ "./dist/dem/dem.interfaces.js"
 /*!************************************!*\
   !*** ./dist/dem/dem.interfaces.js ***!
   \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15272,13 +16784,13 @@ function IsElevationLayer(b) {
 }
 //# sourceMappingURL=dem.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/dem/dem.layer.js":
+/***/ "./dist/dem/dem.layer.js"
 /*!*******************************!*\
   !*** ./dist/dem/dem.layer.js ***!
   \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15317,13 +16829,13 @@ ElevationLayer.ExagerationPropertyName = "exageration";
 ElevationLayer.OffsetsPropertyName = "offsets";
 //# sourceMappingURL=dem.layer.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/dem/index.js":
+/***/ "./dist/dem/index.js"
 /*!***************************!*\
   !*** ./dist/dem/index.js ***!
   \***************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15337,13 +16849,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/display/display.holographic.bounds.js":
+/***/ "./dist/display/display.holographic.bounds.js"
 /*!****************************************************!*\
   !*** ./dist/display/display.holographic.bounds.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15403,13 +16915,13 @@ function HasHolographicBounds(obj) {
 }
 //# sourceMappingURL=display.holographic.bounds.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/display/display.holographic.js":
+/***/ "./dist/display/display.holographic.js"
 /*!*********************************************!*\
   !*** ./dist/display/display.holographic.js ***!
   \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15417,14 +16929,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./display.holographic.bounds */ "./dist/display/display.holographic.bounds.js");
-/* harmony import */ var _display_virtual__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./display.virtual */ "./dist/display/display.virtual.js");
+/* harmony import */ var _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./display.holographic.bounds */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _display_virtual__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./display.virtual */ "./dist/display/display.virtual.js");
 /* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
 
 
 
 
-class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
+class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplay {
     static BuildLateralClipPlanes(display) {
         const clipPlanes = new Array();
         const halfWidth = display.halfDimension.width;
@@ -15434,10 +16946,10 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
         const nEast = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(1, 0, 0);
         const nWest = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(-1, 0, 0);
         const position = display.node.position;
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.North, position.add(nNorth.scale(halfHeight)), nSouth));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.South, position.add(nSouth.scale(halfHeight)), nNorth));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.East, position.add(nEast.scale(halfWidth)), nWest));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.West, position.add(nWest.scale(halfWidth)), nEast));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.North, position.add(nNorth.scale(halfHeight)), nSouth));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.South, position.add(nSouth.scale(halfHeight)), nNorth));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.East, position.add(nEast.scale(halfWidth)), nWest));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.West, position.add(nWest.scale(halfWidth)), nEast));
         return clipPlanes;
     }
     static buildHorizontalClipPlanes(display) {
@@ -15446,8 +16958,8 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
         const nTop = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, 1);
         const nBottom = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 0, -1);
         const position = display.node.position;
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.Top, position.add(nTop.scale(halfThickness)), nBottom));
-        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.Bottom, position.add(nBottom.scale(halfThickness)), nTop));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.Top, position.add(nTop.scale(halfThickness)), nBottom));
+        clipPlanes.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(_display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipIndex.Bottom, position.add(nBottom.scale(halfThickness)), nTop));
         return clipPlanes;
     }
     constructor(name, dimension, resolution, scene) {
@@ -15478,23 +16990,23 @@ class HolographicDisplay extends _display_virtual__WEBPACK_IMPORTED_MODULE_1__.V
         for (const plane of this._clipPlanes) {
             const p = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformCoordinates(plane.point, transform);
             const n = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.TransformNormal(plane.normal, transform);
-            world.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.ClipPlaneDefinition(plane.index, p, n));
+            world.push(new _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition(plane.index, p, n));
         }
         return world;
     }
     get type() {
-        return _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_2__.HolographicBoundsType.BOX;
+        return _display_holographic_bounds__WEBPACK_IMPORTED_MODULE_1__.HolographicBoundsType.BOX;
     }
 }
 //# sourceMappingURL=display.holographic.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/display/display.inputs.scene.js":
+/***/ "./dist/display/display.inputs.scene.js"
 /*!**********************************************!*\
   !*** ./dist/display/display.inputs.scene.js ***!
   \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15505,8 +17017,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_map_inputs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/map/inputs */ "../core/dist/map/inputs/map.inputs.controller.drag.js");
-/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map/inputs/map.inputs.controller.touch */ "../core/dist/map/inputs/map.inputs.controller.touch.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map/inputs/map.inputs.controller.touch */ "../core/dist/map/inputs/map.inputs.controller.touch.js");
 
 
 
@@ -15522,7 +17034,7 @@ class TransformedPointerToDragController extends core_map_inputs__WEBPACK_IMPORT
         return e.displayY ?? e.clientY;
     }
 }
-class TransformedPointerToGestureController extends core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_2__.PointerToGestureController {
+class TransformedPointerToGestureController extends core_map_inputs_map_inputs_controller_touch__WEBPACK_IMPORTED_MODULE_3__.PointerToGestureController {
     constructor(source) {
         super(source);
     }
@@ -15557,67 +17069,67 @@ class VirtualDisplayInputsSource {
     }
     get onPointerOverObservable() {
         if (!this._onPointerOverObservable) {
-            this._onPointerOverObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerOverObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerOverObservable;
     }
     get onPointerEnterObservable() {
         if (!this._onPointerEnterObservable) {
-            this._onPointerEnterObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerEnterObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerEnterObservable;
     }
     get onPointerOutObservable() {
         if (!this._onPointerOutObservable) {
-            this._onPointerOutObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerOutObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerOutObservable;
     }
     get onPointerLeaveObservable() {
         if (!this._onPointerLeaveObservable) {
-            this._onPointerLeaveObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerLeaveObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerLeaveObservable;
     }
     get onPointerMoveObservable() {
         if (!this._onPointerMoveObservable) {
-            this._onPointerMoveObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerMoveObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerMoveObservable;
     }
     get onPointerDownObservable() {
         if (!this._onPointerDownObservable) {
-            this._onPointerDownObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerDownObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerDownObservable;
     }
     get onPointerUpObservable() {
         if (!this._onPointerUpObservable) {
-            this._onPointerUpObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerUpObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerUpObservable;
     }
     get onPointerCancelObservable() {
         if (!this._onPointerCancelObservable) {
-            this._onPointerCancelObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerCancelObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerCancelObservable;
     }
     get onPointerGotCaptureObservable() {
         if (!this._onPointerGotCaptureObservable) {
-            this._onPointerGotCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerGotCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerGotCaptureObservable;
     }
     get onPointerLostCaptureObservable() {
         if (!this._onPointerLostCaptureObservable) {
-            this._onPointerLostCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onPointerLostCaptureObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onPointerLostCaptureObservable;
     }
     get onWheelObservable() {
         if (!this._onWheelObservable) {
-            this._onWheelObservable = new core_events__WEBPACK_IMPORTED_MODULE_3__.Observable();
+            this._onWheelObservable = new core_events__WEBPACK_IMPORTED_MODULE_2__.Observable();
         }
         return this._onWheelObservable;
     }
@@ -15660,19 +17172,32 @@ class VirtualDisplayInputsSource {
     }
     _onPrePointer(pi) {
         if (!this._display.node) {
-            return;
+            return; // no display node, nothing to do
         }
         const scene = this._getScene();
         if (!scene) {
-            return;
+            return; // no scene, nothing to do
         }
+        // We only handle pointer events that are relevant to the display
+        // the reason is that i=on pre-event, the picking info is not yet available,
+        // and doing pick is expensive, so we want to avoid it unless necessary.
         if (pi.type === _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE) {
+            // pointer move events are the most frequent, so we want to avoid
+            // processing them if the pointer did not actually move. (yes, this can happen)
             if (this._lastX === pi.event.clientX && this._lastY === pi.event.clientY) {
-                return;
+                return; // no movement, skip
             }
             this._lastX = pi.event.clientX;
             this._lastY = pi.event.clientY;
         }
+        //if (!this._isPointerInsideMeshScreenBounds(pi.event.clientX, pi.event.clientY, this._display.node, scene)) {
+        // If the pointer is not inside the mesh screen bounds, we skip further processing
+        //return; TODO : There is a bug here using with the map display...
+        //}
+        // By default, Babylon.js types the event field in PointerInfo as IMouseEvent,
+        // a simplified abstraction that does not expose pointerType, even though
+        // under the hood, the actual value passed is a real PointerEvent in browsers
+        // that support pointer events.
         switch (pi.type) {
             case _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PointerEventTypes.POINTERMOVE: {
                 this._onPointerMove(pi, scene);
@@ -15715,7 +17240,7 @@ class VirtualDisplayInputsSource {
         var pick = this._getPickingInfos(scene);
         var meshUnderPointer = pick ? pick.pickedMesh : scene.meshUnderPointer;
         if (meshUnderPointer !== this._display.node) {
-            return;
+            return; // not on the display node
         }
         pointerInfo.skipOnPointerObservable = true;
         if (this._onPointerDownObservable && this._onPointerDownObservable.hasObservers()) {
@@ -15727,7 +17252,7 @@ class VirtualDisplayInputsSource {
         var pick = this._getPickingInfos(scene);
         var meshUnderPointer = pick ? pick.pickedMesh : scene.meshUnderPointer;
         if (meshUnderPointer !== this._display.node) {
-            return;
+            return; // not on the display node
         }
         pointerInfo.skipOnPointerObservable = true;
         if (this._onPointerUpObservable && this._onPointerUpObservable.hasObservers()) {
@@ -15740,7 +17265,9 @@ class VirtualDisplayInputsSource {
         var meshUnderPointer = pick ? pick.pickedMesh : scene.meshUnderPointer;
         if (this._meshUnderPointer !== meshUnderPointer) {
             if (this._meshUnderPointer) {
+                // pointer left the previous mesh
                 if (this._meshUnderPointer === this._display.node) {
+                    // was the display node
                     if (this._onPointerLeaveObservable && this._onPointerLeaveObservable.hasObservers()) {
                         const base = pointerInfo.event;
                         base.displayX = 0;
@@ -15751,7 +17278,9 @@ class VirtualDisplayInputsSource {
                 }
             }
             if (meshUnderPointer) {
+                // pointer entered a new mesh
                 if (meshUnderPointer === this._display.node) {
+                    // entered the display node
                     if (this._onPointerEnterObservable && this._onPointerEnterObservable.hasObservers()) {
                         const base = this._getBasePointer(pointerInfo, pick);
                         this._onPointerEnterObservable.notifyObservers(base, -1, this._display, this);
@@ -15763,7 +17292,7 @@ class VirtualDisplayInputsSource {
             return;
         }
         if (this._meshUnderPointer != this._display.node) {
-            return;
+            return; // not on the display node
         }
         if (this._onPointerMoveObservable && this._onPointerMoveObservable.hasObservers()) {
             const base = this._getBasePointer(pointerInfo, pick);
@@ -15795,13 +17324,13 @@ class VirtualDisplayInputsSource {
 }
 //# sourceMappingURL=display.inputs.scene.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/display/display.virtual.js":
+/***/ "./dist/display/display.virtual.js"
 /*!*****************************************!*\
   !*** ./dist/display/display.virtual.js ***!
   \*****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -15811,11 +17340,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core/Meshes */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var _display_inputs_scene__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./display.inputs.scene */ "./dist/display/display.inputs.scene.js");
-/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
-/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.units.js");
+/* harmony import */ var _display_inputs_scene__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./display.inputs.scene */ "./dist/display/display.inputs.scene.js");
+/* harmony import */ var core_events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.units.js");
 
 
 
@@ -15844,7 +17373,7 @@ var UVKind;
     UVKind[UVKind["DV"] = 5] = "DV";
 })(UVKind || (UVKind = {}));
 class VirtualDisplay {
-    constructor(name, dimension, resolution, scene, unit = core_math__WEBPACK_IMPORTED_MODULE_1__.Length.Units.meter) {
+    constructor(name, dimension, resolution, scene, unit = core_math__WEBPACK_IMPORTED_MODULE_5__.Length.Units.meter) {
         this._dimension = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(dimension);
         this._halfDimension = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3(this._dimension.width / 2, this._dimension.height / 2, this._dimension.depth / 2);
         this._resolution = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.FromSize(resolution);
@@ -15854,18 +17383,18 @@ class VirtualDisplay {
             this._node = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
             const data = this._buildVertexData(this._dimension);
             data.applyToMesh(this._node);
-            this._center = core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
+            this._center = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
         }
         else {
             this._node = scene;
             const vertices = scene.getVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind);
-            this._center = vertices ? core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Centroid(vertices) : core_geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
+            this._center = vertices ? core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Centroid(vertices) : core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
         }
         this._uvs = this._buildUvs(this._node);
         this._worldTransform = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode(`${name}_context`, this._node.getScene());
         this._worldTransform.parent = this._node;
-        this._node.isPickable = true;
-        this._inputSource = new _display_inputs_scene__WEBPACK_IMPORTED_MODULE_4__.VirtualDisplayInputsSource(this);
+        this._node.isPickable = true; // enable pointer events
+        this._inputSource = new _display_inputs_scene__WEBPACK_IMPORTED_MODULE_3__.VirtualDisplayInputsSource(this);
         this._unit = unit;
     }
     get node() {
@@ -15876,7 +17405,7 @@ class VirtualDisplay {
     }
     get propertyChangedObservable() {
         if (!this._propertyChangedObservable) {
-            this._propertyChangedObservable = new core_events__WEBPACK_IMPORTED_MODULE_5__.Observable();
+            this._propertyChangedObservable = new core_events__WEBPACK_IMPORTED_MODULE_4__.Observable();
         }
         return this._propertyChangedObservable;
     }
@@ -15893,15 +17422,18 @@ class VirtualDisplay {
         return this._inputSource;
     }
     _buildUvs(mesh) {
+        // Extract UV data
         const uvs = mesh.getVerticesData(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.UVKind);
         if (uvs) {
             let minU = Infinity;
             let minV = Infinity;
             let maxU = -Infinity;
             let maxV = -Infinity;
+            // Iterate over the UV data (interleaved U and V)
             for (let i = 0; i < uvs.length; i += 2) {
-                const u = uvs[i];
-                const v = uvs[i + 1];
+                const u = uvs[i]; // U coordinate
+                const v = uvs[i + 1]; // V coordinate
+                // Update bounding box
                 if (u < minU)
                     minU = u;
                 if (v < minV)
@@ -15928,15 +17460,26 @@ class VirtualDisplay {
     get context3D() {
         return this._worldTransform;
     }
+    /// <summary>
+    /// Gets the display resolution in "pixels" like.
+    /// </summary>
     get resolution() {
         return this._resolution;
     }
+    /// <summary>
+    /// Gets the display dimension unit. Defualt is meter.
+    /// </summary>
     get unit() {
         return this._unit;
     }
+    /// <summary>
+    /// Gets the display dimension in current unit. Current unit may be accessed via <see cref="unit"/> property.
     get dimension() {
         return this._dimension;
     }
+    /// <summary>
+    /// Gets the display half dimension in current unit.
+    /// </summary>
     get halfDimension() {
         return this._halfDimension;
     }
@@ -15944,7 +17487,7 @@ class VirtualDisplay {
         return this._ppu;
     }
     get dpi() {
-        return core_math__WEBPACK_IMPORTED_MODULE_1__.Quantity.Convert(this._ppu.x, this._unit, core_math__WEBPACK_IMPORTED_MODULE_1__.Length.Units.inch);
+        return core_math__WEBPACK_IMPORTED_MODULE_5__.Quantity.Convert(this._ppu.x, this._unit, core_math__WEBPACK_IMPORTED_MODULE_5__.Length.Units.inch);
     }
     get aspectRatio() {
         return this._ratio;
@@ -15991,13 +17534,13 @@ VirtualDisplay.UltraHD = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(38
 VirtualDisplay.UltraHD2 = new core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size2(7680, 4320);
 //# sourceMappingURL=display.virtual.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/display/index.js":
+/***/ "./dist/display/index.js"
 /*!*******************************!*\
   !*** ./dist/display/index.js ***!
   \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16027,13 +17570,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/engines/index.js":
+/***/ "./dist/engines/index.js"
 /*!*******************************!*\
   !*** ./dist/engines/index.js ***!
   \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16045,13 +17588,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/engines/thinEngine.ext.js":
+/***/ "./dist/engines/thinEngine.ext.js"
 /*!****************************************!*\
   !*** ./dist/engines/thinEngine.ext.js ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16061,6 +17604,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+///////////////////////////
+// Thin Engine Extension //
+///////////////////////////
 
 function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
     return function (texture, level, xoffset, yoffset, zoffset, width, height, depth, data, format = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_RGBA, textureType = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_UNSIGNED_INT) {
@@ -16068,13 +17614,23 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
         const internalType = this._getWebGLTextureType(textureType);
         const internalFormat = this._getInternalFormat(format);
         this._bindTextureDirectly(target, texture, true);
+        // When working with WebGL, it's crucial to remember that changes made to the WebGL context's state are global and persistent
+        // across all subsequent operations using that context. This means that if you set certain flags or states, such as `UNPACK_FLIP_Y_WEBGL`,
+        // they will remain in effect for all future operations unless explicitly changed again.
+        // To avoid unintended side-effects and maintain modular, predictable code, it's a best practice to save the current state of
+        // the WebGL context before setting mandatory flags or making significant state changes. After you've completed the operations
+        // that require these specific settings, you should then restore the context to its original state.
+        // This practice ensures that other parts of your application that use the same WebGL context aren't adversely affected by unexpected state changes.
+        // In WebGL, however, there's no direct method to save and restore the entire context state at once (like a push/pop mechanism).
+        // You need to manually save and restore the parameters that you change. It's important to be mindful of this to maintain the integrity
+        // of your rendering process and avoid hard-to-track bugs.
         let flipYState = this._gl.getParameter(this._gl.UNPACK_FLIP_Y_WEBGL);
         if (flipYState) {
-            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0); // Texture 3D does NOT support FLIP_Y
         }
         let preMultiplyAlpha = this._gl.getParameter(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
         if (preMultiplyAlpha) {
-            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // Texture 3D does NOT support PREMULTIPLY_ALPHA
         }
         this._gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, internalFormat, internalType, data);
         let err = this._gl.getError();
@@ -16084,10 +17640,10 @@ function _makeUpdateSubRawTexture2DArrayFunction(is3D) {
         this._bindTextureDirectly(target, null);
         texture.isReady = true;
         if (flipYState) {
-            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1); // restore state
         }
         if (preMultiplyAlpha) {
-            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1); // Restore state
         }
     };
 }
@@ -16117,13 +17673,23 @@ function _makeCreateRawTextureFunction(is3D) {
         }
         const internalSizedFomat = internalFormat || this._getRGBABufferInternalSizedFormat(textureType, format);
         this._bindTextureDirectly(target, texture, true);
+        // When working with WebGL, it's crucial to remember that changes made to the WebGL context's state are global and persistent
+        // across all subsequent operations using that context. This means that if you set certain flags or states, such as `UNPACK_FLIP_Y_WEBGL`,
+        // they will remain in effect for all future operations unless explicitly changed again.
+        // To avoid unintended side-effects and maintain modular, predictable code, it's a best practice to save the current state of
+        // the WebGL context before setting mandatory flags or making significant state changes. After you've completed the operations
+        // that require these specific settings, you should then restore the context to its original state.
+        // This practice ensures that other parts of your application that use the same WebGL context aren't adversely affected by unexpected state changes.
+        // In WebGL, however, there's no direct method to save and restore the entire context state at once (like a push/pop mechanism).
+        // You need to manually save and restore the parameters that you change. It's important to be mindful of this to maintain the integrity
+        // of your rendering process and avoid hard-to-track bugs.
         let flipYState = this._gl.getParameter(this._gl.UNPACK_FLIP_Y_WEBGL);
         if (flipYState) {
-            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0);
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 0); // Texture 3D does NOT support FLIP_Y
         }
         let preMultiplyAlpha = this._gl.getParameter(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL);
         if (preMultiplyAlpha) {
-            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // Texture 3D does NOT support PREMULTIPLY_ALPHA
         }
         this._gl.texStorage3D(target, 1, internalSizedFomat, texture.width, texture.height, texture.depth);
         let err = this._gl.getError();
@@ -16133,10 +17699,10 @@ function _makeCreateRawTextureFunction(is3D) {
         this._bindTextureDirectly(target, null, true);
         texture.isReady = true;
         if (flipYState) {
-            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
+            this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1); // restore state
         }
         if (preMultiplyAlpha) {
-            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+            this._gl.pixelStorei(this._gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1); // Restore state
         }
         return texture;
     };
@@ -16144,31 +17710,54 @@ function _makeCreateRawTextureFunction(is3D) {
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR__createRawTexture2DArray = _makeCreateRawTextureFunction(false);
 function _makeCopyRawTextureFunction() {
     return function (oldTexture, newTexture) {
+        // Create a framebuffer for the source texture
         const framebuffer = this._gl.createFramebuffer();
+        // When a framebuffer is bound (gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)), rendering operations target the attached textures or renderbuffers.
+        // The output is stored in the framebuffer’s attachments, not shown on the screen
         this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, framebuffer);
         for (let i = 0; i < oldTexture.depth && i < newTexture.depth; i++) {
-            this._gl.framebufferTextureLayer(this._gl.FRAMEBUFFER, this._gl.COLOR_ATTACHMENT0, oldTexture._hardwareTexture?.underlyingResource, 0, i);
+            // Attach the current layer of the old texture to the framebuffer
+            this._gl.framebufferTextureLayer(this._gl.FRAMEBUFFER, this._gl.COLOR_ATTACHMENT0, oldTexture._hardwareTexture?.underlyingResource, 0, // Mipmap level
+            i // Layer index
+            );
+            // Check framebuffer completeness
             if (this._gl.checkFramebufferStatus(this._gl.FRAMEBUFFER) !== this._gl.FRAMEBUFFER_COMPLETE) {
                 console.error(`Framebuffer not complete for layer ${i}`);
                 continue;
             }
+            // Bind the new texture as the destination
             this._gl.bindTexture(this._gl.TEXTURE_2D_ARRAY, newTexture._hardwareTexture?.underlyingResource);
-            this._gl.copyTexSubImage3D(this._gl.TEXTURE_2D_ARRAY, 0, 0, 0, i, 0, 0, oldTexture.width, oldTexture.height);
+            // Copy data from the source layer to the destination layer
+            this._gl.copyTexSubImage3D(this._gl.TEXTURE_2D_ARRAY, // Target
+            0, // Level
+            0, // X offset
+            0, // Y offset
+            i, // Z offset (layer index in the new texture)
+            0, // X of source texture
+            0, // Y of source texture
+            oldTexture.width, // Width
+            oldTexture.height // Height
+            );
         }
+        // Clean up
+        // When no framebuffer is bound (gl.bindFramebuffer(gl.FRAMEBUFFER, null)), rendering operations go directly to the screen.
         this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
         this._gl.deleteFramebuffer(framebuffer);
     };
 }
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ThinEngine.prototype.__SpaceXR__copyRawTexture2DArray = _makeCopyRawTextureFunction();
+///////////////////////////////
+// End Thin Engine Extension //
+///////////////////////////////
 //# sourceMappingURL=thinEngine.ext.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/display/index.js":
+/***/ "./dist/map/display/index.js"
 /*!***********************************!*\
   !*** ./dist/map/display/index.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16178,13 +17767,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/display/map.display.virtual.js":
+/***/ "./dist/map/display/map.display.virtual.js"
 /*!*************************************************!*\
   !*** ./dist/map/display/map.display.virtual.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16192,22 +17781,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../display */ "./dist/display/display.virtual.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/map */ "../core/dist/map/inputs/map.inputs.controller.navigation.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../display */ "./dist/display/display.virtual.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../display */ "./dist/display/display.inputs.scene.js");
-/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../materials */ "./dist/materials/textures/textures.webMapTexture.js");
+/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../materials */ "./dist/materials/textures/textures.webMapTexture.js");
 
 
 
 
-class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
+class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_2__.VirtualDisplay {
     constructor(name, dimension, options, scene) {
-        options = options ?? _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture.OptionsHD();
+        options = options ?? _materials__WEBPACK_IMPORTED_MODULE_4__.WebMapTexture.OptionsHD();
         super(name, dimension, options, scene);
         this._content = this._createTextureMap(name, options, this.getScene());
         this.node.material = this._createMaterial(name, this._content, this.getScene());
         this._source = new _display__WEBPACK_IMPORTED_MODULE_3__.VirtualDisplayInputsSource(this);
-        this._controller = new core_map__WEBPACK_IMPORTED_MODULE_4__.InputsNavigationController(this._source, this._content?.map, { invertY: true });
+        this._controller = new core_map__WEBPACK_IMPORTED_MODULE_1__.InputsNavigationController(this._source, this._content?.map, { invertY: true });
     }
     get content() {
         return this._content;
@@ -16216,8 +17805,8 @@ class MapDisplay extends _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay {
         return this._content.map;
     }
     _createTextureMap(name, options, scene) {
-        options = options ?? _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture.OptionsHD();
-        return new _materials__WEBPACK_IMPORTED_MODULE_2__.WebMapTexture(this._createTextureName(name), options, scene);
+        options = options ?? _materials__WEBPACK_IMPORTED_MODULE_4__.WebMapTexture.OptionsHD();
+        return new _materials__WEBPACK_IMPORTED_MODULE_4__.WebMapTexture(this._createTextureName(name), options, scene);
     }
     _createMaterial(name, texture, scene) {
         const material = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(this._createMaterialName(name), scene);
@@ -16235,13 +17824,13 @@ MapDisplay.MaterialSuffix = "material";
 MapDisplay.TextureSuffix = "texture";
 //# sourceMappingURL=map.display.virtual.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/index.js":
+/***/ "./dist/map/index.js"
 /*!***************************!*\
   !*** ./dist/map/index.js ***!
   \***************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16276,13 +17865,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.grid.factory.js":
+/***/ "./dist/map/map.grid.factory.js"
 /*!**************************************!*\
   !*** ./dist/map/map.grid.factory.js ***!
   \**************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16291,13 +17880,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/meshes/terrain.grid.js");
-/* harmony import */ var core_types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/types */ "../core/dist/types.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var core_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/types */ "../core/dist/types.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
 
 
 
 
 class ElevationGridFactory {
+    /*private static InitZ(column: number, row: number, w: number, h: number): number {
+        let i = column == w - 1 ? 1 : 0;
+        let j = row == h - 1 ? 2 : 0;
+        return i + j;
+    }*/
     buildTopology(options) {
         const o = this._buildTerrainOptions(options);
         const data = new core_geometry__WEBPACK_IMPORTED_MODULE_1__.TerrainNormalizedGridBuilder().withOptions(o).build(new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData());
@@ -16311,31 +17905,32 @@ class ElevationGridFactory {
             return options.build();
         }
         const builder = new core_geometry__WEBPACK_IMPORTED_MODULE_1__.TerrainGridOptionsBuilder()
-            .withScale(-1, 1)
+            .withScale(-1, 1) // we consider a grid oriented with babylonjs coordinate system, left handed
             .withInvertIndices(true);
-        if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_2__.IsSize)(options)) {
+        //.withZInitializer(ElevationGridFactory.InitZ); // register the z initializer, which serve as referencing the elevation depth
+        if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_3__.IsSize)(options)) {
             builder
-                .withColumns(options.width + 1)
-                .withRows(options.height + 1);
+                .withColumns(options.width + 1) // add one column to fill the gap
+                .withRows(options.height + 1); // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
         }
-        if ((0,core_types__WEBPACK_IMPORTED_MODULE_3__.IsNumber)(options)) {
+        if ((0,core_types__WEBPACK_IMPORTED_MODULE_2__.IsNumber)(options)) {
             const s = options;
             builder
-                .withColumns(s + 1)
-                .withRows(s + 1);
+                .withColumns(s + 1) // add one column to fill the gap
+                .withRows(s + 1); // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
         }
         return builder.build();
     }
 }
 //# sourceMappingURL=map.grid.factory.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.interfaces.js":
+/***/ "./dist/map/map.interfaces.js"
 /*!************************************!*\
   !*** ./dist/map/map.interfaces.js ***!
   \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16351,35 +17946,35 @@ function IsTileWithMesh(b) {
 }
 //# sourceMappingURL=map.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.js":
+/***/ "./dist/map/map.js"
 /*!*************************!*\
   !*** ./dist/map/map.js ***!
   \*************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Map3D: () => (/* binding */ Map3D),
 /* harmony export */   Map3DOptions: () => (/* binding */ Map3DOptions)
 /* harmony export */ });
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.view.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/typed/tiles.map.layer.image.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core/Meshes */ "@babylonjs/core");
-/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map_layer_texture__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./map.layer.texture */ "./dist/map/map.layer.texture.js");
-/* harmony import */ var _dem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../dem */ "./dist/dem/dem.layer.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _map_grid_factory__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./map.grid.factory */ "./dist/map/map.grid.factory.js");
-/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
-/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../materials */ "./dist/materials/materials.map.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
-/* harmony import */ var _map_layer_dem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.layer.dem */ "./dist/map/map.layer.dem.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/typed/tiles.map.layer.image.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.view.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babylonjs/core/Meshes */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _map_layer_texture__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.layer.texture */ "./dist/map/map.layer.texture.js");
+/* harmony import */ var _dem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../dem */ "./dist/dem/dem.layer.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _map_grid_factory__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./map.grid.factory */ "./dist/map/map.grid.factory.js");
+/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/text.js");
+/* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../materials */ "./dist/materials/materials.map.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _map_layer_dem__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./map.layer.dem */ "./dist/map/map.layer.dem.js");
 
 
 
@@ -16395,18 +17990,18 @@ class Map3DOptions {
 }
 Map3DOptions.DefaultGridSize = 32;
 Map3DOptions.DefaultExageration = 1.0;
-class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
+class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapBase {
     constructor(root, options) {
         super();
         this._root = root;
         this._gridSize = options?.gridSize ?? Map3DOptions.DefaultGridSize;
-        this._offset = options?.offset ?? core_geometry__WEBPACK_IMPORTED_MODULE_2__.Cartesian3.Zero();
+        this._offset = options?.offset ?? core_geometry__WEBPACK_IMPORTED_MODULE_9__.Cartesian3.Zero();
         this._exageration = options?.exageration ?? Map3DOptions.DefaultExageration;
         const scene = this._root.getScene();
         this._grid = this._buildTemplate(scene);
         this._grid.setEnabled(false);
         this._material = this._buildMaterial(this._buildMaterialName() ?? this.name, scene);
-        if (this._material instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material) {
+        if (this._material instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_5__.Material) {
             this._grid.material = this._material;
         }
     }
@@ -16429,7 +18024,7 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
         return this._gridSize;
     }
     get gridDimension() {
-        return (0,core_geometry__WEBPACK_IMPORTED_MODULE_3__.IsSize)(this._gridSize) ? Math.max(this._gridSize.width, this._gridSize.height) : this._gridSize;
+        return (0,core_geometry__WEBPACK_IMPORTED_MODULE_8__.IsSize)(this._gridSize) ? Math.max(this._gridSize.width, this._gridSize.height) : this._gridSize;
     }
     set gridSize(value) {
         this._gridSize = value;
@@ -16446,13 +18041,19 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
     set exageration(value) {
         this._exageration = value;
     }
+    /**
+     * This is where we create different views, depending the type of layer.
+     * Elevation type layer will create specific view, which hold the necessary mechanism to create grid instances
+     * @param layer
+     * @returns the layer view created
+     */
     _buildLayerView(layer) {
-        if (layer instanceof _dem__WEBPACK_IMPORTED_MODULE_4__.ElevationLayer) {
-            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_5__.AbstractTileMetrics.DefaultTileSize);
-            return new _map_layer_dem__WEBPACK_IMPORTED_MODULE_6__.ElevationLayerView(this, layer, this._display, new core_tiles__WEBPACK_IMPORTED_MODULE_7__.TileView(zoomOffset));
+        if (layer instanceof _dem__WEBPACK_IMPORTED_MODULE_7__.ElevationLayer) {
+            const zoomOffset = this._computeTheoricalZoomOffset(this.gridDimension, layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize);
+            return new _map_layer_dem__WEBPACK_IMPORTED_MODULE_14__.ElevationLayerView(this, layer, this._display, new core_tiles__WEBPACK_IMPORTED_MODULE_3__.TileView(zoomOffset));
         }
-        if (layer instanceof core_tiles__WEBPACK_IMPORTED_MODULE_8__.ImageLayer) {
-            return new _map_layer_texture__WEBPACK_IMPORTED_MODULE_9__.TextureLayerView(this, layer, this.display, this.view);
+        if (layer instanceof core_tiles__WEBPACK_IMPORTED_MODULE_1__.ImageLayer) {
+            return new _map_layer_texture__WEBPACK_IMPORTED_MODULE_6__.TextureLayerView(this, layer, this.display, this.view);
         }
         return null;
     }
@@ -16460,9 +18061,10 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
         const n = tileSize / gridDimension;
         return -Math.ceil(Math.log(n));
     }
+    // when navigation propertie's changed
     _onNavigationPropertyChanged(event, state) {
         super._onNavigationPropertyChanged(event, state);
-        if (event.propertyName === core_tiles__WEBPACK_IMPORTED_MODULE_10__.TileNavigationState.AZIMUTH_PROPERTY_NAME) {
+        if (event.propertyName === core_tiles__WEBPACK_IMPORTED_MODULE_2__.TileNavigationState.AZIMUTH_PROPERTY_NAME) {
             this._rotateMap(event.source);
         }
     }
@@ -16471,6 +18073,7 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
             this._root.rotation.z = this.navigationState?.azimuth.radian ?? 0;
         }
     }
+    // when the navigation object has changed - very unlikely.
     _onNavigationBinded(nav) {
         super._onNavigationBinded(nav);
         this._rotateMap(nav);
@@ -16481,8 +18084,8 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
     }
     _bindDisplayInternal(display) {
         const material = this.material;
-        if (display && material && material instanceof _materials__WEBPACK_IMPORTED_MODULE_11__.Map3dMaterial) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_12__.IsHolographicBounds)(this.display)) {
+        if (display && material && material instanceof _materials__WEBPACK_IMPORTED_MODULE_12__.Map3dMaterial) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_13__.IsHolographicBounds)(this.display)) {
                 material.holographicBounds = this.display;
             }
             if (this.display?.resolution) {
@@ -16490,29 +18093,31 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
             }
         }
     }
+    // bind the tile root to this root
     _onLayerViewAdded(eventData, eventState) {
         super._onLayerViewAdded(eventData, eventState);
         for (const v of eventData) {
-            if (v instanceof _map_layer_texture__WEBPACK_IMPORTED_MODULE_9__.TextureLayerView) {
+            if (v instanceof _map_layer_texture__WEBPACK_IMPORTED_MODULE_6__.TextureLayerView) {
                 v.tilesRoot.parent = this._root;
                 v.linkTo(this.material.imagesTarget);
                 continue;
             }
-            if (v instanceof _map_layer_dem__WEBPACK_IMPORTED_MODULE_6__.ElevationLayerView) {
+            if (v instanceof _map_layer_dem__WEBPACK_IMPORTED_MODULE_14__.ElevationLayerView) {
                 v.linkTo(this.material.elevationsTarget);
                 continue;
             }
         }
     }
+    // unbind the tile root from this root
     _onLayerViewRemoved(eventData, eventState) {
         super._onLayerViewRemoved(eventData, eventState);
         for (const v of eventData) {
-            if (v instanceof _map_layer_texture__WEBPACK_IMPORTED_MODULE_9__.TextureLayerView) {
+            if (v instanceof _map_layer_texture__WEBPACK_IMPORTED_MODULE_6__.TextureLayerView) {
                 v.tilesRoot.parent = null;
                 v.unlinkFrom(this.material.imagesTarget);
                 continue;
             }
-            if (v instanceof _map_layer_dem__WEBPACK_IMPORTED_MODULE_6__.ElevationLayerView) {
+            if (v instanceof _map_layer_dem__WEBPACK_IMPORTED_MODULE_14__.ElevationLayerView) {
                 v.unlinkFrom(this.material.elevationsTarget);
             }
         }
@@ -16524,24 +18129,24 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
         return n;
     }
     _buildTemplateName() {
-        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_13__.TextUtils.BuildNameWithSuffix(this.name, Map3D.TEMPLATE_SUFFIX));
+        return this._buildQualifiedName(core_utils__WEBPACK_IMPORTED_MODULE_11__.TextUtils.BuildNameWithSuffix(this.name, Map3D.TEMPLATE_SUFFIX));
     }
     _buildMaterialName() {
-        return core_utils__WEBPACK_IMPORTED_MODULE_13__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), Map3D.MATERIAL_SUFFIX);
+        return core_utils__WEBPACK_IMPORTED_MODULE_11__.TextUtils.BuildNameWithSuffix(this._buildTemplateName(), Map3D.MATERIAL_SUFFIX);
     }
     _buildMaterial(name, scene) {
-        return new _materials__WEBPACK_IMPORTED_MODULE_11__.Map3dMaterial(name, scene);
+        return new _materials__WEBPACK_IMPORTED_MODULE_12__.Map3dMaterial(name, scene);
     }
     _buildTemplate(scene) {
         const mesh = this._buildMeshForTemplate(this._buildTemplateName() ?? this.name, scene);
         const gridFactory = this._buildGridFactory() ?? this._buildGridFactoryInternal();
         const gridSize = this.gridSize ?? Map3DOptions.DefaultGridSize;
         const grid = gridFactory.buildTopology(gridSize);
-        if (grid instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData) {
+        if (grid instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_5__.VertexData) {
             grid.applyToMesh(mesh);
         }
         else {
-            const data = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData();
+            const data = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_5__.VertexData();
             data.indices = grid.indices;
             data.normals = grid.normals;
             data.positions = grid.positions;
@@ -16551,27 +18156,27 @@ class Map3D extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileMapBase {
         return mesh;
     }
     _buildMeshForTemplate(name, scene) {
-        const mesh = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(name, scene);
+        const mesh = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_5__.Mesh(name, scene);
         return mesh;
     }
     _buildGridFactory() {
         return this._buildGridFactoryInternal();
     }
     _buildGridFactoryInternal() {
-        return new _map_grid_factory__WEBPACK_IMPORTED_MODULE_14__.ElevationGridFactory();
+        return new _map_grid_factory__WEBPACK_IMPORTED_MODULE_10__.ElevationGridFactory();
     }
 }
 Map3D.TEMPLATE_SUFFIX = "grid";
 Map3D.MATERIAL_SUFFIX = "material";
 //# sourceMappingURL=map.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.layer.dem.js":
+/***/ "./dist/map/map.layer.dem.js"
 /*!***********************************!*\
   !*** ./dist/map/map.layer.dem.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16587,13 +18192,13 @@ class ElevationLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_0__.Ma
 }
 //# sourceMappingURL=map.layer.dem.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.layer.texture.js":
+/***/ "./dist/map/map.layer.texture.js"
 /*!***************************************!*\
   !*** ./dist/map/map.layer.texture.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16601,31 +18206,34 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
-/* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
-/* harmony import */ var _map_layer_view__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map.layer.view */ "./dist/map/map.layer.view.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/map/tiles.map.interfaces.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _map_tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map.tile */ "./dist/map/map.tile.js");
+/* harmony import */ var _map_layer_view__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map.layer.view */ "./dist/map/map.layer.view.js");
 
 
 
 
 
-class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3dLayerView {
+class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_7__.Map3dLayerView {
     constructor(map, layer, display, source) {
         super(map, layer, display, source);
+        // cached cartesian center
         this._cartesianCenterCache = null;
-        this.factory.withType(_map_tile__WEBPACK_IMPORTED_MODULE_2__.TileWithElevation);
+        // ensure factory is with correct type.
+        this.factory.withType(_map_tile__WEBPACK_IMPORTED_MODULE_6__.TileWithElevation);
         const gridSize = map.elevationOptions?.gridSize;
-        if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_3__.IsSize)(gridSize)) {
+        if ((0,core_geometry__WEBPACK_IMPORTED_MODULE_4__.IsSize)(gridSize)) {
             this._cachedSize = gridSize;
         }
         else {
             const d = gridSize;
-            this._cachedSize = new core_geometry__WEBPACK_IMPORTED_MODULE_4__.Size2(d, d);
+            this._cachedSize = new core_geometry__WEBPACK_IMPORTED_MODULE_5__.Size2(d, d);
         }
+        // build the root for the tiles
         const scene = this._map.root.getScene();
         this._tilesRoot = this._buildRoot(scene);
     }
@@ -16654,8 +18262,9 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         const m = this._buildInstance(tile);
         if (m) {
             m.parent = this._tilesRoot;
-            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_5__.AbstractTileMetrics.DefaultTileSize;
-            m.scaling.z = 1.0;
+            m.scaling.x = m.scaling.y = this.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_3__.AbstractTileMetrics.DefaultTileSize;
+            m.scaling.z = 1.0; // exageration is hold by the tiles root scaling.
+            // set the surface 3D
             tile.surface = m;
             tile.gridSize = this._cachedSize;
             if (!tile.content) {
@@ -16686,6 +18295,7 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         if (tile?.boundingBox && tile?.surface) {
             const c = tile.boundingBox.center;
             const p = tile.surface.position;
+            // the tile system is origin north-west corner, y pointing to the south, x to the east.
             p.x = center.x - c.x;
             p.y = center.y - c.y;
             p.z = 0;
@@ -16705,8 +18315,10 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         if (display.dimension.depth && display.resolution.depth) {
             z = display.dimension.depth / (display.resolution.depth * groundResolution);
         }
+        // x & y are unitless, so we define the size in meter using scale and groundResolution
         this._tilesRoot.scaling.x = x * groundResolution * nav.scale;
         this._tilesRoot.scaling.y = y * groundResolution * nav.scale;
+        // z data are already in meter so they just need to be scaled, and exagerated.
         this._tilesRoot.scaling.z = z * (this._map.elevationOptions?.exageration ?? TextureLayerView.DefaultExageration) * nav.scale;
     }
     _onNavigationChanged(oldValue, newValue) {
@@ -16716,13 +18328,13 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
     }
     _onNavigationPropertyChanged(event, state) {
         switch (event.propertyName) {
-            case core_tiles__WEBPACK_IMPORTED_MODULE_6__.TileNavigationState.CENTER_PROPERTY_NAME: {
-                this._cartesianCenterCache = null;
+            case core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState.CENTER_PROPERTY_NAME: {
+                this._cartesianCenterCache = null; // invalidate the cache
                 this._onCenterChanged();
-                this._onZoomChanged();
+                this._onZoomChanged(); // scale is function of the latitude
                 break;
             }
-            case core_tiles__WEBPACK_IMPORTED_MODULE_6__.TileNavigationState.ZOOM_PROPERTY_NAME: {
+            case core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileNavigationState.ZOOM_PROPERTY_NAME: {
                 this._onZoomChanged();
                 break;
             }
@@ -16730,7 +18342,7 @@ class TextureLayerView extends _map_layer_view__WEBPACK_IMPORTED_MODULE_1__.Map3
         super._onNavigationPropertyChanged(event, state);
     }
     _onZoomChanged() {
-        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_7__.IsPhysicalDisplay)(this.display) && this.metrics) {
+        if (this.isReady && (0,core_tiles__WEBPACK_IMPORTED_MODULE_2__.IsPhysicalDisplay)(this.display) && this.metrics) {
             this._setScale(this.navigationState, this.display, this.layer, this.metrics);
         }
     }
@@ -16770,13 +18382,13 @@ TextureLayerView.DefaultExageration = 1.0;
 TextureLayerView.ROOT_SUFFIX = "root";
 //# sourceMappingURL=map.layer.texture.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.layer.view.js":
+/***/ "./dist/map/map.layer.view.js"
 /*!************************************!*\
   !*** ./dist/map/map.layer.view.js ***!
   \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16795,13 +18407,13 @@ class Map3dLayerView extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.TileMapLaye
 }
 //# sourceMappingURL=map.layer.view.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.node.js":
+/***/ "./dist/map/map.node.js"
 /*!******************************!*\
   !*** ./dist/map/map.node.js ***!
   \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16816,6 +18428,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+/// <sumary>
+/// Act as proxy for Elevation Map, and bind the rendering event of the scene
+/// </sumary>
 class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
     constructor(name, scene) {
         super(name, scene);
@@ -16905,13 +18520,13 @@ class MapNode extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode
 }
 //# sourceMappingURL=map.node.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/map/map.tile.js":
+/***/ "./dist/map/map.tile.js"
 /*!******************************!*\
   !*** ./dist/map/map.tile.js ***!
   \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16940,13 +18555,13 @@ class TileWithElevation extends core_tiles__WEBPACK_IMPORTED_MODULE_0__.Tile {
 }
 //# sourceMappingURL=map.tile.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/index.js":
+/***/ "./dist/materials/index.js"
 /*!*********************************!*\
   !*** ./dist/materials/index.js ***!
   \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16968,13 +18583,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/materials.ellipsoidalMap.js":
+/***/ "./dist/materials/materials.ellipsoidalMap.js"
 /*!****************************************************!*\
   !*** ./dist/materials/materials.ellipsoidalMap.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16982,7 +18597,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _materials_map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials.map */ "./dist/materials/materials.map.js");
 
+/**
+ * The `EllipsoidalMapMaterial` class represents a special material used for rendering map tiles.
+ * It employs the Cartesian coordinate system (known as ECF - Earth-Centered, Earth-Fixed, and ENU - East, North, Up)
+ * to project these tiles onto a 3D elevation terrain, which is represented as ellipsoidal geometry.
+ * This material is specifically designed to operate within a `Map3D` object,
+ * rendering the map content on an ellipsoidal surface with defined boundaries.
+ */
 class EllipsoidalMapMaterial extends _materials_map__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial {
+    /**
+     * Creates a new `EllipsoidalMapMaterial` object.
+     * @param name The name of the material.
+     * @param scene The scene the material belongs to.
+     */
     constructor(name, scene) {
         super(name, scene, EllipsoidalMapMaterial.ShaderName);
     }
@@ -16994,13 +18621,13 @@ EllipsoidalMapMaterial.ClassName = "EllipsoidalMapMaterial";
 EllipsoidalMapMaterial.ShaderName = "ellipsoidalmap";
 //# sourceMappingURL=materials.ellipsoidalMap.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/materials.map.js":
+/***/ "./dist/materials/materials.map.js"
 /*!*****************************************!*\
   !*** ./dist/materials/materials.map.js ***!
   \*****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17009,18 +18636,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
-/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
-/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
-/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.texture.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.dem.js");
-/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
-/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.helpers.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.size.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../display */ "./dist/display/display.holographic.bounds.js");
+/* harmony import */ var _textures__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./textures */ "./dist/materials/textures/texture.texture3.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.target.proxy.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.metrics.js");
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.texture.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../map */ "./dist/map/map.layer.dem.js");
+/* harmony import */ var core_math__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core/math */ "../core/dist/math/math.js");
+/* harmony import */ var core_dem__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core/dem */ "../core/dist/dem/dem.helpers.js");
 
 
 
@@ -17036,6 +18663,7 @@ var TileBorder;
     TileBorder[TileBorder["South"] = 2] = "South";
     TileBorder[TileBorder["SouthEast"] = 3] = "SouthEast";
 })(TileBorder || (TileBorder = {}));
+// internal class used to hold the tile pool areas
 class TileLayout {
     constructor(tile, layer, area = null) {
         this.tile = tile;
@@ -17046,16 +18674,18 @@ class TileLayout {
         this.area?.release();
     }
 }
+// specialization for texture
 class TextureLayout extends TileLayout {
     constructor(tile, layer, area = null) {
         super(tile, layer, area);
     }
 }
+// specialization for elevation with dem and normals
 class ElevationLayout extends TileLayout {
     constructor(tile, layer, area = null, normalArea = null) {
         super(tile, layer, area);
         this.normalArea = normalArea;
-        this._neighbors = core_tiles__WEBPACK_IMPORTED_MODULE_1__.TileAddress.ToNeighborsXY(tile.address);
+        this._neighbors = core_tiles__WEBPACK_IMPORTED_MODULE_4__.TileAddress.ToNeighborsXY(tile.address);
     }
     get neighbors() {
         return this._neighbors;
@@ -17068,19 +18698,25 @@ class ElevationLayout extends TileLayout {
 class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMaterial {
     constructor(name, scene, shaderName) {
         super(name, scene);
+        // the optional holographix box where the material is used
         this._holoBounds = null;
+        // the observers for the holographic box clip planes
         this._clipPlanesAddedObservers = null;
         this._clipPlanesRemovedObservers = null;
         this._textureSampler = null;
         this._elevationSampler = null;
+        // the elevation related properties.
         this._elevationRange = null;
+        // the internal scale defined by the LOD (decimal part)
         this._mapScale = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.One();
+        // the layout and meta properties of each tiles
         this._textureTileLayouts = new Map();
         this._elevationTileLayouts = new Map();
-        this._displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.Zero();
+        // the resolution of the display
+        this._displayResolution = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.Zero();
         this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
-        this._imagesTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_3__.TargetProxy(this._imagesAdded.bind(this), this._imagesRemoved.bind(this), this._imagesUpdated.bind(this));
-        this._elevationsTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_3__.TargetProxy(this._elevationsAdded.bind(this), this._elevationsRemoved.bind(this), this._elevationsUpdated.bind(this));
+        this._imagesTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_5__.TargetProxy(this._imagesAdded.bind(this), this._imagesRemoved.bind(this), this._imagesUpdated.bind(this));
+        this._elevationsTarget = new core_tiles__WEBPACK_IMPORTED_MODULE_5__.TargetProxy(this._elevationsAdded.bind(this), this._elevationsRemoved.bind(this), this._elevationsUpdated.bind(this));
     }
     get imagesTarget() {
         return this._imagesTarget;
@@ -17133,13 +18769,17 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             return true;
         }
         const attribs = [
+            // babylon related
             _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexBuffer.PositionKind,
+            // instance related
             Map3dMaterial.TextureDepthsAttName,
             Map3dMaterial.ElevationUvsAttName,
             Map3dMaterial.ElevationDepthsAttName,
         ];
         const uniforms = [
+            // babylon related
             Map3dMaterial.ViewProjectionMatrixUniformName,
+            // elevations
             Map3dMaterial.AltRangeUniformName,
             Map3dMaterial.MapScaleUniformName,
         ];
@@ -17148,6 +18788,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         if (this._holoBounds) {
             this._pushUniformsForBounds(defines, uniforms);
         }
+        // we heavily rely on instances
         defines.INSTANCES = true;
         _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.MaterialHelper.PushAttributesForInstances(attribs);
         defines.rebuild();
@@ -17182,10 +18823,14 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
         this._activeEffect = effect;
         const scene = this.getScene();
+        // Matrices
         this._bindMatrix(effect, world, scene);
         if (this._mustRebind(scene, effect, subMesh)) {
+            // Clip planes
             this._bindClipPlanes(effect);
+            // samplers
             this._bindSamplers(effect);
+            // Elevations.
             this._bindElevations(effect);
         }
     }
@@ -17205,6 +18850,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             if (mess) {
                 console.log(mess);
             }
+            // this is the place where we need to reallocate some depth into the samplers
             sampler.ensureRoomFor(1);
             area = sampler.reserve();
         }
@@ -17212,18 +18858,19 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _ensureTextureSamplersReady(src) {
         if (!this._textureSampler) {
-            let size = src.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
+            let size = src.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
             this._textureSampler = this._buildTextureSampler(size, size);
             this._ensureInstanceBufferReady(src._map.grid);
         }
     }
     _ensureElevationSamplersReady(src) {
         if (!this._elevationSampler) {
-            let size = src.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
+            let size = src.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
+            // we try optimize the depth using the zoom offset.
             const offset = src.layer.zoomOffset ?? 0;
             const r = offset == 0 ? 1.0 : offset > 0 ? Math.pow(2, offset) : 1.0 / Math.pow(2, -offset);
             const depth = this._getOverallSamplerDepth(size * r);
-            size++;
+            size++; // we add one to fit the grid.
             this._elevationSampler = this._buildElevationSampler(size, size, depth);
         }
     }
@@ -17237,6 +18884,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _registerInstanceBuffers(target) {
         target.registerInstancedBuffer(Map3dMaterial.ElevationUvsAttName, Map3dMaterial.ElevationUvsSize);
+        //target.registerInstancedBuffer(Map3dMaterial.NormalDepthsAttName, Map3dMaterial.NormalDepthsSize);
         target.registerInstancedBuffer(Map3dMaterial.ElevationDepthsAttName, Map3dMaterial.ElevationDepthsSize);
         target.registerInstancedBuffer(Map3dMaterial.TextureDepthsAttName, Map3dMaterial.TextureDepthsSize);
     }
@@ -17254,7 +18902,8 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             internalFormat: Map3dMaterial.GL_RGB8,
             generateMipMap: false,
         };
-        return new _textures__WEBPACK_IMPORTED_MODULE_5__.Texture3(scene, options);
+        // this is where we leverage the Map3dTexture class to handle the layer texture
+        return new _textures__WEBPACK_IMPORTED_MODULE_3__.Texture3(scene, options);
     }
     _buildElevationSampler(width, height, depth) {
         height = height ?? width;
@@ -17265,18 +18914,20 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             height: height,
             depth: maxDepth,
             format: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTUREFORMAT_R,
-            textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT,
+            textureType: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURETYPE_FLOAT, // the input is Float32Array
             samplingMode: _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Constants.TEXTURE_NEAREST_NEAREST,
-            internalFormat: Map3dMaterial.GL_R16F,
+            internalFormat: Map3dMaterial.GL_R16F, // force internal format to save half space
             generateMipMap: false,
         };
-        return new _textures__WEBPACK_IMPORTED_MODULE_5__.Texture3(scene, options);
+        return new _textures__WEBPACK_IMPORTED_MODULE_3__.Texture3(scene, options);
     }
     _getOverallSamplerDepth(width, height) {
-        if (core_geometry__WEBPACK_IMPORTED_MODULE_2__.Size3.IsEmpty(this._displayResolution)) {
-            return Map3dMaterial.DefaultElevationTextureDepth;
+        if (core_geometry__WEBPACK_IMPORTED_MODULE_1__.Size3.IsEmpty(this._displayResolution)) {
+            return Map3dMaterial.DefaultElevationTextureDepth; // we set a fixed number of tiles
         }
         height = height ?? width;
+        // we calculate the number of tiles that can be displayed on the screen
+        // using empiric formula based on surface, trying to minimize the number of tiles
         const a = this._displayResolution.width / width;
         const b = this._displayResolution.height / height;
         const N = Math.ceil(a * b + 2 * (a + b));
@@ -17292,19 +18943,19 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindClipPlanes(effect) {
         if (this._holoBounds) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicBox)(this._holoBounds)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBox)(this._holoBounds)) {
                 const clips = this._holoBounds.clipPlanesWorld;
                 if (clips) {
-                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.North);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.South);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.East);
-                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_6__.ClipIndex.West);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.NorthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.North);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.SouthClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.South);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.EastClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.East);
+                    this._bindClipPlane(effect, clips, Map3dMaterial.WestClipPlaneUniformName, _display__WEBPACK_IMPORTED_MODULE_2__.ClipIndex.West);
                 }
             }
-            else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicSphere)(this._holoBounds)) {
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicSphere)(this._holoBounds)) {
                 effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
             }
-            else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicCylinder)(this._holoBounds)) {
+            else if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicCylinder)(this._holoBounds)) {
                 effect.setFloat(Map3dMaterial.RadiusUniformName, this._holoBounds.radius);
                 effect.setVector3(Map3dMaterial.HeightUniformName, this._holoBounds.height ?? new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, Number.MAX_SAFE_INTEGER, 0));
             }
@@ -17323,7 +18974,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _bindHolographicBounds() {
         if (this._holoBounds) {
-            if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicBox)(this._holoBounds)) {
+            if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBox)(this._holoBounds)) {
                 this._clipPlanesAddedObservers = this._holoBounds.clipPlanesAddedObservable.add(this._onClipPlanesAdded.bind(this));
                 this._clipPlanesRemovedObservers = this._holoBounds.clipPlanesRemovedObservable.add(this._onClipPlanesRemoved.bind(this));
             }
@@ -17339,20 +18990,26 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         }
     }
     _pushUniformsForBounds(defines, uniforms) {
-        if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicBox)(this._holoBounds)) {
+        if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicBox)(this._holoBounds)) {
             defines.HOLOGRAPHIC_BOUNDS_BOX = true;
             const properties = ["point", "normal"];
-            uniforms.push(...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
+            uniforms.push(
+            // clip planes
+            ...this._prepareUniforms(Map3dMaterial.NorthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.SouthClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.EastClipPlaneUniformName, ...properties), ...this._prepareUniforms(Map3dMaterial.WestClipPlaneUniformName, ...properties));
         }
-        else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicSphere)(this._holoBounds)) {
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicSphere)(this._holoBounds)) {
             throw new Error("Sphere bounds Not supported");
-            defines.HOLOGRAPHIC_BOUNDS_SPHERE = true;
-            uniforms.push(Map3dMaterial.RadiusUniformName);
+            // removed by dead control flow
+
+            // removed by dead control flow
+
         }
-        else if ((0,_display__WEBPACK_IMPORTED_MODULE_6__.IsHolographicCylinder)(this._holoBounds)) {
+        else if ((0,_display__WEBPACK_IMPORTED_MODULE_2__.IsHolographicCylinder)(this._holoBounds)) {
             throw new Error("Cylinder bounds Not supported");
-            defines.HOLOGRAPHIC_BOUNDS_CYLINDER = true;
-            uniforms.push(Map3dMaterial.RadiusUniformName, Map3dMaterial.HeightUniformName);
+            // removed by dead control flow
+
+            // removed by dead control flow
+
         }
     }
     _prepareUniforms(name, ...properties) {
@@ -17365,6 +19022,9 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.AttributesDirtyFlag);
     }
     _onEffectCompiled(effect) {
+        // console.log("DEFINES:", effect.defines);
+        // console.log("VERTEX:", effect.vertexSourceCode);
+        // console.log("FRAGMENT:", effect.fragmentSourceCode);
         if (this.onCompiled) {
             this.onCompiled(effect);
         }
@@ -17384,13 +19044,13 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             const infos = b.tile.content;
             if (infos) {
                 if (range === null) {
-                    range = new core_math__WEBPACK_IMPORTED_MODULE_7__.Range(infos.min.z, infos.max.z);
+                    range = new core_math__WEBPACK_IMPORTED_MODULE_11__.Range(infos.min.z, infos.max.z);
                     continue;
                 }
                 range.unionInPlace(infos.min.z, infos.max.z);
             }
         }
-        return range ?? new core_math__WEBPACK_IMPORTED_MODULE_7__.Range(Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
+        return range ?? new core_math__WEBPACK_IMPORTED_MODULE_11__.Range(Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
     }
     _updateElevationRange(infos) {
         if (infos) {
@@ -17400,7 +19060,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _imagesAdded(data, state) {
         const host = state.currentTarget;
-        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_8__.TextureLayerView && host.metrics) {
+        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_9__.TextureLayerView && host.metrics) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 if (this._textureTileLayouts.has(key)) {
@@ -17417,6 +19077,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                 if (area === undefined) {
                     return;
                 }
+                // the depth of the texture and elevations
                 const textureDepths = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(area.depth, -1, -1, -1);
                 surface.instancedBuffers[Map3dMaterial.TextureDepthsAttName] = textureDepths;
                 const elevationUvs = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector4(-1, -1, -1, -1);
@@ -17464,7 +19125,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _elevationsAdded(data, state) {
         const host = state.currentTarget;
-        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_9__.ElevationLayerView && host.metrics) {
+        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_10__.ElevationLayerView && host.metrics) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 if (this._elevationTileLayouts.has(key)) {
@@ -17498,7 +19159,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _elevationsUpdated(data, state) {
         const host = state.currentTarget;
-        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_9__.ElevationLayerView) {
+        if (host instanceof _map__WEBPACK_IMPORTED_MODULE_10__.ElevationLayerView) {
             for (const tile of data) {
                 const key = tile.address.quadkey;
                 const layout = this._elevationTileLayouts.get(key);
@@ -17511,44 +19172,55 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     _processElevations(layout, view) {
         const tile = layout.tile;
         if (tile.content?.elevations && view.metrics) {
+            // update the elevation range
             this._updateElevationRange(tile.content);
             const area = layout.area;
             if (area) {
+                // initialize the sampler
                 const size = view.metrics.tileSize;
                 area.update(tile.content.elevations, 0, 0, size, size);
-                let buffer = core_dem__WEBPACK_IMPORTED_MODULE_10__.ElevationHelpers.GetLastColumn(tile.content.elevations, size, size);
+                // TODO: add temp buffer to avoid allocations
+                let buffer = core_dem__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers.GetLastColumn(tile.content.elevations, size, size);
                 let z = buffer[size - 1];
                 area.update(buffer, size, 0, 1, size);
-                buffer = core_dem__WEBPACK_IMPORTED_MODULE_10__.ElevationHelpers.GetLastRow(tile.content.elevations, size, size);
+                buffer = core_dem__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers.GetLastRow(tile.content.elevations, size, size);
                 z = (z + buffer[size - 1]) / 2;
                 area.update(buffer, 0, size, size, 1);
                 buffer = new Float32Array([z]);
                 area.update(buffer, size, size, 1, 1);
             }
             this._updateNeighbourgs(layout);
+            // dispatch the elevation value to the mesh attributes
             this._dispatchElevations(layout);
+            // mark as dirty, so we gona rebind
             this.markAsDirty(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Material.TextureDirtyFlag);
         }
     }
+    ///<sumary>
+    /// gather elevations from grid.
+    ///</sumary>
     _grabElevations(layout) {
         const textureTile = layout.tile;
-        const textureBounds = textureTile.geoBounds;
+        const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
         const surface = textureTile.surface;
         if (textureBounds && surface) {
             const w1 = textureBounds.east - textureBounds.west;
             const h1 = textureBounds.north - textureBounds.south;
             for (const l of this._elevationTileLayouts.values()) {
                 const elevationTile = l.tile;
-                const elevationBounds = elevationTile.geoBounds;
+                const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
                 if (elevationBounds) {
                     if (elevationBounds.contains(textureBounds)) {
+                        // elevation uv's will be
+                        // u = u0 + u * su
+                        // v = v0 + v * sv
                         const w0 = elevationBounds.east - elevationBounds.west;
                         const h0 = elevationBounds.north - elevationBounds.south;
                         const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                        elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0;
-                        elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0;
-                        elevationUvs.z = w1 / w0;
-                        elevationUvs.w = h1 / h0;
+                        elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
+                        elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+                        elevationUvs.z = w1 / w0; // su
+                        elevationUvs.w = h1 / h0; // sv
                         const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                         elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = l.area?.depth ?? -1;
                     }
@@ -17556,26 +19228,35 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
             }
         }
     }
+    ///<sumary>
+    // dispatch elevations to grid
+    ///</sumary>
     _dispatchElevations(layout) {
         const elevationTile = layout.tile;
-        const elevationBounds = elevationTile.geoBounds;
+        const elevationBounds = elevationTile.geoBounds; // the bounds has been tested for undefined before.
         if (elevationBounds) {
             const w0 = elevationBounds.east - elevationBounds.west;
             const h0 = elevationBounds.north - elevationBounds.south;
             for (const l of this._textureTileLayouts.values()) {
                 const textureTile = l.tile;
-                const textureBounds = textureTile.geoBounds;
+                const textureBounds = textureTile.geoBounds; // the bounds has been tested for undefined before.
                 if (textureBounds) {
                     if (elevationBounds.contains(textureBounds)) {
                         const surface = textureTile.surface;
                         if (surface) {
+                            // we assume the uvs of the grid are [0,0,1,1] so the elevation uv's will be
+                            // u = u0 + u * su
+                            // v = v0 + v * sv
                             const w1 = textureBounds.east - textureBounds.west;
                             const h1 = textureBounds.north - textureBounds.south;
                             const elevationUvs = surface.instancedBuffers[Map3dMaterial.ElevationUvsAttName];
-                            elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0;
-                            elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0;
-                            elevationUvs.z = w1 / w0;
-                            elevationUvs.w = h1 / h0;
+                            elevationUvs.x = (textureBounds.west - elevationBounds.west) / w0; // u0
+                            elevationUvs.y = -(textureBounds.north - elevationBounds.north) / h0; // v0
+                            elevationUvs.z = w1 / w0; // su
+                            elevationUvs.w = h1 / h0; // sv
+                            //console.log(
+                            //    `found texture ${textureTile.quadkey} into ${elevationTile.quadkey}, b0:${elevationBounds}, b1:${textureBounds} -> x=${elevationUvs.x},y=${elevationUvs.y},sx=${elevationUvs.z},sy=${elevationUvs.w}`
+                            //);
                             const elevationDepths = surface.instancedBuffers[Map3dMaterial.ElevationDepthsAttName];
                             elevationDepths.x = elevationDepths.y = elevationDepths.z = elevationDepths.w = layout.area?.depth ?? -1;
                         }
@@ -17586,7 +19267,7 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
     }
     _ensureTileGeoBoundsIsReady(tile, metrics) {
         if (tile.geoBounds == undefined || tile.geoBounds == null || tile.geoBounds.isEmpty()) {
-            const env = core_tiles__WEBPACK_IMPORTED_MODULE_11__.Tile.BuildEnvelope(tile, metrics);
+            const env = core_tiles__WEBPACK_IMPORTED_MODULE_8__.Tile.BuildEnvelope(tile, metrics);
             tile.geoBounds = env;
         }
     }
@@ -17594,36 +19275,45 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
         const addresses = layout._neighbors;
         if (layout.tile.content?.elevations) {
             const elevations = layout.tile.content.elevations;
-            const elevationTileSize = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
-            let a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_12__.NeighborsAddress.NW];
+            const elevationTileSize = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
+            // checking the north-west neighbour
+            // we push the current upper left corner to neighbour lower right corner.
+            let a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_6__.NeighborsAddress.NW];
             if (a) {
                 const nwLayout = this._elevationTileLayouts.get(a.quadkey);
                 if (nwLayout && nwLayout.area) {
+                    // we may update the elevation texture with the upper left corner
                     const buffer = new Float32Array([elevations[0]]);
-                    const size = nwLayout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
+                    const size = nwLayout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
                     nwLayout.area.update(buffer, size, size, 1, 1);
                 }
             }
-            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_12__.NeighborsAddress.N];
+            // checking the north neighbour
+            // we push the current first row to the neighbour last row
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_6__.NeighborsAddress.N];
             if (a) {
                 const nLayout = this._elevationTileLayouts.get(a.quadkey);
                 if (nLayout && nLayout.area) {
-                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_10__.ElevationHelpers.GetFirstRow(elevations, elevationTileSize);
-                    const size = nLayout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers.GetFirstRow(elevations, elevationTileSize);
+                    const size = nLayout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
                     nLayout.area.update(buffer, 0, size, size, 1);
                 }
             }
-            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_12__.NeighborsAddress.E];
+            // checking the east neighbour
+            // we push the neighbour first column to current last column
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_6__.NeighborsAddress.E];
             if (a) {
                 const eLayout = this._elevationTileLayouts.get(a.quadkey);
                 const eElevations = eLayout?.tile.content?.elevations;
                 if (eElevations && layout.area) {
-                    const size = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
-                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_10__.ElevationHelpers.GetFirstColumn(eElevations, size, size);
+                    const size = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers.GetFirstColumn(eElevations, size, size);
                     layout.area.update(buffer, elevationTileSize, 0, 1, elevationTileSize);
                 }
             }
-            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_12__.NeighborsAddress.SE];
+            // checking the south-east neigbour
+            // we push the neighbour upper left corner to current lower right corner.
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_6__.NeighborsAddress.SE];
             if (a) {
                 const seLayout = this._elevationTileLayouts.get(a.quadkey);
                 const seElevations = seLayout?.tile.content?.elevations;
@@ -17632,22 +19322,26 @@ class Map3dMaterial extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.PushMat
                     layout.area.update(buffer, elevationTileSize, elevationTileSize, 1, 1);
                 }
             }
-            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_12__.NeighborsAddress.S];
+            // checking the south neigbour
+            // we push the neighbour first row to the current last row
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_6__.NeighborsAddress.S];
             if (a) {
                 const sLayout = this._elevationTileLayouts.get(a.quadkey);
                 const sElevations = sLayout?.tile.content?.elevations;
                 if (sElevations && layout.area) {
-                    const size = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
-                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_10__.ElevationHelpers.GetFirstRow(sElevations, size);
+                    const size = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers.GetFirstRow(sElevations, size);
                     layout.area.update(buffer, 0, elevationTileSize, elevationTileSize, 1);
                 }
             }
-            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_12__.NeighborsAddress.W];
+            // checking the west neighbour
+            // we push the current first column to the neighbour last column
+            a = addresses[core_tiles__WEBPACK_IMPORTED_MODULE_6__.NeighborsAddress.W];
             if (a) {
                 const wLayout = this._elevationTileLayouts.get(a.quadkey);
                 if (wLayout?.area) {
-                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_10__.ElevationHelpers.GetFirstColumn(elevations, elevationTileSize, elevationTileSize);
-                    const size = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_4__.AbstractTileMetrics.DefaultTileSize;
+                    const buffer = core_dem__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers.GetFirstColumn(elevations, elevationTileSize, elevationTileSize);
+                    const size = layout.layer.metrics?.tileSize ?? core_tiles__WEBPACK_IMPORTED_MODULE_7__.AbstractTileMetrics.DefaultTileSize;
                     wLayout.area.update(buffer, size, 0, 1, size);
                 }
             }
@@ -17669,25 +19363,29 @@ Map3dMaterial.ElevationDepthsSize = 4;
 Map3dMaterial.TextureDepthsAttName = "textureDepths";
 Map3dMaterial.TextureDepthsSize = 4;
 Map3dMaterial.ViewProjectionMatrixUniformName = "viewProjection";
+// clip planes uniforms in case of holographic box
 Map3dMaterial.NorthClipPlaneUniformName = "uNorthClip";
 Map3dMaterial.SouthClipPlaneUniformName = "uSouthClip";
 Map3dMaterial.EastClipPlaneUniformName = "uEastClip";
 Map3dMaterial.WestClipPlaneUniformName = "uWestClip";
+// radius and height for holographic sphere and cylinder
 Map3dMaterial.RadiusUniformName = "uRadiusClip";
 Map3dMaterial.HeightUniformName = "uHeightClip";
+// altitude range and map scale for the material
 Map3dMaterial.AltRangeUniformName = "uAltRange";
 Map3dMaterial.MapScaleUniformName = "uMapScale";
+// Samplers for the material
 Map3dMaterial.TextureSamplerUniformName = "uTextures";
 Map3dMaterial.ElevationSamplerUniformName = "uElevations";
 //# sourceMappingURL=materials.map.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/materials.webMap.js":
+/***/ "./dist/materials/materials.webMap.js"
 /*!********************************************!*\
   !*** ./dist/materials/materials.webMap.js ***!
   \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17695,7 +19393,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _materials_map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials.map */ "./dist/materials/materials.map.js");
 
+/**
+ * The `WebMapMaterial` class represents a special material used for rendering map tiles.
+ * It utilizes the Web Mercator projection to map these tiles onto a 3D elevation terrain,
+ * which is represented as Plane Geometry. This material is specifically designed to
+ * function within a `Map3D` object, rendering the map content as a plane with rectangular
+ * boundaries.
+ */
 class WebMapMaterial extends _materials_map__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial {
+    /**
+     * Creates a new `WebMapMaterial` object.
+     * @param name The name of the material.
+     * @param scene The scene the material belongs to.
+     */
     constructor(name, scene) {
         super(name, scene, WebMapMaterial.ShaderName);
     }
@@ -17707,13 +19417,13 @@ WebMapMaterial.ClassName = "WebMapMaterial";
 WebMapMaterial.ShaderName = "webmap";
 //# sourceMappingURL=materials.webMap.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/textures/index.js":
+/***/ "./dist/materials/textures/index.js"
 /*!******************************************!*\
   !*** ./dist/materials/textures/index.js ***!
   \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17729,13 +19439,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/textures/texture.map.js":
+/***/ "./dist/materials/textures/texture.map.js"
 /*!************************************************!*\
   !*** ./dist/materials/textures/texture.map.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17756,13 +19466,13 @@ class SurfaceTexture extends core_map__WEBPACK_IMPORTED_MODULE_0__.Context2DTile
 }
 //# sourceMappingURL=texture.map.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/textures/texture.texture3.js":
+/***/ "./dist/materials/textures/texture.texture3.js"
 /*!*****************************************************!*\
   !*** ./dist/materials/textures/texture.texture3.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17815,6 +19525,7 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
         this._count = 0;
         this._w = width;
         this._h = height;
+        // save internal format for later use on copy
         this._internalFormat = internalFormat;
         const engine = this._getEngine();
         this._texture = engine.__SpaceXR__createRawTexture2DArray(width, height, depth, format, samplingMode, textureType, internalFormat);
@@ -17845,12 +19556,22 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
                 }
             }
         }
+        //console.log(`reserved layer ${a?.depth} used: ${this.count} / ${this.depth}`);
         return a;
     }
     update(depth, data, xoffset, yoffset, width, height) {
         const engine = this._getEngine();
         if (engine && this._texture) {
-            engine.__SpaceXR__updateSubRawTexture2DArray(this._texture, 0, xoffset ?? 0, yoffset ?? 0, depth, width ?? this._w, height ?? this._h, 1, data, this._texture.format, this._texture.type);
+            engine.__SpaceXR__updateSubRawTexture2DArray(this._texture, 0, // specifying the level of detail - 0 is the base image
+            xoffset ?? 0, // column where pixel data should go
+            yoffset ?? 0, // row where pixel data should go
+            depth, // array "index" for pixels
+            width ?? this._w, // width of pixel data
+            height ?? this._h, // height of pixel data
+            1, // number of slice for this data
+            data, this._texture.format, // data format of pixel data
+            this._texture.type // data type of pixel data
+            );
         }
     }
     release(depth) {
@@ -17868,7 +19589,7 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
             return false;
         }
         if (this.depth - this.count >= count) {
-            return true;
+            return true; // Enough space already
         }
         const engine = this._getEngine();
         if (!engine) {
@@ -17878,7 +19599,7 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
         if (!caps) {
             return false;
         }
-        const maxLayers = caps.texture2DArrayMaxLayerCount ?? 0;
+        const maxLayers = caps.texture2DArrayMaxLayerCount ?? 0; // backend-agnostic
         const targetDepth = count + this.depth;
         let newDepth = this.depth;
         do {
@@ -17890,11 +19611,13 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
             return false;
         }
         console.log(`Grow texture layers from ${this.depth} to ${newDepth}`);
+        // Create a new texture with larger depth
         const newTexture = engine.__SpaceXR__createRawTexture2DArray(this._w, this._h, newDepth, oldTexture.format, oldTexture.samplingMode, oldTexture.type, this._internalFormat);
         engine.__SpaceXR__copyRawTexture2DArray(oldTexture, newTexture);
+        // Replace the old texture with the new one
         oldTexture.dispose();
         this._texture = newTexture;
-        this._layers = this._layers.concat(new Array(newDepth - this._layers.length).fill(null));
+        this._layers = this._layers.concat(new Array(newDepth - this._layers.length).fill(null)); // Reset layers array
         return true;
     }
     _buildLayer(z) {
@@ -17907,13 +19630,13 @@ class Texture3 extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.BaseTexture 
 }
 //# sourceMappingURL=texture.texture3.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/materials/textures/textures.webMapTexture.js":
+/***/ "./dist/materials/textures/textures.webMapTexture.js"
 /*!***********************************************************!*\
   !*** ./dist/materials/textures/textures.webMapTexture.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17921,12 +19644,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_map_canvas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/map/canvas */ "../core/dist/map/canvas/map.canvas.js");
 /* harmony import */ var core_map_canvas__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map/canvas */ "../core/dist/map/canvas/map.canvas.display.js");
-/* harmony import */ var core_map_canvas__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/map/canvas */ "../core/dist/map/canvas/map.canvas.js");
-/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/runtime.js");
+/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/runtime.js");
 
 
 
+/**
+ * Provide Babylon js Texture implementation for a 2D WebMap (Web Mercator projection).
+ */
 class WebMapTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture {
     static Options(o) {
         return { ...WebMapTexture.DefaultOptions, ...(o ?? {}) };
@@ -17946,19 +19672,21 @@ class WebMapTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture
     constructor(name, options, scene, nav) {
         const o = { ...WebMapTexture.DefaultOptions, ...options };
         super(null, scene, !o.generateMipMaps, o.invertY, o.samplingMode, undefined, undefined, undefined, undefined, o.format);
+        // preliminary setup
         this._display = null;
         this._map = null;
         this._renderObserver = null;
+        // texture setup
         this.name = name;
         this.wrapU = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
         this.wrapV = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
         const engine = this._getEngine();
-        (0,core_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(engine !== null, "unable to get engine");
+        (0,core_utils__WEBPACK_IMPORTED_MODULE_3__.Assert)(engine !== null, "unable to get engine");
         const canvas = engine.createCanvas(options.width, options.height);
-        (0,core_utils__WEBPACK_IMPORTED_MODULE_1__.Assert)(canvas !== null && canvas != undefined, "unable to create canvas");
+        (0,core_utils__WEBPACK_IMPORTED_MODULE_3__.Assert)(canvas !== null && canvas != undefined, "unable to create canvas");
         this._texture = engine.createDynamicTexture(options.width, options.height, o.generateMipMaps, o.samplingMode);
-        this._display = new core_map_canvas__WEBPACK_IMPORTED_MODULE_2__.CanvasDisplay(canvas, 1, false);
-        this._map = new core_map_canvas__WEBPACK_IMPORTED_MODULE_3__.CanvasMap(this._display, o, nav);
+        this._display = new core_map_canvas__WEBPACK_IMPORTED_MODULE_2__.CanvasDisplay(canvas, 1, false); // do NOT automatically resize the canvas to the client size.
+        this._map = new core_map_canvas__WEBPACK_IMPORTED_MODULE_1__.CanvasMap(this._display, o, nav);
         this._renderObserver = scene.onBeforeCameraRenderObservable.add(this._checkUpdate.bind(this));
     }
     get map() {
@@ -17972,6 +19700,7 @@ class WebMapTexture extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture
         this._map?.dispose();
         this._display?.dispose();
     }
+    // rendering related
     _checkUpdate(camera, eventState) {
         if (this._map && this._display) {
             if (this._map.isValid == false) {
@@ -17991,13 +19720,13 @@ WebMapTexture.DefaultOptions = {
 };
 //# sourceMappingURL=textures.webMapTexture.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/meshes/builders/index.js":
+/***/ "./dist/meshes/builders/index.js"
 /*!***************************************!*\
   !*** ./dist/meshes/builders/index.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18007,13 +19736,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/meshes/builders/quickhullBuilder.js":
+/***/ "./dist/meshes/builders/quickhullBuilder.js"
 /*!**************************************************!*\
   !*** ./dist/meshes/builders/quickhullBuilder.js ***!
   \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18054,13 +19783,13 @@ function CreateQuickHull(name, source) {
 }
 //# sourceMappingURL=quickhullBuilder.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/meshes/index.js":
+/***/ "./dist/meshes/index.js"
 /*!******************************!*\
   !*** ./dist/meshes/index.js ***!
   \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18071,30 +19800,37 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/3mfSerializer.configuration.js":
+/***/ "./dist/serializers/3MF/3mfSerializer.configuration.js"
 /*!*************************************************************!*\
   !*** ./dist/serializers/3MF/3mfSerializer.configuration.js ***!
   \*************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ThreeMfSerializerGlobalConfiguration: () => (/* binding */ ThreeMfSerializerGlobalConfiguration)
 /* harmony export */ });
+/**
+ * Class used to store configuration of the 3MF Serializer
+ */
 class ThreeMfSerializerGlobalConfiguration {
 }
+/**
+ * Url to use to load the fflate library (for zip compression)
+ */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 ThreeMfSerializerGlobalConfiguration.FFLATEUrl = "https://unpkg.com/fflate@0.8.2";
 //# sourceMappingURL=3mfSerializer.configuration.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/3mfSerializer.js":
+/***/ "./dist/serializers/3MF/3mfSerializer.js"
 /*!***********************************************!*\
   !*** ./dist/serializers/3MF/3mfSerializer.js ***!
   \***********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18102,38 +19838,83 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core/Misc/tools */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./core/model/3mf.utils */ "./dist/serializers/3MF/core/model/3mf.utils.js");
-/* harmony import */ var _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./core/model/3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
+/* harmony import */ var _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core/model/3mf.utils */ "./dist/serializers/3MF/core/model/3mf.utils.js");
+/* harmony import */ var _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./core/model/3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
 /* harmony import */ var _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./core/model/3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
-/* harmony import */ var _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./core/model/3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
-/* harmony import */ var _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core/model/3mf.serializer */ "./dist/serializers/3MF/core/model/3mf.serializer.js");
-/* harmony import */ var _3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./3mfSerializer.configuration */ "./dist/serializers/3MF/3mfSerializer.configuration.js");
+/* harmony import */ var _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./core/model/3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
+/* harmony import */ var _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./core/model/3mf.serializer */ "./dist/serializers/3MF/core/model/3mf.serializer.js");
+/* harmony import */ var _3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./3mfSerializer.configuration */ "./dist/serializers/3MF/3mfSerializer.configuration.js");
+
+
+// 3MF
 
 
 
 
 
 
-
-
-class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_1__.AbstractThreeMfSerializer {
+/**
+ * Babylon.js -> 3MF serializer.
+ *
+ * This serializer converts Babylon meshes into a 3MF model, then relies on the base class
+ * (AbstractThreeMfSerializer) to package the OPC parts into a zip stream.
+ *
+ * Design notes:
+ * - First pass: export "source" meshes (non-instances) and build an index to map Babylon mesh/submesh to 3MF object id.
+ * - Second pass (optional): export instances as additional build items referencing the original object ids.
+ * - Submesh export is handled by extracting per-submesh vertex/index buffers so materials/colors can be preserved
+ *   by downstream steps that attach per-object properties.
+ */
+class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_MODULE_5__.AbstractThreeMfSerializer {
+    /**
+     * @param opts serializer options (merged with defaults in base class).
+     */
     constructor(opts = {}) {
         super({ ...BjsThreeMfSerializer.DefaultOptions, ...opts });
     }
+    /**
+     * Build a 3MF model from Babylon meshes.
+     *
+     * Important: this method should not allocate huge intermediate data unless needed.
+     * Submesh extraction does allocate new position/index arrays for each exported submesh.
+     */
     toModel(builder, meshes) {
-        const idFactory = new _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_2__.IncrementalIdFactory();
+        const idFactory = new _core_model_3mf_utils__WEBPACK_IMPORTED_MODULE_1__.IncrementalIdFactory();
         const modelBuilder = builder;
+        /**
+         * Index mapping Babylon elements to the created 3MF object.
+         *
+         * Why:
+         * - Instances need to reference the base object id.
+         * - When exporting submeshes, instances should reference per-submesh objects rather than the whole mesh.
+         *
+         * Key type:
+         * - When exportSubmeshes is true: we store entries for each SubMesh.
+         * - Otherwise: we store entries for each Mesh.
+         */
         const index = new Map();
+        /**
+         * If exportInstances is enabled, we collect instanced meshes during the first pass and process them later.
+         * If exportInstances is disabled, instances are ignored (they will not appear in the output).
+         */
         const instances = this.options.exportInstances ? [] : null;
+        // First pass: export base meshes (non-instances).
+        // This creates the "resource objects" referenced by build items.
         for (let j = 0; j < meshes.length; j++) {
             if (meshes[j].isAnInstance) {
+                // Defer instance handling to the second pass.
                 instances?.push(meshes[j]);
                 continue;
             }
             const babylonMesh = meshes[j];
             const objectName = babylonMesh.name || `mesh${j}`;
+            // Convert Babylon world matrix to 3MF build transform (3x4).
+            // This transform will be attached to the build item referencing the created object.
             const worldTransform = babylonMesh.getWorldMatrix();
             const buildTransform = this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__.Matrix3d.Zero());
+            // Submeshes can carry material/color boundaries in Babylon.
+            // When exportSubmeshes is enabled, we export each submesh as its own 3MF object so
+            // consumers can attach per-object properties (e.g. colors) later.
             if (this.options.exportSubmeshes) {
                 const subMeshes = babylonMesh.subMeshes;
                 if (subMeshes && subMeshes.length > 0) {
@@ -18142,29 +19923,42 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
                         const data = this._extractSubMesh(babylonMesh, subMesh);
                         if (data) {
                             const submeshName = `${objectName}_${k}`;
-                            const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfMeshBuilder(idFactory.next())
+                            const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_2__.ThreeMfMeshBuilder(idFactory.next())
                                 .withData(data)
                                 .withName(submeshName)
                                 .build();
+                            // Add object to resources.
                             modelBuilder.withMesh(object);
+                            // Add a build item referencing the object at the mesh world transform.
                             modelBuilder.withBuild(object.id, buildTransform);
+                            // Cache mapping for instances (instances will reference this object id).
                             index.set(subMesh, object);
                         }
                     }
                 }
+                // Note: if there are no submeshes, nothing is exported here.
+                // Depending on your expectations, you may want to fall back to exporting the whole mesh.
+                // Kept as-is to preserve current behavior.
             }
             else {
+                // Export the whole mesh as a single 3MF object.
                 const data = {
                     positions: babylonMesh.getVerticesData(BjsThreeMfSerializer._PositionKind) || [],
                     indices: babylonMesh.getIndices() || [],
                 };
-                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
+                const object = new _core_model_3mf_builder__WEBPACK_IMPORTED_MODULE_2__.ThreeMfMeshBuilder(idFactory.next()).withData(data).withName(objectName).build();
                 modelBuilder.withMesh(object);
                 modelBuilder.withBuild(object.id, buildTransform);
                 index.set(babylonMesh, object);
             }
         }
+        // Second pass: export instances as additional build items.
+        //
+        // In 3MF terms:
+        // - We do not duplicate geometry for each instance.
+        // - We emit multiple build items referencing the same object id, each with its own transform.
         if (instances && instances.length) {
+            // Group instances by their source mesh to keep related builds close in the XML.
             const grouped = this._groupBy(instances, (i) => i.sourceMesh);
             for (const [_babylonMesh, _instances] of Array.from(grouped.entries())) {
                 if (!_instances || !_instances.length) {
@@ -18173,41 +19967,70 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
                 for (let j = 0; j < _instances.length; j++) {
                     const mesh = _instances[j];
                     const worldTransform = mesh.getWorldMatrix();
+                    // If we exported submeshes, the base "resource objects" are per-submesh.
+                    // For an instance we emit a build item per submesh object.
                     const subMeshes = _babylonMesh.subMeshes;
                     if (this.options.exportSubmeshes && subMeshes && subMeshes.length > 0) {
                         for (let k = 0; k < subMeshes.length; k++) {
                             const subMesh = subMeshes[k];
+                            // Look up the 3MF object created for this submesh in the first pass.
                             const objectRef = index.get(subMesh);
                             if (objectRef) {
                                 modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__.Matrix3d.Zero()));
                                 continue;
                             }
+                            // If objectRef is missing, we skip silently.
+                            // This could happen if _extractSubMesh returned undefined earlier.
                         }
                         continue;
                     }
+                    // If we exported whole meshes, instances reference the mesh-level object.
                     const objectRef = index.get(_babylonMesh);
                     if (objectRef) {
                         modelBuilder.withBuild(objectRef.id, this._handleBjsTo3mfMatrixTransformToRef(worldTransform, _core_model_3mf_math__WEBPACK_IMPORTED_MODULE_3__.Matrix3d.Zero()));
                         continue;
                     }
+                    // If objectRef is missing, the instance is skipped.
                 }
             }
         }
         return modelBuilder.build();
     }
+    /**
+     * Ensure the zip library (fflate) is available in the current runtime.
+     *
+     * Host assumptions:
+     * - This implementation relies on fflate being exposed on globalThis.fflate.
+     * - If it is not present, it loads a script from ThreeMfSerializerGlobalConfiguration.FFLATEUrl using Babylon Tools.LoadScriptAsync.
+     */
     async ensureZipLibReadyAsync() {
         if (this._fflateReadyPromise) {
             return await this._fflateReadyPromise;
         }
         this._fflateReadyPromise = (async () => {
+            // globalThis is the global object in all modern JS runtimes (browser, workers, Node, etc.).
             const g = globalThis;
+            // If fflate is not already present, load it dynamically.
+            // This assumes the loaded script sets globalThis.fflate.
             if (!g.fflate) {
-                await _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Tools.LoadScriptAsync(_3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_5__.ThreeMfSerializerGlobalConfiguration.FFLATEUrl);
+                await _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Tools.LoadScriptAsync(_3mfSerializer_configuration__WEBPACK_IMPORTED_MODULE_6__.ThreeMfSerializerGlobalConfiguration.FFLATEUrl);
             }
             return g.fflate;
         })();
         return await this._fflateReadyPromise;
     }
+    /**
+     * Extract a single SubMesh into a standalone vertex/index buffer pair.
+     *
+     * Why:
+     * - 3MF mesh objects typically reference a contiguous vertex array and triangle indices.
+     * - Babylon SubMesh references a slice of the global index buffer, but shares the vertex buffer.
+     * - To serialize each submesh independently, we build a compacted vertex buffer containing only the used vertices
+     *   and remap indices accordingly.
+     *
+     * Complexity:
+     * - O(indexCount) time, O(uniqueVerticesInSubmesh) additional memory.
+     */
     _extractSubMesh(mesh, sm) {
         const allInd = mesh.getIndices();
         if (!allInd) {
@@ -18217,6 +20040,9 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
         if (!allPos) {
             return undefined;
         }
+        // Fast path: the submesh covers the full index buffer, so reuse the original arrays.
+        // Note: This returns Babylon-owned arrays; if callers mutate, they will affect source mesh data.
+        // Kept as-is to avoid extra allocations.
         if (sm.indexStart == 0 && sm.indexCount == allInd.length) {
             return {
                 positions: allPos,
@@ -18224,8 +20050,12 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
             };
         }
         const indStart = sm.indexStart;
+        // Map old vertex index -> new compacted vertex index.
         const map = new Map();
+        // Compacted positions (x,y,z repeated). We assemble into number[] then convert to Float32Array at the end.
         const newPositions = [];
+        // Indices for the compacted vertex buffer.
+        // Uint32Array is used to support large meshes; ensure downstream 3MF writer supports 32-bit indices if needed.
         const newIndices = new Uint32Array(sm.indexCount);
         for (let i = 0; i < sm.indexCount; i++) {
             const oldVi = allInd[indStart + i];
@@ -18233,6 +20063,8 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
             if (newVi === undefined) {
                 newVi = map.size;
                 map.set(oldVi, newVi);
+                // Copy the corresponding position (assumes positions are 3-floats per vertex).
+                // If the source mesh uses a different stride or includes morph targets, this ignores them.
                 const p = oldVi * 3;
                 newPositions.push(allPos[p], allPos[p + 1], allPos[p + 2]);
             }
@@ -18243,6 +20075,10 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
             indices: newIndices,
         };
     }
+    /**
+     * Group items by a computed key.
+     * Used to group instances by sourceMesh so the resulting XML is easier to read and debug.
+     */
     _groupBy(items, key) {
         const m = new Map();
         for (const it of items) {
@@ -18257,9 +20093,40 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
         }
         return m;
     }
+    /**
+     * Converts a Babylon.js 4x4 matrix into a 3MF 3x4 transform matrix and writes the result into ref.
+     *
+     * Babylon.js conventions:
+     * - Babylon exposes matrices with logical row/column indexing (M(row, column)).
+     * - It stores the 16 coefficients in a contiguous array in row-major order:
+     *   [ M00, M01, M02, M03,
+     *     M10, M11, M12, M13,
+     *     M20, M21, M22, M23,
+     *     M30, M31, M32, M33 ]
+     *
+     * 3MF expectation:
+     * - 3MF uses an affine transform represented as a 3x4 matrix (12 values).
+     * - The values are taken from the first 3 columns of the 4x4 matrix, across the 4 rows:
+     *   m00 m01 m02  m10 m11 m12  m20 m21 m22  m30 m31 m32
+     *
+     * Steps:
+     * 1) Compose Babylon transform with the basis change:
+     *    tmp = tBjs * _R_BJS_TO_3MF
+     * 2) Extract the 12 coefficients in 3MF order from tmp.m.
+     *
+     * Interop note:
+     * - Do not transpose here. We only reorder values to match the 3MF 3x4 serialization order.
+     * - Transposition is only relevant when interfacing with code that assumes column-major storage.
+     *
+     * @param tBjs Babylon.js 4x4 matrix.
+     * @param ref Output 3MF 3x4 matrix container (ref.values assigned).
+     * @returns ref, for chaining.
+     */
     _handleBjsTo3mfMatrixTransformToRef(tBjs, ref) {
         const tmp = tBjs.multiplyToRef(BjsThreeMfSerializer._R_BJS_TO_3MF, _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Zero());
         const a = tmp.m;
+        // a is Babylon row-major storage. Extract rows 0..3, cols 0..2 in 3MF order.
+        // 3MF order: m00 m01 m02 m10 m11 m12 m20 m21 m22 m30 m31 m32
         ref.values = [
             a[0], a[1], a[2],
             a[4], a[5], a[6],
@@ -18269,18 +20136,29 @@ class BjsThreeMfSerializer extends _core_model_3mf_serializer__WEBPACK_IMPORTED_
         return ref;
     }
 }
-BjsThreeMfSerializer.DefaultOptions = { unit: _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_6__.ST_Unit.meter, exportInstances: false, exportSubmeshes: false };
+BjsThreeMfSerializer.DefaultOptions = { unit: _core_model_3mf_interfaces__WEBPACK_IMPORTED_MODULE_4__.ST_Unit.meter, exportInstances: false, exportSubmeshes: false };
+/**
+ * Babylon's vertex buffer semantic for positions.
+ * Babylon uses string-based "kind" keys for vertex buffers.
+ */
 BjsThreeMfSerializer._PositionKind = "position";
+/**
+ * Basis conversion from Babylon coordinate system to the expected 3MF coordinate system.
+ *
+ * Here we rotate +90 degrees around X:
+ * - This is commonly used to convert between Y-up and Z-up conventions.
+ * - Verify this matches your pipeline (Babylon is typically left-handed Y-up).
+ */
 BjsThreeMfSerializer._R_BJS_TO_3MF = _babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.RotationX(Math.PI / 2).multiply(_babylonjs_core_Maths_math__WEBPACK_IMPORTED_MODULE_0__.Matrix.Scaling(1, -1, 1));
 //# sourceMappingURL=3mfSerializer.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/index.js":
+/***/ "./dist/serializers/3MF/core/index.js"
 /*!********************************************!*\
   !*** ./dist/serializers/3MF/core/index.js ***!
   \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18355,13 +20233,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.builder.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.builder.js"
 /*!********************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.builder.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18377,58 +20255,127 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _3mf_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
 /* harmony import */ var _3mf_opc__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./3mf.opc */ "./dist/serializers/3MF/core/model/3mf.opc.js");
 /* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
+// 3MF
 
 
 
 
 
+/** */
 class ThreeMfObjectBuilder {
+    /**
+     *
+     * @param id
+     * @param type
+     */
     constructor(id, type) {
         this._object = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfObject(id, type);
     }
+    /**
+     *
+     * @param name
+     * @returns
+     */
     withName(name) {
         this._object.name = name;
         return this;
     }
+    /**
+     *
+     * @param thumbnail
+     * @returns
+     */
     withThumbnail(thumbnail) {
         this._object.thumbnail = thumbnail;
         return this;
     }
+    /**
+     *
+     * @returns
+     */
     build() {
         return this._object;
     }
+    /**
+     *
+     * @param id
+     * @param type
+     */
     reset(id, type) {
         this._object = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfObject(id, type);
     }
 }
+/**
+ *
+ */
 class ThreeMfComponentsBuilder extends ThreeMfObjectBuilder {
+    /**
+     *
+     * @param id
+     * @param type
+     */
     constructor(id, type = _3mf_interfaces__WEBPACK_IMPORTED_MODULE_1__.ST_ObjectType.model) {
         super(id, type);
         this._object.content = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfComponents();
     }
+    /**
+     *
+     * @param id
+     * @param t
+     * @returns
+     */
     withComponent(id, t) {
         this._object.content.component.push(new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfComponent(id, t));
         return this;
     }
 }
+/**
+ *
+ */
 class ThreeMfMeshBuilder extends ThreeMfObjectBuilder {
+    /**
+     *
+     * @param id
+     */
     constructor(id) {
         super(id, _3mf_interfaces__WEBPACK_IMPORTED_MODULE_1__.ST_ObjectType.model);
     }
+    /**
+     *
+     * @param vertex
+     * @param triangle
+     * @returns
+     */
     withPostProcessHandlers(vertex, triangle) {
         this._vh = vertex;
         this._th = triangle;
         return this;
     }
+    /**
+     *
+     * @param data
+     * @returns
+     */
     withData(data) {
         this._object.content = this._buildMesh(data);
         return this;
     }
+    /**
+     *
+     * @param id
+     * @param i
+     * @returns
+     */
     withMaterial(id, i) {
         this._object.pid = id;
         this._object.pindex = i;
         return this;
     }
+    /**
+     *
+     * @param data
+     * @returns
+     */
     _buildMesh(data) {
         const vertices = this._buildVertices(data.positions);
         const triangles = this._buildTriangle(data.indices);
@@ -18442,6 +20389,7 @@ class ThreeMfMeshBuilder extends ThreeMfObjectBuilder {
                 const y = p[i++];
                 const z = p[i++];
                 let v = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfVertex(x, y, z);
+                // might be optimized....
                 if (this._vh) {
                     v = this._vh(v);
                 }
@@ -18458,6 +20406,7 @@ class ThreeMfMeshBuilder extends ThreeMfObjectBuilder {
                 const b = indice[i++];
                 const c = indice[i++];
                 let t = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfTriangle(a, b, c);
+                // might be optimized....
                 if (this._th) {
                     t = this._th(t);
                 }
@@ -18467,10 +20416,19 @@ class ThreeMfMeshBuilder extends ThreeMfObjectBuilder {
         return container;
     }
 }
+/**
+ *
+ */
 class ThreeMfMaterialBuilder {
     constructor(id) {
         this._m = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBaseMaterials(id);
     }
+    /**
+     *
+     * @param name
+     * @param color
+     * @returns
+     */
     withColor(name, color) {
         this._m.base = this._m.base ?? [];
         let m = this._m.base.find((m) => m.name.toLowerCase() === name.toLowerCase());
@@ -18482,22 +20440,51 @@ class ThreeMfMaterialBuilder {
         this._m.base.push(m);
         return this;
     }
+    /**
+     *
+     * @returns
+     */
     build() {
         return this._m;
     }
 }
+/**
+ *
+ */
 class ThreeMfModelBuilder {
     constructor() {
+        /**
+         *
+         */
         this._model = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfModel();
+        /**
+         *
+         */
         this._objects = new Map();
     }
+    /**
+     *
+     * @param name
+     * @param value
+     * @param preserve
+     * @param type
+     * @returns
+     */
     withMetaData(name, value, preserve, type) {
         if (!this._model.metadata) {
+            // lazzy
             this._model.metadata = new Array();
         }
+        //const isKnownMeta = (s: string): boolean => TMFBuilder.knownMetaSet.has(s.toLowerCase());
+        //const qn:IQName = xmlNameToParts(name);
         this._model.metadata.push(new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfMeta(name, value, preserve, type));
         return this;
     }
+    /**
+     *
+     * @param material
+     * @returns
+     */
     withMaterial(material) {
         if (material instanceof ThreeMfMaterialBuilder) {
             material = material.build();
@@ -18509,6 +20496,11 @@ class ThreeMfModelBuilder {
         }
         return this;
     }
+    /**
+     *
+     * @param object
+     * @returns
+     */
     withMesh(object) {
         if (object instanceof ThreeMfMeshBuilder) {
             object = object.build();
@@ -18517,6 +20509,11 @@ class ThreeMfModelBuilder {
         this._model.resources.object.push(object);
         return this;
     }
+    /**
+     *
+     * @param components
+     * @returns
+     */
     withComponents(components) {
         if (components instanceof ThreeMfComponentsBuilder) {
             components = components.build();
@@ -18525,21 +20522,42 @@ class ThreeMfModelBuilder {
         this._model.resources.object.push(components);
         return this;
     }
+    /**
+     *
+     * @param objectid
+     * @param transform
+     * @param partnumber
+     * @returns
+     */
     withBuild(objectid, transform, partnumber) {
         this._model.build = this._model.build ?? new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfBuild();
         this._model.build.item?.push(new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfItem(objectid, transform, partnumber));
         return this;
     }
+    /**
+     *
+     * @param unit
+     * @returns
+     */
     withUnit(unit) {
         this._model.unit = unit;
         return this;
     }
+    /**
+     *
+     * @returns
+     */
     reset() {
         this._model = new _3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfModel();
         this._objects = new Map();
         return this;
     }
+    /**
+     *
+     * @returns
+     */
     build() {
+        // quick surface check..
         if (!this._model.resources?.object?.length) {
             throw new Error("Invalid state: resources MUST be defined ");
         }
@@ -18549,8 +20567,19 @@ class ThreeMfModelBuilder {
         return this._model;
     }
 }
+/**
+ *
+ */
 ThreeMfModelBuilder.KnownMetaSet = new Set(_3mf__WEBPACK_IMPORTED_MODULE_0__.ThreeMfModel.KnownMeta.map((m) => m.toLowerCase()));
+/**
+ *
+ */
 class ThreeMfDocumentBuilder {
+    /**
+     *
+     * @param type
+     * @returns
+     */
     withContentType(type) {
         if (!this._cts) {
             this._cts = new _3mf_opc__WEBPACK_IMPORTED_MODULE_3__.ThreeMfContentTypes();
@@ -18561,6 +20590,11 @@ class ThreeMfDocumentBuilder {
         }
         return this;
     }
+    /**
+     *
+     * @param rel
+     * @returns
+     */
     withRelationship(rel) {
         if (!this._rs) {
             this._rs = new _3mf_opc__WEBPACK_IMPORTED_MODULE_3__.ThreeMfRelationships();
@@ -18569,14 +20603,21 @@ class ThreeMfDocumentBuilder {
         if (!arr.some((x) => x.id === rel.id)) {
             arr.push(rel);
         }
+        // here we ensure that the content type is declared.
         this.withContentType(new _3mf_opc__WEBPACK_IMPORTED_MODULE_3__.ThreeMfContentType("rels", _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.KnownI3mfContentType.Relationships));
         return this;
     }
+    /**
+     *
+     * @param m
+     * @returns
+     */
     withModel(m) {
         if (m instanceof ThreeMfModelBuilder) {
             m = m.build();
         }
         this._m = m;
+        // here we ensure that the content type is declared.
         this.withContentType(new _3mf_opc__WEBPACK_IMPORTED_MODULE_3__.ThreeMfContentType("model", _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.KnownI3mfContentType.Model));
         return this;
     }
@@ -18584,6 +20625,7 @@ class ThreeMfDocumentBuilder {
         if (!this._m) {
             throw new Error("Invalid state: you Must provide at least a model.");
         }
+        // we automate the build of the relationship if not provided..
         const path = `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.Object3dDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_4__.ModelFileName}`;
         if (!this._rs) {
             const absolutePath = `/${path}`;
@@ -18594,13 +20636,13 @@ class ThreeMfDocumentBuilder {
 }
 //# sourceMappingURL=3mf.builder.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.interfaces.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.interfaces.js"
 /*!***********************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.interfaces.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18609,8 +20651,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeDimModelNamespace: () => (/* binding */ ThreeDimModelNamespace),
 /* harmony export */   TriangleSetsNamespace: () => (/* binding */ TriangleSetsNamespace)
 /* harmony export */ });
+/**
+ * XML namespace for the core 3MF model schema.
+ * This is the default namespace used by <model> and most standard 3MF elements.
+ */
 const ThreeDimModelNamespace = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02";
+/**
+ * XML namespace for the TriangleSets extension (2021/07).
+ * This extension is used for more advanced triangle/property use cases.
+ * Only declare/use it when you actually emit elements/attributes that require it.
+ */
 const TriangleSetsNamespace = "http://schemas.microsoft.com/3dmanufacturing/trianglesets/2021/07";
+/* eslint-disable @typescript-eslint/naming-convention */
+/**
+ * 3MF model units.
+ * The unit affects interpretation of vertex coordinates (x,y,z).
+ * Most pipelines use millimeter, but the writer should match the upstream scene unit expectations.
+ */
 var ST_Unit;
 (function (ST_Unit) {
     ST_Unit["micron"] = "micron";
@@ -18620,6 +20677,10 @@ var ST_Unit;
     ST_Unit["foot"] = "foot";
     ST_Unit["meter"] = "meter";
 })(ST_Unit || (ST_Unit = {}));
+/**
+ * Standard 3MF object type.
+ * This is optional in 3MF; if omitted, consumers often treat it as "model".
+ */
 var ST_ObjectType;
 (function (ST_ObjectType) {
     ST_ObjectType["model"] = "model";
@@ -18630,13 +20691,13 @@ var ST_ObjectType;
 })(ST_ObjectType || (ST_ObjectType = {}));
 //# sourceMappingURL=3mf.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.js"
 /*!************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18657,38 +20718,53 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMfVertex: () => (/* binding */ ThreeMfVertex),
 /* harmony export */   ThreeMfVertices: () => (/* binding */ ThreeMfVertices)
 /* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../../../node_modules/tslib/tslib.es6.mjs");
 /* harmony import */ var _xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
-/* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
-/* harmony import */ var _3mf_math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
-var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
+/* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
+/* harmony import */ var _3mf_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./3mf.math */ "./dist/serializers/3MF/core/model/3mf.math.js");
 
 
 
+
+/**
+ *
+ */
 let ThreeMfModel = class ThreeMfModel {
     constructor() {
-        this.unit = _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_Unit.millimeter;
+        /**
+         *
+         */
+        this.unit = _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ST_Unit.millimeter;
     }
 };
+/**
+ *
+ */
 ThreeMfModel.KnownMeta = ["Title", "Designer", "Description", "Copyright", "LicenseTerms", "Rating", "CreationDate", "ModificationDate", "Application"];
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "unit" })
 ], ThreeMfModel.prototype, "unit", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "requiredextensions" })
 ], ThreeMfModel.prototype, "requiredextensions", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "recommendedextensions" })
 ], ThreeMfModel.prototype, "recommendedextensions", void 0);
-ThreeMfModel = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "model" })
+ThreeMfModel = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "model" })
 ], ThreeMfModel);
 
+/**
+ *
+ */
 let ThreeMfMeta = class ThreeMfMeta {
+    /**
+     *
+     * @param name
+     * @param value
+     * @param preserve
+     * @param type
+     */
     constructor(name, value, preserve, type) {
         this.name = name;
         this.value = value;
@@ -18696,87 +20772,114 @@ let ThreeMfMeta = class ThreeMfMeta {
         this.type = type;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "name" })
 ], ThreeMfMeta.prototype, "name", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "preserve" })
 ], ThreeMfMeta.prototype, "preserve", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "type" })
 ], ThreeMfMeta.prototype, "type", void 0);
-ThreeMfMeta = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "meta" })
+ThreeMfMeta = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "meta" })
 ], ThreeMfMeta);
 
+/**
+ *
+ */
 let ThreeMfMetadataGroup = class ThreeMfMetadataGroup {
     constructor() {
+        /**
+         *
+         */
         this.metadata = [];
     }
 };
-ThreeMfMetadataGroup = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "metadatagroup" })
+ThreeMfMetadataGroup = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "metadatagroup" })
 ], ThreeMfMetadataGroup);
 
+/**
+ *
+ */
 let ThreeMfResources = class ThreeMfResources {
     constructor() {
+        /**
+         *
+         */
         this.object = [];
     }
 };
-ThreeMfResources = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "resources" })
+ThreeMfResources = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "resources" })
 ], ThreeMfResources);
 
+/**
+ *
+ */
 let ThreeMfObject = class ThreeMfObject {
-    constructor(id, type = _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ST_ObjectType.model) {
+    constructor(id, type = _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ST_ObjectType.model) {
         this.id = id;
         this.type = type;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "id" })
 ], ThreeMfObject.prototype, "id", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "type" })
 ], ThreeMfObject.prototype, "type", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "thumbnail" })
 ], ThreeMfObject.prototype, "thumbnail", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "partnumber" })
 ], ThreeMfObject.prototype, "partnumber", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "name" })
 ], ThreeMfObject.prototype, "name", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "pid" })
 ], ThreeMfObject.prototype, "pid", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "pindex" })
 ], ThreeMfObject.prototype, "pindex", void 0);
-ThreeMfObject = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "object" })
+ThreeMfObject = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "object" })
 ], ThreeMfObject);
 
+/**
+ *
+ */
 let ThreeMfMesh = class ThreeMfMesh {
     constructor(vertices, triangles) {
         this.vertices = vertices ?? new ThreeMfVertices();
         this.triangles = triangles ?? new ThreeMfTriangles();
     }
 };
-ThreeMfMesh = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "mesh" })
+ThreeMfMesh = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "mesh" })
 ], ThreeMfMesh);
 
+/**
+ *
+ */
 let ThreeMfVertices = class ThreeMfVertices {
     constructor() {
+        /**
+         *
+         */
         this.vertex = [];
     }
 };
-ThreeMfVertices = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "vertices" })
+ThreeMfVertices = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "vertices" })
 ], ThreeMfVertices);
 
+/**
+ *
+ */
 let ThreeMfVertex = class ThreeMfVertex {
     constructor(x = 0, y = 0, z = 0) {
         this.x = x;
@@ -18784,28 +20887,37 @@ let ThreeMfVertex = class ThreeMfVertex {
         this.z = z;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "x" })
 ], ThreeMfVertex.prototype, "x", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "y" })
 ], ThreeMfVertex.prototype, "y", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "z" })
 ], ThreeMfVertex.prototype, "z", void 0);
-ThreeMfVertex = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "vertex" })
+ThreeMfVertex = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "vertex" })
 ], ThreeMfVertex);
 
+/**
+ *
+ */
 let ThreeMfTriangles = class ThreeMfTriangles {
     constructor() {
+        /**
+         *
+         */
         this.triangle = [];
     }
 };
-ThreeMfTriangles = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "triangles" })
+ThreeMfTriangles = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "triangles" })
 ], ThreeMfTriangles);
 
+/**
+ *
+ */
 let ThreeMfTriangle = class ThreeMfTriangle {
     constructor(v1, v2, v3) {
         this.v1 = v1;
@@ -18813,94 +20925,121 @@ let ThreeMfTriangle = class ThreeMfTriangle {
         this.v3 = v3;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "v1" })
 ], ThreeMfTriangle.prototype, "v1", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "v2" })
 ], ThreeMfTriangle.prototype, "v2", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "v3" })
 ], ThreeMfTriangle.prototype, "v3", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "p1" })
 ], ThreeMfTriangle.prototype, "p1", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "p2" })
 ], ThreeMfTriangle.prototype, "p2", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "p3" })
 ], ThreeMfTriangle.prototype, "p3", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "pid" })
 ], ThreeMfTriangle.prototype, "pid", void 0);
-ThreeMfTriangle = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "triangle" })
+ThreeMfTriangle = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "triangle" })
 ], ThreeMfTriangle);
 
+/**
+ *
+ */
 let ThreeMfComponents = class ThreeMfComponents {
     constructor() {
+        /**
+         *
+         */
         this.component = [];
     }
 };
-ThreeMfComponents = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "components" })
+ThreeMfComponents = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "components" })
 ], ThreeMfComponents);
 
+/**
+ *
+ */
 let ThreeMfComponent = class ThreeMfComponent {
     constructor(objectid, transform) {
         this.objectid = objectid;
         this.transform = transform;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "objectid" })
 ], ThreeMfComponent.prototype, "objectid", void 0);
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform", formatter: _3mf_math__WEBPACK_IMPORTED_MODULE_2__.MatrixFormatter })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform", formatter: _3mf_math__WEBPACK_IMPORTED_MODULE_3__.MatrixFormatter })
 ], ThreeMfComponent.prototype, "transform", void 0);
-ThreeMfComponent = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "component" })
+ThreeMfComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "component" })
 ], ThreeMfComponent);
 
+/**
+ *
+ */
 let ThreeMfBaseMaterials = class ThreeMfBaseMaterials {
     constructor(id) {
+        /**
+         *
+         */
         this.base = [];
         this.id = id;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "id" })
 ], ThreeMfBaseMaterials.prototype, "id", void 0);
-ThreeMfBaseMaterials = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "basematerials" })
+ThreeMfBaseMaterials = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "basematerials" })
 ], ThreeMfBaseMaterials);
 
+/**
+ *
+ */
 let ThreeMfBase = class ThreeMfBase {
     constructor(name, displaycolor) {
         this.name = name;
         this.displaycolor = displaycolor;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "name" })
 ], ThreeMfBase.prototype, "name", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "displaycolor" })
 ], ThreeMfBase.prototype, "displaycolor", void 0);
-ThreeMfBase = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "base" })
+ThreeMfBase = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "base" })
 ], ThreeMfBase);
 
+/**
+ *
+ */
 let ThreeMfBuild = class ThreeMfBuild {
     constructor() {
+        /**
+         *
+         */
         this.item = [];
     }
 };
-ThreeMfBuild = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "build" })
+ThreeMfBuild = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "build" })
 ], ThreeMfBuild);
 
+/**
+ *
+ */
 let ThreeMfItem = class ThreeMfItem {
     constructor(objectid, transform, partnumber) {
         this.objectid = objectid;
@@ -18908,28 +21047,28 @@ let ThreeMfItem = class ThreeMfItem {
         this.partnumber = partnumber;
     }
 };
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "objectid" })
 ], ThreeMfItem.prototype, "objectid", void 0);
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform", formatter: _3mf_math__WEBPACK_IMPORTED_MODULE_2__.MatrixFormatter })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "transform", formatter: _3mf_math__WEBPACK_IMPORTED_MODULE_3__.MatrixFormatter })
 ], ThreeMfItem.prototype, "transform", void 0);
-__decorate([
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
     (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "partnumber" })
 ], ThreeMfItem.prototype, "partnumber", void 0);
-ThreeMfItem = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_0__.ThreeDimModelNamespace, name: "item" })
+ThreeMfItem = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ThreeDimModelNamespace, name: "item" })
 ], ThreeMfItem);
 
 //# sourceMappingURL=3mf.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.math.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.math.js"
 /*!*****************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.math.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18939,13 +21078,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _xml__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml */ "./dist/serializers/3MF/core/xml/xml.serializer.format.js");
 
+/**
+ *
+ */
 class Matrix3d {
+    /**
+     *
+     * @returns
+     */
     static Zero() {
         return new Matrix3d([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     }
+    /**
+     *
+     * @param values
+     */
     constructor(values) {
         this.values = values;
     }
+    /**
+     *
+     * @returns
+     */
     toString() {
         return this.values.join(" ");
     }
@@ -18959,6 +21113,11 @@ class MatrixFormatter {
         return x.values.map(v => this._f.toString(v)).join(" ");
     }
 }
+/**
+ *
+ * @param c
+ * @returns
+ */
 function RgbaToHex(c) {
     const toSRGB = (c) => Math.round(Math.min(255, Math.max(0, Math.pow(c, 1 / 2.2) * 255)));
     const r = toSRGB(c.r).toString(16).padStart(2, "0").toUpperCase();
@@ -18975,13 +21134,13 @@ function RgbaToHex(c) {
 }
 //# sourceMappingURL=3mf.math.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js"
 /*!***************************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.opc.interfaces.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -18999,8 +21158,11 @@ const OpenXmlContentTypesNamespace = "http://schemas.openxmlformats.org/package/
 const OpenXmlRelationshipsNamespace = "http://schemas.openxmlformats.org/package/2006/relationships";
 var KnownI3mfContentType;
 (function (KnownI3mfContentType) {
+    // OPC core
     KnownI3mfContentType["Relationships"] = "application/vnd.openxmlformats-package.relationships+xml";
+    // 3MF core
     KnownI3mfContentType["Model"] = "application/vnd.ms-package.3dmanufacturing-3dmodel+xml";
+    // Extensions officielles
     KnownI3mfContentType["Materials"] = "application/vnd.ms-package.3dmanufacturing-material+xml";
     KnownI3mfContentType["Colors"] = "application/vnd.ms-package.3dmanufacturing-colors+xml";
     KnownI3mfContentType["Texture"] = "application/vnd.ms-package.3dmanufacturing-texture+xml";
@@ -19009,6 +21171,7 @@ var KnownI3mfContentType;
     KnownI3mfContentType["Slice"] = "application/vnd.ms-package.3dmanufacturing-slice+xml";
     KnownI3mfContentType["BeamLattice"] = "application/vnd.ms-package.3dmanufacturing-beamlattice+xml";
     KnownI3mfContentType["SecureContent"] = "application/vnd.ms-package.3dmanufacturing-securecontent+xml";
+    // Assets
     KnownI3mfContentType["Png"] = "image/png";
     KnownI3mfContentType["Jpeg"] = "image/jpeg";
     KnownI3mfContentType["Tiff"] = "image/tiff";
@@ -19019,18 +21182,46 @@ const Object3dDirName = "3D/";
 const ModelFileName = `3dmodel.model`;
 const RelationshipFileName = `.rels`;
 const ContentTypeFileName = "[Content_Types].xml";
+/**
+ * Common OPC and 3MF relationship Type URIs.
+ */
 class Known3mfRelationshipTypes {
+    /**
+     * Test if the relationship Type is one of the common known URIs above
+     * @param type
+     * @returns true if the relationship Type is one of the common known URIs above
+     */
     static IsKnown(type) {
         return Known3mfRelationshipTypes.Known.has(type);
     }
+    /**
+     * test if the relationship Type is the main 3MF model entry point
+     * @param type
+     * @returns  true if the relationship Type is the main 3MF model entry point
+     */
     static IsThreeDimModel(type) {
         return type === Known3mfRelationshipTypes.ThreeDimModel;
     }
 }
+/**
+ * 3MF core: points to the main .model part of the package
+ */
 Known3mfRelationshipTypes.ThreeDimModel = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+/**
+ * OPC core: points to a package thumbnail (often used by 3MF packages)
+ */
 Known3mfRelationshipTypes.Thumbnail = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
+/**
+ * 3MF (print ticket): optional printing settings part (rarely used by slicers)
+ */
 Known3mfRelationshipTypes.PrintTicket = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
+/**
+ * OPC core: indicates parts that must be preserved when editing the package
+ */
 Known3mfRelationshipTypes.MustPreserve = "http://schemas.openxmlformats.org/package/2006/relationships/mustpreserve";
+/**
+ * Convenience set for quick checks
+ */
 Known3mfRelationshipTypes.Known = new Set([
     Known3mfRelationshipTypes.ThreeDimModel,
     Known3mfRelationshipTypes.Thumbnail,
@@ -19039,13 +21230,13 @@ Known3mfRelationshipTypes.Known = new Set([
 ]);
 //# sourceMappingURL=3mf.opc.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.opc.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.opc.js"
 /*!****************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.opc.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -19055,50 +21246,69 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ThreeMfRelationship: () => (/* binding */ ThreeMfRelationship),
 /* harmony export */   ThreeMfRelationships: () => (/* binding */ ThreeMfRelationships)
 /* harmony export */ });
-/* harmony import */ var _xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml/xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
-/* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
-var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../../../node_modules/tslib/tslib.es6.mjs");
+/* harmony import */ var _xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
+/* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
 
 
+
+/**
+ *
+ */
 let ThreeMfContentTypes = class ThreeMfContentTypes {
     constructor() {
+        /**
+         *
+         */
         this.items = [];
     }
 };
-ThreeMfContentTypes = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlContentTypesNamespace, name: "Types" })
+ThreeMfContentTypes = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__.OpenXmlContentTypesNamespace, name: "Types" })
 ], ThreeMfContentTypes);
 
+/**
+ *
+ */
 let ThreeMfContentType = class ThreeMfContentType {
+    /**
+     *
+     * @param ext
+     * @param ct
+     */
     constructor(ext, ct) {
         this.ext = ext;
         this.ct = ct;
     }
 };
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: { ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlContentTypesNamespace, name: "Extension" } })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: { ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__.OpenXmlContentTypesNamespace, name: "Extension" } })
 ], ThreeMfContentType.prototype, "ext", void 0);
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: { ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlContentTypesNamespace, name: "ContentType" } })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: { ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__.OpenXmlContentTypesNamespace, name: "ContentType" } })
 ], ThreeMfContentType.prototype, "ct", void 0);
-ThreeMfContentType = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlContentTypesNamespace, name: "Default" })
+ThreeMfContentType = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__.OpenXmlContentTypesNamespace, name: "Default" })
 ], ThreeMfContentType);
 
+/**
+ *
+ */
 let ThreeMfRelationships = class ThreeMfRelationships {
     constructor() {
+        /**
+         *
+         */
         this.items = [];
     }
 };
-ThreeMfRelationships = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlRelationshipsNamespace, name: "Relationships" })
+ThreeMfRelationships = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__.OpenXmlRelationshipsNamespace, name: "Relationships" })
 ], ThreeMfRelationships);
 
+/**
+ *
+ */
 let ThreeMfRelationship = class ThreeMfRelationship {
     constructor(id, type, target) {
         this.id = id;
@@ -19106,19 +21316,22 @@ let ThreeMfRelationship = class ThreeMfRelationship {
         this.target = target;
     }
 };
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: "Id" })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "Id" })
 ], ThreeMfRelationship.prototype, "id", void 0);
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: "Type" })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "Type" })
 ], ThreeMfRelationship.prototype, "type", void 0);
-__decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlAttr)({ name: "Target" })
+(0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlAttr)({ name: "Target" })
 ], ThreeMfRelationship.prototype, "target", void 0);
-ThreeMfRelationship = __decorate([
-    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.OpenXmlRelationshipsNamespace, name: "Relationship" })
+ThreeMfRelationship = (0,tslib__WEBPACK_IMPORTED_MODULE_0__.__decorate)([
+    (0,_xml_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlName)({ ns: _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_2__.OpenXmlRelationshipsNamespace, name: "Relationship" })
 ], ThreeMfRelationship);
 
+/**
+ *
+ */
 class ThreeMfDocument {
     constructor(contentTypes, relationships, model) {
         this.contentTypes = contentTypes;
@@ -19128,88 +21341,172 @@ class ThreeMfDocument {
 }
 //# sourceMappingURL=3mf.opc.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.serializer.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.serializer.js"
 /*!***********************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.serializer.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractThreeMfSerializer: () => (/* binding */ AbstractThreeMfSerializer),
 /* harmony export */   ThreeMf: () => (/* binding */ ThreeMf)
 /* harmony export */ });
-/* harmony import */ var _3mf_builder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
-/* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
-/* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
-/* harmony import */ var _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../xml/xml.builder */ "./dist/serializers/3MF/core/xml/xml.builder.js");
-/* harmony import */ var _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../xml/xml.serializer */ "./dist/serializers/3MF/core/xml/xml.serializer.js");
-/* harmony import */ var _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../xml/xml.builder.bytes */ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js");
+/* harmony import */ var _3mf_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3mf.builder */ "./dist/serializers/3MF/core/model/3mf.builder.js");
+/* harmony import */ var _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./3mf.opc.interfaces */ "./dist/serializers/3MF/core/model/3mf.opc.interfaces.js");
+/* harmony import */ var _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./3mf.interfaces */ "./dist/serializers/3MF/core/model/3mf.interfaces.js");
+/* harmony import */ var _xml_xml_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../xml/xml.builder */ "./dist/serializers/3MF/core/xml/xml.builder.js");
+/* harmony import */ var _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../xml/xml.serializer */ "./dist/serializers/3MF/core/xml/xml.serializer.js");
+/* harmony import */ var _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../xml/xml.builder.bytes */ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js");
+// 3MF
 
 
 
+// XML
 
 
 
+/**
+ * Base class for 3MF serialization.
+ *
+ * Responsibilities:
+ * - Convert user meshes to a 3MF model (toModel).
+ * - Wrap the 3MF document parts into an OPC container (zip) and stream bytes through the sink.
+ *
+ * Non-responsibilities:
+ * - Providing/initializing the zip implementation (ensureZipLibReadyAsync is abstract).
+ * - Defining how meshes map to 3MF objects (toModel is abstract).
+ */
 class AbstractThreeMfSerializer {
+    /**
+     * @param opts user-provided options overriding defaults.
+     */
     constructor(opts) {
         this._o = opts;
     }
+    /**
+     * Expose the resolved options (defaults + overrides) as readonly.
+     */
     get options() {
         return this._o;
     }
+    /**
+     * Generic 3MF binary serializer.
+     *
+     * @param meshes the meshes to serialize.
+     * @param sink a callback receiving byte chunks; enables streaming without buffering the full archive in memory.
+     *
+     * Pipeline overview:
+     * 1. ensureZipLibReadyAsync provides a zip implementation (host-dependent).
+     * 2. Convert meshes into an I3mfDocument (OPC parts + model).
+     * 3. Create a zip target that streams through the provided sink.
+     * 4. Serialize XML parts into zip entries.
+     * 5. End the zip stream.
+     */
     async serializeAsync(sink, ...meshes) {
+        // The zip library (e.g. fflate) may need dynamic import / polyfills depending on host.
+        // This is delegated to the concrete serializer implementation.
         const lib = await this.ensureZipLibReadyAsync();
+        // If no lib is available, we silently do nothing today.
+        // Consider: throwing could be better to fail fast. Kept as-is to preserve current behavior.
         if (!lib) {
             return;
         }
         const zip = lib.Zip;
         const zipDeflate = lib.ZipDeflate;
+        // We expect a "fflate-like" API. If it is missing, fail with an explicit error.
         if (!zip || !zipDeflate) {
             throw new Error("fflate Zip / ZipDeflate not available");
         }
+        /**
+         * Adapt a fflate entry to our ByteSink interface used by Utf8XmlWriterToBytes.
+         *
+         * fflate entry.push(chunk, final) is the writer endpoint for compressed bytes.
+         */
         const makeByteSinkFromFflateEntry = function (entry) {
             return { push: (chunk, final) => entry.push(chunk, final) };
         };
+        /**
+         * Serialize an in-memory XML object into a compressed zip entry.
+         *
+         * Notes:
+         * - "object" here is expected to be a structure understood by XmlSerializer.
+         * - Compression level 6 is a reasonable default for speed/size tradeoff.
+         */
         const serializeEntry = function (target, name, object) {
             const entry = new zipDeflate(name, { level: 6 });
             target.add(entry);
+            // Convert XmlSerializer output into UTF-8 bytes and push to the zip entry.
             const sink = makeByteSinkFromFflateEntry(entry);
-            const w = new _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_0__.Utf8XmlWriterToBytes(sink);
-            const b = new _xml_xml_builder__WEBPACK_IMPORTED_MODULE_1__.XmlBuilder(w).dec("1.0", "UTF-8");
-            const s = new _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_2__.XmlSerializer(b);
+            const w = new _xml_xml_builder_bytes__WEBPACK_IMPORTED_MODULE_5__.Utf8XmlWriterToBytes(sink);
+            // Build XML declaration and serialize.
+            const b = new _xml_xml_builder__WEBPACK_IMPORTED_MODULE_3__.XmlBuilder(w).dec("1.0", "UTF-8");
+            const s = new _xml_xml_serializer__WEBPACK_IMPORTED_MODULE_4__.XmlSerializer(b);
             s.serialize(object);
+            // Ensure the writer flushes any pending bytes and closes the stream for this entry.
             w.finish();
         };
+        // Convert meshes into a 3MF document (content types + relationships + model part).
         const doc = this.toDocument(meshes);
         if (!doc) {
+            // Nothing to write. Current behavior: no zip output.
             return;
         }
+        // Create the zip container. It will forward produced bytes to the provided sink.
         const target = new zip(sink);
-        serializeEntry(target, _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ContentTypeFileName, doc.contentTypes);
-        serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.RelationshipFileName}`, doc.relationships);
-        serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.Object3dDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_3__.ModelFileName}`, doc.model);
+        // Save the root content types part.
+        // In OPC, [Content_Types].xml defines the MIME/content types for the package parts.
+        serializeEntry(target, _3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.ContentTypeFileName, doc.contentTypes);
+        // Save relationships.
+        // In OPC, relationships live under _rels and map parts to each other.
+        serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.RelationshipDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.RelationshipFileName}`, doc.relationships);
+        // Save the 3D model part.
+        // In 3MF, the main model is typically under /3D/3dmodel.model.
+        serializeEntry(target, `${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.Object3dDirName}${_3mf_opc_interfaces__WEBPACK_IMPORTED_MODULE_1__.ModelFileName}`, doc.model);
+        // Finalize the archive stream.
+        // This should trigger the zip implementation to call sink(..., final=true) when done.
         target.end();
     }
+    /**
+     * Build a full 3MF OPC document from meshes.
+     *
+     * The default behavior uses ThreeMfDocumentBuilder with the model produced by toModel().
+     * Override if you need custom parts (textures, thumbnails, print ticket, etc.).
+     */
     toDocument(meshes) {
-        const b = new _3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfModelBuilder().withUnit(this._o?.unit ?? _3mf_interfaces__WEBPACK_IMPORTED_MODULE_5__.ST_Unit.millimeter);
-        return new _3mf_builder__WEBPACK_IMPORTED_MODULE_4__.ThreeMfDocumentBuilder().withModel(this.toModel(b, meshes)).build();
+        const b = new _3mf_builder__WEBPACK_IMPORTED_MODULE_0__.ThreeMfModelBuilder().withUnit(this._o?.unit ?? _3mf_interfaces__WEBPACK_IMPORTED_MODULE_2__.ST_Unit.millimeter);
+        return new _3mf_builder__WEBPACK_IMPORTED_MODULE_0__.ThreeMfDocumentBuilder().withModel(this.toModel(b, meshes)).build();
     }
 }
+/**
+ * Convenience helpers around serializers.
+ */
 class ThreeMf {
+    /**
+     * Serialize to a single in-memory buffer.
+     *
+     * This is a helper that buffers all chunks produced by serializeAsync, then concatenates them.
+     * Use serializeAsync directly if you want true streaming to a file/response.
+     */
     static async SerializeToMemoryAsync(s, ...meshes) {
         const chunks = new Array();
         let size = 0;
+        // Sink used by the zip stream. We ignore `final` because we buffer everything anyway.
+        // If `err` is used by the underlying zip lib, callers may want to detect/throw here.
         const sink = function (err, chunk, _final) {
+            // Current behavior: ignore err and keep accumulating.
+            // Consider: if err is non-null, you might want to throw or record it.
             chunks.push(chunk);
             size += chunk.length;
         };
         await s.serializeAsync(sink, ...meshes);
+        // If nothing was written, return undefined (matches current behavior).
         if (!size) {
             return undefined;
         }
+        // Concatenate chunks into a single Uint8Array.
         const buffer = new Uint8Array(size);
         let off = 0;
         for (const c of chunks) {
@@ -19221,25 +21518,38 @@ class ThreeMf {
 }
 //# sourceMappingURL=3mf.serializer.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/3mf.utils.js":
+/***/ "./dist/serializers/3MF/core/model/3mf.utils.js"
 /*!******************************************************!*\
   !*** ./dist/serializers/3MF/core/model/3mf.utils.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IncrementalIdFactory: () => (/* binding */ IncrementalIdFactory)
 /* harmony export */ });
+/**
+ *
+ */
 class IncrementalIdFactory {
+    /**
+     *
+     * @param from
+     * @param to
+     * @param step
+     */
     constructor(from = 0, to = Number.MIN_SAFE_INTEGER, step = 1) {
         this._from = from;
         this._to = to;
         this._step = step;
         this._i = from;
     }
+    /**
+     *
+     * @returns
+     */
     next() {
         if (this._i < this._to) {
             throw new Error("ST_ResourceID out of bound");
@@ -19248,6 +21558,10 @@ class IncrementalIdFactory {
         this._i += this._step;
         return v;
     }
+    /**
+     *
+     * @returns
+     */
     reset() {
         this._i = this._from;
         return this;
@@ -19255,13 +21569,13 @@ class IncrementalIdFactory {
 }
 //# sourceMappingURL=3mf.utils.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/model/index.js":
+/***/ "./dist/serializers/3MF/core/model/index.js"
 /*!**************************************************!*\
   !*** ./dist/serializers/3MF/core/model/index.js ***!
   \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -19328,13 +21642,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/index.js":
+/***/ "./dist/serializers/3MF/core/xml/index.js"
 /*!************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/index.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -19372,27 +21686,33 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js":
+/***/ "./dist/serializers/3MF/core/xml/xml.builder.bytes.js"
 /*!************************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/xml.builder.bytes.js ***!
   \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Utf8XmlWriterToBytes: () => (/* binding */ Utf8XmlWriterToBytes)
 /* harmony export */ });
+/** */
 class Utf8XmlWriterToBytes {
     constructor(_sink, _opts = {}) {
         this._sink = _sink;
         this._opts = _opts;
+        /** */
         this.count = 0;
         this._encoder = new TextEncoder();
         this._pending = "";
         this._pendingChars = 0;
     }
+    /**
+     * @param data
+     * @returns
+     */
     write(...data) {
         if (data.length === 0) {
             return this;
@@ -19409,6 +21729,9 @@ class Utf8XmlWriterToBytes {
         }
         return this;
     }
+    /**
+     * @returns
+     */
     flush() {
         if (this._pendingChars === 0) {
             return this;
@@ -19420,10 +21743,14 @@ class Utf8XmlWriterToBytes {
         this._pendingChars = 0;
         return this;
     }
+    /**
+     */
     finish() {
         this.flush();
         this._sink.push(new Uint8Array(0), true);
     }
+    /**
+     */
     clear() {
         this._pending = "";
         this._pendingChars = 0;
@@ -19432,19 +21759,20 @@ class Utf8XmlWriterToBytes {
 }
 //# sourceMappingURL=xml.builder.bytes.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/xml.builder.js":
+/***/ "./dist/serializers/3MF/core/xml/xml.builder.js"
 /*!******************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/xml.builder.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TokenType: () => (/* binding */ TokenType),
 /* harmony export */   XmlBuilder: () => (/* binding */ XmlBuilder)
 /* harmony export */ });
+/** */
 class XmlSyntax {
 }
 XmlSyntax.OpenTag = "<";
@@ -19469,9 +21797,12 @@ var TokenType;
     TokenType[TokenType["Attribute"] = 2] = "Attribute";
     TokenType[TokenType["Text"] = 3] = "Text";
 })(TokenType || (TokenType = {}));
+/** */
 class XmlBuilder {
     constructor(w) {
+        /** */
         this._ctxStack = [];
+        /** */
         this._d = 0;
         this._w = w;
     }
@@ -19495,15 +21826,18 @@ class XmlBuilder {
         if (ctx.closed) {
             throw new Error(`att() after start tag closed for <${ctx.name}>`);
         }
+        // explicit namespace declaration: xmlns or xmlns:prefix
         if (this._isXmlnsDecl(ns, n)) {
             if (n === XmlSyntax.Xmlns) {
+                // default namespace
                 ctx.defaultNs = v;
+                // you can store default as empty prefix if you want
                 this._registerNamespace(ctx, "", v);
                 this._writeAttStr(XmlSyntax.Xmlns, v);
             }
             else {
                 if (!ns) {
-                    const prefix = n.slice(6);
+                    const prefix = n.slice(6); // "xmlns:"
                     this._registerNamespace(ctx, prefix, v);
                     this._writeAttStr(n, v);
                 }
@@ -19515,8 +21849,10 @@ class XmlBuilder {
             ctx.lastToken = TokenType.Attribute;
             return this;
         }
+        // normal attribute
         let qn = n;
         if (ns) {
+            // treat ns as a namespace URI, not a prefix
             const p = this._ensurePrefixDeclared(ctx, ns);
             qn = `${p}:${n}`;
         }
@@ -19640,6 +21976,7 @@ class XmlBuilder {
             throw new Error(`can not declare namespace after start tag closed for <${ctx.name}>`);
         }
         const prefix = this._allocPrefix(ctx);
+        // write xmlns:prefix="uri" and register it
         this._writeAttStr(`${XmlSyntax.Xmlns}:${prefix}`, uri);
         this._registerNamespace(ctx, prefix, uri);
         return prefix;
@@ -19651,13 +21988,17 @@ class XmlBuilder {
         }
     }
 }
+/** */
 XmlBuilder.Context = class {
     constructor(name, depth) {
         this.name = "";
         this.closed = false;
         this.lastToken = null;
+        // uri -> prefix
         this.ns2prefix = new Map();
+        // prefix -> uri (for conflict checks)
         this.prefix2ns = new Map();
+        // optional: default namespace uri
         this.defaultNs = null;
         this.name = name;
         this.depth = depth;
@@ -19665,35 +22006,47 @@ XmlBuilder.Context = class {
 };
 //# sourceMappingURL=xml.builder.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/xml.builder.string.js":
+/***/ "./dist/serializers/3MF/core/xml/xml.builder.string.js"
 /*!*************************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/xml.builder.string.js ***!
   \*************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   StringXmlWriter: () => (/* binding */ StringXmlWriter)
 /* harmony export */ });
+/** */
 class StringXmlWriter {
     constructor() {
+        /** */
         this.count = 0;
         this._chunks = [];
     }
+    /**
+     * @param data
+     * @returns
+     */
     write(...data) {
         if (data.length === 0) {
             return this;
         }
+        // join once per call, keeps DOM out, very fast
         const s = data.join("");
         this._chunks.push(s);
         this.count += s.length;
         return this;
     }
+    /**
+     * @returns
+     */
     toString() {
         return this._chunks.join("");
     }
+    /**
+     */
     clear() {
         this._chunks = [];
         this.count = 0;
@@ -19701,13 +22054,13 @@ class StringXmlWriter {
 }
 //# sourceMappingURL=xml.builder.string.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/xml.interfaces.js":
+/***/ "./dist/serializers/3MF/core/xml/xml.interfaces.js"
 /*!*********************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/xml.interfaces.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -19721,6 +22074,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   XmlName: () => (/* binding */ XmlName),
 /* harmony export */   XmlNameToParts: () => (/* binding */ XmlNameToParts)
 /* harmony export */ });
+/**
+ * @param x
+ * @returns
+ */
 function IsQualifiedName(x) {
     return typeof x?.name === "string";
 }
@@ -19730,30 +22087,69 @@ function AddXmlMeta(target, meta) {
     const ctor = target.constructor;
     (ctor[XML_CLASS_META] ??= []).push(meta);
 }
+/**
+ * @param name
+ * @returns
+ */
 function XmlName(name) {
     return (ctor) => {
         ctor[XML_CLASS_NAME] = name;
     };
 }
+/**
+ * tell the serializer to ignore the property
+ * @returns
+ */
 function XmlIgnore() {
     return (target, prop) => AddXmlMeta(target, { kind: "none", prop, ignore: true });
 }
+/**
+ * tell the serializer to serialize the property as attribute
+ * @returns
+ */
 function XmlAttr(opts) {
     return (target, prop) => AddXmlMeta(target, { kind: "attr", prop, ...opts });
 }
+/**
+ * tell the serializer to serialize the property as element - this is the default behavior but shoud be
+ * specified when wanted to update the default name of the classe or if the class is not decorated (without \@XmlName)
+ * @returns
+ */
 function XmlElem(opts) {
     return (target, prop) => AddXmlMeta(target, { kind: "elem", prop, ...opts });
 }
+/**
+ *
+ * @param obj
+ * @returns
+ */
 function GetXmlFieldMeta(obj) {
     return (obj?.constructor?.[XML_CLASS_META] ?? []);
 }
+/**
+ *
+ * @param obj
+ * @returns
+ */
 function GetXmlName(obj) {
     const n = obj?.constructor?.[XML_CLASS_NAME];
     return n ? n : undefined;
 }
+/**
+ *
+ * @param s
+ * @returns
+ */
 function LooksLikeXmlNcName(s) {
+    // Approximation ASCII de NCName: pas de ":" et demarre par lettre ou underscore
+    // Puis lettres/chiffres/underscore/point/tiret.
     return /^[A-Za-z_][A-Za-z0-9._-]*$/.test(s);
 }
+/**
+ *
+ * @param qn
+ * @returns
+ */
 function XmlNameToParts(qn) {
     if (IsQualifiedName(qn)) {
         return qn;
@@ -19766,6 +22162,8 @@ function XmlNameToParts(qn) {
     if (i === -1) {
         return { name: s };
     }
+    // Un QName XML ne doit contenir qu un seul ":".
+    // Si il y en a plusieurs, on considere que ce n est pas un QName.
     if (s.indexOf(":", i + 1) !== -1) {
         return { name: s };
     }
@@ -19776,18 +22174,24 @@ function XmlNameToParts(qn) {
     }
     return { name: s };
 }
+/**
+ *
+ * @param name
+ * @param prefix
+ * @returns
+ */
 function ToQualifiedString(name, prefix) {
     return prefix ? `${prefix}:${name}` : name;
 }
 //# sourceMappingURL=xml.interfaces.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/xml.serializer.format.js":
+/***/ "./dist/serializers/3MF/core/xml/xml.serializer.format.js"
 /*!****************************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/xml.serializer.format.js ***!
   \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -19801,8 +22205,11 @@ const DefaultXmlSerializerNumberOptions = Object.freeze({
     eps: 1e-6,
     maxDecimalsCap: 15,
     trimTrailingZeros: true,
+    // fixedDecimals: undefined,
     allowScientific: false,
     snapNearZero: true,
+    // zeroThreshold defaults to eps if not provided
+    // perAttributeEps: undefined,
 });
 const DefaultXmlSerializerFormatOptions = Object.freeze({
     number: DefaultXmlSerializerNumberOptions,
@@ -19842,33 +22249,46 @@ class NumberFormatter {
         const trimTrailingZeros = opts.trimTrailingZeros ?? true;
         const snapNearZero = opts.snapNearZero ?? true;
         const zeroThreshold = opts.zeroThreshold ?? opts.eps;
+        // Quantize to eps grid
         const inv = 1 / opts.eps;
         let q = Math.round(x * inv) / inv;
+        // Normalize -0 to 0
         if (Object.is(q, -0)) {
             q = 0;
         }
+        // Snap tiny values to 0 (helps size + stability)
         if (snapNearZero && Math.abs(q) <= zeroThreshold) {
             q = 0;
         }
+        // Choose decimals policy
         let decimals;
         if (opts.fixedDecimals !== undefined) {
             decimals = this._clampInt(opts.fixedDecimals, 0, maxDecimalsCap);
         }
         else {
+            // decimals needed for eps steps
             decimals = this._clampInt(Math.ceil(-Math.log10(opts.eps)), 0, maxDecimalsCap);
         }
+        // Note: this implementation intentionally avoids scientific notation.
+        // If allowScientific=true, you may want a different path (toPrecision).
         if (opts.allowScientific) {
+            // Still avoid scientific here; keep deterministic fixed output.
+            // If you really want scientific, implement a separate branch.
         }
+        // Fast path when decimals = 0
         if (decimals === 0) {
             return String(Math.trunc(q));
         }
+        // Start fixed, then optionally trim
         let s = q.toFixed(decimals);
         if (trimTrailingZeros && opts.fixedDecimals === undefined) {
+            // Trim trailing zeros and optional trailing dot
             s = s
                 .replace(/(\.\d*?[1-9])0+$/, "$1")
                 .replace(/\.0+$/, "")
                 .replace(/\.$/, "");
         }
+        // Safety: ensure no scientific notation (should not happen with toFixed)
         if (/[eE]/.test(s)) {
             throw new Error(`Scientific notation not allowed in XML output: ${s}`);
         }
@@ -19884,20 +22304,20 @@ class NumberFormatter {
 }
 //# sourceMappingURL=xml.serializer.format.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/core/xml/xml.serializer.js":
+/***/ "./dist/serializers/3MF/core/xml/xml.serializer.js"
 /*!*********************************************************!*\
   !*** ./dist/serializers/3MF/core/xml/xml.serializer.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   XmlSerializer: () => (/* binding */ XmlSerializer)
 /* harmony export */ });
-/* harmony import */ var _xml_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
-/* harmony import */ var _xml_serializer_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml.serializer.format */ "./dist/serializers/3MF/core/xml/xml.serializer.format.js");
+/* harmony import */ var _xml_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./xml.interfaces */ "./dist/serializers/3MF/core/xml/xml.interfaces.js");
+/* harmony import */ var _xml_serializer_format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./xml.serializer.format */ "./dist/serializers/3MF/core/xml/xml.serializer.format.js");
 
 
 function IsDate(x) {
@@ -19915,27 +22335,47 @@ function IsPrimitive(x) {
 function IsPrimitiveButString(x) {
     return typeof x === "number" || typeof x === "boolean" || typeof x === "bigint" || IsDate(x);
 }
+/**
+ */
 class XmlSerializer {
+    /**
+     *
+     * @param builder
+     * @param format
+     */
     constructor(builder, format) {
+        /** */
         this._ns = new Map();
+        /** */
         this._prefixCount = 0;
         this._builder = builder;
-        this._format = (0,_xml_serializer_format__WEBPACK_IMPORTED_MODULE_0__.resolveFormatOptions)(format);
-        this._nFmt = new _xml_serializer_format__WEBPACK_IMPORTED_MODULE_0__.NumberFormatter(this._format);
+        this._format = (0,_xml_serializer_format__WEBPACK_IMPORTED_MODULE_1__.resolveFormatOptions)(format);
+        this._nFmt = new _xml_serializer_format__WEBPACK_IMPORTED_MODULE_1__.NumberFormatter(this._format);
     }
+    /**
+     *
+     * @param ns
+     * @returns
+     */
     withNamespace(...ns) {
         for (const s of ns) {
             this._assignNamespace(s);
         }
         return this;
     }
+    /**
+     *
+     * @param root
+     * @param name
+     */
     serialize(root, name) {
-        name = name ?? (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlName)(root);
+        name = name ?? (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName)(root);
         if (!name) {
             throw new Error("can not find name for given object");
         }
-        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(name);
+        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(name);
         if (currentName.ns) {
+            // ensure we register the root namespace as default if not already set...
             this._assignNamespace(currentName.ns, "xmlns");
         }
         this._gatherNamespaces(root, new WeakSet());
@@ -19964,13 +22404,13 @@ class XmlSerializer {
             }
             return;
         }
-        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlName)(source);
+        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName)(source);
         if (!qname) {
             return;
         }
-        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(qname);
+        const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(qname);
         const prefix = this._getPrefix(currentName);
-        const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.ToQualifiedString)(currentName.name, prefix);
+        const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.ToQualifiedString)(currentName.name, prefix);
         builder.ele(null, tmp);
         this._writeObjectContent(builder, source, visited);
         this._builder.end();
@@ -19985,20 +22425,23 @@ class XmlSerializer {
         return undefined;
     }
     _writeObjectContent(builder, source, visited) {
-        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlFieldMeta)(source) ?? [];
+        // gather meta and build index
+        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta)(source) ?? [];
         const metaByProp = new Map();
         for (const m of metas) {
             const arr = metaByProp.get(m.prop) ?? [];
             arr.push(m);
             metaByProp.set(m.prop, arr);
         }
+        // ensure the att are processed first, otherwize, the tag might be closed...
         const keys = Object.keys(source).sort((a, b) => {
             const aHasAttr = (metaByProp.get(a) ?? []).some(m => m.kind === "attr");
             const bHasAttr = (metaByProp.get(b) ?? []).some(m => m.kind === "attr");
             if (aHasAttr === bHasAttr)
                 return 0;
-            return aHasAttr ? -1 : 1;
+            return aHasAttr ? -1 : 1; // attr d abord
         });
+        // We decide per property, using metadata if present
         for (const prop of keys) {
             const value = source[prop];
             if (value === null || value === undefined) {
@@ -20011,7 +22454,7 @@ class XmlSerializer {
                     continue;
                 }
                 for (const m of propMetas) {
-                    const name = m.name ?? m.prop.toLowerCase();
+                    const name = m.name ?? m.prop.toLowerCase(); // if the name is not defined, we assume it's the lower case version of name of the property.
                     if (name) {
                         switch (m.kind) {
                             case "attr": {
@@ -20020,14 +22463,15 @@ class XmlSerializer {
                                     vStr = this._nFmt.toString(value);
                                 }
                                 if (m.formatter) {
+                                    // TODO : cache the created formatter to avoid to many allocation.
                                     const f = new m.formatter(this._format);
                                     vStr = f.toString(value);
                                 }
                                 vStr = vStr ?? value.toString();
                                 if (vStr) {
-                                    const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(name);
+                                    const currentName = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(name);
                                     const prefix = this._getPrefix(currentName);
-                                    const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.ToQualifiedString)(currentName.name, prefix);
+                                    const tmp = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.ToQualifiedString)(currentName.name, prefix);
                                     builder.att(null, tmp, vStr);
                                 }
                                 break;
@@ -20047,6 +22491,7 @@ class XmlSerializer {
             this._writeObject(builder, value, visited);
         }
     }
+    // this is the first browse of the hierarchy to collect the namespaces and assign placeholder.( ns0, ns1,...)
     _gatherNamespaces(tag, visited) {
         if (visited.has(tag)) {
             return;
@@ -20061,17 +22506,19 @@ class XmlSerializer {
             }
             return;
         }
-        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlName)(tag);
+        const qname = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlName)(tag);
         if (qname) {
             this._assignNamespace(qname);
         }
-        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetXmlFieldMeta)(tag) ?? [];
+        // gather meta and build index
+        const metas = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.GetXmlFieldMeta)(tag) ?? [];
         const metaByProp = new Map();
         for (const m of metas) {
             const arr = metaByProp.get(m.prop) ?? [];
             arr.push(m);
             metaByProp.set(m.prop, arr);
         }
+        // We decide per property, using metadata if present
         const toVisit = [];
         for (const prop of Object.keys(tag)) {
             const value = tag[prop];
@@ -20100,7 +22547,7 @@ class XmlSerializer {
         }
     }
     _assignNamespace(qn, prefix) {
-        const nqn = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_1__.XmlNameToParts)(qn);
+        const nqn = (0,_xml_interfaces__WEBPACK_IMPORTED_MODULE_0__.XmlNameToParts)(qn);
         if (nqn?.ns) {
             const ns = nqn.ns.toLowerCase();
             if (!this._ns.get(ns)) {
@@ -20132,13 +22579,13 @@ class XmlSerializer {
 }
 //# sourceMappingURL=xml.serializer.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/3MF/index.js":
+/***/ "./dist/serializers/3MF/index.js"
 /*!***************************************!*\
   !*** ./dist/serializers/3MF/index.js ***!
   \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -20214,13 +22661,13 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "./dist/serializers/index.js":
+/***/ "./dist/serializers/index.js"
 /*!***********************************!*\
   !*** ./dist/serializers/index.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -20294,17 +22741,464 @@ __webpack_require__.r(__webpack_exports__);
 
 //# sourceMappingURL=index.js.map
 
-/***/ }),
+/***/ },
 
-/***/ "@babylonjs/core":
+/***/ "@babylonjs/core"
 /*!**************************!*\
   !*** external "BABYLON" ***!
   \**************************/
-/***/ ((module) => {
+(module) {
 
 module.exports = BABYLON;
 
-/***/ })
+/***/ },
+
+/***/ "../../../node_modules/tslib/tslib.es6.mjs"
+/*!*************************************************!*\
+  !*** ../../../node_modules/tslib/tslib.es6.mjs ***!
+  \*************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   __addDisposableResource: () => (/* binding */ __addDisposableResource),
+/* harmony export */   __assign: () => (/* binding */ __assign),
+/* harmony export */   __asyncDelegator: () => (/* binding */ __asyncDelegator),
+/* harmony export */   __asyncGenerator: () => (/* binding */ __asyncGenerator),
+/* harmony export */   __asyncValues: () => (/* binding */ __asyncValues),
+/* harmony export */   __await: () => (/* binding */ __await),
+/* harmony export */   __awaiter: () => (/* binding */ __awaiter),
+/* harmony export */   __classPrivateFieldGet: () => (/* binding */ __classPrivateFieldGet),
+/* harmony export */   __classPrivateFieldIn: () => (/* binding */ __classPrivateFieldIn),
+/* harmony export */   __classPrivateFieldSet: () => (/* binding */ __classPrivateFieldSet),
+/* harmony export */   __createBinding: () => (/* binding */ __createBinding),
+/* harmony export */   __decorate: () => (/* binding */ __decorate),
+/* harmony export */   __disposeResources: () => (/* binding */ __disposeResources),
+/* harmony export */   __esDecorate: () => (/* binding */ __esDecorate),
+/* harmony export */   __exportStar: () => (/* binding */ __exportStar),
+/* harmony export */   __extends: () => (/* binding */ __extends),
+/* harmony export */   __generator: () => (/* binding */ __generator),
+/* harmony export */   __importDefault: () => (/* binding */ __importDefault),
+/* harmony export */   __importStar: () => (/* binding */ __importStar),
+/* harmony export */   __makeTemplateObject: () => (/* binding */ __makeTemplateObject),
+/* harmony export */   __metadata: () => (/* binding */ __metadata),
+/* harmony export */   __param: () => (/* binding */ __param),
+/* harmony export */   __propKey: () => (/* binding */ __propKey),
+/* harmony export */   __read: () => (/* binding */ __read),
+/* harmony export */   __rest: () => (/* binding */ __rest),
+/* harmony export */   __rewriteRelativeImportExtension: () => (/* binding */ __rewriteRelativeImportExtension),
+/* harmony export */   __runInitializers: () => (/* binding */ __runInitializers),
+/* harmony export */   __setFunctionName: () => (/* binding */ __setFunctionName),
+/* harmony export */   __spread: () => (/* binding */ __spread),
+/* harmony export */   __spreadArray: () => (/* binding */ __spreadArray),
+/* harmony export */   __spreadArrays: () => (/* binding */ __spreadArrays),
+/* harmony export */   __values: () => (/* binding */ __values),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/******************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
+
+var extendStatics = function(d, b) {
+  extendStatics = Object.setPrototypeOf ||
+      ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+      function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+  return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+  if (typeof b !== "function" && b !== null)
+      throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+  extendStatics(d, b);
+  function __() { this.constructor = d; }
+  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = function() {
+  __assign = Object.assign || function __assign(t) {
+      for (var s, i = 1, n = arguments.length; i < n; i++) {
+          s = arguments[i];
+          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+      }
+      return t;
+  }
+  return __assign.apply(this, arguments);
+}
+
+function __rest(s, e) {
+  var t = {};
+  for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+          if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+              t[p[i]] = s[p[i]];
+      }
+  return t;
+}
+
+function __decorate(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+  else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __param(paramIndex, decorator) {
+  return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function __esDecorate(ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+  function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
+  var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+  var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+  var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+  var _, done = false;
+  for (var i = decorators.length - 1; i >= 0; i--) {
+      var context = {};
+      for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
+      for (var p in contextIn.access) context.access[p] = contextIn.access[p];
+      context.addInitializer = function (f) { if (done) throw new TypeError("Cannot add initializers after decoration has completed"); extraInitializers.push(accept(f || null)); };
+      var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+      if (kind === "accessor") {
+          if (result === void 0) continue;
+          if (result === null || typeof result !== "object") throw new TypeError("Object expected");
+          if (_ = accept(result.get)) descriptor.get = _;
+          if (_ = accept(result.set)) descriptor.set = _;
+          if (_ = accept(result.init)) initializers.unshift(_);
+      }
+      else if (_ = accept(result)) {
+          if (kind === "field") initializers.unshift(_);
+          else descriptor[key] = _;
+      }
+  }
+  if (target) Object.defineProperty(target, contextIn.name, descriptor);
+  done = true;
+};
+
+function __runInitializers(thisArg, initializers, value) {
+  var useValue = arguments.length > 2;
+  for (var i = 0; i < initializers.length; i++) {
+      value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+  }
+  return useValue ? value : void 0;
+};
+
+function __propKey(x) {
+  return typeof x === "symbol" ? x : "".concat(x);
+};
+
+function __setFunctionName(f, name, prefix) {
+  if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
+  return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
+};
+
+function __metadata(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
+  function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+  return new (P || (P = Promise))(function (resolve, reject) {
+      function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+      function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+      function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+}
+
+function __generator(thisArg, body) {
+  var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+  return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+  function verb(n) { return function (v) { return step([n, v]); }; }
+  function step(op) {
+      if (f) throw new TypeError("Generator is already executing.");
+      while (g && (g = 0, op[0] && (_ = 0)), _) try {
+          if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+          if (y = 0, t) op = [op[0] & 2, t.value];
+          switch (op[0]) {
+              case 0: case 1: t = op; break;
+              case 4: _.label++; return { value: op[1], done: false };
+              case 5: _.label++; y = op[1]; op = [0]; continue;
+              case 7: op = _.ops.pop(); _.trys.pop(); continue;
+              default:
+                  if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                  if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                  if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                  if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                  if (t[2]) _.ops.pop();
+                  _.trys.pop(); continue;
+          }
+          op = body.call(thisArg, _);
+      } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+      if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+  }
+}
+
+var __createBinding = Object.create ? (function(o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+  }
+  Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+
+function __exportStar(m, o) {
+  for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p)) __createBinding(o, m, p);
+}
+
+function __values(o) {
+  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+  if (m) return m.call(o);
+  if (o && typeof o.length === "number") return {
+      next: function () {
+          if (o && i >= o.length) o = void 0;
+          return { value: o && o[i++], done: !o };
+      }
+  };
+  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
+function __read(o, n) {
+  var m = typeof Symbol === "function" && o[Symbol.iterator];
+  if (!m) return o;
+  var i = m.call(o), r, ar = [], e;
+  try {
+      while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+  }
+  catch (error) { e = { error: error }; }
+  finally {
+      try {
+          if (r && !r.done && (m = i["return"])) m.call(i);
+      }
+      finally { if (e) throw e.error; }
+  }
+  return ar;
+}
+
+/** @deprecated */
+function __spread() {
+  for (var ar = [], i = 0; i < arguments.length; i++)
+      ar = ar.concat(__read(arguments[i]));
+  return ar;
+}
+
+/** @deprecated */
+function __spreadArrays() {
+  for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+  for (var r = Array(s), k = 0, i = 0; i < il; i++)
+      for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+          r[k] = a[j];
+  return r;
+}
+
+function __spreadArray(to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+      if (ar || !(i in from)) {
+          if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+          ar[i] = from[i];
+      }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+}
+
+function __await(v) {
+  return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function () { return this; }, i;
+  function awaitReturn(f) { return function (v) { return Promise.resolve(v).then(f, reject); }; }
+  function verb(n, f) { if (g[n]) { i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; if (f) i[n] = f(i[n]); } }
+  function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+  function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+  function fulfill(value) { resume("next", value); }
+  function reject(value) { resume("throw", value); }
+  function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function __asyncDelegator(o) {
+  var i, p;
+  return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+  function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: false } : f ? f(v) : v; } : f; }
+}
+
+function __asyncValues(o) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+  function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+  function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+}
+
+function __makeTemplateObject(cooked, raw) {
+  if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+  return cooked;
+};
+
+var __setModuleDefault = Object.create ? (function(o, v) {
+  Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+  o["default"] = v;
+};
+
+var ownKeys = function(o) {
+  ownKeys = Object.getOwnPropertyNames || function (o) {
+    var ar = [];
+    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+    return ar;
+  };
+  return ownKeys(o);
+};
+
+function __importStar(mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+  __setModuleDefault(result, mod);
+  return result;
+}
+
+function __importDefault(mod) {
+  return (mod && mod.__esModule) ? mod : { default: mod };
+}
+
+function __classPrivateFieldGet(receiver, state, kind, f) {
+  if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+}
+
+function __classPrivateFieldSet(receiver, state, value, kind, f) {
+  if (kind === "m") throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+}
+
+function __classPrivateFieldIn(state, receiver) {
+  if (receiver === null || (typeof receiver !== "object" && typeof receiver !== "function")) throw new TypeError("Cannot use 'in' operator on non-object");
+  return typeof state === "function" ? receiver === state : state.has(receiver);
+}
+
+function __addDisposableResource(env, value, async) {
+  if (value !== null && value !== void 0) {
+    if (typeof value !== "object" && typeof value !== "function") throw new TypeError("Object expected.");
+    var dispose, inner;
+    if (async) {
+      if (!Symbol.asyncDispose) throw new TypeError("Symbol.asyncDispose is not defined.");
+      dispose = value[Symbol.asyncDispose];
+    }
+    if (dispose === void 0) {
+      if (!Symbol.dispose) throw new TypeError("Symbol.dispose is not defined.");
+      dispose = value[Symbol.dispose];
+      if (async) inner = dispose;
+    }
+    if (typeof dispose !== "function") throw new TypeError("Object not disposable.");
+    if (inner) dispose = function() { try { inner.call(this); } catch (e) { return Promise.reject(e); } };
+    env.stack.push({ value: value, dispose: dispose, async: async });
+  }
+  else if (async) {
+    env.stack.push({ async: true });
+  }
+  return value;
+}
+
+var _SuppressedError = typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+  var e = new Error(message);
+  return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
+
+function __disposeResources(env) {
+  function fail(e) {
+    env.error = env.hasError ? new _SuppressedError(e, env.error, "An error was suppressed during disposal.") : e;
+    env.hasError = true;
+  }
+  var r, s = 0;
+  function next() {
+    while (r = env.stack.pop()) {
+      try {
+        if (!r.async && s === 1) return s = 0, env.stack.push(r), Promise.resolve().then(next);
+        if (r.dispose) {
+          var result = r.dispose.call(r.value);
+          if (r.async) return s |= 2, Promise.resolve(result).then(next, function(e) { fail(e); return next(); });
+        }
+        else s |= 1;
+      }
+      catch (e) {
+        fail(e);
+      }
+    }
+    if (s === 1) return env.hasError ? Promise.reject(env.error) : Promise.resolve();
+    if (env.hasError) throw env.error;
+  }
+  return next();
+}
+
+function __rewriteRelativeImportExtension(path, preserveJsx) {
+  if (typeof path === "string" && /^\.\.?\//.test(path)) {
+      return path.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function (m, tsx, d, ext, cm) {
+          return tsx ? preserveJsx ? ".jsx" : ".js" : d && (!ext || !cm) ? m : (d + ext + "." + cm.toLowerCase() + "js");
+      });
+  }
+  return path;
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  __extends,
+  __assign,
+  __rest,
+  __decorate,
+  __param,
+  __esDecorate,
+  __runInitializers,
+  __propKey,
+  __setFunctionName,
+  __metadata,
+  __awaiter,
+  __generator,
+  __createBinding,
+  __exportStar,
+  __values,
+  __read,
+  __spread,
+  __spreadArrays,
+  __spreadArray,
+  __await,
+  __asyncGenerator,
+  __asyncDelegator,
+  __asyncValues,
+  __makeTemplateObject,
+  __importStar,
+  __importDefault,
+  __classPrivateFieldGet,
+  __classPrivateFieldSet,
+  __classPrivateFieldIn,
+  __addDisposableResource,
+  __disposeResources,
+  __rewriteRelativeImportExtension,
+});
+
+
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -20317,6 +23211,12 @@ module.exports = BABYLON;
 /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -20387,11 +23287,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "glowPixelShader";
 const shader = `precision highp float;varying vec2 vUV;uniform float time;void main(void) {float glow=sin(vUV.x*20.0+time)*0.5+0.5;vec3 neonColor=vec3(0.0,0.5,1.0);float distToCenter=abs(vUV.y-0.5);float edgeFade=1.0-smoothstep(0.0,0.5,distToCenter);gl_FragColor=vec4(neonColor*glow,edgeFade);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const glowPixelShader = { name, shader };
+/** @internal */ const glowPixelShader = { name, shader };
 //# sourceMappingURL=glow.fragment.js.map
 })();
 
@@ -20407,11 +23310,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "glowVertexShader";
 const shader = `precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void) {vUV=uv;gl_Position=worldViewProjection*vec4(position,1.0);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const glowVertexShader = { name, shader };
+/** @internal */ const glowVertexShader = { name, shader };
 //# sourceMappingURL=glow.vertex.js.map
 })();
 
@@ -20427,13 +23333,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "clipFragment";
 const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX) || defined(HOLOGRAPHIC_BOUNDS_CYLINDER) || defined(HOLOGRAPHIC_BOUNDS_SPHERE)
 bvec4 isNegative=lessThan(vfClipDistance,vec4(0.0));bool anyNegative=any(isNegative);if (anyNegative) {discard;}#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipFragment = { name, shader };
+/** @internal */ const clipFragment = { name, shader };
 //# sourceMappingURL=clipFragment.js.map
 })();
 
@@ -20449,13 +23358,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "clipFragmentDeclaration";
 const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX) || defined(HOLOGRAPHIC_BOUNDS_CYLINDER) || defined(HOLOGRAPHIC_BOUNDS_SPHERE)
 varying vec4 vfClipDistance;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipFragmentDeclaration = { name, shader };
+/** @internal */ const clipFragmentDeclaration = { name, shader };
 //# sourceMappingURL=clipFragmentDeclaration.js.map
 })();
 
@@ -20471,6 +23383,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "clipVertex";
 const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX)
@@ -20481,7 +23396,7 @@ vfClipDistance=vec4( uRadiusClip-length(worldPosition.xyz));#endif
 vfClipDistance=vec4( 0.0f);#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipVertex = { name, shader };
+/** @internal */ const clipVertex = { name, shader };
 //# sourceMappingURL=clipVertex.js.map
 })();
 
@@ -20497,6 +23412,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "clipVertexDeclaration";
 const shader = `#if defined(HOLOGRAPHIC_BOUNDS_BOX)
@@ -20507,7 +23425,7 @@ uniform float uRadiusClip;out vec4 vfClipDistance;#endif
 uniform float uRadiusClip;uniform vec3 uHeightClip;out vec4 vfClipDistance;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const clipVertexDeclaration = { name, shader };
+/** @internal */ const clipVertexDeclaration = { name, shader };
 //# sourceMappingURL=clipVertexDeclaration.js.map
 })();
 
@@ -20523,11 +23441,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "elevationVertexDeclaration";
 const shader = `vec3 elevation_rgbaToNormal(vec4 rgba){float x=(2.0*rgba.r)-1.0;float y=(2.0*rgba.g)-1.0;float z=(rgba.b*255.0-128.0)/127.0;return normalize(vec3(x,y,z));}uniform highp sampler2DArray uElevations;uniform highp vec2 uAltRange;uniform highp float uMapScale;in vec4 elevationUvs;in vec4 elevationDepths;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const elevationVertexDeclaration = { name, shader };
+/** @internal */ const elevationVertexDeclaration = { name, shader };
 //# sourceMappingURL=elevationVertexDeclaration.js.map
 })();
 
@@ -20543,11 +23464,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "ellipsoidVertexDeclaration";
 const shader = `const float oneOver2PI=0.15915494309189533576888;const float oneOverPI =0.31830988618379067153777;struct Ellipsoid {float _a;float _ee;float _p1mee;};vec4 toECEF(Ellipsoid ref,vec3 geo) {float sin_lambda=sin(geo.y);float cos_lambda=cos(geo.y);float cos_phi=cos(geo.x);float sin_phi=sin(geo.x);float N=ref._a/sqrt(1.0-ref._ee*sin_lambda*sin_lambda);float tmp=(geo.z+N)*cos_lambda;float x=tmp*cos_phi;float y=tmp*sin_phi;float z=(geo.z+ref._p1mee*N)*sin_lambda;return vec4(x,z,y,1.0);}uniform Ellipsoid ellipsoid;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const ellipsoidVertexDeclaration = { name, shader };
+/** @internal */ const ellipsoidVertexDeclaration = { name, shader };
 //# sourceMappingURL=ellipsoidVertexDeclaration.js.map
 })();
 
@@ -20563,11 +23487,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "geodesyDeclaration";
 const shader = `struct Ellipsoid {float _a;float _ee;float _p1mee;};vec4 toECEF(Ellipsoid ref,vec4 trigo,float alt) {float sin_lambda=trigo.x;float cos_lambda=trigo.y;float sin_phi=trigo.z;float cos_phi=trigo.w;float N=ref._a/sqrt(1.0-ref._ee*sin_lambda*sin_lambda);float tmp=(alt+N)*cos_lambda;float x=tmp*cos_phi;float y=tmp*sin_phi;float z=(alt+ref._p1mee*N)*sin_lambda;return vec4(x,y,z,1.0);}uniform Ellipsoid ellipsoid;uniform mat4 enuTransform;uniform sampler2D altitudes;uniform sampler2D lonLT;uniform sampler2D latLT;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const geodesyDeclaration = { name, shader };
+/** @internal */ const geodesyDeclaration = { name, shader };
 //# sourceMappingURL=geodesyDeclaration.js.map
 })();
 
@@ -20583,13 +23510,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "lightCommonsDeclaration";
 const shader = `uniform vec3 uAmbientLight;uniform HemisphericLight uHemiLight;uniform PointLight uPointLights[MAX_POINT_LIGHTS];uniform SpotLight uSpotLights[MAX_SPOT_LIGHTS];uniform int uNumPointLights;uniform int uNumSpotLights;#if defined(SPECULAR)
 uniform float uShininess;uniform vec3 uViewPosition;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightCommonsDeclaration = { name, shader };
+/** @internal */ const lightCommonsDeclaration = { name, shader };
 //# sourceMappingURL=lightCommonsDeclaration.js.map
 })();
 
@@ -20605,6 +23535,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "lightDefinition";
 const shader = `struct PointLight{vec3 position;vec3 color;float intensity;};struct SpotLight{vec3 position;vec3 direction;vec3 color;float innerCutoff;float outerCutoff;float exponent;float intensity;};struct HemisphericLight{vec3 skyColor;vec3 groundColor;vec3 direction;float intensity;};#if defined(SPECULAR)
@@ -20649,7 +23582,7 @@ vec3 lightColor=calculateSpotLight(spotLights[i],normal,lightDir,viewDir,shinine
 vec3 lightColor=calculateSpotLight(spotLights[i],normal,lightDir);#endif
 color+=lightColor;}return clamp(color+ambient,0.0,1.0);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightDefinition = { name, shader };
+/** @internal */ const lightDefinition = { name, shader };
 //# sourceMappingURL=lightDefinition.js.map
 })();
 
@@ -20665,6 +23598,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "lightFragmentDeclaration";
 const shader = `#if defined(PHONG_SHADING) || defined (BLINN_PHONG_SHADING)
@@ -20675,7 +23611,7 @@ flat in vec4 vColor;#elif defined(GOUREAUD_SHADING)
 in vec4 vColor;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightFragmentDeclaration = { name, shader };
+/** @internal */ const lightFragmentDeclaration = { name, shader };
 //# sourceMappingURL=lightFragmentDeclaration.js.map
 })();
 
@@ -20691,6 +23627,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "lightVertexDeclaration";
 const shader = `#if defined(FLAT_SHADING) || defined(GOUREAUD_SHADING) 
@@ -20703,7 +23642,7 @@ out vec4 vColor;#endif
 out vec3 vNormal;out vec3 vPosition;#endif
 `;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const lightVertexDeclaration = { name, shader };
+/** @internal */ const lightVertexDeclaration = { name, shader };
 //# sourceMappingURL=lightVertexDeclaration.js.map
 })();
 
@@ -20719,11 +23658,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "textureDepthFragmentDeclaration";
 const shader = `uniform highp sampler2DArray uTextures;in vec2 vUvs;flat in float depth;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const textureDepthFragmentDeclaration = { name, shader };
+/** @internal */ const textureDepthFragmentDeclaration = { name, shader };
 //# sourceMappingURL=textureDepthFragmentDeclaration.js.map
 })();
 
@@ -20739,11 +23681,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "textureDepthVertexDeclaration";
 const shader = `in vec4 textureDepths;out vec2 vUvs;flat out float depth;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const textureDepthVertexDeclaration = { name, shader };
+/** @internal */ const textureDepthVertexDeclaration = { name, shader };
 //# sourceMappingURL=textureDepthVertexDeclaration.js.map
 })();
 
@@ -20759,11 +23704,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "textureFragmentDeclaration";
 const shader = `uniform highp sampler2DArray uTextures;in vec2 vUvs;flat in float depth;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const textureFragmentDeclaration = { name, shader };
+/** @internal */ const textureFragmentDeclaration = { name, shader };
 //# sourceMappingURL=textureFragmentDeclaration.js.map
 })();
 
@@ -20779,11 +23727,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "textureVertexDeclaration";
 const shader = `in vec4 textureDepths;out vec2 vUvs;flat out float depth;`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.IncludesShadersStore[name] = shader;
-const textureVertexDeclaration = { name, shader };
+/** @internal */ const textureVertexDeclaration = { name, shader };
 //# sourceMappingURL=textureVertexDeclaration.js.map
 })();
 
@@ -20799,6 +23750,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "mapPixelShader";
 const shader = `precision highp float;#include<clipFragmentDeclaration>
@@ -20806,7 +23760,7 @@ const shader = `precision highp float;#include<clipFragmentDeclaration>
 void main(void) {#include<clipFragment>
 gl_FragColor=texture(uTextures,vec3(vUvs,depth));}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const mapPixelShader = { name, shader };
+/** @internal */ const mapPixelShader = { name, shader };
 //# sourceMappingURL=map.fragment.js.map
 })();
 
@@ -20822,6 +23776,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "mapVertexShader";
 const shader = `precision highp float;#include<instancesDeclaration>
@@ -20832,7 +23789,7 @@ in vec3 position;uniform mat4 viewProjection;void main(void) {int i=0; float
 float rawAltitude=float(texture(uElevations,v));float alt=(rawAltitude -uAltRange.x)*uMapScale;vec4 pos=vec4(position.xy,alt,1.0);vec4 worldPosition=finalWorld*pos;#include<clipVertex>
 gl_Position=viewProjection*worldPosition;vUvs=uv0; depth=textureDepths.x;}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const mapVertexShader = { name, shader };
+/** @internal */ const mapVertexShader = { name, shader };
 //# sourceMappingURL=map.vertex.js.map
 })();
 
@@ -20848,6 +23805,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "webmapPixelShader";
 const shader = `#include<lightFragmentDeclaration>
@@ -20865,7 +23825,7 @@ vec3 lightColor= calculateLight(uAmbientLight,uHemiLight,uPointLights,uNumPointL
 gl_FragColor= texColor;#endif
 }`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const webmapPixelShader = { name, shader };
+/** @internal */ const webmapPixelShader = { name, shader };
 //# sourceMappingURL=webmap.fragment.js.map
 })();
 
@@ -20881,6 +23841,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+// Important Note: This file has been generated as part of the build process.
+// Therefore, any manual changes made to this file will be overridden by the next build.
+// We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "webmapVertexShader";
 const shader = `#include<instancesDeclaration>
@@ -20898,7 +23861,7 @@ vNormal=worldNormal;vPosition=worldPosition.xyz;#endif
 #include<clipVertex>
 gl_Position=viewProjection*worldPosition;vUvs=vec3(- position.xy+0.5,demIds[0]);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
-const webmapVertexShader = { name, shader };
+/** @internal */ const webmapVertexShader = { name, shader };
 //# sourceMappingURL=webmap.vertex.js.map
 })();
 
@@ -21068,13 +24031,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
+/* harmony export */   Mars: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mars),
+/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MarsUrlBuilder),
 /* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mass),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Matrix3d),
 /* harmony export */   MatrixFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.MatrixFormatter),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MemoryCache),
+/* harmony export */   Mercury: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mercury),
+/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MercuryUrlBuilder),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ModelFileName),
+/* harmony export */   Moon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Moon),
 /* harmony export */   MoonState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MoonState),
+/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MoonUrlBuilder),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MorganKeenanClass),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsIndex),
@@ -21123,6 +24092,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size3),
+/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SolarSystemBodies),
 /* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SourceBlock),
 /* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTree),
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTreeNode),
@@ -21262,7 +24232,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
+ // this tells the packager to include the core package in the output
 //# sourceMappingURL=index.js.map
 })();
 

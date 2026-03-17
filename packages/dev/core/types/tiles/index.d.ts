@@ -11,6 +11,7 @@ export * from "./vector/index";
 export * from "./tiles.interfaces";
 export * from "./tiles.metrics";
 export * from "./tiles.client";
+export * from "./tiles.client.image";
 export * from "./tiles";
 export * from "./tiles.url.web";
 export * from "./tiles.collection";

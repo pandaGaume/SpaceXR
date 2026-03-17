@@ -176,6 +176,9 @@ export class TileMapBase<T> extends ValidableBase implements ITileMap<T> {
         const toRemove = Array.from(this._layerViews.get((v) => eventData.includes(v.layer)));
         if (toRemove?.length) {
             this._layerViews.remove(...toRemove);
+            // Clear the shared view's tile address cache so the next layer added
+            // at the same position/zoom will get fresh tile requests
+            this._view.clearContext();
             this.invalidate();
         }
     }

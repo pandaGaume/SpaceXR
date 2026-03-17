@@ -49,6 +49,8 @@ export interface ITileSelectionContext {
 }
 export declare function hasTileSelectionContext(b: unknown): b is ITileSelectionContext;
 export interface ITileView extends ITilePipelineComponent, ISourceBlock<ITile2DAddress>, ITileSelectionContext {
+    /** Clear cached tile addresses, forcing re-emission on the next setContext call */
+    clearContext(): void;
 }
 export interface IHasView {
     view: ITileView;

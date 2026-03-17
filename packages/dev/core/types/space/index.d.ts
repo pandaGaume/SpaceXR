@@ -3,3 +3,4 @@ export * from "./space.interfaces";
 export * from "./space.spectralClass";
 export * from "./space.starColor";
 export * from "./Mechanics/index";
+export * from "./space.bodies";

@@ -24,5 +24,11 @@ export declare class KeplerOrbitBase implements IKeplerOrbit {
     get period(): Timespan;
     get apoapsis(): Length;
     get meanAngularSpeed(): Speed;
+    /**
+     * Kepler's equation cannot be solved algebraically. It can be treated by an iteration methods.
+     * One of them is Newton's method, finding roots of f(E) = E - e*sin(E) - M(t)
+     * @param meanAnomaly
+     * @param decimalPrecision
+     */
     getEccentricAnomaly(meanAnomaly: number, decimalPrecision: number): Length;
 }

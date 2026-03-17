@@ -9,6 +9,15 @@ export declare enum CartesianMode {
 }
 export declare class GeodeticSystem {
     static readonly Default: GeodeticSystem;
+    /**
+     * Given lat, lon and alt, return an array of 16, which is the enu transformation matrix (4x4)
+     * @param lat the reference latitude
+     * @param lon the reference longitude
+     * @param alt the reference altitude, default is zero
+     * @param ellipsoid the reference ellipsoid, default is Ellipsoid.WGS84
+     * @param rowOrder the matrix order returned. true is row order, false is column order. default is true, so row order.
+     * @returns
+     */
     static GetENUTransformMatrixFromFloat(lat: number, lon: number, alt?: number, ellipsoid?: Ellipsoid, rowOrder?: boolean): Array<number>;
     _ellipsoid: Ellipsoid;
     _bounds?: IEnvelope;

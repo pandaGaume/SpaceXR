@@ -7,10 +7,17 @@ export interface IHasNavigationState {
     navigationState: Nullable<ITileNavigationState>;
 }
 export declare function HasNavigationState(obj: unknown): obj is IHasNavigationState;
+/**
+ * Options required to turn an ICameraState into a perspective frustum.
+ */
 export interface IFrustumValues {
+    /** Viewport aspect ratio (width/height). Default: 16/9. */
     aspect?: number;
+    /** Near plane distance (> 0). Default: 0.1. */
     near?: number;
+    /** Far plane distance (> near). Default: 10_000. */
     far?: number;
+    /** World up vector. Default: {0,1,0}. */
     up?: ICartesian3;
 }
 export interface ICameraViewState extends IFrustumValues {

@@ -7,17 +7,22 @@
     "types": "dist/index",
     "private": true,
     "files": [
+        "dist",
         "src"
     ],
     "scripts": {
-        "clean:babylon:gui": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "compile:babylon:gui:source": "tsc --project tsconfig.json",
-        "build:babylon:gui:dev": "npm run clean:babylon:gui && npm run compile:babylon:gui:source",
-        "webpack:babylon:gui:dev": "webpack --mode development --stats-error-details",
-        "publish:babylon:gui:dev": "npm run build:babylon:gui:dev && npm run webpack:babylon:gui:dev"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development --stats-error-details",
+        "publish:dev": "npm run build && npm run bundle:dev"
     },
     "sideEffects": false,
-    "devDependencies": {},
     "dependencies": {
         "path-scurry": "^1.10.1"
     }

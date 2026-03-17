@@ -1,9 +1,9 @@
 import { ICloneable } from "../types";
 export declare enum RegionCode {
-    INSIDE = 0,
-    LEFT = 1,
-    RIGHT = 2,
-    BOTTOM = 4,
+    INSIDE = 0,// 0000
+    LEFT = 1,// 0001
+    RIGHT = 2,// 0010
+    BOTTOM = 4,// 0100
     TOP = 8
 }
 export interface ICartesian2 {
@@ -42,14 +42,35 @@ export interface ISize3 {
 }
 export declare function IsSize(b: unknown): b is ISize3 | ISize2;
 export declare function IsSize3(size: ISize2 | ISize3): size is ISize3;
+/**
+ * Describes a 3D bounding sphere (as in Babylon.js BoundingSphere).
+ */
 export interface IBoundingSphere {
+    /**
+     * The center point of the sphere.
+     */
     center: ICartesian3;
+    /**
+     * The radius of the sphere.
+     */
     radius: number;
 }
 export interface IBoundingBox {
+    /**
+     * The minimum point (corner) of the bounding box.
+     */
     minimum: ICartesian3;
+    /**
+     * The maximum point (corner) of the bounding box.
+     */
     maximum: ICartesian3;
+    /**
+     * The center point of the bounding box.
+     */
     center: ICartesian3;
+    /**
+     * The extend size (half-dimensions) from center to box side.
+     */
     extendSize: ICartesian3;
 }
 export interface IBounds extends IBoundingBox, ISize3, ICartesian3, ICloneable<IBounds> {

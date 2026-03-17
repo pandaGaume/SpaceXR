@@ -10,15 +10,14 @@
         "dist"
     ],
     "scripts": {
-        "build:build-tools": "npm run compile:build-tools",
-        "compile:build-tools": "npm run compile:build-tools:source",
-        "compile:build-tools:source": "tsc --project tsconfig.json"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json"
     },
     "devDependencies": {
         "copyfiles": "^2.4.1",
         "glob": "^10.5.0",
-        "path": "^0.12.7",
-        "rimraf": "^4.4.1"
+        "path": "^0.12.7"
     },
     "bin": {
         "build-tools": "./dist/index.js"

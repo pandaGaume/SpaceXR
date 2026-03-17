@@ -1,4 +1,4 @@
-export declare const webmapVertexShader: {
+/** @internal */ export declare const webmapVertexShader: {
     name: string;
     shader: string;
 };

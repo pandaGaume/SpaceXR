@@ -1,2 +1,0 @@
-declare const wireframe_fragment_declVertexShader: String;
-export default wireframe_fragment_declVertexShader;

@@ -7,22 +7,24 @@
     "types": "dist/index",
     "private": true,
     "files": [
-        "./src"
+        "dist",
+        "src"
     ],
     "scripts": {
-        "build:osm:dev": "npm run clean:osm && npm run compile:osm",
-        "clean:osm": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "compile:osm": "npm run compile:osm:source",
-        "compile:osm:source": "tsc --project tsconfig.json",
-        "webpack:osm:dev": "webpack --mode development",
-        "copy:osm:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
-        "publish:osm:dev": "npm run build:osm:dev && npm run webpack:osm:dev && npm run copy:osm:bundle",
-        "test:osm": "jest -c ./jest.config.ts --verbose"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development",
+        "copy:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
+        "publish:dev": "npm run build && npm run bundle:dev && npm run copy:bundle",
+        "test": "jest -c ./jest.config.ts --verbose"
     },
     "sideEffects": false,
-    "devDependencies": {
-        "rimraf": "^4.4.1"
-    },
     "dependencies": {
         "protobufjs-cli": "^1.1.2"
     }

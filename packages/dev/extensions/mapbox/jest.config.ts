@@ -105,7 +105,7 @@ export default {
 
     globals: {
         "ts-jest": {
-            tsconfig: "./tsconfig.json",
+            tsconfig: "./tsconfig.build.json",
         },
     },
     moduleNameMapper: {

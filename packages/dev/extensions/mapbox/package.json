@@ -7,22 +7,24 @@
     "types": "dist/index",
     "private": true,
     "files": [
-        "./src"
+        "dist",
+        "src"
     ],
     "scripts": {
-        "build:vector:dev": "npm run clean:vector && npm run compile:vector",
-        "clean:vector": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "compile:vector": "npm run compile:vector:source",
-        "compile:vector:source": "tsc --project tsconfig.json",
-        "webpack:vector:dev": "webpack --mode development",
-        "copy:vector:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
-        "publish:vector:dev": "npm run build:vector:dev && npm run webpack:vector:dev && npm run copy:vector:bundle",
-        "test:vector": "jest -c ./jest.config.ts --verbose"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development",
+        "copy:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
+        "publish:dev": "npm run build && npm run bundle:dev && npm run copy:bundle",
+        "test": "jest -c ./jest.config.ts --verbose"
     },
     "sideEffects": false,
-    "devDependencies": {
-        "rimraf": "^4.4.1"
-    },
     "dependencies": {
         "protobufjs-cli": "^1.1.2"
     }

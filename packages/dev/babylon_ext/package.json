@@ -5,19 +5,22 @@
     "module": "dist/index",
     "esnext": "dist/index",
     "types": "dist/index",
+    "private": true,
     "files": [
-        "./src"
+        "dist",
+        "src"
     ],
     "scripts": {
-        "clean:babylon-ext": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "build:babylon-ext:dev": "npm run clean:babylon-ext && npm run compile:babylon-ext",
-        "compile:babylon-ext": "npm run compile:babylon-ext:source",
-        "compile:babylon-ext:source": "tsc --project tsconfig.json",
-        "webpack:babylon-ext:dev": "webpack --mode development",
-        "publish:babylon-ext:dev": "npm run build:babylon-ext:dev && npm run webpack:babylon-ext:dev"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development",
+        "publish:dev": "npm run build && npm run bundle:dev"
     },
-    "sideEffects": false,
-    "devDependencies": {
-        "rimraf": "^4.4.1"
-    }
+    "sideEffects": false
 }

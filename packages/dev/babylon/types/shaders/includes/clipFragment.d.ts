@@ -1,4 +1,4 @@
-export declare const clipFragment: {
+/** @internal */ export declare const clipFragment: {
     name: string;
     shader: string;
 };

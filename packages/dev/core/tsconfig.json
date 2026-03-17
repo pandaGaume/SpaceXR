@@ -1,16 +1,4 @@
 {
     "extends": "../../../tsconfig.json",
-    "name": "spacexr-core",
-    "compilerOptions": {
-        "composite": true,
-        "outDir": "./dist",
-        "rootDir": "./src",
-        "declarationDir": "./types",
-        "skipLibCheck": true,
-        "paths": {},
-        "types": ["webxr"]
-    },
-
-    "include": ["./src/**/*.ts"],
-    "exclude": ["**/node_modules", "**/dist", "**/types"]
+    "compilerOptions": {}
 }

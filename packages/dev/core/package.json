@@ -7,20 +7,22 @@
     "types": "dist/index",
     "private": true,
     "files": [
-        "./src"
+        "dist",
+        "src"
     ],
     "scripts": {
-        "build:core:dev": "npm run clean:core && npm run compile:core",
-        "clean:core": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "compile:core": "npm run compile:core:source",
-        "compile:core:source": "tsc --project tsconfig.json",
-        "webpack:core:dev": "webpack --mode development",
-        "copy:core:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../host/www/libs\"",
-        "publish:core:dev": "npm run build:core:dev && npm run webpack:core:dev && npm run copy:core:bundle",
-        "test:core": "jest -c ../../../jest.config.ts --verbose"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development",
+        "copy:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../host/www/libs\"",
+        "publish:dev": "npm run build && npm run bundle:dev && npm run copy:bundle",
+        "test": "jest -c ../../../jest.config.ts --verbose"
     },
-    "sideEffects": false,
-    "devDependencies": {
-        "rimraf": "^4.4.1"
-    }
+    "sideEffects": false
 }

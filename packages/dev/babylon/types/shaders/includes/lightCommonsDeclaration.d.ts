@@ -1,4 +1,4 @@
-export declare const lightCommonsDeclaration: {
+/** @internal */ export declare const lightCommonsDeclaration: {
     name: string;
     shader: string;
 };

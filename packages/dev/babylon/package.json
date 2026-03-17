@@ -7,18 +7,22 @@
     "types": "dist/index",
     "private": true,
     "files": [
+        "dist",
         "src"
     ],
     "scripts": {
-        "clean:babylon": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "build:babylon:dev": "npm run clean:babylon && npm run compile:babylon",
-        "compile:babylon": "npm run precompile:babylon && npm run compile:babylon:source",
-        "compile:babylon:source": "tsc --project tsconfig.json",
-        "precompile:babylon": "npm run build:babylon:assets",
-        "build:babylon:assets": "npx build-tools -c process-assets",
-        "webpack:babylon:dev": "webpack --mode development --stats-error-details",
-        "copy:babylon:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../host/www/libs\"",
-        "publish:babylon:dev": "npm run build:babylon:dev && npm run webpack:babylon:dev && npm run copy:babylon:bundle"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "npm run precompile && tsc -b tsconfig.build.json",
+        "precompile": "npx build-tools -c process-assets",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development --stats-error-details",
+        "copy:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../host/www/libs\"",
+        "publish:dev": "npm run build && npm run bundle:dev && npm run copy:bundle"
     },
     "sideEffects": false,
     "devDependencies": {

@@ -1,4 +1,4 @@
-export declare const clipVertex: {
+/** @internal */ export declare const clipVertex: {
     name: string;
     shader: string;
 };

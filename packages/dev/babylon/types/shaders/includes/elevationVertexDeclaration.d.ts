@@ -1,4 +1,4 @@
-export declare const elevationVertexDeclaration: {
+/** @internal */ export declare const elevationVertexDeclaration: {
     name: string;
     shader: string;
 };

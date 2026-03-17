@@ -1,14 +1,4 @@
 {
     "extends": "../../../tsconfig.json",
-
-    "compilerOptions": {
-        "module": "CommonJS",
-        "composite": true,
-        "outDir": "./dist",
-        "rootDir": "./src",
-        "declarationDir": "./types",
-        "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true
-    },
-    "include": ["./src/**/*"]
+    "compilerOptions": {}
 }

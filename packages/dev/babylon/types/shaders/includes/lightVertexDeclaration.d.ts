@@ -1,4 +1,4 @@
-export declare const lightVertexDeclaration: {
+/** @internal */ export declare const lightVertexDeclaration: {
     name: string;
     shader: string;
 };

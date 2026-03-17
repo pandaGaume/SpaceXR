@@ -1,0 +1,19 @@
+{
+    "extends": "../../../../tsconfig.build.json",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declarationDir": "./types",
+        "skipLibCheck": true,
+        // paths are used to resolve modules
+        "paths": {
+            "core/*": ["./dev/core/src/*"],
+            "stellar/*": ["./dev/babylon/src/*"]
+        }
+    },
+    // you MUST use reference to the core tsconfig and the babylon tsconfig
+    "references": [{ "path": "../../core/tsconfig.build.json" }, { "path": "../../babylon/tsconfig.build.json" }],
+    "include": ["./src/**/*.ts", "../../babylon/src/camera/camera.Geodetic.ts"],
+    "exclude": ["**/node_modules", "**/dist", "**/types"]
+}

@@ -1,4 +1,4 @@
-export declare const mapVertexShader: {
+/** @internal */ export declare const mapVertexShader: {
     name: string;
     shader: string;
 };

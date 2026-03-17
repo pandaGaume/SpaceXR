@@ -7,21 +7,23 @@
     "types": "dist/index",
     "private": true,
     "files": [
-        "./src"
+        "dist",
+        "src"
     ],
     "scripts": {
-        "build:cesium:dev": "npm run clean:cesium && npm run compile:cesium",
-        "clean:cesium": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-        "compile:cesium": "npm run compile:cesium:source",
-        "compile:cesium:source": "tsc --project tsconfig.json",
-        "webpack:cesium:dev": "webpack --mode development",
-        "copy:cesium:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
-        "publish:cesium:dev": "npm run build:cesium:dev && npm run webpack:cesium:dev && npm run copy:cesium:bundle"
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf -g dist bundle bundles types *.tsbuildinfo",
+        "compile": "tsc -b tsconfig.build.json",
+        "watch:source": "tsc -b tsconfig.build.json -w",
+        "lint": "npm run lint:check",
+        "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+        "bundle": "webpack --mode production",
+        "bundle:dev": "webpack --mode development",
+        "copy:bundle": "copyfiles -V -u 1 \"./bundles/*.*\" \"../../../host/www/libs\"",
+        "publish:dev": "npm run build && npm run bundle:dev && npm run copy:bundle"
     },
     "sideEffects": false,
-    "devDependencies": {
-        "rimraf": "^4.4.1"
-    },
     "dependencies": {
         "protobufjs": "^7.3.2",
         "protobufjs-cli": "^1.1.2"

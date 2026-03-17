@@ -34,6 +34,12 @@ export declare class Map3D extends TileMapBase<Map3DContentType> implements IMap
     set offset(value: ICartesian3 | undefined);
     get exageration(): number | undefined;
     set exageration(value: number | undefined);
+    /**
+     * This is where we create different views, depending the type of layer.
+     * Elevation type layer will create specific view, which hold the necessary mechanism to create grid instances
+     * @param layer
+     * @returns the layer view created
+     */
     protected _buildLayerView(layer: ITileMapLayer<Map3DContentType>): Nullable<ITileMapLayerView<any>>;
     protected _computeTheoricalZoomOffset(gridDimension: number, tileSize: number): number;
     protected _onNavigationPropertyChanged(event: PropertyChangedEventArgs<ITileNavigationState, unknown>, state: EventState): void;

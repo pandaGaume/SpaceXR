@@ -9,6 +9,9 @@ export interface IMapTextureOptions extends ICanvasMapOptions, ISize2 {
     format?: number;
     invertY?: boolean;
 }
+/**
+ * Provide Babylon js Texture implementation for a 2D WebMap (Web Mercator projection).
+ */
 export declare class WebMapTexture extends BABYLON.Texture {
     static readonly DefaultOptions: IMapTextureOptions;
     static Options(o?: Partial<IMapTextureOptions>): IMapTextureOptions;

@@ -1,18 +1,40 @@
-# Compiled binary
-build
-
-# Dependency directory
-node_modules
-
-# Optional npm cache directory
+# Dependencies
+node_modules/
 .npm
 
-dist
-typings
+# Build outputs
+build/
+dist/
+bundle/
+**/bundles/
+typings/
 lib/*.js
+
+# TypeScript
+**/*.tsbuildinfo
 *.map
 *.d.ts
 
-**/bundles
-**/*.tsbuildinfo
+# Coverage
+coverage/
 
+# Environment
+.env
+.env.local
+.env.*.local
+
+# AI
+.claude
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

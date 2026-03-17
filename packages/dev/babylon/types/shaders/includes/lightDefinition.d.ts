@@ -1,4 +1,4 @@
-export declare const lightDefinition: {
+/** @internal */ export declare const lightDefinition: {
     name: string;
     shader: string;
 };

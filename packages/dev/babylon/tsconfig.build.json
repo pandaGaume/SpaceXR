@@ -1,0 +1,19 @@
+{
+    "extends": "../../../tsconfig.build.json",
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "composite": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declarationDir": "./types",
+        "skipLibCheck": true,
+        // paths are used to resolve modules
+        "paths": {
+            "core/*": ["./dev/core/src/*"]
+        }
+    },
+    // you MUST use reference to the core tsconfig
+    "references": [{ "path": "../core/tsconfig.build.json" }],
+    "include": ["./src/**/*.ts", "../core/src/map/inputs/map.inputs.source.ts", "../core/src/tiles/3d/tile3d.node.ts", "../core/src/tiles/3d/tile3d.interfaces.ts"],
+    "exclude": ["**/node_modules", "**/dist", "**/types"]
+}

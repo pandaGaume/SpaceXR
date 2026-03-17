@@ -1,24 +1,36 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:react/recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
-    "overrides": [
-    ],
+    "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
+        "ecmaVersion": 2020,
+        "sourceType": "module",
+        "project": [
+            "./packages/dev/core/tsconfig.build.json",
+            "./packages/dev/babylon/tsconfig.build.json",
+            "./packages/dev/babylon-gui/tsconfig.build.json",
+            "./packages/dev/babylon_ext/tsconfig.build.json",
+            "./packages/dev/buildTools/tsconfig.build.json",
+            "./packages/dev/extensions/cesium/tsconfig.build.json",
+            "./packages/dev/extensions/mapbox/tsconfig.build.json",
+            "./packages/dev/extensions/osm/tsconfig.build.json"
+        ]
     },
-    "plugins": [
-        "react",
-        "@typescript-eslint"
+    "plugins": ["@typescript-eslint", "prettier"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
     ],
     "rules": {
-    }
+        "prettier/prettier": "error",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "no-console": "warn",
+        "eqeqeq": ["error", "always"],
+        "no-var": "error",
+        "prefer-const": "error"
+    },
+    "ignorePatterns": ["dist/", "build/", "node_modules/", "*.js"]
 }

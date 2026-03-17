@@ -1,4 +1,4 @@
-export declare const webmapPixelShader: {
+/** @internal */ export declare const webmapPixelShader: {
     name: string;
     shader: string;
 };

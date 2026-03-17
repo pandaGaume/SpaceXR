@@ -1,10 +1,13 @@
 import { TileWebClient } from "../tiles.client";
 import { ImageTileClient } from "../tiles.client.image";
-import { ImageTileCodec } from "../codecs/tiles.codecs.image";
+import { ImageTileCodec, Float32TileCodec, Float32TileCodecOptions } from "../codecs/tiles.codecs.image";
+import { isFilter } from "../codecs/tiles.codecs.interfaces";
 import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
 import { WebTileUrlBuilder } from "../tiles.url.web";
 import { WebClientOptions } from "../../io";
 import { SolarSystemBodies } from "../../space";
+import { ArcGISImageServerUrlBuilder, ArcGISGrayscaleElevationDecoder } from "./tiles.vendors.arcgis";
+import { DemTileWebClient } from "../../dem/dem.tileclient";
 
 export class MoonUrlBuilder extends WebTileUrlBuilder {
     /** Carto CDN — supports CORS */
@@ -28,11 +31,38 @@ export class Moon {
     public static Metrics = new EPSG3857({ maxLOD: Moon.MaxLevelOfDetail }, SolarSystemBodies.Moon.ellipsoid);
     public static Attribution = "OpenPlanetary / USGS / NASA";
 
+    // LOLA DEM elevation range (meters)
+    private static readonly LOLA_MIN = -9128;
+    private static readonly LOLA_MAX = 10786;
+
+    /** NASA Trek ArcGIS ImageServer — LRO LOLA DEM (256 ppd) */
+    private static readonly LOLA_DEM_URL = "https://trek.nasa.gov/moon/trekarcgis/rest/services/LRO_LOLA_DEM_Global_256ppd_v06/ImageServer/exportImage";
+
     public static BasemapClient(options?: WebClientOptions) {
         return new TileWebClient(`${Moon.KEY}_basemap`, MoonUrlBuilder.Basemap, new ImageTileCodec(), Moon.Metrics, options);
     }
+
     public static HillshadeClient(options?: WebClientOptions) {
         // Uses ImageTileClient (loads via <img>) because S3 does not serve CORS headers
         return new ImageTileClient(`${Moon.KEY}_hillshade`, MoonUrlBuilder.HillshadeAlbedo, Moon.Metrics, options);
+    }
+
+    /**
+     * Returns a tile client that fetches LOLA DEM elevations as Float32Array.
+     * Each pixel is decoded from ArcGIS grayscale (0–255) to meters using the LOLA elevation range.
+     */
+    public static ElevationsClient(options?: WebClientOptions) {
+        const urlBuilder = new ArcGISImageServerUrlBuilder(Moon.LOLA_DEM_URL, SolarSystemBodies.Moon.ellipsoid.semiMajorAxis);
+        const decoder = new ArcGISGrayscaleElevationDecoder(Moon.LOLA_MIN, Moon.LOLA_MAX);
+        const o = isFilter<Float32Array>(options?.filter) ? new Float32TileCodecOptions({ filter: options?.filter }) : undefined;
+        return new TileWebClient(`${Moon.KEY}_lola_dem`, urlBuilder, new Float32TileCodec(decoder, o), Moon.Metrics, options);
+    }
+
+    /**
+     * Returns a DEM tile client combining LOLA elevations with computed normals.
+     * Compatible with the existing DemTileWebClient pipeline.
+     */
+    public static DemClient(options?: WebClientOptions) {
+        return new DemTileWebClient(`${Moon.KEY}_dem`, Moon.ElevationsClient(options));
     }
 }

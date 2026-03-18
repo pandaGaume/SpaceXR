@@ -1,96 +1,11 @@
 {
     "configurations": [
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Test Vector",
-            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
-            "args": ["--config", "./jest.config.ts", "--verbose"],
-            "outputCapture": "std",
-            "internalConsoleOptions": "openOnSessionStart",
-            "cwd": "${workspaceFolder}/packages/dev/extensions/mapbox/",
-            "windows": {
-                "skipFiles": ["C:\\**\\node_modules\\**\\*", "<node_internals>/**/*"]
-            }
-        },
-        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Canvas Map on chrome",
             "url": "http://localhost:1338/packages/host/www/core/canvasmap.html",
             "webRoot": "${workspaceFolder}/packages/dev/core/",
-            "sourceMaps": true
-        },
-                {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Test xml on chrome",
-            "url": "http://localhost:1338/packages/host/www/core/testXml.html",
-            "webRoot": "${workspaceFolder}/packages/dev/core/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Canvas Map with vectors image on chrome",
-            "url": "http://localhost:1338/packages/host/www/core/canvasmapwithvectorasimage.html",
-            "webRoot": "${workspaceFolder}/packages/dev/core/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Canvas Map with vectors on chrome",
-            "url": "http://localhost:1338/packages/host/www/core/canvasmapwithvector.html",
-            "webRoot": "${workspaceFolder}/packages/dev/core/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Canvas Source on chrome",
-            "url": "http://localhost:1338/packages/host/www/core/canvassource.html",
-            "webRoot": "${workspaceFolder}/packages/dev/core/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "GUI 2D on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/gui2DMap.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon-gui/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Texture Map on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/dynamictexturemap.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Virtual Display test on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/virtualScreen.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Virtual Display with map on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/virtualScreenWithMap.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch 3D DEM MESH on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/3dDemMesh.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },
         {
@@ -109,38 +24,6 @@
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },
-                {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch 3MF test  on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/tests/test3mf.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Tile3d map on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/tile3dMap.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch 3D map with shapes on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/3DMapWithShapes.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch 3D map with vectors on chrome",
-            "url": "http://localhost:1338/packages/host/www/babylon/3DMapWithVector.html",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
         {
             "type": "chrome",
             "request": "launch",
@@ -154,22 +37,6 @@
             "request": "launch",
             "name": "Launch Test Mesh Feature Id",
             "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?file=FeatureIdTexture.gltf",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Test instance Feature Id",
-            "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?file=GpuInstancesMetadata.gltf",
-            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
-            "sourceMaps": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Test google 3D Tile",
-            "url": "http://localhost:1338/packages/host/www/babylon/tests/testFeatureId.html?root=glb&file=Google3DTile.glb",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },

@@ -5,7 +5,7 @@ import { Polyline } from "../../geometry/shapes/geometry.polyline";
 import { Line } from "../../geometry/shapes/geometry.line";
 import { IShape } from "../../geometry/shapes/geometry.shapes.interfaces";
 import { Nullable } from "../../types";
-import { ITileMetrics, ITileMetricsProvider } from "../tiles.interfaces";
+import { ITileMetrics, IHasTileMetrics } from "../tiles.interfaces";
 import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
 
@@ -20,7 +20,7 @@ export class ShapeCollectionEventArgs {
 /// ShapeCollection will be used by VectorTileProvider to build VectorTileContent, windowing the shapes to the tiles and
 /// offseting the coordinates to the tile bounds.
 /// </summary>
-export class ShapeCollection implements ITileMetricsProvider {
+export class ShapeCollection implements IHasTileMetrics {
     public static DefaultSimplifyTolerance: number = 2;
     public static DefaultSimplifyHighQuality: boolean = false;
     public static Epsilon = 1;

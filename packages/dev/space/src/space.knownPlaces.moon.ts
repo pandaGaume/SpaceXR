@@ -1,4 +1,4 @@
-import { Geo2 } from "../geography/geography.position";
+import { Geo2 } from "core/geography/geography.position";
 
 /**
  * Notable locations on the Moon using selenographic coordinates (latitude, longitude).

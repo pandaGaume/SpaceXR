@@ -1,4 +1,4 @@
-import { Ellipsoid } from "../geodesy/geodesy.ellipsoid";
+import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
 import { CelestialNodeType } from "./space.interfaces";
 
 export interface IPlanetaryBody {

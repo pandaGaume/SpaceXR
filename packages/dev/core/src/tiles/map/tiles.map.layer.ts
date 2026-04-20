@@ -1,10 +1,10 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { IsTileDatasource, ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { IsTileDatasource, ITileAddress, ITileContentFetcher, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, IsTileMapLayerContainerProxy, LayerRenderFn } from "./tiles.map.interfaces";
 
 import { Assert } from "../../utils";
 import { IMemoryCache } from "../../cache";
-import { TileContentProvider } from "../providers";
+import { TileContentFetcher } from "../loaders";
 import { IWeighted } from "../../collections/collections.interfaces";
 
 export class TileMapLayer<T> implements ITileMapLayer<T> {
@@ -19,9 +19,9 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
     _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
 
-    _provider: ITileContentProvider<T>;
+    _provider: ITileContentFetcher<T>;
 
-    public constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress >, options?: ITileMapLayerOptions<T>, enabled?: boolean) {
+    public constructor(name: string, provider: ITileContentFetcher<T> | ITileDatasource<T, ITileAddress >, options?: ITileMapLayerOptions<T>, enabled?: boolean) {
         Assert(name !== undefined && name !== null && name !== "", "Invalid layer name.");
         Assert(provider !== undefined && name !== null, "Invalid provider or datasource");
 
@@ -39,7 +39,7 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
         return this._provider.metrics;
     }
 
-    public get provider(): ITileContentProvider<T> {
+    public get provider(): ITileContentFetcher<T> {
         return this._provider;
     }
 
@@ -152,7 +152,7 @@ export class TileMapLayer<T> implements ITileMapLayer<T> {
 
     public dispose() {}
 
-    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T> {
-        return new TileContentProvider<T>(dataSource, cache);
+    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentFetcher<T> {
+        return new TileContentFetcher<T>(dataSource, cache);
     }
 }

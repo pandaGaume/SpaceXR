@@ -4,13 +4,13 @@ import { IsDisposable, Nullable } from "../../types";
 import { ITileNavigationApi, ITileNavigationState, TileNavigationState } from "../navigation";
 import { TileNavigationApi } from "../navigation/tiles.navigation.api";
 import { hasTileSelectionContext, ISourceBlock, ITileSelectionContext, ITileView } from "../pipeline";
-import { TileProvider } from "../providers";
+import { TileLoader } from "../loaders";
 
 import { ITile2DAddress } from "../tiles.interfaces";
 import { IDisplay, ITileMapLayer, ITileMapLayerView } from "./tiles.map.interfaces";
 import { TileView } from "./tiles.map.view";
 
-export class TileMapLayerView<T> extends TileProvider<T> implements ITileMapLayerView<T> {
+export class TileMapLayerView<T> extends TileLoader<T> implements ITileMapLayerView<T> {
     private _weightChangedObservable?: Observable<IWeighted>;
 
     private _layer: ITileMapLayer<T>;

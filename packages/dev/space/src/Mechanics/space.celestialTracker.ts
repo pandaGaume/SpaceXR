@@ -1,4 +1,4 @@
-import { Scalar } from "../../math/math";
+import { Scalar } from "core/math/math";
 
 export class HorizonVector {
     public distance?: number;

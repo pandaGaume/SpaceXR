@@ -1,0 +1,15 @@
+{
+    "_comment": "Solution file for `tsc -b` at the repo root. Lists every package's tsconfig.build.json so each package respects its own rootDir/outDir and nothing ends up next to .ts sources.",
+    "files": [],
+    "references": [
+        { "path": "./packages/dev/core/tsconfig.build.json" },
+        { "path": "./packages/dev/space/tsconfig.build.json" },
+        { "path": "./packages/dev/babylon/tsconfig.build.json" },
+        { "path": "./packages/dev/babylon-gui/tsconfig.build.json" },
+        { "path": "./packages/dev/babylon_ext/tsconfig.build.json" },
+        { "path": "./packages/dev/extensions/cesium/tsconfig.build.json" },
+        { "path": "./packages/dev/extensions/mapbox/tsconfig.build.json" },
+        { "path": "./packages/dev/extensions/osm/tsconfig.build.json" },
+        { "path": "./packages/dev/buildTools/tsconfig.build.json" }
+    ]
+}

@@ -1,13 +1,13 @@
-import { TileWebClient } from "../tiles.client";
-import { ImageTileClient } from "../tiles.client.image";
-import { ImageTileCodec, Float32TileCodec, Float32TileCodecOptions } from "../codecs/tiles.codecs.image";
-import { isFilter } from "../codecs/tiles.codecs.interfaces";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
-import { WebTileUrlBuilder } from "../tiles.url.web";
-import { WebClientOptions } from "../../io";
-import { SolarSystemBodies } from "../../space";
-import { ArcGISImageServerUrlBuilder, ArcGISGrayscaleElevationDecoder } from "./tiles.vendors.arcgis";
-import { DemTileWebClient } from "../../dem/dem.tileclient";
+import { TileWebClient } from "core/tiles/tiles.client";
+import { ImageTileClient } from "core/tiles/tiles.client.image";
+import { ImageTileCodec, Float32TileCodec, Float32TileCodecOptions } from "core/tiles/codecs/tiles.codecs.image";
+import { isFilter } from "core/tiles/codecs/tiles.codecs.interfaces";
+import { EPSG3857 } from "core/tiles/geography/tiles.geography.EPSG3857";
+import { WebTileUrlBuilder } from "core/tiles/tiles.url.web";
+import { WebClientOptions } from "core/io";
+import { SolarSystemBodies } from "..";
+import { ArcGISImageServerUrlBuilder, ArcGISGrayscaleElevationDecoder } from "core/tiles/vendors/tiles.vendors.arcgis";
+import { DemTileWebClient } from "core/dem/dem.tileclient";
 
 export class MoonUrlBuilder extends WebTileUrlBuilder {
     /** Carto CDN — supports CORS */

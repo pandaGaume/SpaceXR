@@ -1,19 +1,19 @@
-import { IsTileConstructor, ITile, ITile2DAddress, ITileBuilder, ITileMetrics, ITileProvider, TileConstructor } from "../tiles.interfaces";
+import { IsTileConstructor, ITile, ITile2DAddress, ITileBuilder, ITileMetrics, ITileLoader, TileConstructor } from "../tiles.interfaces";
 import { EventState, Observable } from "../../events/events.observable";
 import { IEnvelope } from "../../geography/geography.interfaces";
 import { IBounds } from "../../geometry/geometry.interfaces";
 import { TileCollection } from "../tiles.collection";
 import { TileBuilder } from "../tiles.builder";
-import { ILinkOptions, IPipelineMessageType, ITargetBlock, ITilePipelineLink, TilePipelineLink } from "../pipeline";
+import { ILinkOptions, IPipelineMessageType, ITargetBlock, IPipelineLink, TilePipelineLink } from "../pipeline";
 import { Nullable } from "../../types";
 import { ValidableBase } from "../../validable";
 
-export abstract class AbstractTileProvider<T> extends ValidableBase implements ITileProvider<T> {
+export abstract class AbstractTileLoader<T> extends ValidableBase implements ITileLoader<T> {
     _updateObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _addedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
     _removedObservable?: Observable<IPipelineMessageType<ITile<T>>>;
 
-    _enabledObservable?: Observable<ITileProvider<T>>;
+    _enabledObservable?: Observable<ITileLoader<T>>;
 
     _factory: ITileBuilder<T>;
     _activTiles: TileCollection<T>;
@@ -22,7 +22,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
     // internal
     _callback: (t: ITile<T>) => void;
     // internal pipeline links
-    _links: Array<ITilePipelineLink<ITile<T>>> = [];
+    _links: Array<IPipelineLink<ITile<T>>> = [];
 
     public constructor(factory?: ITileBuilder<T> | TileConstructor<T>, enabled = true) {
         super();
@@ -46,8 +46,8 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return this._activTiles?.boundingBox;
     }
 
-    public get enabledObservable(): Observable<ITileProvider<T>> {
-        this._enabledObservable = this._enabledObservable || new Observable<ITileProvider<T>>();
+    public get enabledObservable(): Observable<ITileLoader<T>> {
+        this._enabledObservable = this._enabledObservable || new Observable<ITileLoader<T>>();
         return this._enabledObservable!;
     }
 
@@ -108,7 +108,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return this._removedObservable!;
     }
 
-    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions<ITile<T>>, ...args: Array<any>): void {
+    public linkTo(target: ITargetBlock<ITile<T>>, options?: ILinkOptions<ITile<T>>, ..._args: Array<any>): void {
         // a view may be linked to several targets, so we need to keep track of them.
         if (this._links.findIndex((l) => l.target === target) === -1) {
             // avoid linking twice to the same target
@@ -118,12 +118,12 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    protected _onLinked(link: ITilePipelineLink<ITile<T>>): void {
+    protected _onLinked(link: IPipelineLink<ITile<T>>): void {
         // we are forwarding the activ tile to the newly linked target.
         link.forwardAdded(Array.from(this._activTiles), new EventState(-1, false, this, this));
     }
 
-    public unlinkFrom(target: ITargetBlock<ITile<T>>): ITilePipelineLink<ITile<T>> | undefined {
+    public unlinkFrom(target: ITargetBlock<ITile<T>>): IPipelineLink<ITile<T>> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];
@@ -134,7 +134,7 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return undefined;
     }
 
-    protected _onUnlinked(link: ITilePipelineLink<ITile<T>>): void {}
+    protected _onUnlinked(_link: IPipelineLink<ITile<T>>): void {}
 
     /// end ISourceBlock
 
@@ -169,12 +169,12 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         }
     }
 
-    public updated(eventData: IPipelineMessageType<ITile2DAddress>, eventState: EventState): void {
+    public updated(_eventData: IPipelineMessageType<ITile2DAddress>, _eventState: EventState): void {
         // nothing to do here, updating address is not suppose to happen
     }
     /// end ITargetBlock
 
-    protected _onTileAddressesAdded(address: Array<ITile2DAddress>, eventState: EventState): Array<ITile<T>> {
+    protected _onTileAddressesAdded(address: Array<ITile2DAddress>, _eventState: EventState): Array<ITile<T>> {
         const toActivate = address.length === 0 ? [...(this._activTiles ?? [])].map((t) => t.address) : address;
         const tiles = new Array<ITile<T>>();
         for (const a of toActivate ?? []) {
@@ -204,14 +204,14 @@ export abstract class AbstractTileProvider<T> extends ValidableBase implements I
         return tiles;
     }
 
-    protected _onTileAddressesRemoved(address: Array<ITile2DAddress>, eventState: EventState): Array<ITile<T>> {
+    protected _onTileAddressesRemoved(address: Array<ITile2DAddress>, _eventState: EventState): Array<ITile<T>> {
         if (this._activTiles && this._activTiles.count) {
             const tiles = new Array<ITile<T>>();
             for (const a of address ?? []) {
                 const t = this._activTiles?.get(a);
                 if (t) {
                     tiles.push(t);
-                    this._activTiles?.remove(a)!;
+                    this._activTiles.remove(a)!;
                 }
             }
 

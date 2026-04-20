@@ -1,5 +1,5 @@
 import { Observable } from "../../events";
-import { ILinkOptions, IPipelineMessageType, ISourceBlock, ITargetBlock, ITilePipelineLink } from "./tiles.pipeline.interfaces";
+import { ILinkOptions, IPipelineMessageType, ISourceBlock, ITargetBlock, IPipelineLink } from "./tiles.pipeline.interfaces";
 import { TilePipelineLink } from "./tiles.pipeline.link";
 
 export class SourceBlock<T> implements ISourceBlock<T> {
@@ -8,7 +8,7 @@ export class SourceBlock<T> implements ISourceBlock<T> {
     _updatedObservable?: Observable<IPipelineMessageType<T>>;
 
     // internal pipeline links
-    _links: Array<ITilePipelineLink<T>> = [];
+    _links: Array<IPipelineLink<T>> = [];
 
     public dispose(): void {
         // dispose the links
@@ -18,7 +18,7 @@ export class SourceBlock<T> implements ISourceBlock<T> {
         this._links = [];
     }
 
-    public get links(): Array<ITilePipelineLink<T>> | undefined {
+    public get links(): Array<IPipelineLink<T>> | undefined {
         return this._links;
     }
 
@@ -45,7 +45,7 @@ export class SourceBlock<T> implements ISourceBlock<T> {
         }
     }
 
-    public unlinkFrom(target: ITargetBlock<T>): ITilePipelineLink<T> | undefined {
+    public unlinkFrom(target: ITargetBlock<T>): IPipelineLink<T> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
             const l = this._links.splice(i)[0];

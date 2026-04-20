@@ -1,4 +1,4 @@
-import { Length, Angle, Timespan, Speed } from "../../math/math.units";
+import { Length, Angle, Timespan, Speed } from "core/math/math.units";
 import { IKeplerOrbit, ICelestialBody } from "../space.interfaces";
 
 export class KeplerOrbitBase implements IKeplerOrbit {

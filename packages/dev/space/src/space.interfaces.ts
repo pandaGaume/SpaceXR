@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { Temperature, Length, Angle, Timespan, Speed } from "../math/math.units";
-import { RGBAColor } from "../math/math.color";
+import { Temperature, Length, Angle, Timespan, Speed } from "core/math/math.units";
+import { RGBAColor } from "core/math/math.color";
 import { AxialTilt } from "./space.axialTilt";
 import { SpectralClass } from "./space.spectralClass";
 

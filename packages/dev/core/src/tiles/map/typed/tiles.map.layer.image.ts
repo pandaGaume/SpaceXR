@@ -1,11 +1,11 @@
-import { ITile, ITile2DAddress, ITileContentProvider, ITileDatasource } from "../../tiles.interfaces";
+import { ITile, ITile2DAddress, ITileContentFetcher, ITileDatasource } from "../../tiles.interfaces";
 import { IImageTileMapLayer, IImageTileMapLayerOptions, ImageLayerContentType } from "../tiles.map.interfaces";
 import { TileMapLayer } from "../tiles.map.layer";
 
 export class ImageLayer extends TileMapLayer<ImageLayerContentType> implements IImageTileMapLayer {
     public constructor(
         name: string,
-        provider: ITileContentProvider<ImageLayerContentType> | ITileDatasource<ImageLayerContentType, ITile2DAddress>,
+        provider: ITileContentFetcher<ImageLayerContentType> | ITileDatasource<ImageLayerContentType, ITile2DAddress>,
         options?: IImageTileMapLayerOptions,
         enabled?: boolean
     ) {

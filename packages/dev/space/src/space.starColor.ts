@@ -1,7 +1,7 @@
-import { ParametricValue } from "../math";
+import { ParametricValue } from "core/math";
 import { SpectralClass, MKLuminosity, MorganKeenanName, MorganKeenanClass } from "./space.spectralClass";
-import { Temperature } from "../math/math.units";
-import { RGBAColor } from "../math/math.color";
+import { Temperature } from "core/math/math.units";
+import { RGBAColor } from "core/math/math.color";
 
 export interface ColorInfoPair {
     key: MorganKeenanName;

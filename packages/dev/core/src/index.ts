@@ -4,13 +4,16 @@ export * from "./events/index";
 export * from "./geodesy/index";
 export * from "./geography/index";
 export * from "./geometry/index";
+export * from "./dataflow/index";
+export * from "./camera/index";
 export * from "./map/index";
 export * from "./math/index";
-export * from "./space/index";
 export * from "./tiles/index";
 export * from "./utils/index";
 export * from "./cache/index";
 export * from "./dem/index";
 export * from "./text";
 export * from "./tree";
+export * from "./streaming";
+export * from "./streaming/tile";
 

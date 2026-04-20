@@ -1,8 +1,8 @@
 import { IMemoryCache, MemoryCache } from "../../cache/cache";
-import { ITile, ITile2DAddress, ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { ITile, ITile2DAddress, ITileAddress, ITileContentFetcher, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { TileAddress } from "../address/tiles.address";
 
-export class TileContentProvider<T> implements ITileContentProvider<T> {
+export class TileContentFetcher<T> implements ITileContentFetcher<T> {
     private _cache: IMemoryCache<string, TileContentType<T>>;
     private _ownCache: boolean;
     private _datasource: ITileDatasource<T, ITileAddress>;
@@ -55,7 +55,7 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         }
 
         // then try to build a temporary content using alternative method
-        let c = this._buildTemporaryContent(address);
+        const c = this._buildTemporaryContent(address);
 
         // store the content, either null or not. This flag the address as beeing processed.
         this._cache.set(cacheKey, c);
@@ -81,12 +81,12 @@ export class TileContentProvider<T> implements ITileContentProvider<T> {
         return tile;
     }
 
-    protected _buildTemporaryContent(address: ITile2DAddress): TileContentType<T> {
+    protected _buildTemporaryContent(_address: ITile2DAddress): TileContentType<T> {
         // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
         // in oder to avoid empty tile to be displayed during pan and zoom operation.
         return null;
     }
-    protected _buildAlternativContent(address: ITile2DAddress): TileContentType<T> {
+    protected _buildAlternativContent(_address: ITile2DAddress): TileContentType<T> {
         // TODO : implement a strategy to build an alternativ content
         // this could be used when the datasource is not available or when the lookup operation has failed
         // or when the content is unavailable on purpose such as a 404 error for sea based tile

@@ -1,4 +1,4 @@
-import { Temperature, Length, Mass, Luminosity, QuantityRange as QR } from "../math/math.units";
+import { Temperature, Length, Mass, Luminosity, QuantityRange as QR } from "core/math/math.units";
 
 export type MKMajor = "O" | "B" | "A" | "F" | "G" | "K" | "M";
 export type MKMinor = number;

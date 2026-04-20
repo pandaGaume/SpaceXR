@@ -1,9 +1,9 @@
-import { TileWebClient } from "../tiles.client";
-import { ImageTileCodec } from "../codecs/tiles.codecs.image";
-import { EPSG3857 } from "../geography/tiles.geography.EPSG3857";
-import { WebTileUrlBuilder } from "../tiles.url.web";
-import { WebClientOptions } from "../../io";
-import { SolarSystemBodies } from "../../space";
+import { TileWebClient } from "core/tiles/tiles.client";
+import { ImageTileCodec } from "core/tiles/codecs/tiles.codecs.image";
+import { EPSG3857 } from "core/tiles/geography/tiles.geography.EPSG3857";
+import { WebTileUrlBuilder } from "core/tiles/tiles.url.web";
+import { WebClientOptions } from "core/io";
+import { SolarSystemBodies } from "..";
 
 export class MercuryUrlBuilder extends WebTileUrlBuilder {
     public static Basemap = new MercuryUrlBuilder(

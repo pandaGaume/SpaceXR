@@ -1,57 +1,13 @@
-import { EventState, Observable } from "../../events";
 import { IDisposable, Nullable } from "../../types";
 import { ITile2DAddress, ITileMetrics } from "../tiles.interfaces";
 import { ITileNavigationState } from "../navigation/tiles.navigation.interfaces";
 import { IDisplay } from "../map";
 
-export type IPipelineMessageType<T> = Array<T>;
+// Generic dataflow primitives now live in core/src/dataflow. Re-exported here so
+// historical imports from "tiles/pipeline" keep working.
+export * from "../../dataflow";
 
-export type TargetCallbackFn<T> = (eventData: T, eventState: EventState) => void;
-
-export interface ITargetBlock<T> {
-    added?: TargetCallbackFn<IPipelineMessageType<T>>;
-    removed?: TargetCallbackFn<IPipelineMessageType<T>>;
-    updated?: TargetCallbackFn<IPipelineMessageType<T>>;
-}
-
-export function IsTargetBlock<T>(b: unknown): b is ITargetBlock<T> {
-    if (b === null || typeof b !== "object") return false;
-    return (<ITargetBlock<T>>b).added !== undefined || (<ITargetBlock<T>>b).removed !== undefined || (<ITargetBlock<T>>b).updated !== undefined;
-}
-
-export interface ILinkOptions<T> {
-    accept?: (data: T) => boolean;
-    acceptAdded?: (data: T) => boolean;
-    acceptRemoved?: (data: T) => boolean;
-    acceptUpdated?: (data: T) => boolean;
-}
-
-export interface ISourceEvent<T> {
-    /// <summary> messaged when a tile is updated </summary>
-    updatedObservable: Observable<IPipelineMessageType<T>>;
-    /// <summary> messaged when a tile is added </summary>
-    addedObservable: Observable<IPipelineMessageType<T>>;
-    /// <summary> messaged when a tile is removed </summary>
-    removedObservable: Observable<IPipelineMessageType<T>>;
-}
-
-export interface ISourceBlock<T> extends ISourceEvent<T> {
-    linkTo(target: ITargetBlock<T>, options?: ILinkOptions<T>, ...args: Array<any>): void;
-    unlinkFrom(target: ITargetBlock<T>, ...args: Array<any>): ITilePipelineLink<T> | undefined;
-    links?: Array<ITilePipelineLink<T>>;
-}
-
-export interface ITransformBlock<TInput, TOutput> extends ITargetBlock<TInput>, ISourceBlock<TOutput> {}
-
-export interface ITilePipelineLink<T> extends IDisposable {
-    source: ISourceBlock<T>;
-    target: ITargetBlock<T>;
-    options?: ILinkOptions<T>;
-
-    forwardAdded(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-    forwardRemoved(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-    forwardUpdated(eventData: IPipelineMessageType<T>, eventState: EventState): void;
-}
+import { ISourceBlock } from "../../dataflow";
 
 export interface ITilePipelineComponent extends IDisposable {
     name?: string;

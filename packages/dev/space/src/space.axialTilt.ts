@@ -1,4 +1,4 @@
-import { Unit, Angle, Timespan } from "../math/math.units";
+import { Unit, Angle, Timespan } from "core/math/math.units";
 
 export class AxialTilt {
     public static defaultAngleUnit: Unit = Angle.Units.d;

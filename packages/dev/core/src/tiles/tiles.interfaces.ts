@@ -107,7 +107,7 @@ export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
 
-export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
+export interface ITileBuilder<T> extends IHasTileMetrics, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITile2DAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
@@ -180,16 +180,16 @@ export interface ITileMetrics extends ITileSystem {
     getPointXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }
 
-export interface ITileMetricsProvider {
+export interface IHasTileMetrics {
     metrics?: ITileMetrics;
 }
 
-export function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider {
+export function IsHasTileMetrics(b: unknown): b is IHasTileMetrics {
     if (b === null || typeof b !== "object") return false;
-    return (<ITileMetricsProvider>b).metrics !== undefined;
+    return (<IHasTileMetrics>b).metrics !== undefined;
 }
 
-export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
+export interface ITileDatasource<T, A extends ITileAddress> extends IHasTileMetrics {
     name: string;
     fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
@@ -204,7 +204,7 @@ export interface ITileClient<T> extends ITileDatasource<T, ITileAddress > {}
 /// <summary>
 /// Act as decorator arround ITileDatasource to provide address filtering, content generation and also caching capabilities
 /// </summary>
-export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
+export interface ITileContentFetcher<T> extends IHasTileMetrics, IDisposable {
     name: string; // usually shortcut for datasource?.name
     datasource: ITileDatasource<T, ITileAddress >; // the underlying data source
     accept(address: ITileAddress ): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
@@ -225,18 +225,18 @@ export interface IHasActivTiles<T> {
 /// Used as entry point to Tile Data source. It is responsible for managing the lifecycle of the datasource and the content provider
 /// plus dealing with the asynchronous nature of the data source, by providing update notification.
 /// The main interaction is done using ITransformBlock interface methods.
-/// Basically, a TileProvider may be connected to several ISourceBlock<ITileAddress>, listening for Address to resolve. Fetch or build Tile base on addresses, and finally messaging listeners of ITargetBlock<ITile<T>>.
+/// Basically, a TileLoader may be connected to several ISourceBlock<ITileAddress>, listening for Address to resolve. Fetch or build Tile base on addresses, and finally messaging listeners of ITargetBlock<ITile<T>>.
 /// </summary>
-export interface ITileProvider<T>
+export interface ITileLoader<T>
     extends ITransformBlock<ITile2DAddress, ITile<T>>,
         IValidable,
         IHasNamespace,
         IHasActivTiles<T>,
-        ITileMetricsProvider,
+        IHasTileMetrics,
         IDisposable,
         IGeoBounded,
         IBounded {
-    enabledObservable: Observable<ITileProvider<T>>; // messaged when the provider is enabled/disabled
+    enabledObservable: Observable<ITileLoader<T>>; // messaged when the provider is enabled/disabled
     enabled: boolean; // enable/disable the provider
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used
 }

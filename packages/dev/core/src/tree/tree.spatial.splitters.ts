@@ -2,7 +2,7 @@ import { Bounds, IBounded, IBounds, IsBounds } from "../geometry";
 import { IKdtreeSplitter, ISpatialTreeNode, ISpatialTreeOptions, ISplitter, RoundRobin } from "./tree.spatial.interfaces";
 
 export class QuadtreeSplitter<T extends IBounds | IBounded> implements ISplitter<T> {
-    public split(node: ISpatialTreeNode<T>, options: ISpatialTreeOptions<T>): Array<IBounds> {
+    public split(node: ISpatialTreeNode<T>, _options: ISpatialTreeOptions<T>): Array<IBounds> {
         if (node.boundingBox) {
             const { xmin, ymin, zmin, width, height } = node.boundingBox;
             const halfWidth = width / 2;
@@ -21,7 +21,7 @@ export class QuadtreeSplitter<T extends IBounds | IBounded> implements ISplitter
 }
 
 export class OctreeSplitter<T extends IBounds | IBounded> implements ISplitter<T> {
-    public split(node: ISpatialTreeNode<T>, options: ISpatialTreeOptions<T>): Array<IBounds> {
+    public split(node: ISpatialTreeNode<T>, _options: ISpatialTreeOptions<T>): Array<IBounds> {
         if (node.boundingBox) {
             const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
             const halfWidth = width / 2;
@@ -69,7 +69,7 @@ export class KdtreeSplitter<T extends IBounds | IBounded> implements IKdtreeSpli
             const axe = this.splitAxisSelector ? this.splitAxisSelector(node.depth, this.dimension ?? 3) : RoundRobin(node.depth, this.dimension ?? 3);
             switch (axe) {
                 case 0: // X-axis
-                    let center = node.items?.data.map((item) => (IsBounds(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
+                    let center = node.items?.data.map((item) => (IsBounds(item) ? item.center.x : (item.boundingBox?.center.x ?? midX)));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - xmin;
@@ -80,7 +80,7 @@ export class KdtreeSplitter<T extends IBounds | IBounded> implements IKdtreeSpli
                     }
                     break;
                 case 1: // Y-axis
-                    center = node.items?.data.map((item) => (IsBounds(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
+                    center = node.items?.data.map((item) => (IsBounds(item) ? item.center.y : (item.boundingBox?.center.y ?? midY)));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - ymin;
@@ -91,7 +91,7 @@ export class KdtreeSplitter<T extends IBounds | IBounded> implements IKdtreeSpli
                     }
                     break;
                 case 2: // Z-axis
-                    center = node.items?.data.map((item) => (IsBounds(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
+                    center = node.items?.data.map((item) => (IsBounds(item) ? item.center.z : (item.boundingBox?.center.z ?? midZ)));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - zmin;

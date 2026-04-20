@@ -6640,6 +6640,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileMetrics),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileProvider),
 /* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Angle),
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISImageServerUrlBuilder),
 /* harmony export */   Assert: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.Assert),
 /* harmony export */   AxialTilt: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.AxialTilt),
 /* harmony export */   Bearing: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Bearing),
@@ -6711,6 +6713,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptions),
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageLayer),
+/* harmony export */   ImageTileClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileClient),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileCodec),
 /* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputController),
@@ -12154,6 +12157,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__.AbstractTileMetrics),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileProvider),
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.ArcGISImageServerUrlBuilder),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.CanvasTileCodec),
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodec),
@@ -12174,6 +12179,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptions),
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.ImageLayer),
+/* harmony export */   ImageTileClient: () => (/* reexport safe */ _tiles_client_image__WEBPACK_IMPORTED_MODULE_13__.ImageTileClient),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsDrawableTileMapLayer),
@@ -12212,9 +12218,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SourceBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.SourceBlock),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
-/* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_13__.Tile),
+/* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_14__.Tile),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
-/* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_15__.TileCollection),
+/* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_16__.TileCollection),
 /* harmony export */   TileContentProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayer),
@@ -12225,13 +12231,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
 /* harmony export */   TileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileProvider),
-/* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_16__.TileSystemBounds),
+/* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_17__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileView),
 /* harmony export */   TileViewBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileViewBase),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClient),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
-/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_url_web__WEBPACK_IMPORTED_MODULE_14__.WebTileUrlBuilder),
+/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_url_web__WEBPACK_IMPORTED_MODULE_15__.WebTileUrlBuilder),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.hasTileSelectionContext),
 /* harmony export */   isFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.isFilter),
@@ -12250,10 +12256,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.metrics */ "../core/dist/tiles/tiles.metrics.js");
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles.collection */ "../core/dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.system */ "../core/dist/tiles/tiles.system.js");
+/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles.client.image */ "../core/dist/tiles/tiles.client.image.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles */ "../core/dist/tiles/tiles.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.collection */ "../core/dist/tiles/tiles.collection.js");
+/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./tiles.system */ "../core/dist/tiles/tiles.system.js");
+
 
 
 
@@ -12512,6 +12520,9 @@ class TileMapBase extends _validable__WEBPACK_IMPORTED_MODULE_3__.ValidableBase 
         const toRemove = Array.from(this._layerViews.get((v) => eventData.includes(v.layer)));
         if (toRemove?.length) {
             this._layerViews.remove(...toRemove);
+            // Clear the shared view's tile address cache so the next layer added
+            // at the same position/zoom will get fresh tile requests
+            this._view.clearContext();
             this.invalidate();
         }
     }
@@ -12971,6 +12982,14 @@ class TileViewBase extends _pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTE
             return;
         }
         this._doValidateContext(state, display, metrics, this._activ, options);
+    }
+    /**
+     * Clear the active tile address cache. This forces the next setContext call
+     * to treat all tile addresses as new, triggering fresh tile requests.
+     * Useful when the layer composition changes but navigation state stays the same.
+     */
+    clearContext() {
+        this._activ.clear();
     }
     _doClearContext(state, activAddresses, options) {
         if (state) {
@@ -14363,6 +14382,97 @@ class TileBuilder {
 
 /***/ },
 
+/***/ "../core/dist/tiles/tiles.client.image.js"
+/*!************************************************!*\
+  !*** ../core/dist/tiles/tiles.client.image.js ***!
+  \************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ImageTileClient: () => (/* binding */ ImageTileClient)
+/* harmony export */ });
+/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../io */ "../core/dist/io/webClient.js");
+
+
+/**
+ * A tile client that loads image tiles via <img> elements instead of fetch().
+ * This bypasses CORS restrictions, allowing tiles to be loaded from servers
+ * that do not send Access-Control-Allow-Origin headers (e.g. raw S3 buckets).
+ *
+ * Use this client for image-only tile sources where the server does not support CORS.
+ * For servers that support CORS, prefer TileWebClient with ImageTileCodec.
+ */
+class ImageTileClient {
+    constructor(name, urlFactory, metrics, options) {
+        this._name = name;
+        this._urlFactory = urlFactory;
+        this._metrics = metrics;
+        this._options = { ..._io__WEBPACK_IMPORTED_MODULE_1__.WebClientOptions.getDefault(), ...options };
+    }
+    get name() {
+        return this._name;
+    }
+    get metrics() {
+        return this._metrics;
+    }
+    async fetchAsync(request, env, ...userArgs) {
+        if (!request) {
+            throw new _io__WEBPACK_IMPORTED_MODULE_1__.FetchError("Invalid request parameter.");
+        }
+        if (_address_tiles_address__WEBPACK_IMPORTED_MODULE_0__.TileAddress.IsValidAddress(request, this._metrics) === false) {
+            return _io__WEBPACK_IMPORTED_MODULE_1__.FetchResult.Null(request, userArgs);
+        }
+        const url = this._urlFactory.buildUrl(request, ...userArgs);
+        if (!url) {
+            throw new _io__WEBPACK_IMPORTED_MODULE_1__.FetchError(`Built url of ${request.toString()} can not be null`);
+        }
+        const maxRetry = this._options.maxRetry ?? 1;
+        let retryCount = 0;
+        let delay = this._options.initialDelay ?? 1000;
+        do {
+            try {
+                const img = await this._loadImage(url);
+                return new _io__WEBPACK_IMPORTED_MODULE_1__.FetchResult(request, img, userArgs);
+            }
+            catch (error) {
+                console.error(`Error loading image ${url}: ${error.message || error}`);
+                if (retryCount >= maxRetry - 1) {
+                    throw new _io__WEBPACK_IMPORTED_MODULE_1__.FetchError(`Exceeded maximum retries for image URL: ${url}`, ...userArgs);
+                }
+            }
+            const jitter = Math.floor(Math.random() * (this._options.initialDelay ?? 1000));
+            await new Promise((resolve) => setTimeout(resolve, Math.min(delay + jitter, 30000)));
+            delay *= 2;
+            retryCount++;
+        } while (retryCount < maxRetry);
+        throw new _io__WEBPACK_IMPORTED_MODULE_1__.FetchError(`Exceeded maximum retries for image URL: ${url}`, ...userArgs);
+    }
+    _loadImage(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                img.onload = null;
+                img.onerror = null;
+                resolve(img);
+            };
+            img.onerror = () => {
+                img.onload = null;
+                img.onerror = null;
+                reject(new Error(`Failed to load image: ${url}`));
+            };
+            // Do NOT set crossOrigin — this allows loading from no-CORS servers.
+            // The trade-off is that this image will taint the canvas (no getImageData/toBlob),
+            // but for tile rendering via drawImage this is perfectly fine.
+            img.src = url;
+        });
+    }
+}
+//# sourceMappingURL=tiles.client.image.js.map
+
+/***/ },
+
 /***/ "../core/dist/tiles/tiles.client.js"
 /*!******************************************!*\
   !*** ../core/dist/tiles/tiles.client.js ***!
@@ -15140,6 +15250,15 @@ class WebTileUrlBuilder {
         this._subdomains = subdomains;
         return this;
     }
+    /**
+     * Enable TMS Y-axis convention. TMS tiles have Y=0 at the bottom (south),
+     * while XYZ/slippy-map tiles have Y=0 at the top (north).
+     * When enabled, the Y coordinate is flipped: y_tms = (2^z - 1) - y_xyz
+     */
+    withTMSY(v = true) {
+        this._tmsY = v;
+        return this;
+    }
     buildUrl(a, ...params) {
         const scheme = this._isSecure ? "https" : "http";
         const host = this._port ? `${this._host}:${this._port}` : `${this._host}`;
@@ -15148,8 +15267,9 @@ class WebTileUrlBuilder {
         if (this._extension) {
             template = template.replaceAll("{extension}", this._extension);
         }
+        const y = this._tmsY ? (1 << a.levelOfDetail) - 1 - a.y : a.y;
         let str = template.replaceAll("{x}", a.x.toString());
-        str = str.replaceAll("{y}", a.y.toString());
+        str = str.replaceAll("{y}", y.toString());
         str = str.replaceAll("{z}", a.levelOfDetail.toString());
         if (this._subdomains) {
             let i = this._i ?? 0;
@@ -15531,6 +15651,8 @@ function IsLineLayerStyle(value) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_2__.ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_2__.ArcGISImageServerUrlBuilder),
 /* harmony export */   Google: () => (/* reexport safe */ _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_1__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_1__.GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_1__.GoogleMap2DUrlBuilder),
@@ -15538,24 +15660,115 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
-/* harmony export */   Mars: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_3__.Mars),
-/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_3__.MarsUrlBuilder),
-/* harmony export */   Mercury: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_4__.Mercury),
-/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_4__.MercuryUrlBuilder),
-/* harmony export */   Moon: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_2__.Moon),
-/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_2__.MoonUrlBuilder)
+/* harmony export */   Mars: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_4__.Mars),
+/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_4__.MarsUrlBuilder),
+/* harmony export */   Mercury: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_5__.Mercury),
+/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_5__.MercuryUrlBuilder),
+/* harmony export */   Moon: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_3__.Moon),
+/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_3__.MoonUrlBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapzen */ "../core/dist/tiles/vendors/tiles.vendors.mapzen.js");
 /* harmony import */ var _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vendors.google */ "../core/dist/tiles/vendors/tiles.vendors.google.js");
-/* harmony import */ var _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vendors.moon */ "../core/dist/tiles/vendors/tiles.vendors.moon.js");
-/* harmony import */ var _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.vendors.mars */ "../core/dist/tiles/vendors/tiles.vendors.mars.js");
-/* harmony import */ var _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.vendors.mercury */ "../core/dist/tiles/vendors/tiles.vendors.mercury.js");
+/* harmony import */ var _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vendors.arcgis */ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js");
+/* harmony import */ var _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.vendors.moon */ "../core/dist/tiles/vendors/tiles.vendors.moon.js");
+/* harmony import */ var _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.vendors.mars */ "../core/dist/tiles/vendors/tiles.vendors.mars.js");
+/* harmony import */ var _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.vendors.mercury */ "../core/dist/tiles/vendors/tiles.vendors.mercury.js");
+
 
 
 
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js"
+/*!**********************************************************!*\
+  !*** ../core/dist/tiles/vendors/tiles.vendors.arcgis.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* binding */ ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* binding */ ArcGISImageServerUrlBuilder)
+/* harmony export */ });
+/**
+ * URL builder for ArcGIS ImageServer `exportImage` API.
+ *
+ * Converts tile XYZ addresses to bbox-based URLs using the Web Mercator projection (EPSG:3857).
+ * The bbox is computed from tile coordinates:
+ *   tileSpan = 2 * PI * R / 2^z
+ *   xmin = -PI * R + x * tileSpan
+ *   ymax =  PI * R - y * tileSpan
+ *   xmax = xmin + tileSpan
+ *   ymin = ymax - tileSpan
+ *
+ * Example URL:
+ *   https://trek.nasa.gov/.../ImageServer/exportImage?bbox=-20037508,-20037508,20037508,20037508
+ *     &bboxSR=3857&imageSR=3857&size=256,256&format=png&f=image
+ */
+class ArcGISImageServerUrlBuilder {
+    /**
+     * @param baseUrl The ArcGIS ImageServer exportImage endpoint URL
+     *                (e.g. "https://trek.nasa.gov/.../ImageServer/exportImage")
+     * @param semiMajorAxis The semi-major axis of the body's ellipsoid in meters.
+     *                      Used for Web Mercator extent calculation.
+     * @param tileSize Tile pixel size (default 256)
+     * @param format Image format (default "png")
+     */
+    constructor(baseUrl, semiMajorAxis, tileSize = 256, format = "png") {
+        this._baseUrl = baseUrl;
+        this._semiMajorAxis = semiMajorAxis;
+        this._tileSize = tileSize;
+        this._format = format;
+    }
+    buildUrl(a, ...params) {
+        const R = this._semiMajorAxis;
+        const extent = Math.PI * R; // half the full Web Mercator extent
+        const tileSpan = (2 * extent) / (1 << a.levelOfDetail);
+        const xmin = -extent + a.x * tileSpan;
+        const ymax = extent - a.y * tileSpan;
+        const xmax = xmin + tileSpan;
+        const ymin = ymax - tileSpan;
+        return (`${this._baseUrl}?bbox=${xmin},${ymin},${xmax},${ymax}` +
+            `&bboxSR=3857&imageSR=3857` +
+            `&size=${this._tileSize},${this._tileSize}` +
+            `&format=${this._format}` +
+            `&f=image`);
+    }
+}
+/**
+ * Decodes ArcGIS ImageServer grayscale elevation PNG tiles to Float32Array.
+ *
+ * ArcGIS ImageServer renders elevation data as 8-bit grayscale PNG images
+ * where pixel values are linearly stretched from the elevation range [min, max]
+ * to the grayscale range [0, 255].
+ *
+ * Decoding formula: elevation = min + (gray / 255) * (max - min)
+ *
+ * This is a lossy representation — with only 256 distinct values, the precision
+ * is (max - min) / 255 meters per step.
+ */
+class ArcGISGrayscaleElevationDecoder {
+    /**
+     * @param min Minimum elevation in meters (maps to grayscale 0)
+     * @param max Maximum elevation in meters (maps to grayscale 255)
+     */
+    constructor(min, max) {
+        this._min = min;
+        this._range = max - min;
+    }
+    decode(pixels, offset, target, targetOffset) {
+        // ArcGIS grayscale PNG: R=G=B=gray, A=255
+        // We use the red channel as the grayscale value
+        const gray = pixels[offset];
+        target[targetOffset++] = this._min + (gray / 255) * this._range;
+        return targetOffset;
+    }
+}
+//# sourceMappingURL=tiles.vendors.arcgis.js.map
 
 /***/ },
 
@@ -15727,43 +15940,84 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MarsUrlBuilder: () => (/* binding */ MarsUrlBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client.image */ "../core/dist/tiles/tiles.client.image.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+/* harmony import */ var _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.vendors.arcgis */ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js");
+/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
 
 
 
 
 
-class MarsUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
-    constructor(host, path) {
+
+
+
+
+class MarsUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__.WebTileUrlBuilder {
+    constructor(host, path, tms = false) {
         super();
         this.withSecure(true).withHost(host).withPath(path).withExtension("png");
+        if (tms) {
+            this.withTMSY(true);
+        }
     }
 }
+/** Carto CDN — supports CORS */
 MarsUrlBuilder.Basemap = new MarsUrlBuilder("cartocdn-gusc.global.ssl.fastly.net", "opmbuilder/api/v1/map/named/opm-mars-basemap-v0-2/all/{z}/{x}/{y}.{extension}");
-MarsUrlBuilder.MOLAColor = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.{extension}");
-MarsUrlBuilder.MOLAGray = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-gray/{z}/{x}/{y}.{extension}");
-MarsUrlBuilder.Surface = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/celestia_mars-shaded-16k_global/{z}/{x}/{y}.{extension}");
+/** Raw S3 — no CORS headers, TMS Y convention */
+MarsUrlBuilder.MOLAColor = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.{extension}", true);
+/** Raw S3 — no CORS headers, TMS Y convention */
+MarsUrlBuilder.MOLAGray = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-gray/{z}/{x}/{y}.{extension}", true);
+/** Raw S3 — no CORS headers, TMS Y convention */
+MarsUrlBuilder.Surface = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/celestia_mars-shaded-16k_global/{z}/{x}/{y}.{extension}", true);
 class Mars {
     static BasemapClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_basemap`, MarsUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+        // Carto CDN serves CORS headers — use standard fetch-based client
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_basemap`, MarsUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Mars.Metrics, options);
     }
     static MOLAColorClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_mola_color`, MarsUrlBuilder.MOLAColor, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+        // Raw S3, no CORS — use <img> loading
+        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Mars.KEY}_mola_color`, MarsUrlBuilder.MOLAColor, Mars.Metrics, options);
     }
     static MOLAGrayClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_mola_gray`, MarsUrlBuilder.MOLAGray, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+        // Raw S3, no CORS — use <img> loading
+        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Mars.KEY}_mola_gray`, MarsUrlBuilder.MOLAGray, Mars.Metrics, options);
     }
     static SurfaceClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_surface`, MarsUrlBuilder.Surface, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mars.Metrics, options);
+        // Raw S3, no CORS — use <img> loading
+        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Mars.KEY}_surface`, MarsUrlBuilder.Surface, Mars.Metrics, options);
+    }
+    /**
+     * Returns a tile client that fetches MOLA DEM elevations as Float32Array.
+     * Each pixel is decoded from ArcGIS grayscale (0–255) to meters using the MOLA elevation range.
+     */
+    static ElevationsClient(options) {
+        const urlBuilder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISImageServerUrlBuilder(Mars.MOLA_DEM_URL, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Mars.ellipsoid.semiMajorAxis);
+        const decoder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISGrayscaleElevationDecoder(Mars.MOLA_MIN, Mars.MOLA_MAX);
+        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_mola_dem`, urlBuilder, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(decoder, o), Mars.Metrics, options);
+    }
+    /**
+     * Returns a DEM tile client combining MOLA elevations with computed normals.
+     * Compatible with the existing DemTileWebClient pipeline.
+     */
+    static DemClient(options) {
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient(`${Mars.KEY}_dem`, Mars.ElevationsClient(options));
     }
 }
 Mars.KEY = "mars";
 Mars.MaxLevelOfDetail = 7;
-Mars.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Mars.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_4__.SolarSystemBodies.Mars.ellipsoid);
+Mars.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__.EPSG3857({ maxLOD: Mars.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Mars.ellipsoid);
 Mars.Attribution = "OpenPlanetary / USGS / NASA";
+// MOLA DEM elevation range (meters)
+Mars.MOLA_MIN = -8201;
+Mars.MOLA_MAX = 21241;
+/** NASA Trek ArcGIS ImageServer — MOLA DEM (128/64 ppd merge) */
+Mars.MOLA_DEM_URL = "https://trek.nasa.gov/mars/trekarcgis/rest/services/mola128_mola64_merge_90Nto90S_SimpleC_clon0/ImageServer/exportImage";
 //# sourceMappingURL=tiles.vendors.mars.js.map
 
 /***/ },
@@ -15821,35 +16075,71 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MoonUrlBuilder: () => (/* binding */ MoonUrlBuilder)
 /* harmony export */ });
 /* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client.image */ "../core/dist/tiles/tiles.client.image.js");
+/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
+/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
+/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
+/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
+/* harmony import */ var _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.vendors.arcgis */ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js");
+/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
 
 
 
 
 
-class MoonUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
-    constructor(host, path) {
+
+
+
+
+class MoonUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__.WebTileUrlBuilder {
+    constructor(host, path, tms = false) {
         super();
         this.withSecure(true).withHost(host).withPath(path).withExtension("png");
+        if (tms) {
+            this.withTMSY(true);
+        }
     }
 }
+/** Carto CDN — supports CORS */
 MoonUrlBuilder.Basemap = new MoonUrlBuilder("cartocdn-gusc.global.ssl.fastly.net", "opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.{extension}");
-MoonUrlBuilder.HillshadeAlbedo = new MoonUrlBuilder("s3.amazonaws.com", "opmbuilder/301_moon/tiles/w/hillshaded-albedo/{z}/{x}/{y}.{extension}");
+/** Raw S3 — no CORS headers, TMS Y convention, must be loaded via <img> */
+MoonUrlBuilder.HillshadeAlbedo = new MoonUrlBuilder("s3.amazonaws.com", "opmbuilder/301_moon/tiles/w/hillshaded-albedo/{z}/{x}/{y}.{extension}", true);
 class Moon {
     static BasemapClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_basemap`, MoonUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Moon.Metrics, options);
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_basemap`, MoonUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Moon.Metrics, options);
     }
     static HillshadeClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_hillshade`, MoonUrlBuilder.HillshadeAlbedo, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Moon.Metrics, options);
+        // Uses ImageTileClient (loads via <img>) because S3 does not serve CORS headers
+        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Moon.KEY}_hillshade`, MoonUrlBuilder.HillshadeAlbedo, Moon.Metrics, options);
+    }
+    /**
+     * Returns a tile client that fetches LOLA DEM elevations as Float32Array.
+     * Each pixel is decoded from ArcGIS grayscale (0–255) to meters using the LOLA elevation range.
+     */
+    static ElevationsClient(options) {
+        const urlBuilder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISImageServerUrlBuilder(Moon.LOLA_DEM_URL, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Moon.ellipsoid.semiMajorAxis);
+        const decoder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISGrayscaleElevationDecoder(Moon.LOLA_MIN, Moon.LOLA_MAX);
+        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
+        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_lola_dem`, urlBuilder, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(decoder, o), Moon.Metrics, options);
+    }
+    /**
+     * Returns a DEM tile client combining LOLA elevations with computed normals.
+     * Compatible with the existing DemTileWebClient pipeline.
+     */
+    static DemClient(options) {
+        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient(`${Moon.KEY}_dem`, Moon.ElevationsClient(options));
     }
 }
 Moon.KEY = "moon";
 Moon.MaxLevelOfDetail = 7;
-Moon.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Moon.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_4__.SolarSystemBodies.Moon.ellipsoid);
+Moon.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__.EPSG3857({ maxLOD: Moon.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Moon.ellipsoid);
 Moon.Attribution = "OpenPlanetary / USGS / NASA";
+// LOLA DEM elevation range (meters)
+Moon.LOLA_MIN = -9128;
+Moon.LOLA_MAX = 10786;
+/** NASA Trek ArcGIS ImageServer — LRO LOLA DEM (256 ppd) */
+Moon.LOLA_DEM_URL = "https://trek.nasa.gov/moon/trekarcgis/rest/services/LRO_LOLA_DEM_Global_256ppd_v06/ImageServer/exportImage";
 //# sourceMappingURL=tiles.vendors.moon.js.map
 
 /***/ },
@@ -23878,6 +24168,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileMetrics),
 /* harmony export */   AbstractTileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileProvider),
 /* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ArcGISImageServerUrlBuilder),
 /* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Assert),
 /* harmony export */   AxialTilt: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AxialTilt),
 /* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bearing),
@@ -23966,6 +24258,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),
 /* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptionsBuilder),
 /* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageLayer),
+/* harmony export */   ImageTileClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileClient),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
 /* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InputController),

@@ -19,8 +19,16 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch 3D map on chrome",
+            "name": "Launch 3D Earth map on chrome",
             "url": "http://localhost:1338/packages/host/www/babylon/3DMap.html",
+            "webRoot": "${workspaceFolder}/packages/dev/babylon/",
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch 3D Moon map on chrome",
+            "url": "http://localhost:1338/packages/host/www/babylon/3DMap_moon.html",
             "webRoot": "${workspaceFolder}/packages/dev/babylon/",
             "sourceMaps": true
         },

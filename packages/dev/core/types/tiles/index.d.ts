@@ -3,7 +3,7 @@ export * from "./codecs/index";
 export * from "./pipeline/index";
 export * from "./navigation/index";
 export * from "./map/index";
-export * from "./providers/index";
+export * from "./loaders/index";
 export * from "./address/index";
 export * from "./display/index";
 export * from "./geography/index";

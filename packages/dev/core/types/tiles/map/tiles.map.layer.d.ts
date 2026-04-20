@@ -1,5 +1,5 @@
 import { Observable, PropertyChangedEventArgs } from "../../events";
-import { ITileAddress, ITileContentProvider, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
+import { ITileAddress, ITileContentFetcher, ITileDatasource, ITileMetrics, TileContentType } from "../tiles.interfaces";
 import { ITileMapLayer, ITileMapLayerOptions, ITileMapLayerContainer, IHasTileMapLayerContainer, LayerRenderFn } from "./tiles.map.interfaces";
 import { IMemoryCache } from "../../cache";
 import { IWeighted } from "../../collections/collections.interfaces";
@@ -13,10 +13,10 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     _drawTarget?: any;
     _weightChangedObservable?: Observable<IWeighted>;
     _propertyChangedObservable?: Observable<PropertyChangedEventArgs<unknown, unknown>>;
-    _provider: ITileContentProvider<T>;
-    constructor(name: string, provider: ITileContentProvider<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
+    _provider: ITileContentFetcher<T>;
+    constructor(name: string, provider: ITileContentFetcher<T> | ITileDatasource<T, ITileAddress>, options?: ITileMapLayerOptions<T>, enabled?: boolean);
     get metrics(): ITileMetrics | undefined;
-    get provider(): ITileContentProvider<T>;
+    get provider(): ITileContentFetcher<T>;
     get drawFn(): LayerRenderFn<T> | undefined;
     get drawTarget(): any;
     get propertyChangedObservable(): Observable<PropertyChangedEventArgs<unknown, unknown>>;
@@ -32,5 +32,5 @@ export declare class TileMapLayer<T> implements ITileMapLayer<T> {
     set enabled(enabled: boolean);
     addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
     dispose(): void;
-    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentProvider<T>;
+    protected _buildProvider(dataSource: ITileDatasource<T, ITileAddress>, cache?: IMemoryCache<string, TileContentType<T>>): ITileContentFetcher<T>;
 }

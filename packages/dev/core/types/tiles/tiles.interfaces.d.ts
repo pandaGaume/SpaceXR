@@ -54,7 +54,7 @@ export declare function IsTileCollection<T>(b: unknown): b is ITileCollection<T>
 export interface ITileProxy<T> {
     delegate: ITile<T>;
 }
-export interface ITileBuilder<T> extends ITileMetricsProvider, IHasNamespace {
+export interface ITileBuilder<T> extends IHasTileMetrics, IHasNamespace {
     withNamespace(namespace: string): ITileBuilder<T>;
     withAddress(a: ITile2DAddress): ITileBuilder<T>;
     withData(d: TileContentType<T>): ITileBuilder<T>;
@@ -107,18 +107,18 @@ export interface ITileMetrics extends ITileSystem {
     getTileXYToPointXYToRef(x: number, y: number, pointXY?: ICartesian2): void;
     getPointXYToTileXYToRef(x: number, y: number, tileXY?: ICartesian2): void;
 }
-export interface ITileMetricsProvider {
+export interface IHasTileMetrics {
     metrics?: ITileMetrics;
 }
-export declare function IsTileMetricsProvider(b: unknown): b is ITileMetricsProvider;
-export interface ITileDatasource<T, A extends ITileAddress> extends ITileMetricsProvider {
+export declare function IsHasTileMetrics(b: unknown): b is IHasTileMetrics;
+export interface ITileDatasource<T, A extends ITileAddress> extends IHasTileMetrics {
     name: string;
     fetchAsync(address: A, env?: IGeoBounded, ...userArgs: Array<unknown>): Promise<FetchResult<A, Nullable<T>>>;
 }
 export declare function IsTileDatasource<T, A extends ITileAddress>(b: unknown): b is ITileDatasource<T, A>;
 export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {
 }
-export interface ITileContentProvider<T> extends ITileMetricsProvider, IDisposable {
+export interface ITileContentFetcher<T> extends IHasTileMetrics, IDisposable {
     name: string;
     datasource: ITileDatasource<T, ITileAddress>;
     accept(address: ITileAddress): boolean;
@@ -132,8 +132,8 @@ export interface IHasActivTiles<T> {
     getTile(a: ITileAddress): Nullable<ITile<T>> | undefined;
     hasTile(a: ITileAddress): boolean;
 }
-export interface ITileProvider<T> extends ITransformBlock<ITile2DAddress, ITile<T>>, IValidable, IHasNamespace, IHasActivTiles<T>, ITileMetricsProvider, IDisposable, IGeoBounded, IBounded {
-    enabledObservable: Observable<ITileProvider<T>>;
+export interface ITileLoader<T> extends ITransformBlock<ITile2DAddress, ITile<T>>, IValidable, IHasNamespace, IHasActivTiles<T>, IHasTileMetrics, IDisposable, IGeoBounded, IBounded {
+    enabledObservable: Observable<ITileLoader<T>>;
     enabled: boolean;
     factory: ITileBuilder<T>;
 }

@@ -1,6 +1,6 @@
 import { Observable } from "../../events/events.observable";
 import { IHasNavigationApi, IHasNavigationState, ITileNavigationApi } from "../navigation/tiles.navigation.interfaces";
-import { IHasActivTiles, ITile, ITileContentProvider, ITileMetricsProvider, ITileProvider } from "../tiles.interfaces";
+import { IHasActivTiles, ITile, ITileContentFetcher, IHasTileMetrics, ITileLoader } from "../tiles.interfaces";
 import { PropertyChangedEventArgs } from "../../events/events.args";
 import { IDisposable, IValidable, Nullable } from "../../types";
 import { ICartesian3, ISize3 } from "../../geometry";
@@ -16,11 +16,11 @@ export interface ITileMapLayerOptions<T> extends IDrawableTileMapLayer<T> {
     attribution?: string;
 }
 export declare function IsDrawableTileMapLayer<T>(b: unknown): b is IDrawableTileMapLayer<T>;
-export interface ITileMapLayer<T> extends ITileMapLayerOptions<T>, ITileMetricsProvider, IWeighted {
+export interface ITileMapLayer<T> extends ITileMapLayerOptions<T>, IHasTileMetrics, IWeighted {
     propertyChangedObservable: Observable<PropertyChangedEventArgs<unknown, unknown>>;
     name: string;
     enabled: boolean;
-    provider: ITileContentProvider<T>;
+    provider: ITileContentFetcher<T>;
     addTo(map: ITileMapLayerContainer<T> | IHasTileMapLayerContainer<T>): ITileMapLayer<T>;
 }
 export declare function IsTileMapLayer<T>(b: unknown): b is ITileMapLayer<T>;
@@ -58,7 +58,7 @@ export interface ITileMapCoreProperties extends IHasDisplay, IHasNavigationState
 }
 export interface ITileMap<T> extends IHasTileMapLayerContainer<T>, IHasTileMapLayerViewContainer<T>, ITileNavigationApi, ITileMapCoreProperties, IDisposable {
 }
-export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileProvider<T>, IValidable, ITileMapCoreProperties, IWeighted, IHasNavigationApi {
+export interface ITileMapLayerView<T> extends ITileMapLayerProxy<T>, ITileLoader<T>, IValidable, ITileMapCoreProperties, IWeighted, IHasNavigationApi {
 }
 export interface ITileMapLayerViewContainer<T> extends IOrderedCollection<ITileMapLayerView<T>> {
 }

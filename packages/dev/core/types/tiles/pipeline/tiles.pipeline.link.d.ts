@@ -1,7 +1,7 @@
 import { Nullable } from "../../types";
-import { ILinkOptions, IPipelineMessageType, ISourceBlock, ITargetBlock, ITilePipelineLink } from "./tiles.pipeline.interfaces";
+import { ILinkOptions, IPipelineMessageType, ISourceBlock, ITargetBlock, IPipelineLink } from "./tiles.pipeline.interfaces";
 import { EventState, Observer } from "../../events/events.observable";
-export declare class TilePipelineLink<T> implements ITilePipelineLink<T> {
+export declare class TilePipelineLink<T> implements IPipelineLink<T> {
     _source: ISourceBlock<T>;
     _target: ITargetBlock<T>;
     _options?: ILinkOptions<T>;

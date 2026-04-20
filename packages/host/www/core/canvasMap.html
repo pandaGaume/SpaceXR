@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Exemple de dessin de tuiles sur canvas</title>
         <script src="../libs/spacexr.1.0.0.js"></script>
+        <script src="../libs/spacexr_space.1.0.0.js"></script>
         <style>
             html,
             body {
@@ -184,46 +185,46 @@
                     },
                     // ── Moon ──
                     moon_basemap: {
-                        client: () => SPACEXR.Moon.BasemapClient(),
-                        attribution: SPACEXR.Moon.Attribution,
+                        client: () => SPACEXR_SPACE.Moon.BasemapClient(),
+                        attribution: SPACEXR_SPACE.Moon.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },
                     moon_hillshade: {
-                        client: () => SPACEXR.Moon.HillshadeClient(),
-                        attribution: SPACEXR.Moon.Attribution,
+                        client: () => SPACEXR_SPACE.Moon.HillshadeClient(),
+                        attribution: SPACEXR_SPACE.Moon.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },
                     // ── Mars ──
                     mars_basemap: {
-                        client: () => SPACEXR.Mars.BasemapClient(),
-                        attribution: SPACEXR.Mars.Attribution,
+                        client: () => SPACEXR_SPACE.Mars.BasemapClient(),
+                        attribution: SPACEXR_SPACE.Mars.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },
                     mars_mola_color: {
-                        client: () => SPACEXR.Mars.MOLAColorClient(),
-                        attribution: SPACEXR.Mars.Attribution,
+                        client: () => SPACEXR_SPACE.Mars.MOLAColorClient(),
+                        attribution: SPACEXR_SPACE.Mars.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },
                     mars_mola_gray: {
-                        client: () => SPACEXR.Mars.MOLAGrayClient(),
-                        attribution: SPACEXR.Mars.Attribution,
+                        client: () => SPACEXR_SPACE.Mars.MOLAGrayClient(),
+                        attribution: SPACEXR_SPACE.Mars.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },
                     mars_surface: {
-                        client: () => SPACEXR.Mars.SurfaceClient(),
-                        attribution: SPACEXR.Mars.Attribution,
+                        client: () => SPACEXR_SPACE.Mars.SurfaceClient(),
+                        attribution: SPACEXR_SPACE.Mars.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },
                     // ── Mercury ──
                     mercury_basemap: {
-                        client: () => SPACEXR.Mercury.BasemapClient(),
-                        attribution: SPACEXR.Mercury.Attribution,
+                        client: () => SPACEXR_SPACE.Mercury.BasemapClient(),
+                        attribution: SPACEXR_SPACE.Mercury.Attribution,
                         center: [0, 0],
                         zoom: 3,
                     },

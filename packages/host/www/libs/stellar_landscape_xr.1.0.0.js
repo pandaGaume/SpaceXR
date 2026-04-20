@@ -563,6 +563,41 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
 
 /***/ },
 
+/***/ "../core/dist/dataflow/dataflow.interfaces.js"
+/*!****************************************************!*\
+  !*** ../core/dist/dataflow/dataflow.interfaces.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsTargetBlock: () => (/* binding */ IsTargetBlock)
+/* harmony export */ });
+function IsTargetBlock(b) {
+    if (b === null || typeof b !== "object")
+        return false;
+    return b.added !== undefined || b.removed !== undefined || b.updated !== undefined;
+}
+//# sourceMappingURL=dataflow.interfaces.js.map
+
+/***/ },
+
+/***/ "../core/dist/dataflow/index.js"
+/*!**************************************!*\
+  !*** ../core/dist/dataflow/index.js ***!
+  \**************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsTargetBlock: () => (/* reexport safe */ _dataflow_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock)
+/* harmony export */ });
+/* harmony import */ var _dataflow_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dataflow.interfaces */ "../core/dist/dataflow/dataflow.interfaces.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
 /***/ "../core/dist/dem/dem.helpers.js"
 /*!***************************************!*\
   !*** ../core/dist/dem/dem.helpers.js ***!
@@ -6635,15 +6670,15 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.AbstractRange),
+/* harmony export */   AbstractRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.AbstractShape),
+/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.AbstractStreamSourceProducer),
+/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileLoader),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileMetrics),
-/* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileProvider),
-/* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Angle),
+/* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
 /* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISGrayscaleElevationDecoder),
 /* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISImageServerUrlBuilder),
 /* harmony export */   Assert: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.Assert),
-/* harmony export */   AxialTilt: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.AxialTilt),
 /* harmony export */   Bearing: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Bearing),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.BlobTileCodec),
 /* harmony export */   Bounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Bounded),
@@ -6655,8 +6690,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CachePolicy: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_11__.CachePolicy),
 /* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_11__.CachePolicyBuilder),
 /* harmony export */   CalculatorBase: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.CalculatorBase),
-/* harmony export */   CanvasDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.CanvasDisplay),
-/* harmony export */   CanvasMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.CanvasMap),
+/* harmony export */   CanvasDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.CanvasDisplay),
+/* harmony export */   CanvasMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.CanvasMap),
 /* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CanvasTileCodec),
 /* harmony export */   Cartesian2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Cartesian2),
 /* harmony export */   Cartesian3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Cartesian3),
@@ -6664,13 +6699,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4TileCodec),
 /* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4TileCodecOptions),
 /* harmony export */   CartesianMode: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.CartesianMode),
-/* harmony export */   CelestialNodeType: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.CelestialNodeType),
-/* harmony export */   CelestialTracker: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.CelestialTracker),
 /* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CellCoordinateReference),
 /* harmony export */   Circle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Circle),
-/* harmony export */   ColorValue: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.ColorValue),
-/* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.Context2DTileMap),
-/* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Current),
+/* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.Context2DTileMap),
+/* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.DebugTouchConsole),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemTileWebClient),
@@ -6680,7 +6712,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid),
 /* harmony export */   Envelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Envelope),
-/* harmony export */   EquatorialVector: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.EquatorialVector),
 /* harmony export */   EventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventArgs),
 /* harmony export */   EventEmitter: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventEmitter),
 /* harmony export */   EventState: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventState),
@@ -6703,11 +6734,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Google: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DUrlBuilder),
-/* harmony export */   HSLColor: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.HSLColor),
+/* harmony export */   HSLColor: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.HSLColor),
 /* harmony export */   HasNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.HasNavigationApi),
 /* harmony export */   HasNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.HasNavigationState),
 /* harmony export */   HasToString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.HasToString),
-/* harmony export */   HorizonVector: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.HorizonVector),
 /* harmony export */   ISO6391: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.ISO6391),
 /* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodec),
 /* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptions),
@@ -6715,9 +6745,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageLayer),
 /* harmony export */   ImageTileClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileClient),
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileCodec),
-/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InpustNavigationControllerOptions),
-/* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputController),
-/* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.InputsNavigationController),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InpustNavigationControllerOptions),
+/* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InputController),
+/* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InputsNavigationController),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTile),
 /* harmony export */   IsBounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounded),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounds),
@@ -6726,15 +6756,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsDrawableTileMapLayer),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
+/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsHasTileMetrics),
 /* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.IsKDTreeSplitter),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsNumber),
+/* harmony export */   IsOctreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.IsOctreeNode),
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsPhysicalDisplay),
+/* harmony export */   IsReferenceFrame: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.IsReferenceFrame),
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
+/* harmony export */   IsStreamSource: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamSource),
+/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamingViewTarget),
 /* harmony export */   IsString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsString),
-/* harmony export */   IsTargetBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTargetBlock),
+/* harmony export */   IsTargetBlock: () => (/* reexport safe */ _dataflow_index__WEBPACK_IMPORTED_MODULE_6__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
 /* harmony export */   IsTile2DAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile2DAddress),
 /* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileCollection),
@@ -6743,86 +6778,77 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayer),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayerProxy),
-/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMetricsProvider),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileSystemBounds),
-/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.IsTouchCapable),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.IsTouchCapable),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.JsonTileCodec),
-/* harmony export */   JulianDate: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.JulianDate),
 /* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.KdtreeSplitter),
-/* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.KeplerOrbitBase),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.KnownPlaces),
-/* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Length),
+/* harmony export */   Length: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Length),
 /* harmony export */   Line: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Line),
 /* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.LocalString),
-/* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Luminosity),
+/* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Luminosity),
 /* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.MakePlaneFromPointAndNormal),
 /* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
-/* harmony export */   Mars: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Mars),
-/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MarsUrlBuilder),
-/* harmony export */   Mass: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Mass),
+/* harmony export */   Mass: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Mass),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_11__.MemoryCache),
-/* harmony export */   Mercury: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Mercury),
-/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MercuryUrlBuilder),
-/* harmony export */   Moon: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Moon),
-/* harmony export */   MoonState: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.MoonState),
-/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MoonUrlBuilder),
-/* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.MorganKeenanClass),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsIndex),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.ObjectPool),
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.Observer),
+/* harmony export */   Octree: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.Octree),
+/* harmony export */   OctreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.OctreeNode),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.OctreeSplitter),
 /* harmony export */   PathUtils: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.PathUtils),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),
-/* harmony export */   PointerToDragController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.PointerToDragController),
+/* harmony export */   PointerToDragController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.PointerToDragController),
 /* harmony export */   Polygon: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Polygon),
 /* harmony export */   Polyline: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Polyline),
 /* harmony export */   PolylineSimplifier: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PolylineSimplifier),
-/* harmony export */   Power: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Power),
+/* harmony export */   Power: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Power),
 /* harmony export */   Projections: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Projections),
 /* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.PropertyChangedEventArgs),
 /* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.PythagoreanFlatEarthCalculator),
 /* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.QuadtreeSplitter),
-/* harmony export */   Quantity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Quantity),
-/* harmony export */   QuantityRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.QuantityRange),
+/* harmony export */   Quantity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Quantity),
+/* harmony export */   QuantityRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.QuantityRange),
 /* harmony export */   QuickHull: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.QuickHull),
-/* harmony export */   RGBAColor: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.RGBAColor),
+/* harmony export */   RGBAColor: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.RGBAColor),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RGBATileCodec),
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RGBTileCodec),
-/* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Range),
+/* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Range),
 /* harmony export */   RegionCode: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RegionCode),
 /* harmony export */   RibbonBuilder: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonBuilder),
 /* harmony export */   RibbonOptions: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonOptions),
 /* harmony export */   RoundRobin: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.RoundRobin),
-/* harmony export */   Scalar: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Scalar),
+/* harmony export */   Scalar: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Scalar),
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ScreenSpaceErrorPolicy),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
 /* harmony export */   ShapeType: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.ShapeType),
 /* harmony export */   Side: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Size3),
-/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.SolarSystemBodies),
 /* harmony export */   SourceBlock: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.SourceBlock),
 /* harmony export */   SpatialTree: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.SpatialTree),
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.SpatialTreeNode),
-/* harmony export */   SpectralClass: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.SpectralClass),
-/* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Speed),
+/* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
-/* harmony export */   StarColor: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.StarColor),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_index__WEBPACK_IMPORTED_MODULE_8__.SunTrajectoryConfig),
+/* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingEngine),
+/* harmony export */   StreamingView: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingView),
+/* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_STREAM_CONTENT_TYPE),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
-/* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Temperature),
+/* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.TerrainGridOptions),
 /* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.TerrainGridOptionsBuilder),
 /* harmony export */   TerrainNormalizedGridBuilder: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.TerrainNormalizedGridBuilder),
@@ -6831,7 +6857,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileAddress),
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
-/* harmony export */   TileContentProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileContentProvider),
+/* harmony export */   TileContentFetcher: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileContentFetcher),
+/* harmony export */   TileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileLoader),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayerView),
@@ -6840,21 +6867,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TilePipelineLink),
-/* harmony export */   TileProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileProvider),
+/* harmony export */   TileStreamSource: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileStreamSource),
+/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileStreamSourceProducer),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileView),
 /* harmony export */   TileViewBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileViewBase),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileWebClient),
-/* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Timespan),
-/* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.TouchGestureType),
-/* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Unit),
+/* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Timespan),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.TouchGestureType),
+/* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Unit),
 /* harmony export */   ValidableBase: () => (/* reexport safe */ _validable__WEBPACK_IMPORTED_MODULE_1__.ValidableBase),
 /* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
-/* harmony export */   Voltage: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Voltage),
-/* harmony export */   Volume: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_7__.Volume),
+/* harmony export */   Voltage: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Voltage),
+/* harmony export */   Volume: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Volume),
 /* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.WebTileUrlBuilder),
-/* harmony export */   XRGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_6__.XRGestureType),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.XRGestureType),
 /* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.XmlDocumentTileCodec),
 /* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.hasTileSelectionContext),
 /* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.isArrayOfCartesianArray),
@@ -6881,15 +6909,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _geodesy_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geodesy/index */ "../core/dist/geodesy/index.js");
 /* harmony import */ var _geography_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./geography/index */ "../core/dist/geography/index.js");
 /* harmony import */ var _geometry_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./geometry/index */ "../core/dist/geometry/index.js");
-/* harmony import */ var _map_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./map/index */ "../core/dist/map/index.js");
-/* harmony import */ var _math_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./math/index */ "../core/dist/math/index.js");
-/* harmony import */ var _space_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./space/index */ "../core/dist/space/index.js");
+/* harmony import */ var _dataflow_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./dataflow/index */ "../core/dist/dataflow/index.js");
+/* harmony import */ var _map_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./map/index */ "../core/dist/map/index.js");
+/* harmony import */ var _math_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./math/index */ "../core/dist/math/index.js");
 /* harmony import */ var _tiles_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./tiles/index */ "../core/dist/tiles/index.js");
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./utils/index */ "../core/dist/utils/index.js");
 /* harmony import */ var _cache_index__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./cache/index */ "../core/dist/cache/index.js");
 /* harmony import */ var _dem_index__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./dem/index */ "../core/dist/dem/index.js");
 /* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./text */ "../core/dist/text/index.js");
 /* harmony import */ var _tree__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tree */ "../core/dist/tree/index.js");
+/* harmony import */ var _streaming__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./streaming */ "../core/dist/streaming/index.js");
+/* harmony import */ var _streaming_tile__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./streaming/tile */ "../core/dist/streaming/tile/index.js");
+
+
+
 
 
 
@@ -9223,1003 +9256,797 @@ Speed.Units = {};
 
 /***/ },
 
-/***/ "../core/dist/space/Mechanics/index.js"
-/*!*********************************************!*\
-  !*** ../core/dist/space/Mechanics/index.js ***!
-  \*********************************************/
+/***/ "../core/dist/streaming/index.js"
+/*!***************************************!*\
+  !*** ../core/dist/streaming/index.js ***!
+  \***************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CelestialTracker: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.CelestialTracker),
-/* harmony export */   EquatorialVector: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.EquatorialVector),
-/* harmony export */   HorizonVector: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.HorizonVector),
-/* harmony export */   JulianDate: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.JulianDate),
-/* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_kepler__WEBPACK_IMPORTED_MODULE_0__.KeplerOrbitBase),
-/* harmony export */   MoonState: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.MoonState),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.SunTrajectoryConfig)
+/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_3__.AbstractStreamSourceProducer),
+/* harmony export */   IsStreamSource: () => (/* reexport safe */ _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsStreamSource),
+/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ _streaming_view__WEBPACK_IMPORTED_MODULE_4__.IsStreamingViewTarget),
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceErrorPolicy),
+/* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_2__.StreamingEngine),
+/* harmony export */   StreamingView: () => (/* reexport safe */ _streaming_view__WEBPACK_IMPORTED_MODULE_4__.StreamingView)
 /* harmony export */ });
-/* harmony import */ var _space_kepler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.kepler */ "../core/dist/space/Mechanics/space.kepler.js");
-/* harmony import */ var _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.celestialTracker */ "../core/dist/space/Mechanics/space.celestialTracker.js");
+/* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming.datasource.interfaces */ "../core/dist/streaming/streaming.datasource.interfaces.js");
+/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.visibility.sse */ "../core/dist/streaming/streaming.visibility.sse.js");
+/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.engine */ "../core/dist/streaming/streaming.engine.js");
+/* harmony import */ var _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.producer.abstract */ "../core/dist/streaming/streaming.producer.abstract.js");
+/* harmony import */ var _streaming_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./streaming.view */ "../core/dist/streaming/streaming.view.js");
+// Public surface of the streaming module is domain-agnostic.
+// Tile-specific adapters live under streaming/tile and must be imported
+// explicitly (or via the root barrel) by consumers that need them.
+
+
+
+
 
 
 //# sourceMappingURL=index.js.map
 
 /***/ },
 
-/***/ "../core/dist/space/Mechanics/space.celestialTracker.js"
-/*!**************************************************************!*\
-  !*** ../core/dist/space/Mechanics/space.celestialTracker.js ***!
-  \**************************************************************/
+/***/ "../core/dist/streaming/streaming.datasource.interfaces.js"
+/*!*****************************************************************!*\
+  !*** ../core/dist/streaming/streaming.datasource.interfaces.js ***!
+  \*****************************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CelestialTracker: () => (/* binding */ CelestialTracker),
-/* harmony export */   EquatorialVector: () => (/* binding */ EquatorialVector),
-/* harmony export */   HorizonVector: () => (/* binding */ HorizonVector),
-/* harmony export */   JulianDate: () => (/* binding */ JulianDate),
-/* harmony export */   MoonState: () => (/* binding */ MoonState),
-/* harmony export */   SunTrajectoryConfig: () => (/* binding */ SunTrajectoryConfig)
+/* harmony export */   IsStreamSource: () => (/* binding */ IsStreamSource)
 /* harmony export */ });
-/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "../core/dist/math/math.js");
-
-class HorizonVector {
-    constructor(azimuth, altitude) {
-        this.azimuth = azimuth;
-        this.altitude = altitude;
-    }
+function IsStreamSource(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    const d = b;
+    return typeof d.id === "string" && typeof d.kind === "string" && d.encumbrance !== undefined && typeof d.contentType === "string" && typeof d.status === "string";
 }
-/// Right Ascension (RA): Analogous to longitude on Earth, Right Ascension measures the east-west position of a celestial object.
-/// It is expressed in terms of hours, minutes, and seconds, where 24 hours equals a full 360-degree circle.
-/// RA is measured eastward along the celestial equator from the vernal equinox.
-/// Declination (Dec): Similar to latitude on Earth, Declination measures the north-south position of a celestial object.
-/// It is expressed in degrees, where positive values indicate north of the celestial equator and negative values indicate south.
-/// The range of declination is from +90 degrees at the celestial north pole to -90 degrees at the celestial south pole.
-class EquatorialVector {
-    constructor(rightAscension, declination) {
-        this.rightAscension = rightAscension;
-        this.declination = declination;
-    }
-}
-class MoonState {
-    constructor(fraction, phase, angle) {
-        this.fraction = fraction;
-        this.phase = phase;
-        this.angle = angle;
-    }
-}
-class SunTrajectoryConfig {
-    constructor(angle, riseName, setName) {
-        this.angle = angle;
-        this.riseName = riseName;
-        this.setName = setName;
-    }
-}
-class JulianDate {
-    static JulianCycle(d, lw) {
-        return Math.round(d - JulianDate.J0 - lw / (2 * Math.PI));
-    }
-    static FromDate(date) {
-        return new JulianDate(date.valueOf() / JulianDate.DayMs - 0.5 + JulianDate.J1970);
-    }
-    static ToDate(julian) {
-        return new Date((julian + 0.5 - JulianDate.J1970) * JulianDate.DayMs);
-    }
-    constructor(value) {
-        this._value = value;
-    }
-    get value() {
-        return this._value;
-    }
-    toDate() {
-        return new Date((this._value + 0.5 - JulianDate.J1970) * JulianDate.DayMs);
-    }
-    toDays() {
-        return this._value - JulianDate.J2000;
-    }
-}
-JulianDate.DayMs = 1000 * 60 * 60 * 24;
-JulianDate.J1970 = 2440588;
-JulianDate.J2000 = 2451545;
-JulianDate.J0 = 0.0009;
-/// CelestialTracker is a collection of functions to calculate the position of the sun and the moon in the sky of the earth
-/// based on js lib suncalc.js by Vladimir Agafonkin. https://github.com/mourner/suncalc
-class CelestialTracker {
-    static _ApproxTransit(Ht, lw, n) {
-        return JulianDate.J0 + (Ht + lw) / (2 * Math.PI) + n;
-    }
-    static _SolarTransitJ(ds, M, L) {
-        return JulianDate.J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
-    }
-    static _HourAngle(h, phi, d) {
-        return Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d)));
-    }
-    static _ObserverAngle(height) {
-        return (-2.076 * Math.sqrt(height)) / 60;
-    }
-    // returns set time for the given sun altitude
-    static _GetSetJ(h, lw, phi, dec, n, M, L) {
-        var w = CelestialTracker._HourAngle(h, phi, dec), a = CelestialTracker._ApproxTransit(w, lw, n);
-        return CelestialTracker._SolarTransitJ(a, M, L);
-    }
-    static Azimuth(H, phi, dec) {
-        return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi));
-    }
-    static Altitude(H, phi, dec) {
-        return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
-    }
-    static SiderealTime(d, lw) {
-        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (280.16 + 360.9856235 * d) - lw;
-    }
-    static Declination(l, b) {
-        return Math.asin(Math.sin(b) * CelestialTracker.EarthObliquity_Cos + Math.sin(l) * CelestialTracker.EarthObliquity_Sin * Math.cos(b));
-    }
-    static RightAscension(l, b) {
-        return Math.atan2(Math.sin(l) * CelestialTracker.EarthObliquity_Cos - Math.tan(b) * CelestialTracker.EarthObliquity_Sin, Math.cos(l));
-    }
-    static EclipticLongitude(M) {
-        const C = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
-        const P = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 102.9372;
-        return M + C + P + Math.PI;
-    }
-    static SolarMeanAnomaly(d) {
-        return _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (357.5291 + 0.98560028 * d);
-    }
-    static SunCoords(d) {
-        const M = CelestialTracker.SolarMeanAnomaly(d);
-        const L = CelestialTracker.EclipticLongitude(M);
-        return new EquatorialVector(CelestialTracker.RightAscension(L, 0), CelestialTracker.Declination(L, 0));
-    }
-    // calculates sun times for a given date, latitude/longitude, and, optionally,
-    // the observer height (in meters) relative to the horizon
-    static GetSunTimes(date, lat, lng, height) {
-        height = height || 0;
-        const lw = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * -lng;
-        const phi = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * lat;
-        const dh = CelestialTracker._ObserverAngle(height);
-        const d = JulianDate.FromDate(date).toDays();
-        const n = JulianDate.JulianCycle(d, lw);
-        const ds = CelestialTracker._ApproxTransit(0, lw, n);
-        const M = CelestialTracker.SolarMeanAnomaly(ds);
-        const L = CelestialTracker.EclipticLongitude(M);
-        const dec = CelestialTracker.Declination(L, 0);
-        const Jnoon = CelestialTracker._SolarTransitJ(ds, M, L);
-        var result = {
-            solarNoon: JulianDate.ToDate(Jnoon),
-            nadir: JulianDate.ToDate(Jnoon - 0.5),
-        };
-        const times = CelestialTracker.SunTrajectories;
-        for (let i = 0, len = times.length; i < len; i += 1) {
-            const time = times[i];
-            const h0 = (time.angle + dh) * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
-            const Jset = CelestialTracker._GetSetJ(h0, lw, phi, dec, n, M, L);
-            const Jrise = Jnoon - (Jset - Jnoon);
-            result[time.riseName] = JulianDate.ToDate(Jrise);
-            result[time.setName] = JulianDate.ToDate(Jset);
-        }
-        return result;
-    }
-    static GetSunPosition(date, lat, lon) {
-        const lw = -lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
-        const phi = lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
-        const d = JulianDate.FromDate(date).toDays();
-        const c = CelestialTracker.SunCoords(d);
-        const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
-        return new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), CelestialTracker.Altitude(H, phi, c.declination));
-    }
-    // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
-    static _MoonCoords(d) {
-        // geocentric ecliptic coordinates of the moon
-        const L = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (218.316 + 13.176396 * d); // ecliptic longitude
-        const M = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (134.963 + 13.064993 * d); // mean anomaly
-        const F = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (93.272 + 13.22935 * d); // mean distance
-        const l = L + _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 6.289 * Math.sin(M); // longitude
-        const b = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 5.128 * Math.sin(F); // latitude
-        const dt = 385001 - 20905 * Math.cos(M); // distance to the moon in km
-        const v = new EquatorialVector(CelestialTracker.RightAscension(l, b), CelestialTracker.Declination(l, b));
-        v.distance = dt;
-        return v;
-    }
-    static _AstroRefraction(h) {
-        if (h < 0)
-            // the following formula works for positive altitudes only.
-            h = 0; // if h = -0.08901179 a div/0 would occur.
-        // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-        // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
-        return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
-    }
-    static GetMoonPosition(date, lat, lon) {
-        const lw = -lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
-        const phi = lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
-        const d = JulianDate.FromDate(date).toDays();
-        const c = CelestialTracker._MoonCoords(d);
-        const H = CelestialTracker.SiderealTime(d, lw) - c.rightAscension;
-        let h = CelestialTracker.Altitude(H, phi, c.declination);
-        // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-        const pa = Math.atan2(Math.sin(H), Math.tan(phi) * Math.cos(c.declination) - Math.sin(c.declination) * Math.cos(H));
-        h = h + CelestialTracker._AstroRefraction(h); // altitude correction for refraction
-        const v = new HorizonVector(CelestialTracker.Azimuth(H, phi, c.declination), h);
-        v.distance = c.distance;
-        v.parallacticAngle = pa;
-        return v;
-    }
-    static _HoursLater(date, h) {
-        return new Date(date.valueOf() + (h * JulianDate.DayMs) / 24);
-    }
-}
-CelestialTracker.EarthObliquity = _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 23.4397;
-CelestialTracker.EarthObliquity_Sin = Math.sin(CelestialTracker.EarthObliquity);
-CelestialTracker.EarthObliquity_Cos = Math.cos(CelestialTracker.EarthObliquity);
-CelestialTracker.SunTrajectories = [
-    new SunTrajectoryConfig(-0.833, "sunrise", "sunset"),
-    new SunTrajectoryConfig(-0.3, "sunriseEnd", "sunsetStart"),
-    new SunTrajectoryConfig(-6, "dawn", "dusk"),
-    new SunTrajectoryConfig(-12, "nauticalDawn", "nauticalDusk"),
-    new SunTrajectoryConfig(-18, "nightEnd", "night"),
-    new SunTrajectoryConfig(6, "goldenHourEnd", "goldenHour"),
-];
-// calculations for illumination parameters of the moon,
-// based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
-// Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-CelestialTracker.GetMoonIllumination = function (date) {
-    const d = JulianDate.FromDate(date).toDays();
-    const s = CelestialTracker.SunCoords(d);
-    const m = CelestialTracker._MoonCoords(d);
-    const sdist = 149598000; // distance from Earth to Sun in km
-    const phi = Math.acos(Math.sin(s.declination) * Math.sin(m.declination) + Math.cos(s.declination) * Math.cos(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
-    const inc = Math.atan2(sdist * Math.sin(phi), m.distance - sdist * Math.cos(phi));
-    const angle = Math.atan2(Math.cos(s.declination) * Math.sin(s.rightAscension - m.rightAscension), Math.sin(s.declination) * Math.cos(m.declination) - Math.cos(s.declination) * Math.sin(m.declination) * Math.cos(s.rightAscension - m.rightAscension));
-    return new MoonState(1 + Math.cos(inc), 0.5 + (0.5 * inc * (angle < 0 ? -1 : 1)) / Math.PI, angle);
-};
-// calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
-CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
-    var t = new Date(date);
-    if (inUTC)
-        t.setUTCHours(0, 0, 0, 0);
-    else
-        t.setHours(0, 0, 0, 0);
-    const hc = 0.133 * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
-    let h0 = CelestialTracker.GetMoonPosition(t, lat, lng).altitude - hc;
-    let rise, set, ye;
-    // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
-    for (var i = 1; i <= 24; i += 2) {
-        const h1 = CelestialTracker.GetMoonPosition(CelestialTracker._HoursLater(t, i), lat, lng).altitude - hc;
-        const h2 = CelestialTracker.GetMoonPosition(CelestialTracker._HoursLater(t, i + 1), lat, lng).altitude - hc;
-        const a = (h0 + h2) / 2 - h1;
-        const b = (h2 - h0) / 2;
-        const xe = -b / (2 * a);
-        ye = (a * xe + b) * xe + h1;
-        const d = b * b - 4 * a * h1;
-        let roots = 0;
-        let x1 = 0;
-        let x2 = 0;
-        if (d >= 0) {
-            const dx = Math.sqrt(d) / (Math.abs(a) * 2);
-            x1 = xe - dx;
-            x2 = xe + dx;
-            if (Math.abs(x1) <= 1)
-                roots++;
-            if (Math.abs(x2) <= 1)
-                roots++;
-            if (x1 < -1)
-                x1 = x2;
-        }
-        if (roots === 1) {
-            if (h0 < 0)
-                rise = i + x1;
-            else
-                set = i + x1;
-        }
-        else if (roots === 2) {
-            rise = i + (ye < 0 ? x2 : x1);
-            set = i + (ye < 0 ? x1 : x2);
-        }
-        if (rise && set)
-            break;
-        h0 = h2;
-    }
-    var result = {};
-    if (rise)
-        result.rise = CelestialTracker._HoursLater(t, rise);
-    if (set)
-        result.set = CelestialTracker._HoursLater(t, set);
-    if (!rise && !set)
-        result[ye && ye > 0 ? "alwaysUp" : "alwaysDown"] = true;
-    return result;
-};
-//# sourceMappingURL=space.celestialTracker.js.map
+//# sourceMappingURL=streaming.datasource.interfaces.js.map
 
 /***/ },
 
-/***/ "../core/dist/space/Mechanics/space.kepler.js"
-/*!****************************************************!*\
-  !*** ../core/dist/space/Mechanics/space.kepler.js ***!
-  \****************************************************/
+/***/ "../core/dist/streaming/streaming.engine.js"
+/*!**************************************************!*\
+  !*** ../core/dist/streaming/streaming.engine.js ***!
+  \**************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   KeplerOrbitBase: () => (/* binding */ KeplerOrbitBase)
+/* harmony export */   StreamingEngine: () => (/* binding */ StreamingEngine)
 /* harmony export */ });
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math.units */ "../core/dist/math/math.units.js");
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.visibility.sse */ "../core/dist/streaming/streaming.visibility.sse.js");
 
-class KeplerOrbitBase {
-    constructor(body, focus, semiMajorAxis, eccentricity = 0, periapsisTime = 0, inclination, ascendingNodeLongitude, periapsisAngle, period) {
-        this._body = body;
-        this._focus = focus;
-        this._semiMajorAxis = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(semiMajorAxis, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Ly);
-        this._eccentricity = eccentricity;
-        this._periapsisTime = periapsisTime;
-        this._inclination = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(inclination, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._ascendingNodeLongitude = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(ascendingNodeLongitude, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._periapsisAngle = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(periapsisAngle, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d);
-        this._period = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.Yr);
+
+/**
+ * Per-camera engine that traverses shared octrees, applies visibility policies,
+ * diffs against the previous active set, and emits datasource activations
+ * through the SourceBlock pipeline pattern.
+ *
+ * Emission model:
+ *  - addedObservable: datasources newly activated (operation: activate)
+ *  - removedObservable: datasources newly deactivated (operation: deactivate)
+ *  - updatedObservable: active datasources whose bounds changed (operation: update)
+ *
+ * The engine holds a Set of currently-visible cells and a Map of active sources,
+ * which lets it react incrementally to octree mutations (fleet-monitoring case).
+ */
+class StreamingEngine extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor(options) {
+        super();
+        this._visibleCells = new Set();
+        this._refineCells = new Set();
+        this._active = new Map();
+        this._cameraObserver = null;
+        this._octreeObservers = [];
+        this._viewId = options.viewId;
+        this._camera = options.camera;
+        this._octrees = options.octrees;
+        this._defaultPolicy = options.defaultPolicy ?? new _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceErrorPolicy();
+        this._autoRefresh = options.autoRefresh ?? true;
+        if (this._autoRefresh) {
+            this._subscribeAll();
+        }
     }
-    get body() {
-        return this._body;
+    get viewId() {
+        return this._viewId;
     }
-    get focus() {
-        return this._focus;
+    get visibleCells() {
+        return this._visibleCells;
     }
-    get semiMajorAxis() {
-        return this._semiMajorAxis;
-    }
-    get semiMinorAxis() {
-        const v = this._semiMajorAxis.value * Math.sqrt(1.0 - this._eccentricity * this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(v, this._semiMajorAxis.unit);
-    }
-    get periapsis() {
-        const v = this.semiMajorAxis.value * (1.0 - this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(v, this._semiMajorAxis.unit);
-    }
-    get periapsisTime() {
-        return this._periapsisTime;
-    }
-    get periapsisAngle() {
-        return this._periapsisAngle;
-    }
-    get inclination() {
-        return this._inclination;
-    }
-    get period() {
-        return this._period;
-    }
-    get apoapsis() {
-        const v = this.semiMajorAxis.value * (1.0 + this._eccentricity);
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(v, this._semiMajorAxis.unit);
-    }
-    get meanAngularSpeed() {
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Speed(360.0 / this._period.value);
+    get activeSources() {
+        return this._active;
     }
     /**
-     * Kepler's equation cannot be solved algebraically. It can be treated by an iteration methods.
-     * One of them is Newton's method, finding roots of f(E) = E - e*sin(E) - M(t)
-     * @param meanAnomaly
-     * @param decimalPrecision
+     * Runs a traversal, diffs against the current state and emits activations.
+     *
+     * By default the traversal is incremental: it starts from the parents of last
+     * frame's frontier (_refineCells ∪ _visibleCells), dedup'd via a visited set.
+     * This avoids re-walking the whole tree when the camera moves slightly.
+     *
+     * Pass `clearCache = true` to force a full traversal from the tree roots
+     * (camera teleport, octree swap, fresh world, etc.).
+     *
+     * Diff semantics:
+     *   - invisible → visible : emit "activate"
+     *   - visible   → invisible : emit "deactivate"
+     * The engine is the visibility authority. It does not broadcast bounds changes
+     * of active items: the scene already holds the IStreamSource reference and can
+     * observe its bounds directly if needed.
      */
-    getEccentricAnomaly(meanAnomaly, decimalPrecision) {
-        const dp = decimalPrecision || KeplerOrbitBase.DefaultDecimalPrecision;
-        const K = Math.PI / 180.0;
-        let m = meanAnomaly / 360.0;
-        m = 2.0 * Math.PI * (m - Math.floor(m));
-        let E = this._eccentricity < 0.8 ? m : Math.PI;
-        // initialize
-        let F = E - this._eccentricity * Math.sin(m) - m;
-        // iterations limits.
-        const maxIteration = KeplerOrbitBase.DefaultIterationLimit;
-        const delta = Math.pow(10, -dp);
-        let i = 0;
-        while (Math.abs(F) > delta && i++ < maxIteration) {
-            E -= F / (1.0 - this._eccentricity * Math.cos(E));
-            F = E - this._eccentricity * Math.sin(E) - m;
+    refresh(clearCache = false) {
+        if (clearCache) {
+            this._refineCells.clear();
+            this._visibleCells.clear();
         }
-        E /= K;
-        return new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(Math.round(E * Math.pow(10, dp)) / Math.pow(10, dp));
+        const nextRefine = new Set();
+        const nextCells = new Set();
+        const nextItems = new Map();
+        const visited = new Set();
+        const startCells = this._computeStartCells();
+        for (const start of startCells) {
+            this._traverse(start, visited, nextRefine, nextCells, nextItems);
+        }
+        const added = [];
+        const removed = [];
+        for (const [id, src] of nextItems) {
+            if (!this._active.has(id)) {
+                added.push({ source: src, operation: "activate", priority: 0, viewId: this._viewId });
+            }
+        }
+        for (const [id, src] of this._active) {
+            if (!nextItems.has(id)) {
+                removed.push({ source: src, operation: "deactivate", priority: 0, viewId: this._viewId });
+            }
+        }
+        this._refineCells = nextRefine;
+        this._visibleCells = nextCells;
+        this._active = nextItems;
+        if (added.length > 0)
+            this.notifyAdded(added);
+        if (removed.length > 0)
+            this.notifyRemoved(removed);
+    }
+    /**
+     * Forces the next refresh to traverse from the roots. Use after camera teleports
+     * or any event that invalidates the incremental state. Equivalent to `refresh(true)`
+     * when called before `refresh()`.
+     */
+    resetTraversalCache() {
+        this._refineCells.clear();
+        this._visibleCells.clear();
+    }
+    dispose() {
+        this._unsubscribeAll();
+        super.dispose();
+    }
+    _traverse(node, visited, refineOut, cellsOut, itemsOut) {
+        if (visited.has(node))
+            return;
+        visited.add(node);
+        const policy = node.resolveVisibilityPolicy?.() ?? this._defaultPolicy;
+        const decision = policy.evaluate(node, this._camera);
+        switch (decision.kind) {
+            case "cull":
+                return;
+            case "load":
+                cellsOut.add(node);
+                this._collectSubtree(node, itemsOut);
+                return;
+            case "refine":
+                if (node.children && node.children.length > 0) {
+                    refineOut.add(node);
+                    for (const c of node.children) {
+                        this._traverse(c, visited, refineOut, cellsOut, itemsOut);
+                    }
+                }
+                else {
+                    cellsOut.add(node);
+                    this._collectSubtree(node, itemsOut);
+                }
+                return;
+        }
+    }
+    /**
+     * Returns the nodes from which the traversal should descend on this frame.
+     *
+     * - Cold start (no prior frontier): the roots of every octree.
+     * - Warm start: parents of every cell in the prior frontier. Walking up one
+     *   level catches siblings that transition from cull to load/refine when the
+     *   camera moves slightly. The `visited` set in `_traverse` handles the overlap.
+     *
+     * For a camera jump that moves past that one-level neighborhood, call
+     * `refresh(true)` or `resetTraversalCache()` to force a full re-traversal.
+     */
+    _computeStartCells() {
+        if (this._refineCells.size === 0 && this._visibleCells.size === 0) {
+            return this._octrees.map((t) => t.root);
+        }
+        const starts = new Set();
+        const push = (cell) => {
+            const anchor = cell.parent ?? cell;
+            starts.add(anchor);
+        };
+        for (const cell of this._refineCells)
+            push(cell);
+        for (const cell of this._visibleCells)
+            push(cell);
+        return Array.from(starts);
+    }
+    _collectSubtree(node, out) {
+        if (node.items) {
+            for (const item of node.items.data) {
+                out.set(item.id, item);
+            }
+        }
+        if (node.children) {
+            for (const c of node.children) {
+                this._collectSubtree(c, out);
+            }
+        }
+    }
+    _subscribeAll() {
+        if (this._camera.propertyChangedObservable) {
+            const obs = this._camera.propertyChangedObservable.add(() => this.refresh());
+            this._cameraObserver = obs;
+        }
+        for (const tree of this._octrees) {
+            const onAdded = tree.addedObservable.add(() => this.refresh());
+            const onRemoved = tree.removedObservable.add(() => this.refresh());
+            const onUpdated = tree.updatedObservable.add(() => this.refresh());
+            if (onAdded)
+                this._octreeObservers.push(onAdded);
+            if (onRemoved)
+                this._octreeObservers.push(onRemoved);
+            if (onUpdated)
+                this._octreeObservers.push(onUpdated);
+        }
+        this.refresh();
+    }
+    _unsubscribeAll() {
+        this._cameraObserver?.disconnect();
+        this._cameraObserver = null;
+        for (const o of this._octreeObservers)
+            o.disconnect();
+        this._octreeObservers = [];
     }
 }
-KeplerOrbitBase.DefaultDecimalPrecision = 5;
-KeplerOrbitBase.DefaultIterationLimit = 30; // be conservative...
-//# sourceMappingURL=space.kepler.js.map
+//# sourceMappingURL=streaming.engine.js.map
 
 /***/ },
 
-/***/ "../core/dist/space/index.js"
-/*!***********************************!*\
-  !*** ../core/dist/space/index.js ***!
-  \***********************************/
+/***/ "../core/dist/streaming/streaming.producer.abstract.js"
+/*!*************************************************************!*\
+  !*** ../core/dist/streaming/streaming.producer.abstract.js ***!
+  \*************************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AxialTilt: () => (/* reexport safe */ _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__.AxialTilt),
-/* harmony export */   CelestialNodeType: () => (/* reexport safe */ _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType),
-/* harmony export */   CelestialTracker: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.CelestialTracker),
-/* harmony export */   ColorValue: () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.ColorValue),
-/* harmony export */   EquatorialVector: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.EquatorialVector),
-/* harmony export */   HorizonVector: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.HorizonVector),
-/* harmony export */   JulianDate: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.JulianDate),
-/* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.KeplerOrbitBase),
-/* harmony export */   MoonState: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.MoonState),
-/* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.MorganKeenanClass),
-/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ _space_bodies__WEBPACK_IMPORTED_MODULE_5__.SolarSystemBodies),
-/* harmony export */   SpectralClass: () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.SpectralClass),
-/* harmony export */   StarColor: () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.SunTrajectoryConfig)
+/* harmony export */   AbstractStreamSourceProducer: () => (/* binding */ AbstractStreamSourceProducer)
 /* harmony export */ });
-/* harmony import */ var _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.axialTilt */ "../core/dist/space/space.axialTilt.js");
-/* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "../core/dist/space/space.interfaces.js");
-/* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.spectralClass */ "../core/dist/space/space.spectralClass.js");
-/* harmony import */ var _space_starColor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./space.starColor */ "../core/dist/space/space.starColor.js");
-/* harmony import */ var _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Mechanics/index */ "../core/dist/space/Mechanics/index.js");
-/* harmony import */ var _space_bodies__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./space.bodies */ "../core/dist/space/space.bodies.js");
+/* harmony import */ var _cache_cache__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cache/cache */ "../core/dist/cache/cache.js");
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
 
 
+/**
+ * Base class for 1:1 (static) datasource producers.
+ *
+ * For each activation:
+ *  1. ADD is emitted immediately with status = "downloading"
+ *  2. _load(source) runs asynchronously
+ *  3. on success  : status = "ready", content = payload, UPDATE emitted
+ *     on failure  : status = "failed" (or "failed-permanently" if subclass decides), UPDATE emitted
+ *     on cancel   : REMOVE emitted, payload discarded
+ *  4. on deactivate : status = "deactivated", REMOVE emitted (content stays cached for re-activation)
+ *  5. on unload     : cache.delete, content dropped
+ *
+ * Cancellation is safe: a deactivate arriving while the source is still loading
+ * flips the internal state to "cancelled"; the pending load's result is discarded
+ * for THIS view but the shared load keeps running for other views (see `_pending`).
+ *
+ * Spawner producers (1:N) should extend IStreamSourceProducer directly and NOT rely
+ * on this base class: their lifecycle does not match the 1:1 model.
+ */
+class AbstractStreamSourceProducer extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_1__.SourceBlock {
+    constructor(cache) {
+        super();
+        this._pending = new Map();
+        this._states = new Map();
+        this.added = (batch, _es) => {
+            void this._handle(batch);
+        };
+        this.removed = (batch, _es) => {
+            void this._handle(batch);
+        };
+        this.updated = (batch, _es) => {
+            void this._handle(batch);
+        };
+        this._cache = cache ?? new _cache_cache__WEBPACK_IMPORTED_MODULE_0__.MemoryCache();
+    }
+    handles(source) {
+        return source.contentType === this.contentType;
+    }
+    /** Optional hook for subclasses (e.g. ref-counting). Default no-op. */
+    _onActivated(_source, _viewId) { }
+    /** Optional hook for subclasses (e.g. ref-counting). Default no-op. */
+    _onDeactivated(_source, _viewId) { }
+    /** Optional hook on unload. Default no-op. */
+    _onUnloaded(_source, _payload) { }
+    dispose() {
+        this._states.clear();
+        this._pending.clear();
+        this._cache.dispose();
+        super.dispose();
+    }
+    async _handle(batch) {
+        for (const a of batch) {
+            if (!this.handles(a.source))
+                continue;
+            switch (a.operation) {
+                case "load":
+                    await this._ensureLoaded(a.source);
+                    break;
+                case "activate":
+                    await this._doActivate(a);
+                    break;
+                case "update":
+                    this._doUpdate(a);
+                    break;
+                case "deactivate":
+                    this._doDeactivate(a);
+                    break;
+                case "unload":
+                    this._doUnload(a);
+                    break;
+            }
+        }
+    }
+    async _doActivate(a) {
+        const src = a.source;
+        const existing = this._getState(a.viewId, src.id);
+        if (existing && (existing.status === "loading" || existing.status === "active")) {
+            return;
+        }
+        const state = { status: "loading" };
+        this._setState(a.viewId, src.id, state);
+        // Emit ADD immediately with downloading status so the scene can render placeholders.
+        src.status = "downloading";
+        this.notifyAdded([src]);
+        let payload;
+        try {
+            payload = await this._ensureLoaded(src);
+        }
+        catch (err) {
+            if (this._getState(a.viewId, src.id) === state) {
+                src.status = "failed";
+                this.notifyUpdated([src]);
+                this._deleteState(a.viewId, src.id);
+            }
+            throw err;
+        }
+        if (state.status === "cancelled") {
+            // deactivate raced with the load; ADD was already emitted so we must emit REMOVE
+            this._deleteState(a.viewId, src.id);
+            src.status = "deactivated";
+            this.notifyRemoved([src]);
+            return;
+        }
+        state.status = "active";
+        src.status = "ready";
+        src.content = payload;
+        this._onActivated(src, a.viewId);
+        this.notifyUpdated([src]);
+    }
+    _doUpdate(a) {
+        const src = a.source;
+        const state = this._getState(a.viewId, src.id);
+        if (state?.status === "active") {
+            this.notifyUpdated([src]);
+        }
+    }
+    _doDeactivate(a) {
+        const src = a.source;
+        const state = this._getState(a.viewId, src.id);
+        if (!state)
+            return;
+        if (state.status === "loading") {
+            state.status = "cancelled";
+            return;
+        }
+        if (state.status === "active") {
+            src.status = "deactivated";
+            this._onDeactivated(src, a.viewId);
+            this._deleteState(a.viewId, src.id);
+            this.notifyRemoved([src]);
+        }
+    }
+    _doUnload(a) {
+        const src = a.source;
+        const state = this._getState(a.viewId, src.id);
+        if (state?.status === "loading") {
+            state.status = "cancelled";
+        }
+        else if (state?.status === "active") {
+            src.status = "deactivated";
+            this._onDeactivated(src, a.viewId);
+            this._deleteState(a.viewId, src.id);
+            this.notifyRemoved([src]);
+        }
+        const payload = this._cache.get(src.id);
+        if (payload !== undefined) {
+            this._onUnloaded(src, payload);
+            this._cache.delete(src.id);
+            src.content = null;
+        }
+    }
+    async _ensureLoaded(source) {
+        const cached = this._cache.get(source.id);
+        if (cached !== undefined)
+            return cached;
+        let pending = this._pending.get(source.id);
+        if (!pending) {
+            pending = (async () => {
+                try {
+                    const p = await this._load(source);
+                    this._cache.set(source.id, p);
+                    return p;
+                }
+                finally {
+                    this._pending.delete(source.id);
+                }
+            })();
+            this._pending.set(source.id, pending);
+        }
+        return pending;
+    }
+    _getState(viewId, sourceId) {
+        return this._states.get(viewId)?.get(sourceId);
+    }
+    _setState(viewId, sourceId, state) {
+        let m = this._states.get(viewId);
+        if (!m) {
+            m = new Map();
+            this._states.set(viewId, m);
+        }
+        m.set(sourceId, state);
+    }
+    _deleteState(viewId, sourceId) {
+        const m = this._states.get(viewId);
+        if (!m)
+            return;
+        m.delete(sourceId);
+        if (m.size === 0)
+            this._states.delete(viewId);
+    }
+}
+//# sourceMappingURL=streaming.producer.abstract.js.map
 
+/***/ },
 
+/***/ "../core/dist/streaming/streaming.view.js"
+/*!************************************************!*\
+  !*** ../core/dist/streaming/streaming.view.js ***!
+  \************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsStreamingViewTarget: () => (/* binding */ IsStreamingViewTarget),
+/* harmony export */   StreamingView: () => (/* binding */ StreamingView)
+/* harmony export */ });
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+
+/**
+ * Per-camera routing block.
+ *
+ * Target side (ITargetBlock<IStreamSourceActivation>): receives activations from the
+ * StreamingEngine. The view resolves datasource links (replace / add / modify),
+ * groups activations by `contentType`, and forwards them to the registered producers.
+ *
+ * Source side (ISourceBlock<IStreamSource>): aggregates the outputs of all producers
+ * so the downstream scene can link once to the view and see the union of datasources
+ * (with their evolving status) across producers.
+ *
+ * The view holds the "visible/active" set for its camera implicitly, derived from
+ * what the engine emits and what producers acknowledge.
+ */
+class StreamingView extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor(options) {
+        super();
+        this._byContentType = new Map();
+        this._producerObservers = [];
+        this.added = (batch, es) => this._route(batch, es, "added");
+        this.removed = (batch, es) => this._route(batch, es, "removed");
+        this.updated = (batch, es) => this._route(batch, es, "updated");
+        this._viewId = options.viewId;
+        if (options.producers) {
+            for (const p of options.producers)
+                this.registerProducer(p);
+        }
+    }
+    get viewId() {
+        return this._viewId;
+    }
+    /**
+     * Register a producer. Its outputs (activatedObservable/deactivatedObservable/
+     * updatedObservable) are forwarded through the view's own SourceBlock.
+     * A producer can only be registered once per contentType.
+     */
+    registerProducer(producer) {
+        if (this._byContentType.has(producer.contentType))
+            return;
+        this._byContentType.set(producer.contentType, producer);
+        const onAdded = producer.addedObservable.add((batch) => this.notifyAdded(batch));
+        const onRemoved = producer.removedObservable.add((batch) => this.notifyRemoved(batch));
+        const onUpdated = producer.updatedObservable.add((batch) => this.notifyUpdated(batch));
+        if (onAdded)
+            this._producerObservers.push(onAdded);
+        if (onRemoved)
+            this._producerObservers.push(onRemoved);
+        if (onUpdated)
+            this._producerObservers.push(onUpdated);
+    }
+    getProducer(contentType) {
+        return this._byContentType.get(contentType) ?? null;
+    }
+    dispose() {
+        for (const o of this._producerObservers)
+            o.disconnect();
+        this._producerObservers.length = 0;
+        this._byContentType.clear();
+        super.dispose();
+    }
+    _route(batch, es, channel) {
+        const resolved = this._resolveLinks(batch);
+        const byType = new Map();
+        for (const a of resolved) {
+            let arr = byType.get(a.source.contentType);
+            if (!arr) {
+                arr = [];
+                byType.set(a.source.contentType, arr);
+            }
+            arr.push(a);
+        }
+        for (const [contentType, acts] of byType) {
+            const producer = this._byContentType.get(contentType);
+            if (!producer)
+                continue;
+            const cb = producer[channel];
+            if (cb)
+                cb.call(producer, acts, es);
+        }
+    }
+    /**
+     * Resolves datasource links before dispatch. v1 is a pass-through.
+     *
+     * TODO: implement link semantics:
+     *  - replace(target) : when this source activates, emit deactivate for target first
+     *  - add(target)     : emit both (no conflict)
+     *  - modify(target)  : emit an update on target carrying this source as overlay
+     *
+     * Resolution needs the view's current active set plus the datasource registry;
+     * deferring until we have a concrete use case that stresses it.
+     */
+    _resolveLinks(batch) {
+        return batch;
+    }
+}
+/**
+ * Type guard for ITargetBlock<IStreamSourceActivation> so an engine can link to a view.
+ * (Mostly useful for external callers that want to verify a view shape at runtime.)
+ */
+function IsStreamingViewTarget(b) {
+    if (b === null || typeof b !== "object")
+        return false;
+    const t = b;
+    return t.added !== undefined || t.removed !== undefined || t.updated !== undefined;
+}
+//# sourceMappingURL=streaming.view.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/streaming.visibility.sse.js"
+/*!**********************************************************!*\
+  !*** ../core/dist/streaming/streaming.visibility.sse.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* binding */ ScreenSpaceErrorPolicy)
+/* harmony export */ });
+/**
+ * Default 3DTiles-style visibility policy.
+ *
+ * For each cell:
+ *  - compute the distance from the camera to the cell bounding box center (world frame)
+ *  - project the cell's geometric error onto the screen (pixel units)
+ *  - if projected error <= maxScreenSpaceError : load this cell
+ *  - else : refine (traverse children)
+ *
+ * Projection (standard pinhole, vertical FOV):
+ *   sse = (geometricError * viewportHeight) / (distance * 2 * tan(fovY / 2))
+ *
+ * Cells without a geometricError always load (leaf semantics).
+ * Frustum plane culling is used when the camera state carries `frustumPlanes`.
+ */
+class ScreenSpaceErrorPolicy {
+    constructor(options) {
+        this.options = {
+            maxScreenSpaceError: options?.maxScreenSpaceError ?? ScreenSpaceErrorPolicy.DefaultMaxScreenSpaceError,
+            defaultViewportHeight: options?.defaultViewportHeight ?? 1080,
+            defaultNear: options?.defaultNear ?? 0.1,
+            defaultFar: options?.defaultFar ?? 1e9,
+        };
+    }
+    evaluate(node, camera) {
+        const box = node.boundingBox;
+        if (!box) {
+            return { kind: "cull" };
+        }
+        const cx = box.center.x - camera.worldPosition.x;
+        const cy = box.center.y - camera.worldPosition.y;
+        const cz = box.center.z - camera.worldPosition.z;
+        const distance = Math.hypot(cx, cy, cz);
+        const near = camera.near ?? this.options.defaultNear;
+        const far = camera.far ?? this.options.defaultFar;
+        const radius = Math.max(box.extendSize.x, box.extendSize.y, box.extendSize.z);
+        if (distance - radius > far || distance + radius < near) {
+            return { kind: "cull" };
+        }
+        if (camera.isInFrustum) {
+            if (!camera.isInFrustum(box)) {
+                return { kind: "cull" };
+            }
+        }
+        else if (camera.frustumPlanes && camera.frustumPlanes.length > 0) {
+            for (const plane of camera.frustumPlanes) {
+                const d = plane.normal.x * box.center.x + plane.normal.y * box.center.y + plane.normal.z * box.center.z + plane.d;
+                if (d < -radius) {
+                    return { kind: "cull" };
+                }
+            }
+        }
+        const ge = node.geometricError;
+        if (ge === undefined || ge <= 0) {
+            return { kind: "load", priority: 1 / Math.max(distance, 1e-6) };
+        }
+        const tan = camera.tanFov2 > 0 ? camera.tanFov2 : Math.tan((camera.fovY || 0) * 0.5);
+        const viewportHeight = camera.viewportHeight ?? this.options.defaultViewportHeight;
+        const denom = 2 * tan * Math.max(distance, 1e-6);
+        const sse = denom > 0 ? (ge * viewportHeight) / denom : Infinity;
+        const priority = sse;
+        if (sse <= this.options.maxScreenSpaceError || !node.children || node.children.length === 0) {
+            return { kind: "load", priority };
+        }
+        return { kind: "refine", priority };
+    }
+}
+ScreenSpaceErrorPolicy.DefaultMaxScreenSpaceError = 16;
+//# sourceMappingURL=streaming.visibility.sse.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/tile/index.js"
+/*!********************************************!*\
+  !*** ../core/dist/streaming/tile/index.js ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TILE_STREAM_CONTENT_TYPE),
+/* harmony export */   TileStreamSource: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSource),
+/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSourceProducer)
+/* harmony export */ });
+/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile.stream.source */ "../core/dist/streaming/tile/tile.stream.source.js");
 
 //# sourceMappingURL=index.js.map
 
 /***/ },
 
-/***/ "../core/dist/space/space.axialTilt.js"
-/*!*********************************************!*\
-  !*** ../core/dist/space/space.axialTilt.js ***!
-  \*********************************************/
+/***/ "../core/dist/streaming/tile/tile.stream.source.js"
+/*!*********************************************************!*\
+  !*** ../core/dist/streaming/tile/tile.stream.source.js ***!
+  \*********************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AxialTilt: () => (/* binding */ AxialTilt)
+/* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* binding */ TILE_STREAM_CONTENT_TYPE),
+/* harmony export */   TileStreamSource: () => (/* binding */ TileStreamSource),
+/* harmony export */   TileStreamSourceProducer: () => (/* binding */ TileStreamSourceProducer)
 /* harmony export */ });
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math.units */ "../core/dist/math/math.units.js");
-
-class AxialTilt {
-    constructor(obliquity, period) {
-        this._obliquity = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(obliquity, AxialTilt.defaultAngleUnit);
-        this._period = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, AxialTilt.defaultPeriodUnit);
-    }
-    get obliquity() {
-        return this._obliquity;
-    }
-    get period() {
-        return this._period;
-    }
-    get meanAngularSpeed() {
-        return 360.0 / this._period.value;
-    }
-}
-AxialTilt.defaultAngleUnit = _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d;
-AxialTilt.defaultPeriodUnit = _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.s;
-//# sourceMappingURL=space.axialTilt.js.map
-
-/***/ },
-
-/***/ "../core/dist/space/space.bodies.js"
-/*!******************************************!*\
-  !*** ../core/dist/space/space.bodies.js ***!
-  \******************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SolarSystemBodies: () => (/* binding */ SolarSystemBodies)
-/* harmony export */ });
-/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geodesy/geodesy.ellipsoid */ "../core/dist/geodesy/geodesy.ellipsoid.js");
-/* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "../core/dist/space/space.interfaces.js");
+/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../streaming.producer.abstract */ "../core/dist/streaming/streaming.producer.abstract.js");
 
 
-const SolarSystemBodies = {
-    Earth: {
-        name: "Earth",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84,
-        meanRadiusKm: 6371,
-        surfaceGravity: 9.807,
-    },
-    Moon: {
-        name: "Moon",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.MOON,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Moon", 1738100, Infinity),
-        meanRadiusKm: 1737.4,
-        surfaceGravity: 1.622,
-    },
-    Mars: {
-        name: "Mars",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mars", 3396190, 169.89),
-        meanRadiusKm: 3389.5,
-        surfaceGravity: 3.721,
-    },
-    Mercury: {
-        name: "Mercury",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mercury", 2439700, Infinity),
-        meanRadiusKm: 2439.7,
-        surfaceGravity: 3.7,
-    },
-    Ceres: {
-        name: "Ceres",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.ASTEROIDE,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Ceres", 476200, Infinity),
-        meanRadiusKm: 476.2,
-        surfaceGravity: 0.28,
-    },
-    Vesta: {
-        name: "Vesta",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.ASTEROIDE,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Vesta", 262700, Infinity),
-        meanRadiusKm: 262.7,
-        surfaceGravity: 0.25,
-    },
-    Titan: {
-        name: "Titan",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.MOON,
-        ellipsoid: _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Titan", 2574730, Infinity),
-        meanRadiusKm: 2574.7,
-        surfaceGravity: 1.352,
-    },
-};
-//# sourceMappingURL=space.bodies.js.map
 
-/***/ },
-
-/***/ "../core/dist/space/space.interfaces.js"
-/*!**********************************************!*\
-  !*** ../core/dist/space/space.interfaces.js ***!
-  \**********************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CelestialNodeType: () => (/* binding */ CelestialNodeType)
-/* harmony export */ });
-var CelestialNodeType;
-(function (CelestialNodeType) {
-    CelestialNodeType[CelestialNodeType["HUBBLE_RADIUS"] = 0] = "HUBBLE_RADIUS";
-    CelestialNodeType[CelestialNodeType["SUPER_CLUSTER"] = 1] = "SUPER_CLUSTER";
-    CelestialNodeType[CelestialNodeType["CLUSTER"] = 2] = "CLUSTER";
-    CelestialNodeType[CelestialNodeType["GROUP"] = 3] = "GROUP";
-    CelestialNodeType[CelestialNodeType["GALAXY"] = 4] = "GALAXY";
-    CelestialNodeType[CelestialNodeType["SYSTEM"] = 5] = "SYSTEM";
-    CelestialNodeType[CelestialNodeType["STAR"] = 6] = "STAR";
-    CelestialNodeType[CelestialNodeType["PLANET"] = 7] = "PLANET";
-    CelestialNodeType[CelestialNodeType["MOON"] = 8] = "MOON";
-    CelestialNodeType[CelestialNodeType["ASTEROIDE"] = 9] = "ASTEROIDE";
-    CelestialNodeType[CelestialNodeType["COMET"] = 10] = "COMET";
-    CelestialNodeType[CelestialNodeType["ARTIFICIAL"] = 11] = "ARTIFICIAL";
-    CelestialNodeType[CelestialNodeType["VOID"] = 12] = "VOID";
-    CelestialNodeType[CelestialNodeType["BLACK_HOLE"] = 13] = "BLACK_HOLE";
-    CelestialNodeType[CelestialNodeType["RING"] = 14] = "RING";
-})(CelestialNodeType || (CelestialNodeType = {}));
-//# sourceMappingURL=space.interfaces.js.map
-
-/***/ },
-
-/***/ "../core/dist/space/space.spectralClass.js"
-/*!*************************************************!*\
-  !*** ../core/dist/space/space.spectralClass.js ***!
-  \*************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   MorganKeenanClass: () => (/* binding */ MorganKeenanClass),
-/* harmony export */   SpectralClass: () => (/* binding */ SpectralClass)
-/* harmony export */ });
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../math/math.units */ "../core/dist/math/math.units.js");
-
-class MorganKeenanClass {
-    static Parse(str) {
-        const a = this.pattern.exec(str);
-        if (a) {
-            const major = a[0];
-            const minor = parseFloat(a[1]);
-            const lum = (a.length > 2 ? a[2] : undefined);
-            return new MorganKeenanClass(major, minor, lum);
-        }
-        return undefined;
-    }
-    constructor(major, minor, luminosity) {
-        this._major = major;
-        this._minor = minor;
-        this._lum = luminosity;
-    }
-    get major() {
-        return this._major;
-    }
-    get minor() {
-        return this._minor;
-    }
-    get luminosity() {
-        return this._lum;
-    }
-    get fullName() {
-        return this._major + this._minor + this._lum ? "(" + this._lum + ")" : "";
-    }
-}
-MorganKeenanClass.pattern = /^(O|B|A|F|G|K|M)([0-9](.[0-9])?)((Ia\+|I|II|III|IV|V|sd|D))?$/;
-MorganKeenanClass.LuminosityNames = ["Ia+", "I", "II", "III", "IV", "V", "sd", "D"];
-/* Most stars are currently classified under the Morgan–Keenan (MK) system using the letters O, B, A, F, G, K, and M,
- * a sequence from the hottest (O type) to the coolest (M type). Each letter class is then subdivided using a numeric
- * digit with 0 being hottest and 9 being coolest (e.g. A8, A9, F0, F1 form a sequence from hotter to cooler).
- * The sequence has been expanded with classes for other stars and star-like objects that do not fit in the classical
- * system, such as class D for white dwarfs and class C for carbon stars.
- * In the MK system, a luminosity class is added to the spectral class using Roman numerals. This is based on the width
- * of certain absorption lines in the star"s spectrum, which vary with the density of the atmosphere and so distinguish
- * giant stars from dwarfs. Luminosity class 0 or Ia+ stars for hypergiants, class I stars for supergiants, class II for
- * bright giants, class III for regular giants, class IV for sub-giants, class V for main-sequence stars, class sd for
- * sub-dwarfs, and class D for white dwarfs. The full spectral class for the Sun is then G2V, indicating a main-sequence
- * star with a temperature around 5,800 K.
+/**
+ * Default contentType for provider-backed datasources. Customize per concrete
+ * tile content (e.g. "tile-provider:imagery") when the scene needs to route
+ * different providers through different producers.
  */
-class SpectralClass {
-    static ClassFromTemperature(temperature) {
-        const temp = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(temperature, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k);
-        const c = SpectralClass.HarwardClassification;
-        for (let i = 0; i !== c.length; i++) {
-            const sc = c[i];
-            const min = sc.effectiveTemperature.min;
-            const max = sc.effectiveTemperature.max;
-            if ((!min || min.value <= temp.value) && (!max || max.value > temp.value)) {
-                return sc;
-            }
-        }
-        return undefined;
-    }
-    constructor(name, effectiveTemperature, VegaRelativeColorLabel, chromacityLabel, mass, radius, luminosity, hydrogenLine, fractionOfStars) {
-        this.name = name;
-        this.effectiveTemperature = effectiveTemperature;
-        this.VegaRelativeColorLabel = VegaRelativeColorLabel;
-        this.chromacityLabel = chromacityLabel;
-        this.mass = mass;
-        this.radius = radius;
-        this.luminosity = luminosity;
-        this.hydrogenLine = hydrogenLine;
-        this.fractionOfStars = fractionOfStars;
-    }
-}
-SpectralClass.O = new SpectralClass("O", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(30000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(60000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "blue", "blue", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(16, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(6.6, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(30000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "weak", 0.00003);
-SpectralClass.B = new SpectralClass("B", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(10000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(30000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "blue white", "deep blue white", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(2.1, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(16, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(1.8, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(6.6, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(25, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(30000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "weak", 0.13);
-SpectralClass.A = new SpectralClass("A", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(7500, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(10000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "white", "blue white", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(1.4, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(2.1, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(1.4, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(1.8, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(5, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(25, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "strong", 0.6);
-SpectralClass.F = new SpectralClass("F", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(6000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(7500, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "yellow white", "white", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(1.04, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(1.4, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(1.15, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(1.4, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(1.5, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(5, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "medium", 3);
-SpectralClass.G = new SpectralClass("G", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(5200, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(6000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "yellow", "yello white", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(0.8, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(1.04, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(0.96, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(1.15, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(0.6, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(1.5, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "weak", 7.6);
-SpectralClass.K = new SpectralClass("K", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(3700, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(5200, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "orange	pale", "yello orange", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(0.45, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(0.8, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(0.7, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(0.96, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(0.08, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(0.6, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "very weak", 12.1);
-SpectralClass.M = new SpectralClass("M", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(2400, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(3700, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k)), "red light", "orange red", new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(0.08, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass(0.45, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Mass.Units.Sm)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(0, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length(0.7, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Length.Units.Sr)), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(0, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity(0.8, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Luminosity.Units.Lsun)), "very weak", 76.45);
-SpectralClass.HarwardClassificationIndex = {
-    O: SpectralClass.O,
-    B: SpectralClass.B,
-    A: SpectralClass.A,
-    F: SpectralClass.F,
-    G: SpectralClass.G,
-    K: SpectralClass.K,
-    M: SpectralClass.M,
-};
-SpectralClass.HarwardClassification = [SpectralClass.O, SpectralClass.B, SpectralClass.A, SpectralClass.F, SpectralClass.G, SpectralClass.K, SpectralClass.M];
-SpectralClass.TemperatureRange = new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.QuantityRange(new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(2400, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k), new _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature(60000, _math_math_units__WEBPACK_IMPORTED_MODULE_0__.Temperature.Units.k));
-//# sourceMappingURL=space.spectralClass.js.map
-
-/***/ },
-
-/***/ "../core/dist/space/space.starColor.js"
-/*!*********************************************!*\
-  !*** ../core/dist/space/space.starColor.js ***!
-  \*********************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ColorValue: () => (/* binding */ ColorValue),
-/* harmony export */   StarColor: () => (/* binding */ StarColor)
-/* harmony export */ });
-/* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.spectralClass */ "../core/dist/space/space.spectralClass.js");
-/* harmony import */ var _math_math_units__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../math/math.units */ "../core/dist/math/math.units.js");
-/* harmony import */ var _math_math_color__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../math/math.color */ "../core/dist/math/math.color.js");
-
-
-
-class ColorValue {
-    constructor(mk, sclass, kelvin, color) {
-        this.mk = mk;
-        this.sclass = sclass;
-        this.kelvin = kelvin;
-        this.color = color;
-    }
-}
-/*
- * • The upshot is this: the color of a star depends on its surface temperature.  But a blue star doesn’t emit only blue light,
- *   nor does a red star emit only red light.  They emit visible light of all colors to some degree.  It’s just that their
- *   spectrum peaks at a particular color.
- * • So why are there blue stars, yellow stars, red stars, but no green stars?  As it turns out, there are green stars, that is,
- *   stars that radiate much of their light in the green part of the spectrum.  But the total combination of the full range of
- *   colors of a “green” star appears white to our eyes.  If you pass the color from a whitish star through a prism, you’ll see
- *   all the colors, including green, spread out in a continuum.
- * • Astronomers came to understand that bluer stars are intrinsically brighter because they are more massive than
- *   white or red stars, and more massive stars burn much faster and hotter than less massive stars.  The bluish type-O stars,
- *   for example, are only 30-50 times more massive than yellow-white stars like our sun.  But O stars burn a million times
- *   brighter, so they have far shorter lifetimes.
- *   O and B stars only last a few million years before they die in spectacular supernova explosions, while cooler and less
- *   massive K and M stars burn steadily for billions of years.
- * • Some 88% of stars in the universe seem to be the cooler type K and M.  Only 1 in 3,000,000 stars are type O.
- *   Even middle-weights like our type-G Sun comprise only 8% of all known stars.
- *   This relationship between star mass, luminosity, and color holds only for stars burning hydrogen in the core during the
- *   prime of their lives. For example, young and middle-aged M-type stars are small, faint and long-lived.  But as stars age
- *   and start burning heavier elements in the core, bluish O and B stars, for example, evolve briefly into immensely bright
- *   M-type red stars known as red supergiants. We’ll explain this in later issues.  If it sounds complicated, fear not.
- *   Even astronomy majors wrestle over this for some time before they understand how stars live and evolve.
+const TILE_STREAM_CONTENT_TYPE = "tile-provider";
+/**
+ * IStreamSource wrapper around an existing AbstractTileLoader.
  *
- * thanks to http://oneminuteastronomer.com/708/star-colors-explained/
- * ---------------------------------------------------------------------
- * Stars radiate light a little like glowing coals in a campfire.  Just as a glowing red-hot coal is cooler than a white-hot coal,
- * for example, so a red star is cooler than a white star, and a white star is cooler than a blue star. This was a major scientific
- * discovery… simply by measuring the color of light coming from a star, and applying a little physics, it was possible to estimate
- * a star’s surface temperature.
- * Like most scientists, astronomers love to classify things.  In the late 19th century, Harvard astronomers developed a system to
- * classify stars not according to color, but by the strength by which hydrogen gas absorbed light at particular wavelengths.
- * The star classes were labeled A to N in order of decreasing hydrogen absorption strength.  After a time, the classes
- * were simplified to O, B, A, F, G, K, and M.  This is the Harvard spectral classification, which is still used today.
- * So what does this have to do with star color?
- * • As astronomers and physicists learned more about atomic structure and the spectra of light from stars,
- *   they discovered the Harvard classification system really described the temperature of a star’s atmosphere.
- *   They discovered the type-O stars are hotter than type-B stars, and type-B stars are hotter than type-A stars, and so on.
- *   But hot stars are blue, and medium-hot stars are white, and cool stars are red.
- * • Here’s a summary of the dominant color and temperatures of the main classes of stars, along with examples of stars that
- *   belong to each class
- * according http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
+ * Design note: one provider maps to ONE datasource sitting in ONE octree cell.
+ * The 2D tile pyramid is never materialized inside the octree; it stays implicit,
+ * driven by tile addresses and the existing ITileView → AbstractTileLoader pipeline.
+ *
+ * Two independent LOD systems coexist and do not conflict:
+ *  - Octree LOD (this module): decides when the whole provider region is relevant
+ *    for a given camera. It toggles the provider ON / OFF via activate / deactivate.
+ *  - Tile pyramid LOD (tiles/pipeline): runs only while the provider is active and
+ *    selects the right zoom level / tile addresses based on navigation state.
+ *
+ * This keeps the octree small (one cell per provider, not millions of tile cells)
+ * and reuses the entire tiles/loaders + tiles/pipeline machinery as-is.
  */
-class StarColor {
-    static _buildIndex(ColorTable) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const o = {};
-        for (const l of _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__.MorganKeenanClass.LuminosityNames) {
-            o[l] = Array.from(StarColor._SelectByLuminosity(l, ColorTable)).sort((a, b) => a.kelvin - b.kelvin);
+class TileStreamSource {
+    static _deriveBounds(enc) {
+        if ((0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(enc))
+            return enc;
+        const box = enc;
+        if (box.minimum && box.maximum) {
+            const w = box.maximum.x - box.minimum.x;
+            const h = box.maximum.y - box.minimum.y;
+            const d = box.maximum.z - box.minimum.z;
+            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
         }
-        return o;
+        const sphere = enc;
+        if (sphere.center && typeof sphere.radius === "number") {
+            const r = sphere.radius;
+            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
+        }
+        return undefined;
     }
-    static *_SelectByLuminosity(l, table) {
-        for (const p of table) {
-            const c = _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__.MorganKeenanClass.Parse(p.key);
-            if (c && c.luminosity === l) {
-                const t = 0.9 - c.minor / 10;
-                const sc = _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__.SpectralClass.HarwardClassificationIndex[c.major];
-                const { min, delta } = sc.effectiveTemperature;
-                const { r, g, b } = p.value;
-                yield { mk: c, sclass: sc, kelvin: min.value + delta.value * t, color: new _math_math_color__WEBPACK_IMPORTED_MODULE_2__.RGBAColor(r, g, b) };
-            }
+    constructor(options) {
+        this.kind = "provider";
+        this.status = "pending";
+        this.content = null;
+        this.id = options.id;
+        this.provider = options.provider;
+        this.encumbrance = options.encumbrance;
+        this.links = options.links;
+        this.contentType = options.contentType ?? TILE_STREAM_CONTENT_TYPE;
+        this.boundingBox = options.boundingBox ?? TileStreamSource._deriveBounds(options.encumbrance);
+        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(options.encumbrance)) {
+            this.boundingSphere = options.encumbrance;
         }
-    }
-    static _lookup(source, temperature) {
-        let low = 0, high = source.length;
-        while (low < high) {
-            const mid = (low + high) >>> 1;
-            if (source[mid].kelvin > temperature)
-                low = mid + 1;
-            else
-                high = mid;
-        }
-        return low;
-    }
-    /* use to find the range of matrix items wheres temperature lies.
-       return an array of one or two matrix item */
-    static _lookupIndexes(luminosity, temperature) {
-        const l = StarColor.Matrix[luminosity];
-        if (!l || !l.length)
-            return [];
-        const i = StarColor._lookup(l, temperature);
-        const res = [];
-        if (i == l.length) {
-            res.push(l[i - 1]);
-            return res;
-        }
-        res.push(l[i]);
-        if (i > 0) {
-            res.push(l[i - 1]);
-        }
-        return res;
-    }
-    static lookupRgb(luminosity, temperature) {
-        const kelvin = new _math_math_units__WEBPACK_IMPORTED_MODULE_1__.Temperature(temperature, _math_math_units__WEBPACK_IMPORTED_MODULE_1__.Temperature.Units.k);
-        const i = this._lookupIndexes(luminosity, kelvin.value);
-        if (!i || !i.length)
-            return new _math_math_color__WEBPACK_IMPORTED_MODULE_2__.RGBAColor(0, 0, 0);
-        if (i.length == 1) {
-            return i[0].color;
-        }
-        const k0 = i[0].kelvin;
-        const k1 = i[1].kelvin;
-        const dk = k1 - k0;
-        const c0 = i[0].color;
-        if (dk == 0)
-            return c0;
-        const c1 = i[1].color;
-        const f = (kelvin.value - k0) / dk;
-        return c0.interpolateInPlace(c1, f);
     }
 }
-StarColor.ColorTable = [
-    { key: "O9I", value: { x: 0.2507, y: 0.2468, r: 164, g: 185, b: 255, color: "#a4b9ff" } },
-    { key: "B0I", value: { x: 0.2498, y: 0.2513, r: 161, g: 189, b: 255, color: "#a1bdff" } },
-    { key: "B1I", value: { x: 0.2547, y: 0.2562, r: 168, g: 193, b: 255, color: "#a8c1ff" } },
-    { key: "B2I", value: { x: 0.2606, y: 0.2611, r: 177, g: 196, b: 255, color: "#b1c4ff" } },
-    { key: "B3I", value: { x: 0.2591, y: 0.2582, r: 175, g: 194, b: 255, color: "#afc2ff" } },
-    { key: "B4I", value: { x: 0.2678, y: 0.271, r: 187, g: 203, b: 255, color: "#bbcbff" } },
-    { key: "B5I", value: { x: 0.2628, y: 0.2685, r: 179, g: 202, b: 255, color: "#b3caff" } },
-    { key: "B6I", value: { x: 0.2711, y: 0.2754, r: 191, g: 207, b: 255, color: "#bfcfff" } },
-    { key: "B7I", value: { x: 0.2734, y: 0.2785, r: 195, g: 209, b: 255, color: "#c3d1ff" } },
-    { key: "B8I", value: { x: 0.2653, y: 0.274, r: 182, g: 206, b: 255, color: "#b6ceff" } },
-    { key: "B9I", value: { x: 0.2797, y: 0.2865, r: 204, g: 216, b: 255, color: "#ccd8ff" } },
-    { key: "A0I", value: { x: 0.2683, y: 0.2737, r: 187, g: 206, b: 255, color: "#bbceff" } },
-    { key: "A1I", value: { x: 0.2871, y: 0.2955, r: 214, g: 223, b: 255, color: "#d6dfff" } },
-    { key: "A2I", value: { x: 0.2768, y: 0.2842, r: 199, g: 214, b: 255, color: "#c7d6ff" } },
-    { key: "A5I", value: { x: 0.2925, y: 0.3019, r: 223, g: 229, b: 255, color: "#dfe5ff" } },
-    { key: "F0I", value: { x: 0.2789, y: 0.2855, r: 202, g: 215, b: 255, color: "#cad7ff" } },
-    { key: "F2I", value: { x: 0.3061, y: 0.3172, r: 244, g: 243, b: 255, color: "#f4f3ff" } },
-    { key: "F5I", value: { x: 0.2899, y: 0.2978, r: 219, g: 225, b: 255, color: "#dbe1ff" } },
-    { key: "F8I", value: { x: 0.3177, y: 0.3337, r: 255, g: 252, b: 247, color: "#fffcf7" } },
-    { key: "G0I", value: { x: 0.3361, y: 0.349, r: 255, g: 239, b: 219, color: "#ffefdb" } },
-    { key: "G2I", value: { x: 0.3461, y: 0.3605, r: 255, g: 236, b: 205, color: "#ffeccd" } },
-    { key: "G3I", value: { x: 0.3479, y: 0.3566, r: 255, g: 231, b: 203, color: "#ffe7cb" } },
-    { key: "G5I", value: { x: 0.3617, y: 0.3769, r: 255, g: 230, b: 183, color: "#ffe6b7" } },
-    { key: "G8I", value: { x: 0.3764, y: 0.3833, r: 255, g: 220, b: 167, color: "#ffdca7" } },
-    { key: "K0I", value: { x: 0.3659, y: 0.3706, r: 255, g: 221, b: 181, color: "#ffddb5" } },
-    { key: "K1I", value: { x: 0.3693, y: 0.373, r: 255, g: 220, b: 177, color: "#ffdcb1" } },
-    { key: "K2I", value: { x: 0.4022, y: 0.4058, r: 255, g: 211, b: 135, color: "#ffd387" } },
-    { key: "K3I", value: { x: 0.411, y: 0.4074, r: 255, g: 204, b: 128, color: "#ffcc80" } },
-    { key: "K4I", value: { x: 0.4195, y: 0.4128, r: 255, g: 201, b: 118, color: "#ffc976" } },
-    { key: "K5I", value: { x: 0.3896, y: 0.3863, r: 255, g: 209, b: 154, color: "#ffd19a" } },
-    { key: "M0I", value: { x: 0.3994, y: 0.392, r: 255, g: 204, b: 143, color: "#ffcc8f" } },
-    { key: "M1I", value: { x: 0.4048, y: 0.3948, r: 255, g: 202, b: 138, color: "#ffca8a" } },
-    { key: "M2I", value: { x: 0.4338, y: 0.4178, r: 255, g: 193, b: 104, color: "#ffc168" } },
-    { key: "M3I", value: { x: 0.4254, y: 0.4044, r: 255, g: 192, b: 118, color: "#ffc076" } },
-    { key: "M4I", value: { x: 0.4402, y: 0.41, r: 255, g: 185, b: 104, color: "#ffb968" } },
-    { key: "B2II", value: { x: 0.253, y: 0.2557, r: 165, g: 192, b: 255, color: "#a5c0ff" } },
-    { key: "B5II", value: { x: 0.2593, y: 0.2597, r: 175, g: 195, b: 255, color: "#afc3ff" } },
-    { key: "F0II", value: { x: 0.2795, y: 0.288, r: 203, g: 217, b: 255, color: "#cbd9ff" } },
-    { key: "F2II", value: { x: 0.2966, y: 0.3069, r: 229, g: 233, b: 255, color: "#e5e9ff" } },
-    { key: "G5II", value: { x: 0.3471, y: 0.3611, r: 255, g: 235, b: 203, color: "#ffebcb" } },
-    { key: "M3II", value: { x: 0.4185, y: 0.412, r: 255, g: 201, b: 119, color: "#ffc977" } },
-    { key: "O7III", value: { x: 0.246, y: 0.2363, r: 158, g: 177, b: 255, color: "#9eb1ff" } },
-    { key: "O8III", value: { x: 0.2455, y: 0.2373, r: 157, g: 178, b: 255, color: "#9db2ff" } },
-    { key: "O9III", value: { x: 0.246, y: 0.2363, r: 158, g: 177, b: 255, color: "#9eb1ff" } },
-    { key: "B0III", value: { x: 0.246, y: 0.2363, r: 158, g: 177, b: 255, color: "#9eb1ff" } },
-    { key: "B1III", value: { x: 0.246, y: 0.2363, r: 158, g: 177, b: 255, color: "#9eb1ff" } },
-    { key: "B2III", value: { x: 0.247, y: 0.2396, r: 159, g: 180, b: 255, color: "#9fb4ff" } },
-    { key: "B3III", value: { x: 0.2509, y: 0.2486, r: 163, g: 187, b: 255, color: "#a3bbff" } },
-    { key: "B5III", value: { x: 0.2541, y: 0.2514, r: 168, g: 189, b: 255, color: "#a8bdff" } },
-    { key: "B7III", value: { x: 0.2562, y: 0.2542, r: 171, g: 191, b: 255, color: "#abbfff" } },
-    { key: "B9III", value: { x: 0.2615, y: 0.2608, r: 178, g: 195, b: 255, color: "#b2c3ff" } },
-    { key: "A0III", value: { x: 0.2687, y: 0.2729, r: 188, g: 205, b: 255, color: "#bccdff" } },
-    { key: "A3III", value: { x: 0.2691, y: 0.2707, r: 189, g: 203, b: 255, color: "#bdcbff" } },
-    { key: "A5III", value: { x: 0.2787, y: 0.2858, r: 202, g: 215, b: 255, color: "#cad7ff" } },
-    { key: "A6III", value: { x: 0.2837, y: 0.2903, r: 209, g: 219, b: 255, color: "#d1dbff" } },
-    { key: "A7III", value: { x: 0.2843, y: 0.2911, r: 210, g: 219, b: 255, color: "#d2dbff" } },
-    { key: "A8III", value: { x: 0.2837, y: 0.2903, r: 209, g: 219, b: 255, color: "#d1dbff" } },
-    { key: "A9III", value: { x: 0.2837, y: 0.2903, r: 209, g: 219, b: 255, color: "#d1dbff" } },
-    { key: "F0III", value: { x: 0.2865, y: 0.2945, r: 213, g: 222, b: 255, color: "#d5deff" } },
-    { key: "F2III", value: { x: 0.3041, y: 0.3151, r: 241, g: 241, b: 255, color: "#f1f1ff" } },
-    { key: "F4III", value: { x: 0.3043, y: 0.3137, r: 241, g: 240, b: 255, color: "#f1f0ff" } },
-    { key: "F5III", value: { x: 0.3048, y: 0.3145, r: 242, g: 240, b: 255, color: "#f2f0ff" } },
-    { key: "F6III", value: { x: 0.3043, y: 0.3137, r: 241, g: 240, b: 255, color: "#f1f0ff" } },
-    { key: "F7III", value: { x: 0.3043, y: 0.3137, r: 241, g: 240, b: 255, color: "#f1f0ff" } },
-    { key: "G0III", value: { x: 0.3268, y: 0.3384, r: 255, g: 242, b: 233, color: "#fff2e9" } },
-    { key: "G1III", value: { x: 0.3265, y: 0.338, r: 255, g: 243, b: 233, color: "#fff3e9" } },
-    { key: "G2III", value: { x: 0.3265, y: 0.338, r: 255, g: 243, b: 233, color: "#fff3e9" } },
-    { key: "G3III", value: { x: 0.3265, y: 0.338, r: 255, g: 243, b: 233, color: "#fff3e9" } },
-    { key: "G4III", value: { x: 0.3265, y: 0.338, r: 255, g: 243, b: 233, color: "#fff3e9" } },
-    { key: "G5III", value: { x: 0.3421, y: 0.3541, r: 255, g: 236, b: 211, color: "#ffecd3" } },
-    { key: "G6III", value: { x: 0.3392, y: 0.3496, r: 255, g: 236, b: 215, color: "#ffecd7" } },
-    { key: "G8III", value: { x: 0.3505, y: 0.3613, r: 255, g: 231, b: 199, color: "#ffe7c7" } },
-    { key: "G9III", value: { x: 0.3529, y: 0.3643, r: 255, g: 231, b: 196, color: "#ffe7c4" } },
-    { key: "K0III", value: { x: 0.358, y: 0.3663, r: 255, g: 227, b: 190, color: "#ffe3be" } },
-    { key: "K1III", value: { x: 0.3653, y: 0.3721, r: 255, g: 223, b: 181, color: "#ffdfb5" } },
-    { key: "K2III", value: { x: 0.3698, y: 0.376, r: 255, g: 221, b: 175, color: "#ffddaf" } },
-    { key: "K3III", value: { x: 0.3776, y: 0.38, r: 255, g: 216, b: 167, color: "#ffd8a7" } },
-    { key: "K4III", value: { x: 0.3947, y: 0.3956, r: 255, g: 211, b: 146, color: "#ffd392" } },
-    { key: "K5III", value: { x: 0.4034, y: 0.3966, r: 255, g: 204, b: 138, color: "#ffcc8a" } },
-    { key: "K7III", value: { x: 0.3989, y: 0.3975, r: 255, g: 208, b: 142, color: "#ffd08e" } },
-    { key: "M0III", value: { x: 0.4088, y: 0.4013, r: 255, g: 203, b: 132, color: "#ffcb84" } },
-    { key: "M1III", value: { x: 0.4181, y: 0.4085, r: 255, g: 200, b: 121, color: "#ffc879" } },
-    { key: "M2III", value: { x: 0.4215, y: 0.4098, r: 255, g: 198, b: 118, color: "#ffc676" } },
-    { key: "M3III", value: { x: 0.4192, y: 0.4108, r: 255, g: 200, b: 119, color: "#ffc877" } },
-    { key: "M4III", value: { x: 0.4102, y: 0.4091, r: 255, g: 206, b: 127, color: "#ffce7f" } },
-    { key: "M5III", value: { x: 0.4171, y: 0.4035, r: 255, g: 197, b: 124, color: "#ffc57c" } },
-    { key: "M6III", value: { x: 0.4312, y: 0.3876, r: 255, g: 178, b: 121, color: "#ffb279" } },
-    { key: "M7III", value: { x: 0.4591, y: 0.3966, r: 255, g: 165, b: 97, color: "#ffa561" } },
-    { key: "M8III", value: { x: 0.4582, y: 0.398, r: 255, g: 167, b: 97, color: "#ffa761" } },
-    { key: "M9III", value: { x: 0.3802, y: 0.4084, r: 255, g: 233, b: 154, color: "#ffe99a" } },
-    { key: "B1IV", value: { x: 0.2459, y: 0.2397, r: 157, g: 180, b: 255, color: "#9db4ff" } },
-    { key: "B2IV", value: { x: 0.2467, y: 0.2388, r: 159, g: 179, b: 255, color: "#9fb3ff" } },
-    { key: "B3IV", value: { x: 0.2523, y: 0.2498, r: 166, g: 188, b: 255, color: "#a6bcff" } },
-    { key: "B6IV", value: { x: 0.2591, y: 0.2582, r: 175, g: 194, b: 255, color: "#afc2ff" } },
-    { key: "B7IV", value: { x: 0.2552, y: 0.2522, r: 170, g: 189, b: 255, color: "#aabdff" } },
-    { key: "B9IV", value: { x: 0.2628, y: 0.2629, r: 180, g: 197, b: 255, color: "#b4c5ff" } },
-    { key: "A0IV", value: { x: 0.2622, y: 0.2623, r: 179, g: 197, b: 255, color: "#b3c5ff" } },
-    { key: "A3IV", value: { x: 0.2698, y: 0.2734, r: 190, g: 205, b: 255, color: "#becdff" } },
-    { key: "A4IV", value: { x: 0.2738, y: 0.2793, r: 195, g: 210, b: 255, color: "#c3d2ff" } },
-    { key: "A5IV", value: { x: 0.2857, y: 0.2923, r: 212, g: 220, b: 255, color: "#d4dcff" } },
-    { key: "A7IV", value: { x: 0.2715, y: 0.2759, r: 192, g: 207, b: 255, color: "#c0cfff" } },
-    { key: "A9IV", value: { x: 0.2932, y: 0.2997, r: 224, g: 227, b: 255, color: "#e0e3ff" } },
-    { key: "F0IV", value: { x: 0.2893, y: 0.2966, r: 218, g: 224, b: 255, color: "#dae0ff" } },
-    { key: "F2IV", value: { x: 0.2951, y: 0.3029, r: 227, g: 230, b: 255, color: "#e3e6ff" } },
-    { key: "F3IV", value: { x: 0.2952, y: 0.3036, r: 227, g: 230, b: 255, color: "#e3e6ff" } },
-    { key: "F5IV", value: { x: 0.3044, y: 0.3133, r: 241, g: 239, b: 255, color: "#f1efff" } },
-    { key: "F7IV", value: { x: 0.304, y: 0.313, r: 240, g: 239, b: 255, color: "#f0efff" } },
-    { key: "F8IV", value: { x: 0.3138, y: 0.328, r: 255, g: 252, b: 253, color: "#fffcfd" } },
-    { key: "G0IV", value: { x: 0.319, y: 0.3317, r: 255, g: 248, b: 245, color: "#fff8f5" } },
-    { key: "G2IV", value: { x: 0.3212, y: 0.3311, r: 255, g: 244, b: 242, color: "#fff4f2" } },
-    { key: "G3IV", value: { x: 0.3319, y: 0.3417, r: 255, g: 238, b: 226, color: "#ffeee2" } },
-    { key: "G4IV", value: { x: 0.3232, y: 0.3359, r: 255, g: 245, b: 238, color: "#fff5ee" } },
-    { key: "G5IV", value: { x: 0.3404, y: 0.3503, r: 255, g: 235, b: 213, color: "#ffebd5" } },
-    { key: "G6IV", value: { x: 0.326, y: 0.3359, r: 255, g: 242, b: 234, color: "#fff2ea" } },
-    { key: "G7IV", value: { x: 0.3466, y: 0.3551, r: 255, g: 231, b: 205, color: "#ffe7cd" } },
-    { key: "G8IV", value: { x: 0.3422, y: 0.351, r: 255, g: 233, b: 211, color: "#ffe9d3" } },
-    { key: "K0IV", value: { x: 0.3592, y: 0.3659, r: 255, g: 225, b: 189, color: "#ffe1bd" } },
-    { key: "K1IV", value: { x: 0.3743, y: 0.3753, r: 255, g: 216, b: 171, color: "#ffd8ab" } },
-    { key: "K2IV", value: { x: 0.3491, y: 0.3565, r: 255, g: 229, b: 202, color: "#ffe5ca" } },
-    { key: "K3IV", value: { x: 0.3764, y: 0.3821, r: 255, g: 219, b: 167, color: "#ffdba7" } },
-    { key: "O5V", value: { x: 0.2436, y: 0.2343, r: 155, g: 176, b: 255, color: "#9bb0ff" } },
-    { key: "O6V", value: { x: 0.2492, y: 0.2445, r: 162, g: 184, b: 255, color: "#a2b8ff" } },
-    { key: "O7V", value: { x: 0.2451, y: 0.2351, r: 157, g: 177, b: 255, color: "#9db1ff" } },
-    { key: "O8V", value: { x: 0.2451, y: 0.2351, r: 157, g: 177, b: 255, color: "#9db1ff" } },
-    { key: "O9V", value: { x: 0.2437, y: 0.2366, r: 154, g: 178, b: 255, color: "#9ab2ff" } },
-    { key: "O9.5V", value: { x: 0.251, y: 0.2472, r: 164, g: 186, b: 255, color: "#a4baff" } },
-    { key: "B0V", value: { x: 0.2448, y: 0.2362, r: 156, g: 178, b: 255, color: "#9cb2ff" } },
-    { key: "B0.5V", value: { x: 0.253, y: 0.2501, r: 167, g: 188, b: 255, color: "#a7bcff" } },
-    { key: "B1V", value: { x: 0.2481, y: 0.2424, r: 160, g: 182, b: 255, color: "#a0b6ff" } },
-    { key: "B2V", value: { x: 0.2474, y: 0.2395, r: 160, g: 180, b: 255, color: "#a0b4ff" } },
-    { key: "B3V", value: { x: 0.2517, y: 0.2472, r: 165, g: 185, b: 255, color: "#a5b9ff" } },
-    { key: "B4V", value: { x: 0.2506, y: 0.2453, r: 164, g: 184, b: 255, color: "#a4b8ff" } },
-    { key: "B5V", value: { x: 0.2559, y: 0.2546, r: 170, g: 191, b: 255, color: "#aabfff" } },
-    { key: "B6V", value: { x: 0.2563, y: 0.2522, r: 172, g: 189, b: 255, color: "#acbdff" } },
-    { key: "B7V", value: { x: 0.2578, y: 0.2555, r: 173, g: 191, b: 255, color: "#adbfff" } },
-    { key: "B8V", value: { x: 0.2604, y: 0.2603, r: 177, g: 195, b: 255, color: "#b1c3ff" } },
-    { key: "B9V", value: { x: 0.2639, y: 0.2642, r: 181, g: 198, b: 255, color: "#b5c6ff" } },
-    { key: "A0V", value: { x: 0.2668, y: 0.2686, r: 185, g: 201, b: 255, color: "#b9c9ff" } },
-    { key: "A1V", value: { x: 0.2635, y: 0.265, r: 181, g: 199, b: 255, color: "#b5c7ff" } },
-    { key: "A2V", value: { x: 0.2677, y: 0.2701, r: 187, g: 203, b: 255, color: "#bbcbff" } },
-    { key: "A3V", value: { x: 0.2706, y: 0.2752, r: 191, g: 207, b: 255, color: "#bfcfff" } },
-    { key: "A5V", value: { x: 0.2786, y: 0.2858, r: 202, g: 215, b: 255, color: "#cad7ff" } },
-    { key: "A6V", value: { x: 0.2765, y: 0.2825, r: 199, g: 212, b: 255, color: "#c7d4ff" } },
-    { key: "A7V", value: { x: 0.2771, y: 0.283, r: 200, g: 213, b: 255, color: "#c8d5ff" } },
-    { key: "A8V", value: { x: 0.2864, y: 0.2943, r: 213, g: 222, b: 255, color: "#d5deff" } },
-    { key: "A9V", value: { x: 0.2901, y: 0.2971, r: 219, g: 224, b: 255, color: "#dbe0ff" } },
-    { key: "F0V", value: { x: 0.2932, y: 0.3018, r: 224, g: 229, b: 255, color: "#e0e5ff" } },
-    { key: "F2V", value: { x: 0.3012, y: 0.3125, r: 236, g: 239, b: 255, color: "#ecefff" } },
-    { key: "F4V", value: { x: 0.2935, y: 0.2993, r: 224, g: 226, b: 255, color: "#e0e2ff" } },
-    { key: "F5V", value: { x: 0.3088, y: 0.3209, r: 248, g: 247, b: 255, color: "#f8f7ff" } },
-    { key: "F6V", value: { x: 0.306, y: 0.3154, r: 244, g: 241, b: 255, color: "#f4f1ff" } },
-    { key: "F7V", value: { x: 0.3075, y: 0.3168, r: 246, g: 243, b: 255, color: "#f6f3ff" } },
-    { key: "F8V", value: { x: 0.3147, y: 0.324, r: 255, g: 247, b: 252, color: "#fff7fc" } },
-    { key: "F9V", value: { x: 0.3149, y: 0.3247, r: 255, g: 247, b: 252, color: "#fff7fc" } },
-    { key: "G0V", value: { x: 0.3149, y: 0.3257, r: 255, g: 248, b: 252, color: "#fff8fc" } },
-    { key: "G1V", value: { x: 0.3172, y: 0.3278, r: 255, g: 247, b: 248, color: "#fff7f8" } },
-    { key: "G2V", value: { x: 0.3211, y: 0.3323, r: 255, g: 245, b: 242, color: "#fff5f2" } },
-    { key: "G4V", value: { x: 0.3293, y: 0.3403, r: 255, g: 241, b: 229, color: "#fff1e5" } },
-    { key: "G5V", value: { x: 0.326, y: 0.3382, r: 255, g: 244, b: 234, color: "#fff4ea" } },
-    { key: "G6V", value: { x: 0.3257, y: 0.338, r: 255, g: 244, b: 235, color: "#fff4eb" } },
-    { key: "G7V", value: { x: 0.3257, y: 0.338, r: 255, g: 244, b: 235, color: "#fff4eb" } },
-    { key: "G8V", value: { x: 0.3346, y: 0.3445, r: 255, g: 237, b: 222, color: "#ffedde" } },
-    { key: "G9V", value: { x: 0.3352, y: 0.3469, r: 255, g: 239, b: 221, color: "#ffefdd" } },
-    { key: "K0V", value: { x: 0.3352, y: 0.3458, r: 255, g: 238, b: 221, color: "#ffeedd" } },
-    { key: "K1V", value: { x: 0.3603, y: 0.3664, r: 255, g: 224, b: 188, color: "#ffe0bc" } },
-    { key: "K2V", value: { x: 0.3535, y: 0.3597, r: 255, g: 227, b: 196, color: "#ffe3c4" } },
-    { key: "K3V", value: { x: 0.3555, y: 0.3571, r: 255, g: 222, b: 195, color: "#ffdec3" } },
-    { key: "K4V", value: { x: 0.367, y: 0.3645, r: 255, g: 216, b: 181, color: "#ffd8b5" } },
-    { key: "K5V", value: { x: 0.3836, y: 0.3798, r: 255, g: 210, b: 161, color: "#ffd2a1" } },
-    { key: "K7V", value: { x: 0.403, y: 0.3875, r: 255, g: 199, b: 142, color: "#ffc78e" } },
-    { key: "K8V", value: { x: 0.3746, y: 0.3661, r: 255, g: 209, b: 174, color: "#ffd1ae" } },
-    { key: "M0V", value: { x: 0.4073, y: 0.3876, r: 255, g: 195, b: 139, color: "#ffc38b" } },
-    { key: "M1V", value: { x: 0.4011, y: 0.3927, r: 255, g: 204, b: 142, color: "#ffcc8e" } },
-    { key: "M2V", value: { x: 0.413, y: 0.3958, r: 255, g: 196, b: 131, color: "#ffc483" } },
-    { key: "M3V", value: { x: 0.4089, y: 0.4075, r: 255, g: 206, b: 129, color: "#ffce81" } },
-    { key: "M4V", value: { x: 0.4137, y: 0.4043, r: 255, g: 201, b: 127, color: "#ffc97f" } },
-    { key: "M5V", value: { x: 0.4227, y: 0.4218, r: 255, g: 204, b: 111, color: "#ffcc6f" } },
-    { key: "M6V", value: { x: 0.4271, y: 0.4123, r: 255, g: 195, b: 112, color: "#ffc370" } },
-    { key: "M8V", value: { x: 0.4276, y: 0.4176, r: 255, g: 198, b: 109, color: "#ffc66d" } },
-];
-/* this is where we prepare the static matrix (Space.StarColorFactory.Matrix) to efficient color lookup. */
-StarColor.Matrix = StarColor._buildIndex(StarColor.ColorTable);
-//# sourceMappingURL=space.starColor.js.map
+/**
+ * Placeholder 1:1 producer for TileStreamSource.
+ *
+ * This version emits the provider as the `content` of the TileStreamSource
+ * itself (status: pending → downloading → ready). Scenes can listen to the
+ * activation and wire the provider into their own tile consumer via the existing
+ * tiles/pipeline machinery.
+ *
+ * TODO (phase 3): replace with a proper spawner that instantiates an ITileView
+ * per (viewId, provider) and emits Tile2DDataSource children as addresses flow.
+ * See streaming.tile2d.ts (to be added).
+ */
+class TileStreamSourceProducer extends _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_2__.AbstractStreamSourceProducer {
+    constructor(contentType = TILE_STREAM_CONTENT_TYPE) {
+        super();
+        this.contentType = contentType;
+    }
+    _load(source) {
+        const provider = source.provider;
+        return Promise.resolve(provider);
+    }
+}
+//# sourceMappingURL=tile.stream.source.js.map
 
 /***/ },
 
@@ -11033,52 +10860,106 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _iso6391__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./iso6391 */ "../core/dist/text/iso6391.js");
 
+/** Narrow a {@link LocalizableString} to a proper {@link LocalString}. */
 function IsLocalizable(item) {
-    return item instanceof LocalString;
+    return typeof item !== "string";
 }
+/**
+ * Build a {@link LocalizableString} from an arbitrary JSON-ish input.
+ *
+ * Accepted shapes:
+ *  - `undefined` / `null`                                  -> `undefined`
+ *  - a plain `string`                                      -> returned as-is (fixed, non-localized)
+ *  - a {@link LocalString} instance                        -> returned as-is
+ *  - an object with a `contents` field of code-to-string   -> rebuilt into a LocalString
+ *  - a plain object mapping codes to strings               -> rebuilt into a LocalString
+ *
+ * Unknown language codes are silently skipped.
+ */
 function DeserializeLocalizableString(input) {
-    if (!input) {
+    if (input == null)
         return undefined;
-    }
-    if (input["contents"]) {
+    if (typeof input === "string")
         return input;
-    }
-    var ls = new LocalString();
-    ls.deserialize(input);
+    if (input instanceof LocalString)
+        return input;
+    // Either the `{ contents: { ... } }` envelope or the raw `{ code: value }` map.
+    const source = typeof input.contents === "object" && input.contents !== null
+        ? input.contents
+        : input;
+    const ls = new LocalString();
+    ls.deserialize(source);
     return ls;
 }
+/**
+ * Resolve a {@link LocalizableString} to a plain `string`.
+ *
+ * @param str  The localizable value to resolve.
+ * @param code Preferred ISO 639-1 code. Falls back to
+ *             {@link LocalString.DefaultCode} when missing or unknown.
+ * @returns The resolved string, or `undefined` if the value is a
+ *          LocalString with no entry for the requested code AND no entry
+ *          for the default code.
+ */
 function GetLocalizableStringValue(str, code) {
-    return str instanceof String ? str : str.getValue(code);
+    return typeof str === "string" ? str : str.getValue(code);
 }
+/**
+ * Holds one string per ISO 639-1 language code. Unknown codes passed to
+ * {@link tryAdd} or {@link deserialize} are rejected (no exception,
+ * they are just ignored).
+ */
 class LocalString {
     constructor() {
         this.contents = new Map();
     }
+    /**
+     * Add or replace the value for a given language code.
+     * @returns `true` if the code is a valid ISO 639-1 code and the
+     *          value was stored; `false` otherwise.
+     */
     tryAdd(code, value) {
-        if (_iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391.validate(code)) {
-            this.contents.set(code, value);
-            return true;
-        }
-        return false;
+        if (!_iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391.validate(code))
+            return false;
+        this.contents.set(code, value);
+        return true;
     }
+    /**
+     * Replace all entries from a plain object mapping codes to strings.
+     * Non-string values are coerced to strings; unknown codes are
+     * skipped.
+     */
     deserialize(input) {
         this.contents.clear();
-        for (var p in input.getOwnPropertyNames()) {
-            if (_iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391.validate(p)) {
-                this.contents.set(p, input[p]);
+        if (!input || typeof input !== "object")
+            return;
+        for (const code of Object.keys(input)) {
+            if (_iso6391__WEBPACK_IMPORTED_MODULE_0__.ISO6391.validate(code)) {
+                this.contents.set(code, String(input[code]));
             }
         }
     }
+    /**
+     * Look up the value for a specific code, falling back to
+     * {@link DefaultCode} when missing.
+     *
+     * @returns `undefined` only when neither `code` nor the default code
+     *          have a value.
+     */
     getValue(code) {
         if (code) {
-            var v = this.contents.get(code);
-            if (v || code == LocalString.DefaultCode) {
+            const v = this.contents.get(code);
+            if (v !== undefined || code === LocalString.DefaultCode) {
                 return v;
             }
         }
         return this.contents.get(LocalString.DefaultCode);
     }
 }
+/**
+ * Default language code used as fallback when a locale-specific
+ * value is missing. Set this once at application startup.
+ */
 LocalString.DefaultCode = "en";
 //# sourceMappingURL=localizable.js.map
 
@@ -12155,8 +12036,8 @@ ShapeCollection.Epsilon = 1;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileLoader),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__.AbstractTileMetrics),
-/* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileProvider),
 /* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.ArcGISGrayscaleElevationDecoder),
 /* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.ArcGISImageServerUrlBuilder),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
@@ -12183,6 +12064,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ImageTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
 /* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsDrawableTileMapLayer),
+/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsHasTileMetrics),
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsPhysicalDisplay),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile),
@@ -12193,7 +12075,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayer),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerProxy),
-/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileMetricsProvider),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileSystemBounds),
@@ -12202,13 +12083,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
-/* harmony export */   Mars: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Mars),
-/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MarsUrlBuilder),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
-/* harmony export */   Mercury: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Mercury),
-/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MercuryUrlBuilder),
-/* harmony export */   Moon: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Moon),
-/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MoonUrlBuilder),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.NeighborsIndex),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
@@ -12221,7 +12096,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_14__.Tile),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_16__.TileCollection),
-/* harmony export */   TileContentProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider),
+/* harmony export */   TileContentFetcher: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_5__.TileContentFetcher),
+/* harmony export */   TileLoader: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_5__.TileLoader),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView),
@@ -12230,7 +12106,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
-/* harmony export */   TileProvider: () => (/* reexport safe */ _providers_index__WEBPACK_IMPORTED_MODULE_5__.TileProvider),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_17__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileView),
@@ -12248,7 +12123,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pipeline_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pipeline/index */ "../core/dist/tiles/pipeline/index.js");
 /* harmony import */ var _navigation_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./navigation/index */ "../core/dist/tiles/navigation/index.js");
 /* harmony import */ var _map_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map/index */ "../core/dist/tiles/map/index.js");
-/* harmony import */ var _providers_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./providers/index */ "../core/dist/tiles/providers/index.js");
+/* harmony import */ var _loaders_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./loaders/index */ "../core/dist/tiles/loaders/index.js");
 /* harmony import */ var _address_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./address/index */ "../core/dist/tiles/address/index.js");
 /* harmony import */ var _display_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./display/index */ "../core/dist/tiles/display/index.js");
 /* harmony import */ var _geography_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./geography/index */ "../core/dist/tiles/geography/index.js");
@@ -12280,6 +12155,388 @@ __webpack_require__.r(__webpack_exports__);
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/loaders/index.js"
+/*!*******************************************!*\
+  !*** ../core/dist/tiles/loaders/index.js ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _tiles_loader_abstract__WEBPACK_IMPORTED_MODULE_1__.AbstractTileLoader),
+/* harmony export */   TileContentFetcher: () => (/* reexport safe */ _tiles_content_fetcher__WEBPACK_IMPORTED_MODULE_0__.TileContentFetcher),
+/* harmony export */   TileLoader: () => (/* reexport safe */ _tiles_loader__WEBPACK_IMPORTED_MODULE_2__.TileLoader)
+/* harmony export */ });
+/* harmony import */ var _tiles_content_fetcher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.content.fetcher */ "../core/dist/tiles/loaders/tiles.content.fetcher.js");
+/* harmony import */ var _tiles_loader_abstract__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.loader.abstract */ "../core/dist/tiles/loaders/tiles.loader.abstract.js");
+/* harmony import */ var _tiles_loader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.loader */ "../core/dist/tiles/loaders/tiles.loader.js");
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/loaders/tiles.content.fetcher.js"
+/*!***********************************************************!*\
+  !*** ../core/dist/tiles/loaders/tiles.content.fetcher.js ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TileContentFetcher: () => (/* binding */ TileContentFetcher)
+/* harmony export */ });
+/* harmony import */ var _cache_cache__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../cache/cache */ "../core/dist/cache/cache.js");
+/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+
+
+class TileContentFetcher {
+    constructor(datasource, cache) {
+        this._datasource = datasource;
+        this._cache = cache || new _cache_cache__WEBPACK_IMPORTED_MODULE_0__.MemoryCache();
+        if (cache) {
+            this._prefix = this._buildPrefix();
+            this._ownCache = false;
+        }
+        else {
+            this._ownCache = true;
+        }
+    }
+    accept(address) {
+        return this.metrics != undefined && _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress.IsValidAddress(address, this.metrics);
+    }
+    get name() {
+        return this._datasource.name;
+    }
+    get datasource() {
+        return this._datasource;
+    }
+    get metrics() {
+        return this._datasource.metrics;
+    }
+    dispose() {
+        if (this._prefix && !this._ownCache) {
+            const p = this._prefix;
+            this._cache.clear((k) => k.startsWith(p));
+            return;
+        }
+        this._cache.clear();
+    }
+    fetchContent(tile, callback) {
+        const address = tile.address;
+        const cacheKey = this._buildCacheKey(address.quadkey);
+        // first have a look in cache
+        if (this._cache.contains(cacheKey)) {
+            tile.content = this._cache.get(cacheKey);
+            return tile;
+        }
+        // then try to build a temporary content using alternative method
+        const c = this._buildTemporaryContent(address);
+        // store the content, either null or not. This flag the address as beeing processed.
+        this._cache.set(cacheKey, c);
+        // then try to get it from the datasource
+        this._datasource.fetchAsync(address, tile).then((result) => {
+            if (result.ok && address.quadkey) {
+                this._cache.set(this._buildCacheKey(address.quadkey), result.content);
+                tile.content = result.content;
+                callback?.(tile);
+            }
+            else {
+                console.log(`the fetch operation has failed because of ${result.statusText}`);
+                callback?.(tile);
+            }
+        }, (reason) => {
+            console.log(`the fetch operation has failed because of ${reason}`);
+            callback?.(tile);
+        });
+        tile.content = c;
+        return tile;
+    }
+    _buildTemporaryContent(_address) {
+        // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
+        // in oder to avoid empty tile to be displayed during pan and zoom operation.
+        return null;
+    }
+    _buildAlternativContent(_address) {
+        // TODO : implement a strategy to build an alternativ content
+        // this could be used when the datasource is not available or when the lookup operation has failed
+        // or when the content is unavailable on purpose such as a 404 error for sea based tile
+        return null;
+    }
+    _buildPrefix() {
+        let p = `${this.name}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}_`;
+        while (this._cache?.any((k) => k.startsWith(p))) {
+            p = `${this.name}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}_`;
+        }
+        return p;
+    }
+    _buildCacheKey(key) {
+        return this._prefix ? `${key}` : `${this._prefix}${key}`;
+    }
+}
+//# sourceMappingURL=tiles.content.fetcher.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/loaders/tiles.loader.abstract.js"
+/*!***********************************************************!*\
+  !*** ../core/dist/tiles/loaders/tiles.loader.abstract.js ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AbstractTileLoader: () => (/* binding */ AbstractTileLoader)
+/* harmony export */ });
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events/events.observable */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.collection */ "../core/dist/tiles/tiles.collection.js");
+/* harmony import */ var _tiles_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.builder */ "../core/dist/tiles/tiles.builder.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.link.js");
+/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
+
+
+
+
+
+
+class AbstractTileLoader extends _validable__WEBPACK_IMPORTED_MODULE_5__.ValidableBase {
+    constructor(factory, enabled = true) {
+        super();
+        // internal pipeline links
+        this._links = [];
+        if (factory && (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileConstructor)(factory)) {
+            this._factory = this._buildFactory(factory) ?? this._buildFactoryInternal(factory);
+        }
+        else {
+            this._factory = factory ?? this._buildFactory() ?? this._buildFactoryInternal();
+        }
+        this._enabled = enabled;
+        this._activTiles = new _tiles_collection__WEBPACK_IMPORTED_MODULE_2__.TileCollection();
+        this._callback = this._onContentFetched.bind(this);
+    }
+    get geoBounds() {
+        return this._activTiles?.geoBounds;
+    }
+    get boundingBox() {
+        return this._activTiles?.boundingBox;
+    }
+    get enabledObservable() {
+        this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._enabledObservable;
+    }
+    get enabled() {
+        return this._enabled;
+    }
+    set enabled(v) {
+        if (this._enabled !== v) {
+            this._enabled = v;
+            if (this._enabledObservable && this._enabledObservable.hasObservers()) {
+                this._enabledObservable.notifyObservers(this, -1, this, this);
+            }
+        }
+    }
+    get metrics() {
+        return this.factory.metrics;
+    }
+    get namespace() {
+        return this.factory.namespace;
+    }
+    get factory() {
+        return this._factory;
+    }
+    dispose() {
+        this._activTiles?.clear();
+    }
+    get activTiles() {
+        return Array.from(this._activTiles);
+    }
+    getTile(a) {
+        return this._activTiles.get(a);
+    }
+    hasTile(a) {
+        return this._activTiles.has(a);
+    }
+    /// begin ISourceBlock
+    get updatedObservable() {
+        this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._updateObservable;
+    }
+    get addedObservable() {
+        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._addedObservable;
+    }
+    get removedObservable() {
+        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._removedObservable;
+    }
+    linkTo(target, options, ..._args) {
+        // a view may be linked to several targets, so we need to keep track of them.
+        if (this._links.findIndex((l) => l.target === target) === -1) {
+            // avoid linking twice to the same target
+            const link = new _pipeline__WEBPACK_IMPORTED_MODULE_4__.TilePipelineLink(this, target, options);
+            this._links.push(link);
+            this._onLinked(link);
+        }
+    }
+    _onLinked(link) {
+        // we are forwarding the activ tile to the newly linked target.
+        link.forwardAdded(Array.from(this._activTiles), new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.EventState(-1, false, this, this));
+    }
+    unlinkFrom(target) {
+        const i = this._links.findIndex((l) => l.target === target);
+        if (i !== -1) {
+            const l = this._links.splice(i)[0];
+            this._onUnlinked(l);
+            l.dispose();
+            return l;
+        }
+        return undefined;
+    }
+    _onUnlinked(_link) { }
+    /// end ISourceBlock
+    /// begin ITargetBlock
+    added(eventData, eventState) {
+        const tiles = this._onTileAddressesAdded(eventData, eventState);
+        if (tiles.length) {
+            this.invalidate();
+            if (tiles.length === 1) {
+                this._onTileAdded(tiles[0]);
+            }
+            else {
+                this._onTilesAdded(tiles);
+            }
+            if (this._addedObservable && this._addedObservable.hasObservers()) {
+                this._addedObservable.notifyObservers(tiles, -1, this, this);
+            }
+        }
+    }
+    removed(eventData, eventState) {
+        const tiles = this._onTileAddressesRemoved(eventData, eventState);
+        if (tiles.length) {
+            this.invalidate();
+            if (tiles.length === 1) {
+                this._onTileRemoved(tiles[0]);
+            }
+            else {
+                this._onTilesRemoved(tiles);
+            }
+            if (this._removedObservable && this._removedObservable.hasObservers()) {
+                this._removedObservable?.notifyObservers(tiles, -1, this, this);
+            }
+        }
+    }
+    updated(_eventData, _eventState) {
+        // nothing to do here, updating address is not suppose to happen
+    }
+    /// end ITargetBlock
+    _onTileAddressesAdded(address, _eventState) {
+        const toActivate = address.length === 0 ? [...(this._activTiles ?? [])].map((t) => t.address) : address;
+        const tiles = new Array();
+        for (const a of toActivate ?? []) {
+            const t = this._activTiles?.get(a);
+            if (t) {
+                tiles.push(t);
+                continue;
+            }
+            const factory = this._factory.withAddress(a);
+            try {
+                let tile = factory.build();
+                if (tile) {
+                    // fetch content, possibiliy generate alterative content
+                    // if underlying async operation are performed, then the callback will be messaged when the content
+                    // is available.
+                    tile = this._fetchContent(tile, this._callback);
+                    // add to collection
+                    this._activTiles?.add(tile);
+                    // push to result
+                    tiles.push(tile);
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+        return tiles;
+    }
+    _onTileAddressesRemoved(address, _eventState) {
+        if (this._activTiles && this._activTiles.count) {
+            const tiles = new Array();
+            for (const a of address ?? []) {
+                const t = this._activTiles?.get(a);
+                if (t) {
+                    tiles.push(t);
+                    this._activTiles.remove(a);
+                }
+            }
+            return tiles;
+        }
+        return [];
+    }
+    _onContentFetched(tile) {
+        this.invalidate();
+        this._onTileUpdated(tile);
+        if (this.updatedObservable?.hasObservers()) {
+            this.updatedObservable.notifyObservers([tile], -1, this, this);
+        }
+    }
+    _buildFactory(type) {
+        return this._buildFactoryInternal(type);
+    }
+    _onTilesAdded(tiles) {
+        for (const t of tiles) {
+            this._onTileAdded(t);
+        }
+    }
+    _onTileAdded(tiles) { }
+    _onTilesRemoved(tiles) {
+        for (const t of tiles) {
+            this._onTileRemoved(t);
+        }
+    }
+    _onTileRemoved(tiles) { }
+    _onTilesUpdated(tiles) {
+        for (const t of tiles) {
+            this._onTileUpdated(t);
+        }
+    }
+    _onTileUpdated(tiles) { }
+    _buildFactoryInternal(type) {
+        const b = new _tiles_builder__WEBPACK_IMPORTED_MODULE_3__.TileBuilder();
+        return type ? b.withType(type) : b;
+    }
+}
+//# sourceMappingURL=tiles.loader.abstract.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/loaders/tiles.loader.js"
+/*!**************************************************!*\
+  !*** ../core/dist/tiles/loaders/tiles.loader.js ***!
+  \**************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TileLoader: () => (/* binding */ TileLoader)
+/* harmony export */ });
+/* harmony import */ var _tiles_loader_abstract__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.loader.abstract */ "../core/dist/tiles/loaders/tiles.loader.abstract.js");
+
+class TileLoader extends _tiles_loader_abstract__WEBPACK_IMPORTED_MODULE_0__.AbstractTileLoader {
+    constructor(provider, factory, enabled = true) {
+        super(factory, enabled);
+        this.factory.withMetrics(provider.metrics).withNamespace(provider.name); // ensure the factory has the right metrics and namespace to build bounds.
+        this._contentProvider = provider;
+    }
+    _fetchContent(tile, callback) {
+        return this._contentProvider.fetchContent(tile, callback);
+    }
+}
+//# sourceMappingURL=tiles.loader.js.map
 
 /***/ },
 
@@ -12347,7 +12604,7 @@ function IsDrawableTileMapLayer(b) {
 function IsTileMapLayer(b) {
     if (b === null || typeof b !== "object")
         return false;
-    return (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileMetricsProvider)(b) && b.provider !== undefined && b.addTo !== undefined;
+    return (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsHasTileMetrics)(b) && b.provider !== undefined && b.addTo !== undefined;
 }
 function IsTileMapLayerProxy(b) {
     if (b === null || typeof b !== "object")
@@ -12677,7 +12934,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
 /* harmony import */ var _tiles_map_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.map.interfaces */ "../core/dist/tiles/map/tiles.map.interfaces.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils */ "../core/dist/utils/runtime.js");
-/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../providers */ "../core/dist/tiles/providers/tiles.provider.content.js");
+/* harmony import */ var _loaders__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../loaders */ "../core/dist/tiles/loaders/tiles.content.fetcher.js");
 
 
 
@@ -12797,7 +13054,7 @@ class TileMapLayer {
     }
     dispose() { }
     _buildProvider(dataSource, cache) {
-        return new _providers__WEBPACK_IMPORTED_MODULE_5__.TileContentProvider(dataSource, cache);
+        return new _loaders__WEBPACK_IMPORTED_MODULE_5__.TileContentFetcher(dataSource, cache);
     }
 }
 //# sourceMappingURL=tiles.map.layer.js.map
@@ -12819,7 +13076,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navigation */ "../core/dist/tiles/navigation/tiles.navigation.state.js");
 /* harmony import */ var _navigation_tiles_navigation_api__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../navigation/tiles.navigation.api */ "../core/dist/tiles/navigation/tiles.navigation.api.js");
 /* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.interfaces.js");
-/* harmony import */ var _providers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../providers */ "../core/dist/tiles/providers/tiles.provider.js");
+/* harmony import */ var _loaders__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../loaders */ "../core/dist/tiles/loaders/tiles.loader.js");
 /* harmony import */ var _tiles_map_view__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tiles.map.view */ "../core/dist/tiles/map/tiles.map.view.js");
 
 
@@ -12828,7 +13085,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class TileMapLayerView extends _providers__WEBPACK_IMPORTED_MODULE_5__.TileProvider {
+class TileMapLayerView extends _loaders__WEBPACK_IMPORTED_MODULE_5__.TileLoader {
     constructor(layer, display, source, selectionContext) {
         super(layer.provider);
         this._ownSource = false;
@@ -13733,15 +13990,14 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   IsTargetBlock: () => (/* binding */ IsTargetBlock),
+/* harmony export */   IsTargetBlock: () => (/* reexport safe */ _dataflow__WEBPACK_IMPORTED_MODULE_0__.IsTargetBlock),
 /* harmony export */   hasTileSelectionContext: () => (/* binding */ hasTileSelectionContext),
 /* harmony export */   isViewProxy: () => (/* binding */ isViewProxy)
 /* harmony export */ });
-function IsTargetBlock(b) {
-    if (b === null || typeof b !== "object")
-        return false;
-    return b.added !== undefined || b.removed !== undefined || b.updated !== undefined;
-}
+/* harmony import */ var _dataflow__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../dataflow */ "../core/dist/dataflow/index.js");
+// Generic dataflow primitives now live in core/src/dataflow. Re-exported here so
+// historical imports from "tiles/pipeline" keep working.
+
 function hasTileSelectionContext(b) {
     if (b === null || typeof b !== "object")
         return false;
@@ -13941,388 +14197,6 @@ class TargetProxy {
     }
 }
 //# sourceMappingURL=tiles.pipeline.target.proxy.js.map
-
-/***/ },
-
-/***/ "../core/dist/tiles/providers/index.js"
-/*!*********************************************!*\
-  !*** ../core/dist/tiles/providers/index.js ***!
-  \*********************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractTileProvider: () => (/* reexport safe */ _tiles_provider_abstract__WEBPACK_IMPORTED_MODULE_1__.AbstractTileProvider),
-/* harmony export */   TileContentProvider: () => (/* reexport safe */ _tiles_provider_content__WEBPACK_IMPORTED_MODULE_0__.TileContentProvider),
-/* harmony export */   TileProvider: () => (/* reexport safe */ _tiles_provider__WEBPACK_IMPORTED_MODULE_2__.TileProvider)
-/* harmony export */ });
-/* harmony import */ var _tiles_provider_content__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.provider.content */ "../core/dist/tiles/providers/tiles.provider.content.js");
-/* harmony import */ var _tiles_provider_abstract__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.provider.abstract */ "../core/dist/tiles/providers/tiles.provider.abstract.js");
-/* harmony import */ var _tiles_provider__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.provider */ "../core/dist/tiles/providers/tiles.provider.js");
-
-
-
-//# sourceMappingURL=index.js.map
-
-/***/ },
-
-/***/ "../core/dist/tiles/providers/tiles.provider.abstract.js"
-/*!***************************************************************!*\
-  !*** ../core/dist/tiles/providers/tiles.provider.abstract.js ***!
-  \***************************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractTileProvider: () => (/* binding */ AbstractTileProvider)
-/* harmony export */ });
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.interfaces */ "../core/dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _events_events_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../events/events.observable */ "../core/dist/events/events.observable.js");
-/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../tiles.collection */ "../core/dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_builder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.builder */ "../core/dist/tiles/tiles.builder.js");
-/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.link.js");
-/* harmony import */ var _validable__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../validable */ "../core/dist/validable.js");
-
-
-
-
-
-
-class AbstractTileProvider extends _validable__WEBPACK_IMPORTED_MODULE_5__.ValidableBase {
-    constructor(factory, enabled = true) {
-        super();
-        // internal pipeline links
-        this._links = [];
-        if (factory && (0,_tiles_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTileConstructor)(factory)) {
-            this._factory = this._buildFactory(factory) ?? this._buildFactoryInternal(factory);
-        }
-        else {
-            this._factory = factory ?? this._buildFactory() ?? this._buildFactoryInternal();
-        }
-        this._enabled = enabled;
-        this._activTiles = new _tiles_collection__WEBPACK_IMPORTED_MODULE_2__.TileCollection();
-        this._callback = this._onContentFetched.bind(this);
-    }
-    get geoBounds() {
-        return this._activTiles?.geoBounds;
-    }
-    get boundingBox() {
-        return this._activTiles?.boundingBox;
-    }
-    get enabledObservable() {
-        this._enabledObservable = this._enabledObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
-        return this._enabledObservable;
-    }
-    get enabled() {
-        return this._enabled;
-    }
-    set enabled(v) {
-        if (this._enabled !== v) {
-            this._enabled = v;
-            if (this._enabledObservable && this._enabledObservable.hasObservers()) {
-                this._enabledObservable.notifyObservers(this, -1, this, this);
-            }
-        }
-    }
-    get metrics() {
-        return this.factory.metrics;
-    }
-    get namespace() {
-        return this.factory.namespace;
-    }
-    get factory() {
-        return this._factory;
-    }
-    dispose() {
-        this._activTiles?.clear();
-    }
-    get activTiles() {
-        return Array.from(this._activTiles);
-    }
-    getTile(a) {
-        return this._activTiles.get(a);
-    }
-    hasTile(a) {
-        return this._activTiles.has(a);
-    }
-    /// begin ISourceBlock
-    get updatedObservable() {
-        this._updateObservable = this._updateObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
-        return this._updateObservable;
-    }
-    get addedObservable() {
-        this._addedObservable = this._addedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
-        return this._addedObservable;
-    }
-    get removedObservable() {
-        this._removedObservable = this._removedObservable || new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.Observable();
-        return this._removedObservable;
-    }
-    linkTo(target, options, ...args) {
-        // a view may be linked to several targets, so we need to keep track of them.
-        if (this._links.findIndex((l) => l.target === target) === -1) {
-            // avoid linking twice to the same target
-            const link = new _pipeline__WEBPACK_IMPORTED_MODULE_4__.TilePipelineLink(this, target, options);
-            this._links.push(link);
-            this._onLinked(link);
-        }
-    }
-    _onLinked(link) {
-        // we are forwarding the activ tile to the newly linked target.
-        link.forwardAdded(Array.from(this._activTiles), new _events_events_observable__WEBPACK_IMPORTED_MODULE_1__.EventState(-1, false, this, this));
-    }
-    unlinkFrom(target) {
-        const i = this._links.findIndex((l) => l.target === target);
-        if (i !== -1) {
-            const l = this._links.splice(i)[0];
-            this._onUnlinked(l);
-            l.dispose();
-            return l;
-        }
-        return undefined;
-    }
-    _onUnlinked(link) { }
-    /// end ISourceBlock
-    /// begin ITargetBlock
-    added(eventData, eventState) {
-        const tiles = this._onTileAddressesAdded(eventData, eventState);
-        if (tiles.length) {
-            this.invalidate();
-            if (tiles.length === 1) {
-                this._onTileAdded(tiles[0]);
-            }
-            else {
-                this._onTilesAdded(tiles);
-            }
-            if (this._addedObservable && this._addedObservable.hasObservers()) {
-                this._addedObservable.notifyObservers(tiles, -1, this, this);
-            }
-        }
-    }
-    removed(eventData, eventState) {
-        const tiles = this._onTileAddressesRemoved(eventData, eventState);
-        if (tiles.length) {
-            this.invalidate();
-            if (tiles.length === 1) {
-                this._onTileRemoved(tiles[0]);
-            }
-            else {
-                this._onTilesRemoved(tiles);
-            }
-            if (this._removedObservable && this._removedObservable.hasObservers()) {
-                this._removedObservable?.notifyObservers(tiles, -1, this, this);
-            }
-        }
-    }
-    updated(eventData, eventState) {
-        // nothing to do here, updating address is not suppose to happen
-    }
-    /// end ITargetBlock
-    _onTileAddressesAdded(address, eventState) {
-        const toActivate = address.length === 0 ? [...(this._activTiles ?? [])].map((t) => t.address) : address;
-        const tiles = new Array();
-        for (const a of toActivate ?? []) {
-            const t = this._activTiles?.get(a);
-            if (t) {
-                tiles.push(t);
-                continue;
-            }
-            const factory = this._factory.withAddress(a);
-            try {
-                let tile = factory.build();
-                if (tile) {
-                    // fetch content, possibiliy generate alterative content
-                    // if underlying async operation are performed, then the callback will be messaged when the content
-                    // is available.
-                    tile = this._fetchContent(tile, this._callback);
-                    // add to collection
-                    this._activTiles?.add(tile);
-                    // push to result
-                    tiles.push(tile);
-                }
-            }
-            catch (e) {
-                console.log(e);
-            }
-        }
-        return tiles;
-    }
-    _onTileAddressesRemoved(address, eventState) {
-        if (this._activTiles && this._activTiles.count) {
-            const tiles = new Array();
-            for (const a of address ?? []) {
-                const t = this._activTiles?.get(a);
-                if (t) {
-                    tiles.push(t);
-                    this._activTiles?.remove(a);
-                }
-            }
-            return tiles;
-        }
-        return [];
-    }
-    _onContentFetched(tile) {
-        this.invalidate();
-        this._onTileUpdated(tile);
-        if (this.updatedObservable?.hasObservers()) {
-            this.updatedObservable.notifyObservers([tile], -1, this, this);
-        }
-    }
-    _buildFactory(type) {
-        return this._buildFactoryInternal(type);
-    }
-    _onTilesAdded(tiles) {
-        for (const t of tiles) {
-            this._onTileAdded(t);
-        }
-    }
-    _onTileAdded(tiles) { }
-    _onTilesRemoved(tiles) {
-        for (const t of tiles) {
-            this._onTileRemoved(t);
-        }
-    }
-    _onTileRemoved(tiles) { }
-    _onTilesUpdated(tiles) {
-        for (const t of tiles) {
-            this._onTileUpdated(t);
-        }
-    }
-    _onTileUpdated(tiles) { }
-    _buildFactoryInternal(type) {
-        const b = new _tiles_builder__WEBPACK_IMPORTED_MODULE_3__.TileBuilder();
-        return type ? b.withType(type) : b;
-    }
-}
-//# sourceMappingURL=tiles.provider.abstract.js.map
-
-/***/ },
-
-/***/ "../core/dist/tiles/providers/tiles.provider.content.js"
-/*!**************************************************************!*\
-  !*** ../core/dist/tiles/providers/tiles.provider.content.js ***!
-  \**************************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TileContentProvider: () => (/* binding */ TileContentProvider)
-/* harmony export */ });
-/* harmony import */ var _cache_cache__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../cache/cache */ "../core/dist/cache/cache.js");
-/* harmony import */ var _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
-
-
-class TileContentProvider {
-    constructor(datasource, cache) {
-        this._datasource = datasource;
-        this._cache = cache || new _cache_cache__WEBPACK_IMPORTED_MODULE_0__.MemoryCache();
-        if (cache) {
-            this._prefix = this._buildPrefix();
-            this._ownCache = false;
-        }
-        else {
-            this._ownCache = true;
-        }
-    }
-    accept(address) {
-        return this.metrics != undefined && _address_tiles_address__WEBPACK_IMPORTED_MODULE_1__.TileAddress.IsValidAddress(address, this.metrics);
-    }
-    get name() {
-        return this._datasource.name;
-    }
-    get datasource() {
-        return this._datasource;
-    }
-    get metrics() {
-        return this._datasource.metrics;
-    }
-    dispose() {
-        if (this._prefix && !this._ownCache) {
-            const p = this._prefix;
-            this._cache.clear((k) => k.startsWith(p));
-            return;
-        }
-        this._cache.clear();
-    }
-    fetchContent(tile, callback) {
-        const address = tile.address;
-        const cacheKey = this._buildCacheKey(address.quadkey);
-        // first have a look in cache
-        if (this._cache.contains(cacheKey)) {
-            tile.content = this._cache.get(cacheKey);
-            return tile;
-        }
-        // then try to build a temporary content using alternative method
-        let c = this._buildTemporaryContent(address);
-        // store the content, either null or not. This flag the address as beeing processed.
-        this._cache.set(cacheKey, c);
-        // then try to get it from the datasource
-        this._datasource.fetchAsync(address, tile).then((result) => {
-            if (result.ok && address.quadkey) {
-                this._cache.set(this._buildCacheKey(address.quadkey), result.content);
-                tile.content = result.content;
-                callback?.(tile);
-            }
-            else {
-                console.log(`the fetch operation has failed because of ${result.statusText}`);
-                callback?.(tile);
-            }
-        }, (reason) => {
-            console.log(`the fetch operation has failed because of ${reason}`);
-            callback?.(tile);
-        });
-        tile.content = c;
-        return tile;
-    }
-    _buildTemporaryContent(address) {
-        // TODO : implement a strategy to build a temporary content. This can be leveraged to display a placeholder during the fetch operation
-        // in oder to avoid empty tile to be displayed during pan and zoom operation.
-        return null;
-    }
-    _buildAlternativContent(address) {
-        // TODO : implement a strategy to build an alternativ content
-        // this could be used when the datasource is not available or when the lookup operation has failed
-        // or when the content is unavailable on purpose such as a 404 error for sea based tile
-        return null;
-    }
-    _buildPrefix() {
-        let p = `${this.name}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}_`;
-        while (this._cache?.any((k) => k.startsWith(p))) {
-            p = `${this.name}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}_`;
-        }
-        return p;
-    }
-    _buildCacheKey(key) {
-        return this._prefix ? `${key}` : `${this._prefix}${key}`;
-    }
-}
-//# sourceMappingURL=tiles.provider.content.js.map
-
-/***/ },
-
-/***/ "../core/dist/tiles/providers/tiles.provider.js"
-/*!******************************************************!*\
-  !*** ../core/dist/tiles/providers/tiles.provider.js ***!
-  \******************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   TileProvider: () => (/* binding */ TileProvider)
-/* harmony export */ });
-/* harmony import */ var _tiles_provider_abstract__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.provider.abstract */ "../core/dist/tiles/providers/tiles.provider.abstract.js");
-
-class TileProvider extends _tiles_provider_abstract__WEBPACK_IMPORTED_MODULE_0__.AbstractTileProvider {
-    constructor(provider, factory, enabled = true) {
-        super(factory, enabled);
-        this.factory.withMetrics(provider.metrics).withNamespace(provider.name); // ensure the factory has the right metrics and namespace to build bounds.
-        this._contentProvider = provider;
-    }
-    _fetchContent(tile, callback) {
-        return this._contentProvider.fetchContent(tile, callback);
-    }
-}
-//# sourceMappingURL=tiles.provider.js.map
 
 /***/ },
 
@@ -14748,12 +14622,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CellCoordinateReference: () => (/* binding */ CellCoordinateReference),
 /* harmony export */   IsArrayOfTile: () => (/* binding */ IsArrayOfTile),
+/* harmony export */   IsHasTileMetrics: () => (/* binding */ IsHasTileMetrics),
 /* harmony export */   IsTile: () => (/* binding */ IsTile),
 /* harmony export */   IsTile2DAddress: () => (/* binding */ IsTile2DAddress),
 /* harmony export */   IsTileCollection: () => (/* binding */ IsTileCollection),
 /* harmony export */   IsTileConstructor: () => (/* binding */ IsTileConstructor),
 /* harmony export */   IsTileDatasource: () => (/* binding */ IsTileDatasource),
-/* harmony export */   IsTileMetricsProvider: () => (/* binding */ IsTileMetricsProvider),
 /* harmony export */   IsTileSystemBounds: () => (/* binding */ IsTileSystemBounds),
 /* harmony export */   NeighborsAddress: () => (/* binding */ NeighborsAddress)
 /* harmony export */ });
@@ -14825,7 +14699,7 @@ function IsTileSystemBounds(b) {
         b.minLongitude !== undefined &&
         b.maxLongitude !== undefined);
 }
-function IsTileMetricsProvider(b) {
+function IsHasTileMetrics(b) {
     if (b === null || typeof b !== "object")
         return false;
     return b.metrics !== undefined;
@@ -15659,23 +15533,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
-/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
-/* harmony export */   Mars: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_4__.Mars),
-/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_4__.MarsUrlBuilder),
-/* harmony export */   Mercury: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_5__.Mercury),
-/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_5__.MercuryUrlBuilder),
-/* harmony export */   Moon: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_3__.Moon),
-/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_3__.MoonUrlBuilder)
+/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder)
 /* harmony export */ });
 /* harmony import */ var _tiles_vendors_mapzen__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tiles.vendors.mapzen */ "../core/dist/tiles/vendors/tiles.vendors.mapzen.js");
 /* harmony import */ var _tiles_vendors_google__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tiles.vendors.google */ "../core/dist/tiles/vendors/tiles.vendors.google.js");
 /* harmony import */ var _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tiles.vendors.arcgis */ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js");
-/* harmony import */ var _tiles_vendors_moon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tiles.vendors.moon */ "../core/dist/tiles/vendors/tiles.vendors.moon.js");
-/* harmony import */ var _tiles_vendors_mars__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tiles.vendors.mars */ "../core/dist/tiles/vendors/tiles.vendors.mars.js");
-/* harmony import */ var _tiles_vendors_mercury__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tiles.vendors.mercury */ "../core/dist/tiles/vendors/tiles.vendors.mercury.js");
-
-
-
 
 
 
@@ -15928,222 +15790,6 @@ MapZen.Attribution = "Freely provided by MapZen - with thanks.";
 
 /***/ },
 
-/***/ "../core/dist/tiles/vendors/tiles.vendors.mars.js"
-/*!********************************************************!*\
-  !*** ../core/dist/tiles/vendors/tiles.vendors.mars.js ***!
-  \********************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Mars: () => (/* binding */ Mars),
-/* harmony export */   MarsUrlBuilder: () => (/* binding */ MarsUrlBuilder)
-/* harmony export */ });
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client.image */ "../core/dist/tiles/tiles.client.image.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
-/* harmony import */ var _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.vendors.arcgis */ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js");
-/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
-
-
-
-
-
-
-
-
-
-class MarsUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__.WebTileUrlBuilder {
-    constructor(host, path, tms = false) {
-        super();
-        this.withSecure(true).withHost(host).withPath(path).withExtension("png");
-        if (tms) {
-            this.withTMSY(true);
-        }
-    }
-}
-/** Carto CDN — supports CORS */
-MarsUrlBuilder.Basemap = new MarsUrlBuilder("cartocdn-gusc.global.ssl.fastly.net", "opmbuilder/api/v1/map/named/opm-mars-basemap-v0-2/all/{z}/{x}/{y}.{extension}");
-/** Raw S3 — no CORS headers, TMS Y convention */
-MarsUrlBuilder.MOLAColor = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.{extension}", true);
-/** Raw S3 — no CORS headers, TMS Y convention */
-MarsUrlBuilder.MOLAGray = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/mola-gray/{z}/{x}/{y}.{extension}", true);
-/** Raw S3 — no CORS headers, TMS Y convention */
-MarsUrlBuilder.Surface = new MarsUrlBuilder("s3-eu-west-1.amazonaws.com", "whereonmars.cartodb.net/celestia_mars-shaded-16k_global/{z}/{x}/{y}.{extension}", true);
-class Mars {
-    static BasemapClient(options) {
-        // Carto CDN serves CORS headers — use standard fetch-based client
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_basemap`, MarsUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Mars.Metrics, options);
-    }
-    static MOLAColorClient(options) {
-        // Raw S3, no CORS — use <img> loading
-        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Mars.KEY}_mola_color`, MarsUrlBuilder.MOLAColor, Mars.Metrics, options);
-    }
-    static MOLAGrayClient(options) {
-        // Raw S3, no CORS — use <img> loading
-        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Mars.KEY}_mola_gray`, MarsUrlBuilder.MOLAGray, Mars.Metrics, options);
-    }
-    static SurfaceClient(options) {
-        // Raw S3, no CORS — use <img> loading
-        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Mars.KEY}_surface`, MarsUrlBuilder.Surface, Mars.Metrics, options);
-    }
-    /**
-     * Returns a tile client that fetches MOLA DEM elevations as Float32Array.
-     * Each pixel is decoded from ArcGIS grayscale (0–255) to meters using the MOLA elevation range.
-     */
-    static ElevationsClient(options) {
-        const urlBuilder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISImageServerUrlBuilder(Mars.MOLA_DEM_URL, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Mars.ellipsoid.semiMajorAxis);
-        const decoder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISGrayscaleElevationDecoder(Mars.MOLA_MIN, Mars.MOLA_MAX);
-        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mars.KEY}_mola_dem`, urlBuilder, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(decoder, o), Mars.Metrics, options);
-    }
-    /**
-     * Returns a DEM tile client combining MOLA elevations with computed normals.
-     * Compatible with the existing DemTileWebClient pipeline.
-     */
-    static DemClient(options) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient(`${Mars.KEY}_dem`, Mars.ElevationsClient(options));
-    }
-}
-Mars.KEY = "mars";
-Mars.MaxLevelOfDetail = 7;
-Mars.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__.EPSG3857({ maxLOD: Mars.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Mars.ellipsoid);
-Mars.Attribution = "OpenPlanetary / USGS / NASA";
-// MOLA DEM elevation range (meters)
-Mars.MOLA_MIN = -8201;
-Mars.MOLA_MAX = 21241;
-/** NASA Trek ArcGIS ImageServer — MOLA DEM (128/64 ppd merge) */
-Mars.MOLA_DEM_URL = "https://trek.nasa.gov/mars/trekarcgis/rest/services/mola128_mola64_merge_90Nto90S_SimpleC_clon0/ImageServer/exportImage";
-//# sourceMappingURL=tiles.vendors.mars.js.map
-
-/***/ },
-
-/***/ "../core/dist/tiles/vendors/tiles.vendors.mercury.js"
-/*!***********************************************************!*\
-  !*** ../core/dist/tiles/vendors/tiles.vendors.mercury.js ***!
-  \***********************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Mercury: () => (/* binding */ Mercury),
-/* harmony export */   MercuryUrlBuilder: () => (/* binding */ MercuryUrlBuilder)
-/* harmony export */ });
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
-
-
-
-
-
-class MercuryUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_3__.WebTileUrlBuilder {
-    constructor(host, path) {
-        super();
-        this.withSecure(true).withHost(host).withPath(path).withExtension("jpg");
-    }
-}
-MercuryUrlBuilder.Basemap = new MercuryUrlBuilder("trek.nasa.gov", "tiles/Mercury/EQ/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm/{z}/{y}/{x}.{extension}");
-class Mercury {
-    static BasemapClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Mercury.KEY}_basemap`, MercuryUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec(), Mercury.Metrics, options);
-    }
-}
-Mercury.KEY = "mercury";
-Mercury.MaxLevelOfDetail = 7;
-Mercury.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_2__.EPSG3857({ maxLOD: Mercury.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_4__.SolarSystemBodies.Mercury.ellipsoid);
-Mercury.Attribution = "NASA / USGS / MESSENGER";
-//# sourceMappingURL=tiles.vendors.mercury.js.map
-
-/***/ },
-
-/***/ "../core/dist/tiles/vendors/tiles.vendors.moon.js"
-/*!********************************************************!*\
-  !*** ../core/dist/tiles/vendors/tiles.vendors.moon.js ***!
-  \********************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Moon: () => (/* binding */ Moon),
-/* harmony export */   MoonUrlBuilder: () => (/* binding */ MoonUrlBuilder)
-/* harmony export */ });
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles.client */ "../core/dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles.client.image */ "../core/dist/tiles/tiles.client.image.js");
-/* harmony import */ var _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../codecs/tiles.codecs.image */ "../core/dist/tiles/codecs/tiles.codecs.image.js");
-/* harmony import */ var _codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../codecs/tiles.codecs.interfaces */ "../core/dist/tiles/codecs/tiles.codecs.interfaces.js");
-/* harmony import */ var _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../geography/tiles.geography.EPSG3857 */ "../core/dist/tiles/geography/tiles.geography.EPSG3857.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tiles.url.web */ "../core/dist/tiles/tiles.url.web.js");
-/* harmony import */ var _space__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../space */ "../core/dist/space/space.bodies.js");
-/* harmony import */ var _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles.vendors.arcgis */ "../core/dist/tiles/vendors/tiles.vendors.arcgis.js");
-/* harmony import */ var _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../dem/dem.tileclient */ "../core/dist/dem/dem.tileclient.js");
-
-
-
-
-
-
-
-
-
-class MoonUrlBuilder extends _tiles_url_web__WEBPACK_IMPORTED_MODULE_5__.WebTileUrlBuilder {
-    constructor(host, path, tms = false) {
-        super();
-        this.withSecure(true).withHost(host).withPath(path).withExtension("png");
-        if (tms) {
-            this.withTMSY(true);
-        }
-    }
-}
-/** Carto CDN — supports CORS */
-MoonUrlBuilder.Basemap = new MoonUrlBuilder("cartocdn-gusc.global.ssl.fastly.net", "opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.{extension}");
-/** Raw S3 — no CORS headers, TMS Y convention, must be loaded via <img> */
-MoonUrlBuilder.HillshadeAlbedo = new MoonUrlBuilder("s3.amazonaws.com", "opmbuilder/301_moon/tiles/w/hillshaded-albedo/{z}/{x}/{y}.{extension}", true);
-class Moon {
-    static BasemapClient(options) {
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_basemap`, MoonUrlBuilder.Basemap, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec(), Moon.Metrics, options);
-    }
-    static HillshadeClient(options) {
-        // Uses ImageTileClient (loads via <img>) because S3 does not serve CORS headers
-        return new _tiles_client_image__WEBPACK_IMPORTED_MODULE_1__.ImageTileClient(`${Moon.KEY}_hillshade`, MoonUrlBuilder.HillshadeAlbedo, Moon.Metrics, options);
-    }
-    /**
-     * Returns a tile client that fetches LOLA DEM elevations as Float32Array.
-     * Each pixel is decoded from ArcGIS grayscale (0–255) to meters using the LOLA elevation range.
-     */
-    static ElevationsClient(options) {
-        const urlBuilder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISImageServerUrlBuilder(Moon.LOLA_DEM_URL, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Moon.ellipsoid.semiMajorAxis);
-        const decoder = new _tiles_vendors_arcgis__WEBPACK_IMPORTED_MODULE_7__.ArcGISGrayscaleElevationDecoder(Moon.LOLA_MIN, Moon.LOLA_MAX);
-        const o = (0,_codecs_tiles_codecs_interfaces__WEBPACK_IMPORTED_MODULE_3__.isFilter)(options?.filter) ? new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions({ filter: options?.filter }) : undefined;
-        return new _tiles_client__WEBPACK_IMPORTED_MODULE_0__.TileWebClient(`${Moon.KEY}_lola_dem`, urlBuilder, new _codecs_tiles_codecs_image__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec(decoder, o), Moon.Metrics, options);
-    }
-    /**
-     * Returns a DEM tile client combining LOLA elevations with computed normals.
-     * Compatible with the existing DemTileWebClient pipeline.
-     */
-    static DemClient(options) {
-        return new _dem_dem_tileclient__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient(`${Moon.KEY}_dem`, Moon.ElevationsClient(options));
-    }
-}
-Moon.KEY = "moon";
-Moon.MaxLevelOfDetail = 7;
-Moon.Metrics = new _geography_tiles_geography_EPSG3857__WEBPACK_IMPORTED_MODULE_4__.EPSG3857({ maxLOD: Moon.MaxLevelOfDetail }, _space__WEBPACK_IMPORTED_MODULE_6__.SolarSystemBodies.Moon.ellipsoid);
-Moon.Attribution = "OpenPlanetary / USGS / NASA";
-// LOLA DEM elevation range (meters)
-Moon.LOLA_MIN = -9128;
-Moon.LOLA_MAX = 10786;
-/** NASA Trek ArcGIS ImageServer — LRO LOLA DEM (256 ppd) */
-Moon.LOLA_DEM_URL = "https://trek.nasa.gov/moon/trekarcgis/rest/services/LRO_LOLA_DEM_Global_256ppd_v06/ImageServer/exportImage";
-//# sourceMappingURL=tiles.vendors.moon.js.map
-
-/***/ },
-
 /***/ "../core/dist/tree/index.js"
 /*!**********************************!*\
   !*** ../core/dist/tree/index.js ***!
@@ -16153,7 +15799,11 @@ Moon.LOLA_DEM_URL = "https://trek.nasa.gov/moon/trekarcgis/rest/services/LRO_LOL
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsKDTreeSplitter),
+/* harmony export */   IsOctreeNode: () => (/* reexport safe */ _tree_octree_interfaces__WEBPACK_IMPORTED_MODULE_4__.IsOctreeNode),
+/* harmony export */   IsReferenceFrame: () => (/* reexport safe */ _tree_octree_interfaces__WEBPACK_IMPORTED_MODULE_4__.IsReferenceFrame),
 /* harmony export */   KdtreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.KdtreeSplitter),
+/* harmony export */   Octree: () => (/* reexport safe */ _tree_octree__WEBPACK_IMPORTED_MODULE_6__.Octree),
+/* harmony export */   OctreeNode: () => (/* reexport safe */ _tree_octree_node__WEBPACK_IMPORTED_MODULE_5__.OctreeNode),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.OctreeSplitter),
 /* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__.QuadtreeSplitter),
 /* harmony export */   RoundRobin: () => (/* reexport safe */ _tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_0__.RoundRobin),
@@ -16164,11 +15814,203 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
 /* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tree.spatial.splitters */ "../core/dist/tree/tree.spatial.splitters.js");
 /* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
+/* harmony import */ var _tree_octree_interfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tree.octree.interfaces */ "../core/dist/tree/tree.octree.interfaces.js");
+/* harmony import */ var _tree_octree_node__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tree.octree.node */ "../core/dist/tree/tree.octree.node.js");
+/* harmony import */ var _tree_octree__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tree.octree */ "../core/dist/tree/tree.octree.js");
+
+
+
 
 
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/tree/tree.octree.interfaces.js"
+/*!***************************************************!*\
+  !*** ../core/dist/tree/tree.octree.interfaces.js ***!
+  \***************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsOctreeNode: () => (/* binding */ IsOctreeNode),
+/* harmony export */   IsReferenceFrame: () => (/* binding */ IsReferenceFrame)
+/* harmony export */ });
+function IsReferenceFrame(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    return b.mode !== undefined;
+}
+function IsOctreeNode(b) {
+    if (typeof b !== "object" || b === null)
+        return false;
+    const n = b;
+    return n.resolveReferenceFrame !== undefined && n.resolveVisibilityPolicy !== undefined;
+}
+//# sourceMappingURL=tree.octree.interfaces.js.map
+
+/***/ },
+
+/***/ "../core/dist/tree/tree.octree.js"
+/*!****************************************!*\
+  !*** ../core/dist/tree/tree.octree.js ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Octree: () => (/* binding */ Octree)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geometry */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _tree_spatial__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tree.spatial */ "../core/dist/tree/tree.spatial.js");
+/* harmony import */ var _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tree.spatial.splitters */ "../core/dist/tree/tree.spatial.splitters.js");
+/* harmony import */ var _tree_octree_node__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tree.octree.node */ "../core/dist/tree/tree.octree.node.js");
+
+
+
+
+
+/**
+ * Hierarchical spatial index with 8-way subdivision.
+ *
+ * In addition to the generic SpatialTree contract:
+ *  - carries per-cell metadata (reference frame, geometric error, visibility policy)
+ *    used by the streaming pipeline
+ *  - is observable: add/remove/update emit events so downstream views can keep their
+ *    visibility set coherent in fleet-monitoring scenarios where items move between cells
+ *
+ * Remains generic on T so the tree can also be used outside the streaming module.
+ */
+class Octree extends _tree_spatial__WEBPACK_IMPORTED_MODULE_2__.SpatialTree {
+    constructor(maxDepth = _tree_spatial__WEBPACK_IMPORTED_MODULE_2__.SpatialTree.DefaultMaxDepth, maxItemPerNode = _tree_spatial__WEBPACK_IMPORTED_MODULE_2__.SpatialTree.DefaultMaxItemPerNode, lookupThreshold = _tree_spatial__WEBPACK_IMPORTED_MODULE_2__.SpatialTree.DefaultLookupThreshold, rootOptions) {
+        super(maxDepth, maxItemPerNode, new _tree_spatial_splitters__WEBPACK_IMPORTED_MODULE_3__.OctreeSplitter(), lookupThreshold);
+        this._root = new _tree_octree_node__WEBPACK_IMPORTED_MODULE_4__.OctreeNode();
+        if (rootOptions) {
+            const root = this._root;
+            root.referenceFrame = rootOptions.referenceFrame;
+            root.visibilityPolicy = rootOptions.visibilityPolicy;
+            root.geometricError = rootOptions.geometricError;
+        }
+    }
+    get root() {
+        return this._root;
+    }
+    get addedObservable() {
+        this._added = this._added ?? new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._added;
+    }
+    get removedObservable() {
+        this._removed = this._removed ?? new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._removed;
+    }
+    get updatedObservable() {
+        this._updated = this._updated ?? new _events__WEBPACK_IMPORTED_MODULE_1__.Observable();
+        return this._updated;
+    }
+    add(...data) {
+        if (data.length === 0)
+            return;
+        super.add(...data);
+        if (this._added?.hasObservers()) {
+            this._added.notifyObservers(data);
+        }
+    }
+    remove(...data) {
+        if (data.length === 0)
+            return;
+        super.remove(...data);
+        if (this._removed?.hasObservers()) {
+            this._removed.notifyObservers(data);
+        }
+    }
+    update(item, previousBounds) {
+        this._rehome(item, previousBounds);
+        if (this._updated?.hasObservers()) {
+            this._updated.notifyObservers([{ item, previousBounds }]);
+        }
+    }
+    updateAll(updates) {
+        if (updates.length === 0)
+            return;
+        for (const u of updates) {
+            this._rehome(u.item, u.previousBounds);
+        }
+        if (this._updated?.hasObservers()) {
+            this._updated.notifyObservers(updates);
+        }
+    }
+    _buildNode(bounds, depth) {
+        return new _tree_octree_node__WEBPACK_IMPORTED_MODULE_4__.OctreeNode(bounds, depth);
+    }
+    /**
+     * Moves an item within the tree. When previousBounds is provided and the item
+     * is IBounded, we temporarily patch its boundingBox to previousBounds so the
+     * remove walk follows the old path, then restore the new bounds for the add walk.
+     * Without previousBounds, remove is attempted with the current (new) bounds: only
+     * safe if the item has not yet left its former cell.
+     */
+    _rehome(item, previousBounds) {
+        if (previousBounds && (0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounded)(item)) {
+            const current = item.boundingBox;
+            item.boundingBox = previousBounds;
+            super.remove(item);
+            item.boundingBox = current;
+            super.add(item);
+            return;
+        }
+        super.remove(item);
+        super.add(item);
+    }
+}
+//# sourceMappingURL=tree.octree.js.map
+
+/***/ },
+
+/***/ "../core/dist/tree/tree.octree.node.js"
+/*!*********************************************!*\
+  !*** ../core/dist/tree/tree.octree.node.js ***!
+  \*********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   OctreeNode: () => (/* binding */ OctreeNode)
+/* harmony export */ });
+/* harmony import */ var _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tree.spatial.node */ "../core/dist/tree/tree.spatial.node.js");
+
+class OctreeNode extends _tree_spatial_node__WEBPACK_IMPORTED_MODULE_0__.SpatialTreeNode {
+    constructor(bounds, depth, parent) {
+        super(bounds, depth);
+        this.parent = parent ?? null;
+    }
+    resolveReferenceFrame() {
+        let n = this;
+        while (n) {
+            if (n.referenceFrame)
+                return n.referenceFrame;
+            n = n.parent ?? null;
+        }
+        return undefined;
+    }
+    resolveVisibilityPolicy() {
+        let n = this;
+        while (n) {
+            if (n.visibilityPolicy)
+                return n.visibilityPolicy;
+            n = n.parent ?? null;
+        }
+        return undefined;
+    }
+    createInstance(_ctx, box, depth) {
+        const child = new OctreeNode(box, depth, this);
+        return child;
+    }
+}
+//# sourceMappingURL=tree.octree.node.js.map
 
 /***/ },
 
@@ -16438,7 +16280,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class QuadtreeSplitter {
-    split(node, options) {
+    split(node, _options) {
         if (node.boundingBox) {
             const { xmin, ymin, zmin, width, height } = node.boundingBox;
             const halfWidth = width / 2;
@@ -16456,7 +16298,7 @@ class QuadtreeSplitter {
     }
 }
 class OctreeSplitter {
-    split(node, options) {
+    split(node, _options) {
         if (node.boundingBox) {
             const { xmin, ymin, zmin, width, height, depth } = node.boundingBox;
             const halfWidth = width / 2;
@@ -16496,7 +16338,7 @@ class KdtreeSplitter {
             const axe = this.splitAxisSelector ? this.splitAxisSelector(node.depth, this.dimension ?? 3) : (0,_tree_spatial_interfaces__WEBPACK_IMPORTED_MODULE_2__.RoundRobin)(node.depth, this.dimension ?? 3);
             switch (axe) {
                 case 0: // X-axis
-                    let center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.x : item.boundingBox?.center.x ?? midX));
+                    let center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.x : (item.boundingBox?.center.x ?? midX)));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - xmin;
@@ -16507,7 +16349,7 @@ class KdtreeSplitter {
                     }
                     break;
                 case 1: // Y-axis
-                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.y : item.boundingBox?.center.y ?? midY));
+                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.y : (item.boundingBox?.center.y ?? midY)));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - ymin;
@@ -16518,7 +16360,7 @@ class KdtreeSplitter {
                     }
                     break;
                 case 2: // Z-axis
-                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.z : item.boundingBox?.center.z ?? midZ));
+                    center = node.items?.data.map((item) => ((0,_geometry__WEBPACK_IMPORTED_MODULE_0__.IsBounds)(item) ? item.center.z : (item.boundingBox?.center.z ?? midZ)));
                     if (center && center.length > 0) {
                         const splitPlane = center.reduce((a, b) => a + b, 0) / center.length;
                         const size = splitPlane - zmin;
@@ -24164,14 +24006,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractShape),
+/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractStreamSourceProducer),
 /* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.AbstractThreeMfSerializer),
+/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileLoader),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileMetrics),
-/* harmony export */   AbstractTileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileProvider),
 /* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
 /* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ArcGISGrayscaleElevationDecoder),
 /* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ArcGISImageServerUrlBuilder),
 /* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Assert),
-/* harmony export */   AxialTilt: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AxialTilt),
 /* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bearing),
 /* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.BjsThreeMfSerializer),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BlobTileCodec),
@@ -24193,13 +24035,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian4TileCodec),
 /* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian4TileCodecOptions),
 /* harmony export */   CartesianMode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CartesianMode),
-/* harmony export */   CelestialNodeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CelestialNodeType),
-/* harmony export */   CelestialTracker: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CelestialTracker),
 /* harmony export */   CellCoordinateReference: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CellCoordinateReference),
 /* harmony export */   Circle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Circle),
 /* harmony export */   ClipIndex: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex),
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition),
-/* harmony export */   ColorValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ColorValue),
 /* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ContentTypeFileName),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Context2DTileMap),
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_5__.CreateQuickHull),
@@ -24219,7 +24058,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Ellipsoid),
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.EllipsoidalMapMaterial),
 /* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Envelope),
-/* harmony export */   EquatorialVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EquatorialVector),
 /* harmony export */   EventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EventArgs),
 /* harmony export */   EventEmitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EventEmitter),
 /* harmony export */   EventState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EventState),
@@ -24252,7 +24090,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   HasToString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.HasToString),
 /* harmony export */   HolographicBoundsType: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HolographicBoundsType),
 /* harmony export */   HolographicDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HolographicDisplay),
-/* harmony export */   HorizonVector: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.HorizonVector),
 /* harmony export */   ISO6391: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ISO6391),
 /* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
 /* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),
@@ -24273,6 +24110,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayerOptions),
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsGeoBounded),
+/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsHasTileMetrics),
 /* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicCylinder),
@@ -24281,10 +24119,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsLocation),
 /* harmony export */   IsNumber: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsNumber),
+/* harmony export */   IsOctreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsOctreeNode),
 /* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsPhysicalDisplay),
 /* harmony export */   IsQualifiedName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.IsQualifiedName),
+/* harmony export */   IsReferenceFrame: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsReferenceFrame),
 /* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsSize3),
+/* harmony export */   IsStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsStreamSource),
+/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsStreamingViewTarget),
 /* harmony export */   IsString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsString),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTile),
@@ -24295,16 +24137,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayer),
 /* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayerContainerProxy),
 /* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayerProxy),
-/* harmony export */   IsTileMetricsProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMetricsProvider),
 /* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileNavigationApi),
 /* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileNavigationState),
 /* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileSystemBounds),
 /* harmony export */   IsTileWithMesh: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.IsTileWithMesh),
 /* harmony export */   IsTouchCapable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTouchCapable),
 /* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
-/* harmony export */   JulianDate: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.JulianDate),
 /* harmony export */   KdtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KdtreeSplitter),
-/* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KeplerOrbitBase),
 /* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Known3mfRelationshipTypes),
 /* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.KnownI3mfContentType),
 /* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KnownPlaces),
@@ -24324,20 +24163,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
-/* harmony export */   Mars: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mars),
-/* harmony export */   MarsUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MarsUrlBuilder),
 /* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mass),
 /* harmony export */   Matrix3d: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Matrix3d),
 /* harmony export */   MatrixFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.MatrixFormatter),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MemoryCache),
-/* harmony export */   Mercury: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mercury),
-/* harmony export */   MercuryUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MercuryUrlBuilder),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ModelFileName),
-/* harmony export */   Moon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Moon),
-/* harmony export */   MoonState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MoonState),
-/* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MoonUrlBuilder),
-/* harmony export */   MorganKeenanClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MorganKeenanClass),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsIndex),
 /* harmony export */   NumberFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.NumberFormatter),
@@ -24346,6 +24177,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ObjectPoolOptions),
 /* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Observable),
 /* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Observer),
+/* harmony export */   Octree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Octree),
+/* harmony export */   OctreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.OctreeNode),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.OctreeSplitter),
 /* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.OpenXmlContentTypesNamespace),
 /* harmony export */   OpenXmlRelationshipsNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.OpenXmlRelationshipsNamespace),
@@ -24379,23 +24212,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ST_ObjectType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ST_ObjectType),
 /* harmony export */   ST_Unit: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ST_Unit),
 /* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Scalar),
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ScreenSpaceErrorPolicy),
 /* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollection),
 /* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollectionEventArgs),
 /* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeType),
 /* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Side),
 /* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size2),
 /* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size3),
-/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SolarSystemBodies),
 /* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SourceBlock),
 /* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTree),
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTreeNode),
-/* harmony export */   SpectralClass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpectralClass),
 /* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SphericalCalculator),
-/* harmony export */   StarColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.StarColor),
+/* harmony export */   StreamingEngine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.StreamingEngine),
+/* harmony export */   StreamingView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.StreamingView),
 /* harmony export */   StringXmlWriter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.StringXmlWriter),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SunTrajectoryConfig),
 /* harmony export */   SurfaceTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.SurfaceTexture),
+/* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TILE_STREAM_CONTENT_TYPE),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Temperature),
 /* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions),
@@ -24438,7 +24271,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.TileBorder),
 /* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileCollection),
-/* harmony export */   TileContentProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileContentProvider),
+/* harmony export */   TileContentFetcher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileContentFetcher),
+/* harmony export */   TileLoader: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileLoader),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapLayerView),
@@ -24447,7 +24281,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TilePipelineLink),
-/* harmony export */   TileProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileProvider),
+/* harmony export */   TileStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileStreamSource),
+/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileStreamSourceProducer),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileView),

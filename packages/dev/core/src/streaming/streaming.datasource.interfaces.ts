@@ -6,10 +6,10 @@ import { IBounded, IBounds, IBoundingBox, IBoundingSphere } from "../geometry";
  * - add: the new source stacks on top of the target (both remain active)
  * - modify: the new source mutates or augments the target (e.g. adds detail, overrides attributes)
  */
-export type StreamSourceLinkOp = "replace" | "add" | "modify";
+export type StreamSourceDependencyOp = "replace" | "add" | "modify";
 
-export interface IStreamSourceLink {
-    readonly op: StreamSourceLinkOp;
+export interface IStreamSourceDependency {
+    readonly op: StreamSourceDependencyOp;
     /** Id of the target datasource. */
     readonly target: string;
 }
@@ -28,7 +28,7 @@ export type StreamSourceKind = "static" | "provider";
  * datasources whose status is "ready"; other statuses are informational
  * (progress UI, retry policies, etc.).
  */
-export type StreamSourceStatus = "pending" | "downloading" | "ready" | "failed" | "failed-permanently" | "deactivated";
+export type StreamSourceStatus = "pending" | "downloading" | "ready" | "failed" | "failed-permanently";
 
 /**
  * A datasource is the unit of content referenced by an octree cell. It carries its
@@ -44,7 +44,7 @@ export interface IStreamSource<T = unknown> extends IBounded {
     readonly kind: StreamSourceKind;
     readonly contentType: string;
     readonly encumbrance: IBoundingBox | IBoundingSphere;
-    readonly links?: ReadonlyArray<IStreamSourceLink>;
+    readonly dependencies?: ReadonlyArray<IStreamSourceDependency>;
     status: StreamSourceStatus;
     content?: T | null;
     boundingBox?: IBounds;
@@ -55,27 +55,4 @@ export function IsStreamSource(b: unknown): b is IStreamSource {
     if (typeof b !== "object" || b === null) return false;
     const d = b as IStreamSource;
     return typeof d.id === "string" && typeof d.kind === "string" && d.encumbrance !== undefined && typeof d.contentType === "string" && typeof d.status === "string";
-}
-
-/**
- * Lifecycle operation emitted by the engine for a datasource within a given view.
- * - load: fetch bytes / build CPU-side representation (no scene effect yet)
- * - activate: insert into the scene (implies load if not already loaded)
- * - update: still active but its bounds/state changed (typical for moving assets)
- * - deactivate: remove from the scene but keep loaded
- * - unload: drop from memory (implies deactivate)
- */
-export type StreamSourceOperation = "load" | "activate" | "update" | "deactivate" | "unload";
-
-/**
- * Event payload flowing from Engine to View (and from View to Producer).
- * Carries the datasource, the operation to apply, a priority hint and the target view id.
- */
-export interface IStreamSourceActivation {
-    readonly source: IStreamSource;
-    readonly operation: StreamSourceOperation;
-    readonly priority: number;
-    readonly viewId: string;
-    /** Optional context hint: the octree cell that triggered this activation. */
-    readonly cellId?: string;
 }

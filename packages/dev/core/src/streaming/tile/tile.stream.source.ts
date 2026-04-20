@@ -1,109 +1,101 @@
 import { Bounds } from "../../geometry/geometry.bounds";
-import { IBounds, IBoundingBox, IBoundingSphere, IsBounds } from "../../geometry/geometry.interfaces";
-import { AbstractTileLoader } from "../../tiles/loaders/tiles.loader.abstract";
-import { StreamSourceStatus, IStreamSource, IStreamSourceLink } from "../streaming.datasource.interfaces";
-import { AbstractStreamSourceProducer } from "../streaming.producer.abstract";
+import { IBounds, IBoundingBox, IBoundingSphere } from "../../geometry/geometry.interfaces";
+import { ITile, ITile2DAddress } from "../../tiles/tiles.interfaces";
+import { Nullable } from "../../types";
+import { IStreamSource, IStreamSourceDependency, StreamSourceStatus } from "../streaming.datasource.interfaces";
 
 /**
- * Default contentType for provider-backed datasources. Customize per concrete
- * tile content (e.g. "tile-provider:imagery") when the scene needs to route
- * different providers through different producers.
+ * Default contentType for individual tile stream sources. Customize per layer
+ * (e.g. "tile-address:imagery" / ":elevation") to route different layers to
+ * different downstream consumers.
  */
-export const TILE_STREAM_CONTENT_TYPE = "tile-provider";
+export const TILE_STREAM_CONTENT_TYPE = "tile-address";
 
-export interface ITileStreamSourceOptions<T> {
-    id: string;
-    provider: AbstractTileLoader<T>;
-    encumbrance: IBoundingBox | IBoundingSphere;
-    /** Optional concrete bounding box used to insert this datasource into an Octree. */
-    boundingBox?: IBounds;
-    /** Optional links to other datasources (replace / add / modify). */
-    links?: ReadonlyArray<IStreamSourceLink>;
-    /** Override the default contentType. Useful to split routing by payload type. */
+export interface ITileStreamSourceOptions {
+    /** Tile address carried as the stream source's `content`. */
+    address: ITile2DAddress;
+    /** 3D bounding box in world frame (ECEF or flat plane, set by the pyramid). */
+    boundingBox: IBounds;
+    /** Optional bounding sphere. */
+    boundingSphere?: IBoundingSphere;
+    /** Geometric error (meters) used by SSE computations. Set by the pyramid. */
+    geometricError: number;
+    /** Namespace prefix for id uniqueness across layers. */
+    namespace?: string;
+    /** Override contentType. */
     contentType?: string;
+    /** Initial status. Defaults to "pending". The loader flips to "ready" once content is fetched. */
+    status?: StreamSourceStatus;
 }
 
 /**
- * IStreamSource wrapper around an existing AbstractTileLoader.
+ * IStreamSource<ITile2DAddress> : a single tile, tracked as a first-class
+ * streaming entity with its own lifecycle (status).
  *
- * Design note: one provider maps to ONE datasource sitting in ONE octree cell.
- * The 2D tile pyramid is never materialized inside the octree; it stays implicit,
- * driven by tile addresses and the existing ITileView → AbstractTileLoader pipeline.
- *
- * Two independent LOD systems coexist and do not conflict:
- *  - Octree LOD (this module): decides when the whole provider region is relevant
- *    for a given camera. It toggles the provider ON / OFF via activate / deactivate.
- *  - Tile pyramid LOD (tiles/pipeline): runs only while the provider is active and
- *    selects the right zoom level / tile addresses based on navigation state.
- *
- * This keeps the octree small (one cell per provider, not millions of tile cells)
- * and reuses the entire tiles/loaders + tiles/pipeline machinery as-is.
+ * Emitted by `TilePyramidStreamSource` on camera-driven visibility changes.
+ * Consumers (TileLoader adapters, scene renderers, diagnostics) can:
+ *  - read `content` for the address
+ *  - watch `status` transitions pending → downloading → ready / failed
+ *  - use `boundingBox` for culling / placement (already in world frame)
+ *  - read `geometricError` for priority / LOD decisions downstream
+ *  - follow `dependencies` (parent quadkey) to resolve cross-tile replacement
+ *  - read `tile` once `status === "ready"` to access the fetched `ITile<T>`
+ *    (populated by `TileLoaderAdapter` when the fetch completes)
  */
-export class TileStreamSource<T = unknown> implements IStreamSource<AbstractTileLoader<T>> {
-    private static _deriveBounds(enc: IBoundingBox | IBoundingSphere): IBounds | undefined {
-        if (IsBounds(enc)) return enc;
-        const box = enc as IBoundingBox;
-        if (box.minimum && box.maximum) {
-            const w = box.maximum.x - box.minimum.x;
-            const h = box.maximum.y - box.minimum.y;
-            const d = box.maximum.z - box.minimum.z;
-            return new Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
-        }
-        const sphere = enc as IBoundingSphere;
-        if (sphere.center && typeof sphere.radius === "number") {
-            const r = sphere.radius;
-            return new Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
-        }
-        return undefined;
-    }
-
-    public readonly id: string;
-    public readonly kind = "provider" as const;
+export class TileStreamSource implements IStreamSource<ITile2DAddress> {
+    public readonly kind = "static" as const;
     public readonly contentType: string;
+    public readonly namespace?: string;
     public readonly encumbrance: IBoundingBox | IBoundingSphere;
-    public readonly links?: ReadonlyArray<IStreamSourceLink>;
-    public readonly provider: AbstractTileLoader<T>;
+    public readonly geometricError: number;
+    public readonly dependencies?: ReadonlyArray<IStreamSourceDependency>;
 
-    public status: StreamSourceStatus = "pending";
-    public content?: AbstractTileLoader<T> | null = null;
+    public status: StreamSourceStatus;
+    public content?: ITile2DAddress | null;
     public boundingBox?: IBounds;
     public boundingSphere?: IBoundingSphere;
+    /**
+     * Fetched tile attached by a TileLoaderAdapter once the loader has
+     * delivered content. `null` or `undefined` before then. The payload type
+     * is erased (ITile<unknown>) because a stream may carry heterogeneous
+     * layers ; consumers cast based on the `contentType`.
+     */
+    public tile?: Nullable<ITile<unknown>>;
 
-    public constructor(options: ITileStreamSourceOptions<T>) {
-        this.id = options.id;
-        this.provider = options.provider;
-        this.encumbrance = options.encumbrance;
-        this.links = options.links;
+    public constructor(options: ITileStreamSourceOptions) {
         this.contentType = options.contentType ?? TILE_STREAM_CONTENT_TYPE;
-        this.boundingBox = options.boundingBox ?? TileStreamSource._deriveBounds(options.encumbrance);
-        if (!IsBounds(options.encumbrance)) {
-            this.boundingSphere = options.encumbrance as IBoundingSphere;
+        this.namespace = options.namespace;
+        this.content = options.address;
+        this.boundingBox = options.boundingBox;
+        this.encumbrance = options.boundingBox;
+        this.geometricError = options.geometricError;
+        this.boundingSphere = options.boundingSphere;
+        this.status = options.status ?? "pending";
+        // Cross-tile dep: coarser parent replaces at refinement boundary.
+        const q = options.address.quadkey;
+        if (q && q.length > 0) {
+            const parent = q.slice(0, -1);
+            const parentId = options.namespace ? `${options.namespace}:${parent}` : parent;
+            this.dependencies = [{ op: "replace", target: parentId }];
         }
+    }
+
+    /** `<namespace>:<quadkey>` when namespace is set, else the quadkey alone. */
+    public get id(): string {
+        const q = this.content?.quadkey ?? "";
+        return this.namespace ? `${this.namespace}:${q}` : q;
+    }
+
+    /** Convenience alias for `content`. */
+    public get address(): ITile2DAddress | null {
+        return this.content ?? null;
     }
 }
 
 /**
- * Placeholder 1:1 producer for TileStreamSource.
- *
- * This version emits the provider as the `content` of the TileStreamSource
- * itself (status: pending → downloading → ready). Scenes can listen to the
- * activation and wire the provider into their own tile consumer via the existing
- * tiles/pipeline machinery.
- *
- * TODO (phase 3): replace with a proper spawner that instantiates an ITileView
- * per (viewId, provider) and emits Tile2DDataSource children as addresses flow.
- * See streaming.tile2d.ts (to be added).
+ * Builds a zero-bounds placeholder. Useful when a caller needs a TileStreamSource
+ * reference before the 3D bounds have been computed.
  */
-export class TileStreamSourceProducer extends AbstractStreamSourceProducer<AbstractTileLoader<unknown>> {
-    public readonly contentType: string;
-
-    public constructor(contentType: string = TILE_STREAM_CONTENT_TYPE) {
-        super();
-        this.contentType = contentType;
-    }
-
-    protected _load(source: IStreamSource<AbstractTileLoader<unknown>>): Promise<AbstractTileLoader<unknown>> {
-        const provider = (source as TileStreamSource<unknown>).provider;
-        return Promise.resolve(provider);
-    }
+export function EmptyTileBounds(): IBounds {
+    return Bounds.Zero();
 }

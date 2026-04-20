@@ -109,8 +109,8 @@ export class GeodeticSystem {
     public geodeticFloatToCartesianToRef(lat: number, lon: number, alt: number, target: ICartesian3, deg: boolean = true): ICartesian3 {
         target = target || Cartesian3.Zero();
 
-        let lambda = deg ? lat * Scalar.DEG2RAD : lat;
-        let phi = deg ? lon * Scalar.DEG2RAD : lon;
+        const lambda = deg ? lat * Scalar.DEG2RAD : lat;
+        const phi = deg ? lon * Scalar.DEG2RAD : lon;
 
         // firs pass is to ECEF
         const sin_lambda = Math.sin(lambda);
@@ -144,8 +144,8 @@ export class GeodeticSystem {
     public geodeticToCartesianToRef(geo: IGeo3, target: ICartesian3): ICartesian3 {
         return this.geodeticFloatToCartesianToRef(geo.lat, geo.lon, geo.alt || 0, target);
     }
-    
-    public cartesianToGeodetic(from:ICartesian3, target: IGeo3): boolean {
+
+    public cartesianToGeodetic(from: ICartesian3, target: IGeo3): boolean {
         const x = from.x;
         const y = from.y;
         const z = from.z;
@@ -182,7 +182,7 @@ export class GeodeticSystem {
         let t5 = 0.5 * (beta - i);
         t5 = Math.abs(t5); // numeric turbulence fix near +-45.3 deg
         const t6 = Math.sqrt(t5);
-        const t7 = (m < n) ? t6 : -t6;
+        const t7 = m < n ? t6 : -t6;
 
         const t = t4 + t7;
 
@@ -209,7 +209,7 @@ export class GeodeticSystem {
         const dw = w - wv * invuv;
         const dz = z - zu * this._ellipsoid._p1mee * invuv;
         const da = Math.sqrt(dw * dw + dz * dz);
-        const alt = (u < 1) ? -da : da;
+        const alt = u < 1 ? -da : da;
 
         // longitude in degrees
         const lon = Math.atan2(y, x) * Ellipsoid.r2d;

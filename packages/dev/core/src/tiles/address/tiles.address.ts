@@ -1,7 +1,9 @@
 import { Nullable } from "../../types";
 import { Scalar } from "../../math/math";
 import { ITile2DAddress, ITileMetrics } from "../tiles.interfaces";
-import { Bounds, IBounds } from "../../geometry";
+import { Bounds, Cartesian3, IBounds, ICartesian3 } from "../../geometry";
+import { Ellipsoid } from "../../geodesy/geodesy.ellipsoid";
+import { GeodeticSystem } from "../../geodesy/geodesy.system";
 
 export enum NeighborsIndex {
     NW = 0,
@@ -17,7 +19,7 @@ export enum NeighborsIndex {
 
 export class TileAddress implements ITile2DAddress {
     public static Split(a: ITile2DAddress, metrics: ITileMetrics): Nullable<ITile2DAddress[]> {
-        if (a.levelOfDetail == metrics.maxLOD) {
+        if (a.levelOfDetail === metrics.maxLOD) {
             return null;
         }
         const baseX = a.x * 2;
@@ -43,14 +45,14 @@ export class TileAddress implements ITile2DAddress {
                 // Add all child quadkeys to the set
                 shifted.forEach((child) => {
                     const qk = child.quadkey;
-                    if (qk){
+                    if (qk) {
                         uniqueQuadKeys.add(qk);
                     }
                 });
             } else if (shifted) {
                 // Add the single parent quadkey to the set
                 const qk = shifted.quadkey;
-                if (qk){
+                if (qk) {
                     uniqueQuadKeys.add(qk);
                 }
             }
@@ -66,7 +68,7 @@ export class TileAddress implements ITile2DAddress {
         }
 
         let currentKey = a.quadkey;
-        if(!currentKey){
+        if (!currentKey) {
             return null;
         }
         let currentLod = a.levelOfDetail;
@@ -108,6 +110,52 @@ export class TileAddress implements ITile2DAddress {
     public static ToBounds(a: ITile2DAddress, metrics: ITileMetrics): IBounds {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
         return Bounds.FromPoints2(...points);
+    }
+
+    /**
+     * 3D bounding box of the tile projected on an ellipsoid (ECEF). Uses the
+     * four tile corners in geodetic coordinates (altitude 0) and builds the
+     * axis-aligned box enclosing them in cartesian space. Suitable for frustum
+     * tests in a planet-scale setup.
+     *
+     * A single GeodeticSystem instance can be reused across calls to avoid
+     * rebuilding it every time.
+     */
+    public static ToBoundsECEF(a: ITile2DAddress, metrics: ITileMetrics, ellipsoid: Ellipsoid, system?: GeodeticSystem): IBounds {
+        const sys = system ?? new GeodeticSystem(ellipsoid);
+        const deltas: Array<[number, number]> = [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+        ];
+        const tmp: ICartesian3 = Cartesian3.Zero();
+        let xmin = Infinity;
+        let ymin = Infinity;
+        let zmin = Infinity;
+        let xmax = -Infinity;
+        let ymax = -Infinity;
+        let zmax = -Infinity;
+        for (const [dx, dy] of deltas) {
+            const ll = metrics.getTileXYToLatLon(a.x + dx, a.y + dy, a.levelOfDetail);
+            sys.geodeticFloatToCartesianToRef(ll.lat, ll.lon, 0, tmp);
+            if (tmp.x < xmin) xmin = tmp.x;
+            if (tmp.y < ymin) ymin = tmp.y;
+            if (tmp.z < zmin) zmin = tmp.z;
+            if (tmp.x > xmax) xmax = tmp.x;
+            if (tmp.y > ymax) ymax = tmp.y;
+            if (tmp.z > zmax) zmax = tmp.z;
+        }
+        return new Bounds(xmin, ymin, xmax - xmin, ymax - ymin, zmin, zmax - zmin);
+    }
+
+    /**
+     * Geometric error of the tile in world meters, defined as the tile side at
+     * the equator for this LOD (groundResolution * tileSize). Used as the
+     * reference error for screen-space-error computations.
+     */
+    public static GeometricError(a: ITile2DAddress, metrics: ITileMetrics): number {
+        return metrics.groundResolution(0, a.levelOfDetail) * metrics.tileSize;
     }
 
     public static IsEquals(a: ITile2DAddress, b: ITile2DAddress): boolean {

@@ -199,15 +199,15 @@ export function IsTileDatasource<T, A extends ITileAddress>(b: unknown): b is IT
     return (<ITileDatasource<T, A>>b).fetchAsync !== undefined && (<ITileDatasource<T, A>>b).metrics !== undefined;
 }
 
-export interface ITileClient<T> extends ITileDatasource<T, ITileAddress > {}
+export interface ITileClient<T> extends ITileDatasource<T, ITileAddress> {}
 
 /// <summary>
 /// Act as decorator arround ITileDatasource to provide address filtering, content generation and also caching capabilities
 /// </summary>
 export interface ITileContentFetcher<T> extends IHasTileMetrics, IDisposable {
     name: string; // usually shortcut for datasource?.name
-    datasource: ITileDatasource<T, ITileAddress >; // the underlying data source
-    accept(address: ITileAddress ): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
+    datasource: ITileDatasource<T, ITileAddress>; // the underlying data source
+    accept(address: ITileAddress): boolean; // filter address, default is TileAddress.IsValidAddress(address, this.metrics)
     fetchContent(tile: ITile<T>, callback: (a: ITile<T>) => void): ITile<T>; // fetch content using datasource.
 }
 
@@ -228,14 +228,7 @@ export interface IHasActivTiles<T> {
 /// Basically, a TileLoader may be connected to several ISourceBlock<ITileAddress>, listening for Address to resolve. Fetch or build Tile base on addresses, and finally messaging listeners of ITargetBlock<ITile<T>>.
 /// </summary>
 export interface ITileLoader<T>
-    extends ITransformBlock<ITile2DAddress, ITile<T>>,
-        IValidable,
-        IHasNamespace,
-        IHasActivTiles<T>,
-        IHasTileMetrics,
-        IDisposable,
-        IGeoBounded,
-        IBounded {
+    extends ITransformBlock<ITile2DAddress, ITile<T>>, IValidable, IHasNamespace, IHasActivTiles<T>, IHasTileMetrics, IDisposable, IGeoBounded, IBounded {
     enabledObservable: Observable<ITileLoader<T>>; // messaged when the provider is enabled/disabled
     enabled: boolean; // enable/disable the provider
     factory: ITileBuilder<T>; // the factory used to build the tile, if none is provided, the default one located into Tile<T> class is used

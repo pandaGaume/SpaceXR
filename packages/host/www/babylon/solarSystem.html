@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Solar system ephemeris</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+        <!--
+          space bundle carries SolarSystemBodies, AxialTilt, computeSolarSystemEphemeris, etc.
+          It assigns to a separate SPACEXR_SPACE global so it doesn't stomp on SPACEXR.
+        -->
+        <script src="../libs/spacexr_space.1.0.0.js"></script>
+
+        <style>
+            html,
+            body {
+                background: rgb(5, 5, 12);
+                color: #ddd;
+                font-family: sans-serif;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+            #canvas {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            .panel {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.55);
+                padding: 12px 14px;
+                border-radius: 8px;
+                font-size: 13px;
+                line-height: 1.4;
+                z-index: 2;
+                min-width: 280px;
+                max-width: 320px;
+                backdrop-filter: blur(6px);
+            }
+            .panel h2 {
+                margin: 0 0 8px 0;
+                font-size: 14px;
+            }
+            .panel label {
+                display: block;
+                margin-top: 8px;
+                font-size: 12px;
+                color: #aaa;
+            }
+            .panel input[type="range"],
+            .panel input[type="datetime-local"],
+            .panel select {
+                width: 100%;
+                box-sizing: border-box;
+                background: #1a1a22;
+                color: #ddd;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 4px;
+                font-family: inherit;
+                font-size: 12px;
+            }
+            .panel .row {
+                display: flex;
+                gap: 6px;
+                margin-top: 8px;
+            }
+            .panel .row button {
+                flex: 1;
+                background: #1a1a22;
+                color: #ddd;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 5px 8px;
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 12px;
+            }
+            .panel .row button:hover {
+                background: #2a2a35;
+            }
+            .panel .row button.active {
+                border-color: #7fd4ff;
+                color: #7fd4ff;
+            }
+            .panel .readout {
+                display: flex;
+                justify-content: space-between;
+                font-family: monospace;
+                color: #c9c9c9;
+                font-size: 12px;
+            }
+            .panel .readout span:last-child {
+                color: #7fd4ff;
+            }
+            .panel hr {
+                border: none;
+                border-top: 1px solid #333;
+                margin: 10px 0;
+            }
+            .caption {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                font-size: 11px;
+                color: #777;
+                background: rgba(0, 0, 0, 0.4);
+                padding: 6px 10px;
+                border-radius: 6px;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+
+        <div class="panel">
+            <h2>Solar system ephemeris</h2>
+
+            <label for="dateInput">UTC time</label>
+            <input type="datetime-local" id="dateInput" step="1" />
+
+            <label for="speedSlider">Time speed (<span id="speedLabel">1x</span>)</label>
+            <input type="range" id="speedSlider" min="0" max="9" step="0.01" value="0" />
+
+            <div class="row">
+                <button id="playPause">▶ Play</button>
+                <button id="nowBtn">Now</button>
+                <button id="artemisBtn">Artemis II</button>
+            </div>
+
+            <hr />
+
+            <label for="scaleSlider">Distance scale (<span id="scaleLabel">1</span>x)</label>
+            <input type="range" id="scaleSlider" min="-5" max="1" step="0.01" value="-2" />
+
+            <label for="focusSelect">Focus body</label>
+            <select id="focusSelect"></select>
+
+            <hr />
+
+            <div class="readout"><span>selected</span><span id="focusStat">-</span></div>
+            <div class="readout"><span>lat (deg)</span><span id="latStat">-</span></div>
+            <div class="readout"><span>lon (deg)</span><span id="lonStat">-</span></div>
+            <div class="readout"><span>distance (km)</span><span id="distStat">-</span></div>
+            <div class="readout"><span>rotation (deg)</span><span id="rotStat">-</span></div>
+        </div>
+
+        <div class="caption">Sun at origin · ecliptic J2000 on XZ plane · Y up · planet sizes real (km) · distances scaled</div>
+
+        <script>
+            // ---------- Axis mapping ----------
+            // Ephemeris lives in ecliptic J2000: +X vernal equinox, +Y in the ecliptic
+            // plane, +Z along the ecliptic north pole. The scene wants the ecliptic in
+            // its XZ plane with Y up. Map (ex, ey, ez) -> (ex, ez, ey).
+            function eclipticToBabylon(v) {
+                return new BABYLON.Vector3(v.x, v.z, v.y);
+            }
+
+            // ---------- Visual config ----------
+            // Bodies without bundled textures get a flat color instead.
+            const TEXTURES = {
+                Earth: { diffuse: "../images/planets/earth_map.jpg", normal: "../images/planets/earth_normal_map.jpg", specular: "../images/planets/earth_specular_map.jpg" },
+                Moon: { diffuse: "../images/planets/moon_map.jpg", normal: "../images/planets/moon_normal_map.jpg" },
+                Mars: { diffuse: "../images/planets/mars_map.jpg", normal: "../images/planets/mars_normal_map.jpg" },
+                Jupiter: { diffuse: "../images/planets/jupiter_map.jpg" },
+            };
+            const FALLBACK_COLORS = {
+                Sun: [1.0, 0.9, 0.5],
+                Mercury: [0.65, 0.6, 0.55],
+                Venus: [0.95, 0.85, 0.55],
+                Saturn: [0.9, 0.8, 0.55],
+                Uranus: [0.55, 0.85, 0.9],
+                Neptune: [0.3, 0.45, 0.85],
+                Phobos: [0.45, 0.4, 0.38],
+                Deimos: [0.5, 0.45, 0.42],
+                Io: [0.85, 0.8, 0.4],
+                Europa: [0.8, 0.75, 0.65],
+                Ganymede: [0.6, 0.55, 0.5],
+                Callisto: [0.45, 0.4, 0.38],
+                Mimas: [0.8, 0.8, 0.85],
+                Enceladus: [0.95, 0.95, 1.0],
+                Tethys: [0.85, 0.85, 0.9],
+                Dione: [0.85, 0.85, 0.85],
+                Rhea: [0.8, 0.8, 0.8],
+                Titan: [0.85, 0.7, 0.3],
+                Iapetus: [0.4, 0.35, 0.3],
+                Miranda: [0.7, 0.7, 0.75],
+                Ariel: [0.7, 0.7, 0.75],
+                Umbriel: [0.45, 0.45, 0.5],
+                Titania: [0.65, 0.65, 0.7],
+                Oberon: [0.55, 0.55, 0.6],
+                Triton: [0.7, 0.75, 0.9],
+            };
+            const DEFAULT_COLOR = [0.6, 0.6, 0.65];
+
+            function colorFor(name) {
+                const c = FALLBACK_COLORS[name] ?? DEFAULT_COLOR;
+                return new BABYLON.Color3(c[0], c[1], c[2]);
+            }
+
+            // ---------- Scene building ----------
+            function orientEquirect(t) {
+                // Matches the UV fixes from geodeticCamera.html.
+                t.uScale = -1;
+                t.uOffset = 0.5;
+                t.vScale = -1;
+                t.vOffset = 1;
+            }
+
+            function buildBodyMesh(scene, descriptor) {
+                const ellipsoid = descriptor.ellipsoid;
+                // Ellipsoid semiMajorAxis is stored in meters; scene unit is km.
+                const semiMajorKm = ellipsoid.semiMajorAxis / 1000;
+                const semiMinorKm = ellipsoid.semiMinorAxis / 1000;
+
+                const sphere = BABYLON.MeshBuilder.CreateSphere(
+                    descriptor.name,
+                    {
+                        diameter: 2 * semiMajorKm,
+                        segments: descriptor.name === "Sun" ? 48 : 32,
+                    },
+                    scene
+                );
+                // Oblate squash along local +Y (the mesh will later be re-oriented by the tilt quaternion).
+                sphere.scaling.y = semiMinorKm / semiMajorKm;
+
+                const isStar = descriptor.name === "Sun";
+                const mat = new BABYLON.StandardMaterial(descriptor.name + "Mat", scene);
+                const tex = TEXTURES[descriptor.name];
+                if (tex) {
+                    mat.diffuseTexture = new BABYLON.Texture(tex.diffuse, scene);
+                    orientEquirect(mat.diffuseTexture);
+                    if (tex.normal) {
+                        mat.bumpTexture = new BABYLON.Texture(tex.normal, scene);
+                        orientEquirect(mat.bumpTexture);
+                    }
+                    if (tex.specular) {
+                        mat.specularTexture = new BABYLON.Texture(tex.specular, scene);
+                        orientEquirect(mat.specularTexture);
+                    }
+                } else {
+                    mat.diffuseColor = colorFor(descriptor.name);
+                }
+                if (isStar) {
+                    mat.emissiveColor = colorFor("Sun");
+                    mat.disableLighting = true;
+                } else {
+                    mat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
+                    mat.emissiveColor = new BABYLON.Color3(0.02, 0.02, 0.03);
+                }
+                sphere.material = mat;
+                return sphere;
+            }
+
+            // ---------- Orientation ----------
+            const Y_UP = new BABYLON.Vector3(0, 1, 0);
+            const tiltAlignmentScratch = new BABYLON.Quaternion();
+            const spinScratch = new BABYLON.Quaternion();
+
+            function alignYToAxis(axis, out) {
+                const dot = BABYLON.Vector3.Dot(Y_UP, axis);
+                if (dot > 0.99999) {
+                    out.set(0, 0, 0, 1);
+                    return;
+                }
+                if (dot < -0.99999) {
+                    // 180 deg around X works for any mesh; arbitrary perpendicular axis.
+                    BABYLON.Quaternion.RotationAxisToRef(new BABYLON.Vector3(1, 0, 0), Math.PI, out);
+                    return;
+                }
+                const rotAxis = BABYLON.Vector3.Cross(Y_UP, axis).normalize();
+                BABYLON.Quaternion.RotationAxisToRef(rotAxis, Math.acos(dot), out);
+            }
+
+            /**
+             * Enforce tidal locking on every satellite: override the ephemeris rotation so
+             * that the mesh's local +X (the direction our texture layout puts Greenwich at)
+             * points from the satellite toward its parent, measured in the satellite's
+             * equatorial plane.
+             *
+             * The catalog's W0/Wdot are IAU values referenced to the ICRS node, but the
+             * `alignYToAxis` path here picks its own (valid but arbitrary) body-frame X.
+             * So instead of trusting the cataloged W, we compute the angle that makes the
+             * mesh face its parent under our own orientation convention.
+             */
+            const tlTiltScratch = new BABYLON.Vector3();
+            const tlAlignScratch = new BABYLON.Quaternion();
+            const tlRefXScratch = new BABYLON.Vector3();
+            const tlToParentScratch = new BABYLON.Vector3();
+            const tlProjScratch = new BABYLON.Vector3();
+            const tlCrossScratch = new BABYLON.Vector3();
+            const X_AXIS = new BABYLON.Vector3(1, 0, 0);
+
+            function enforceTidalLocking(ephemeris) {
+                const bodies = SPACEXR_SPACE.SolarSystemBodies;
+                const byName = new Map();
+                for (const e of ephemeris) byName.set(e.name, e);
+
+                for (const entry of ephemeris) {
+                    const body = bodies[entry.name];
+                    if (!body || !body.parent) continue;
+                    const parentEntry = byName.get(body.parent);
+                    if (!parentEntry) continue;
+
+                    // Tilt axis in Babylon scene axes.
+                    tlTiltScratch.set(entry.tilt.x, entry.tilt.z, entry.tilt.y);
+                    tlTiltScratch.normalize();
+
+                    // Reference +X as produced by alignYToAxis(tilt): take scene +X through
+                    // the same alignment quaternion.
+                    alignYToAxis(tlTiltScratch, tlAlignScratch);
+                    X_AXIS.rotateByQuaternionToRef(tlAlignScratch, tlRefXScratch);
+                    tlRefXScratch.normalize();
+
+                    // Satellite -> parent vector in Babylon scene (scale is irrelevant here).
+                    tlToParentScratch.set(
+                        parentEntry.position.x - entry.position.x,
+                        parentEntry.position.z - entry.position.z,
+                        parentEntry.position.y - entry.position.y
+                    );
+
+                    // Project it onto the equatorial plane (perpendicular to the tilt axis).
+                    const projDot = BABYLON.Vector3.Dot(tlToParentScratch, tlTiltScratch);
+                    tlProjScratch.copyFrom(tlTiltScratch).scaleInPlace(projDot);
+                    tlProjScratch.set(
+                        tlToParentScratch.x - tlProjScratch.x,
+                        tlToParentScratch.y - tlProjScratch.y,
+                        tlToParentScratch.z - tlProjScratch.z
+                    );
+                    if (tlProjScratch.lengthSquared() < 1e-6) continue;
+                    tlProjScratch.normalize();
+
+                    // Signed angle from refX to proj around the tilt axis.
+                    const cosA = BABYLON.Vector3.Dot(tlRefXScratch, tlProjScratch);
+                    BABYLON.Vector3.CrossToRef(tlRefXScratch, tlProjScratch, tlCrossScratch);
+                    const sinA = BABYLON.Vector3.Dot(tlCrossScratch, tlTiltScratch);
+                    entry.rotation = Math.atan2(sinA, cosA);
+                }
+            }
+
+            function applyEphemerisPose(mesh, ephemeris, distanceScale) {
+                const pos = eclipticToBabylon(ephemeris.position).scaleInPlace(distanceScale);
+                mesh.position.copyFrom(pos);
+
+                const tiltBabylon = eclipticToBabylon(ephemeris.tilt).normalize();
+                alignYToAxis(tiltBabylon, tiltAlignmentScratch);
+                BABYLON.Quaternion.RotationAxisToRef(tiltBabylon, ephemeris.rotation, spinScratch);
+                // spin applied around the already-tilted Y axis => spin * alignment.
+                if (!mesh.rotationQuaternion) mesh.rotationQuaternion = new BABYLON.Quaternion();
+                spinScratch.multiplyToRef(tiltAlignmentScratch, mesh.rotationQuaternion);
+            }
+
+            // ---------- Orbit sampling ----------
+            // Replays the Keplerian math from space.ephemeris.ts but sweeps the eccentric
+            // anomaly E from 0..2pi to produce a closed polyline of the orbit. Elements are
+            // evaluated at T = 0 (J2000); secular drift is negligible over typical play ranges.
+            const AU_KM = 149597870.7;
+            function sampleHeliocentricOrbit(el, segments = 192) {
+                const T = 0;
+                const a = el.a + el.aDot * T;
+                const e = el.e + el.eDot * T;
+                const I = (el.I + el.IDot * T) * Math.PI / 180;
+                const varpi = (el.varpi + el.varpiDot * T) * Math.PI / 180;
+                const Omega = (el.Omega + el.OmegaDot * T) * Math.PI / 180;
+                const omega = varpi - Omega;
+
+                const cw = Math.cos(omega), sw = Math.sin(omega);
+                const cO = Math.cos(Omega), sO = Math.sin(Omega);
+                const cI = Math.cos(I), sI = Math.sin(I);
+                const b = Math.sqrt(1 - e * e);
+
+                const points = [];
+                for (let i = 0; i <= segments; i++) {
+                    const E = (i / segments) * 2 * Math.PI;
+                    const xp = a * (Math.cos(E) - e);
+                    const yp = a * b * Math.sin(E);
+                    const xEcl = ((cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp) * AU_KM;
+                    const yEcl = ((cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp) * AU_KM;
+                    const zEcl = (sw * sI * xp + cw * sI * yp) * AU_KM;
+                    // Ecliptic -> Babylon axis swap (ex, ey, ez) -> (ex, ez, ey).
+                    points.push(new BABYLON.Vector3(xEcl, zEcl, yEcl));
+                }
+                return points;
+            }
+
+            function buildOrbitLine(scene, descriptor, parent) {
+                const points = sampleHeliocentricOrbit(descriptor.orbit);
+                const line = BABYLON.MeshBuilder.CreateLines(descriptor.name + "Orbit", { points }, scene);
+                const c = colorFor(descriptor.name);
+                // Keep orbit lines dim so the bodies stay the focal point.
+                line.color = new BABYLON.Color3(c.r * 0.7 + 0.1, c.g * 0.7 + 0.1, c.b * 0.7 + 0.1);
+                line.alpha = 0.55;
+                line.isPickable = false;
+                line.parent = parent;
+                return line;
+            }
+
+            // ---------- Artemis II (crewed lunar flyby) ----------
+            // NASA Artemis II is a ~10-day crewed hybrid free-return lunar flyby. Launch
+            // placeholder is 2026-04-03 UTC (the NET window at the time this sample was
+            // written); adjust LAUNCH / DURATION if the mission slips.
+            //
+            // Trajectory model: a cubic Bezier in an Earth-relative ecliptic frame.
+            //   P0, P3 = Earth (origin in this frame, i.e. launch and splashdown hug Earth)
+            //   P1     = outbound control ≈ 4/3 * flybyPoint_rel + a sideways nudge
+            //   P2     = return control   ≈ 4/3 * flybyPoint_rel - the same nudge
+            // The sideways nudge lies in the ecliptic plane and turns the symmetric
+            // straight-line shape into a real loop around the Moon. flybyPoint_rel is
+            // 15,000 km past the Moon (far side from Earth) at the flyby epoch.
+            //
+            // The trail/marker are anchored to a TransformNode that tracks Earth's
+            // current scaled position each frame, so the Earth-Moon loop is drawn where
+            // Earth actually is — not smeared across 26 Mkm of orbital motion.
+            const ARTEMIS_II = {
+                launch: new Date("2026-04-03T12:00:00Z"),
+                durationMs: 10 * 24 * 3600 * 1000,
+                flybyOffsetKm: 15000,
+                color: new BABYLON.Color3(1, 0.35, 0.25),
+                markerRadiusKm: 400, // purely cosmetic — Orion is ~5 m, we need something clickable
+            };
+
+            function computeArtemisIIControlPoints() {
+                const flybyDate = new Date(ARTEMIS_II.launch.getTime() + 0.5 * ARTEMIS_II.durationMs);
+                const flybyEph = SPACEXR_SPACE.computeSolarSystemEphemeris(flybyDate);
+                const pick = (eph, name) => eph.find((b) => b.name === name).position;
+                const earthFlyby = pick(flybyEph, "Earth");
+                const moonFlyby = pick(flybyEph, "Moon");
+
+                // Moon relative to Earth at flyby (ecliptic J2000 km).
+                const mx = moonFlyby.x - earthFlyby.x;
+                const my = moonFlyby.y - earthFlyby.y;
+                const mz = moonFlyby.z - earthFlyby.z;
+                const mlen = Math.hypot(mx, my, mz) || 1;
+
+                // Flyby point: past the Moon, away from Earth, by flybyOffsetKm.
+                const fx = mx + (mx / mlen) * ARTEMIS_II.flybyOffsetKm;
+                const fy = my + (my / mlen) * ARTEMIS_II.flybyOffsetKm;
+                const fz = mz + (mz / mlen) * ARTEMIS_II.flybyOffsetKm;
+
+                // Sideways nudge: perpendicular to flyby direction, in the ecliptic plane.
+                // Cross product with ecliptic +Z = (0, 0, 1). If flyby happens to be colinear
+                // with +Z, fall back to (0, 1, 0) so we never produce a zero vector.
+                let px = -fy;
+                let py = fx;
+                let pz = 0;
+                let plen = Math.hypot(px, py, pz);
+                if (plen < 1e-6) {
+                    px = 0; py = 1; pz = 0; plen = 1;
+                }
+                const k = 0.35 * mlen; // side offset magnitude, proportional to Earth-Moon distance
+                const nx = (px / plen) * k;
+                const ny = (py / plen) * k;
+                const nz = (pz / plen) * k;
+
+                // For cubic Bezier with P0 = P3 = 0, B(0.5) = 0.75 * (P1 + P2)/2.
+                // If P1 = c + n and P2 = c - n, then B(0.5) = 0.75 c, so c = (4/3) flybyPoint.
+                const cx = fx * (4 / 3);
+                const cy = fy * (4 / 3);
+                const cz = fz * (4 / 3);
+                return {
+                    P0: { x: 0, y: 0, z: 0 },
+                    P1: { x: cx + nx, y: cy + ny, z: cz + nz },
+                    P2: { x: cx - nx, y: cy - ny, z: cz - nz },
+                    P3: { x: 0, y: 0, z: 0 },
+                };
+            }
+
+            function bezier3(P0, P1, P2, P3, t) {
+                const u = 1 - t;
+                const uu = u * u;
+                const tt = t * t;
+                return {
+                    x: P0.x * uu * u + 3 * P1.x * uu * t + 3 * P2.x * u * tt + P3.x * tt * t,
+                    y: P0.y * uu * u + 3 * P1.y * uu * t + 3 * P2.y * u * tt + P3.y * tt * t,
+                    z: P0.z * uu * u + 3 * P1.z * uu * t + 3 * P2.z * u * tt + P3.z * tt * t,
+                };
+            }
+
+            function buildArtemisAssets(scene) {
+                const control = computeArtemisIIControlPoints();
+                const TRAIL_SEGMENTS = 192;
+
+                // Earth-relative trail points in Babylon axis order.
+                const trailPoints = [];
+                for (let i = 0; i <= TRAIL_SEGMENTS; i++) {
+                    const p = bezier3(control.P0, control.P1, control.P2, control.P3, i / TRAIL_SEGMENTS);
+                    trailPoints.push(new BABYLON.Vector3(p.x, p.z, p.y));
+                }
+
+                // Anchor: position = Earth's scaled scene position, scaling = distanceScale.
+                // Children (the trail line, in km-valued offsets) are translated to Earth and
+                // stretched by the distance slider — no smearing across the heliocentric frame.
+                const anchor = new BABYLON.TransformNode("artemisAnchor", scene);
+
+                const trail = BABYLON.MeshBuilder.CreateLines("artemisTrail", { points: trailPoints }, scene);
+                trail.color = ARTEMIS_II.color;
+                trail.alpha = 0.85;
+                trail.isPickable = false;
+                trail.parent = anchor;
+
+                // Marker mesh: NOT parented to the anchor — its radius must stay constant in
+                // scene units, so we position it manually each frame.
+                const marker = BABYLON.MeshBuilder.CreateSphere("artemisII", { diameter: 2 * ARTEMIS_II.markerRadiusKm, segments: 8 }, scene);
+                const mat = new BABYLON.StandardMaterial("artemisMat", scene);
+                mat.emissiveColor = ARTEMIS_II.color;
+                mat.diffuseColor = ARTEMIS_II.color;
+                mat.disableLighting = true;
+                marker.material = mat;
+                marker.isPickable = false;
+
+                return { control, anchor, trail, marker };
+            }
+
+            function updateArtemisII(artemis, simDate, distanceScale, earthMesh) {
+                // Track Earth and scale the trail in one step.
+                artemis.anchor.position.copyFrom(earthMesh.position);
+                artemis.anchor.scaling.setAll(distanceScale);
+
+                const t = (simDate.getTime() - ARTEMIS_II.launch.getTime()) / ARTEMIS_II.durationMs;
+                const inFlight = t >= 0 && t <= 1;
+                artemis.marker.setEnabled(inFlight);
+                // The trail represents the specific launch epoch, not the sim date. Show it
+                // during flight and for a few days either side so users can see the path.
+                const trailVisible = t >= -5 && t <= 6;
+                artemis.trail.setEnabled(trailVisible);
+
+                if (inFlight) {
+                    const o = bezier3(artemis.control.P0, artemis.control.P1, artemis.control.P2, artemis.control.P3, t);
+                    // Compose manually: Earth (scaled) + Earth-relative offset (km) * scale.
+                    // Note the ecliptic -> Babylon axis swap on the offset (o.z -> y, o.y -> z).
+                    artemis.marker.position.set(
+                        earthMesh.position.x + o.x * distanceScale,
+                        earthMesh.position.y + o.z * distanceScale,
+                        earthMesh.position.z + o.y * distanceScale
+                    );
+                }
+            }
+
+            // ---------- Scene ----------
+            async function createScene(canvas, engine) {
+                const scene = new BABYLON.Scene(engine);
+                scene.clearColor = new BABYLON.Color4(0.02, 0.02, 0.05, 1);
+
+                // Sun at origin doubles as a point light.
+                const sunLight = new BABYLON.PointLight("sunLight", BABYLON.Vector3.Zero(), scene);
+                sunLight.intensity = 2.0;
+                sunLight.range = 1e15;
+                // A very faint fill so the night side of planets is not pitch black.
+                const fill = new BABYLON.HemisphericLight("fill", new BABYLON.Vector3(0, 1, 0), scene);
+                fill.intensity = 0.05;
+
+                const camera = new BABYLON.ArcRotateCamera(
+                    "cam",
+                    Math.PI / 3,
+                    Math.PI / 3,
+                    2e7, // 20 million km default radius
+                    BABYLON.Vector3.Zero(),
+                    scene
+                );
+                camera.attachControl(canvas, true);
+                camera.minZ = 1;
+                camera.maxZ = 1e11; // 100 billion km — covers any scaled Solar System configuration
+                camera.wheelDeltaPercentage = 0.02;
+                camera.lowerRadiusLimit = 1e3;
+                camera.upperRadiusLimit = 1e11;
+                camera.inertia = 0.8;
+
+                // Build one mesh per catalog entry that carries a tilt (ephemeris emits only those).
+                const meshes = new Map();
+                for (const body of Object.values(SPACEXR_SPACE.SolarSystemBodies)) {
+                    if (!body.tilt) continue;
+                    meshes.set(body.name, buildBodyMesh(scene, body));
+                }
+
+                // Orbit ellipses. Grouped under a single TransformNode whose uniform scale
+                // is driven by the distance slider each frame, so orbits stretch exactly
+                // the same way body positions do without touching body sizes.
+                const orbitsRoot = new BABYLON.TransformNode("orbitsRoot", scene);
+                const orbits = new Map();
+                for (const body of Object.values(SPACEXR_SPACE.SolarSystemBodies)) {
+                    // Only planet (heliocentric) orbits for now — moon trails would each need
+                    // to follow their parent body every frame.
+                    if (!body.orbit || body.parent) continue;
+                    orbits.set(body.name, buildOrbitLine(scene, body, orbitsRoot));
+                }
+
+                // Populate the focus dropdown.
+                const focusSelect = document.getElementById("focusSelect");
+                const focusOptions = [{ value: "", label: "Sun (origin)" }, ...[...meshes.keys()].filter((n) => n !== "Sun").map((n) => ({ value: n, label: n }))];
+                for (const opt of focusOptions) {
+                    const el = document.createElement("option");
+                    el.value = opt.value;
+                    el.textContent = opt.label;
+                    focusSelect.appendChild(el);
+                }
+
+                const artemis = buildArtemisAssets(scene);
+
+                return { scene, camera, meshes, orbitsRoot, artemis };
+            }
+
+            // ---------- Simulation loop + UI ----------
+            const state = {
+                simDate: new Date(),
+                playing: false,
+                speedExp: 0, // log10 seconds-per-second; 0 = realtime, 5 = ~1 day/s
+                distanceScaleExp: -2, // log10; -2 = 0.01
+                lastFrameMs: 0,
+                focus: "",
+                lastEphemeris: null,
+            };
+
+            function updateSpeedLabel() {
+                const s = Math.pow(10, state.speedExp);
+                const label =
+                    state.speedExp <= 0.01
+                        ? "real time"
+                        : s >= 86400
+                        ? (s / 86400).toFixed(1) + " d/s"
+                        : s >= 3600
+                        ? (s / 3600).toFixed(1) + " h/s"
+                        : s >= 60
+                        ? (s / 60).toFixed(1) + " min/s"
+                        : s.toFixed(1) + " s/s";
+                document.getElementById("speedLabel").textContent = label;
+            }
+            function updateScaleLabel() {
+                const f = Math.pow(10, state.distanceScaleExp);
+                document.getElementById("scaleLabel").textContent = f.toExponential(1);
+            }
+            function formatDateInput(d) {
+                const pad = (n) => n.toString().padStart(2, "0");
+                return (
+                    d.getUTCFullYear() +
+                    "-" +
+                    pad(d.getUTCMonth() + 1) +
+                    "-" +
+                    pad(d.getUTCDate()) +
+                    "T" +
+                    pad(d.getUTCHours()) +
+                    ":" +
+                    pad(d.getUTCMinutes()) +
+                    ":" +
+                    pad(d.getUTCSeconds())
+                );
+            }
+            function parseDateInput(s) {
+                // Treat the value as UTC (input type="datetime-local" gives naive strings).
+                return new Date(s + "Z");
+            }
+
+            function wireUI(context) {
+                const { camera, meshes } = context;
+                const dateInput = document.getElementById("dateInput");
+                const speedSlider = document.getElementById("speedSlider");
+                const scaleSlider = document.getElementById("scaleSlider");
+                const focusSelect = document.getElementById("focusSelect");
+                const playPauseBtn = document.getElementById("playPause");
+                const nowBtn = document.getElementById("nowBtn");
+
+                dateInput.value = formatDateInput(state.simDate);
+                speedSlider.value = state.speedExp;
+                scaleSlider.value = state.distanceScaleExp;
+                updateSpeedLabel();
+                updateScaleLabel();
+
+                dateInput.addEventListener("input", () => {
+                    const d = parseDateInput(dateInput.value);
+                    if (!isNaN(d.getTime())) state.simDate = d;
+                });
+                speedSlider.addEventListener("input", () => {
+                    state.speedExp = parseFloat(speedSlider.value);
+                    updateSpeedLabel();
+                });
+                scaleSlider.addEventListener("input", () => {
+                    state.distanceScaleExp = parseFloat(scaleSlider.value);
+                    updateScaleLabel();
+                });
+                focusSelect.addEventListener("change", () => {
+                    state.focus = focusSelect.value;
+                    if (state.focus && meshes.has(state.focus)) {
+                        const mesh = meshes.get(state.focus);
+                        camera.setTarget(mesh.position.clone());
+                        const semiMajorKm = mesh.getBoundingInfo().boundingSphere.radius; // scaled-for-oblate; still ~size
+                        camera.radius = Math.max(semiMajorKm * 6, 1000);
+                    } else {
+                        camera.setTarget(BABYLON.Vector3.Zero());
+                    }
+                });
+                playPauseBtn.addEventListener("click", () => {
+                    state.playing = !state.playing;
+                    playPauseBtn.textContent = state.playing ? "⏸ Pause" : "▶ Play";
+                    playPauseBtn.classList.toggle("active", state.playing);
+                });
+                nowBtn.addEventListener("click", () => {
+                    state.simDate = new Date();
+                    dateInput.value = formatDateInput(state.simDate);
+                });
+
+                const artemisBtn = document.getElementById("artemisBtn");
+                artemisBtn.addEventListener("click", () => {
+                    // Jump to the flyby moment (middle of the mission) — best view of the loop.
+                    state.simDate = new Date(ARTEMIS_II.launch.getTime() + 0.5 * ARTEMIS_II.durationMs);
+                    dateInput.value = formatDateInput(state.simDate);
+                    // Real-scale distances so the Earth-Moon geometry is undistorted.
+                    state.distanceScaleExp = 0;
+                    scaleSlider.value = 0;
+                    updateScaleLabel();
+                    // Focus on Earth and pull the camera out to frame the full Earth-Moon loop
+                    // (~400,000 km across); 800,000 km radius gives breathing room.
+                    const earthMesh = meshes.get("Earth");
+                    if (earthMesh) {
+                        focusSelect.value = "Earth";
+                        state.focus = "Earth";
+                        camera.setTarget(earthMesh.position.clone());
+                        camera.radius = 800000;
+                    }
+                });
+            }
+
+            function updateReadouts(meshes) {
+                const eph = state.lastEphemeris;
+                if (!eph) return;
+                const focusName = state.focus || "Sun";
+                const entry = eph.find((b) => b.name === focusName);
+                if (!entry) return;
+                document.getElementById("focusStat").textContent = focusName;
+                // Heliocentric ecliptic latitude / longitude for the selected body.
+                const p = entry.position;
+                const r = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
+                const lon = (Math.atan2(p.y, p.x) * 180) / Math.PI;
+                const lat = r > 0 ? (Math.asin(p.z / r) * 180) / Math.PI : 0;
+                document.getElementById("lonStat").textContent = lon.toFixed(3);
+                document.getElementById("latStat").textContent = lat.toFixed(3);
+                document.getElementById("distStat").textContent = r.toExponential(3);
+                document.getElementById("rotStat").textContent = ((entry.rotation * 180) / Math.PI).toFixed(2);
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("canvas");
+                const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+                const ctx = await createScene(canvas, engine);
+                const { scene, camera, meshes, orbitsRoot, artemis } = ctx;
+
+                wireUI(ctx);
+
+                const dateInput = document.getElementById("dateInput");
+
+                engine.runRenderLoop(() => {
+                    const nowMs = performance.now();
+                    const dtMs = state.lastFrameMs === 0 ? 0 : nowMs - state.lastFrameMs;
+                    state.lastFrameMs = nowMs;
+
+                    if (state.playing) {
+                        const secPerSec = Math.pow(10, state.speedExp);
+                        state.simDate = new Date(state.simDate.getTime() + dtMs * secPerSec);
+                        // Do not thrash the input while typing: only push while playing.
+                        if (document.activeElement !== dateInput) {
+                            dateInput.value = formatDateInput(state.simDate);
+                        }
+                    }
+
+                    const distanceScale = Math.pow(10, state.distanceScaleExp);
+                    // One uniform scale on the orbits root keeps every orbit line aligned with
+                    // the scaled body positions without touching body sizes.
+                    orbitsRoot.scaling.setAll(distanceScale);
+
+                    const ephemeris = SPACEXR_SPACE.computeSolarSystemEphemeris(state.simDate);
+                    // Lock every satellite so its rendered face always points at its parent.
+                    enforceTidalLocking(ephemeris);
+                    state.lastEphemeris = ephemeris;
+
+                    for (const entry of ephemeris) {
+                        const mesh = meshes.get(entry.name);
+                        if (!mesh) continue;
+                        applyEphemerisPose(mesh, entry, distanceScale);
+                    }
+
+                    // Anchor the Artemis II trail / marker to Earth's current scene position,
+                    // which was just updated above. Must run after Earth's applyEphemerisPose.
+                    const earthMesh = meshes.get("Earth");
+                    if (earthMesh) updateArtemisII(artemis, state.simDate, distanceScale, earthMesh);
+
+                    // If the camera is locked on a body, track it as it moves.
+                    if (state.focus && meshes.has(state.focus)) {
+                        camera.setTarget(meshes.get(state.focus).position);
+                    }
+
+                    updateReadouts(meshes);
+                    scene.render();
+                });
+
+                window.addEventListener("resize", () => engine.resize());
+            };
+        </script>
+    </body>
+</html>

@@ -1,63 +1,59 @@
 import { Ellipsoid } from "core/geodesy/geodesy.ellipsoid";
+import { AxialTilt } from "./space.axialTilt";
 import { CelestialNodeType } from "./space.interfaces";
 
-export interface IPlanetaryBody {
+/**
+ * Mean orbital elements + per-century linear rates.
+ *
+ * For primary bodies (planets) these are JPL / Standish 1992 elements in the
+ * J2000 ecliptic frame; `a` is in AU. For satellites they are given in the
+ * parent body's equatorial plane; `a` is in km, `I` is measured from the
+ * parent's equator, `Omega` is the longitude of the ascending node on that
+ * equator (zero = parent-equatorial X axis), `L` is the mean longitude at
+ * J2000. Angles are in degrees, `LDot` is in degrees / Julian century.
+ */
+export interface IOrbitalElements {
+    /** Semi-major axis (AU for primaries, km for satellites). */
+    a: number;
+    aDot: number;
+    /** Eccentricity. */
+    e: number;
+    eDot: number;
+    /** Inclination (deg). */
+    I: number;
+    IDot: number;
+    /** Mean longitude (deg). */
+    L: number;
+    LDot: number;
+    /** Longitude of perihelion (deg). */
+    varpi: number;
+    varpiDot: number;
+    /** Longitude of ascending node (deg). */
+    Omega: number;
+    OmegaDot: number;
+}
+
+/**
+ * Data-level descriptor of any celestial body: stars, planets, moons, minor
+ * bodies (asteroids, dwarf planets), and equally applicable to exoplanets or
+ * satellites of other stars. Not restricted to our Solar System.
+ *
+ * This is the catalog/table shape consumed by the ephemeris and vendor
+ * pipelines. It is distinct from the richer object-model interface
+ * {@link ICelestialBody} in `space.interfaces.ts`, which describes a runtime
+ * instance with geometry, material, atmosphere, etc.
+ */
+export interface ICelestialBodyDescriptor {
     readonly name: string;
     readonly celestialType: CelestialNodeType;
     readonly ellipsoid: Ellipsoid;
     readonly meanRadiusKm: number;
-    /** Surface gravity in m/s² */
+    /** Surface gravity in m/s^2 */
     readonly surfaceGravity: number;
+    /** Name of the parent body for satellites (e.g. "Earth" for the Moon). */
+    readonly parent?: string;
+    /** Heliocentric Keplerian elements. Absent for the Sun and for satellites. */
+    readonly orbit?: IOrbitalElements;
+    /** Rotation axis + prime meridian (IAU WGCCRE) packaged as an {@link AxialTilt}. */
+    readonly tilt?: AxialTilt;
 }
-
-export const SolarSystemBodies: Record<string, IPlanetaryBody> = {
-    Earth: {
-        name: "Earth",
-        celestialType: CelestialNodeType.PLANET,
-        ellipsoid: Ellipsoid.WGS84,
-        meanRadiusKm: 6371,
-        surfaceGravity: 9.807,
-    },
-    Moon: {
-        name: "Moon",
-        celestialType: CelestialNodeType.MOON,
-        ellipsoid: Ellipsoid.FromAAndInverseF("Moon", 1738100, Infinity),
-        meanRadiusKm: 1737.4,
-        surfaceGravity: 1.622,
-    },
-    Mars: {
-        name: "Mars",
-        celestialType: CelestialNodeType.PLANET,
-        ellipsoid: Ellipsoid.FromAAndInverseF("Mars", 3396190, 169.89),
-        meanRadiusKm: 3389.5,
-        surfaceGravity: 3.721,
-    },
-    Mercury: {
-        name: "Mercury",
-        celestialType: CelestialNodeType.PLANET,
-        ellipsoid: Ellipsoid.FromAAndInverseF("Mercury", 2439700, Infinity),
-        meanRadiusKm: 2439.7,
-        surfaceGravity: 3.7,
-    },
-    Ceres: {
-        name: "Ceres",
-        celestialType: CelestialNodeType.ASTEROIDE,
-        ellipsoid: Ellipsoid.FromAAndInverseF("Ceres", 476200, Infinity),
-        meanRadiusKm: 476.2,
-        surfaceGravity: 0.28,
-    },
-    Vesta: {
-        name: "Vesta",
-        celestialType: CelestialNodeType.ASTEROIDE,
-        ellipsoid: Ellipsoid.FromAAndInverseF("Vesta", 262700, Infinity),
-        meanRadiusKm: 262.7,
-        surfaceGravity: 0.25,
-    },
-    Titan: {
-        name: "Titan",
-        celestialType: CelestialNodeType.MOON,
-        ellipsoid: Ellipsoid.FromAAndInverseF("Titan", 2574730, Infinity),
-        meanRadiusKm: 2574.7,
-        surfaceGravity: 1.352,
-    },
-};

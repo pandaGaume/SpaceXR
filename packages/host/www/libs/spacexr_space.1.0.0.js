@@ -17,10 +17,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   JulianDate: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.JulianDate),
 /* harmony export */   KeplerOrbitBase: () => (/* reexport safe */ _space_kepler__WEBPACK_IMPORTED_MODULE_0__.KeplerOrbitBase),
 /* harmony export */   MoonState: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.MoonState),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.SunTrajectoryConfig)
+/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__.SunTrajectoryConfig),
+/* harmony export */   computeBodyEphemeris: () => (/* reexport safe */ _space_ephemeris__WEBPACK_IMPORTED_MODULE_2__.computeBodyEphemeris),
+/* harmony export */   computeSolarSystemEphemeris: () => (/* reexport safe */ _space_ephemeris__WEBPACK_IMPORTED_MODULE_2__.computeSolarSystemEphemeris)
 /* harmony export */ });
 /* harmony import */ var _space_kepler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.kepler */ "./dist/Mechanics/space.kepler.js");
 /* harmony import */ var _space_celestialTracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.celestialTracker */ "./dist/Mechanics/space.celestialTracker.js");
+/* harmony import */ var _space_ephemeris__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.ephemeris */ "./dist/Mechanics/space.ephemeris.js");
+
 
 
 //# sourceMappingURL=index.js.map
@@ -42,7 +46,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MoonState: () => (/* binding */ MoonState),
 /* harmony export */   SunTrajectoryConfig: () => (/* binding */ SunTrajectoryConfig)
 /* harmony export */ });
-/* harmony import */ var core_math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math */ "core/math/math.units");
+/* harmony import */ var core_math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math */ "core/geography/geography.position");
 /* harmony import */ var core_math_math__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_math_math__WEBPACK_IMPORTED_MODULE_0__);
 
 class HorizonVector {
@@ -313,6 +317,206 @@ CelestialTracker.GetMoonTimes = function (date, lat, lng, inUTC) {
 
 /***/ },
 
+/***/ "./dist/Mechanics/space.ephemeris.js"
+/*!*******************************************!*\
+  !*** ./dist/Mechanics/space.ephemeris.js ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   computeBodyEphemeris: () => (/* binding */ computeBodyEphemeris),
+/* harmony export */   computeSolarSystemEphemeris: () => (/* binding */ computeSolarSystemEphemeris)
+/* harmony export */ });
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math */ "core/geography/geography.position");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_geometry__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _space_solarSystem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../space.solarSystem */ "./dist/space.solarSystem.js");
+/* harmony import */ var _space_celestialTracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.celestialTracker */ "./dist/Mechanics/space.celestialTracker.js");
+
+
+
+
+const AU_KM = 149597870.7;
+const J2000_OBLIQUITY_RAD = 23.4392911 * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+/** Newton-Raphson solver for Kepler's equation M = E - e sin(E). Radians in, radians out. */
+function solveKepler(M, e, tolerance = 1e-8, maxIter = 30) {
+    let E = e < 0.8 ? M : Math.PI;
+    for (let i = 0; i < maxIter; i++) {
+        const f = E - e * Math.sin(E) - M;
+        const dE = f / (1 - e * Math.cos(E));
+        E -= dE;
+        if (Math.abs(dE) < tolerance)
+            break;
+    }
+    return E;
+}
+function wrapAngle(rad) {
+    const twoPi = 2 * Math.PI;
+    return ((rad % twoPi) + twoPi) % twoPi;
+}
+/**
+ * Solve an elliptical Keplerian orbit and return the (x, y, z) vector in the
+ * orbit's reference plane. `distanceScale` converts the length units of `a`
+ * into kilometers: AU_KM for heliocentric planet orbits, 1 for satellite
+ * orbits where `a` is already in km.
+ *
+ * For planets the returned vector lives in the ecliptic J2000 frame.
+ * For satellites it lives in the parent's equatorial frame and still needs a
+ * final rotation to ecliptic.
+ */
+function computeKeplerianPosition(el, T, distanceScale) {
+    const a = el.a + el.aDot * T;
+    const e = el.e + el.eDot * T;
+    const I = (el.I + el.IDot * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const L = (el.L + el.LDot * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const varpi = (el.varpi + el.varpiDot * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const Omega = (el.Omega + el.OmegaDot * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const omega = varpi - Omega;
+    let M = L - varpi;
+    M = ((M % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+    const E = solveKepler(M, e);
+    const xp = a * (Math.cos(E) - e);
+    const yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
+    const cw = Math.cos(omega);
+    const sw = Math.sin(omega);
+    const cO = Math.cos(Omega);
+    const sO = Math.sin(Omega);
+    const cI = Math.cos(I);
+    const sI = Math.sin(I);
+    const x = (cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp;
+    const y = (cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp;
+    const z = sw * sI * xp + cw * sI * yp;
+    return new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x * distanceScale, y * distanceScale, z * distanceScale);
+}
+/**
+ * Geocentric lunar position in the ecliptic J2000 frame, in km.
+ * Low-precision Meeus / SunCalc series, ~0.3 degree longitude accuracy.
+ */
+function computeMoonGeocentric(d) {
+    const L = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (218.316 + 13.176396 * d);
+    const M = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (134.963 + 13.064993 * d);
+    const F = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * (93.272 + 13.22935 * d);
+    const lambda = L + core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 6.289 * Math.sin(M);
+    const beta = core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD * 5.128 * Math.sin(F);
+    const dist = 385001 - 20905 * Math.cos(M);
+    const cb = Math.cos(beta);
+    return new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(dist * cb * Math.cos(lambda), dist * cb * Math.sin(lambda), dist * Math.sin(beta));
+}
+/** Unit vector of the body's spin axis in the ecliptic J2000 frame. */
+function computeTiltAxis(tilt, T) {
+    const alpha = (tilt.alpha0 + tilt.alpha0DotT * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const delta = (tilt.delta0 + tilt.delta0DotT * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const xEq = Math.cos(delta) * Math.cos(alpha);
+    const yEq = Math.cos(delta) * Math.sin(alpha);
+    const zEq = Math.sin(delta);
+    const ce = Math.cos(J2000_OBLIQUITY_RAD);
+    const se = Math.sin(J2000_OBLIQUITY_RAD);
+    return new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(xEq, yEq * ce + zEq * se, -yEq * se + zEq * ce);
+}
+function computeRotationAngle(tilt, d) {
+    return wrapAngle((tilt.W0 + tilt.Wdot * d) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD);
+}
+/**
+ * Rotate a position vector from the parent body's equatorial frame into the
+ * ecliptic J2000 frame, using the parent pole's (alpha0, delta0) direction.
+ * Composed as Rx(-epsilonJ2000) * Rz(alpha + pi/2) * Rx(pi/2 - delta).
+ */
+function rotateParentEquatorialToEcliptic(pos, tilt, T) {
+    const alpha = (tilt.alpha0 + tilt.alpha0DotT * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const delta = (tilt.delta0 + tilt.delta0DotT * T) * core_geometry__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+    const halfPi = Math.PI / 2;
+    const c1 = Math.cos(halfPi - delta);
+    const s1 = Math.sin(halfPi - delta);
+    const c2 = Math.cos(alpha + halfPi);
+    const s2 = Math.sin(alpha + halfPi);
+    const ce = Math.cos(J2000_OBLIQUITY_RAD);
+    const se = Math.sin(J2000_OBLIQUITY_RAD);
+    // Rx(pi/2 - delta) — tilts the parent equator up by (pi/2 - delta) around X.
+    const x1 = pos.x;
+    const y1 = pos.y * c1 - pos.z * s1;
+    const z1 = pos.y * s1 + pos.z * c1;
+    // Rz(alpha + pi/2) — swings the ascending node to the ICRS node.
+    const x2 = x1 * c2 - y1 * s2;
+    const y2 = x1 * s2 + y1 * c2;
+    const z2 = z1;
+    // Rx(-epsilon_J2000) — ICRS equatorial -> ecliptic J2000.
+    return new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(x2, y2 * ce + z2 * se, -y2 * se + z2 * ce);
+}
+/**
+ * Compute heliocentric ephemerides for every body in {@link SolarSystemBodies}
+ * that has enough data to be fully resolved (a {@link AxialTilt} plus either a
+ * heliocentric orbit, or a parent for which the parent-relative theory is known).
+ *
+ * - Planet positions use the JPL / Standish low-precision Keplerian elements
+ *   stored on each body's `orbit` field.
+ * - The Moon's heliocentric position is Earth's position plus a low-precision
+ *   geocentric Meeus series.
+ * - Tilt axis and prime-meridian angle come from the {@link AxialTilt} on
+ *   each body (linear IAU WGCCRE terms only). Bodies without a `tilt` are skipped.
+ *
+ * Returned order matches the insertion order of {@link SolarSystemBodies}.
+ */
+function computeSolarSystemEphemeris(utc) {
+    const d = _space_celestialTracker__WEBPACK_IMPORTED_MODULE_2__.JulianDate.FromDate(utc).toDays();
+    const T = d / 36525;
+    const positions = {};
+    // First pass: primaries. Bodies with an orbit live in heliocentric ecliptic;
+    // bodies with neither orbit nor parent (the Sun) sit at the origin.
+    for (const body of Object.values(_space_solarSystem__WEBPACK_IMPORTED_MODULE_1__.SolarSystemBodies)) {
+        if (body.parent)
+            continue;
+        positions[body.name] = body.orbit ? computeKeplerianPosition(body.orbit, T, AU_KM) : new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(0, 0, 0);
+    }
+    // Second pass: satellites.
+    // - Earth's Moon uses the Meeus low-precision series (more accurate than
+    //   a plain Keplerian at that scale).
+    // - All other satellites with an `orbit` field run a Keplerian solve in the
+    //   parent's equatorial plane (a is in km, I is measured from the parent
+    //   equator), then rotate into the ecliptic J2000 frame using the parent's
+    //   pole orientation before adding the parent's heliocentric position.
+    for (const body of Object.values(_space_solarSystem__WEBPACK_IMPORTED_MODULE_1__.SolarSystemBodies)) {
+        if (!body.parent)
+            continue;
+        const parentBody = _space_solarSystem__WEBPACK_IMPORTED_MODULE_1__.SolarSystemBodies[body.parent];
+        const parentPos = positions[body.parent];
+        if (!parentBody || !parentPos)
+            continue;
+        if (body.name === "Moon") {
+            const moonGeo = computeMoonGeocentric(d);
+            positions.Moon = new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(parentPos.x + moonGeo.x, parentPos.y + moonGeo.y, parentPos.z + moonGeo.z);
+            continue;
+        }
+        if (body.orbit && parentBody.tilt) {
+            const local = computeKeplerianPosition(body.orbit, T, 1);
+            const offset = rotateParentEquatorialToEcliptic(local, parentBody.tilt, T);
+            positions[body.name] = new core_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(parentPos.x + offset.x, parentPos.y + offset.y, parentPos.z + offset.z);
+        }
+    }
+    const result = [];
+    for (const body of Object.values(_space_solarSystem__WEBPACK_IMPORTED_MODULE_1__.SolarSystemBodies)) {
+        if (!body.tilt)
+            continue;
+        const pos = positions[body.name];
+        if (!pos)
+            continue;
+        result.push({
+            name: body.name,
+            celestialType: body.celestialType,
+            position: pos,
+            tilt: computeTiltAxis(body.tilt, T),
+            rotation: computeRotationAngle(body.tilt, d),
+        });
+    }
+    return result;
+}
+/** Same as {@link computeSolarSystemEphemeris} but returns a single body by name. */
+function computeBodyEphemeris(name, utc) {
+    return computeSolarSystemEphemeris(utc).find((b) => b.name === name);
+}
+//# sourceMappingURL=space.ephemeris.js.map
+
+/***/ },
+
 /***/ "./dist/Mechanics/space.kepler.js"
 /*!****************************************!*\
   !*** ./dist/Mechanics/space.kepler.js ***!
@@ -323,7 +527,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   KeplerOrbitBase: () => (/* binding */ KeplerOrbitBase)
 /* harmony export */ });
-/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math.units */ "core/math/math.units");
+/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math.units */ "core/geography/geography.position");
 /* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_math_math_units__WEBPACK_IMPORTED_MODULE_0__);
 
 class KeplerOrbitBase {
@@ -416,97 +620,61 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AxialTilt: () => (/* binding */ AxialTilt)
 /* harmony export */ });
-/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math.units */ "core/math/math.units");
+/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math */ "core/geography/geography.position");
 /* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_math_math_units__WEBPACK_IMPORTED_MODULE_0__);
 
+
+/**
+ * Full rotational-element descriptor for a celestial body.
+ *
+ * Replaces the earlier obliquity + period shorthand: knowing only an angle
+ * and a sidereal period is insufficient to locate the rotation axis in a
+ * reference frame or to know where the prime meridian points at a given
+ * instant. This class keeps the IAU WGCCRE inputs and exposes the older
+ * `obliquity` / `period` quantities as derived getters.
+ */
 class AxialTilt {
-    constructor(obliquity, period) {
-        this._obliquity = new core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(obliquity, AxialTilt.defaultAngleUnit);
-        this._period = new core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(period, AxialTilt.defaultPeriodUnit);
+    constructor(params) {
+        this.alpha0 = params.alpha0;
+        this.delta0 = params.delta0;
+        this.W0 = params.W0;
+        this.Wdot = params.Wdot;
+        this.alpha0DotT = params.alpha0DotT ?? 0;
+        this.delta0DotT = params.delta0DotT ?? 0;
     }
+    /**
+     * Angle between this spin axis and the ecliptic J2000 north pole.
+     * Derived from (alpha0, delta0) — returned as a positive angle.
+     */
     get obliquity() {
-        return this._obliquity;
+        const eps = AxialTilt.EclipticObliquityJ2000 * core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const alpha = this.alpha0 * core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const delta = this.delta0 * core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        // Spin-axis unit vector in ecliptic J2000 (z component only is needed).
+        const yEq = Math.cos(delta) * Math.sin(alpha);
+        const zEq = Math.sin(delta);
+        const zEcl = -yEq * Math.sin(eps) + zEq * Math.cos(eps);
+        const clamped = Math.max(-1, Math.min(1, zEcl));
+        return new core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle(Math.acos(clamped) * core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Scalar.RAD2DEG, AxialTilt.defaultAngleUnit);
     }
+    /**
+     * Sidereal rotation period derived from |Wdot|, in seconds.
+     * Retrograde spins (negative Wdot) still yield a positive period.
+     */
     get period() {
-        return this._period;
+        const secondsPerRotation = (360 / Math.abs(this.Wdot)) * 86400;
+        return new core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan(secondsPerRotation, AxialTilt.defaultPeriodUnit);
     }
+    /** Signed mean angular speed, in deg/day (matches Wdot). */
     get meanAngularSpeed() {
-        return 360.0 / this._period.value;
+        return this.Wdot;
     }
 }
 AxialTilt.defaultAngleUnit = core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Angle.Units.d;
 AxialTilt.defaultPeriodUnit = core_math_math_units__WEBPACK_IMPORTED_MODULE_0__.Timespan.Units.s;
+/** J2000 obliquity of the ecliptic relative to the ICRS equator (deg). */
+AxialTilt.EclipticObliquityJ2000 = 23.4392911;
 //# sourceMappingURL=space.axialTilt.js.map
-
-/***/ },
-
-/***/ "./dist/space.bodies.js"
-/*!******************************!*\
-  !*** ./dist/space.bodies.js ***!
-  \******************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SolarSystemBodies: () => (/* binding */ SolarSystemBodies)
-/* harmony export */ });
-/* harmony import */ var core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/geodesy/geodesy.ellipsoid */ "core/math/math.units");
-/* harmony import */ var core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "./dist/space.interfaces.js");
-
-
-const SolarSystemBodies = {
-    Earth: {
-        name: "Earth",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84,
-        meanRadiusKm: 6371,
-        surfaceGravity: 9.807,
-    },
-    Moon: {
-        name: "Moon",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.MOON,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Moon", 1738100, Infinity),
-        meanRadiusKm: 1737.4,
-        surfaceGravity: 1.622,
-    },
-    Mars: {
-        name: "Mars",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mars", 3396190, 169.89),
-        meanRadiusKm: 3389.5,
-        surfaceGravity: 3.721,
-    },
-    Mercury: {
-        name: "Mercury",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.PLANET,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mercury", 2439700, Infinity),
-        meanRadiusKm: 2439.7,
-        surfaceGravity: 3.7,
-    },
-    Ceres: {
-        name: "Ceres",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.ASTEROIDE,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Ceres", 476200, Infinity),
-        meanRadiusKm: 476.2,
-        surfaceGravity: 0.28,
-    },
-    Vesta: {
-        name: "Vesta",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.ASTEROIDE,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Vesta", 262700, Infinity),
-        meanRadiusKm: 262.7,
-        surfaceGravity: 0.25,
-    },
-    Titan: {
-        name: "Titan",
-        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_1__.CelestialNodeType.MOON,
-        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Titan", 2574730, Infinity),
-        meanRadiusKm: 2574.7,
-        surfaceGravity: 1.352,
-    },
-};
-//# sourceMappingURL=space.bodies.js.map
 
 /***/ },
 
@@ -552,7 +720,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MoonKnownPlaces: () => (/* binding */ MoonKnownPlaces)
 /* harmony export */ });
-/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/geography/geography.position */ "core/math/math.units");
+/* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/geography/geography.position */ "core/geography/geography.position");
 /* harmony import */ var core_geography_geography_position__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_geography_geography_position__WEBPACK_IMPORTED_MODULE_0__);
 
 /**
@@ -638,6 +806,393 @@ MoonKnownPlaces.ExplorationCandidates = {
 
 /***/ },
 
+/***/ "./dist/space.solarSystem.js"
+/*!***********************************!*\
+  !*** ./dist/space.solarSystem.js ***!
+  \***********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SolarSystemBodies: () => (/* binding */ SolarSystemBodies)
+/* harmony export */ });
+/* harmony import */ var core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/geodesy/geodesy.ellipsoid */ "core/geography/geography.position");
+/* harmony import */ var core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.axialTilt */ "./dist/space.axialTilt.js");
+/* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.interfaces */ "./dist/space.interfaces.js");
+
+
+
+/**
+ * Catalog of bodies the ephemeris / rendering pipelines can reason about.
+ *
+ * Order matters: `Object.values(SolarSystemBodies)` preserves insertion order,
+ * so the Sun comes first, then the planets outward from the Sun, with each
+ * satellite declared immediately after its parent planet.
+ *
+ * Data sources:
+ * - Planet heliocentric orbits: JPL / Standish 1992 mean elements (valid 1800-2050).
+ * - Satellite orbits: approximate Keplerian elements in the parent's equatorial
+ *   plane, `a` in km.
+ * - Tilts: IAU WGCCRE rotational elements (linear terms only).
+ */
+const SolarSystemBodies = {
+    Sun: {
+        name: "Sun",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.STAR,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Sun", 695700000, Infinity),
+        meanRadiusKm: 695700,
+        surfaceGravity: 274,
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 286.13, delta0: 63.87, W0: 84.176, Wdot: 14.1844 }),
+    },
+    Mercury: {
+        name: "Mercury",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mercury", 2439700, Infinity),
+        meanRadiusKm: 2439.7,
+        surfaceGravity: 3.7,
+        orbit: {
+            a: 0.38709927, aDot: 0.00000037,
+            e: 0.20563593, eDot: 0.00001906,
+            I: 7.00497902, IDot: -0.00594749,
+            L: 252.2503235, LDot: 149472.67411175,
+            varpi: 77.45779628, varpiDot: 0.16047689,
+            Omega: 48.33076593, OmegaDot: -0.12534081,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 281.0103, alpha0DotT: -0.0328, delta0: 61.4155, delta0DotT: -0.0049, W0: 329.5988, Wdot: 6.1385108 }),
+    },
+    Venus: {
+        name: "Venus",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Venus", 6051800, Infinity),
+        meanRadiusKm: 6051.8,
+        surfaceGravity: 8.87,
+        orbit: {
+            a: 0.72333566, aDot: 0.0000039,
+            e: 0.00677672, eDot: -0.00004107,
+            I: 3.39467605, IDot: -0.0007889,
+            L: 181.9790995, LDot: 58517.81538729,
+            varpi: 131.60246718, varpiDot: 0.00268329,
+            Omega: 76.67984255, OmegaDot: -0.27769418,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 272.76, delta0: 67.16, W0: 160.2, Wdot: -1.4813688 }),
+    },
+    Earth: {
+        name: "Earth",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84,
+        meanRadiusKm: 6371,
+        surfaceGravity: 9.807,
+        orbit: {
+            a: 1.00000261, aDot: 0.00000562,
+            e: 0.01671123, eDot: -0.00004392,
+            I: -0.00001531, IDot: -0.01294668,
+            L: 100.46457166, LDot: 35999.37244981,
+            varpi: 102.93768193, varpiDot: 0.32327364,
+            Omega: 0, OmegaDot: 0,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 0, alpha0DotT: -0.641, delta0: 90, delta0DotT: -0.557, W0: 190.147, Wdot: 360.9856235 }),
+    },
+    Moon: {
+        name: "Moon",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Moon", 1738100, Infinity),
+        meanRadiusKm: 1737.4,
+        surfaceGravity: 1.622,
+        parent: "Earth",
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 269.9949, delta0: 66.5392, W0: 38.3213, Wdot: 13.17635815 }),
+    },
+    Mars: {
+        name: "Mars",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mars", 3396190, 169.89),
+        meanRadiusKm: 3389.5,
+        surfaceGravity: 3.721,
+        orbit: {
+            a: 1.52371034, aDot: 0.00001847,
+            e: 0.0933941, eDot: 0.00007882,
+            I: 1.84969142, IDot: -0.00813131,
+            L: -4.55343205, LDot: 19140.30268499,
+            varpi: -23.94362959, varpiDot: 0.44441088,
+            Omega: 49.55953891, OmegaDot: -0.29257343,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 317.269, alpha0DotT: -0.109, delta0: 54.432, delta0DotT: -0.0609, W0: 176.63, Wdot: 350.891982 }),
+    },
+    Phobos: {
+        name: "Phobos",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Phobos", 11100, Infinity),
+        meanRadiusKm: 11.1,
+        surfaceGravity: 0.0057,
+        parent: "Mars",
+        orbit: { a: 9377.2, aDot: 0, e: 0.0151, eDot: 0, I: 1.093, IDot: 0, L: 0, LDot: 41230066, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 317.269, delta0: 54.432, W0: 35.06, Wdot: 1128.844585 }),
+    },
+    Deimos: {
+        name: "Deimos",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Deimos", 6200, Infinity),
+        meanRadiusKm: 6.2,
+        surfaceGravity: 0.003,
+        parent: "Mars",
+        orbit: { a: 23460, aDot: 0, e: 0.00033, eDot: 0, I: 1.788, IDot: 0, L: 0, LDot: 10413456, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 317.269, delta0: 54.432, W0: 79.41, Wdot: 285.161897 }),
+    },
+    Jupiter: {
+        name: "Jupiter",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Jupiter", 71492000, 15.4144),
+        meanRadiusKm: 69911,
+        surfaceGravity: 24.79,
+        orbit: {
+            a: 5.202887, aDot: -0.00011607,
+            e: 0.04838624, eDot: -0.00013253,
+            I: 1.30439695, IDot: -0.00183714,
+            L: 34.39644051, LDot: 3034.74612775,
+            varpi: 14.72847983, varpiDot: 0.21252668,
+            Omega: 100.47390909, OmegaDot: 0.20469106,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 268.057, delta0: 64.495, W0: 284.95, Wdot: 870.536 }),
+    },
+    Io: {
+        name: "Io",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Io", 1821600, Infinity),
+        meanRadiusKm: 1821.6,
+        surfaceGravity: 1.796,
+        parent: "Jupiter",
+        orbit: { a: 421800, aDot: 0, e: 0.0041, eDot: 0, I: 0.036, IDot: 0, L: 342.021, LDot: 7432434, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 268.057, delta0: 64.495, W0: 200.39, Wdot: 203.4889538 }),
+    },
+    Europa: {
+        name: "Europa",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Europa", 1560800, Infinity),
+        meanRadiusKm: 1560.8,
+        surfaceGravity: 1.314,
+        parent: "Jupiter",
+        orbit: { a: 671100, aDot: 0, e: 0.0094, eDot: 0, I: 0.466, IDot: 0, L: 171.016, LDot: 3702712, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 268.057, delta0: 64.495, W0: 36.022, Wdot: 101.3747235 }),
+    },
+    Ganymede: {
+        name: "Ganymede",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Ganymede", 2634100, Infinity),
+        meanRadiusKm: 2634.1,
+        surfaceGravity: 1.428,
+        parent: "Jupiter",
+        orbit: { a: 1070400, aDot: 0, e: 0.0013, eDot: 0, I: 0.177, IDot: 0, L: 317.54, LDot: 1837624, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 268.057, delta0: 64.495, W0: 44.064, Wdot: 50.3176081 }),
+    },
+    Callisto: {
+        name: "Callisto",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Callisto", 2410300, Infinity),
+        meanRadiusKm: 2410.3,
+        surfaceGravity: 1.235,
+        parent: "Jupiter",
+        orbit: { a: 1882700, aDot: 0, e: 0.0074, eDot: 0, I: 0.192, IDot: 0, L: 181.408, LDot: 787909, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 268.057, delta0: 64.495, W0: 259.51, Wdot: 21.5710715 }),
+    },
+    Saturn: {
+        name: "Saturn",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Saturn", 60268000, 10.208),
+        meanRadiusKm: 58232,
+        surfaceGravity: 10.44,
+        orbit: {
+            a: 9.53667594, aDot: -0.0012506,
+            e: 0.05386179, eDot: -0.00050991,
+            I: 2.48599187, IDot: 0.00193609,
+            L: 49.95424423, LDot: 1222.49362201,
+            varpi: 92.59887831, varpiDot: -0.41897216,
+            Omega: 113.66242448, OmegaDot: -0.28867794,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 40.589, alpha0DotT: -0.036, delta0: 83.537, delta0DotT: -0.004, W0: 38.9, Wdot: 810.7939024 }),
+    },
+    Mimas: {
+        name: "Mimas",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Mimas", 198200, Infinity),
+        meanRadiusKm: 198.2,
+        surfaceGravity: 0.064,
+        parent: "Saturn",
+        orbit: { a: 185539, aDot: 0, e: 0.0196, eDot: 0, I: 1.574, IDot: 0, L: 0, LDot: 13951161, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 40.66, delta0: 83.52, W0: 333.46, Wdot: 381.994555 }),
+    },
+    Enceladus: {
+        name: "Enceladus",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Enceladus", 252100, Infinity),
+        meanRadiusKm: 252.1,
+        surfaceGravity: 0.113,
+        parent: "Saturn",
+        orbit: { a: 237948, aDot: 0, e: 0.0047, eDot: 0, I: 0.009, IDot: 0, L: 0, LDot: 9596209, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 40.66, delta0: 83.52, W0: 6.32, Wdot: 262.7318996 }),
+    },
+    Tethys: {
+        name: "Tethys",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Tethys", 531100, Infinity),
+        meanRadiusKm: 531.1,
+        surfaceGravity: 0.146,
+        parent: "Saturn",
+        orbit: { a: 294670, aDot: 0, e: 0.0001, eDot: 0, I: 1.091, IDot: 0, L: 0, LDot: 6964757, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 40.66, delta0: 83.52, W0: 8.95, Wdot: 190.6979085 }),
+    },
+    Dione: {
+        name: "Dione",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Dione", 561400, Infinity),
+        meanRadiusKm: 561.4,
+        surfaceGravity: 0.232,
+        parent: "Saturn",
+        orbit: { a: 377396, aDot: 0, e: 0.0022, eDot: 0, I: 0.028, IDot: 0, L: 0, LDot: 4803841, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 40.66, delta0: 83.52, W0: 357.6, Wdot: 131.5349316 }),
+    },
+    Rhea: {
+        name: "Rhea",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Rhea", 763800, Infinity),
+        meanRadiusKm: 763.8,
+        surfaceGravity: 0.264,
+        parent: "Saturn",
+        orbit: { a: 527108, aDot: 0, e: 0.001, eDot: 0, I: 0.345, IDot: 0, L: 0, LDot: 2910585, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 40.38, delta0: 83.55, W0: 235.16, Wdot: 79.6900478 }),
+    },
+    Titan: {
+        name: "Titan",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Titan", 2574730, Infinity),
+        meanRadiusKm: 2574.7,
+        surfaceGravity: 1.352,
+        parent: "Saturn",
+        orbit: { a: 1221865, aDot: 0, e: 0.0288, eDot: 0, I: 0.312, IDot: 0, L: 0, LDot: 824624, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 39.4827, delta0: 83.4279, W0: 186.5855, Wdot: 22.5769768 }),
+    },
+    Iapetus: {
+        name: "Iapetus",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Iapetus", 734500, Infinity),
+        meanRadiusKm: 734.5,
+        surfaceGravity: 0.223,
+        parent: "Saturn",
+        orbit: { a: 3560852, aDot: 0, e: 0.0283, eDot: 0, I: 7.57, IDot: 0, L: 0, LDot: 165750, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 318.16, delta0: 75.03, W0: 355.2, Wdot: 4.5379572 }),
+    },
+    Uranus: {
+        name: "Uranus",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Uranus", 25559000, 43.616),
+        meanRadiusKm: 25362,
+        surfaceGravity: 8.87,
+        orbit: {
+            a: 19.18916464, aDot: -0.00196176,
+            e: 0.04725744, eDot: -0.00004397,
+            I: 0.77263783, IDot: -0.00242939,
+            L: 313.23810451, LDot: 428.48202785,
+            varpi: 170.9542763, varpiDot: 0.40805281,
+            Omega: 74.01692503, OmegaDot: 0.04240589,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 257.311, delta0: -15.175, W0: 203.81, Wdot: -501.1600928 }),
+    },
+    Miranda: {
+        name: "Miranda",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Miranda", 235800, Infinity),
+        meanRadiusKm: 235.8,
+        surfaceGravity: 0.079,
+        parent: "Uranus",
+        orbit: { a: 129390, aDot: 0, e: 0.0013, eDot: 0, I: 4.338, IDot: 0, L: 0, LDot: 9302187, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 257.43, delta0: -15.08, W0: 30.7, Wdot: 254.6906892 }),
+    },
+    Ariel: {
+        name: "Ariel",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Ariel", 578900, Infinity),
+        meanRadiusKm: 578.9,
+        surfaceGravity: 0.269,
+        parent: "Uranus",
+        orbit: { a: 191020, aDot: 0, e: 0.0012, eDot: 0, I: 0.041, IDot: 0, L: 0, LDot: 5217032, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 257.43, delta0: -15.1, W0: 156.22, Wdot: 142.8356681 }),
+    },
+    Umbriel: {
+        name: "Umbriel",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Umbriel", 584700, Infinity),
+        meanRadiusKm: 584.7,
+        surfaceGravity: 0.2,
+        parent: "Uranus",
+        orbit: { a: 266300, aDot: 0, e: 0.0039, eDot: 0, I: 0.128, IDot: 0, L: 0, LDot: 3173041, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 257.43, delta0: -15.1, W0: 108.05, Wdot: 86.8688923 }),
+    },
+    Titania: {
+        name: "Titania",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Titania", 788400, Infinity),
+        meanRadiusKm: 788.4,
+        surfaceGravity: 0.367,
+        parent: "Uranus",
+        orbit: { a: 435910, aDot: 0, e: 0.0011, eDot: 0, I: 0.079, IDot: 0, L: 0, LDot: 1510386, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 257.43, delta0: -15.1, W0: 77.74, Wdot: 41.3514316 }),
+    },
+    Oberon: {
+        name: "Oberon",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Oberon", 761400, Infinity),
+        meanRadiusKm: 761.4,
+        surfaceGravity: 0.346,
+        parent: "Uranus",
+        orbit: { a: 583520, aDot: 0, e: 0.0014, eDot: 0, I: 0.068, IDot: 0, L: 0, LDot: 976703, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 257.43, delta0: -15.1, W0: 6.77, Wdot: 26.7394932 }),
+    },
+    Neptune: {
+        name: "Neptune",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.PLANET,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Neptune", 24764000, 58.5),
+        meanRadiusKm: 24622,
+        surfaceGravity: 11.15,
+        orbit: {
+            a: 30.06992276, aDot: 0.00026291,
+            e: 0.00859048, eDot: 0.00005105,
+            I: 1.77004347, IDot: 0.00035372,
+            L: -55.12002969, LDot: 218.45945325,
+            varpi: 44.96476227, varpiDot: -0.32241464,
+            Omega: 131.78422574, OmegaDot: -0.00508664,
+        },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 299.36, delta0: 43.46, W0: 249.978, Wdot: 541.1397757 }),
+    },
+    Triton: {
+        name: "Triton",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.MOON,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Triton", 1353400, Infinity),
+        meanRadiusKm: 1353.4,
+        surfaceGravity: 0.779,
+        parent: "Neptune",
+        // Retrograde orbit — LDot is negative. Relative to Neptune's equator
+        // the inclination is 156.865 deg (close to 180 = fully retrograde).
+        orbit: { a: 354760, aDot: 0, e: 0.000016, eDot: 0, I: 156.865, IDot: 0, L: 0, LDot: -2237337, varpi: 0, varpiDot: 0, Omega: 0, OmegaDot: 0 },
+        tilt: new _space_axialTilt__WEBPACK_IMPORTED_MODULE_1__.AxialTilt({ alpha0: 299.36, delta0: 41.17, W0: 296.53, Wdot: -61.2572637 }),
+    },
+    Ceres: {
+        name: "Ceres",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.ASTEROIDE,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Ceres", 476200, Infinity),
+        meanRadiusKm: 476.2,
+        surfaceGravity: 0.28,
+    },
+    Vesta: {
+        name: "Vesta",
+        celestialType: _space_interfaces__WEBPACK_IMPORTED_MODULE_2__.CelestialNodeType.ASTEROIDE,
+        ellipsoid: core_geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.FromAAndInverseF("Vesta", 262700, Infinity),
+        meanRadiusKm: 262.7,
+        surfaceGravity: 0.25,
+    },
+};
+//# sourceMappingURL=space.solarSystem.js.map
+
+/***/ },
+
 /***/ "./dist/space.spectralClass.js"
 /*!*************************************!*\
   !*** ./dist/space.spectralClass.js ***!
@@ -649,7 +1204,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MorganKeenanClass: () => (/* binding */ MorganKeenanClass),
 /* harmony export */   SpectralClass: () => (/* binding */ SpectralClass)
 /* harmony export */ });
-/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math.units */ "core/math/math.units");
+/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/math/math.units */ "core/geography/geography.position");
 /* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_math_math_units__WEBPACK_IMPORTED_MODULE_0__);
 
 class MorganKeenanClass {
@@ -755,7 +1310,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StarColor: () => (/* binding */ StarColor)
 /* harmony export */ });
 /* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.spectralClass */ "./dist/space.spectralClass.js");
-/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/math/math.color */ "core/math/math.units");
+/* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/math/math.color */ "core/geography/geography.position");
 /* harmony import */ var core_math_math_units__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_math_math_units__WEBPACK_IMPORTED_MODULE_1__);
 
 
@@ -1101,9 +1656,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Mars: () => (/* binding */ Mars),
 /* harmony export */   MarsUrlBuilder: () => (/* binding */ MarsUrlBuilder)
 /* harmony export */ });
-/* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/dem/dem.tileclient */ "core/math/math.units");
+/* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/dem/dem.tileclient */ "core/geography/geography.position");
 /* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! .. */ "./dist/space.bodies.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! .. */ "./dist/space.solarSystem.js");
 
 
 
@@ -1189,9 +1744,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Mercury: () => (/* binding */ Mercury),
 /* harmony export */   MercuryUrlBuilder: () => (/* binding */ MercuryUrlBuilder)
 /* harmony export */ });
-/* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles/tiles.url.web */ "core/math/math.units");
+/* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/tiles/tiles.url.web */ "core/geography/geography.position");
 /* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! .. */ "./dist/space.bodies.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! .. */ "./dist/space.solarSystem.js");
 
 
 
@@ -1228,9 +1783,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Moon: () => (/* binding */ Moon),
 /* harmony export */   MoonUrlBuilder: () => (/* binding */ MoonUrlBuilder)
 /* harmony export */ });
-/* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/dem/dem.tileclient */ "core/math/math.units");
+/* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/dem/dem.tileclient */ "core/geography/geography.position");
 /* harmony import */ var core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_tiles_tiles_client__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! .. */ "./dist/space.bodies.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! .. */ "./dist/space.solarSystem.js");
 
 
 
@@ -1292,7 +1847,7 @@ Moon.LOLA_DEM_URL = "https://trek.nasa.gov/moon/trekarcgis/rest/services/LRO_LOL
 
 /***/ },
 
-/***/ "core/math/math.units"
+/***/ "core/geography/geography.position"
 /*!**************************!*\
   !*** external "SPACEXR" ***!
   \**************************/
@@ -1401,19 +1956,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MoonState: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.MoonState),
 /* harmony export */   MoonUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_6__.MoonUrlBuilder),
 /* harmony export */   MorganKeenanClass: () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.MorganKeenanClass),
-/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ _space_bodies__WEBPACK_IMPORTED_MODULE_5__.SolarSystemBodies),
+/* harmony export */   SolarSystemBodies: () => (/* reexport safe */ _space_solarSystem__WEBPACK_IMPORTED_MODULE_5__.SolarSystemBodies),
 /* harmony export */   SpectralClass: () => (/* reexport safe */ _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__.SpectralClass),
 /* harmony export */   StarColor: () => (/* reexport safe */ _space_starColor__WEBPACK_IMPORTED_MODULE_3__.StarColor),
-/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.SunTrajectoryConfig)
+/* harmony export */   SunTrajectoryConfig: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.SunTrajectoryConfig),
+/* harmony export */   computeBodyEphemeris: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.computeBodyEphemeris),
+/* harmony export */   computeSolarSystemEphemeris: () => (/* reexport safe */ _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__.computeSolarSystemEphemeris)
 /* harmony export */ });
 /* harmony import */ var _space_axialTilt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./space.axialTilt */ "./dist/space.axialTilt.js");
 /* harmony import */ var _space_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./space.interfaces */ "./dist/space.interfaces.js");
 /* harmony import */ var _space_spectralClass__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./space.spectralClass */ "./dist/space.spectralClass.js");
 /* harmony import */ var _space_starColor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./space.starColor */ "./dist/space.starColor.js");
 /* harmony import */ var _Mechanics_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Mechanics/index */ "./dist/Mechanics/index.js");
-/* harmony import */ var _space_bodies__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./space.bodies */ "./dist/space.bodies.js");
+/* harmony import */ var _space_solarSystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./space.solarSystem */ "./dist/space.solarSystem.js");
 /* harmony import */ var _vendors_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./vendors/index */ "./dist/vendors/index.js");
 /* harmony import */ var _space_knownPlaces_moon__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./space.knownPlaces.moon */ "./dist/space.knownPlaces.moon.js");
+
 
 
 

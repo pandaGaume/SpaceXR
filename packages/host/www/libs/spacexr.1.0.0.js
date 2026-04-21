@@ -563,6 +563,114 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
 
 /***/ },
 
+/***/ "./dist/collections/priorityQueue.js"
+/*!*******************************************!*\
+  !*** ./dist/collections/priorityQueue.js ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PriorityQueue: () => (/* binding */ PriorityQueue),
+/* harmony export */   isPriorityQueue: () => (/* binding */ isPriorityQueue)
+/* harmony export */ });
+function isPriorityQueue(x) {
+    // duck-typing : adapte selon ton API réelle (enqueue/dequeue/peek/size)
+    return !!x && typeof x === "object" && typeof x.enqueue === "function" && typeof x.dequeue === "function";
+}
+/**
+ * PriorityQueue<T>
+ * - Binary heap with O(log n) push/pop, O(1) peek
+ * - Comparator: return < 0 if a has HIGHER priority than b
+ */
+class PriorityQueue {
+    constructor(compare) {
+        this._heap = [];
+        this._compare = compare;
+    }
+    /** Number of items */
+    size() {
+        return this._heap.length;
+    }
+    /** True if empty */
+    isEmpty() {
+        return this._heap.length === 0;
+    }
+    /** Peek best item (highest priority) without removing it */
+    peek() {
+        return this._heap[0];
+    }
+    /** Push an item (O(log n)) */
+    enqueue(value) {
+        this._heap.push(value);
+        this._siftUp(this._heap.length - 1);
+    }
+    /** Pop best item (O(log n)) */
+    dequeue() {
+        const n = this._heap.length;
+        if (n === 0)
+            return undefined;
+        this._swap(0, n - 1);
+        const out = this._heap.pop();
+        if (this._heap.length > 0)
+            this._siftDown(0);
+        return out;
+    }
+    /** Remove all items */
+    clear() {
+        this._heap.length = 0;
+    }
+    /** Build a Min-heap by numeric key: smaller key = higher priority */
+    static fromMin(key) {
+        return new PriorityQueue((a, b) => key(a) - key(b));
+    }
+    /** Build a Max-heap by numeric key: larger key = higher priority */
+    static fromMax(key) {
+        return new PriorityQueue((a, b) => key(b) - key(a));
+    }
+    // --- internals ---
+    _siftUp(i) {
+        while (i > 0) {
+            const p = (i - 1) >> 1;
+            if (this._compare(this._heap[i], this._heap[p]) < 0) {
+                this._swap(i, p);
+                i = p;
+            }
+            else
+                break;
+        }
+    }
+    _siftDown(i) {
+        const n = this._heap.length;
+        while (true) {
+            const l = (i << 1) + 1;
+            const r = l + 1;
+            let best = i;
+            if (l < n && this._compare(this._heap[l], this._heap[best]) < 0)
+                best = l;
+            if (r < n && this._compare(this._heap[r], this._heap[best]) < 0)
+                best = r;
+            if (best !== i) {
+                this._swap(i, best);
+                i = best;
+            }
+            else
+                break;
+        }
+    }
+    _swap(a, b) {
+        const tmp = this._heap[a];
+        this._heap[a] = this._heap[b];
+        this._heap[b] = tmp;
+    }
+    includes(item) {
+        return this._heap.includes(item);
+    }
+}
+//# sourceMappingURL=priorityQueue.js.map
+
+/***/ },
+
 /***/ "./dist/dataflow/dataflow.interfaces.js"
 /*!**********************************************!*\
   !*** ./dist/dataflow/dataflow.interfaces.js ***!
@@ -2291,8 +2399,8 @@ class GeodeticSystem {
     }
     geodeticFloatToCartesianToRef(lat, lon, alt, target, deg = true) {
         target = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
-        let lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lat;
-        let phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lon;
+        const lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lat;
+        const phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lon;
         // firs pass is to ECEF
         const sin_lambda = Math.sin(lambda);
         const cos_lambda = Math.cos(lambda);
@@ -2353,7 +2461,7 @@ class GeodeticSystem {
         let t5 = 0.5 * (beta - i);
         t5 = Math.abs(t5); // numeric turbulence fix near +-45.3 deg
         const t6 = Math.sqrt(t5);
-        const t7 = (m < n) ? t6 : -t6;
+        const t7 = m < n ? t6 : -t6;
         const t = t4 + t7;
         // Newton-Raphson correction
         const j = this._ellipsoid._l * (m - n);
@@ -2376,7 +2484,7 @@ class GeodeticSystem {
         const dw = w - wv * invuv;
         const dz = z - zu * this._ellipsoid._p1mee * invuv;
         const da = Math.sqrt(dw * dw + dz * dz);
-        const alt = (u < 1) ? -da : da;
+        const alt = u < 1 ? -da : da;
         // longitude in degrees
         const lon = Math.atan2(y, x) * _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.r2d;
         target.lat = lat;
@@ -3907,10 +4015,10 @@ class Cartesian3 extends Cartesian2 {
     ///   Check if four points are coplanar
     /// </summary>
     static AreCoplanar(a, b, c, d, epsilon) {
-        var n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
-        var n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
-        var m1 = Cartesian3.Magnitude(n1);
-        var m2 = Cartesian3.Magnitude(n2);
+        const n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
+        const n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
+        const m1 = Cartesian3.Magnitude(n1);
+        const m2 = Cartesian3.Magnitude(n2);
         const EPSILON = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON;
         return (m1 <= EPSILON ||
             m2 <= EPSILON ||
@@ -4049,7 +4157,7 @@ class Cartesian3 extends Cartesian2 {
         if (epsilon) {
             return Cartesian3.EqualsWithinEpsilon(a, b, epsilon);
         }
-        return b.x == a.x && b.y == a.y && b.z == a.z;
+        return b.x === a.x && b.y === a.y && b.z === a.z;
     }
     static EqualsWithinEpsilon(a, b, epsilon) {
         epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON;
@@ -4057,6 +4165,16 @@ class Cartesian3 extends Cartesian2 {
     }
     static Clone(other) {
         return new Cartesian3(other.x, other.y, other.z);
+    }
+    static Reset(a, x, y, z = 0.0) {
+        a.x = x;
+        a.y = y;
+        a.z = z;
+    }
+    static ResetFromArray(a, src, offset = 0) {
+        a.x = src[offset++];
+        a.y = src[offset++];
+        a.z = src[offset];
     }
     constructor(x, y, z = 0.0) {
         super(x, y);
@@ -8984,18 +9102,30 @@ Speed.Units = {};
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_3__.AbstractStreamSourceProducer),
+/* harmony export */   ClosestDistanceToAABB: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.ClosestDistanceToAABB),
+/* harmony export */   ConstantSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.ConstantSSEBudget),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.DefaultScreenSpaceErrorFn),
+/* harmony export */   IntersectsBoundingBox: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_6__.IntersectsBoundingBox),
+/* harmony export */   IsBeyondHorizon: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.IsBeyondHorizon),
 /* harmony export */   IsStreamSource: () => (/* reexport safe */ _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsStreamSource),
-/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ _streaming_view__WEBPACK_IMPORTED_MODULE_4__.IsStreamingViewTarget),
-/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceErrorPolicy),
-/* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_2__.StreamingEngine),
-/* harmony export */   StreamingView: () => (/* reexport safe */ _streaming_view__WEBPACK_IMPORTED_MODULE_4__.StreamingView)
+/* harmony export */   IsStreamSubEngine: () => (/* reexport safe */ _streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsStreamSubEngine),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.MapOverflightVisibilityPolicy),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.PiecewiseLinearSSEBudget),
+/* harmony export */   ResolveSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.ResolveSSEBudget),
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__.ScreenSpaceErrorPolicy),
+/* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.StepwiseSSEBudget),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming_active_context__WEBPACK_IMPORTED_MODULE_5__.StreamActiveContext),
+/* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming_content_adapter__WEBPACK_IMPORTED_MODULE_7__.StreamSourceContentAdapter),
+/* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_6__.StreamingEngine)
 /* harmony export */ });
 /* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming.datasource.interfaces */ "./dist/streaming/streaming.datasource.interfaces.js");
-/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.visibility.sse */ "./dist/streaming/streaming.visibility.sse.js");
-/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.engine */ "./dist/streaming/streaming.engine.js");
-/* harmony import */ var _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.producer.abstract */ "./dist/streaming/streaming.producer.abstract.js");
-/* harmony import */ var _streaming_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./streaming.view */ "./dist/streaming/streaming.view.js");
+/* harmony import */ var _streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.subengine.interfaces */ "./dist/streaming/streaming.subengine.interfaces.js");
+/* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.visibility.budget */ "./dist/streaming/streaming.visibility.budget.js");
+/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.visibility.sse */ "./dist/streaming/streaming.visibility.sse.js");
+/* harmony import */ var _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./streaming.visibility.overflight */ "./dist/streaming/streaming.visibility.overflight.js");
+/* harmony import */ var _streaming_active_context__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./streaming.active.context */ "./dist/streaming/streaming.active.context.js");
+/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./streaming.engine */ "./dist/streaming/streaming.engine.js");
+/* harmony import */ var _streaming_content_adapter__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./streaming.content.adapter */ "./dist/streaming/streaming.content.adapter.js");
 // Public surface of the streaming module is domain-agnostic.
 // Tile-specific adapters live under streaming/tile and must be imported
 // explicitly (or via the root barrel) by consumers that need them.
@@ -9005,7 +9135,123 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/streaming/streaming.active.context.js"
+/*!****************************************************!*\
+  !*** ./dist/streaming/streaming.active.context.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StreamActiveContext: () => (/* binding */ StreamActiveContext)
+/* harmony export */ });
+/* harmony import */ var _collections_priorityQueue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../collections/priorityQueue */ "./dist/collections/priorityQueue.js");
+
+/**
+ * Per-view mutable state maintained by StreamingEngine.
+ *
+ * Matches the "cut / parents / frontier" terminology commonly used in 3DTiles
+ * engines :
+ *  - `cut`       : items currently emitted to consumers (the leaves of the
+ *                  current selection).
+ *  - `parents`   : octree cells whose decision was "refine" this frame
+ *                  (ancestors of cut cells, kept for warm-start traversal).
+ *  - `frontier`  : octree cells whose decision was "load" this frame (the
+ *                  cells whose items populate `cut`).
+ *  - `refinePQ`  : priority queue of candidate refine operations, ordered so
+ *                  `dequeue` returns the highest-SSE item first (worst
+ *                  offender = most urgent to refine).
+ *  - `coarsenPQ` : priority queue of candidate coarsen operations, ordered so
+ *                  `dequeue` returns the lowest-SSE item first (least useful
+ *                  = safest to drop when coarsening is budgeted).
+ *
+ * `parents` and `frontier` are populated only by traversals that use the
+ * octree (the engine's default `_traverse`). Custom sub-engines that walk
+ * their own structure (tile pyramid, 3DTiles tree, …) simply leave them
+ * untouched.
+ */
+class StreamActiveContext {
+    constructor() {
+        this.camera = null;
+        this.cut = new Map();
+        this.parents = new Set();
+        this.frontier = new Set();
+        /** Monotonic frame counter incremented on every `_refresh`. */
+        this.frame = 0;
+        this.refinePQ = _collections_priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue.fromMax((e) => e.priority);
+        this.coarsenPQ = _collections_priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue.fromMin((e) => e.priority);
+    }
+    /** Drops the octree warm-start frontier. Forces a cold traversal from the roots next frame. */
+    resetTraversalFrontier() {
+        this.parents.clear();
+        this.frontier.clear();
+    }
+}
+//# sourceMappingURL=streaming.active.context.js.map
+
+/***/ },
+
+/***/ "./dist/streaming/streaming.content.adapter.js"
+/*!*****************************************************!*\
+  !*** ./dist/streaming/streaming.content.adapter.js ***!
+  \*****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StreamSourceContentAdapter: () => (/* binding */ StreamSourceContentAdapter)
+/* harmony export */ });
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+
+/**
+ * Generic unwrap adapter for streaming pipelines.
+ *
+ * Target side : `ITargetBlock<IStreamSource<T>>` (receives stream sources).
+ * Source side : `ISourceBlock<T>` (emits their `content`, skipping null ones).
+ *
+ * Lets hosts wire any `IStreamSource<T>` emitter (typically a sub-engine like
+ * TilePyramidStreamSource) to a downstream block that consumes the raw `T`
+ * content (e.g. an existing ITileLoader that consumes `ITile2DAddress`).
+ *
+ * Items whose `content` is null / undefined are silently skipped on each of
+ * the three channels; only payload-bearing items propagate.
+ */
+class StreamSourceContentAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor() {
+        super(...arguments);
+        this.added = (batch, _es) => {
+            const out = this._unwrap(batch);
+            if (out.length > 0)
+                this.notifyAdded(out);
+        };
+        this.updated = (batch, _es) => {
+            const out = this._unwrap(batch);
+            if (out.length > 0)
+                this.notifyUpdated(out);
+        };
+        this.removed = (batch, _es) => {
+            const out = this._unwrap(batch);
+            if (out.length > 0)
+                this.notifyRemoved(out);
+        };
+    }
+    _unwrap(batch) {
+        const out = [];
+        for (const s of batch) {
+            const c = s.content;
+            if (c !== null && c !== undefined)
+                out.push(c);
+        }
+        return out;
+    }
+}
+//# sourceMappingURL=streaming.content.adapter.js.map
 
 /***/ },
 
@@ -9037,188 +9283,65 @@ function IsStreamSource(b) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IntersectsBoundingBox: () => (/* binding */ IntersectsBoundingBox),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming_active_context__WEBPACK_IMPORTED_MODULE_1__.StreamActiveContext),
 /* harmony export */   StreamingEngine: () => (/* binding */ StreamingEngine)
 /* harmony export */ });
 /* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.visibility.sse */ "./dist/streaming/streaming.visibility.sse.js");
+/* harmony import */ var _streaming_active_context__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.active.context */ "./dist/streaming/streaming.active.context.js");
+/* harmony import */ var _streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.subengine.interfaces */ "./dist/streaming/streaming.subengine.interfaces.js");
+/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.visibility.sse */ "./dist/streaming/streaming.visibility.sse.js");
+
+
 
 
 /**
- * Per-camera engine that traverses shared octrees, applies visibility policies,
- * diffs against the previous active set, and emits datasource activations
- * through the SourceBlock pipeline pattern.
+ * AABB intersection test on two IBoundingBox (min/max). Inclusive on the edges.
+ */
+function IntersectsBoundingBox(a, b) {
+    return (a.minimum.x <= b.maximum.x &&
+        a.maximum.x >= b.minimum.x &&
+        a.minimum.y <= b.maximum.y &&
+        a.maximum.y >= b.minimum.y &&
+        a.minimum.z <= b.maximum.z &&
+        a.maximum.z >= b.minimum.z);
+}
+/**
+ * Multi-view streaming engine.
  *
- * Emission model:
- *  - addedObservable: datasources newly activated (operation: activate)
- *  - removedObservable: datasources newly deactivated (operation: deactivate)
- *  - updatedObservable: active datasources whose bounds changed (operation: update)
+ * Drives the streaming pipeline for one or more cameras through explicit
+ * `setContext(viewId, camera, clipBounds?)` pushes.
  *
- * The engine holds a Set of currently-visible cells and a Map of active sources,
- * which lets it react incrementally to octree mutations (fleet-monitoring case).
+ * Each refresh :
+ *  1. Full traversal populates `cut` candidates (desired set).
+ *  2. Diff vs the current cut seeds the `refinePQ` (new sources, max-SSE first)
+ *     and `coarsenPQ` (dropped sources, min-SSE first) of the view's
+ *     `StreamActiveContext`.
+ *  3. Up to `maxRefinePerFrame` items are dequeued from `refinePQ` and
+ *     activated ; up to `maxCoarsenPerFrame` from `coarsenPQ` and
+ *     deactivated. Leftovers are seen again next frame (lazy convergence).
+ *  4. `setContext(viewId, camera, clipBounds)` is forwarded to every active
+ *     sub-engine so they refresh their own sub-traversal.
+ *
+ * The default `_traverse` walks the configured octrees with the given policy
+ * and is designed to be overridden by subclasses that model their own spatial
+ * structure (quadtree + ellipsoid for `TilePyramidStreamSource`, for example).
  */
 class StreamingEngine extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
-    constructor(options) {
+    constructor(options = {}) {
         super();
-        this._visibleCells = new Set();
-        this._refineCells = new Set();
-        this._active = new Map();
-        this._cameraObserver = null;
+        this._views = new Map();
+        this._activeSubEngines = new Set();
         this._octreeObservers = [];
-        this._viewId = options.viewId;
-        this._camera = options.camera;
-        this._octrees = options.octrees;
-        this._defaultPolicy = options.defaultPolicy ?? new _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceErrorPolicy();
-        this._autoRefresh = options.autoRefresh ?? true;
-        if (this._autoRefresh) {
-            this._subscribeAll();
-        }
-    }
-    get viewId() {
-        return this._viewId;
-    }
-    get visibleCells() {
-        return this._visibleCells;
-    }
-    get activeSources() {
-        return this._active;
-    }
-    /**
-     * Runs a traversal, diffs against the current state and emits activations.
-     *
-     * By default the traversal is incremental: it starts from the parents of last
-     * frame's frontier (_refineCells ∪ _visibleCells), dedup'd via a visited set.
-     * This avoids re-walking the whole tree when the camera moves slightly.
-     *
-     * Pass `clearCache = true` to force a full traversal from the tree roots
-     * (camera teleport, octree swap, fresh world, etc.).
-     *
-     * Diff semantics:
-     *   - invisible → visible : emit "activate"
-     *   - visible   → invisible : emit "deactivate"
-     * The engine is the visibility authority. It does not broadcast bounds changes
-     * of active items: the scene already holds the IStreamSource reference and can
-     * observe its bounds directly if needed.
-     */
-    refresh(clearCache = false) {
-        if (clearCache) {
-            this._refineCells.clear();
-            this._visibleCells.clear();
-        }
-        const nextRefine = new Set();
-        const nextCells = new Set();
-        const nextItems = new Map();
-        const visited = new Set();
-        const startCells = this._computeStartCells();
-        for (const start of startCells) {
-            this._traverse(start, visited, nextRefine, nextCells, nextItems);
-        }
-        const added = [];
-        const removed = [];
-        for (const [id, src] of nextItems) {
-            if (!this._active.has(id)) {
-                added.push({ source: src, operation: "activate", priority: 0, viewId: this._viewId });
-            }
-        }
-        for (const [id, src] of this._active) {
-            if (!nextItems.has(id)) {
-                removed.push({ source: src, operation: "deactivate", priority: 0, viewId: this._viewId });
-            }
-        }
-        this._refineCells = nextRefine;
-        this._visibleCells = nextCells;
-        this._active = nextItems;
-        if (added.length > 0)
-            this.notifyAdded(added);
-        if (removed.length > 0)
-            this.notifyRemoved(removed);
-    }
-    /**
-     * Forces the next refresh to traverse from the roots. Use after camera teleports
-     * or any event that invalidates the incremental state. Equivalent to `refresh(true)`
-     * when called before `refresh()`.
-     */
-    resetTraversalCache() {
-        this._refineCells.clear();
-        this._visibleCells.clear();
-    }
-    dispose() {
-        this._unsubscribeAll();
-        super.dispose();
-    }
-    _traverse(node, visited, refineOut, cellsOut, itemsOut) {
-        if (visited.has(node))
-            return;
-        visited.add(node);
-        const policy = node.resolveVisibilityPolicy?.() ?? this._defaultPolicy;
-        const decision = policy.evaluate(node, this._camera);
-        switch (decision.kind) {
-            case "cull":
-                return;
-            case "load":
-                cellsOut.add(node);
-                this._collectSubtree(node, itemsOut);
-                return;
-            case "refine":
-                if (node.children && node.children.length > 0) {
-                    refineOut.add(node);
-                    for (const c of node.children) {
-                        this._traverse(c, visited, refineOut, cellsOut, itemsOut);
-                    }
-                }
-                else {
-                    cellsOut.add(node);
-                    this._collectSubtree(node, itemsOut);
-                }
-                return;
-        }
-    }
-    /**
-     * Returns the nodes from which the traversal should descend on this frame.
-     *
-     * - Cold start (no prior frontier): the roots of every octree.
-     * - Warm start: parents of every cell in the prior frontier. Walking up one
-     *   level catches siblings that transition from cull to load/refine when the
-     *   camera moves slightly. The `visited` set in `_traverse` handles the overlap.
-     *
-     * For a camera jump that moves past that one-level neighborhood, call
-     * `refresh(true)` or `resetTraversalCache()` to force a full re-traversal.
-     */
-    _computeStartCells() {
-        if (this._refineCells.size === 0 && this._visibleCells.size === 0) {
-            return this._octrees.map((t) => t.root);
-        }
-        const starts = new Set();
-        const push = (cell) => {
-            const anchor = cell.parent ?? cell;
-            starts.add(anchor);
-        };
-        for (const cell of this._refineCells)
-            push(cell);
-        for (const cell of this._visibleCells)
-            push(cell);
-        return Array.from(starts);
-    }
-    _collectSubtree(node, out) {
-        if (node.items) {
-            for (const item of node.items.data) {
-                out.set(item.id, item);
-            }
-        }
-        if (node.children) {
-            for (const c of node.children) {
-                this._collectSubtree(c, out);
-            }
-        }
-    }
-    _subscribeAll() {
-        if (this._camera.propertyChangedObservable) {
-            const obs = this._camera.propertyChangedObservable.add(() => this.refresh());
-            this._cameraObserver = obs;
-        }
+        this._octrees = options.octrees ?? [];
+        this._defaultPolicy = options.defaultPolicy ?? new _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__.ScreenSpaceErrorPolicy();
+        this._maxRefinePerFrame = options.maxRefinePerFrame ?? Number.POSITIVE_INFINITY;
+        this._maxCoarsenPerFrame = options.maxCoarsenPerFrame ?? Number.POSITIVE_INFINITY;
+        this._minFramesBeforeCoarsen = Math.max(0, options.minFramesBeforeCoarsen ?? 0);
         for (const tree of this._octrees) {
-            const onAdded = tree.addedObservable.add(() => this.refresh());
-            const onRemoved = tree.removedObservable.add(() => this.refresh());
-            const onUpdated = tree.updatedObservable.add(() => this.refresh());
+            const onAdded = tree.addedObservable.add(() => this._onOctreeChanged());
+            const onRemoved = tree.removedObservable.add(() => this._onOctreeChanged());
+            const onUpdated = tree.updatedObservable.add(() => this._onOctreeChanged());
             if (onAdded)
                 this._octreeObservers.push(onAdded);
             if (onRemoved)
@@ -9226,348 +9349,540 @@ class StreamingEngine extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPAC
             if (onUpdated)
                 this._octreeObservers.push(onUpdated);
         }
-        this.refresh();
     }
-    _unsubscribeAll() {
-        this._cameraObserver?.disconnect();
-        this._cameraObserver = null;
+    get activeViewCount() {
+        return this._views.size;
+    }
+    get maxRefinePerFrame() {
+        return this._maxRefinePerFrame;
+    }
+    get maxCoarsenPerFrame() {
+        return this._maxCoarsenPerFrame;
+    }
+    activate(viewId) {
+        if (this._views.has(viewId))
+            return;
+        this._views.set(viewId, new _streaming_active_context__WEBPACK_IMPORTED_MODULE_1__.StreamActiveContext());
+    }
+    setContext(viewId, camera, clipBounds) {
+        let ctx = this._views.get(viewId);
+        if (!ctx) {
+            this.activate(viewId);
+            ctx = this._views.get(viewId);
+        }
+        ctx.camera = camera;
+        ctx.clipBounds = clipBounds;
+        this._refresh(viewId, ctx);
+    }
+    deactivate(viewId) {
+        const ctx = this._views.get(viewId);
+        if (!ctx)
+            return;
+        const removed = [];
+        for (const entry of ctx.cut.values()) {
+            if ((0,_streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsStreamSubEngine)(entry.source)) {
+                const se = entry.source;
+                se.deactivate(viewId);
+                if (se.activeViewCount === 0)
+                    this._activeSubEngines.delete(se);
+            }
+            removed.push(entry.source);
+        }
+        this._views.delete(viewId);
+        if (removed.length > 0)
+            this.notifyRemoved(removed);
+    }
+    dispose() {
+        for (const viewId of Array.from(this._views.keys()))
+            this.deactivate(viewId);
+        this._activeSubEngines.clear();
         for (const o of this._octreeObservers)
             o.disconnect();
         this._octreeObservers = [];
+        super.dispose();
+    }
+    /**
+     * Drops the octree warm-start frontier for one view (or all). Next refresh
+     * runs a cold traversal from the octree roots.
+     */
+    resetTraversalCache(viewId) {
+        if (viewId) {
+            this._views.get(viewId)?.resetTraversalFrontier();
+            return;
+        }
+        for (const ctx of this._views.values())
+            ctx.resetTraversalFrontier();
+    }
+    /** Read-only view of a context's cut (for diagnostics). */
+    getActiveSources(viewId) {
+        const ctx = this._views.get(viewId);
+        if (!ctx)
+            return undefined;
+        const out = new Map();
+        for (const [id, entry] of ctx.cut)
+            out.set(id, entry.source);
+        return out;
+    }
+    // ───────── refresh / diff / forwarding ─────────
+    _refresh(viewId, ctx) {
+        if (!ctx.camera)
+            return;
+        ctx.frame++;
+        const frame = ctx.frame;
+        // Reset octree frontier for this refresh. Traversal will re-populate.
+        const nextParents = new Set();
+        const nextFrontier = new Set();
+        const nextEntries = new Map();
+        this._traverse(ctx.camera, ctx, nextParents, nextFrontier, nextEntries);
+        // Swap in fresh octree frontier immediately : it tracks traversal state,
+        // not emission state, and next frame's warm-start reads it directly.
+        ctx.parents.clear();
+        for (const n of nextParents)
+            ctx.parents.add(n);
+        ctx.frontier.clear();
+        for (const n of nextFrontier)
+            ctx.frontier.add(n);
+        // Build refine / coarsen queues from the diff.
+        ctx.refinePQ.clear();
+        ctx.coarsenPQ.clear();
+        for (const [id, entry] of nextEntries) {
+            if (!ctx.cut.has(id))
+                ctx.refinePQ.enqueue(entry);
+        }
+        for (const [id, entry] of ctx.cut) {
+            if (!nextEntries.has(id)) {
+                // Min-age gate : freshly-added entries survive at least a few frames
+                // to avoid activation/deactivation oscillation near a SSE threshold.
+                if (this._minFramesBeforeCoarsen > 0 && frame - entry.activatedFrame < this._minFramesBeforeCoarsen) {
+                    continue;
+                }
+                ctx.coarsenPQ.enqueue(entry);
+            }
+        }
+        // Apply per-frame budgets. Leftovers survive to next refresh via the diff.
+        const addedSources = [];
+        let refineBudget = this._maxRefinePerFrame;
+        while (refineBudget > 0 && !ctx.refinePQ.isEmpty()) {
+            const entry = ctx.refinePQ.dequeue();
+            if (!entry)
+                break;
+            entry.activatedFrame = frame;
+            entry.lastSeenFrame = frame;
+            ctx.cut.set(entry.source.id, entry);
+            if ((0,_streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsStreamSubEngine)(entry.source)) {
+                const se = entry.source;
+                se.activate(viewId);
+                this._activeSubEngines.add(se);
+            }
+            addedSources.push(entry.source);
+            refineBudget--;
+        }
+        const removedSources = [];
+        let coarsenBudget = this._maxCoarsenPerFrame;
+        while (coarsenBudget > 0 && !ctx.coarsenPQ.isEmpty()) {
+            const entry = ctx.coarsenPQ.dequeue();
+            if (!entry)
+                break;
+            ctx.cut.delete(entry.source.id);
+            if ((0,_streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsStreamSubEngine)(entry.source)) {
+                const se = entry.source;
+                se.deactivate(viewId);
+                if (se.activeViewCount === 0)
+                    this._activeSubEngines.delete(se);
+            }
+            removedSources.push(entry.source);
+            coarsenBudget--;
+        }
+        // Refresh stored priorities + lastSeenFrame of entries still present on
+        // both sides (their SSE moved as the camera moved, they are still alive).
+        for (const [id, entry] of ctx.cut) {
+            const next = nextEntries.get(id);
+            if (next) {
+                entry.priority = next.priority;
+                entry.lastSeenFrame = frame;
+            }
+        }
+        // Forward the fresh context to every currently-active sub-engine. Each
+        // sub-engine no-ops on viewIds it has not activated.
+        for (const se of this._activeSubEngines) {
+            se.setContext(viewId, ctx.camera, ctx.clipBounds);
+        }
+        if (addedSources.length > 0)
+            this.notifyAdded(addedSources);
+        if (removedSources.length > 0)
+            this.notifyRemoved(removedSources);
+    }
+    // ───────── traversal (overridable) ─────────
+    /**
+     * Default octree-based traversal : walks from the frontier anchors (or the
+     * octree roots on a cold start), applies per-cell visibility policies and
+     * collects leaf items with their cell-level priority.
+     *
+     * Subclasses override this when their engine does not use an octree (e.g.
+     * a tile pyramid traverses its implicit quadtree with a per-tile SSE).
+     * Octree-specific `parentsOut` / `frontierOut` populate the `parents` and
+     * `frontier` sets of `StreamActiveContext` ; subclasses may leave them empty.
+     */
+    _traverse(camera, ctx, parentsOut, frontierOut, entriesOut) {
+        const visited = new Set();
+        const starts = this._computeStartCells(ctx);
+        for (const start of starts) {
+            this._traverseNode(start, camera, ctx.clipBounds, visited, parentsOut, frontierOut, entriesOut);
+        }
+    }
+    _traverseNode(node, camera, clipBounds, visited, parentsOut, frontierOut, entriesOut) {
+        if (visited.has(node))
+            return;
+        visited.add(node);
+        // clipBounds pre-filter : skip whole sub-trees outside the requested region.
+        if (clipBounds && node.boundingBox && !IntersectsBoundingBox(node.boundingBox, clipBounds)) {
+            return;
+        }
+        const policy = node.resolveVisibilityPolicy?.() ?? this._defaultPolicy;
+        const decision = policy.evaluate(node, camera);
+        switch (decision.kind) {
+            case "cull":
+                return;
+            case "load": {
+                frontierOut.add(node);
+                const priority = decision.priority ?? 0;
+                this._collectSubtree(node, clipBounds, priority, entriesOut);
+                return;
+            }
+            case "refine":
+                if (node.children && node.children.length > 0) {
+                    parentsOut.add(node);
+                    for (const c of node.children) {
+                        this._traverseNode(c, camera, clipBounds, visited, parentsOut, frontierOut, entriesOut);
+                    }
+                }
+                else {
+                    frontierOut.add(node);
+                    const priority = decision.priority ?? 0;
+                    this._collectSubtree(node, clipBounds, priority, entriesOut);
+                }
+                return;
+        }
+    }
+    _computeStartCells(ctx) {
+        if (ctx.parents.size === 0 && ctx.frontier.size === 0) {
+            return this._octrees.map((t) => t.root);
+        }
+        const starts = new Set();
+        const push = (cell) => {
+            const anchor = cell.parent ?? cell;
+            starts.add(anchor);
+        };
+        for (const cell of ctx.parents)
+            push(cell);
+        for (const cell of ctx.frontier)
+            push(cell);
+        return Array.from(starts);
+    }
+    _collectSubtree(node, clipBounds, priority, out) {
+        if (node.items) {
+            for (const item of node.items.data) {
+                if (clipBounds && item.boundingBox && !IntersectsBoundingBox(item.boundingBox, clipBounds))
+                    continue;
+                const existing = out.get(item.id);
+                if (existing) {
+                    if (priority > existing.priority)
+                        existing.priority = priority;
+                }
+                else {
+                    // activatedFrame / lastSeenFrame are stamped when the entry actually
+                    // enters the cut in `_refresh` ; seed them to -1 so the aging check
+                    // treats this as a candidate (not yet promoted).
+                    out.set(item.id, { source: item, priority, activatedFrame: -1, lastSeenFrame: -1 });
+                }
+            }
+        }
+        if (node.children) {
+            for (const c of node.children) {
+                if (clipBounds && c.boundingBox && !IntersectsBoundingBox(c.boundingBox, clipBounds))
+                    continue;
+                this._collectSubtree(c, clipBounds, priority, out);
+            }
+        }
+    }
+    // ───────── octree mutation handling ─────────
+    _onOctreeChanged() {
+        for (const [viewId, ctx] of this._views) {
+            if (ctx.camera)
+                this._refresh(viewId, ctx);
+        }
     }
 }
+// Re-export for callers that only pull StreamingEngine + want the context type.
+
 //# sourceMappingURL=streaming.engine.js.map
 
 /***/ },
 
-/***/ "./dist/streaming/streaming.producer.abstract.js"
+/***/ "./dist/streaming/streaming.subengine.interfaces.js"
+/*!**********************************************************!*\
+  !*** ./dist/streaming/streaming.subengine.interfaces.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsStreamSubEngine: () => (/* binding */ IsStreamSubEngine)
+/* harmony export */ });
+function IsStreamSubEngine(b) {
+    if (b === null || typeof b !== "object")
+        return false;
+    const s = b;
+    return typeof s.activate === "function" && typeof s.setContext === "function" && typeof s.deactivate === "function" && typeof s.activeViewCount === "number";
+}
+//# sourceMappingURL=streaming.subengine.interfaces.js.map
+
+/***/ },
+
+/***/ "./dist/streaming/streaming.visibility.budget.js"
 /*!*******************************************************!*\
-  !*** ./dist/streaming/streaming.producer.abstract.js ***!
+  !*** ./dist/streaming/streaming.visibility.budget.js ***!
   \*******************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractStreamSourceProducer: () => (/* binding */ AbstractStreamSourceProducer)
+/* harmony export */   ConstantSSEBudget: () => (/* binding */ ConstantSSEBudget),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* binding */ PiecewiseLinearSSEBudget),
+/* harmony export */   ResolveSSEBudget: () => (/* binding */ ResolveSSEBudget),
+/* harmony export */   StepwiseSSEBudget: () => (/* binding */ StepwiseSSEBudget)
 /* harmony export */ });
-/* harmony import */ var _cache_cache__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cache/cache */ "./dist/cache/cache.js");
-/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-
-
-/**
- * Base class for 1:1 (static) datasource producers.
- *
- * For each activation:
- *  1. ADD is emitted immediately with status = "downloading"
- *  2. _load(source) runs asynchronously
- *  3. on success  : status = "ready", content = payload, UPDATE emitted
- *     on failure  : status = "failed" (or "failed-permanently" if subclass decides), UPDATE emitted
- *     on cancel   : REMOVE emitted, payload discarded
- *  4. on deactivate : status = "deactivated", REMOVE emitted (content stays cached for re-activation)
- *  5. on unload     : cache.delete, content dropped
- *
- * Cancellation is safe: a deactivate arriving while the source is still loading
- * flips the internal state to "cancelled"; the pending load's result is discarded
- * for THIS view but the shared load keeps running for other views (see `_pending`).
- *
- * Spawner producers (1:N) should extend IStreamSourceProducer directly and NOT rely
- * on this base class: their lifecycle does not match the 1:1 model.
- */
-class AbstractStreamSourceProducer extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_1__.SourceBlock {
-    constructor(cache) {
-        super();
-        this._pending = new Map();
-        this._states = new Map();
-        this.added = (batch, _es) => {
-            void this._handle(batch);
-        };
-        this.removed = (batch, _es) => {
-            void this._handle(batch);
-        };
-        this.updated = (batch, _es) => {
-            void this._handle(batch);
-        };
-        this._cache = cache ?? new _cache_cache__WEBPACK_IMPORTED_MODULE_0__.MemoryCache();
+/** Altitude-independent budget : the classic "one maxSSE for all". */
+class ConstantSSEBudget {
+    constructor(maxSSE) {
+        this.maxSSE = maxSSE;
     }
-    handles(source) {
-        return source.contentType === this.contentType;
-    }
-    /** Optional hook for subclasses (e.g. ref-counting). Default no-op. */
-    _onActivated(_source, _viewId) { }
-    /** Optional hook for subclasses (e.g. ref-counting). Default no-op. */
-    _onDeactivated(_source, _viewId) { }
-    /** Optional hook on unload. Default no-op. */
-    _onUnloaded(_source, _payload) { }
-    dispose() {
-        this._states.clear();
-        this._pending.clear();
-        this._cache.dispose();
-        super.dispose();
-    }
-    async _handle(batch) {
-        for (const a of batch) {
-            if (!this.handles(a.source))
-                continue;
-            switch (a.operation) {
-                case "load":
-                    await this._ensureLoaded(a.source);
-                    break;
-                case "activate":
-                    await this._doActivate(a);
-                    break;
-                case "update":
-                    this._doUpdate(a);
-                    break;
-                case "deactivate":
-                    this._doDeactivate(a);
-                    break;
-                case "unload":
-                    this._doUnload(a);
-                    break;
-            }
-        }
-    }
-    async _doActivate(a) {
-        const src = a.source;
-        const existing = this._getState(a.viewId, src.id);
-        if (existing && (existing.status === "loading" || existing.status === "active")) {
-            return;
-        }
-        const state = { status: "loading" };
-        this._setState(a.viewId, src.id, state);
-        // Emit ADD immediately with downloading status so the scene can render placeholders.
-        src.status = "downloading";
-        this.notifyAdded([src]);
-        let payload;
-        try {
-            payload = await this._ensureLoaded(src);
-        }
-        catch (err) {
-            if (this._getState(a.viewId, src.id) === state) {
-                src.status = "failed";
-                this.notifyUpdated([src]);
-                this._deleteState(a.viewId, src.id);
-            }
-            throw err;
-        }
-        if (state.status === "cancelled") {
-            // deactivate raced with the load; ADD was already emitted so we must emit REMOVE
-            this._deleteState(a.viewId, src.id);
-            src.status = "deactivated";
-            this.notifyRemoved([src]);
-            return;
-        }
-        state.status = "active";
-        src.status = "ready";
-        src.content = payload;
-        this._onActivated(src, a.viewId);
-        this.notifyUpdated([src]);
-    }
-    _doUpdate(a) {
-        const src = a.source;
-        const state = this._getState(a.viewId, src.id);
-        if (state?.status === "active") {
-            this.notifyUpdated([src]);
-        }
-    }
-    _doDeactivate(a) {
-        const src = a.source;
-        const state = this._getState(a.viewId, src.id);
-        if (!state)
-            return;
-        if (state.status === "loading") {
-            state.status = "cancelled";
-            return;
-        }
-        if (state.status === "active") {
-            src.status = "deactivated";
-            this._onDeactivated(src, a.viewId);
-            this._deleteState(a.viewId, src.id);
-            this.notifyRemoved([src]);
-        }
-    }
-    _doUnload(a) {
-        const src = a.source;
-        const state = this._getState(a.viewId, src.id);
-        if (state?.status === "loading") {
-            state.status = "cancelled";
-        }
-        else if (state?.status === "active") {
-            src.status = "deactivated";
-            this._onDeactivated(src, a.viewId);
-            this._deleteState(a.viewId, src.id);
-            this.notifyRemoved([src]);
-        }
-        const payload = this._cache.get(src.id);
-        if (payload !== undefined) {
-            this._onUnloaded(src, payload);
-            this._cache.delete(src.id);
-            src.content = null;
-        }
-    }
-    async _ensureLoaded(source) {
-        const cached = this._cache.get(source.id);
-        if (cached !== undefined)
-            return cached;
-        let pending = this._pending.get(source.id);
-        if (!pending) {
-            pending = (async () => {
-                try {
-                    const p = await this._load(source);
-                    this._cache.set(source.id, p);
-                    return p;
-                }
-                finally {
-                    this._pending.delete(source.id);
-                }
-            })();
-            this._pending.set(source.id, pending);
-        }
-        return pending;
-    }
-    _getState(viewId, sourceId) {
-        return this._states.get(viewId)?.get(sourceId);
-    }
-    _setState(viewId, sourceId, state) {
-        let m = this._states.get(viewId);
-        if (!m) {
-            m = new Map();
-            this._states.set(viewId, m);
-        }
-        m.set(sourceId, state);
-    }
-    _deleteState(viewId, sourceId) {
-        const m = this._states.get(viewId);
-        if (!m)
-            return;
-        m.delete(sourceId);
-        if (m.size === 0)
-            this._states.delete(viewId);
+    getMaxSSE(_altitude) {
+        return this.maxSSE;
     }
 }
-//# sourceMappingURL=streaming.producer.abstract.js.map
+/**
+ * Step function in altitude : first step whose `upToAltitude` is >= the current
+ * altitude wins, else `aboveLastMaxSSE` is used for altitudes above the last step.
+ *
+ * Example : `new StepwiseSSEBudget([{upToAltitude: 500, maxSSE: 4}, {upToAltitude: 10_000, maxSSE: 12}], 32)`
+ *  - [0, 500]       : 4
+ *  - (500, 10_000]  : 12
+ *  - (10_000, inf)  : 32
+ */
+class StepwiseSSEBudget {
+    constructor(steps, aboveLastMaxSSE) {
+        this.steps = steps.slice().sort((a, b) => a.upToAltitude - b.upToAltitude);
+        this.aboveLastMaxSSE = aboveLastMaxSSE;
+    }
+    getMaxSSE(altitude) {
+        for (const step of this.steps) {
+            if (altitude <= step.upToAltitude)
+                return step.maxSSE;
+        }
+        return this.aboveLastMaxSSE;
+    }
+}
+/**
+ * Piecewise-linear interpolation between anchor points in altitude. Edges are
+ * clamped (no extrapolation) : altitudes below the first point use the first
+ * value, above the last point use the last value.
+ *
+ * Example : `new PiecewiseLinearSSEBudget([{altitude: 0, maxSSE: 4}, {altitude: 1_000, maxSSE: 16}, {altitude: 1_000_000, maxSSE: 32}])`
+ *  - ground (0)       : 4
+ *  - 500 m            : 10 (linear interp between 4 and 16)
+ *  - 1 km             : 16
+ *  - 500 km           : ~24 (interp between 16 and 32)
+ *  - 1 000 km and up  : 32
+ */
+class PiecewiseLinearSSEBudget {
+    constructor(points) {
+        if (points.length === 0) {
+            throw new Error("PiecewiseLinearSSEBudget requires at least one point.");
+        }
+        this.points = points.slice().sort((a, b) => a.altitude - b.altitude);
+    }
+    getMaxSSE(altitude) {
+        const pts = this.points;
+        const first = pts[0];
+        const last = pts[pts.length - 1];
+        if (altitude <= first.altitude)
+            return first.maxSSE;
+        if (altitude >= last.altitude)
+            return last.maxSSE;
+        for (let i = 0; i < pts.length - 1; i++) {
+            const a = pts[i];
+            const b = pts[i + 1];
+            if (altitude >= a.altitude && altitude <= b.altitude) {
+                const span = b.altitude - a.altitude;
+                const t = span > 0 ? (altitude - a.altitude) / span : 0;
+                return a.maxSSE + t * (b.maxSSE - a.maxSSE);
+            }
+        }
+        return last.maxSSE;
+    }
+}
+/**
+ * Narrows any value to an IScreenSpaceErrorBudget : forwards an existing budget,
+ * wraps a plain number as a ConstantSSEBudget.
+ */
+function ResolveSSEBudget(budgetOrNumber) {
+    return typeof budgetOrNumber === "number" ? new ConstantSSEBudget(budgetOrNumber) : budgetOrNumber;
+}
+//# sourceMappingURL=streaming.visibility.budget.js.map
 
 /***/ },
 
-/***/ "./dist/streaming/streaming.view.js"
-/*!******************************************!*\
-  !*** ./dist/streaming/streaming.view.js ***!
-  \******************************************/
+/***/ "./dist/streaming/streaming.visibility.overflight.js"
+/*!***********************************************************!*\
+  !*** ./dist/streaming/streaming.visibility.overflight.js ***!
+  \***********************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   IsStreamingViewTarget: () => (/* binding */ IsStreamingViewTarget),
-/* harmony export */   StreamingView: () => (/* binding */ StreamingView)
+/* harmony export */   ClosestDistanceToAABB: () => (/* binding */ ClosestDistanceToAABB),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* binding */ DefaultScreenSpaceErrorFn),
+/* harmony export */   IsBeyondHorizon: () => (/* binding */ IsBeyondHorizon),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* binding */ MapOverflightVisibilityPolicy)
 /* harmony export */ });
-/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming.visibility.budget */ "./dist/streaming/streaming.visibility.budget.js");
 
 /**
- * Per-camera routing block.
- *
- * Target side (ITargetBlock<IStreamSourceActivation>): receives activations from the
- * StreamingEngine. The view resolves datasource links (replace / add / modify),
- * groups activations by `contentType`, and forwards them to the registered producers.
- *
- * Source side (ISourceBlock<IStreamSource>): aggregates the outputs of all producers
- * so the downstream scene can link once to the view and see the union of datasources
- * (with their evolving status) across producers.
- *
- * The view holds the "visible/active" set for its camera implicitly, derived from
- * what the engine emits and what producers acknowledge.
+ * Default SSE : standard perspective projection of geometric error on the image plane.
+ *   sse = (geometricError * viewportHeight) / (distance * 2 * tan(fov/2))
  */
-class StreamingView extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+const DefaultScreenSpaceErrorFn = (geometricError, distance, viewportHeight, tanFov2) => (geometricError * viewportHeight) / (Math.max(distance, 1e-6) * 2 * Math.max(tanFov2, 1e-6));
+/**
+ * Visibility policy tailored for the "camera overflight" case : the map is
+ * either a flat plane or a sphere (any planet via Ellipsoid), and the decision
+ * whether to load or refine a cell depends on
+ *  - frustum culling (via `camera.isInFrustum` when provided),
+ *  - horizon culling when flying over a sphere,
+ *  - altitude-dependent max screen-space error (via IScreenSpaceErrorBudget),
+ *  - hysteresis around the budget to prevent flicker.
+ *
+ * Stateful : keeps the last decision per node in a WeakMap so the hysteresis
+ * can kick in. Safe to reuse across engines and views.
+ */
+class MapOverflightVisibilityPolicy {
     constructor(options) {
-        super();
-        this._byContentType = new Map();
-        this._producerObservers = [];
-        this.added = (batch, es) => this._route(batch, es, "added");
-        this.removed = (batch, es) => this._route(batch, es, "removed");
-        this.updated = (batch, es) => this._route(batch, es, "updated");
-        this._viewId = options.viewId;
-        if (options.producers) {
-            for (const p of options.producers)
-                this.registerProducer(p);
-        }
+        this._lastDecision = new WeakMap();
+        this._mode = options.mode;
+        this._budget = (0,_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_0__.ResolveSSEBudget)(options.budget);
+        this._planePoint = options.planePoint ?? { x: 0, y: 0, z: 0 };
+        const n = options.planeNormal ?? { x: 0, y: 0, z: 1 };
+        const nl = Math.hypot(n.x, n.y, n.z) || 1;
+        this._planeNormal = { x: n.x / nl, y: n.y / nl, z: n.z / nl };
+        this._sphereCenter = options.sphereCenter ?? { x: 0, y: 0, z: 0 };
+        this._sphereRadius = options.ellipsoid ? options.ellipsoid.semiMajorAxis : options.sphereRadius ?? 6378137;
+        this._horizonCull = options.horizonCull ?? options.mode === "sphere";
+        this._hysteresisOffset = options.hysteresisOffset;
+        this._hysteresisPercent = options.hysteresisPercent;
+        this._sseFn = options.sseFn ?? DefaultScreenSpaceErrorFn;
+        this._defaultVH = options.defaultViewportHeight ?? MapOverflightVisibilityPolicy.DefaultViewportHeight;
     }
-    get viewId() {
-        return this._viewId;
-    }
-    /**
-     * Register a producer. Its outputs (activatedObservable/deactivatedObservable/
-     * updatedObservable) are forwarded through the view's own SourceBlock.
-     * A producer can only be registered once per contentType.
-     */
-    registerProducer(producer) {
-        if (this._byContentType.has(producer.contentType))
-            return;
-        this._byContentType.set(producer.contentType, producer);
-        const onAdded = producer.addedObservable.add((batch) => this.notifyAdded(batch));
-        const onRemoved = producer.removedObservable.add((batch) => this.notifyRemoved(batch));
-        const onUpdated = producer.updatedObservable.add((batch) => this.notifyUpdated(batch));
-        if (onAdded)
-            this._producerObservers.push(onAdded);
-        if (onRemoved)
-            this._producerObservers.push(onRemoved);
-        if (onUpdated)
-            this._producerObservers.push(onUpdated);
-    }
-    getProducer(contentType) {
-        return this._byContentType.get(contentType) ?? null;
-    }
-    dispose() {
-        for (const o of this._producerObservers)
-            o.disconnect();
-        this._producerObservers.length = 0;
-        this._byContentType.clear();
-        super.dispose();
-    }
-    _route(batch, es, channel) {
-        const resolved = this._resolveLinks(batch);
-        const byType = new Map();
-        for (const a of resolved) {
-            let arr = byType.get(a.source.contentType);
-            if (!arr) {
-                arr = [];
-                byType.set(a.source.contentType, arr);
+    evaluate(node, camera) {
+        const bounds = node.boundingBox;
+        if (!bounds)
+            return { kind: "cull" };
+        // Frustum
+        if (camera.isInFrustum && !camera.isInFrustum(bounds))
+            return { kind: "cull" };
+        // Horizon (sphere mode only)
+        if (this._mode === "sphere" && this._horizonCull) {
+            if (IsBeyondHorizon(bounds.center, camera.worldPosition, this._sphereCenter, this._sphereRadius)) {
+                return { kind: "cull" };
             }
-            arr.push(a);
         }
-        for (const [contentType, acts] of byType) {
-            const producer = this._byContentType.get(contentType);
-            if (!producer)
-                continue;
-            const cb = producer[channel];
-            if (cb)
-                cb.call(producer, acts, es);
+        // Altitude for the budget
+        const altitude = this._altitude(camera.worldPosition);
+        // Distance to closest point on the AABB
+        const distance = ClosestDistanceToAABB(camera.worldPosition, bounds);
+        const gErr = node.geometricError;
+        if (gErr === undefined || gErr <= 0) {
+            // no geometric error : keep the cell as load (leaf-like semantics)
+            this._lastDecision.set(node, "load");
+            return { kind: "load", priority: 1 / Math.max(distance, 1e-6) };
         }
+        const vh = camera.viewportHeight && camera.viewportHeight > 0 ? camera.viewportHeight : this._defaultVH;
+        const tan = camera.tanFov2 > 0 ? camera.tanFov2 : Math.tan((camera.fovY || 0) * 0.5);
+        const sse = this._sseFn(gErr, distance, vh, tan);
+        const budgetMax = this._budget.getMaxSSE(altitude);
+        // Hysteresis : asymmetric threshold depending on the previous decision.
+        let effectiveMax = budgetMax;
+        const hys = this._hysteresisAmount(budgetMax);
+        if (hys > 0) {
+            const prev = this._lastDecision.get(node);
+            if (prev === "load") {
+                effectiveMax = budgetMax + hys;
+            }
+            else if (prev === "refine") {
+                effectiveMax = budgetMax - hys;
+            }
+        }
+        const noChildren = !node.children || node.children.length === 0;
+        if (sse <= effectiveMax || noChildren) {
+            this._lastDecision.set(node, "load");
+            return { kind: "load", priority: sse };
+        }
+        this._lastDecision.set(node, "refine");
+        return { kind: "refine", priority: sse };
     }
-    /**
-     * Resolves datasource links before dispatch. v1 is a pass-through.
-     *
-     * TODO: implement link semantics:
-     *  - replace(target) : when this source activates, emit deactivate for target first
-     *  - add(target)     : emit both (no conflict)
-     *  - modify(target)  : emit an update on target carrying this source as overlay
-     *
-     * Resolution needs the view's current active set plus the datasource registry;
-     * deferring until we have a concrete use case that stresses it.
-     */
-    _resolveLinks(batch) {
-        return batch;
+    /** Camera altitude above the map surface (>=0 in sphere mode, signed in plane mode). */
+    _altitude(position) {
+        if (this._mode === "plane") {
+            const dx = position.x - this._planePoint.x;
+            const dy = position.y - this._planePoint.y;
+            const dz = position.z - this._planePoint.z;
+            return dx * this._planeNormal.x + dy * this._planeNormal.y + dz * this._planeNormal.z;
+        }
+        const dx = position.x - this._sphereCenter.x;
+        const dy = position.y - this._sphereCenter.y;
+        const dz = position.z - this._sphereCenter.z;
+        return Math.max(Math.hypot(dx, dy, dz) - this._sphereRadius, 0);
     }
+    _hysteresisAmount(budgetMax) {
+        if (this._hysteresisOffset !== undefined)
+            return this._hysteresisOffset;
+        if (this._hysteresisPercent !== undefined)
+            return budgetMax * this._hysteresisPercent;
+        return 0;
+    }
+}
+MapOverflightVisibilityPolicy.DefaultViewportHeight = 1080;
+// ─────────────────────────────────────────────────────────────────────────
+// Shared math helpers (exported for reuse by other policies / sub-engines).
+// ─────────────────────────────────────────────────────────────────────────
+/**
+ * Closest distance from `point` to the axis-aligned bounding box. Returns 0
+ * when the point is inside the box.
+ */
+function ClosestDistanceToAABB(point, bounds) {
+    const cx = point.x < bounds.minimum.x ? bounds.minimum.x : point.x > bounds.maximum.x ? bounds.maximum.x : point.x;
+    const cy = point.y < bounds.minimum.y ? bounds.minimum.y : point.y > bounds.maximum.y ? bounds.maximum.y : point.y;
+    const cz = point.z < bounds.minimum.z ? bounds.minimum.z : point.z > bounds.maximum.z ? bounds.maximum.z : point.z;
+    return Math.hypot(point.x - cx, point.y - cy, point.z - cz);
 }
 /**
- * Type guard for ITargetBlock<IStreamSourceActivation> so an engine can link to a view.
- * (Mostly useful for external callers that want to verify a view shape at runtime.)
+ * True when `point` is occluded by the sphere as seen from `cameraPosition`.
+ *
+ * Uses the horizon-plane test :
+ *   dot(point - center, cameraPos - center) < R²
+ * which is exact for points on the sphere surface and mildly over-culls for
+ * points well above the surface (acceptable for tile-pyramid cells). Cheap :
+ * one dot product and one comparison.
  */
-function IsStreamingViewTarget(b) {
-    if (b === null || typeof b !== "object")
-        return false;
-    const t = b;
-    return t.added !== undefined || t.removed !== undefined || t.updated !== undefined;
+function IsBeyondHorizon(point, cameraPosition, sphereCenter, sphereRadius) {
+    const ux = cameraPosition.x - sphereCenter.x;
+    const uy = cameraPosition.y - sphereCenter.y;
+    const uz = cameraPosition.z - sphereCenter.z;
+    const vx = point.x - sphereCenter.x;
+    const vy = point.y - sphereCenter.y;
+    const vz = point.z - sphereCenter.z;
+    return ux * vx + uy * vy + uz * vz < sphereRadius * sphereRadius;
 }
-//# sourceMappingURL=streaming.view.js.map
+//# sourceMappingURL=streaming.visibility.overflight.js.map
 
 /***/ },
 
@@ -9661,13 +9976,361 @@ ScreenSpaceErrorPolicy.DefaultMaxScreenSpaceError = 16;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EmptyTileBounds: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.EmptyTileBounds),
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ _tile_pyramid_stream_source__WEBPACK_IMPORTED_MODULE_1__.TILE_PYRAMID_CONTENT_TYPE),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TILE_STREAM_CONTENT_TYPE),
-/* harmony export */   TileStreamSource: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSourceProducer)
+/* harmony export */   TileLoaderAdapter: () => (/* reexport safe */ _tile_loader_adapter__WEBPACK_IMPORTED_MODULE_2__.TileLoaderAdapter),
+/* harmony export */   TilePyramidStreamSource: () => (/* reexport safe */ _tile_pyramid_stream_source__WEBPACK_IMPORTED_MODULE_1__.TilePyramidStreamSource),
+/* harmony export */   TileStreamSource: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSource)
 /* harmony export */ });
 /* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile.stream.source */ "./dist/streaming/tile/tile.stream.source.js");
+/* harmony import */ var _tile_pyramid_stream_source__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile.pyramid.stream.source */ "./dist/streaming/tile/tile.pyramid.stream.source.js");
+/* harmony import */ var _tile_loader_adapter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.loader.adapter */ "./dist/streaming/tile/tile.loader.adapter.js");
+
+
 
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/streaming/tile/tile.loader.adapter.js"
+/*!****************************************************!*\
+  !*** ./dist/streaming/tile/tile.loader.adapter.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TileLoaderAdapter: () => (/* binding */ TileLoaderAdapter)
+/* harmony export */ });
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles/pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile.stream.source */ "./dist/streaming/tile/tile.stream.source.js");
+
+
+/**
+ * Bridges a TilePyramidStreamSource (or any source emitting IStreamSource<ITile2DAddress>)
+ * to an existing ITileLoader. The adapter :
+ *
+ *  - unwraps the address from each incoming stream source and forwards it to
+ *    the loader (so the loader resolves content in its usual way),
+ *  - subscribes to the loader's added / updated / removed observables and
+ *    writes back on the matching stream sources : flips `status` to
+ *    `"downloading"` → `"ready"` and attaches the fetched `ITile<T>` on
+ *    `TileStreamSource.tile`,
+ *  - re-emits each status transition through its own `updated` / `removed`
+ *    observables, so downstream scene consumers keep a single uniform stream.
+ *
+ * Wiring :
+ *     pyramid.linkTo(adapter);
+ *     adapter.linkTo(sceneTarget);
+ *
+ * Multi-view caveat : when the same quadkey is emitted twice (one per view)
+ * the adapter keeps the last reference per quadkey. Loader-level dedup is
+ * already enforced by TileCollection, so this is safe.
+ */
+class TileLoaderAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor(loader) {
+        super();
+        this._entries = new Map();
+        this._loaderObservers = [];
+        // ───────── ITargetBlock ─────────
+        this.added = (batch, _es) => {
+            const addresses = [];
+            const updatedStatus = [];
+            for (const src of batch) {
+                const addr = src.content;
+                if (!addr)
+                    continue;
+                this._entries.set(addr.quadkey, src);
+                if (src.status === "pending") {
+                    src.status = "downloading";
+                    updatedStatus.push(src);
+                }
+                addresses.push(addr);
+            }
+            if (addresses.length > 0) {
+                this._addressForwarder.notifyAdded(addresses);
+            }
+            if (updatedStatus.length > 0) {
+                this.notifyUpdated(updatedStatus);
+            }
+        };
+        this.removed = (batch, _es) => {
+            const addresses = [];
+            const out = [];
+            for (const src of batch) {
+                const addr = src.content;
+                if (!addr)
+                    continue;
+                this._entries.delete(addr.quadkey);
+                // Leave `status` untouched : the removed event is the authoritative
+                // signal. Drop the attached tile ref so consumers do not hold stale data.
+                if (src instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                    src.tile = null;
+                addresses.push(addr);
+                out.push(src);
+            }
+            if (addresses.length > 0) {
+                this._addressForwarder.notifyRemoved(addresses);
+            }
+            if (out.length > 0) {
+                this.notifyRemoved(out);
+            }
+        };
+        this.updated = (batch, _es) => {
+            // Pass-through : address-level update is rare (pyramid addresses are
+            // immutable) but we forward in case a caller injects synthetic updates.
+            if (batch.length > 0)
+                this.notifyUpdated(batch);
+        };
+        this._loader = loader;
+        // Proxy SourceBlock used to forward addresses through the existing
+        // pipeline machinery (so we honour any ILinkOptions the caller may set).
+        this._addressForwarder = new _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock();
+        this._addressForwarder.linkTo(loader);
+        const onAdded = loader.addedObservable.add((batch) => this._onLoaderAdded(batch));
+        const onUpdated = loader.updatedObservable.add((batch) => this._onLoaderUpdated(batch));
+        const onRemoved = loader.removedObservable.add((batch) => this._onLoaderRemoved(batch));
+        if (onAdded)
+            this._loaderObservers.push(onAdded);
+        if (onUpdated)
+            this._loaderObservers.push(onUpdated);
+        if (onRemoved)
+            this._loaderObservers.push(onRemoved);
+    }
+    get loader() {
+        return this._loader;
+    }
+    dispose() {
+        for (const o of this._loaderObservers)
+            o.disconnect();
+        this._loaderObservers.length = 0;
+        this._addressForwarder.unlinkFrom(this._loader);
+        this._addressForwarder.dispose();
+        this._entries.clear();
+        super.dispose();
+    }
+    // ───────── loader callbacks ─────────
+    _onLoaderAdded(batch) {
+        // The loader's addedObservable fires when a tile object is created
+        // (content may still be null, fetch is async). Keep status downloading
+        // but attach the tile ref right away so downstream sees a live object.
+        this._applyLoaderBatch(batch, /*ready=*/ false);
+    }
+    _onLoaderUpdated(batch) {
+        // Fires when the async content arrives. Flip status to ready.
+        this._applyLoaderBatch(batch, /*ready=*/ true);
+    }
+    _onLoaderRemoved(batch) {
+        const out = [];
+        for (const tile of batch) {
+            const entry = this._entries.get(tile.address.quadkey);
+            if (!entry)
+                continue;
+            this._entries.delete(tile.address.quadkey);
+            // Leave `status` untouched ; the removed event conveys the drop.
+            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                entry.tile = null;
+            out.push(entry);
+        }
+        if (out.length > 0)
+            this.notifyRemoved(out);
+    }
+    _applyLoaderBatch(batch, ready) {
+        const out = [];
+        for (const tile of batch) {
+            const entry = this._entries.get(tile.address.quadkey);
+            if (!entry)
+                continue;
+            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                entry.tile = tile;
+            if (ready && tile.content != null) {
+                entry.status = "ready";
+            }
+            else if (entry.status === "pending") {
+                entry.status = "downloading";
+            }
+            out.push(entry);
+        }
+        if (out.length > 0)
+            this.notifyUpdated(out);
+    }
+}
+//# sourceMappingURL=tile.loader.adapter.js.map
+
+/***/ },
+
+/***/ "./dist/streaming/tile/tile.pyramid.stream.source.js"
+/*!***********************************************************!*\
+  !*** ./dist/streaming/tile/tile.pyramid.stream.source.js ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* binding */ TILE_PYRAMID_CONTENT_TYPE),
+/* harmony export */   TilePyramidStreamSource: () => (/* binding */ TilePyramidStreamSource)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "./dist/geodesy/geodesy.system.js");
+/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../tiles/address/tiles.address */ "./dist/tiles/address/tiles.address.js");
+/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../streaming.engine */ "./dist/streaming/streaming.engine.js");
+/* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../streaming.visibility.budget */ "./dist/streaming/streaming.visibility.budget.js");
+/* harmony import */ var _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../streaming.visibility.overflight */ "./dist/streaming/streaming.visibility.overflight.js");
+/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tile.stream.source */ "./dist/streaming/tile/tile.stream.source.js");
+
+
+
+
+
+
+
+
+/**
+ * contentType for stream sources wrapping a 2D tile pyramid.
+ */
+const TILE_PYRAMID_CONTENT_TYPE = "tile-pyramid";
+/**
+ * A tile pyramid modelled as a nested StreamingEngine: it traverses its own
+ * implicit quadtree from the root using frustum + screen-space error tests
+ * (via `core/geodesy.Ellipsoid` when a planet is specified, flat point-XY
+ * otherwise) and emits `TileStreamSource` children through the inherited
+ * SourceBlock.
+ *
+ * Being an IStreamSubEngine AND a StreamingEngine, it plays two roles at once:
+ *  - As an IStreamSource inside an octree, it is activated / deactivated by
+ *    the parent StreamingEngine when the octree cell becomes (in)visible.
+ *  - As an IStreamEngine itself, it manages per-view state and forwards
+ *    `setContext` from the parent to its own traversal.
+ *
+ * Hosts wire it to a downstream consumer (typically an adapter over the
+ * existing ITileLoader) via `pyramid.linkTo(tileLoader)`.
+ */
+class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE_4__.StreamingEngine {
+    constructor(options) {
+        super({}); // no octrees: pyramid's _traverse walks its own quadtree
+        this.kind = "provider";
+        this.status = "ready";
+        /** The pyramid is an aggregate, not a single tile; content is always null. */
+        this.content = null;
+        this.id = options.id;
+        this.contentType = options.contentType ?? TILE_PYRAMID_CONTENT_TYPE;
+        this.encumbrance = options.encumbrance;
+        this.dependencies = options.dependencies;
+        this._metrics = options.metrics;
+        this._ellipsoid = options.ellipsoid;
+        this._geodetic = options.ellipsoid ? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__.GeodeticSystem(options.ellipsoid) : undefined;
+        this._sphereCenter = options.sphereCenter ?? { x: 0, y: 0, z: 0 };
+        this._sphereRadius = options.ellipsoid?.semiMajorAxis ?? 0;
+        this._horizonCull = options.horizonCull ?? !!options.ellipsoid;
+        this._budget = (0,_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__.ResolveSSEBudget)(options.maxScreenSpaceError ?? TilePyramidStreamSource.DefaultMaxScreenSpaceError);
+        this._childContentType = options.childContentType ?? "tile-address";
+        this.boundingBox = options.boundingBox ?? TilePyramidStreamSource._deriveBounds(options.encumbrance);
+        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(options.encumbrance)) {
+            this.boundingSphere = options.encumbrance;
+        }
+    }
+    get metrics() {
+        return this._metrics;
+    }
+    get ellipsoid() {
+        return this._ellipsoid;
+    }
+    _traverse(camera, ctx, _parentsOut, _frontierOut, entriesOut) {
+        const maxSSE = this._budget.getMaxSSE(this._cameraAltitude(camera));
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(0, 0, this._metrics.minLOD), camera, ctx.clipBounds, maxSSE, entriesOut);
+    }
+    _walk(address, camera, clipBounds, maxSSE, out) {
+        if (address.levelOfDetail > this._metrics.maxLOD)
+            return;
+        const bounds = this._computeBounds(address);
+        if (!bounds)
+            return;
+        // Spatial clip : skip sub-trees outside the requested box.
+        if (clipBounds && !(0,_streaming_engine__WEBPACK_IMPORTED_MODULE_4__.IntersectsBoundingBox)(bounds, clipBounds))
+            return;
+        // Horizon cull when flying a planet : tile is on the far side of the
+        // sphere, invisible whatever the frustum says.
+        if (this._horizonCull && this._sphereRadius > 0) {
+            if ((0,_streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__.IsBeyondHorizon)(bounds.center, camera.worldPosition, this._sphereCenter, this._sphereRadius))
+                return;
+        }
+        if (camera.isInFrustum && !camera.isInFrustum(bounds))
+            return;
+        const geometricError = _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.GeometricError(address, this._metrics);
+        const sse = this._computeSSE(bounds, geometricError, camera);
+        if (sse <= maxSSE || address.levelOfDetail >= this._metrics.maxLOD) {
+            const tile = new _tile_stream_source__WEBPACK_IMPORTED_MODULE_7__.TileStreamSource({
+                address,
+                boundingBox: bounds,
+                geometricError,
+                namespace: this.id,
+                contentType: this._childContentType,
+            });
+            // activatedFrame / lastSeenFrame are stamped by the engine on actual
+            // promotion to the cut ; seed them to -1 so the aging check treats
+            // this tile as a fresh candidate.
+            out.set(tile.id, { source: tile, priority: sse, activatedFrame: -1, lastSeenFrame: -1 });
+            return;
+        }
+        const lod = address.levelOfDetail + 1;
+        const x2 = address.x * 2;
+        const y2 = address.y * 2;
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2, y2, lod), camera, clipBounds, maxSSE, out);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2 + 1, y2, lod), camera, clipBounds, maxSSE, out);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2, y2 + 1, lod), camera, clipBounds, maxSSE, out);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2 + 1, y2 + 1, lod), camera, clipBounds, maxSSE, out);
+    }
+    /** Camera altitude above the map surface. Flat : Z of worldPosition. Sphere : |cam − center| − R. */
+    _cameraAltitude(camera) {
+        if (this._sphereRadius > 0) {
+            const dx = camera.worldPosition.x - this._sphereCenter.x;
+            const dy = camera.worldPosition.y - this._sphereCenter.y;
+            const dz = camera.worldPosition.z - this._sphereCenter.z;
+            return Math.max(Math.hypot(dx, dy, dz) - this._sphereRadius, 0);
+        }
+        return camera.worldPosition.z;
+    }
+    _computeBounds(address) {
+        if (this._ellipsoid && this._geodetic) {
+            return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ToBoundsECEF(address, this._metrics, this._ellipsoid, this._geodetic);
+        }
+        return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ToBounds(address, this._metrics);
+    }
+    _computeSSE(bounds, geometricError, camera) {
+        const cx = bounds.center.x - camera.worldPosition.x;
+        const cy = bounds.center.y - camera.worldPosition.y;
+        const cz = bounds.center.z - camera.worldPosition.z;
+        const radius = Math.max(bounds.extendSize.x, bounds.extendSize.y, bounds.extendSize.z);
+        const distance = Math.max(Math.hypot(cx, cy, cz) - radius, 1e-6);
+        const tan = camera.tanFov2 > 0 ? camera.tanFov2 : Math.tan((camera.fovY || 0) * 0.5);
+        const vh = camera.viewportHeight && camera.viewportHeight > 0 ? camera.viewportHeight : 1080;
+        if (tan <= 0 || vh <= 0)
+            return 0;
+        return (geometricError * vh) / (distance * 2 * tan);
+    }
+    // ───────── bounds helper ─────────
+    static _deriveBounds(enc) {
+        if ((0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(enc))
+            return enc;
+        const box = enc;
+        if (box.minimum && box.maximum) {
+            const w = box.maximum.x - box.minimum.x;
+            const h = box.maximum.y - box.minimum.y;
+            const d = box.maximum.z - box.minimum.z;
+            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
+        }
+        const sphere = enc;
+        if (sphere.center && typeof sphere.radius === "number") {
+            const r = sphere.radius;
+            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
+        }
+        return undefined;
+    }
+}
+TilePyramidStreamSource.DefaultMaxScreenSpaceError = 16;
+//# sourceMappingURL=tile.pyramid.stream.source.js.map
 
 /***/ },
 
@@ -9679,92 +10342,67 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EmptyTileBounds: () => (/* binding */ EmptyTileBounds),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* binding */ TILE_STREAM_CONTENT_TYPE),
-/* harmony export */   TileStreamSource: () => (/* binding */ TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* binding */ TileStreamSourceProducer)
+/* harmony export */   TileStreamSource: () => (/* binding */ TileStreamSource)
 /* harmony export */ });
 /* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../streaming.producer.abstract */ "./dist/streaming/streaming.producer.abstract.js");
-
-
 
 /**
- * Default contentType for provider-backed datasources. Customize per concrete
- * tile content (e.g. "tile-provider:imagery") when the scene needs to route
- * different providers through different producers.
+ * Default contentType for individual tile stream sources. Customize per layer
+ * (e.g. "tile-address:imagery" / ":elevation") to route different layers to
+ * different downstream consumers.
  */
-const TILE_STREAM_CONTENT_TYPE = "tile-provider";
+const TILE_STREAM_CONTENT_TYPE = "tile-address";
 /**
- * IStreamSource wrapper around an existing AbstractTileLoader.
+ * IStreamSource<ITile2DAddress> : a single tile, tracked as a first-class
+ * streaming entity with its own lifecycle (status).
  *
- * Design note: one provider maps to ONE datasource sitting in ONE octree cell.
- * The 2D tile pyramid is never materialized inside the octree; it stays implicit,
- * driven by tile addresses and the existing ITileView → AbstractTileLoader pipeline.
- *
- * Two independent LOD systems coexist and do not conflict:
- *  - Octree LOD (this module): decides when the whole provider region is relevant
- *    for a given camera. It toggles the provider ON / OFF via activate / deactivate.
- *  - Tile pyramid LOD (tiles/pipeline): runs only while the provider is active and
- *    selects the right zoom level / tile addresses based on navigation state.
- *
- * This keeps the octree small (one cell per provider, not millions of tile cells)
- * and reuses the entire tiles/loaders + tiles/pipeline machinery as-is.
+ * Emitted by `TilePyramidStreamSource` on camera-driven visibility changes.
+ * Consumers (TileLoader adapters, scene renderers, diagnostics) can:
+ *  - read `content` for the address
+ *  - watch `status` transitions pending → downloading → ready / failed
+ *  - use `boundingBox` for culling / placement (already in world frame)
+ *  - read `geometricError` for priority / LOD decisions downstream
+ *  - follow `dependencies` (parent quadkey) to resolve cross-tile replacement
+ *  - read `tile` once `status === "ready"` to access the fetched `ITile<T>`
+ *    (populated by `TileLoaderAdapter` when the fetch completes)
  */
 class TileStreamSource {
-    static _deriveBounds(enc) {
-        if ((0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(enc))
-            return enc;
-        const box = enc;
-        if (box.minimum && box.maximum) {
-            const w = box.maximum.x - box.minimum.x;
-            const h = box.maximum.y - box.minimum.y;
-            const d = box.maximum.z - box.minimum.z;
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
-        }
-        const sphere = enc;
-        if (sphere.center && typeof sphere.radius === "number") {
-            const r = sphere.radius;
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
-        }
-        return undefined;
-    }
     constructor(options) {
-        this.kind = "provider";
-        this.status = "pending";
-        this.content = null;
-        this.id = options.id;
-        this.provider = options.provider;
-        this.encumbrance = options.encumbrance;
-        this.links = options.links;
+        this.kind = "static";
         this.contentType = options.contentType ?? TILE_STREAM_CONTENT_TYPE;
-        this.boundingBox = options.boundingBox ?? TileStreamSource._deriveBounds(options.encumbrance);
-        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(options.encumbrance)) {
-            this.boundingSphere = options.encumbrance;
+        this.namespace = options.namespace;
+        this.content = options.address;
+        this.boundingBox = options.boundingBox;
+        this.encumbrance = options.boundingBox;
+        this.geometricError = options.geometricError;
+        this.boundingSphere = options.boundingSphere;
+        this.status = options.status ?? "pending";
+        // Cross-tile dep: coarser parent replaces at refinement boundary.
+        const q = options.address.quadkey;
+        if (q && q.length > 0) {
+            const parent = q.slice(0, -1);
+            const parentId = options.namespace ? `${options.namespace}:${parent}` : parent;
+            this.dependencies = [{ op: "replace", target: parentId }];
         }
+    }
+    /** `<namespace>:<quadkey>` when namespace is set, else the quadkey alone. */
+    get id() {
+        const q = this.content?.quadkey ?? "";
+        return this.namespace ? `${this.namespace}:${q}` : q;
+    }
+    /** Convenience alias for `content`. */
+    get address() {
+        return this.content ?? null;
     }
 }
 /**
- * Placeholder 1:1 producer for TileStreamSource.
- *
- * This version emits the provider as the `content` of the TileStreamSource
- * itself (status: pending → downloading → ready). Scenes can listen to the
- * activation and wire the provider into their own tile consumer via the existing
- * tiles/pipeline machinery.
- *
- * TODO (phase 3): replace with a proper spawner that instantiates an ITileView
- * per (viewId, provider) and emits Tile2DDataSource children as addresses flow.
- * See streaming.tile2d.ts (to be added).
+ * Builds a zero-bounds placeholder. Useful when a caller needs a TileStreamSource
+ * reference before the 3D bounds have been computed.
  */
-class TileStreamSourceProducer extends _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_2__.AbstractStreamSourceProducer {
-    constructor(contentType = TILE_STREAM_CONTENT_TYPE) {
-        super();
-        this.contentType = contentType;
-    }
-    _load(source) {
-        const provider = source.provider;
-        return Promise.resolve(provider);
-    }
+function EmptyTileBounds() {
+    return _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.Zero();
 }
 //# sourceMappingURL=tile.stream.source.js.map
 
@@ -10714,7 +11352,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileAddress: () => (/* binding */ TileAddress)
 /* harmony export */ });
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "./dist/math/math.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "./dist/geodesy/geodesy.system.js");
+
 
 
 var NeighborsIndex;
@@ -10731,7 +11372,7 @@ var NeighborsIndex;
 })(NeighborsIndex || (NeighborsIndex = {}));
 class TileAddress {
     static Split(a, metrics) {
-        if (a.levelOfDetail == metrics.maxLOD) {
+        if (a.levelOfDetail === metrics.maxLOD) {
             return null;
         }
         const baseX = a.x * 2;
@@ -10806,7 +11447,57 @@ class TileAddress {
     }
     static ToBounds(a, metrics) {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds.FromPoints2(...points);
+        return _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds.FromPoints2(...points);
+    }
+    /**
+     * 3D bounding box of the tile projected on an ellipsoid (ECEF). Uses the
+     * four tile corners in geodetic coordinates (altitude 0) and builds the
+     * axis-aligned box enclosing them in cartesian space. Suitable for frustum
+     * tests in a planet-scale setup.
+     *
+     * A single GeodeticSystem instance can be reused across calls to avoid
+     * rebuilding it every time.
+     */
+    static ToBoundsECEF(a, metrics, ellipsoid, system) {
+        const sys = system ?? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem(ellipsoid);
+        const deltas = [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+        ];
+        const tmp = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
+        let xmin = Infinity;
+        let ymin = Infinity;
+        let zmin = Infinity;
+        let xmax = -Infinity;
+        let ymax = -Infinity;
+        let zmax = -Infinity;
+        for (const [dx, dy] of deltas) {
+            const ll = metrics.getTileXYToLatLon(a.x + dx, a.y + dy, a.levelOfDetail);
+            sys.geodeticFloatToCartesianToRef(ll.lat, ll.lon, 0, tmp);
+            if (tmp.x < xmin)
+                xmin = tmp.x;
+            if (tmp.y < ymin)
+                ymin = tmp.y;
+            if (tmp.z < zmin)
+                zmin = tmp.z;
+            if (tmp.x > xmax)
+                xmax = tmp.x;
+            if (tmp.y > ymax)
+                ymax = tmp.y;
+            if (tmp.z > zmax)
+                zmax = tmp.z;
+        }
+        return new _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds(xmin, ymin, xmax - xmin, ymax - ymin, zmin, zmax - zmin);
+    }
+    /**
+     * Geometric error of the tile in world meters, defined as the tile side at
+     * the equator for this LOD (groundResolution * tileSize). Used as the
+     * reference error for screen-space-error computations.
+     */
+    static GeometricError(a, metrics) {
+        return metrics.groundResolution(0, a.levelOfDetail) * metrics.tileSize;
     }
     static IsEquals(a, b) {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
@@ -16630,7 +17321,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.AbstractShape),
-/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.AbstractStreamSourceProducer),
 /* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileLoader),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileMetrics),
 /* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
@@ -16659,9 +17349,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CartesianMode: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.CartesianMode),
 /* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CellCoordinateReference),
 /* harmony export */   Circle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Circle),
+/* harmony export */   ClosestDistanceToAABB: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ClosestDistanceToAABB),
+/* harmony export */   ConstantSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ConstantSSEBudget),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.DebugTouchConsole),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.DefaultScreenSpaceErrorFn),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemTileWebClient),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.DeserializeLocalizableString),
@@ -16669,6 +17362,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid),
+/* harmony export */   EmptyTileBounds: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.EmptyTileBounds),
 /* harmony export */   Envelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Envelope),
 /* harmony export */   EventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventArgs),
 /* harmony export */   EventEmitter: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventEmitter),
@@ -16706,7 +17400,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InputsNavigationController),
+/* harmony export */   IntersectsBoundingBox: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IntersectsBoundingBox),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTile),
+/* harmony export */   IsBeyondHorizon: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsBeyondHorizon),
 /* harmony export */   IsBounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounded),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounds),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.IsDemInfos),
@@ -16725,7 +17421,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
 /* harmony export */   IsStreamSource: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamSource),
-/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamingViewTarget),
+/* harmony export */   IsStreamSubEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamSubEngine),
 /* harmony export */   IsString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsString),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _dataflow_index__WEBPACK_IMPORTED_MODULE_6__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
@@ -16748,6 +17444,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.LocalString),
 /* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Luminosity),
 /* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.MakePlaneFromPointAndNormal),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.MapOverflightVisibilityPolicy),
 /* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
@@ -16766,6 +17463,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   OctreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.OctreeNode),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.OctreeSplitter),
 /* harmony export */   PathUtils: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.PathUtils),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.PiecewiseLinearSSEBudget),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),
@@ -16786,6 +17484,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RGBTileCodec),
 /* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Range),
 /* harmony export */   RegionCode: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RegionCode),
+/* harmony export */   ResolveSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ResolveSSEBudget),
 /* harmony export */   RibbonBuilder: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonBuilder),
 /* harmony export */   RibbonOptions: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonOptions),
 /* harmony export */   RoundRobin: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.RoundRobin),
@@ -16802,8 +17501,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.SpatialTreeNode),
 /* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
+/* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StepwiseSSEBudget),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamActiveContext),
+/* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamSourceContentAdapter),
 /* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingEngine),
-/* harmony export */   StreamingView: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingView),
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_PYRAMID_CONTENT_TYPE),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_STREAM_CONTENT_TYPE),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Temperature),
@@ -16817,6 +17519,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
 /* harmony export */   TileContentFetcher: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileContentFetcher),
 /* harmony export */   TileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileLoader),
+/* harmony export */   TileLoaderAdapter: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileLoaderAdapter),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayerView),
@@ -16825,8 +17528,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TilePipelineLink),
+/* harmony export */   TilePyramidStreamSource: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TilePyramidStreamSource),
 /* harmony export */   TileStreamSource: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileStreamSourceProducer),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileView),

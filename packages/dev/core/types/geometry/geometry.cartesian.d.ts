@@ -63,6 +63,8 @@ export declare class Cartesian3 extends Cartesian2 implements ICartesian3 {
     static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     static EqualsWithinEpsilon(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean;
     static Clone(other: ICartesian3 | ICartesian4): ICartesian3;
+    static Reset(a: ICartesian3, x: number, y: number, z?: number): void;
+    static ResetFromArray(a: ICartesian3, src: number[], offset?: number): void;
     constructor(x: number, y: number, z?: number);
     toString(): string;
 }

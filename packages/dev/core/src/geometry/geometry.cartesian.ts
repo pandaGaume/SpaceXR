@@ -68,10 +68,13 @@ export class Cartesian2 implements ICartesian2 {
         return new Cartesian2(Infinity, Infinity);
     }
 
-    public static Clone(other:ICartesian2|ICartesian3|ICartesian4): ICartesian3 {
+    public static Clone(other: ICartesian2 | ICartesian3 | ICartesian4): ICartesian3 {
         return new Cartesian3(other.x, other.y);
     }
-    public constructor(public x: number, public y: number) {}
+    public constructor(
+        public x: number,
+        public y: number
+    ) {}
 
     public toString() {
         return `x:${this.x}, y:${this.y}`;
@@ -121,7 +124,7 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         a.z += b.z;
         return a;
     }
-    
+
     public static Normalize(a: ICartesian3, magnitude?: number): ICartesian3 {
         return Cartesian3.NormalizeToRef(a, Cartesian3.Zero(), magnitude);
     }
@@ -187,11 +190,11 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
     ///   Check if four points are coplanar
     /// </summary>
     public static AreCoplanar(a: ICartesian3, b: ICartesian3, c: ICartesian3, d: ICartesian3, epsilon?: number): boolean {
-        var n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
-        var n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
+        const n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
+        const n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
 
-        var m1 = Cartesian3.Magnitude(n1);
-        var m2 = Cartesian3.Magnitude(n2);
+        const m1 = Cartesian3.Magnitude(n1);
+        const m2 = Cartesian3.Magnitude(n2);
 
         const EPSILON = epsilon ?? Scalar.EPSILON;
 
@@ -336,7 +339,7 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
         return new Cartesian3(x, y, z);
     }
 
-    public static FromArrayToRef(array: Float32Array | Array<number>, ref:ICartesian3, offset: number = 0, stride: number = 3): ICartesian3 {
+    public static FromArrayToRef(array: Float32Array | Array<number>, ref: ICartesian3, offset: number = 0, stride: number = 3): ICartesian3 {
         let i = 0;
         ref.x = array[offset + i];
         ref.y = i < stride ? array[offset + ++i] : 0;
@@ -355,23 +358,38 @@ export class Cartesian3 extends Cartesian2 implements ICartesian3 {
     }
 
     public static Equals(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
-        if(epsilon){
-            return Cartesian3.EqualsWithinEpsilon(a,b,epsilon)
-        }       
-        return b.x ==a.x && b.y==a.y && b.z==a.z;
+        if (epsilon) {
+            return Cartesian3.EqualsWithinEpsilon(a, b, epsilon);
+        }
+        return b.x === a.x && b.y === a.y && b.z === a.z;
     }
 
     public static EqualsWithinEpsilon(a: ICartesian3, b: ICartesian3, epsilon?: number): boolean {
         epsilon = epsilon ?? Scalar.EPSILON;
-        return Scalar.WithinEpsilon(Math.abs(b.x-a.x), epsilon) && Scalar.WithinEpsilon(Math.abs(b.y-a.y), epsilon) && Scalar.WithinEpsilon(Math.abs(b.z-a.z), epsilon);
+        return Scalar.WithinEpsilon(Math.abs(b.x - a.x), epsilon) && Scalar.WithinEpsilon(Math.abs(b.y - a.y), epsilon) && Scalar.WithinEpsilon(Math.abs(b.z - a.z), epsilon);
     }
 
-    public static Clone(other:ICartesian3|ICartesian4): ICartesian3 {
+    public static Clone(other: ICartesian3 | ICartesian4): ICartesian3 {
         return new Cartesian3(other.x, other.y, other.z);
     }
 
+    public static Reset(a: ICartesian3, x: number, y: number, z: number = 0.0) {
+        a.x = x;
+        a.y = y;
+        a.z = z;
+    }
 
-    public constructor(x: number, y: number, public z: number = 0.0) {
+    public static ResetFromArray(a: ICartesian3, src: number[], offset: number = 0) {
+        a.x = src[offset++];
+        a.y = src[offset++];
+        a.z = src[offset];
+    }
+
+    public constructor(
+        x: number,
+        y: number,
+        public z: number = 0.0
+    ) {
         super(x, y);
     }
 
@@ -384,11 +402,16 @@ export class Cartesian4 extends Cartesian3 implements ICartesian4 {
     public static Zero() {
         return new Cartesian4(0, 0, 0);
     }
-    
-    public static Clone(other:ICartesian4): ICartesian3 {
-        return new Cartesian4(other.x, other.y, other.z,other.w);
+
+    public static Clone(other: ICartesian4): ICartesian3 {
+        return new Cartesian4(other.x, other.y, other.z, other.w);
     }
-    public constructor(x: number, y: number, z: number, public w: number = 1.0) {
+    public constructor(
+        x: number,
+        y: number,
+        z: number,
+        public w: number = 1.0
+    ) {
         super(x, y, z);
     }
     public toString() {
